@@ -32,10 +32,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-contribution-projecttype</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
         </dependency>
         <dependency>
@@ -53,6 +49,10 @@
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-microsoft-vsts-ext-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-pullrequest-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

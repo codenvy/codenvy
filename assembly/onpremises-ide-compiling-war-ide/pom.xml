@@ -34,10 +34,6 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-contribution-vcs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-hosted-ext-factory</artifactId>
         </dependency>
         <dependency>
@@ -54,11 +50,27 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-contribution</artifactId>
+            <artifactId>codenvy-plugin-microsoft-vsts-ext-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-microsoft-vsts-ext-client</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-agent-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-pullrequest-agent-ide-bitbucket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-pullrequest-agent-ide-github</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-pullrequest-agent-ide-vsts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-pullrequest-agent-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

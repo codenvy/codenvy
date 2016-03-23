@@ -34,7 +34,7 @@
         <module>plugin-wso2</module>
         <module>plugin-projectlocker</module>
         <module>plugin-microsoft</module>
-        <module>plugin-contribution</module>
+        <module>plugin-pullrequest</module>
         <module>plugin-hosted</module>
         <module>plugin-webhooks</module>
     </modules>

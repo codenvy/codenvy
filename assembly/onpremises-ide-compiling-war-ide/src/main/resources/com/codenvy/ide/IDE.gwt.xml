@@ -54,8 +54,11 @@
     <inherits name='org.eclipse.che.ide.ext.ssh.MachineSsh'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
-    <inherits name='com.codenvy.plugin.contribution.vcs.ContributionVCS'/>
-    <inherits name='com.codenvy.plugin.contribution.Contributor'/>
+    <inherits name='com.codenvy.plugin.pullrequest.PullRequest'/>
+    <inherits name='com.codenvy.plugin.pullrequest.projecttype.ContributionProjectType'/>
+    <inherits name='com.codenvy.plugin.pullrequest.BitbucketPullRequest'/>
+    <inherits name='com.codenvy.plugin.pullrequest.GithubPullRequest'/>
+    <inherits name='com.codenvy.plugin.pullrequest.VstsPullRequest'/>
 
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
 

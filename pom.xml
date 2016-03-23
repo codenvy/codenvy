@@ -349,16 +349,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-contribution-projecttype</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-contribution-vcs</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-hosted-client-gwt-subscription</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -409,11 +399,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-contribution</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-google-oauth2</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -454,7 +439,32 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-review</artifactId>
+                <artifactId>codenvy-plugin-pullrequest-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-pullrequest-agent-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-pullrequest-agent-ide-bitbucket</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-pullrequest-agent-ide-github</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-pullrequest-agent-ide-vsts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-pullrequest-agent-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
