@@ -48,6 +48,7 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
+                                                                                              null,
                                                                                               null));
         doReturn(ImmutableList.of(mock(UsersWorkspaceImpl.class), mock(UsersWorkspaceImpl.class))) // <- currently used 2
                 .when(manager)
@@ -60,6 +61,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldCallCreateCallBackIfEverythingIsOkayWithLimits() throws Exception {
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2, // <- workspaces max count
                                                                                               "2gb",
+                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
@@ -84,6 +86,7 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
+                                                                                              null,
                                                                                               null));
         doReturn(singletonList(createRuntime("1gb", "1gb"))).when(manager).getRuntimeWorkspaces(anyString()); // <- currently running 2gb
 
@@ -94,6 +97,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldCallStartCallbackIfEverythingIsOkayWithLimits() throws Exception {
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
                                                                                               "3gb", // <- workspaces ram limit
+                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,

@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.RuntimeWorkspaceRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -68,8 +69,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           RuntimeWorkspaceRegistry workspaceRegistry,
                                           WorkspaceConfigValidator workspaceConfigValidator,
                                           EventService eventService,
-                                          MachineManager machineManager) {
-        super(workspaceDao, workspaceRegistry, workspaceConfigValidator, eventService, machineManager);
+                                          MachineManager machineManager,
+                                          UserManager userManager) {
+        super(workspaceDao, workspaceRegistry, workspaceConfigValidator, eventService, machineManager, userManager);
         this.workspacesPerUser = workspacesPerUser;
         this.ramPerUser = Size.parseSizeToMegabytes(ramPerUser);
     }

@@ -33,6 +33,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  * @author Stéphane Daviet
  */
 public class DefaultWorkspaceClient extends AbstractClient implements WorkspaceClient {
+
+    private static final String KEY_DELIMITER = ":";
+
     /**
      * Constructs an instance of {@link DefaultWorkspaceClient}.
      *
@@ -78,7 +81,7 @@ public class DefaultWorkspaceClient extends AbstractClient implements WorkspaceC
     public Request<Workspace> withName(String name) {
         checkNotNull(name);
 
-        final Invocation request = getWebTarget().queryParam("name", name)
+        final Invocation request = getWebTarget().path(KEY_DELIMITER + name)
                                                  .request()
                                                  .accept(APPLICATION_JSON)
                                                  .buildGet();
