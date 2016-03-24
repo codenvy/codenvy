@@ -22,15 +22,15 @@
         <groupId>com.codenvy.plugin</groupId>
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-agent-ide</artifactId>
-    <name>Codenvy Plugin :: Pull request :: Agent IDE</name>
+    <artifactId>codenvy-plugin-pullrequest-ide</artifactId>
+    <name>Codenvy Plugin :: Pull request :: IDE</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-shared</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -209,7 +209,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoreDependenvy>com.codenvy.plugin:codenvy-plugin-pullrequest-agent-shared</ignoreDependenvy>
+                                <ignoreDependenvy>com.codenvy.plugin:codenvy-plugin-pullrequest-shared</ignoreDependenvy>
                             </ignoredDependencies>
                         </configuration>
                     </execution>

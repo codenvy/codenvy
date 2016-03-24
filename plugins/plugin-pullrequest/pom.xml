@@ -34,12 +34,12 @@
         </license>
     </licenses>
     <modules>
-        <module>codenvy-plugin-pullrequest-agent-shared</module>
-        <module>codenvy-plugin-pullrequest-agent</module>
-        <module>codenvy-plugin-pullrequest-agent-ide</module>
-        <module>codenvy-plugin-pullrequest-agent-ide-bitbucket</module>
-        <module>codenvy-plugin-pullrequest-agent-ide-github</module>
-        <module>codenvy-plugin-pullrequest-agent-ide-vsts</module>
+        <module>codenvy-plugin-pullrequest-shared</module>
+        <module>codenvy-plugin-pullrequest-server</module>
+        <module>codenvy-plugin-pullrequest-ide</module>
+        <module>codenvy-plugin-pullrequest-ide-bitbucket</module>
+        <module>codenvy-plugin-pullrequest-ide-github</module>
+        <module>codenvy-plugin-pullrequest-ide-vsts</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/plugin-contribution.git</connection>

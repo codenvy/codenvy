@@ -20,58 +20,37 @@
     <parent>
         <artifactId>codenvy-plugin-pullrequest-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>4.0.0-RC14-SNAPSHOT</version>
+        <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-agent-ide-bitbucket</artifactId>
-    <name>Codenvy Plugin :: Pull request :: Agent IDE Bitbucket</name>
+    <artifactId>codenvy-plugin-pullrequest-agent</artifactId>
+    <name>Codenvy Plugin :: Pull request :: Server</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-shared</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-ide</artifactId>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt.inject</groupId>
-            <artifactId>gin</artifactId>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-gwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -86,11 +65,6 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,5 +98,21 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>com.codenvy.plugin:codenvy-plugin-pullrequest-shared</ignoreDependenvy>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

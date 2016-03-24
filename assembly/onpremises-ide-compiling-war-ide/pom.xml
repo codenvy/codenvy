@@ -54,23 +54,23 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-ide</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-ide-bitbucket</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-ide-bitbucket</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-ide-github</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-ide-github</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-ide-vsts</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-ide-vsts</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent-shared</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

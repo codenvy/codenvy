@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-pullrequest-agent</artifactId>
+            <artifactId>codenvy-plugin-pullrequest-server</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
