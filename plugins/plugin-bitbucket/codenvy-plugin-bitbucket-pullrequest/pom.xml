@@ -22,12 +22,16 @@
         <groupId>com.codenvy.plugin</groupId>
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-ide-github</artifactId>
-    <name>Codenvy Plugin :: Pull request :: IDE Github</name>
+    <artifactId>codenvy-plugin-bitbucket-pullrequest</artifactId>
+    <name>Codenvy Plugin :: Bitbucket :: Pull request</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-pullrequest-ide</artifactId>
@@ -39,10 +43,6 @@
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -69,10 +69,6 @@
             <artifactId>che-core-ide-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-ext-github</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
@@ -90,6 +86,11 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

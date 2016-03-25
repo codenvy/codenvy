@@ -23,9 +23,9 @@
         <version>4.0.0-GA-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-parent</artifactId>
+    <artifactId>codenvy-plugin-github-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Codenvy Plugin :: Pull request :: Parent</name>
+    <name>Codenvy Plugin :: Github :: Parent</name>
     <licenses>
         <license>
             <name>Eclipse Public License</name>
@@ -34,9 +34,8 @@
         </license>
     </licenses>
     <modules>
-        <module>codenvy-plugin-pullrequest-shared</module>
-        <module>codenvy-plugin-pullrequest-server</module>
-        <module>codenvy-plugin-pullrequest-ide</module>
+        <module>codenvy-plugin-github-webhooks</module>
+        <module>codenvy-plugin-github-pullrequest</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/plugin-contribution.git</connection>

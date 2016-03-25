@@ -22,8 +22,8 @@
         <groupId>com.codenvy.plugin</groupId>
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-webhooks-vsts</artifactId>
-    <name>Codenvy Plugin :: Webhooks :: VSTS</name>
+    <artifactId>codenvy-plugin-github-webhooks</artifactId>
+    <name>Codenvy Plugin :: GitHub :: Webhooks</name>
     <properties>
         <dto.generator.out.directory>${project.build.directory}/generated-sources/dto/</dto.generator.out.directory>
     </properties>
@@ -82,19 +82,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -203,10 +195,10 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>com.codenvy.plugin.webhooks.vsts.shared</package>
+                                <package>com.codenvy.plugin.webhooks.github.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto.generator.out.directory}</outputDirectory>
-                            <genClassName>com.codenvy.plugin.webhooks.vsts.dto.DtoServerImpls</genClassName>
+                            <genClassName>com.codenvy.plugin.webhooks.github.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>

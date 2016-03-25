@@ -22,15 +22,16 @@
         <groupId>com.codenvy.plugin</groupId>
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-ide-bitbucket</artifactId>
-    <name>Codenvy Plugin :: Pull request :: IDE Bitbucket</name>
-    <properties>
-        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
-    </properties>
+    <artifactId>codenvy-plugin-microsoft-vsts-pullrequest</artifactId>
+    <name>Codenvy Plugin :: Microsoft :: VSTS pull request</name>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
+            <artifactId>codenvy-plugin-microsoft-vsts-ext-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-microsoft-vsts-ext-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
@@ -86,11 +87,6 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

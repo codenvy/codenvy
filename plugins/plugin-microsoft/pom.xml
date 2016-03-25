@@ -32,5 +32,7 @@
         <module>codenvy-plugin-microsoft-vsts-ext-client</module>
         <module>codenvy-plugin-microsoft-vsts-ext-server</module>
         <module>codenvy-plugin-microsoft-vsts-ext-shared</module>
+        <module>codenvy-plugin-microsoft-vsts-webhooks</module>
+        <module>codenvy-plugin-microsoft-vsts-pullrequest</module>
     </modules>
 </project>

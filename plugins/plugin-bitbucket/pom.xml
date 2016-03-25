@@ -30,5 +30,6 @@
         <module>codenvy-plugin-bitbucket-oauth2</module>
         <module>codenvy-plugin-bitbucket-git-provider</module>
         <module>codenvy-plugin-bitbucket-ext-bitbucket</module>
+        <module>codenvy-plugin-bitbucket-pullrequest</module>
     </modules>
 </project>

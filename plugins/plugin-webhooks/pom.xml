@@ -28,7 +28,5 @@
     <name>Codenvy Plugin :: Webhooks :: Parent</name>
     <modules>
         <module>codenvy-plugin-webhooks-base</module>
-        <module>codenvy-plugin-webhooks-github</module>
-        <module>codenvy-plugin-webhooks-vsts</module>
     </modules>
 </project>
