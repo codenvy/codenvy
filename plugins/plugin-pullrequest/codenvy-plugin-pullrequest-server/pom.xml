@@ -22,7 +22,7 @@
         <groupId>com.codenvy.plugin</groupId>
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-plugin-pullrequest-agent</artifactId>
+    <artifactId>codenvy-plugin-pullrequest-server</artifactId>
     <name>Codenvy Plugin :: Pull request :: Server</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
