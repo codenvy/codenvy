@@ -34,6 +34,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 public class DefaultWorkspaceClient extends AbstractClient implements WorkspaceClient {
 
+    /* Composite key delimiter.
+     * See {@link WorkspaceManager.getWorkspace(String key)}
+     */
     private static final String KEY_DELIMITER = ":";
 
     /**
