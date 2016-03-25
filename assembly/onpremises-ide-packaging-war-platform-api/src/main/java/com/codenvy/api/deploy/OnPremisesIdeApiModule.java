@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.deploy;
 
+import com.codenvy.activity.server.WorkspaceActivityService;
 import com.codenvy.api.dao.authentication.PasswordEncryptor;
 import com.codenvy.api.dao.authentication.SSHAPasswordEncryptor;
 import com.codenvy.api.dao.ldap.AdminUserDaoImpl;
@@ -319,5 +320,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
 
         bind(org.eclipse.che.api.machine.server.WsAgentLauncher.class).to(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.class);
+
+        //workspace activity service
+        install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
     }
 }

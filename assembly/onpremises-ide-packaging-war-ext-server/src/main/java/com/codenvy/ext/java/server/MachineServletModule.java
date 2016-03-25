@@ -39,6 +39,7 @@ public class MachineServletModule extends ServletModule {
         getServletContext().addListener(new com.codenvy.auth.sso.client.DestroySessionListener());
         //filters
         filter("/*").through(com.codenvy.auth.sso.client.MachineRequestTokenInjectFilter.class);
+        filter("/*").through(com.codenvy.workspace.LastAccessTimeFilter.class);
         filterRegex("/(?!_sso/).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
 
         final Map<String, String> corsFilterParams = new HashMap<>();

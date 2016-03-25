@@ -102,6 +102,9 @@ public class MachineModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
 
         bind(HttpJsonRequestFactory.class).to(AuthorizeTokenHttpJsonRequestFactory.class);
+
+        bind(com.codenvy.workspace.websocket.WorkspaceWebsocketConnectionListener.class);
+        install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property

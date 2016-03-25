@@ -75,6 +75,10 @@
             <artifactId>codenvy-hosted-sso-server-organization</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.hosted-infrastructure</groupId>
+            <artifactId>codenvy-hosted-workspace-activity</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-machine-hosted</artifactId>
         </dependency>

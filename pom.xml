@@ -208,6 +208,16 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.codenvy.hosted-infrastructure</groupId>
+                <artifactId>codenvy-hosted-workspace-activity</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.hosted-infrastructure</groupId>
+                <artifactId>codenvy-hosted-workspace-activity-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.im</groupId>
                 <artifactId>installation-manager-cli-bundle</artifactId>
                 <version>${project.version}</version>

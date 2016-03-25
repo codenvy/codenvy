@@ -43,5 +43,7 @@
         <module>codenvy-hosted-sso-oauth</module>
         <module>codenvy-hosted-sso-server-ldap</module>
         <module>codenvy-hosted-sso-server-organization</module>
+        <module>codenvy-hosted-workspace-activity</module>
+        <module>codenvy-hosted-workspace-activity-agent</module>
     </modules>
 </project>

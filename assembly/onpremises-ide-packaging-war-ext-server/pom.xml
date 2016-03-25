@@ -31,6 +31,10 @@
             <artifactId>codenvy-hosted-sso-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.hosted-infrastructure</groupId>
+            <artifactId>codenvy-hosted-workspace-activity-agent</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-contribution-projecttype</artifactId>
         </dependency>
