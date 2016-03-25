@@ -23,7 +23,7 @@
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-microsoft-vsts-ext-client</artifactId>
-    <name>Codenvy Plugin :: Microsoft :: VSTS client</name>
+    <name>Codenvy Plugin :: Microsoft :: VSTS Client</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
         <maven.compiler.source>1.7</maven.compiler.source>

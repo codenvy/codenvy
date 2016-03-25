@@ -23,7 +23,7 @@
         <version>4.0.0-GA-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-microsoft-vsts-pullrequest</artifactId>
-    <name>Codenvy Plugin :: Microsoft :: VSTS pull request</name>
+    <name>Codenvy Plugin :: Microsoft :: VSTS Pull request</name>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>

@@ -399,6 +399,21 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-bitbucket-pullrequest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-github-pullrequest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-github-webhooks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-google-oauth2</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -429,6 +444,16 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-microsoft-vsts-pullrequest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-microsoft-vsts-webhooks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-projectlocker-git-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -444,21 +469,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-pullrequest-ide-bitbucket</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-pullrequest-ide-github</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-pullrequest-ide-vsts</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-pullrequest-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -470,16 +480,6 @@
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-webhooks-base</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-webhooks-github</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-webhooks-vsts</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
