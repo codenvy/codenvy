@@ -1,35 +1,48 @@
-
-.onprem-installation-config-update-warning
-  frame($config-frame-warning-bg-color, $config-frame-warning-color)
-
-.onprem-installation-config-header,
-.onprem-installation-config-row
-  min-height max-content
-
-.onprem-installation-config-body
-  max-height 40vh
-  overflow-x visible
-  overflow-y scroll
-
-.onprem-installation-config-header
-  background-color #F1F1F1
-  font-size 18px
-  color $label-primary-color
-
-.onprem-installation-config-header-cell
-  padding 1em
-
-.onprem-installation-config-row
-  padding 18px
-
-.onprem-installation-config-header
-  border-bottom 1px solid $list-separator-color
-
 .onprem-installation-config-table
   border 1px solid $list-separator-color
-
-.onprem-installation-config-header div.header-property
-  border-right 1px solid $list-separator-color
-
-.onprem-installation-config-table
   margin-bottom 1em
+
+  .config-header
+    font-size 18px
+    font-weight bold
+    min-height max-content
+    color $label-primary-color
+    background-color $table-header-color
+    border-bottom 1px solid $list-separator-color
+
+   .header-property
+     border-right 1px solid $list-separator-color
+
+   .header-property, .header-value
+     padding 1em
+
+   .config-body
+     max-height 40vh
+     overflow-x visible
+     overflow-y auto
+
+     .config-row
+       min-height max-content
+       padding 18px
+
+       .config-cell
+         display inline-block
+
+         .config-key
+           line-height 22px
+
+         .config-value
+           width 100%
+           border none
+           resize none
+           outline none
+           margin-bottom 10px
+           text-decoration none
+           border 1px solid $list-separator-color
+
+         .config-value[rows='1']
+           text-decoration underline
+           border none
+
+  .update-config-warning
+    frame($config-frame-warning-bg-color, $config-frame-warning-color)

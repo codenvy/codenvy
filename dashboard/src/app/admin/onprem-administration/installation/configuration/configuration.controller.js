@@ -158,4 +158,17 @@ export class OnPremConfigurationCtrl {
       }
     });
   }
+
+  getVisibleRows(index) {
+    let value = this.config[index][1];
+    if (!value) {
+      return 1;
+    }
+
+    if(value.length > 512) {
+      return 6;
+    }
+
+    return value.length < 128 && value.search(/(↵|\n)/gm) === -1 ? 1 : 2;
+  }
 }
