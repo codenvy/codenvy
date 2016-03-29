@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.service.token.shared.dto.MachineToken;
+import com.codenvy.service.token.shared.dto.MachineTokenDto;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
@@ -57,8 +57,8 @@ public class MachineTokenService {
     @ApiOperation(value = "Get machine token for user", notes = "Get machine token for user")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Not found")})
-    public MachineToken getMachineToken() throws NotFoundException {
+    public MachineTokenDto getMachineToken() throws NotFoundException {
         final String userId  = EnvironmentContext.getCurrent().getUser().getId();
-        return newDto(MachineToken.class).withUserId(userId).withMachineToken(registry.getToken(userId));
+        return newDto(MachineTokenDto.class).withUserId(userId).withMachineToken(registry.getToken(userId));
     }
 }

@@ -23,18 +23,18 @@ import org.eclipse.che.dto.shared.DTO;
  *
  */
 @DTO
-public interface MachineToken {
+public interface MachineTokenDto {
 
     String getUserId();
 
     void setUserId(String userId);
 
-    MachineToken withUserId(String userId);
+    MachineTokenDto withUserId(String userId);
 
 
     String getMachineToken();
 
     void setMachineToken(String machineToken);
 
-    MachineToken withMachineToken(String machineToken);
+    MachineTokenDto withMachineToken(String machineToken);
 }
