@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -32,10 +33,10 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 @Singleton
 public class MachineTokenRegistry {
 
-    private Map<String, String> tokens = new HashMap<>();
+    private Map<String, String> tokens = new ConcurrentHashMap<>();
 
     public void generateToken(String userId) {
-        tokens.put(userId, generate("", 64));
+        tokens.putIfAbsent(userId, generate("", 64));
     }
 
     public String getToken(String userId) throws NotFoundException {
