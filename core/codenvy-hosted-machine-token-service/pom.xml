@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-infrastructure-parent</artifactId>
         <groupId>com.codenvy.hosted-infrastructure</groupId>
-        <version>4.0.0-GA-SNAPSHOT</version>
+        <version>4.1.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-machine-token-service</artifactId>
     <properties>
@@ -135,7 +135,7 @@
                                 <package>com.codenvy.service.token.shared.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>com.codenvy.service.token.shared.dto.server.DtoServerImpls</genClassName>
+                            <genClassName>com.codenvy.service.machine.token.shared.dto.server.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>

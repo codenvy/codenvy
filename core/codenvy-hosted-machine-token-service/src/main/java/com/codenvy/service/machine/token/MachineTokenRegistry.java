@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.token;
+package com.codenvy.service.machine.token;
 
 import org.eclipse.che.api.core.NotFoundException;
 

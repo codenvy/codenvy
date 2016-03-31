@@ -12,14 +12,14 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.token;
+package com.codenvy.service.machine.token;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.service.token.shared.dto.MachineTokenDto;
+import com.codenvy.service.machine.token.shared.dto.MachineTokenDto;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
