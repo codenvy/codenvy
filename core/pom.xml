@@ -45,5 +45,6 @@
         <module>codenvy-hosted-sso-server-organization</module>
         <module>codenvy-hosted-workspace-activity</module>
         <module>codenvy-hosted-workspace-activity-agent</module>
+        <module>codenvy-hosted-machine-token-service</module>
     </modules>
 </project>
