@@ -177,13 +177,15 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             .getMachineConfigs())
                                                                .mapToLong(this::sumRam)
                                                                .sum();
+
             final long allocating = sumRam(envOptional.get().getMachineConfigs());
+            final long numOfRunning = getWorkspaces(user).stream().filter(ws -> STOPPED != ws.getStatus()).count();
             if (currentlyUsedRamMB + allocating > ramPerUser) {
-                throw new LimitExceededException(format("This workspace cannot be started as it would exceed the maximum available RAM " +
-                                                        "allocated to you. Users are each currently allocated '%dmb' RAM across their " +
-                                                        "active workspaces. This value is set by your admin with the " +
-                                                        "'limits.user.workspaces.ram' property",
-                                                        ramPerUser));
+                throw new LimitExceededException(format("Unable to start this workspace. There are '%d' " +
+                                                        "running workspaces consuming '%dmb' RAM. " +
+                                                        "Your current RAM limit is '%dmb'. " +
+                                                        "You can stop other workspaces to free resources.",
+                                                        numOfRunning, currentlyUsedRamMB, ramPerUser));
             }
             return callback.call();
         } finally {

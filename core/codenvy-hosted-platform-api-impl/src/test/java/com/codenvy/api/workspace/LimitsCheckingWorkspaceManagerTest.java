@@ -17,9 +17,13 @@ package com.codenvy.api.workspace;
 import com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.WorkspaceCallback;
 import com.google.common.collect.ImmutableList;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.codenvy.api.workspace.TestObjects.createConfig;
 import static com.codenvy.api.workspace.TestObjects.createRuntime;
@@ -99,23 +103,31 @@ public class LimitsCheckingWorkspaceManagerTest {
         verify(callback).call();
     }
 
+
+
     @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "This workspace cannot be started as it would exceed the maximum available RAM " +
-                                            "allocated to you. Users are each currently allocated '2048mb' RAM across their active " +
-                                            "workspaces. This value is set by your admin with the 'limits.user.workspaces.ram' property")
+          expectedExceptionsMessageRegExp ="Unable to start this workspace. There are '2' " +
+                                           "running workspaces consuming '4096mb' RAM. " +
+                                           "Your current RAM limit is '4096mb'. " +
+                                           "You can stop other workspaces to free resources.")
     public void shouldNotBeAbleToStartNewWorkspaceIfRamLimitIsExceeded() throws Exception {
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
-                                                                                              "2gb", // <- workspaces ram limit
+                                                                                              "4gb", // <- workspaces ram limit
                                                                                               "1gb",
                                                                                               null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
                                                                                               null));
-        doReturn(singletonList(createRuntime("1gb", "1gb"))).when(manager).getWorkspaces(anyString()); // <- currently running 2gb
+        List<Workspace> workspaces = new ArrayList<>();
+        workspaces.add(createRuntime("1gb", "1gb"));
+        workspaces.add(createRuntime("1gb", "1gb"));
+        doReturn(workspaces).when(manager).getWorkspaces(anyString()); // <- currently running 2gb
 
         manager.checkRamAndPropagateStart(createConfig("1gb"), null, "user123", null);
     }
+
+
 
     @Test
     public void shouldSkipWorkspacesRamCheckIfItIsSetToMinusOne() throws Exception {
