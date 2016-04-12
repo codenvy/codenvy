@@ -197,6 +197,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(TokenValidator.class).to(com.codenvy.auth.sso.server.BearerTokenValidator.class);
         bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
 
+        //machine authentication
+        bind(com.codenvy.service.machine.token.MachineTokenRegistry.class);
+        bind(com.codenvy.service.machine.token.MachineTokenService.class);
+        install(new com.codenvy.service.machine.token.interceptor.InterceptorModule());
+
         //SSO
         Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
                 Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
