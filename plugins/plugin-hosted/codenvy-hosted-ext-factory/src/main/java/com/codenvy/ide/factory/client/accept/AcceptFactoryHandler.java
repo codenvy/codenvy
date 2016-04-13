@@ -16,8 +16,6 @@ package com.codenvy.ide.factory.client.accept;
 
 import com.codenvy.ide.factory.client.FactoryLocalizationConstant;
 import com.codenvy.ide.factory.client.utils.FactoryProjectImporter;
-import com.codenvy.ide.factory.client.welcome.GreetingPartPresenter;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -44,7 +42,6 @@ public class AcceptFactoryHandler {
     private final FactoryProjectImporter      factoryProjectImporter;
     private final EventBus                    eventBus;
     private final AppContext                  appContext;
-    private final GreetingPartPresenter       greetingPartPresenter;
     private final ActionManager               actionManager;
     private final NotificationManager         notificationManager;
 
@@ -56,14 +53,12 @@ public class AcceptFactoryHandler {
                                 FactoryProjectImporter factoryProjectImporter,
                                 EventBus eventBus,
                                 AppContext appContext,
-                                GreetingPartPresenter greetingPartPresenter,
                                 ActionManager actionManager,
                                 NotificationManager notificationManager) {
         this.factoryProjectImporter = factoryProjectImporter;
         this.factoryLocalization = factoryLocalization;
         this.eventBus = eventBus;
         this.appContext = appContext;
-        this.greetingPartPresenter = greetingPartPresenter;
         this.actionManager = actionManager;
         this.notificationManager = notificationManager;
     }
@@ -86,6 +81,7 @@ public class AcceptFactoryHandler {
                 isImportingStarted = true;
 
                 notification = notificationManager.notify(factoryLocalization.cloningSource(), StatusNotification.Status.PROGRESS, false);
+                performOnAppLoadedActions(factory);
                 startImporting(factory);
             }
 
@@ -97,19 +93,13 @@ public class AcceptFactoryHandler {
     }
 
     private void startImporting(final Factory factory) {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                greetingPartPresenter.showGreeting();
-            }
-        });
         factoryProjectImporter.startImporting(factory,
                                               new AsyncCallback<Void>() {
                                                   @Override
                                                   public void onSuccess(Void result) {
                                                       notification.setStatus(StatusNotification.Status.SUCCESS);
                                                       notification.setContent(factoryLocalization.cloningSource());
-                                                      performActions(factory);
+                                                      performOnProjectsLoadedActions(factory);
                                                   }
 
                                                   @Override
@@ -120,7 +110,17 @@ public class AcceptFactoryHandler {
                                               });
     }
 
-    private void performActions(final Factory factory) {
+    private void performOnAppLoadedActions(final Factory factory) {
+        final Ide ide = factory.getIde();
+        if (ide == null || ide.getOnAppLoaded() == null) {
+            return;
+        }
+        for (Action action : ide.getOnAppLoaded().getActions()) {
+            actionManager.performAction(action.getId(), action.getProperties());
+        }
+    }
+
+    private void performOnProjectsLoadedActions(final Factory factory) {
         final Ide ide = factory.getIde();
         if (ide == null || ide.getOnProjectsLoaded() == null) {
             return;

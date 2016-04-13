@@ -48,7 +48,6 @@ public class FactoryExtension {
                             GreetingPartPresenter greetingPartPresenter,
                             OpenWelcomePageAction openWelcomePageAction) {
         acceptFactoryHandler.process();
-        greetingPartPresenter.process();
 
         /*
          * Inject resources and js
