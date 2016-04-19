@@ -132,7 +132,7 @@ public class FactoryProjectImporter extends AbstractImporter {
                 Set<String> projectNames = new HashSet<>();
                 String createPolicy = factory.getPolicies() != null ? factory.getPolicies().getCreate() : null;
                 for (ProjectConfigDto projectConfig : projectConfigs) {
-                    if (projectConfig.getSource() == null && projectConfig.getSource().getLocation() == null) {
+                    if (projectConfig.getSource() == null || projectConfig.getSource().getLocation() == null) {
                         continue;
                     }
 
