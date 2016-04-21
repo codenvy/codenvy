@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
@@ -57,12 +58,15 @@ public class SwarmDockerConnector extends DockerConnector {
     //TODO should it be done in other way?
     private final String                  nodeDaemonScheme;
     private final DockerConnectionFactory connectionFactory;
+    private final int                     nodeDescriptionLength;
 
     @Inject
     public SwarmDockerConnector(DockerConnectorConfiguration connectorConfiguration,
-                                DockerConnectionFactory connectionFactory) {
+                                DockerConnectionFactory connectionFactory,
+                                @Named("swarm.client.node_description_length") int nodeDescriptionLength) {
         super(connectorConfiguration, connectionFactory);
         this.connectionFactory = connectionFactory;
+        this.nodeDescriptionLength = nodeDescriptionLength;
         this.strategy = new RandomNodeSelectionStrategy();
         this.nodeDaemonScheme = "http";
     }
@@ -175,7 +179,7 @@ public class SwarmDockerConnector extends DockerConnector {
         }
         final ArrayList<DockerNode> nodes = new ArrayList<>(count);
         for (int i = 0; i < count; ++i) {
-            final String[] node = systemStatus[i * 8 + startsFrom];
+            final String[] node = systemStatus[i * nodeDescriptionLength + startsFrom];
             nodes.add(new DockerNode(node[0], node[1]));
         }
         return nodes;
