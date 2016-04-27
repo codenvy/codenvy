@@ -33,8 +33,8 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 import java.io.IOException;
 import java.util.Collections;

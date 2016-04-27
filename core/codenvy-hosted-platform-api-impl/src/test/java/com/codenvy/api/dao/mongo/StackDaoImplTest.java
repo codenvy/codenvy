@@ -46,7 +46,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.testng.MockitoTestNGListener;
