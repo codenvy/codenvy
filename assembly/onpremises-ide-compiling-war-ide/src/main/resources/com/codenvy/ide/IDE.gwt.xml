@@ -90,6 +90,8 @@
     <inherits name='com.codenvy.api.subscription.Subscription'/>
     -->
 
+    <inherits name='com.codenvy.machine.authentication.Authentication'/>
+
     <stylesheet src="IDE.css"/>
 
     <!-- Specify the app entry point class.                         -->

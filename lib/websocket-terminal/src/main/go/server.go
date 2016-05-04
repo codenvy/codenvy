@@ -34,7 +34,6 @@ import (
 )
 
 
-
 var addrFlag, cmdFlag, staticFlag string
 
 
@@ -75,6 +74,37 @@ func (wp *wsPty) Stop() {
 }
 
 func ptyHandler(w http.ResponseWriter, r *http.Request) {
+	tokenParam := r.URL.Query().Get("access_token")
+	if tokenParam == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Printf("Authentication failed: missing token.\n")
+		return
+	} else {
+		resp, err := http.Get(os.Getenv("CHE_API_ENDPOINT") + "/machine/token/user/" + tokenParam)
+		if err != nil {
+			log.Printf("Authentication failed: %s\n", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		defer resp.Body.Close()
+
+		reader := bufio.NewReader(resp.Body)
+		body, _, err := reader.ReadLine()
+		userId := string(body[:]);
+
+		if userId == "" {
+			log.Printf("Failed to authenticate: returned empty authenticated userId")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if err != nil {
+			log.Printf("Failed to retrieve authenticated userId: %s\n", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatalf("Websocket upgrade failed: %s\n", err)
@@ -128,7 +158,6 @@ func ptyHandler(w http.ResponseWriter, r *http.Request) {
 			if i < n{
 				buffer.Write(buf[i:n])
 			}
-
 		}
 	}()
 
@@ -188,11 +217,8 @@ func ptyHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 	wp.Stop()
 }
-
-
 
 func init() {
 	cwd, _ := os.Getwd()

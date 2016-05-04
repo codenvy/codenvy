@@ -500,6 +500,21 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-machine-authentication-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-machine-authentication-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-machine-authentication-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-microsoft-git-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>

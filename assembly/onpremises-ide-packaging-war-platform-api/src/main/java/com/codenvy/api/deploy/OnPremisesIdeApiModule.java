@@ -67,8 +67,6 @@ import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.server.recipe.providers.RecipeProvider;
-import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
-import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
 import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
@@ -90,6 +88,7 @@ import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
@@ -201,6 +200,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(TokenValidator.class).to(com.codenvy.auth.sso.server.BearerTokenValidator.class);
         bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
 
+        //machine authentication
+        bind(com.codenvy.machine.authentication.server.MachineTokenRegistry.class);
+        bind(com.codenvy.machine.authentication.server.MachineTokenService.class);
+        bind(org.eclipse.che.api.workspace.server.LinksInjector.class)
+                .to(com.codenvy.machine.authentication.server.link.AuthLinksInjector.class);
+        install(new com.codenvy.machine.authentication.server.interceptor.InterceptorModule());
+
         //SSO
         Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
                 Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
@@ -294,6 +300,12 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.client.DockerConnector.class).to(com.codenvy.swarm.client.SwarmDockerConnector.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
+        bindConstant().annotatedWith(Names.named(DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
+                      .to("mkdir -p ~/che " +
+                          "&& cp /mnt/che/terminal -R ~/che" +
+        "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
+        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
         install(new com.codenvy.api.permission.server.PermissionsModule());
@@ -328,11 +340,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
 
-        bind(WsAgentLauncher.class).to(WsAgentLauncherImpl.class);
+        bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
+                .to(com.codenvy.machine.authentication.server.launcher.WsAgentWithAuthLauncherImpl.class);
 
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
 
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
     }
 }

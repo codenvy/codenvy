@@ -52,6 +52,10 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-machine-authentication-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-microsoft-git-provider</artifactId>
         </dependency>
         <dependency>

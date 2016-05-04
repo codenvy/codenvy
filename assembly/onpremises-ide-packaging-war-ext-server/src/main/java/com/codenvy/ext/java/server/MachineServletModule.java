@@ -15,11 +15,10 @@
 package com.codenvy.ext.java.server;
 
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -34,13 +33,14 @@ public class MachineServletModule extends ServletModule {
         //listeners
         getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
         getServletContext().addListener(new com.codenvy.auth.sso.client.DestroySessionListener());
+
         //filters
+        filter("/*").through(CheCorsFilter.class);
+        filter("/*").through(com.codenvy.machine.authentication.server.MachineLoginFilter.class);
         filter("/*").through(com.codenvy.auth.sso.client.MachineRequestTokenInjectFilter.class);
         filter("/*").through(com.codenvy.workspace.LastAccessTimeFilter.class);
         filterRegex("/(?!_sso/).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
 
-        bind(CheCorsFilter.class).in(Singleton.class);
-        filter("/*").through(CheCorsFilter.class);
         //servlets
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(org.everrest.guice.servlet.GuiceEverrestServlet.class);
