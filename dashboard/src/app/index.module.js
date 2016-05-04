@@ -96,8 +96,51 @@ initModule.factory('AuthInterceptor', ($window, $cookies, $q, $location, $log) =
   };
 });
 
-initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
+initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
+  var tokens = {};
+  function requestToken(workspaceId) {
+    return $injector.get('$http').get('/api/machine/token/' + workspaceId)
+                    .then((resp) => tokens[workspaceId] = resp.data.machineToken);
+  }
 
+  function getWorkspaceId(url) {
+    // examples:
+    // ws-agent-host/wsagent/api/ext/project/:workspaceId/import/:path
+    // ws-agent-host/wsagent/api/ext/project-type/:workspaceId
+    // ws-agent-host/wsagent/api/ext/git/:workspaceId/read-only-url?projectPath=:path'
+    var groups = /.+\/ext\/(project|project-type|git)\/(.+?(?=\/)|.+).*/.exec(url);
+    return groups ? groups[2] : undefined;
+  }
+
+  return {
+    request: function(config) {
+      if (config.url.indexOf("/ext/") === -1) {
+        return config || $q.when(config);
+      }
+
+      let workspaceId = getWorkspaceId(config.url);
+      if (!workspaceId) {
+        return config || $q.when(config);
+      }
+
+      return $q.when(tokens[workspaceId] || requestToken(workspaceId))
+               .then((token) => {
+                 config.headers['Authorization'] = "Bearer " + token;
+                 return config;
+               })
+    },
+
+    responseError: (rejection) => {
+      if (rejection && rejection.config.url.indexOf("/ext/") !== -1) {
+        delete tokens[getWorkspaceId(rejection.config.url)];
+      }
+      return $q.reject(rejection);
+    }
+  }
+});
+
+initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
+  $httpProvider.interceptors.push('AddMachineTokenToUrlInterceptor')
   if (DEV) {
     console.log('adding auth interceptor');
     $httpProvider.interceptors.push('AuthInterceptor');
