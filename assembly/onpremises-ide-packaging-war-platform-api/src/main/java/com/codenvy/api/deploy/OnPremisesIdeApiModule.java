@@ -80,6 +80,7 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.server.WorkspaceServiceLinksInjector;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -203,8 +204,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         //machine authentication
         bind(com.codenvy.machine.authentication.server.MachineTokenRegistry.class);
         bind(com.codenvy.machine.authentication.server.MachineTokenService.class);
-        bind(org.eclipse.che.api.workspace.server.LinksInjector.class)
-                .to(com.codenvy.machine.authentication.server.link.AuthLinksInjector.class);
+        bind(WorkspaceServiceLinksInjector.class).to(com.codenvy.machine.authentication.server.AuthLinksInjector.class);
         install(new com.codenvy.machine.authentication.server.interceptor.InterceptorModule());
 
         //SSO
