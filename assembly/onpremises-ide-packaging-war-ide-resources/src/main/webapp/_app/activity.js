@@ -22,10 +22,16 @@ var ActivityTracker = new function () {
 
     this.init = function (restContext, workspaceId) {
         this.url = restContext + "/activity/" + workspaceId;
-        document.addEventListener("mousemove", function(){  if (!active && errors < maxErrors) active = true; });
-        document.addEventListener("keypress", function(){  if (!active && errors < maxErrors) active = true; });
+        document.addEventListener("mousemove",  ActivityTracker.setActive);
+        document.addEventListener("keypress", ActivityTracker.setActive);
         setInterval(ActivityTracker.sendRequest, timeoutInterval);
     };
+
+    this.setActive = function() {
+        if (!active && errors < maxErrors) {
+            active = true;
+        }
+    }
 
 
     this.sendRequest = function () {
