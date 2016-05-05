@@ -1,3 +1,4 @@
+
 /*
  *  [2012] - [2016] Codenvy, S.A.
  *  All Rights Reserved.
@@ -15,6 +16,7 @@
 package org.eclipse.che.ide.ext.bitbucket.server;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
@@ -76,9 +78,10 @@ public class BitbucketKeyUploader implements SshKeyUploader {
 
     @Override
     public void uploadKey(String publicKey) throws IOException, UnauthorizedException {
+
         final StringBuilder answer = new StringBuilder();
         final String publicKeyString = new String(publicKey.getBytes());
-        final String sshKeysUrl = "https://api.bitbucket.org/1.0/ssh-keys";
+        final String sshKeysUrl = "https://api.bitbucket.org/1.0/users/ssh-keys";
 
         final List<BitbucketKey> bitbucketUserPublicKeys = getUserPublicKeys(sshKeysUrl, answer);
         for (final BitbucketKey oneBitbucketUserPublicKey : bitbucketUserPublicKeys) {
@@ -97,14 +100,17 @@ public class BitbucketKeyUploader implements SshKeyUploader {
 
         int responseCode;
         HttpURLConnection conn = null;
+        final OAuthToken token = tokenProvider.getToken(OAUTH_PROVIDER_NAME, getUserId());
         try {
 
             conn = (HttpURLConnection)new URL(sshKeysUrl).openConnection();
             conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod(POST);
             conn.setRequestProperty(ACCEPT, APPLICATION_JSON);
-            conn.setRequestProperty(AUTHORIZATION, "Bearer " + tokenProvider.getToken(OAUTH_PROVIDER_NAME, getUserId()).getToken());
 
+            if (token != null) {
+                conn.setRequestProperty(AUTHORIZATION, "Bearer " + token.getToken());
+            }
             conn.setRequestProperty(CONTENT_TYPE, APPLICATION_JSON);
             conn.setRequestProperty(CONTENT_LENGTH, String.valueOf(postBody.length()));
             conn.setDoOutput(true);
@@ -132,16 +138,18 @@ public class BitbucketKeyUploader implements SshKeyUploader {
         }
     }
 
-    private List<BitbucketKey> getUserPublicKeys(final String requestUrl, final StringBuilder answer) {
+    private List<BitbucketKey> getUserPublicKeys(final String requestUrl, final StringBuilder answer) throws IOException {
         HttpURLConnection conn = null;
-
+        final OAuthToken token = tokenProvider.getToken(OAUTH_PROVIDER_NAME, getUserId());
         try {
 
             conn = (HttpURLConnection)new URL(requestUrl).openConnection();
             conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod(GET);
             conn.setRequestProperty(ACCEPT, APPLICATION_JSON);
-            conn.setRequestProperty(AUTHORIZATION, "Bearer " + tokenProvider.getToken(OAUTH_PROVIDER_NAME, getUserId()).getToken());
+            if (token != null) {
+                conn.setRequestProperty(AUTHORIZATION, "Bearer " + token.getToken());
+            }
             if (conn.getResponseCode() == OK) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                     String line;
