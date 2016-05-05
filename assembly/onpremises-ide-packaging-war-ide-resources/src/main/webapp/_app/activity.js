@@ -15,14 +15,15 @@
 var ActivityTracker = new function () {
 
     var url;
-    var timeoutInterval = 1000;
-    var maxErrors = 5;
+    var timeoutInterval = 30000;
+    var maxErrors = 10;
+    var errors = 0;
     var active;
 
     this.init = function (restContext, workspaceId) {
         this.url = restContext + "/activity/" + workspaceId;
-        document.addEventListener("mousemove", function(){  if (!active && maxErrors > 0) active = true; });
-        document.addEventListener("keypress", function(){  if (!active && maxErrors > 0) active = true; });
+        document.addEventListener("mousemove", function(){  if (!active && errors < maxErrors) active = true; });
+        document.addEventListener("keypress", function(){  if (!active && errors < maxErrors) active = true; });
         setInterval(ActivityTracker.sendRequest, timeoutInterval);
     };
 
@@ -43,9 +44,9 @@ var ActivityTracker = new function () {
         request.onreadystatechange = function () {
             if (request.readyState == 4) {
                 if (request.status == 204) {
-                    maxErrors = 5;
+                    errors = 0;
                 } else {
-                    maxErrors--;
+                    errors++;
                 }
 
             }
