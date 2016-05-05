@@ -42,7 +42,9 @@ var ActivityTracker = new function () {
 
         request.onreadystatechange = function () {
             if (request.readyState == 4) {
-                if (request.status != 204) {
+                if (request.status == 204) {
+                    maxErrors = 5;
+                } else {
                     maxErrors--;
                 }
 
