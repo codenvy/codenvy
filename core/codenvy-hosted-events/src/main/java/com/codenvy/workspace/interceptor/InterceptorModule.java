@@ -14,12 +14,10 @@
  */
 package com.codenvy.workspace.interceptor;
 
-import com.codenvy.api.account.AddDefaultAccountIdInterceptor;
 import com.codenvy.user.interceptor.CreateUserInterceptor;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
@@ -38,13 +36,5 @@ public class InterceptorModule extends AbstractModule {
         final CreateUserInterceptor createUserInterceptor = new CreateUserInterceptor();
         requestInjection(createUserInterceptor);
         bindInterceptor(subclassesOf(UserDao.class), names("create"), createUserInterceptor);
-
-        final AddDefaultAccountIdInterceptor addDefaultAccountIdInterceptor = new AddDefaultAccountIdInterceptor();
-        requestInjection(addDefaultAccountIdInterceptor);
-        bindInterceptor(subclassesOf(WorkspaceService.class), names("create"), addDefaultAccountIdInterceptor);
-        bindInterceptor(subclassesOf(WorkspaceService.class), names("startById"), addDefaultAccountIdInterceptor);
-        bindInterceptor(subclassesOf(WorkspaceService.class), names("startByName"), addDefaultAccountIdInterceptor);
-        bindInterceptor(subclassesOf(WorkspaceService.class), names("startTemporary"), addDefaultAccountIdInterceptor);
-
     }
 }

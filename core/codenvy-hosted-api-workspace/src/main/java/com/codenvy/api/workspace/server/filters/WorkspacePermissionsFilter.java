@@ -17,8 +17,6 @@ package com.codenvy.api.workspace.server.filters;
 import com.codenvy.api.workspace.server.WorkspaceAction;
 import com.codenvy.api.workspace.server.WorkspaceDomain;
 
-import org.eclipse.che.api.account.server.dao.Account;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -47,15 +45,12 @@ import static com.google.api.client.repackaged.com.google.common.base.Strings.is
 @Filter
 @Path("/workspace{path:(/.*)?}")
 public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
-    private final AccountDao       accountDao;
     private final WorkspaceManager workspaceManager;
     private final UserManager      userManager;
 
     @Inject
-    public WorkspacePermissionsFilter(AccountDao accountDao,
-                                      WorkspaceManager workspaceManager,
+    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager,
                                       UserManager userManager) {
-        this.accountDao = accountDao;
         this.workspaceManager = workspaceManager;
         this.userManager = userManager;
     }
@@ -83,18 +78,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
             case "delete":
                 workspaceId = ((String)arguments[0]);
                 action = WorkspaceAction.DELETE;
-
-                try {
-                    final Account account = accountDao.getByWorkspace(workspaceId);
-                    if (currentUser.hasPermission("account", account.getId(), "deleteWorkspaces")) {
-                        //user has permission for removing workspace on account domain level
-                        return;
-                    }
-                } catch (NotFoundException | ServerException e) {
-                    //do nothing
-                }
                 break;
-
             case "recoverWorkspace":
             case "createMachine":
             case "stop":

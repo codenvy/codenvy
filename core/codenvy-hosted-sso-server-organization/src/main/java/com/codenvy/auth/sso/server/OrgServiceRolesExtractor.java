@@ -48,9 +48,6 @@ import static java.util.Collections.emptySet;
  */
 public class OrgServiceRolesExtractor implements RolesExtractor {
     private static final Logger LOG = LoggerFactory.getLogger(OrgServiceRolesExtractor.class);
-
-//    private final UserDao                   userDao;
-//    private final AccountDao                accountDao;
     private final PreferenceDao             preferenceDao;
     private final InitialLdapContextFactory contextFactory;
     private final String                    containerDn;
@@ -60,18 +57,13 @@ public class OrgServiceRolesExtractor implements RolesExtractor {
     private final String                    allowedRole;
 
     @Inject
-    public OrgServiceRolesExtractor(
-                                    //UserDao userDao,
-                                    //AccountDao accountDao,
-                                    PreferenceDao preferenceDao,
+    public OrgServiceRolesExtractor(PreferenceDao preferenceDao,
                                     @Named("user.ldap.user_container_dn") String userContainerDn,
                                     @Named("user.ldap.user_dn") String userDn,
                                     @Named("user.ldap.old_user_dn") String oldUserDn,
                                     @Nullable @Named("user.ldap.attr.role_name") String roleAttrName,
                                     @Nullable @Named("user.ldap.allowed_role") String allowedRole,
                                     InitialLdapContextFactory contextFactory) {
-//        this.userDao = userDao;
-//        this.accountDao = accountDao;
         this.preferenceDao = preferenceDao;
         this.roleAttrName = roleAttrName;
         this.allowedRole = allowedRole;

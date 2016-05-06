@@ -16,7 +16,6 @@ package com.codenvy.api.dao.ldap;
 
 import com.codenvy.api.user.server.dao.AdminUserDao;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
@@ -41,8 +40,6 @@ public class AdminUserDaoTest extends BaseTest {
     @Mock
     UserProfileDao profileDao;
     @Mock
-    AccountDao     accountDao;
-    @Mock
     PreferenceDao  preferenceDao;
 
     UserLdapPagination        userLdapPagination;
@@ -64,8 +61,7 @@ public class AdminUserDaoTest extends BaseTest {
                                                     null));
         mapper = spy(new UserAttributesMapper());
         userLdapPagination = new UserLdapPagination("dc=codenvy;dc=com", mapper, factory);
-        userDao = new AdminUserDaoImpl(accountDao,
-                                       profileDao,
+        userDao = new AdminUserDaoImpl(profileDao,
                                        preferenceDao,
                                        factory,
                                        "dc=codenvy;dc=com",

@@ -85,11 +85,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-account</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-assured</artifactId>
             <scope>test</scope>

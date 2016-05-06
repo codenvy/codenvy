@@ -57,12 +57,10 @@ public abstract class WorkspaceEnvironmentInitializationFilter implements Filter
                 final EnvironmentContext env = EnvironmentContext.getCurrent();
                 env.setWorkspaceName(workspace.getConfig().getName());
                 env.setWorkspaceId(workspace.getId());
-//                env.setAccountId(workspace.getAccountId());
                 env.setWorkspaceTemporary(workspace.isTemporary());
                 LOG.debug("Set environment context - workspace name: {}, workspace id: {}, account id:{} , is temporary: {}",
                           env.getWorkspaceName(),
                           env.getWorkspaceId(),
-                          env.getAccountId(),
                           env.isWorkspaceTemporary());
                 chain.doFilter(request, response);
             } else {

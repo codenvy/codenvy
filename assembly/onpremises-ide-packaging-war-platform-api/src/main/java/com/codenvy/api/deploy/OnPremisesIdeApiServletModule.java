@@ -14,8 +14,6 @@
  */
 package com.codenvy.api.deploy;
 
-import com.codenvy.service.http.AccountIdEnvironmentInitializationFilter;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.inject.DynaModule;
@@ -48,14 +46,6 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                 .through(com.codenvy.service.http.WorkspaceIdEnvironmentInitializationFilter.class);
         filterRegex("^/workspace/(?!config$|runtime$|.*:.*$).+")
                 .through(com.codenvy.service.http.WorkspaceIdEnvironmentInitializationFilter.class);
-        filterRegex("^/(account|creditcard)/(?!find|list).+").through(new AccountIdEnvironmentInitializationFilter(),
-                                                                      ImmutableMap.of("accountIdPosition", "3"));
-        filterRegex("^/subscription/find/account/.*").through(new AccountIdEnvironmentInitializationFilter(),
-                                                              ImmutableMap.of("accountIdPosition", "5"));
-        filterRegex("/resources/.*").through(new AccountIdEnvironmentInitializationFilter(), ImmutableMap.of("accountIdPosition", "3"));
-        filterRegex("^/saas/resources/[\\w-]*/provided").through(new AccountIdEnvironmentInitializationFilter(),
-                                                                 ImmutableMap.of("accountIdPosition", "4"));
-
         filter("/factory/*",
                "/activity/*",
                "/workspace/*",
