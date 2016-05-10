@@ -14,7 +14,6 @@
  */
 package com.codenvy.ide.factory.client.welcome;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -63,12 +62,6 @@ public class GreetingPartPresenter extends BasePresenter implements GreetingPart
     @Override
     public String getTitle() {
         return title != null ? title : DEFAULT_TITLE;
-    }
-
-    @Nullable
-    @Override
-    public ImageResource getTitleImage() {
-        return null;
     }
 
     @Nullable

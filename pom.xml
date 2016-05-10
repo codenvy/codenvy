@@ -28,6 +28,7 @@
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
+        <module>lib</module>
         <module>core</module>
         <module>plugins</module>
         <module>dashboard</module>
@@ -306,6 +307,20 @@
                 <artifactId>update-server-packaging-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.lib</groupId>
+                <artifactId>codenvy-websocket-terminal</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.lib</groupId>
+                <artifactId>codenvy-websocket-terminal</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
@@ -683,6 +698,27 @@
                 <groupId>org.apache.sshd</groupId>
                 <artifactId>sshd-core</artifactId>
                 <version>${org.apache.sshd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.version}</version>
+                <type>zip</type>
+                <classifier>linux_i386</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm5</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm6</classifier>
             </dependency>
             <dependency>
                 <groupId>org.everrest</groupId>

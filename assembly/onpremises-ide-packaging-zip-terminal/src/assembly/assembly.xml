@@ -26,7 +26,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_amd64</include>
+                <include>com.codenvy.lib:codenvy-websocket-terminal:zip:linux_amd64</include>
             </includes>
         </dependencySet>
     </dependencySets>
