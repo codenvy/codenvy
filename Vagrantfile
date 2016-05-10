@@ -1,12 +1,14 @@
-box         = 'centos7.2'
-url         = 'https://install.codenvycorp.com/centos7.2.box'
+box             = 'centos7.2'
+url             = 'https://install.codenvycorp.com/centos7.2.box'
 
-ram         = '4096'
-cpus        = '2'
-bridge      = 'eth0'
+ram             = '4096'
+cpus            = '2'
+bridge          = 'eth0'
 
-http_proxy  = ""
-https_proxy = ""
+http_proxy      = ""
+https_proxy     = ""
+codenvy_url     = "http://start.codenvy.com/install-codenvy"
+codenvy_options = "--suppress --silent --license=accept"
 
 Vagrant.configure("2") do |config|
   config.vm.box = box
@@ -32,6 +34,8 @@ Vagrant.configure("2") do |config|
   $script = <<-SHELL
     HTTP_PROXY=$1
     HTTPS_PROXY=$2
+    CODENVY_URL=$3
+    CODENVY_OPTIONS=$4
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
       echo "."
@@ -50,16 +54,32 @@ Vagrant.configure("2") do |config|
     echo "."
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-      bash <(curl -L -s --proxy ${HTTPS_PROXY} https://start.codenvy.com/install-codenvy) --silent --fair-source-license=accept --http-proxy=${HTTP_PROXY} --https-proxy=${HTTPS_PROXY}
+      bash <(curl -L -s --proxy ${HTTP_PROXY} ${CODENVY_URL}) ${CODENVY_OPTIONS} --http-proxy=${HTTP_PROXY} --https-proxy=${HTTPS_PROXY}
     else
-      bash <(curl -L -s https://start.codenvy.com/install-codenvy) --silent --fair-source-license=accept
+      bash <(curl -L -s ${CODENVY_URL}) ${CODENVY_OPTIONS}
     fi
 
+    echo "."
+    echo "."
+    echo "CODENVY: DOWNLOADING POPULAR STACKS"
+    echo "."
+    echo "."
+    docker pull codenvy/ubuntu_jdk8
+
+    echo "."
+    echo "."
+    echo "CODENVY: INSTALLED!"
+    echo 'Add "192.168.56.110 codenvy" to your hosts file'
+    echo 'Access:   http://codenvy'
+    echo 'Username: admin'
+    echo 'Password: password'
+    echo "."
+    echo "."
   SHELL
 
   config.vm.provision "shell" do |s|
     s.inline = $script
-    s.args = [http_proxy, https_proxy]
+    s.args = [http_proxy, https_proxy, codenvy_url, codenvy_options]
   end
 
 end

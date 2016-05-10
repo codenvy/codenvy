@@ -38,6 +38,7 @@ import org.apache.commons.io.FileUtils;
 import org.mockito.Mock;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -292,6 +293,35 @@ public class TestCDECArtifact extends BaseTest {
                                           + "{'command'='sudo yum -y -q install puppet-3.8.6-1.el7.noarch', 'agent'='{'host'='api.example.com', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}], [{'command'='sudo systemctl enable puppet', 'agent'='{'host'='data.example.com', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, "
                                           + "{'command'='sudo systemctl enable puppet', 'agent'='{'host'='analytics.example.com', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, "
                                           + "{'command'='sudo systemctl enable puppet', 'agent'='{'host'='api.example.com', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}]]", SYSTEM_USER_NAME));
+    }
+
+
+    @Test
+    public void testConfigurePuppetAgentForSingleServer() throws IOException {
+        System.setProperty("http.proxyUser", "user1");
+        System.setProperty("http.proxyPassword", "paswd1");
+        System.setProperty("http.proxyHost", "user1");
+        System.setProperty("http.proxyPort", "8081");
+        System.setProperty("https.proxyUser", "user2");
+        System.setProperty("https.proxyPassword", "paswd2");
+        System.setProperty("https.proxyHost", "user2");
+        System.setProperty("https.proxyPort", "8082");
+        
+        final String installVersionStr = "4.0.0";
+        Version versionToInstall = Version.valueOf(installVersionStr);
+        Path pathToBinaries = Paths.get("some path");
+
+        InstallOptions options = new InstallOptions();
+        options.setInstallType(InstallType.SINGLE_SERVER);
+        options.setConfigProperties(ImmutableMap.of("some property", "some value", Config.HOST_URL, "host_url"));
+
+        // check install puppet commands
+        List<Command> commands = ((MacroCommand) spyCdecArtifact.getInstallCommand(versionToInstall, pathToBinaries, options.setStep(4))).getCommands();
+        assertEquals(commands.size(), 4);
+        assertEquals(commands.toString(), "[{'command'='if sudo test -f /etc/puppet/puppet.conf; then     if ! sudo test -f /etc/puppet/puppet.conf.back; then         sudo cp /etc/puppet/puppet.conf /etc/puppet/puppet.conf.back;     else         sudo cp /etc/puppet/puppet.conf.back /etc/puppet/puppet.conf;     fi fi', 'agent'='LocalAgent'}, "
+                                          + "{'command'='sudo sed -i 's/\\[main\\]/\\[main\\]\\n  dns_alt_names = puppet,host_url\\n/g' /etc/puppet/puppet.conf', 'agent'='LocalAgent'}, "
+                                          + "{'command'='sudo sed -i 's/\\[agent\\]/[master]\\n  certname = host_url\\n\\n\\[user\\]\\n  http_proxy_user = user1\\n  http_proxy_password = paswd1\\n  http_proxy_host = user1\\n  http_proxy_port = 8081\\n  https_proxy_user = user2\\n  https_proxy_password = paswd2\\n  https_proxy_host = user2\\n  https_proxy_port = 8082\\n\\n\\[agent\\]\\n  show_diff = true\\n  pluginsync = true\\n  report = true\\n  default_schedules = false\\n  certname = host_url\\n  runinterval = 300\\n  configtimeout = 600\\n  server = host_url\\n/g' /etc/puppet/puppet.conf', 'agent'='LocalAgent'}, "
+                                          + "{'command'='sudo sh -c 'echo -e \"\\nPUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\\n\" >> /etc/sysconfig/puppetagent'', 'agent'='LocalAgent'}]");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -1109,10 +1139,87 @@ public class TestCDECArtifact extends BaseTest {
         assertFalse(spyCdecArtifact.isAlive());
     }
 
+    @Test(dataProvider = "getDataForProxySettingsForPuppetConf")
+    public void shouldReturnProxySettingsForPuppetConf(String httpUser, 
+                                                       String httpPassword, 
+                                                       String httpHost, 
+                                                       String httpPort,
+                                                       String httpsUser,
+                                                       String httpsPassword,
+                                                       String httpsHost,
+                                                       String httpsPort,
+                                                       String expectedSettings) {
+        if (httpUser != null) {
+            System.setProperty("http.proxyUser", httpUser);
+        }
+
+        if (httpPassword != null) {
+            System.setProperty("http.proxyPassword", httpPassword);
+        }
+
+        if (httpHost != null) {
+            System.setProperty("http.proxyHost", httpHost);
+        }
+
+        if (httpPort != null) {
+            System.setProperty("http.proxyPort", httpPort);
+        }
+
+        if (httpsUser != null) {
+            System.setProperty("https.proxyUser", httpsUser);
+        }
+
+        if (httpsPassword != null) {
+            System.setProperty("https.proxyPassword", httpsPassword);
+        }
+
+        if (httpsHost != null) {
+            System.setProperty("https.proxyHost", httpsHost);
+        }
+
+        if (httpsPort != null) {
+            System.setProperty("https.proxyPort", httpsPort);
+        }
+
+        String result = spyCDECSingleServerHelper.getProxySettingsForPuppetConf();
+        assertEquals(result, expectedSettings);
+    }
+
+    @DataProvider
+    public Object[][] getDataForProxySettingsForPuppetConf() {
+        return new Object [][] {
+            {
+                null, null, null, null, null, null, null, null,
+                ""
+            },
+            {
+                "user1", "password1", "proxy.net1", "8081", null, null, null, null,
+                "\\[user\\]\\n  http_proxy_user = user1\\n  http_proxy_password = password1\\n  http_proxy_host = proxy.net1\\n  http_proxy_port = 8081\\n\\n"
+            },
+            {
+                null, null, null, null, "user2", "password2", "proxy.net2", "8082",
+                "\\[user\\]\\n  https_proxy_user = user2\\n  https_proxy_password = password2\\n  https_proxy_host = proxy.net2\\n  https_proxy_port = 8082\\n\\n"
+            },
+            {
+                "user1", "password1", "proxy.net1", "8081", "user2", "password2", "proxy.net2", "8082",
+                "\\[user\\]\\n  http_proxy_user = user1\\n  http_proxy_password = password1\\n  http_proxy_host = proxy.net1\\n  http_proxy_port = 8081\\n  https_proxy_user = user2\\n  https_proxy_password = password2\\n  https_proxy_host = proxy.net2\\n  https_proxy_port = 8082\\n\\n"
+            }
+        };
+    }
+
     @AfterMethod
     public void removeTempDir() throws IOException {
         FileUtils.deleteDirectory(new File(BASE_TMP_DIR));
         FileUtils.deleteDirectory(BackupConfig.BASE_TMP_DIRECTORY.toFile());  // to clean up directories creating in time of executing backup/restore tests
-    }
 
+        System.clearProperty("http.proxyUser");
+        System.clearProperty("http.proxyPassword");
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+
+        System.clearProperty("https.proxyUser");
+        System.clearProperty("https.proxyPassword");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
+    }
 }

@@ -32,7 +32,7 @@ vagrantUp ${SINGLE_NODE_VAGRANT_FILE}
 executeSshCommand "sudo sed -i -e 's/vagrant.*/vagrant ALL=\(ALL\) ALL/g' /etc/sudoers"
 executeSshCommand "--valid-exit-code=1" "sudo -n -k true"
 
-executeSshCommand "--valid-exit-code=1" "bash <(curl -L -s ${UPDATE_SERVICE}/repository/public/download/install-codenvy) --silent --fair-source-license=accept"
+executeSshCommand "--valid-exit-code=1" "bash <(curl -L -s ${UPDATE_SERVICE}/repository/public/download/install-codenvy) --suppress --license=accept"
 validateExpectedString ".*ERROR\:.This.account.'vagrant'.does.not.have.sufficient.sudo.rights.to.perform.an.installation.*NOTE\:.Grant.privileges.to.run.sudo.without.password.to.'vagrant'.user.and.restart.installation.*"
 
 printAndLog "RESULT: PASSED"

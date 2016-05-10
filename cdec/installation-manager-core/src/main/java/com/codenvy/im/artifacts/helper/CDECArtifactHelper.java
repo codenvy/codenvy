@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static java.lang.String.format;
 
 /**
  * @author Dmytro Nochevnov
@@ -91,4 +94,49 @@ public abstract class CDECArtifactHelper {
 
     /** @return list of commands to update puppet.conf files of puppet server and puppet agent */
     public abstract Command getUpdatePuppetConfigCommand(Config config, String oldHostName, String newHostName);
+
+    public String getProxySettingsForPuppetConf() {
+        SystemProxySettings systemSettings = SystemProxySettings.create();
+
+        if (systemSettings.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder proxySettings = new StringBuilder("\\[user\\]\\n");
+        if (! Objects.isNull(systemSettings.getHttpUser())) {
+            proxySettings.append(format("  http_proxy_user = %s\\n", systemSettings.getHttpUser()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpPassword())) {
+            proxySettings.append(format("  http_proxy_password = %s\\n", systemSettings.getHttpPassword()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpHost())) {
+            proxySettings.append(format("  http_proxy_host = %s\\n", systemSettings.getHttpHost()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpPort())) {
+            proxySettings.append(format("  http_proxy_port = %s\\n", systemSettings.getHttpPort()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpsUser())) {
+            proxySettings.append(format("  https_proxy_user = %s\\n", systemSettings.getHttpsUser()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpsPassword())) {
+            proxySettings.append(format("  https_proxy_password = %s\\n", systemSettings.getHttpsPassword()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpsHost())) {
+            proxySettings.append(format("  https_proxy_host = %s\\n", systemSettings.getHttpsHost()));
+        }
+
+        if (! Objects.isNull(systemSettings.getHttpsPort())) {
+            proxySettings.append(format("  https_proxy_port = %s\\n", systemSettings.getHttpsPort()));
+        }
+
+        proxySettings.append("\\n");
+
+        return proxySettings.toString();
+    }
 }
