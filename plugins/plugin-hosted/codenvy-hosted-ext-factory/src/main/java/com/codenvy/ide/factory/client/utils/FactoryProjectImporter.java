@@ -300,8 +300,8 @@ public class FactoryProjectImporter extends AbstractImporter {
                                                                                            sourceStorage,
                                                                                            subscriber);
                                                  } else {
-                                                     dialogFactory.createMessageDialog(locale.cloningSourceSshKeyFailedTitle(),
-                                                                                       locale.cloningSourcesSshKeyFailedText(), null).show();
+                                                     dialogFactory.createMessageDialog(locale.cloningSourceSshKeyUploadFailedTitle(),
+                                                                                       locale.cloningSourcesSshKeyUploadFailedText(), null).show();
                                                  }
                                              } else {
                                                  dialogFactory.createMessageDialog(locale.oauthFailedToGetAuthenticatorTitle(),
