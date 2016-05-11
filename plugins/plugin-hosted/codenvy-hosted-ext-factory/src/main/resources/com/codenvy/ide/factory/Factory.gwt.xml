@@ -22,9 +22,9 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
 
-    <inherits name='org.eclipse.che.api.Factory'/>
-    <inherits name='org.eclipse.che.api.Workspace'/>
-    <inherits name="org.eclipse.che.api.Project"/>
+    <inherits name='org.eclipse.che.api.factory.Factory'/>
+    <inherits name='org.eclipse.che.api.workspace.Workspace'/>
+    <inherits name="org.eclipse.che.api.project.Project"/>
 
     <inherits name="org.eclipse.che.ide.Commons"/>
     <inherits name="org.eclipse.che.ide.ext.git.Git"/>
