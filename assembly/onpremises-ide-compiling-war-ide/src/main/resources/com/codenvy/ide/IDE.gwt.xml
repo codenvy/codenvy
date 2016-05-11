@@ -79,7 +79,6 @@
     <inherits name='org.eclipse.che.api.Factory'/>
     <inherits name="org.eclipse.che.api.Workspace"/>
     <inherits name="org.eclipse.che.api.Ssh"/>
-    <inherits name='org.eclipse.che.api.Debugger'/>
     <inherits name='org.eclipse.che.plugin.docker.ext.client.Docker'/>
 
     <!--Hosted specific -->
