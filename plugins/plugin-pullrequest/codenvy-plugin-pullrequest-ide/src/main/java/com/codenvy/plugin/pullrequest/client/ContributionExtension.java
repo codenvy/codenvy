@@ -23,7 +23,6 @@ import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingServiceProvider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -37,6 +36,7 @@ import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -96,7 +96,8 @@ public class ContributionExtension {
             public void onCurrentProjectChanged(CurrentProjectChangedEvent event) {
                 final ProjectConfigDto rootProject = appContext.getCurrentProject().getRootProject();
                 if (!rootProject.getName().equals(lastSelectedProjectName) || !partWasOpened) {
-                    initializeContributorExtension(copy(rootProject)); //here need to use copy of object because it can be changed in other thread
+                    initializeContributorExtension(
+                            copy(rootProject)); //here need to use copy of object because it can be changed in other thread
                 }
                 lastSelectedProjectName = rootProject.getName();
             }

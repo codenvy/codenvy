@@ -14,11 +14,11 @@
  */
 package com.codenvy.ide.hosted.client.informers;
 
-import org.eclipse.che.api.user.gwt.client.UserServiceClient;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedHandler;
+import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
