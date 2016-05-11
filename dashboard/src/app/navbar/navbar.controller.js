@@ -36,9 +36,6 @@ export class CodenvyNavBarCtrl {
     this.displayLoginItem = userDashboardConfig.developmentMode;
     let promiseService = this.cheAPI.getService().fetchServices();
     promiseService.then(() => {
-      this.isInvoiceServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getPayment().getInvoiceServicePath());
-      this.isSubscriptionServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getAccount().getSubscriptionServicePath());
-      this.isAccountServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getAccount().getAccountServicePath());
       this.isFactoryServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getFactory().getFactoryServicePath());
     });
 
@@ -78,9 +75,7 @@ export class CodenvyNavBarCtrl {
 
       // subsection
       account: '#/account',
-      team: '#/team',
-      subscriptions: '#/subscriptions',
-      billing: '#/billing'
+      team: '#/team'
     };
 
     // clear highlighting of menu item from navbar

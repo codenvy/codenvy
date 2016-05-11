@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Named;
@@ -447,17 +448,22 @@ public class ConfigManager {
         }
     }
 
-    private void setupProxyProperties(Map<String, String> properties) {
-        if (properties.containsKey(Config.HTTP_PROXY_FOR_CODENVY) || properties.containsKey(Config.HTTPS_PROXY_FOR_CODENVY)) {
-            if (properties.containsKey(Config.HTTP_PROXY_FOR_CODENVY)) {
-                properties.put(Config.HTTP_PROXY, properties.get(Config.HTTP_PROXY_FOR_CODENVY));
-            }
+    private void setupProxyProperties(Map<String, String> codenvyProperties) {
+        String httpProxyForCodenvy = codenvyProperties.get(Config.HTTP_PROXY_FOR_CODENVY);
+        String httpsProxyForCodenvy = codenvyProperties.get(Config.HTTPS_PROXY_FOR_CODENVY);
 
-            if (properties.containsKey(Config.HTTPS_PROXY_FOR_CODENVY)) {
-                properties.put(Config.HTTPS_PROXY, properties.get(Config.HTTPS_PROXY_FOR_CODENVY));
-            }
+        Map<String, String> systemProperties = obtainProxyProperties();
+
+        if (! StringUtils.isEmpty(httpProxyForCodenvy)) {
+            codenvyProperties.put(Config.HTTP_PROXY, codenvyProperties.get(Config.HTTP_PROXY_FOR_CODENVY));
         } else {
-            properties.putAll(obtainProxyProperties());
+            codenvyProperties.put(Config.HTTP_PROXY, systemProperties.get(Config.HTTP_PROXY));
+        }
+
+        if (! StringUtils.isEmpty(httpsProxyForCodenvy)) {
+            codenvyProperties.put(Config.HTTPS_PROXY, codenvyProperties.get(Config.HTTPS_PROXY_FOR_CODENVY));
+        } else {
+            codenvyProperties.put(Config.HTTPS_PROXY, systemProperties.get(Config.HTTPS_PROXY));
         }
     }
 

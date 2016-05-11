@@ -428,7 +428,9 @@ public class TestConfigManager extends BaseTest {
 
     @Test
     public void testPrepareInstallPropertiesLoadPropertiesFromConfigInstallUseCase() throws Exception {
-        Map<String, String> properties = new HashMap<>(ImmutableMap.of("a", "b"));
+        Map<String, String> properties = new HashMap<>(ImmutableMap.of("a", "b",
+                                                                       Config.HTTP_PROXY_FOR_CODENVY, "",
+                                                                       Config.HTTPS_PROXY_FOR_CODENVY, ""));
 
         doReturn(properties).when(spyConfigManager).loadConfigProperties("file");
 
@@ -444,7 +446,7 @@ public class TestConfigManager extends BaseTest {
                                                                                       ArtifactFactory.createArtifact(CDECArtifact.NAME),
                                                                                       Version.valueOf("3.1.0"),
                                                                                       true);
-        assertEquals(actualProperties.size(), 5);
+        assertEquals(actualProperties.size(), 7);
         assertEquals(actualProperties.get("a"), "b");
 
         assertTrue(actualProperties.containsKey(Config.PRIVATE_KEY));
@@ -499,8 +501,6 @@ public class TestConfigManager extends BaseTest {
                                                                                          ArtifactFactory.createArtifact(CDECArtifact.NAME),
                                                                                          Version.valueOf("3.1.0"),
                                                                                          true);
-
-        verify(spyConfigManager, never()).getEnvironment();
 
         assertEquals(actualProperties.get("a"), "b");
 

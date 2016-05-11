@@ -14,6 +14,7 @@
  */
 package com.codenvy.im.utils;
 
+import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -162,14 +163,6 @@ public class HttpTransport {
         return connection;
     }
 
-    private String getHttpProxyUser(Protocol protocol) {
-        return System.getProperty(format("%s.proxyUser", protocol.toString().toLowerCase()));
-    }
-
-    private String getHttpProxyPassword(Protocol protocol) {
-        return System.getProperty(format("%s.proxyPassword", protocol.toString().toLowerCase()));
-    }
-
     void setDefaultAuthenticator(final String proxyUser, final char[] proxyPassword) {
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -280,14 +273,32 @@ public class HttpTransport {
      * @see <a href="http://www.w3.org/Addressing/URL/url-spec.txt">http://www.w3.org/Addressing/URL/url-spec.txt</a>
      */
     private void considerAuthenticatedProxy(Protocol protocol) {
-        String proxyUser = getHttpProxyUser(protocol);
-        char[] proxyPassword = new char[]{};
+        SystemProxySettings systemProxySettings = SystemProxySettings.create();
+        String proxyUser = null;
+        String proxyPassword = null;
+
+        switch (protocol) {
+            case HTTP:
+                proxyUser = systemProxySettings.getHttpUser();
+                proxyPassword = systemProxySettings.getHttpPassword();
+                break;
+
+            case HTTPS:
+                proxyUser = systemProxySettings.getHttpsUser();
+                proxyPassword = systemProxySettings.getHttpsPassword();
+                break;
+
+            default:
+                break;
+        }
+
         if (!isNullOrEmpty(proxyUser)) {
-            if (nonNull(getHttpProxyPassword(protocol))) {
-                proxyPassword = getHttpProxyPassword(protocol).toCharArray();
+            char[] proxyPasswordChar = new char[]{};
+            if (nonNull(proxyPassword)) {
+                proxyPasswordChar = proxyPassword.toCharArray();
             }
 
-            setDefaultAuthenticator(proxyUser, proxyPassword);
+            setDefaultAuthenticator(proxyUser, proxyPasswordChar);
         }
     }
 }

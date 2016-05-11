@@ -39,35 +39,6 @@
       </md-tab-body>
     </md-tab>
 
-    <md-tab ng-if="accountCtrl.isCreditCardServiceAvailable">
-      <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_credit_card_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Billing</span>
-      </md-tab-label>
-      <md-tab-body>
-        <div ng-controller="CreditcardCtrl as creditCardCtrl">
-          <che-panel che-title="Add a credit card" ng-show="creditCardCtrl.creditCards.length == 0 && creditCardCtrl.loadedCreditCards">
-            <ng-form name="creditCardInformationForm" id="creditCardInformationForm">
-              <add-creditcard style="display: block;" loaded="{{creditCardCtrl.loadedCreditCards}}" ng-init="creditCardCtrl.setCreditCard(this.addCreditcardCtrl.creditCard);"></add-creditcard>
-              <che-button-default che-button-title="add"
-                                   ng-disabled="creditCardInformationForm.$invalid"
-                                   ng-click="creditCardCtrl.addCreditCard();">
-              </che-button-default>
-            </ng-form>
-          </che-panel>
-          <che-panel che-title="Credit Card Information" ng-show="creditCardCtrl.creditCards.length > 0">
-            <div layout="row" layout-align="center center" ng-repeat="card in creditCardCtrl.creditCards">
-              <div layout="column" flex="85" class="creditcard-info">
-                <p>{{card.cardholder}}</p>
-                <p>{{card.type}} ...{{card.number.slice(-4)}} ({{card.expiration}})</p>
-              </div>
-              <che-button-danger flex="15" che-button-title="Remove"
-                                  ng-click="creditCardCtrl.removeCreditCard(card, $event);"/>
-            </div>
-          </che-panel>
-        </div>
-      </md-tab-body>
-    </md-tab>
     <md-tab>
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>

@@ -16,9 +16,6 @@
 
 import {CodenvyAPI} from './codenvy-api.factory';
 import {CodenvyUser} from './codenvy-user.factory';
-import {CodenvyAccount} from './codenvy-account.factory';
-import {CodenvySaas} from './codenvy-saas.factory';
-import {CodenvyPayment} from './codenvy-payment.factory';
 import {CodenvyFactory} from './codenvy-factory.factory';
 import {CodenvyFactoryTemplate} from './codenvy-factory-template.factory';
 
@@ -26,9 +23,6 @@ export class CodenvyApiConfig {
 
   constructor(register) {
     register.factory('codenvyUser', CodenvyUser);
-    register.factory('codenvyAccount', CodenvyAccount);
-    register.factory('codenvySaas', CodenvySaas);
-    register.factory('codenvyPayment', CodenvyPayment);
     register.app.constant('clientTokenPath', '/');//is necessary for Braintree
     register.factory('codenvyFactory', CodenvyFactory);
     register.factory('codenvyFactoryTemplate', CodenvyFactoryTemplate);

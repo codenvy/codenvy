@@ -256,9 +256,9 @@ configureProxySettings() {
             proxyPassword=$([[ "$HTTP_PROXY" =~ $PROXY_WITH_USER_AUTH_REGEXP ]] && echo ${BASH_REMATCH[2]})
         fi
 
+        proxyWithoutAuth=$(echo "$HTTP_PROXY" | sed "s/@//")
         if [[ -n "$proxyUser" ]]; then
             # remove "<proxyUser>:<proxyPassword>@" token from the proxy URL
-            proxyWithoutAuth=$(echo "$HTTP_PROXY" | sed "s/@//")
             proxyWithoutAuth=$(echo "$proxyWithoutAuth" | sed "s/$proxyUser//")
 
             if [[ -n "$proxyPassword" ]]; then
@@ -271,8 +271,8 @@ configureProxySettings() {
         if [[ -n "$HTTP_PROXY" ]]; then
             bashrcToDisplay="${bashrcToDisplay}$(print "export http_proxy=$HTTP_PROXY")\n"
 
+            yumConfToDisplay="${yumConfToDisplay}$(print "proxy=$proxyWithoutAuth")\n"
             if [[ -n "$proxyUser" ]]; then
-                yumConfToDisplay="${yumConfToDisplay}$(print "proxy=$proxyWithoutAuth")\n"
                 yumConfToDisplay="${yumConfToDisplay}$(print "proxy_username=$proxyUser")\n"
             fi
 
@@ -324,8 +324,8 @@ configureProxySettings() {
             source ~/.bashrc
 
             # setup /etc/yum.conf
+            putLineIntoFile /etc/yum.conf "proxy=$proxyWithoutAuth" "^proxy=.*$"
             if [[ -n "$proxyUser" ]]; then
-                putLineIntoFile /etc/yum.conf "proxy=$proxyWithoutAuth" "^proxy=.*$"
                 putLineIntoFile /etc/yum.conf "proxy_username=$proxyUser" "^proxy_username=.*$"
             fi
 
@@ -615,7 +615,7 @@ installIm() {
     tar -xf ${IM_FILE} -C ${DIR}/codenvy-cli
 
     sed -i "2iJAVA_HOME=${HOME}/codenvy-im/jre" ${DIR}/codenvy-cli/bin/codenvy
-    printf "\nexport PATH=\$PATH:\$HOME/codenvy-im/codenvy-cli/bin\n" >> ${HOME}/.bashrc
+    printf '\nexport PATH=$PATH:$HOME/codenvy-im/codenvy-cli/bin\n' >> ${HOME}/.bashrc
 }
 
 clearLine() {

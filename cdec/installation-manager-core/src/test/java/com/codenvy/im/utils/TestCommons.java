@@ -16,9 +16,6 @@ package com.codenvy.im.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.che.api.account.shared.dto.AccountReference;
-import org.eclipse.che.api.account.shared.dto.MemberDescriptor;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -30,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -73,57 +69,11 @@ public class TestCommons {
     }
 
     @Test
-    public void testCreateListDtoFromJson() throws Exception {
-        List<MemberDescriptor> descriptors =
-                Commons.createListDtoFromJson("[{userId:id,accountReference:{id:accountId,name:accountName}}]", MemberDescriptor.class);
-        assertEquals(descriptors.size(), 1);
-
-        MemberDescriptor d = descriptors.get(0);
-        assertEquals(d.getUserId(), "id");
-        assertNotNull(d.getAccountReference());
-        assertEquals(d.getAccountReference().getId(), "accountId");
-        assertEquals(d.getAccountReference().getName(), "accountName");
-    }
-
-    @Test
-    public void testCreateDtoFromJson() throws Exception {
-        MemberDescriptor d = Commons.createDtoFromJson("{userId:id,accountReference:{id:accountId,name:accountName}}", MemberDescriptor.class);
-
-        assertEquals(d.getUserId(), "id");
-        assertNotNull(d.getAccountReference());
-        assertEquals(d.getAccountReference().getId(), "accountId");
-        assertEquals(d.getAccountReference().getName(), "accountName");
-    }
-
-    @Test
     public void testMapFromJson() throws Exception {
         Map<String, String> m = Commons.fromJson("{\"a\":\"b\",\"c\":\"d\"}", Map.class);
         assertEquals(m.size(), 2);
         assertEquals(m.get("a"), "b");
         assertEquals(m.get("c"), "d");
-    }
-
-    @Test
-    public void testMapToJson() throws Exception {
-        AccountReference ar = DtoFactory.getInstance().createDto(AccountReference.class);
-        ar.setId("id");
-        ar.setName(null);
-
-        String json = Commons.toJson(ar);
-
-        String okResult = "{\n"
-                          + "  \"links\" : [ ],\n"
-                          + "  \"id\" : \"id\"\n"
-                          + "}";
-
-        String okResultWithReverseOrder = "{\n"
-                                          + "  \"id\" : \"id\",\n"
-                                          + "  \"links\" : [ ]\n"
-                                          + "}";
-
-        if (!json.equals(okResult)) {
-            assertEquals(json, okResultWithReverseOrder);
-        }
     }
 
     @Test

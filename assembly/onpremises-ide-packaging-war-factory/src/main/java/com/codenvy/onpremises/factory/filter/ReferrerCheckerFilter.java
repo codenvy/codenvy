@@ -33,10 +33,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.eclipse.che.api.factory.server.FactoryConstants.PARAMETRIZED_ILLEGAL_TRACKED_PARAMETER_MESSAGE;
-
 /**
  * Validates that actual and factory object referrers are matching.
  *
@@ -76,11 +72,6 @@ public class ReferrerCheckerFilter implements Filter {
         String referrerHostName = null;
         final Policies policies = requestedFactory.getPolicies();
         if (policies != null && policies.getReferer() != null) {
-            if (requestedFactory.getCreator() == null || isNullOrEmpty(requestedFactory.getCreator().getAccountId())) {
-                dispatchToErrorPage(req, resp, INVALID_FACTORY_URL_PAGE,
-                                    format(PARAMETRIZED_ILLEGAL_TRACKED_PARAMETER_MESSAGE, "policies.referer", null));
-                return;
-            }
             referrerHostName = policies.getReferer();
         }
 

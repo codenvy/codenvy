@@ -14,19 +14,11 @@
  */
 package com.codenvy.service.http;
 
-import static junit.framework.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.commons.env.EnvironmentContext;
-
 import org.everrest.test.mock.MockHttpServletRequest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,6 +38,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Field;
+
+import static junit.framework.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 @Listeners(value = MockitoTestNGListener.class)
 public class WorkspaceNameRequestParamInitializationFilterTest {
@@ -88,8 +87,6 @@ public class WorkspaceNameRequestParamInitializationFilterTest {
                                                .getWorkspaceName(), "myWorkspace");
                 assertEquals(EnvironmentContext.getCurrent()
                                                .getWorkspaceId(), "wsId");
-                assertEquals(EnvironmentContext.getCurrent()
-                                               .getAccountId(), "ac-123123");
 
                 return null;
             }
@@ -123,7 +120,6 @@ public class WorkspaceNameRequestParamInitializationFilterTest {
         //then
         assertNull(EnvironmentContext.getCurrent().getWorkspaceName());
         assertNull(EnvironmentContext.getCurrent().getWorkspaceId());
-        assertNull(EnvironmentContext.getCurrent().getAccountId());
         verify(chain).doFilter(eq(request), eq(response));
     }
 

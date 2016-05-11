@@ -31,6 +31,9 @@ public class SystemProxySettings {
     private String httpsHost;
     private String httpsPort;
 
+    SystemProxySettings() {
+    }
+
     /**
      * Read proxy settings from the System properties and enclose it into the ProxySettings object.
      * @return system proxy settings.

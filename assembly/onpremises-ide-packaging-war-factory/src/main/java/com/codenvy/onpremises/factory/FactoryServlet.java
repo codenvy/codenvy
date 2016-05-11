@@ -71,11 +71,10 @@ public class FactoryServlet extends HttpServlet {
         }
 
         // DO NOT REMOVE! This log will be used in statistic analyzing
-        LOG.info("EVENT#factory-accepted# WS#{}# REFERRER#{}# FACTORY#{}# ORG-ID#{}# AFFILIATE-ID#{}# WS-LOCATION#{}# WS-TYPE#{}#",
+        LOG.info("EVENT#factory-accepted# WS#{}# REFERRER#{}# FACTORY#{}# # AFFILIATE-ID#{}# WS-LOCATION#{}# WS-TYPE#{}#",
                  requestedFactory.getWorkspace().getName(),
                  nullToEmpty(req.getHeader("Referer")),
                  URLDecoder.decode(fromUri(req.getRequestURL().toString()).replaceQuery(req.getQueryString()).build().toString(), "UTF-8"),
-                 nullToEmpty(requestedFactory.getCreator() != null ? requestedFactory.getCreator().getAccountId() : null),
                  "", //AFFILIATE-ID
                  "", //TODO: use from policy
                  "" //TODO: use from policy

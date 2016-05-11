@@ -18,8 +18,6 @@ import com.codenvy.api.workspace.server.WorkspaceAction;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
-import org.eclipse.che.api.account.server.dao.Account;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -74,10 +72,6 @@ public class WorkspacePermissionsFilterTest {
     private static final EnvironmentFilter  FILTER = new EnvironmentFilter();
 
     @Mock
-    AccountDao       accountDao;
-    @Mock
-    Account          account;
-    @Mock
     WorkspaceManager workspaceManager;
     @Mock
     UserManager      userManager;
@@ -120,46 +114,6 @@ public class WorkspacePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(service).create(any(), any(), any(), eq("account123"));
         verify(user).hasPermission(eq("account"), eq("account123"), eq("createWorkspaces"));
-    }
-
-    @Test
-    public void shouldCheckPermissionsByAccountDomainOnWorkspaceRemoving() throws Exception {
-        when(user.hasPermission("account", "account123", "deleteWorkspaces")).thenReturn(true);
-
-        when(accountDao.getByWorkspace("workspace123")).thenReturn(account);
-        when(account.getId()).thenReturn("account123");
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .pathParam("id", "workspace123")
-                                         .when()
-                                         .delete(SECURE_PATH + "/workspace/{id}");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).delete(eq("workspace123"));
-        verify(user).hasPermission(eq("account"), eq("account123"), eq("deleteWorkspaces"));
-    }
-
-    @Test
-    public void shouldCheckPermissionsByWorkspaceDomainOnWorkspaceRemovingWhenUserDoesNotHavePermissionsInAccount() throws Exception {
-        when(user.hasPermission("account", "account123", "deleteWorkspaces")).thenReturn(false);
-        when(user.hasPermission("workspace", "workspace123", "delete")).thenReturn(true);
-
-        when(accountDao.getByWorkspace("workspace123")).thenReturn(account);
-        when(account.getId()).thenReturn("account123");
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .pathParam("id", "workspace123")
-                                         .when()
-                                         .delete(SECURE_PATH + "/workspace/{id}");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).delete(eq("workspace123"));
-        verify(user).hasPermission(eq("account"), eq("account123"), eq("deleteWorkspaces"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("delete"));
     }
 
     @Test

@@ -14,9 +14,6 @@
  */
 'use strict';
 
-import {AddCreditcardCtrl} from './creditcard/add-creditcard.controller';
-import {AddCreditcard} from './creditcard/add-creditcard.directive';
-import {CreditcardCtrl} from './creditcard/creditcard.controller';
 import {AccountProfile} from './profile/account-profile.directive';
 import {AccountProfileCtrl} from './profile/account-profile.controller';
 import {AccountDelete} from './account-delete.directive';
@@ -28,11 +25,6 @@ import {AccountCtrl} from './account.controller';
 export class AccountConfig {
 
   constructor(register) {
-    register.controller('CreditcardCtrl', CreditcardCtrl);
-
-    register.controller('AddCreditcardCtrl', AddCreditcardCtrl);
-    register.directive('addCreditcard', AddCreditcard);
-
     register.directive('accountUpdatePassword', AccountUpdatePassword);
 
     register.controller('AccountProfileCtrl', AccountProfileCtrl);

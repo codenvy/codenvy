@@ -47,7 +47,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -100,7 +99,6 @@ public class MongoDBFactoryStoreTest {
 
         factory.setCreator(DtoFactory.getInstance().createDto(Author.class)
                                      .withName("someAuthor")
-                                     .withAccountId("acc1")
                                      .withCreated(777777777L)
                                      .withEmail("test@test.com"));
 
@@ -319,7 +317,6 @@ public class MongoDBFactoryStoreTest {
 
         factory.setCreator(DtoFactory.getInstance().createDto(Author.class)
                                      .withName("Florent")
-                                     .withAccountId("acc1")
                                      .withCreated(System.currentTimeMillis())
                                      .withEmail("test@codenvy.com"));
 
@@ -379,7 +376,6 @@ public class MongoDBFactoryStoreTest {
 
         factory.setCreator(DtoFactory.getInstance().createDto(Author.class)
                                      .withName("Florent")
-                                     .withAccountId("acc1")
                                      .withCreated(System.currentTimeMillis())
                                      .withEmail("test@codenvy.com")
                                      .withUserId("1234567890"));
@@ -421,7 +417,6 @@ public class MongoDBFactoryStoreTest {
 
         originalFactory.setCreator(DtoFactory.getInstance().createDto(Author.class)
                                              .withName("Florent")
-                                             .withAccountId("acc1")
                                              .withCreated(System.currentTimeMillis())
                                              .withEmail("test@codenvy.com")
                                              .withUserId("1234567890"));

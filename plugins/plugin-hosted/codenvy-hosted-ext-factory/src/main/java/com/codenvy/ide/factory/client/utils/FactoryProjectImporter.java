@@ -290,13 +290,19 @@ public class FactoryProjectImporter extends AbstractImporter {
                                              final Map<String, String> attributes = ExceptionUtils.getAttributes(err.getCause());
                                              final String providerName = attributes.get(PROVIDER_NAME);
                                              final String authenticateUrl = attributes.get(AUTHENTICATE_URL);
+                                             final boolean authenticated = Boolean.parseBoolean(attributes.get("authenticated"));
                                              if (!StringUtils.isNullOrEmpty(providerName) && !StringUtils.isNullOrEmpty(authenticateUrl)) {
-                                                 return tryAuthenticateAndRepeatImport(providerName,
-                                                                                       authenticateUrl,
-                                                                                       pathToProject,
-                                                                                       projectName,
-                                                                                       sourceStorage,
-                                                                                       subscriber);
+                                                 if (!authenticated) {
+                                                     return tryAuthenticateAndRepeatImport(providerName,
+                                                                                           authenticateUrl,
+                                                                                           pathToProject,
+                                                                                           projectName,
+                                                                                           sourceStorage,
+                                                                                           subscriber);
+                                                 } else {
+                                                     dialogFactory.createMessageDialog(locale.cloningSourceSshKeyUploadFailedTitle(),
+                                                                                       locale.cloningSourcesSshKeyUploadFailedText(), null).show();
+                                                 }
                                              } else {
                                                  dialogFactory.createMessageDialog(locale.oauthFailedToGetAuthenticatorTitle(),
                                                                                    locale.oauthFailedToGetAuthenticatorText(), null).show();

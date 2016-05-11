@@ -54,6 +54,12 @@ public interface FactoryLocalizationConstant extends Messages {
     @Key("project.import.configuring.failed")
     String configuringSourceFailed(String projectName);
 
+    @Key("project.import.ssh.key.upload.failed.title")
+    String cloningSourceSshKeyUploadFailedTitle();
+
+    @Key("project.import.ssh.key.upload.failed.text")
+    String cloningSourcesSshKeyUploadFailedText();
+
     @Key("project.already.imported")
     String projectAlreadyImported(String projectName);
 
