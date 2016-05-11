@@ -16,8 +16,6 @@ package com.codenvy.api.dao.ldap;
 
 import com.codenvy.api.event.user.RemoveUserEvent;
 
-import org.eclipse.che.api.account.server.dao.Account;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -47,8 +45,6 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -70,8 +66,6 @@ public class UserDaoImpl implements UserDao {
     protected final String                    userDn;
     protected final String                    oldUserDn;
     protected final EventService              eventService;
-    protected final AccountDao                accountDao;
-    //    private final MemberDao                 memberDao;
     protected final UserProfileDao            profileDao;
     protected final PreferenceDao             preferenceDao;
     protected final UserAttributesMapper      mapper;
@@ -87,9 +81,7 @@ public class UserDaoImpl implements UserDao {
      *         UserAttributesMapper
      */
     @Inject
-    public UserDaoImpl(AccountDao accountDao,
-//                       MemberDao memberDao,
-                       UserProfileDao profileDao,
+    public UserDaoImpl(UserProfileDao profileDao,
                        PreferenceDao preferenceDao,
                        InitialLdapContextFactory contextFactory,
                        @Named("user.ldap.user_container_dn") String userContainerDn,
@@ -103,8 +95,6 @@ public class UserDaoImpl implements UserDao {
         this.oldUserDn = oldUserDn;
         this.mapper = userAttributesMapper;
         this.eventService = eventService;
-        this.accountDao = accountDao;
-//        this.memberDao = memberDao;
         this.profileDao = profileDao;
         this.preferenceDao = preferenceDao;
         final StringBuilder sb = new StringBuilder();
@@ -232,30 +222,6 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void remove(String id) throws NotFoundException, ServerException, ConflictException {
         final User user = getById(id);
-        //search for accounts which should be removed
-        final List<Account> accountsToRemove = new LinkedList<>();
-        for (Account account : accountDao.getByOwner(id)) {
-            //if user is last account owner we should remove account
-            if (isOnlyOneOwner(account.getId())) {
-                if (account.getWorkspaces().isEmpty()) {
-                    accountsToRemove.add(account);
-                } else {
-                    throw new ConflictException(format("Account %s has related workspaces", account.getId()));
-                }
-            }
-        }
-        //remove user relationships with workspaces
-//        for (Member member : memberDao.getUserRelationships(id)) {
-//            memberDao.remove(member);
-//        }
-        //remove user relationships with accounts
-        for (org.eclipse.che.api.account.server.dao.Member member : accountDao.getByMember(id)) {
-            accountDao.removeMember(member);
-        }
-        //remove accounts
-        for (Account account : accountsToRemove) {
-            accountDao.remove(account.getId());
-        }
         //remove profile
         profileDao.remove(id);
         //remove preferences
@@ -321,16 +287,6 @@ public class UserDaoImpl implements UserDao {
                          .withName(other.getName())
                          .withPassword(other.getPassword())
                          .withAliases(new ArrayList<>(other.getAliases()));
-    }
-
-    private boolean isOnlyOneOwner(String accountId) throws ServerException {
-        int owners = 0;
-        for (org.eclipse.che.api.account.server.dao.Member member : accountDao.getMembers(accountId)) {
-            if (member.getRoles().contains("account/owner")) {
-                owners++;
-            }
-        }
-        return owners == 1;
     }
 
     private User doGetByAlias(String alias) throws NamingException {

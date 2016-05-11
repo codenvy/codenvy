@@ -14,17 +14,14 @@
  */
 package com.codenvy.api.dao.ldap;
 
-import org.eclipse.che.api.account.server.dao.Account;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.server.dao.User;
-
+import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -53,8 +50,6 @@ public class UserDaoTest extends BaseTest {
     @Mock
     UserProfileDao profileDao;
     @Mock
-    AccountDao     accountDao;
-    @Mock
     PreferenceDao  preferenceDao;
 
     UserDaoImpl               userDao;
@@ -74,8 +69,7 @@ public class UserDaoTest extends BaseTest {
                                                     null,
                                                     null));
         mapper = spy(new UserAttributesMapper());
-        userDao = new UserDaoImpl(accountDao,
-                                  profileDao,
+        userDao = new UserDaoImpl(profileDao,
                                   preferenceDao,
                                   factory,
                                   "dc=codenvy;dc=com",
@@ -395,24 +389,6 @@ public class UserDaoTest extends BaseTest {
         //prepare user
         final User testUser = users[0];
 
-        //prepare account
-        final Account testAccount = new Account("account_id");
-        when(accountDao.getByOwner(testUser.getId())).thenReturn(singletonList(testAccount));
-
-        //prepare account members
-        final org.eclipse.che.api.account.server.dao.Member accountMember = new org.eclipse.che.api.account.server.dao.Member();
-        accountMember.withUserId(testUser.getId())
-                     .withAccountId(testAccount.getId())
-                     .withRoles(singletonList("account/owner"));
-        when(accountDao.getMembers(testAccount.getId())).thenReturn(singletonList(accountMember));
-        when(accountDao.getByMember(testUser.getId())).thenReturn(singletonList(accountMember));
-
-//        prepare workspace members
-//        final Member workspaceMember = new Member().withUserId(testUser.getId())
-//                                                   .withWorkspaceId("test_workspace_id")
-//                                                   .withRoles(singletonList("workspace/developer"));
-//        when(memberDao.getUserRelationships(testUser.getId())).thenReturn(singletonList(workspaceMember));
-
         //when
         userDao.remove(testUser.getId());
 
@@ -423,8 +399,6 @@ public class UserDaoTest extends BaseTest {
         } catch (NotFoundException ignored) {
             //user was removed successfully
         }
-        verify(accountDao).remove(testAccount.getId());
-        verify(accountDao).removeMember(accountMember);
         verify(profileDao).remove(testUser.getId());
         verify(preferenceDao).remove(testUser.getId());
     }

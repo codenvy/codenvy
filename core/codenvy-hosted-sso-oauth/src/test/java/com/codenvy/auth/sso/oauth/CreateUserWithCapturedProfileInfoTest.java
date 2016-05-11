@@ -19,7 +19,6 @@ import com.codenvy.auth.sso.server.InputDataValidator;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.mail.MailSenderClient;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -58,8 +57,6 @@ public class CreateUserWithCapturedProfileInfoTest {
     private UserDao                                    userDao;
     @Mock
     private ServletConfig                              servletConfig;
-    @Mock
-    private AccountDao                                 accountDao;
     @Mock
     private MailSenderClient                           mailSenderClient;
     @Mock

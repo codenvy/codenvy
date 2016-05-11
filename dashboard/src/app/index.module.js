@@ -15,7 +15,6 @@
 'use strict';
 
 import {CodenvyNavbarConfig} from './navbar/navbar-config';
-import {CodenvyAccountConfig} from './account/account-config';
 import {Register} from './utils/register';
 import {CodenvyComponentsConfig} from '../components/components-config';
 import {FactoryConfig} from './factories/factories-config';
@@ -23,6 +22,7 @@ import {FactoryConfig} from './factories/factories-config';
 import {LoginCtrl} from './login/login.controller';
 
 import {AdminConfig} from './admin/admin-config';
+import {AccountConfig} from './account/details/account-config';
 import {CodenvyOnpremConfig} from './onprem/onprem-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
@@ -121,7 +121,7 @@ angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServic
 var instanceRegister = new Register(initModule);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
-new CodenvyAccountConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
 new AdminConfig(instanceRegister);
 new CodenvyOnpremConfig(instanceRegister);
+new AccountConfig(instanceRegister)

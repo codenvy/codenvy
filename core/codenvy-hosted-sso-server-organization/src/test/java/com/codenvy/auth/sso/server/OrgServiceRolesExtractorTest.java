@@ -17,8 +17,6 @@ package com.codenvy.auth.sso.server;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.ldap.InitialLdapContextFactory;
 
-import org.eclipse.che.api.account.server.dao.Account;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
@@ -60,8 +58,6 @@ public class OrgServiceRolesExtractorTest {
 
     @Mock
     UserDao                  userDao;
-    @Mock
-    AccountDao               accountDao;
     @Mock
     PreferenceDao            preferenceDao;
     @InjectMocks
@@ -142,17 +138,6 @@ public class OrgServiceRolesExtractorTest {
         doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getId());
 
         assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), singleton("temp_user"));
-    }
-
-    @Test(enabled = false)
-    public void shouldReturnAccountRolesWithUserRoleWhenUserHasAccessToAccount() throws Exception {
-        org.eclipse.che.api.account.server.dao.Member member = new org.eclipse.che.api.account.server.dao.Member();
-        member.withUserId(ticket.getPrincipal().getId()).withRoles(asList("account/owner", "account/member"));
-        when(accountDao.getMembers("accId")).thenReturn(asList(member));
-
-        when(accountDao.getById("accId")).thenReturn(new Account("accId"));
-
-        assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), new HashSet<>(asList("user", "account/owner", "account/member")));
     }
 
     @Test

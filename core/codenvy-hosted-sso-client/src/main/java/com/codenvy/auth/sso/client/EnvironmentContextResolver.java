@@ -27,6 +27,6 @@ public class EnvironmentContextResolver implements SSOContextResolver {
     @Override
     public RolesContext getRequestContext(HttpServletRequest request) {
         EnvironmentContext context = EnvironmentContext.getCurrent();
-        return new RolesContext(context.getWorkspaceId(), context.getAccountId());
+        return new RolesContext(context.getWorkspaceId(), null);
     }
 }

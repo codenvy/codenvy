@@ -17,7 +17,6 @@ package com.codenvy.api.dao.ldap;
 import com.codenvy.api.user.server.dao.AdminUserDao;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
@@ -54,8 +53,7 @@ public class AdminUserDaoImpl extends UserDaoImpl implements AdminUserDao {
     private final UserLdapPagination userLdapPagination;
 
     @Inject
-    public AdminUserDaoImpl(AccountDao accountDao,
-                            UserProfileDao profileDao,
+    public AdminUserDaoImpl(UserProfileDao profileDao,
                             PreferenceDao preferenceDao,
                             InitialLdapContextFactory contextFactory,
                             @Named("user.ldap.user_container_dn") String userContainerDn,
@@ -64,8 +62,7 @@ public class AdminUserDaoImpl extends UserDaoImpl implements AdminUserDao {
                             UserAttributesMapper userAttributesMapper,
                             EventService eventService,
                             UserLdapPagination userLdapPagination) {
-        super(accountDao,
-              profileDao,
+        super(profileDao,
               preferenceDao,
               contextFactory,
               userContainerDn,

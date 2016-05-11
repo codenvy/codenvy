@@ -18,7 +18,6 @@ import com.codenvy.api.dao.authentication.PasswordEncryptor;
 import com.codenvy.api.dao.authentication.SSHAPasswordEncryptor;
 import com.codenvy.api.dao.ldap.AdminUserDaoImpl;
 import com.codenvy.api.dao.ldap.UserDaoImpl;
-import com.codenvy.api.dao.mongo.AccountDaoImpl;
 import com.codenvy.api.dao.mongo.MachineMongoDatabaseProvider;
 import com.codenvy.api.dao.mongo.OrganizationMongoDatabaseProvider;
 import com.codenvy.api.dao.mongo.RecipeDaoImpl;
@@ -52,8 +51,6 @@ import com.google.inject.name.Names;
 import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
-import org.eclipse.che.api.account.server.AccountService;
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
@@ -118,7 +115,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(UserService.class);
         bind(AdminUserService.class);
         bind(UserProfileService.class);
-        bind(AccountService.class);
 
         //recipe service
         bind(RecipeService.class);
@@ -175,7 +171,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(PreferenceDao.class).to(com.codenvy.api.dao.mongo.PreferenceDaoImpl.class);
         bind(SshDao.class).to(com.codenvy.api.dao.mongo.ssh.SshDaoImpl.class);
         bind(WorkerDao.class).to(com.codenvy.api.dao.mongo.WorkerDaoImpl.class);
-        bind(AccountDao.class).to(AccountDaoImpl.class);
         bind(org.eclipse.che.api.auth.AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
         bind(RecipeDao.class).to(RecipeDaoImpl.class);
         bind(RecipeLoader.class);
@@ -323,8 +318,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 //        install(new com.codenvy.router.MachineRouterModule());
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
-
-        bind(com.codenvy.api.account.DefaultAccountCreator.class);
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
 

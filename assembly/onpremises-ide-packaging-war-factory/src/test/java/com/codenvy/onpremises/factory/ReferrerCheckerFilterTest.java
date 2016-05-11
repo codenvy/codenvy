@@ -30,11 +30,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.lang.reflect.Field;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -85,24 +83,6 @@ public class ReferrerCheckerFilterTest {
         verify(policies, atLeastOnce()).getReferer();
     }
 
-
-    @Test
-    public void shouldThrowExceptionIfReferrerWithoutOrgidIsUsedV2_x() throws Exception {
-        Policies policies = mock(Policies.class);
-        when(factory.getPolicies()).thenReturn(policies);
-        when(factory.getCreator()).thenReturn(null);
-        when(policies.getReferer()).thenReturn("stackoverflow.com");
-        when(req.getRequestDispatcher(eq("/resources/error-invalid-factory-url.jsp"))).thenReturn(requestDispatcher);
-
-        filter.doFilter(req, res, chain);
-
-        verify(factory, atLeastOnce()).getPolicies();
-        verify(policies, atLeastOnce()).getReferer();
-        verify(req).setAttribute(eq(RequestDispatcher.ERROR_MESSAGE),
-                                 startsWith("You do not have a valid accountId. Your Factory configuration has a parameter that can only be"));
-        verify(requestDispatcher).forward(req, res);
-    }
-
     @Test
     public void shouldThrowExceptionIfReferrerHostDiffersFromReferrerHeaderHost() throws Exception {
         when(req.getHeader("Referer")).thenReturn("http://facebook.com/index.php");
@@ -111,7 +91,6 @@ public class ReferrerCheckerFilterTest {
         when(policies.getReferer()).thenReturn("stackoverflow.com");
         Author creator = mock(Author.class);
         when(factory.getCreator()).thenReturn(creator);
-        when(creator.getAccountId()).thenReturn("12345");
         when(req.getRequestDispatcher(eq("/resources/error-invalid-factory-url.jsp"))).thenReturn(requestDispatcher);
 
         filter.doFilter(req, res, chain);
@@ -128,7 +107,6 @@ public class ReferrerCheckerFilterTest {
         when(policies.getReferer()).thenReturn("stackoverflow.com");
         Author creator = mock(Author.class);
         when(factory.getCreator()).thenReturn(creator);
-        when(creator.getAccountId()).thenReturn("12345");
         when(req.getRequestDispatcher(eq("/resources/error-invalid-factory-url.jsp"))).thenReturn(requestDispatcher);
 
         filter.doFilter(req, res, chain);

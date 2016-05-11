@@ -48,11 +48,8 @@ export class AccountCtrl {
         case 'profile':
           this.selectedTabIndex = 0;
           break;
-        case 'billing':
-          this.selectedTabIndex = 1;
-          break;
         case 'security':
-          this.selectedTabIndex = 2;
+          this.selectedTabIndex = 1;
           break;
         default:
           $location.path('/account');
@@ -60,7 +57,6 @@ export class AccountCtrl {
     }
 
     this.resetPasswordForm = false;
-    this.isCreditCardServiceAvailable = this.cheAPI.getService().isServiceAvailable(codenvyAPI.getPayment().getCreditCardServicePath());
   }
 
   /**

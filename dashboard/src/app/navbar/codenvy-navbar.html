@@ -147,20 +147,6 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="codenvyNavbarCtrl.isSubscriptionServiceAvailable">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{codenvyNavbarCtrl.menuItemUrl.subscriptions}}"
-                         layout-align="left">
-                <div class="navbar-item navbar-item-no-icon" layout="row" layout-align="start center">Subscriptions
-                </div>
-              </md-button>
-            </md-list-item>
-            <md-list-item flex class="navbar-subsection-item"
-                          ng-if="!codenvyNavbarCtrl.ims.isAvailable && codenvyNavbarCtrl.isInvoiceServiceAvailable">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{codenvyNavbarCtrl.menuItemUrl.billing}}" layout-align="left">
-                <div class="navbar-item navbar-item-no-icon" layout="row" layout-align="start center">Billing and Invoices
-                </div>
-              </md-button>
-            </md-list-item>
           </md-list>
         </section>
       </div>
