@@ -53,9 +53,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.slf4j.Logger;
@@ -539,7 +539,7 @@ public class InstallationManagerService {
         try {
             logoutFromCodenvySaaS();
 
-            credentials = new DtoServerImpls.CredentialsImpl(credentials);
+            credentials = DtoFactory.cloneDto(credentials);
 
             Token token = delegate.loginToCodenvySaaS(credentials);
             SaasUserCredentials saasUserCredentials = new SaasUserCredentials(token.getValue());

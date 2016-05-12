@@ -145,7 +145,6 @@
                                     version = ${project.version}
                                 </echo>
                                 <echo append="false" file="${project.build.directory}/classes/META-INF/services/org.eclipse.che.dto.server.DtoFactoryVisitor">
-                                    org.eclipse.che.api.account.server.dto.DtoServerImpls
                                     org.eclipse.che.api.core.server.dto.DtoServerImpls
                                 </echo>
                                 <?SORTPOM RESUME?>
