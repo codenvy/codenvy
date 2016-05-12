@@ -174,8 +174,8 @@ public class PermissionManagerTest {
     public void shouldBeAbleToDomainsActions() throws Exception {
         final Set<String> domains = permissionManager.getDomainsActions("test");
 
-        assertEquals(domains.size(), 4);
-        assertTrue(domains.containsAll(ImmutableSet.of("read", "write", "use", "delete")));
+        assertEquals(domains.size(), 6);
+        assertTrue(domains.containsAll(ImmutableSet.of("setPermissions", "readPermissions", "read", "write", "use", "delete")));
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -186,7 +186,7 @@ public class PermissionManagerTest {
 
     public class TestDomain extends PermissionsDomain {
         public TestDomain() {
-            super("test", ImmutableSet.of("read", "write", "use", "delete"));
+            super("test", ImmutableSet.of("setPermissions", "readPermissions", "read", "write", "use", "delete"));
         }
     }
 }
