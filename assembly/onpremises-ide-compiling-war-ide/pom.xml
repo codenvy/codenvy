@@ -58,6 +58,14 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-machine-authentication-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-machine-authentication-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-microsoft-vsts-ext-client</artifactId>
         </dependency>
         <dependency>
