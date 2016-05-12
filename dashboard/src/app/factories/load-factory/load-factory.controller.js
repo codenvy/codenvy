@@ -318,12 +318,14 @@ export class LoadFactoryCtrl {
   }
 
   importProjects(bus) {
-    let promise = this.cheAPI.getProject().fetchProjectsForWorkspaceId(this.workspace.id);
+    let promise = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
     promise.then(() => {
-      this.detectProjectsToImport(this.cheAPI.getProject().getProjectsByWorkspace()[this.workspace.id], bus);
+      let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspaceId).config.projects;
+      this.detectProjectsToImport(projects, bus);
     }, (error) => {
       if (error.status !== 304) {
-        this.detectProjectsToImport(this.cheAPI.getProject().getProjectsByWorkspace()[this.workspace.id], bus);
+        let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspaceId).config.projects;
+        this.detectProjectsToImport(projects, bus);
       } else {
         this.handleError(error);
       }
@@ -379,11 +381,12 @@ export class LoadFactoryCtrl {
       this.getLoadingSteps()[this.getCurrentProgressStep()].logs = message.line;
     });
 
-    promise = this.cheAPI.getProject().importProject(workspaceId, project.name, project.source);
+    let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
+    promise = projectService.importProject(workspaceId, project.name, project.source);
 
     // needs to update configuration of the project
     let updatePromise = promise.then(() => {
-      this.cheAPI.getProject().updateProject(workspaceId, project.name, project).$promise;
+        projectService.updateProject(workspaceId, project.name, project).$promise;
     }, (error) => {
       this.handleError(error);
     });

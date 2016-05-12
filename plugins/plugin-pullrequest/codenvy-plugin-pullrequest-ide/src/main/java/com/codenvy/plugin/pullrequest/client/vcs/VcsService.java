@@ -88,16 +88,6 @@ public interface VcsService {
     void deleteRemote(@NotNull ProjectConfigDto project, @NotNull String remote, @NotNull AsyncCallback<Void> callback);
 
     /**
-     * Get the current branch for the project.
-     *
-     * @param project
-     *         the project descriptor.
-     * @param callback
-     *         callback when the operation is done.
-     */
-    void getBranchName(@NotNull ProjectConfigDto project, @NotNull AsyncCallback<String> callback);
-
-    /**
      * Returns the name of the current branch for the given {@code project}.
      *
      * @param project
@@ -139,17 +129,6 @@ public interface VcsService {
     void listLocalBranches(@NotNull ProjectConfigDto project, @NotNull AsyncCallback<List<Branch>> callback);
 
     /**
-     * List remotes.
-     *
-     * @param project
-     *         the project descriptor.
-     * @param callback
-     *         what to do with the remotes list
-     * @deprecated use {@link #listRemotes(ProjectConfigDto)}
-     */
-    void listRemotes(@NotNull ProjectConfigDto project, @NotNull AsyncCallback<List<Remote>> callback);
-
-    /**
      * Returns the list of the remotes for given {@code project}.
      *
      * @param project
@@ -157,23 +136,6 @@ public interface VcsService {
      * @return the promise which resolves {@literal List<Remote>} or rejects with an error
      */
     Promise<List<Remote>> listRemotes(ProjectConfigDto project);
-
-    /**
-     * Push a local branch to the given remote.
-     *
-     * @param project
-     *         the project descriptor.
-     * @param remote
-     *         the remote name
-     * @param localBranchName
-     *         the local branch name
-     * @param callback
-     *         callback when the operation is done.
-     */
-    void pushBranch(@NotNull ProjectConfigDto project,
-                    @NotNull String remote,
-                    @NotNull String localBranchName,
-                    @NotNull AsyncCallback<PushResponse> callback);
 
     /**
      * Push a local branch to remote.

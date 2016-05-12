@@ -26,8 +26,8 @@ import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -146,7 +146,7 @@ public class LdapManager {
     }
 
     protected void validateCurrentPassword(byte[] currentPassword, Config config) throws IOException {
-        Credentials credentials = new DtoServerImpls.CredentialsImpl();
+        Credentials credentials = DtoFactory.newDto(Credentials.class);
         credentials.setPassword(new String(currentPassword, "UTF-8"));
         credentials.setUsername(config.getValue(Config.ADMIN_LDAP_USER_NAME));
         credentials.setRealm(getHelper().getRealm());

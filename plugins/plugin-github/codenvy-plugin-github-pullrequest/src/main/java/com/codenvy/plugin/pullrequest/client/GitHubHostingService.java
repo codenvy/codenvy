@@ -102,31 +102,6 @@ public class GitHubHostingService implements VcsHostingService {
     }
 
     @Override
-    public void getUserInfo(@NotNull final AsyncCallback<HostUser> callback) {
-        gitHubClientService.getUserInfo(new AsyncRequestCallback<GitHubUser>(dtoUnmarshallerFactory.newUnmarshaller(GitHubUser.class)) {
-            @Override
-            protected void onSuccess(final GitHubUser gitHubUser) {
-                if (gitHubUser == null) {
-                    callback.onFailure(new Exception("No user info"));
-
-                } else {
-                    final HostUser user = dtoFactory.createDto(HostUser.class)
-                                                    .withId(gitHubUser.getId())
-                                                    .withLogin(gitHubUser.getLogin())
-                                                    .withName(gitHubUser.getName())
-                                                    .withUrl(gitHubUser.getUrl());
-                    callback.onSuccess(user);
-                }
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
-    }
-
-    @Override
     public Promise<HostUser> getUserInfo() {
         return gitHubClientService.getUserInfo()
                                   .then(new Function<GitHubUser, HostUser>() {
@@ -139,22 +114,6 @@ public class GitHubHostingService implements VcsHostingService {
                                                            .withUrl(gitHubUser.getUrl());
                                       }
                                   });
-    }
-
-    @Override
-    public void getRepository(@NotNull String owner, @NotNull String repository, @NotNull final AsyncCallback<Repository> callback) {
-        gitHubClientService.getRepository(owner, repository, new AsyncRequestCallback<GitHubRepository>(
-                dtoUnmarshallerFactory.newUnmarshaller(GitHubRepository.class)) {
-            @Override
-            protected void onSuccess(final GitHubRepository gitHubRepository) {
-                callback.onSuccess(valueOf(gitHubRepository));
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -201,27 +160,6 @@ public class GitHubHostingService implements VcsHostingService {
             throw new IllegalArgumentException("Unknown github repo URL pattern");
         }
         return url.substring(start);
-    }
-
-    @Override
-    public void fork(@NotNull final String owner, @NotNull final String repository, @NotNull final AsyncCallback<Repository> callback) {
-        gitHubClientService.fork(owner, repository, new AsyncRequestCallback<GitHubRepository>(
-                dtoUnmarshallerFactory.newUnmarshaller(GitHubRepository.class)) {
-            @Override
-            protected void onSuccess(final GitHubRepository gitHubRepository) {
-                if (gitHubRepository != null) {
-                    callback.onSuccess(valueOf(gitHubRepository));
-
-                } else {
-                    callback.onFailure(new Exception("No repository."));
-                }
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -288,34 +226,6 @@ public class GitHubHostingService implements VcsHostingService {
     @Override
     public boolean isHostRemoteUrl(@NotNull final String remoteUrl) {
         return remoteUrl.startsWith(SSH_URL_PREFIX) || remoteUrl.startsWith(HTTPS_URL_PREFIX);
-    }
-
-    @Override
-    public void getPullRequest(@NotNull final String owner,
-                               @NotNull final String repository,
-                               @NotNull final String username,
-                               @NotNull final String branchName,
-                               @NotNull final AsyncCallback<PullRequest> callback) {
-
-        final String qualifiedBranchName = username + ":" + branchName;
-
-        getPullRequests(owner, repository, new AsyncCallback<List<PullRequest>>() {
-            @Override
-            public void onSuccess(final List<PullRequest> pullRequests) {
-                final PullRequest pullRequest = getPullRequestByBranch(qualifiedBranchName, pullRequests);
-                if (pullRequest != null) {
-                    callback.onSuccess(pullRequest);
-
-                } else {
-                    callback.onFailure(new NoPullRequestException(qualifiedBranchName));
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -397,50 +307,6 @@ public class GitHubHostingService implements VcsHostingService {
     }
 
     @Override
-    public void createPullRequest(final String owner,
-                                  final String repository,
-                                  final String username,
-                                  final String headBranchName,
-                                  final String baseBranchName,
-                                  final String title,
-                                  final String body,
-                                  final AsyncCallback<PullRequest> callback) {
-
-        final String qualifiedHeadBranchName = username + ":" + headBranchName;
-        final GitHubPullRequestCreationInput input = dtoFactory.createDto(GitHubPullRequestCreationInput.class)
-                                                               .withTitle(title)
-                                                               .withHead(qualifiedHeadBranchName)
-                                                               .withBase(baseBranchName)
-                                                               .withBody(body);
-
-        final Unmarshallable<GitHubPullRequest> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(GitHubPullRequest.class);
-        gitHubClientService.createPullRequest(owner, repository, input, new AsyncRequestCallback<GitHubPullRequest>(unmarshaller) {
-            @Override
-            protected void onSuccess(final GitHubPullRequest gitHubPullRequest) {
-                callback.onSuccess(valueOf(gitHubPullRequest));
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                final String exceptionMessage = exception.getMessage();
-                if (exceptionMessage != null
-                    && containsIgnoreCase(exceptionMessage, NO_COMMITS_IN_PULL_REQUEST_ERROR_MESSAGE)) {
-
-                    callback.onFailure(new NoCommitsInPullRequestException(qualifiedHeadBranchName, baseBranchName));
-
-                } else if (exceptionMessage != null
-                           && containsIgnoreCase(exceptionMessage, PULL_REQUEST_ALREADY_EXISTS_ERROR_MESSAGE)) {
-
-                    callback.onFailure(new PullRequestAlreadyExistsException(qualifiedHeadBranchName));
-
-                } else {
-                    callback.onFailure(exception);
-                }
-            }
-        });
-    }
-
-    @Override
     public Promise<PullRequest> createPullRequest(final String owner,
                                                   final String repository,
                                                   final String username,
@@ -479,32 +345,6 @@ public class GitHubHostingService implements VcsHostingService {
                                           return Promises.reject(err);
                                       }
                                   });
-    }
-
-    @Override
-    public void getUserFork(@NotNull final String user,
-                            @NotNull final String owner,
-                            @NotNull final String repository,
-                            @NotNull final AsyncCallback<Repository> callback) {
-
-        getForks(owner, repository, new AsyncCallback<List<Repository>>() {
-
-            @Override
-            public void onSuccess(final List<Repository> repositories) {
-                final Repository userFork = getUserFork(user, repositories);
-                if (userFork != null) {
-                    callback.onSuccess(userFork);
-
-                } else {
-                    callback.onFailure(new NoUserForkException(user));
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -632,29 +472,6 @@ public class GitHubHostingService implements VcsHostingService {
                          .withState(gitHubPullRequest.getState())
                          .withHeadRef(gitHubPullRequest.getHead().getLabel())
                          .withDescription(gitHubPullRequest.getBody());
-    }
-
-    @Override
-    public void authenticate(@NotNull final CurrentUser currentUser, @NotNull final AsyncCallback<HostUser> callback) {
-        final WorkspaceDto workspace = this.appContext.getWorkspace();
-        if (workspace == null) {
-            callback.onFailure(new Exception("Error accessing current workspace"));
-            return;
-        }
-        final String authUrl = baseUrl
-                               + "/oauth/authenticate?oauth_provider=github&userId=" + currentUser.getProfile().getId()
-                               + "&scope=user,repo,write:public_key&redirect_after_login="
-                               + Window.Location.getProtocol() + "//"
-                               + Window.Location.getHost() + "/ws/"
-                               + workspace.getConfig().getName();
-
-        new JsOAuthWindow(authUrl, "error.url", 500, 980, new OAuthCallback() {
-            @Override
-            public void onAuthenticated(final OAuthStatus authStatus) {
-                // maybe it's possible to avoid this request if authStatus contains the vcs host user.
-                getUserInfo(callback);
-            }
-        }).loginWithOAuth();
     }
 
     @Override

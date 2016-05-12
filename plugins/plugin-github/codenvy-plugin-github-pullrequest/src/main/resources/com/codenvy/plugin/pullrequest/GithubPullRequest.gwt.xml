@@ -22,8 +22,8 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
 
-    <inherits name='org.eclipse.che.api.Workspace'/>
-    <inherits name="org.eclipse.che.api.Project"/>
+    <inherits name='org.eclipse.che.api.workspace.Workspace'/>
+    <inherits name="org.eclipse.che.api.project.Project"/>
     <inherits name="org.eclipse.che.security.OAuth"/>
 
     <inherits name="org.eclipse.che.plugin.github.GitHub"/>

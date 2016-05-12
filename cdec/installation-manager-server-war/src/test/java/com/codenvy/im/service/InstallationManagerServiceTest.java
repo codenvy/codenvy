@@ -41,8 +41,9 @@ import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
+import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -314,7 +315,7 @@ public class InstallationManagerServiceTest {
     public void testLoginToSaas() throws Exception {
         Credentials testSaasUsernameAndPassword = Commons.createDtoFromJson(TEST_CREDENTIALS_JSON, Credentials.class);
 
-        doReturn(new DtoServerImpls.TokenImpl().withValue(TEST_ACCESS_TOKEN)).when(mockFacade).loginToCodenvySaaS(testSaasUsernameAndPassword);
+        doReturn(DtoFactory.newDto(Token.class).withValue(TEST_ACCESS_TOKEN)).when(mockFacade).loginToCodenvySaaS(testSaasUsernameAndPassword);
 
         Response result = service.loginToCodenvySaaS(testSaasUsernameAndPassword);
         assertEquals(result.getStatus(), Response.Status.OK.getStatusCode());

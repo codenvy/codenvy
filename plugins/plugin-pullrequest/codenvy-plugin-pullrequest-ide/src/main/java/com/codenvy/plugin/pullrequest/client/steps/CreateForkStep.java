@@ -33,7 +33,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
  */
 @Singleton
 public class CreateForkStep implements Step {
-    private final ContributeMessages        messages;
+    private final ContributeMessages messages;
 
     @Inject
     public CreateForkStep(final ContributeMessages messages) {
@@ -58,17 +58,18 @@ public class CreateForkStep implements Step {
                        public void apply(Repository fork) throws OperationException {
                            proceed(fork.getName(), executor, context);
                        }
-                   }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    if (error.getCause() instanceof NoUserForkException ) {
-                        createFork(executor, context, upstreamRepositoryOwner, upstreamRepositoryName);
-                        return;
-                    }
+                   })
+                   .catchError(new Operation<PromiseError>() {
+                       @Override
+                       public void apply(PromiseError error) throws OperationException {
+                           if (error.getCause() instanceof NoUserForkException) {
+                               createFork(executor, context, upstreamRepositoryOwner, upstreamRepositoryName);
+                               return;
+                           }
 
-                    executor.fail(CreateForkStep.this, context, error.getCause().getMessage());
-                }
-            });
+                           executor.fail(CreateForkStep.this, context, error.getCause().getMessage());
+                       }
+                   });
         } else {
             // user fork has been cloned
             proceed(originRepositoryName, executor, context);
@@ -80,18 +81,20 @@ public class CreateForkStep implements Step {
                             final String upstreamRepositoryOwner,
                             final String upstreamRepositoryName) {
         context.getVcsHostingService()
-               .fork(upstreamRepositoryOwner, upstreamRepositoryName, new AsyncCallback<Repository>() {
+               .fork(upstreamRepositoryOwner, upstreamRepositoryName)
+               .then(new Operation<Repository>() {
                    @Override
-                   public void onSuccess(final Repository result) {
+                   public void apply(Repository result) throws OperationException {
                        proceed(result.getName(), executor, context);
                    }
-
+               })
+               .catchError(new Operation<PromiseError>() {
                    @Override
-                   public void onFailure(final Throwable exception) {
+                   public void apply(PromiseError err) throws OperationException {
                        final String errorMessage = messages.stepCreateForkErrorCreatingFork(upstreamRepositoryOwner,
                                                                                             upstreamRepositoryName,
-                                                                                            exception.getMessage());
-                        executor.fail(CreateForkStep.this, context, errorMessage);
+                                                                                            err.getCause().getMessage());
+                       executor.fail(CreateForkStep.this, context, errorMessage);
                    }
                });
     }

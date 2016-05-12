@@ -120,13 +120,6 @@ public class MicrosoftHostingService implements VcsHostingService {
     }
 
     @Override
-    public void getPullRequest(@NotNull String owner, @NotNull String repository, @NotNull String username, @NotNull String branchName,
-                               @NotNull AsyncCallback<PullRequest> callback) {
-        microsoftClient.getPullRequests(account, collection, owner, repository);
-
-    }
-
-    @Override
     public Promise<PullRequest> getPullRequest(String owner, String repository, String username, final String branchName) {
         return microsoftClient.getPullRequests(account, collection, owner, repository)
                               .thenPromise(new Function<List<MicrosoftPullRequest>, Promise<PullRequest>>() {
@@ -139,37 +132,6 @@ public class MicrosoftHostingService implements VcsHostingService {
                                       return Promises.reject(JsPromiseError.create(new NoPullRequestException(branchName)));
                                   }
                               });
-    }
-
-    @Override
-    public void createPullRequest(final String owner,
-                                  final String repository,
-                                  final String username,
-                                  final String headBranchName,
-                                  final String baseBranchName,
-                                  final String title,
-                                  final String body,
-                                  final AsyncCallback<PullRequest> callback) {
-        microsoftClient.createPullRequest(account, collection, owner, repository, dtoFactory.createDto(NewMicrosoftPullRequest.class)
-                                                                       .withTitle(title)
-                                                                       .withDescription(body)
-                                                                       .withSourceRefName("refs/heads/" + headBranchName)
-                                                                       .withTargetRefName("refs/heads/" + baseBranchName))
-                       .catchError(new Operation<PromiseError>() {
-                           @Override
-                           public void apply(PromiseError err) throws OperationException {
-                               switch (getErrorCode(err.getCause())) {
-
-                                   case PULL_REQUEST_ALREADY_EXISTS: {
-                                       callback.onFailure(new PullRequestAlreadyExistsException(username + ':' + headBranchName));
-                                       break;
-                                   }
-                                   default: {
-                                       callback.onFailure(err.getCause());
-                                   }
-                               }
-                           }
-                       });
     }
 
     @Override
@@ -207,18 +169,8 @@ public class MicrosoftHostingService implements VcsHostingService {
     }
 
     @Override
-    public void fork(@NotNull String owner, @NotNull String repository, @NotNull AsyncCallback<Repository> callback) {
-        callback.onFailure(new UnsupportedOperationException("Fork is not supported for " + getName()));
-    }
-
-    @Override
     public Promise<Repository> fork(String owner, String repository) {
         return Promises.reject(JsPromiseError.create("Fork is not supported for " + getName()));
-    }
-
-    @Override
-    public void getRepository(@NotNull String owner, @NotNull String repository, @NotNull AsyncCallback<Repository> callback) {
-        callback.onFailure(new UnsupportedOperationException("This method is not implemented"));
     }
 
     @Override
@@ -259,23 +211,10 @@ public class MicrosoftHostingService implements VcsHostingService {
     }
 
     @Override
-    public void getUserFork(final String user,
-                            final String owner,
-                            final String repository,
-                            final AsyncCallback<Repository> callback) {
-        callback.onFailure(new UnsupportedOperationException("User forks is not supported for " + getName()));
-    }
-
-    @Override
     public Promise<Repository> getUserFork(final String user,
                                            final String owner,
                                            final String repository) {
         return Promises.reject(JsPromiseError.create("User forks is not supported for " + getName()));
-    }
-
-    @Override
-    public void getUserInfo(@NotNull AsyncCallback<HostUser> callback) {
-        callback.onFailure(new UnsupportedOperationException("This method is not implemented"));
     }
 
     @Override
@@ -322,11 +261,6 @@ public class MicrosoftHostingService implements VcsHostingService {
     @Override
     public String formatReviewFactoryUrl(@NotNull String reviewFactoryUrl) {
         return reviewFactoryUrl;
-    }
-
-    @Override
-    public void authenticate(@NotNull CurrentUser user, @NotNull AsyncCallback<HostUser> callback) {
-        callback.onFailure(new UnsupportedOperationException("This method is not implemented"));
     }
 
     @Override

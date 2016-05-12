@@ -25,6 +25,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+
 import javax.validation.constraints.NotNull;
 
 public class WaitForkOnRemoteStep implements Step {
@@ -66,27 +70,18 @@ public class WaitForkOnRemoteStep implements Step {
     }
 
     private void checkRepository(final Context context, final AsyncCallback<Void> callback) {
-        vcsHostingServiceProvider.getVcsHostingService(new AsyncCallback<VcsHostingService>() {
-            @Override
-            public void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-
-            @Override
-            public void onSuccess(final VcsHostingService vcsHostingService) {
-                vcsHostingService
-                        .getRepository(context.getHostUserLogin(), context.getForkedRepositoryName(), new AsyncCallback<Repository>() {
-                            @Override
-                            public void onFailure(final Throwable exception) {
-                                callback.onFailure(exception);
-                            }
-
-                            @Override
-                            public void onSuccess(final Repository repository) {
-                                callback.onSuccess(null);
-                            }
-                        });
-            }
-        });
+        context.getVcsHostingService().getRepository(context.getHostUserLogin(), context.getForkedRepositoryName())
+               .then(new Operation<Repository>() {
+                   @Override
+                   public void apply(Repository arg) throws OperationException {
+                       callback.onSuccess(null);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError arg) throws OperationException {
+                       callback.onFailure(arg.getCause());
+                   }
+               });
     }
 }

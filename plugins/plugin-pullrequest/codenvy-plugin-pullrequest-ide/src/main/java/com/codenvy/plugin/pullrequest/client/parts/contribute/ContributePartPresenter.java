@@ -24,7 +24,6 @@ import com.codenvy.plugin.pullrequest.client.events.CurrentContextChangedHandler
 import com.codenvy.plugin.pullrequest.client.events.StepEvent;
 import com.codenvy.plugin.pullrequest.client.events.StepHandler;
 import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import com.codenvy.plugin.pullrequest.client.utils.NotificationHelper;
 import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.workflow.Step;
 import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
@@ -43,6 +42,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -79,7 +79,6 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
     private final ContributeMessages          messages;
     private final WorkflowExecutor            workflowExecutor;
     private final AppContext                  appContext;
-    private final NotificationHelper          notificationHelper;
     private final NotificationManager         notificationManager;
     private final DialogFactory               dialogFactory;
     private final Map<String, StagesProvider> stagesProviders;
@@ -91,7 +90,6 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
                                    final EventBus eventBus,
                                    final WorkflowExecutor workflow,
                                    final AppContext appContext,
-                                   final NotificationHelper notificationHelper,
                                    final NotificationManager notificationManager,
                                    final DialogFactory dialogFactory,
                                    final Map<String, StagesProvider> stagesProviders) {
@@ -100,7 +98,6 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
         this.workflowExecutor = workflow;
         this.messages = messages;
         this.appContext = appContext;
-        this.notificationHelper = notificationHelper;
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
         this.stagesProviders = stagesProviders;
@@ -263,7 +260,7 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
                                                false, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(final Throwable exception) {
-                        notificationHelper.showError(ContributePartPresenter.class, exception);
+                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                     }
 
                     @Override
@@ -703,15 +700,16 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
                    .isLocalBranchWithName(context.getProject(), branchName, new AsyncCallback<Boolean>() {
                        @Override
                        public void onFailure(final Throwable exception) {
-                           notificationHelper.showError(ContributePartPresenter.class, exception);
+                           notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                        }
 
                        @Override
                        public void onSuccess(final Boolean branchExists) {
                            if (branchExists) {
-                               notificationHelper.showError(ContributePartPresenter.class,
-                                                            messages.contributePartConfigureContributionDialogNewBranchErrorBranchExists(
-                                                                    branchName));
+                               notificationManager
+                                       .notify(messages.contributePartConfigureContributionDialogNewBranchErrorBranchExists(branchName),
+                                               FAIL,
+                                               FLOAT_MODE);
 
                            } else {
                                checkoutBranch(context, branchName, true);

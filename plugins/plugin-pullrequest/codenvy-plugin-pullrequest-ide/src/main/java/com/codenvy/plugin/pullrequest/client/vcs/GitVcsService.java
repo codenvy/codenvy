@@ -18,7 +18,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.PushResponse;
@@ -27,12 +26,15 @@ import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -158,22 +160,6 @@ public class GitVcsService implements VcsService {
     }
 
     @Override
-    public void getBranchName(@NotNull final ProjectConfigDto project, @NotNull final AsyncCallback<String> callback) {
-        service.status(appContext.getDevMachine(), project,
-                       new AsyncRequestCallback<Status>(dtoUnmarshallerFactory.newUnmarshaller(Status.class)) {
-                           @Override
-                           protected void onSuccess(final Status status) {
-                               callback.onSuccess(status.getBranchName());
-                           }
-
-                           @Override
-                           protected void onFailure(final Throwable exception) {
-                               callback.onFailure(exception);
-                           }
-                       });
-    }
-
-    @Override
     public Promise<String> getBranchName(ProjectConfigDto project) {
         return service.status(appContext.getDevMachine(), project)
                       .then(new Function<Status, String>() {
@@ -186,18 +172,19 @@ public class GitVcsService implements VcsService {
 
     @Override
     public void hasUncommittedChanges(@NotNull final ProjectConfigDto project, @NotNull final AsyncCallback<Boolean> callback) {
-        service.status(appContext.getDevMachine(), project,
-                       new AsyncRequestCallback<Status>(dtoUnmarshallerFactory.newUnmarshaller(Status.class)) {
-                           @Override
-                           protected void onSuccess(final Status status) {
-                               callback.onSuccess(!status.isClean());
-                           }
-
-                           @Override
-                           protected void onFailure(final Throwable exception) {
-                               callback.onFailure(exception);
-                           }
-                       });
+        service.status(appContext.getDevMachine(), project)
+               .then(new Operation<Status>() {
+                   @Override
+                   public void apply(Status status) throws OperationException {
+                       callback.onSuccess(!status.isClean());
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError err) throws OperationException {
+                       callback.onFailure(err.getCause());
+                   }
+               });
     }
 
     @Override
@@ -229,54 +216,8 @@ public class GitVcsService implements VcsService {
     }
 
     @Override
-    public void listRemotes(@NotNull final ProjectConfigDto project, @NotNull final AsyncCallback<List<Remote>> callback) {
-        final Unmarshallable<List<Remote>> unMarshaller
-                = dtoUnmarshallerFactory.newListUnmarshaller(org.eclipse.che.api.git.shared.Remote.class);
-        service.remoteList(appContext.getDevMachine(), project, null, false,
-                           new AsyncRequestCallback<List<Remote>>(unMarshaller) {
-                               @Override
-                               protected void onSuccess(final List<Remote> remotes) {
-                                   final List<Remote> result = new ArrayList<>();
-                                   for (final Remote remote : remotes) {
-                                       result.add(fromGitRemote(remote));
-                                   }
-                                   callback.onSuccess(result);
-                               }
-
-                               @Override
-                               protected void onFailure(final Throwable exception) {
-                                   callback.onFailure(exception);
-                               }
-                           });
-    }
-
-    @Override
     public Promise<List<Remote>> listRemotes(ProjectConfigDto project) {
         return service.remoteList(appContext.getDevMachine(), project, null, false);
-    }
-
-    @Override
-    public void pushBranch(@NotNull final ProjectConfigDto project,
-                           @NotNull final String remote,
-                           @NotNull final String localBranchName,
-                           @NotNull final AsyncCallback<PushResponse> callback) {
-        service.push(appContext.getDevMachine(), project, Arrays.asList(localBranchName), remote, true,
-                     new AsyncRequestCallback<PushResponse>() {
-                         @Override
-                         protected void onSuccess(final PushResponse result) {
-                             callback.onSuccess(result);
-                         }
-
-                         @Override
-                         protected void onFailure(final Throwable exception) {
-                             if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(exception.getMessage())) {
-                                 callback.onFailure(new BranchUpToDateException(localBranchName));
-
-                             } else {
-                                 callback.onFailure(exception);
-                             }
-                         }
-                     });
     }
 
     @Override

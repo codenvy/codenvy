@@ -33,8 +33,9 @@ import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.http.ContentType;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
+import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -355,7 +356,7 @@ public class InstallationManagerServiceContractTest extends BaseContractTest {
             Response.Status.OK,                                // response status
             () -> {                                             // before test
                 try {
-                    doReturn(new DtoServerImpls.TokenImpl().withValue("token"))
+                    doReturn(DtoFactory.newDto(Token.class).withValue("token"))
                             .when(facade)
                             .loginToCodenvySaaS(Commons.createDtoFromJson("{\"username\": \"test\", \"password\": \"pwd\"}", Credentials.class));
                 } catch (Exception e) {

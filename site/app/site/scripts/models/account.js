@@ -284,7 +284,7 @@
                 responseErr = JSON.parse(response.responseText).message;
             }catch(e){
                 console.log(e);
-                responseErr = "Something went wrong. Please try again or contact support. Check <a href='http://status.codenvy.com/'>http://status.codenvy.com</a>";
+                responseErr = "Something went wrong. Please try again or contact support.";
             }
             return responseErr;
         };

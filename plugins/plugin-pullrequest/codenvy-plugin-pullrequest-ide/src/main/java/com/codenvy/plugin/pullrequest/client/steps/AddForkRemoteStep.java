@@ -24,6 +24,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -61,7 +64,7 @@ public class AddForkRemoteStep implements Step {
         // the fork remote has to be added only if we cloned the upstream else it's origin
         if (originRepositoryOwner.equalsIgnoreCase(upstreamRepositoryOwner) &&
             originRepositoryName.equalsIgnoreCase(upstreamRepositoryName)) {
-                checkRemotePresent(executor, context, remoteUrl);
+            checkRemotePresent(executor, context, remoteUrl);
         } else {
             context.setForkedRemoteName(ORIGIN_REMOTE_NAME);
             proceed(executor, context);
@@ -69,10 +72,10 @@ public class AddForkRemoteStep implements Step {
     }
 
     private void checkRemotePresent(final WorkflowExecutor executor, final Context context, final String remoteUrl) {
-        vcsServiceProvider.getVcsService(context.getProject())
-                          .listRemotes(context.getProject(), new AsyncCallback<List<Remote>>() {
+        vcsServiceProvider.getVcsService(context.getProject()).listRemotes(context.getProject())
+                          .then(new Operation<List<Remote>>() {
                               @Override
-                              public void onSuccess(final List<Remote> result) {
+                              public void apply(List<Remote> result) throws OperationException {
                                   for (final Remote remote : result) {
                                       if (FORK_REMOTE_NAME.equals(remote.getName())) {
                                           context.setForkedRemoteName(FORK_REMOTE_NAME);
@@ -89,12 +92,12 @@ public class AddForkRemoteStep implements Step {
                                   }
                                   addRemote(executor, context, remoteUrl);
                               }
-
-                              @Override
-                              public void onFailure(final Throwable exception) {
-                                  executor.fail(delegate, context, messages.stepAddForkRemoteErrorCheckRemote());
-                              }
-                          });
+                          }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                executor.fail(delegate, context, messages.stepAddForkRemoteErrorCheckRemote());
+            }
+        });
     }
 
     /**

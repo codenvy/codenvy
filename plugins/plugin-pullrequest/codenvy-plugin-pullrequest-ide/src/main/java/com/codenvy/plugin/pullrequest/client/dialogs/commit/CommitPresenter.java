@@ -14,19 +14,21 @@
  */
 package com.codenvy.plugin.pullrequest.client.dialogs.commit;
 
-import com.codenvy.plugin.pullrequest.client.utils.NotificationHelper;
 import com.codenvy.plugin.pullrequest.client.vcs.VcsServiceProvider;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import javax.validation.constraints.NotNull;
 
 import static com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitPresenter.CommitActionHandler.CommitAction.CANCEL;
 import static com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitPresenter.CommitActionHandler.CommitAction.CONTINUE;
 import static com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitPresenter.CommitActionHandler.CommitAction.OK;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.GitRepositoryInitializer.isGitRepository;
 
 /**
@@ -39,18 +41,18 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private final CommitView          view;
     private final AppContext          appContext;
     private final VcsServiceProvider  vcsServiceProvider;
-    private final NotificationHelper  notificationHelper;
+    private final NotificationManager notificationManager;
     private       CommitActionHandler handler;
 
     @Inject
     public CommitPresenter(@NotNull final CommitView view,
                            @NotNull final AppContext appContext,
                            @NotNull final VcsServiceProvider vcsServiceProvider,
-                           @NotNull final NotificationHelper notificationHelper) {
+                           @NotNull final NotificationManager notificationManager) {
         this.view = view;
         this.appContext = appContext;
         this.vcsServiceProvider = vcsServiceProvider;
-        this.notificationHelper = notificationHelper;
+        this.notificationManager = notificationManager;
 
         this.view.setDelegate(this);
     }
@@ -101,7 +103,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                                                       view.getCommitDescription(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(final Throwable exception) {
-                            notificationHelper.showError(CommitPresenter.class, exception);
+                            notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                         }
 
                         @Override

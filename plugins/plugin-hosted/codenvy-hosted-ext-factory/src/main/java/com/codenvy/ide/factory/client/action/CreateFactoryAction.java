@@ -20,9 +20,9 @@ import com.codenvy.ide.factory.client.configure.CreateFactoryPresenter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;

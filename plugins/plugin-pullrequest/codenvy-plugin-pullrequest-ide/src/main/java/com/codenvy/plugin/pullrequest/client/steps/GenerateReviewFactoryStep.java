@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -33,6 +32,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import javax.inject.Inject;

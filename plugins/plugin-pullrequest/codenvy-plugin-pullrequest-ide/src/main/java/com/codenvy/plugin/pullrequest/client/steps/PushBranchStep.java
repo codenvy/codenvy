@@ -30,11 +30,11 @@ import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.ssh.gwt.client.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 
 /**
  * Pushes branch to the repository.
@@ -123,32 +123,33 @@ public class PushBranchStep implements SyntheticStep {
         context.getVcsService()
                .pushBranch(context.getProject(),
                            context.getForkedRemoteName(),
-                           context.getWorkBranchName(),
-                           new AsyncCallback<PushResponse>() {
-                               @Override
-                               public void onSuccess(final PushResponse result) {
-                                   workflow.done(delegate, context);
-                               }
-
-                               @Override
-                               public void onFailure(final Throwable thr) {
-                                   try {
-                                       throw thr;
-                                   } catch (BranchUpToDateException branchUpEx) {
-                                       workflow.fail(delegate,
-                                                     context,
-                                                     messages.stepPushBranchErrorBranchUpToDate());
-                                   } catch (Throwable throwable) {
-                                       if (throwable.getMessage().contains("Unable get private ssh key")) {
-                                           askGenerateSSH(workflow, context);
-                                       } else {
-                                           workflow.fail(delegate,
-                                                         context,
-                                                         messages.stepPushBranchErrorPushingBranch(throwable.getLocalizedMessage()));
-                                       }
-                                   }
-                               }
-                           });
+                           context.getWorkBranchName())
+               .then(new Operation<PushResponse>() {
+                   @Override
+                   public void apply(PushResponse result) throws OperationException {
+                       workflow.done(delegate, context);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError err) throws OperationException {
+                       try {
+                           throw err.getCause();
+                       } catch (BranchUpToDateException branchUpEx) {
+                           workflow.fail(delegate,
+                                         context,
+                                         messages.stepPushBranchErrorBranchUpToDate());
+                       } catch (Throwable throwable) {
+                           if (throwable.getMessage().contains("Unable get private ssh key")) {
+                               askGenerateSSH(workflow, context);
+                           } else {
+                               workflow.fail(delegate,
+                                             context,
+                                             messages.stepPushBranchErrorPushingBranch(throwable.getLocalizedMessage()));
+                           }
+                       }
+                   }
+               });
     }
 
     private void askGenerateSSH(final WorkflowExecutor executor, final Context context) {

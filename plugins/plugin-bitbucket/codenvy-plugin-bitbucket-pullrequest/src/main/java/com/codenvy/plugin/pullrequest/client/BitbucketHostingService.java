@@ -138,45 +138,6 @@ public class BitbucketHostingService implements VcsHostingService {
     }
 
     @Override
-    public void getPullRequest(@NotNull final String owner,
-                               @NotNull final String repository,
-                               @NotNull final String username,
-                               @NotNull final String branchName,
-                               @NotNull final AsyncCallback<PullRequest> callback) {
-
-        final Unmarshallable<List<BitbucketPullRequest>> unmarshaller =
-                dtoUnmarshallerFactory.newListUnmarshaller(BitbucketPullRequest.class);
-
-        bitbucketClientService
-                .getRepositoryPullRequests(owner, repository, new AsyncRequestCallback<List<BitbucketPullRequest>>(unmarshaller) {
-                    @Override
-                    protected void onSuccess(final List<BitbucketPullRequest> bitbucketPullRequests) {
-
-                        for (final BitbucketPullRequest oneBitbucketPullRequest : bitbucketPullRequests) {
-
-                            final BitbucketUser author = oneBitbucketPullRequest.getAuthor();
-                            final BitbucketPullRequestLocation source = oneBitbucketPullRequest.getSource();
-                            if (author != null && source != null) {
-                                final BitbucketPullRequestBranch pullRequestBranch = source.getBranch();
-
-                                if (username.equals(author.getUsername()) && branchName.equals(pullRequestBranch.getName())) {
-                                    callback.onSuccess(valueOf(oneBitbucketPullRequest));
-                                    return;
-                                }
-                            }
-                        }
-
-                        callback.onFailure(new NoPullRequestException(branchName));
-                    }
-
-                    @Override
-                    protected void onFailure(final Throwable exception) {
-                        callback.onFailure(exception);
-                    }
-                });
-    }
-
-    @Override
     public Promise<PullRequest> getPullRequest(final String owner,
                                                final String repository,
                                                final String username,
@@ -199,61 +160,6 @@ public class BitbucketHostingService implements VcsHostingService {
                                              return Promises.reject(JsPromiseError.create(new NoPullRequestException(branchName)));
                                          }
                                      });
-    }
-
-    @Override
-    public void createPullRequest(@NotNull final String owner,
-                                  @NotNull final String repository,
-                                  @NotNull final String username,
-                                  @NotNull final String headBranchName,
-                                  @NotNull final String baseBranchName,
-                                  @NotNull final String title,
-                                  @NotNull final String body,
-                                  @NotNull final AsyncCallback<PullRequest> callback) {
-
-        final Unmarshallable<BitbucketPullRequest> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(BitbucketPullRequest.class);
-
-        final BitbucketPullRequestLocation bitbucketPullRequestDestination = dtoFactory
-                .createDto(BitbucketPullRequestLocation.class)
-                .withBranch(dtoFactory.createDto(BitbucketPullRequestBranch.class).withName(baseBranchName));
-
-        final BitbucketPullRequestLocation bitbucketPullRequestSource = dtoFactory
-                .createDto(BitbucketPullRequestLocation.class)
-                .withBranch(dtoFactory.createDto(BitbucketPullRequestBranch.class).withName(headBranchName))
-                .withRepository(dtoFactory.createDto(BitbucketPullRequestRepository.class).withFullName(username + "/" + repository));
-
-        final BitbucketPullRequest bitbucketPullRequest = dtoFactory
-                .createDto(BitbucketPullRequest.class)
-                .withTitle(title)
-                .withDescription(body)
-                .withDestination(bitbucketPullRequestDestination)
-                .withSource(bitbucketPullRequestSource);
-
-        bitbucketClientService
-                .openPullRequest(owner, repository, bitbucketPullRequest, new AsyncRequestCallback<BitbucketPullRequest>(unmarshaller) {
-                    @Override
-                    protected void onSuccess(final BitbucketPullRequest bitbucketPullRequest) {
-                        callback.onSuccess(valueOf(bitbucketPullRequest));
-                    }
-
-                    @Override
-                    protected void onFailure(final Throwable exception) {
-                        if (exception instanceof ServerException) {
-                            final ServerException serverException = (ServerException)exception;
-                            final String exceptionMessage = serverException.getMessage();
-
-                            if (serverException.getHTTPStatus() == BAD_REQUEST
-                                && exceptionMessage != null
-                                && containsIgnoreCase(exceptionMessage, NO_CHANGES_TO_BE_PULLED_ERROR_MESSAGE)) {
-
-                                callback.onFailure(new NoCommitsInPullRequestException(headBranchName, baseBranchName));
-                            }
-
-                        } else {
-                            callback.onFailure(exception);
-                        }
-                    }
-                });
     }
 
     @Override
@@ -303,35 +209,6 @@ public class BitbucketHostingService implements VcsHostingService {
     }
 
     @Override
-    public void fork(@NotNull final String owner, @NotNull final String repository, @NotNull final AsyncCallback<Repository> callback) {
-        getRepository(owner, repository, new AsyncCallback<Repository>() {
-            @Override
-            public void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-
-            @Override
-            public void onSuccess(final Repository repository) {
-                fork(owner, repository.getName(), 0, repository.isPrivateRepo(), new AsyncCallback<BitbucketRepositoryFork>() {
-                    @Override
-                    public void onFailure(final Throwable exception) {
-                        callback.onFailure(exception);
-                    }
-
-                    @Override
-                    public void onSuccess(final BitbucketRepositoryFork bitbucketRepositoryFork) {
-                        callback.onSuccess(dtoFactory.createDto(Repository.class)
-                                                     .withName(bitbucketRepositoryFork.getName())
-                                                     .withFork(true)
-                                                     .withParent(repository)
-                                                     .withPrivateRepo(bitbucketRepositoryFork.isIsPrivate()));
-                    }
-                });
-            }
-        });
-    }
-
-    @Override
     public Promise<Repository> fork(final String owner, final String repository) {
         return getRepository(owner, repository).thenPromise(new Function<Repository, Promise<Repository>>() {
             @Override
@@ -349,47 +226,6 @@ public class BitbucketHostingService implements VcsHostingService {
                         });
             }
         });
-    }
-
-    /**
-     * @deprecated use {@link #fork(String, String, int, boolean)}
-     */
-    @Deprecated
-    private void fork(@NotNull final String owner,
-                      @NotNull final String repository,
-                      final int number,
-                      final boolean isForkPrivate,
-                      final AsyncCallback<BitbucketRepositoryFork> callback) {
-
-        final Unmarshallable<BitbucketRepositoryFork> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(BitbucketRepositoryFork.class);
-        final String forkName = number == 0 ? repository : (repository + "-" + number);
-
-        bitbucketClientService
-                .forkRepository(owner, repository, forkName, isForkPrivate,
-                                new AsyncRequestCallback<BitbucketRepositoryFork>(unmarshaller) {
-                                    @Override
-                                    protected void onSuccess(final BitbucketRepositoryFork bitbucketRepository) {
-                                        callback.onSuccess(bitbucketRepository);
-                                    }
-
-                                    @Override
-                                    protected void onFailure(final Throwable exception) {
-                                        if (number < MAX_FORK_CREATION_ATTEMPT && exception instanceof ServerException) {
-                                            final ServerException serverException = (ServerException)exception;
-                                            final String exceptionMessage = serverException.getMessage();
-
-                                            if (serverException.getHTTPStatus() == BAD_REQUEST
-                                                && exceptionMessage != null
-                                                && containsIgnoreCase(exceptionMessage, REPOSITORY_EXISTS_ERROR_MESSAGE)) {
-
-                                                fork(owner, repository, number + 1, isForkPrivate, callback);
-                                            }
-
-                                        } else {
-                                            callback.onFailure(exception);
-                                        }
-                                    }
-                                });
     }
 
     private Promise<BitbucketRepositoryFork> fork(final String owner,
@@ -416,30 +252,6 @@ public class BitbucketHostingService implements VcsHostingService {
                                              return Promises.reject(exception);
                                          }
                                      });
-    }
-
-    /**
-     * @deprecated use {@link #getRepository(String, String)}
-     */
-    @Deprecated
-    @Override
-    public void getRepository(@NotNull final String owner,
-                              @NotNull final String repository,
-                              @NotNull final AsyncCallback<Repository> callback) {
-
-        final Unmarshallable<BitbucketRepository> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(BitbucketRepository.class);
-
-        bitbucketClientService.getRepository(owner, repository, new AsyncRequestCallback<BitbucketRepository>(unmarshaller) {
-            @Override
-            protected void onSuccess(final BitbucketRepository bitbucketRepository) {
-                callback.onSuccess(valueOf(bitbucketRepository));
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -479,37 +291,6 @@ public class BitbucketHostingService implements VcsHostingService {
     }
 
     @Override
-    public void getUserFork(@NotNull final String user,
-                            @NotNull final String owner,
-                            @NotNull final String repository,
-                            @NotNull final AsyncCallback<Repository> callback) {
-
-        final Unmarshallable<List<BitbucketRepository>> unmarshaller =
-                dtoUnmarshallerFactory.newListUnmarshaller(BitbucketRepository.class);
-
-        bitbucketClientService.getRepositoryForks(owner, repository, new AsyncRequestCallback<List<BitbucketRepository>>(unmarshaller) {
-            @Override
-            protected void onSuccess(final List<BitbucketRepository> bitbucketRepositories) {
-                for (final BitbucketRepository oneBitbucketRepository : bitbucketRepositories) {
-                    final BitbucketUser owner = oneBitbucketRepository.getOwner();
-
-                    if (owner != null && user.equals(owner.getUsername())) {
-                        callback.onSuccess(valueOf(oneBitbucketRepository));
-                        return;
-                    }
-                }
-
-                callback.onFailure(new NoUserForkException(user));
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
-    }
-
-    @Override
     public Promise<Repository> getUserFork(final String user,
                                            final String owner,
                                            final String repository) {
@@ -527,29 +308,6 @@ public class BitbucketHostingService implements VcsHostingService {
                                              return Promises.reject(JsPromiseError.create(new NoUserForkException(user)));
                                          }
                                      });
-    }
-
-    @Override
-    public void getUserInfo(@NotNull final AsyncCallback<HostUser> callback) {
-        final Unmarshallable<BitbucketUser> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(BitbucketUser.class);
-
-        bitbucketClientService.getUser(new AsyncRequestCallback<BitbucketUser>(unmarshaller) {
-            @Override
-            protected void onSuccess(final BitbucketUser user) {
-                final HostUser hostUser = dtoFactory.createDto(HostUser.class)
-                                                    .withId(user.getUuid())
-                                                    .withName(user.getDisplayName())
-                                                    .withLogin(user.getUsername())
-                                                    .withUrl(user.getLinks().getSelf().getHref());
-
-                callback.onSuccess(hostUser);
-            }
-
-            @Override
-            protected void onFailure(final Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
     }
 
     @Override
@@ -594,29 +352,6 @@ public class BitbucketHostingService implements VcsHostingService {
         final String host = Window.Location.getHost();
 
         return templates.formattedReviewFactoryUrlTemplate(protocol, host, reviewFactoryUrl);
-    }
-
-    @Override
-    public void authenticate(@NotNull final CurrentUser user, @NotNull final AsyncCallback<HostUser> callback) {
-        final WorkspaceDto workspace = this.appContext.getWorkspace();
-        if (workspace == null) {
-            callback.onFailure(new Exception("Error accessing current workspace"));
-            return;
-        }
-        final String authUrl = baseUrl
-                               + "/oauth/authenticate?oauth_provider=bitbucket&userId=" + user.getProfile().getId()
-                               + "&redirect_after_login="
-                               + Window.Location.getProtocol() + "//"
-                               + Window.Location.getHost() + "/ws/"
-                               + workspace.getConfig().getName();
-
-        new JsOAuthWindow(authUrl, "error.url", 500, 980, new OAuthCallback() {
-            @Override
-            public void onAuthenticated(final OAuthStatus authStatus) {
-                // maybe it's possible to avoid this request if authStatus contains the vcs host user.
-                getUserInfo(callback);
-            }
-        }).loginWithOAuth();
     }
 
     @Override

@@ -43,9 +43,9 @@ import com.codenvy.im.utils.HttpTransport;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
@@ -344,7 +344,7 @@ public class TestInstallationManagerFacade extends BaseTest {
 
     @Test
     public void testLoginToSaas() throws Exception {
-        Credentials credentials = new DtoServerImpls.CredentialsImpl();
+        Credentials credentials = DtoFactory.newDto(Credentials.class);
 
         installationManagerFacade.loginToCodenvySaaS(credentials);
 

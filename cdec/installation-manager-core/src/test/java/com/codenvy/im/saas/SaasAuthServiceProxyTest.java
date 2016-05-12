@@ -17,10 +17,10 @@ package com.codenvy.im.saas;
 import com.codenvy.im.BaseTest;
 import com.codenvy.im.utils.HttpException;
 import com.codenvy.im.utils.HttpTransport;
-
 import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.api.auth.server.dto.DtoServerImpls;
+import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -54,7 +54,7 @@ public class SaasAuthServiceProxyTest extends BaseTest {
 
     @Test
     public void testLogin() throws Exception {
-        DtoServerImpls.CredentialsImpl credentials = new DtoServerImpls.CredentialsImpl();
+        Credentials credentials = DtoFactory.newDto(Credentials.class);
         doReturn("{\"value\":\"token\"}").when(transport).doPost(endsWith("/auth/login"), eq(credentials));
 
         Token token = saasAuthServiceProxy.login(credentials);
@@ -71,7 +71,7 @@ public class SaasAuthServiceProxyTest extends BaseTest {
 
     @Test(expectedExceptions = AuthenticationException.class)
     public void loginShouldThrowAuthenticationException() throws Exception {
-        DtoServerImpls.CredentialsImpl credentials = new DtoServerImpls.CredentialsImpl();
+        Credentials credentials = DtoFactory.newDto(Credentials.class);
         doThrow(new HttpException(400, "error")).when(transport).doPost(endsWith("/auth/login"), eq(credentials));
 
         saasAuthServiceProxy.login(credentials);
@@ -79,7 +79,7 @@ public class SaasAuthServiceProxyTest extends BaseTest {
 
     @Test(expectedExceptions = IOException.class)
     public void loginShouldThrowIOException() throws Exception {
-        DtoServerImpls.CredentialsImpl credentials = new DtoServerImpls.CredentialsImpl();
+        Credentials credentials = DtoFactory.newDto(Credentials.class);
         doThrow(IOException.class).when(transport).doPost(endsWith("/auth/login"), eq(credentials));
 
         saasAuthServiceProxy.login(credentials);

@@ -74,64 +74,11 @@ public interface VcsHostingService {
      *         the user name.
      * @param branchName
      *         pull request branch name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getPullRequest(String, String, String, String)}
-     */
-    @Deprecated
-    void getPullRequest(@NotNull String owner,
-                        @NotNull String repository,
-                        @NotNull String username,
-                        @NotNull String branchName,
-                        @NotNull AsyncCallback<PullRequest> callback);
-
-    /**
-     * Get a pull request by qualified name.
-     *
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
-     * @param username
-     *         the user name.
-     * @param branchName
-     *         pull request branch name.
      */
     Promise<PullRequest> getPullRequest(@NotNull String owner,
                                         @NotNull String repository,
                                         @NotNull String username,
                                         @NotNull String branchName);
-
-    /**
-     * Creates a pull request.
-     *
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
-     * @param username
-     *         the user name.
-     * @param headBranchName
-     *         the head branch name.
-     * @param baseBranchName
-     *         the base branch name.
-     * @param title
-     *         the pull request title.
-     * @param body
-     *         the pull request body.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #createPullRequest(String, String, String, String, String, String, String)}
-     */
-    @Deprecated
-    void createPullRequest(@NotNull String owner,
-                           @NotNull String repository,
-                           @NotNull String username,
-                           @NotNull String headBranchName,
-                           @NotNull String baseBranchName,
-                           @NotNull String title,
-                           @NotNull String body,
-                           @NotNull AsyncCallback<PullRequest> callback);
 
     /**
      * Creates a pull request.
@@ -166,34 +113,8 @@ public interface VcsHostingService {
      *         the repository owner.
      * @param repository
      *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #fork(String, String)}
-     */
-    @Deprecated
-    void fork(@NotNull String owner, @NotNull String repository, @NotNull AsyncCallback<Repository> callback);
-
-    /**
-     * Forks the given repository for the current user.
-     *
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
      */
     Promise<Repository> fork(String owner, String repository);
-
-    /**
-     * Returns the information of the given repository.
-     *
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
-     * @deprecated use {@link #getRepository(String, String)}
-     */
-    @Deprecated
-    void getRepository(@NotNull String owner, @NotNull String repository, @NotNull AsyncCallback<Repository> callback);
 
     /**
      * Returns the promise which either resolves repository or rejects with an error.
@@ -234,34 +155,8 @@ public interface VcsHostingService {
      *         the repository owner.
      * @param repository
      *         the repository name.
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getUserFork(String, String, String)}
-     */
-    @Deprecated
-    void getUserFork(@NotNull String user, @NotNull String owner, @NotNull String repository, @NotNull AsyncCallback<Repository> callback);
-
-    /**
-     * Returns the repository fork of the given user.
-     *
-     * @param user
-     *         the  user.
-     * @param owner
-     *         the repository owner.
-     * @param repository
-     *         the repository name.
      */
     Promise<Repository> getUserFork(String user, String owner, String repository);
-
-    /**
-     * Returns the user information on the repository host.
-     *
-     * @param callback
-     *         callback called when operation is done.
-     * @deprecated use {@link #getUserInfo()}
-     */
-    @Deprecated
-    void getUserInfo(@NotNull AsyncCallback<HostUser> callback);
 
     /**
      * Returns the user information on the repository host.
@@ -312,18 +207,6 @@ public interface VcsHostingService {
      */
     @NotNull
     String formatReviewFactoryUrl(@NotNull String reviewFactoryUrl);
-
-    /**
-     * Authenticate on the hosting service.
-     *
-     * @param user
-     *         the user to authenticate
-     * @param callback
-     *         what to do once authentication is done
-     * @deprecated use {@link #authenticate(CurrentUser)}
-     */
-    @Deprecated
-    void authenticate(@NotNull CurrentUser user, @NotNull AsyncCallback<HostUser> callback);
 
     /**
      * Authenticates the current user on the hosting service.
