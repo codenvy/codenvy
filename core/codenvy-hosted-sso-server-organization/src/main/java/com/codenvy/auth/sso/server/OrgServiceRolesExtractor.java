@@ -81,14 +81,14 @@ public class OrgServiceRolesExtractor implements RolesExtractor {
             return emptySet();
         }
         try {
-            final Set<String> ldapRoles = getRoles(ticket.getPrincipal().getId());
+            final Set<String> ldapRoles = getRoles(ticket.getPrincipal().getUserId());
             if (allowedRole != null && !ldapRoles.contains(allowedRole)) {
                 return emptySet();
             }
 
             final Set<String> userRoles = new HashSet<>();
 
-            final Map<String, String> preferences = preferenceDao.getPreferences(ticket.getPrincipal().getId());
+            final Map<String, String> preferences = preferenceDao.getPreferences(ticket.getPrincipal().getUserId());
             if (parseBoolean(preferences.get("temporary"))) {
                 userRoles.add("temp_user");
             } else {

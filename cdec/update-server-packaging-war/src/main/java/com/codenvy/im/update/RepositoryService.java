@@ -36,7 +36,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.slf4j.Logger;
@@ -237,7 +237,7 @@ public class RepositoryService {
     public Response download(@PathParam("artifact") final String artifact,
                              @PathParam("version") final String version) {
         try {
-            String userId = userManager.getCurrentUser().getId();
+            String userId = userManager.getCurrentUser().getUserId();
             return doDownloadArtifact(artifact, version, userId);
         } catch (ArtifactNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(
@@ -436,7 +436,7 @@ public class RepositoryService {
             if (userManager.isAnonymous()) {
                 event.putParameter(Event.USER_PARAM, "");
             } else {
-                String userId = userManager.getCurrentUser().getId();
+                String userId = userManager.getCurrentUser().getUserId();
                 event.putParameter(Event.USER_PARAM, userId == null ? "" : userId);
             }
 
@@ -449,11 +449,11 @@ public class RepositoryService {
         }
     }
 
-    protected void sendNotificationLetter(String accountId, User user) {
+    protected void sendNotificationLetter(String accountId, Subject subject) {
         try {
-            String userEmail = VALID_EMAIL_ADDRESS_RFC822.matcher(user.getName()).matches()
-                               ? user.getName()
-                               : saasUserServiceProxy.getUserEmail(user.getToken());
+            String userEmail = VALID_EMAIL_ADDRESS_RFC822.matcher(subject.getUserName()).matches()
+                               ? subject.getUserName()
+                               : saasUserServiceProxy.getUserEmail(subject.getToken());
 
             mailUtil.sendNotificationLetter(accountId, userEmail);
             LOG.info(format("Subscription for %s was provisioned and notification mail was sent", userEmail));

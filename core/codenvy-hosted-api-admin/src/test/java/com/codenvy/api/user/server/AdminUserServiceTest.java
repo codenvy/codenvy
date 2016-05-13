@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
+import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.impl.ApplicationContextImpl;
 import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.ContainerResponse;
@@ -40,6 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -47,7 +49,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,10 +116,10 @@ public class AdminUserServiceTest {
         when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
         when(uriInfo.getRequestUri()).thenReturn(URI.create(SERVICE_PATH));
 
-        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setUser(new org.eclipse.che.commons.user.User() {
+        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setSubject(new Subject() {
 
             @Override
-            public String getName() {
+            public String getUserName() {
                 return user.getEmail();
             }
 
@@ -133,12 +134,16 @@ public class AdminUserServiceTest {
             }
 
             @Override
+            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
+            }
+
+            @Override
             public String getToken() {
                 return null;
             }
 
             @Override
-            public String getId() {
+            public String getUserId() {
                 return user.getId();
             }
 

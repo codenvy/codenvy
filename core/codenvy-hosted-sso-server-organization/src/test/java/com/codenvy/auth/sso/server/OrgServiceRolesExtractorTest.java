@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -67,7 +67,7 @@ public class OrgServiceRolesExtractorTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        final UserImpl user = new UserImpl("name",
+        final SubjectImpl user = new SubjectImpl("name",
                                            "id",
                                            "token",
                                            Collections.<String>emptyList(),
@@ -75,7 +75,7 @@ public class OrgServiceRolesExtractorTest {
 
         ticket = new AccessTicket("token", user, "authHandler");
 
-        when(userDao.getById(user.getId())).thenReturn(new User().withId("id"));
+        when(userDao.getById(user.getUserId())).thenReturn(new User().withId("id"));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class OrgServiceRolesExtractorTest {
                                                                                     "employeeType",
                                                                                     null,
                                                                                     null));
-        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getId());
+        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getUserId());
 
         assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), singleton("user"));
     }
@@ -103,7 +103,7 @@ public class OrgServiceRolesExtractorTest {
                                                                                     "member",
                                                                                     "admin",
                                                                                     null));
-        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getId());
+        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getUserId());
 
         assertTrue(extractor.extractRoles(ticket, "wsId", "accId").isEmpty());
     }
@@ -120,7 +120,7 @@ public class OrgServiceRolesExtractorTest {
                 "member",
                 "codenvy-user",
                 null));
-        doReturn(singleton("codenvy-user")).when(extractor).getRoles(ticket.getPrincipal().getId());
+        doReturn(singleton("codenvy-user")).when(extractor).getRoles(ticket.getPrincipal().getUserId());
 
         assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), singleton("user"));
     }
@@ -134,8 +134,8 @@ public class OrgServiceRolesExtractorTest {
                                                                                     "employeeType",
                                                                                     null,
                                                                                     null));
-        when(preferenceDao.getPreferences(ticket.getPrincipal().getId())).thenReturn(singletonMap("temporary", "true"));
-        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getId());
+        when(preferenceDao.getPreferences(ticket.getPrincipal().getUserId())).thenReturn(singletonMap("temporary", "true"));
+        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getUserId());
 
         assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), singleton("temp_user"));
     }
@@ -149,14 +149,14 @@ public class OrgServiceRolesExtractorTest {
                                                                                     "employeeType",
                                                                                     null,
                                                                                     null));
-        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getId());
+        doReturn(Collections.<String>emptySet()).when(extractor).getRoles(ticket.getPrincipal().getUserId());
         final HashSet<String> expectedRoles = new HashSet<>(asList("user"));
         assertEquals(extractor.extractRoles(ticket, "wsId", "accId"), expectedRoles);
     }
 
     @Test(enabled = false)
     public void shouldReturnEmptySetWhenUserDoesNotExist() throws Exception {
-        when(userDao.getById(ticket.getPrincipal().getId())).thenThrow(new NotFoundException("fake"));
+        when(userDao.getById(ticket.getPrincipal().getUserId())).thenThrow(new NotFoundException("fake"));
 
         assertTrue(extractor.extractRoles(ticket, "wsId", "accId").isEmpty());
     }
@@ -164,14 +164,14 @@ public class OrgServiceRolesExtractorTest {
     @Test(expectedExceptions = RuntimeException.class,
           expectedExceptionsMessageRegExp = "fake", enabled = false)
     public void shouldRethrowServerExceptionAsRuntimeException() throws Exception {
-        when(userDao.getById(ticket.getPrincipal().getId())).thenThrow(new ServerException("fake"));
+        when(userDao.getById(ticket.getPrincipal().getUserId())).thenThrow(new ServerException("fake"));
 
         extractor.extractRoles(ticket, "wsId", "accId");
     }
 
     @Test
     public void shouldReturnEmptySetWhenAuthHandlerTypeIsSysLdap() {
-        final AccessTicket ticket = new AccessTicket("token", mock(UserImpl.class), "sysldap");
+        final AccessTicket ticket = new AccessTicket("token", mock(SubjectImpl.class), "sysldap");
 
         assertTrue(extractor.extractRoles(ticket, null, null).isEmpty());
     }
@@ -185,7 +185,7 @@ public class OrgServiceRolesExtractorTest {
                                                                                     "employeeType",
                                                                                     null,
                                                                                     null));
-        doReturn(new HashSet<>(asList("system/admin", "system/manager", "fake"))).when(extractor).getRoles(ticket.getPrincipal().getId());
+        doReturn(new HashSet<>(asList("system/admin", "system/manager", "fake"))).when(extractor).getRoles(ticket.getPrincipal().getUserId());
 
         assertTrue(extractor.extractRoles(ticket, "wsId", "accId").contains("system/admin"));
         assertTrue(extractor.extractRoles(ticket, "wsId", "accId").contains("system/manager"));
@@ -213,7 +213,7 @@ public class OrgServiceRolesExtractorTest {
                                                                                     contextFactory));
 
         // when
-        final Set<String> roles = extractor.getRoles(ticket.getPrincipal().getId());
+        final Set<String> roles = extractor.getRoles(ticket.getPrincipal().getUserId());
 
         // then
         assertTrue(roles.isEmpty());

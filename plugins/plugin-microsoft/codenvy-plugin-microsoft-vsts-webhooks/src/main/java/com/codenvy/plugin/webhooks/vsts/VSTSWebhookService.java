@@ -151,8 +151,8 @@ public class VSTSWebhookService extends BaseWebhookService {
         LOG.debug("{}", workItemCreationEvent);
 
         // Set current Codenvy user
-        if (EnvironmentContext.getCurrent().getUser() == null) {
-            EnvironmentContext.getCurrent().setUser(new TokenUser());
+        if (EnvironmentContext.getCurrent().getSubject() == null) {
+            EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         }
 
         // Get current user id
@@ -240,8 +240,8 @@ public class VSTSWebhookService extends BaseWebhookService {
         LOG.debug("{}", pullRequestUpdatedEvent);
 
         // Set current Codenvy user
-        if (EnvironmentContext.getCurrent().getUser() == null) {
-            EnvironmentContext.getCurrent().setUser(new TokenUser());
+        if (EnvironmentContext.getCurrent().getSubject() == null) {
+            EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         }
 
         // Get event data

@@ -14,7 +14,7 @@
  */
 package com.codenvy.im.update;
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -36,9 +36,9 @@ public class UserManagerTest {
     }
 
     @Test(dataProvider = "dataForTestIsAnonymous")
-    public void testIsAnonymous(User currentUser, boolean expected) throws Exception {
-        when(spyUserManager.getCurrentUser()).thenReturn(currentUser);
-        assertEquals("Current user is " + currentUser, spyUserManager.isAnonymous(), expected);
+    public void testIsAnonymous(Subject currentSubject, boolean expected) throws Exception {
+        when(spyUserManager.getCurrentUser()).thenReturn(currentSubject);
+        assertEquals("Current user is " + currentSubject, spyUserManager.isAnonymous(), expected);
     }
 
     @DataProvider
@@ -46,12 +46,12 @@ public class UserManagerTest {
         return new Object[][]{
             {null, true},
 
-            {when(mock(User.class).getName())
+            {when(mock(Subject.class).getUserName())
                  .thenReturn(UserManager.ANONYMOUS_USER_NAME)
                  .getMock(),
              true},
 
-            {when(mock(User.class).getName())
+            {when(mock(Subject.class).getUserName())
                  .thenReturn(ANY_NAME)
                  .getMock(),
              false},

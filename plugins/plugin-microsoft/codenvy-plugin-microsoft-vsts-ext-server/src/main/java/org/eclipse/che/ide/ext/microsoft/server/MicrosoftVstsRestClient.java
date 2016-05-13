@@ -238,7 +238,7 @@ public final class MicrosoftVstsRestClient {
     }
 
     private String getUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 
     private <O> O parseJsonResponse(final JsonValue json, final Class<O> clazz) throws ServerException {

@@ -20,10 +20,12 @@ import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.dao.authentication.TokenGenerator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.auth.sso.shared.dto.UserDto;
+import com.codenvy.auth.sso.shared.dto.SubjectDto;
 
 import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 import static java.net.URLEncoder.encode;
@@ -95,7 +98,7 @@ public class SsoService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{token}")
     @GET
-    public UserDto getCurrentPrincipal(@PathParam("token") String token,
+    public SubjectDto getCurrentPrincipal(@PathParam("token") String token,
                                        @QueryParam("clienturl") String clientUrl,
                                        @QueryParam("workspaceid") String workspaceId,
                                        @QueryParam("accountid") String accountId) throws AuthenticationException {
@@ -114,9 +117,9 @@ public class SsoService {
 
 
             Set<String> roles = rolesExtractorRegistry.getRoles(accessTicket, workspaceId, accountId);
-            return DtoFactory.newDto(UserDto.class)
-                             .withName(accessTicket.getPrincipal().getName())
-                             .withId(accessTicket.getPrincipal().getId())
+            return DtoFactory.newDto(SubjectDto.class)
+                             .withName(accessTicket.getPrincipal().getUserName())
+                             .withId(accessTicket.getPrincipal().getUserId())
                              .withRoles(new ArrayList<>(roles))
                              .withTemporary(roles.contains("temp_user"))
                              .withToken(accessTicket.getAccessToken());
@@ -176,10 +179,14 @@ public class SsoService {
 
             if (Boolean.valueOf(allowAnonymous)) {
                 // create new temp user
-                final User anonymousUser = userCreator.createTemporary();
+                final User user = userCreator.createTemporary();
+                final Subject anonymousSubject = new SubjectImpl(user.getName(),
+                                                                 user.getId(),
+                                                                 null,
+                                                                 Collections.<String>emptyList(),
+                                                                 true);
 
-                final AccessTicket ticket =
-                        new AccessTicket(uniqueTokenGenerator.generate(), anonymousUser, "anonymous");
+                final AccessTicket ticket = new AccessTicket(uniqueTokenGenerator.generate(), anonymousSubject, "anonymous");
                 ticketManager.putAccessTicket(ticket);
 
                 UriBuilder destination = UriBuilder.fromUri(redirectUrl);
@@ -187,7 +194,6 @@ public class SsoService {
                 builder = Response.temporaryRedirect(destination.build());
 
                 ((SsoCookieBuilder)cookieBuilder).setCookies(builder, ticket.getAccessToken(), isSecure, true);
-
             } else {
                 builder = Response.temporaryRedirect(new URI(loginPage + "?redirect_url=" + encode(redirectUrl, "UTF-8")));
             }

@@ -22,34 +22,34 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 @DTO
-public interface UserDto {
+public interface SubjectDto {
     String getName();
 
     void setName(String name);
 
-    UserDto withName(String name);
+    SubjectDto withName(String name);
 
     String getId();
 
     void setId(String id);
 
-    UserDto withId(String id);
+    SubjectDto withId(String id);
 
     String getToken();
 
     void setToken(String token);
 
-    UserDto withToken(String token);
+    SubjectDto withToken(String token);
 
     boolean isTemporary();
 
     void setTemporary(boolean isTemporary);
 
-    UserDto withTemporary(boolean isTemporary);
+    SubjectDto withTemporary(boolean isTemporary);
 
     List<String> getRoles();
 
     void setRoles(List<String> roles);
 
-    UserDto withRoles(List<String> roles);
+    SubjectDto withRoles(List<String> roles);
 }

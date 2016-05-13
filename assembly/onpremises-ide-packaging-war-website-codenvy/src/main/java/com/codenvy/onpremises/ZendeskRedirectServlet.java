@@ -24,7 +24,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -81,9 +81,9 @@ public class ZendeskRedirectServlet extends HttpServlet {
         JWTClaimsSet jwtClaims = new JWTClaimsSet();
         jwtClaims.setIssueTime(new Date());
         jwtClaims.setJWTID(UUID.randomUUID().toString());
-        User user = EnvironmentContext.getCurrent().getUser();
+        Subject subject = EnvironmentContext.getCurrent().getSubject();
         jwtClaims.setCustomClaim("name", getName());
-        jwtClaims.setCustomClaim("email", user.getName());
+        jwtClaims.setCustomClaim("email", subject.getUserName());
         // Create JWS header with HS256 algorithm
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
         JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaims.toJSONObject()));
@@ -119,6 +119,6 @@ public class ZendeskRedirectServlet extends HttpServlet {
         } catch (IOException | ServerException | UnauthorizedException | ForbiddenException | NotFoundException | ConflictException e) {
             LOG.warn(e.getLocalizedMessage());
         }
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }

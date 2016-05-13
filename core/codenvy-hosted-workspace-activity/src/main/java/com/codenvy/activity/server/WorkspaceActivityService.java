@@ -26,12 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 /**
@@ -58,7 +56,7 @@ public class WorkspaceActivityService extends Service {
     @Path("/{wsId}")
     public void active(@PathParam("wsId") String wsId) throws ForbiddenException, NotFoundException, ServerException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(wsId);
-        if (!workspace.getNamespace().equals(EnvironmentContext.getCurrent().getUser().getId())) {
+        if (!workspace.getNamespace().equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
             throw new ForbiddenException("Notify activity operation allowed only for workspace owner");
         }
         if (workspace.getStatus() == RUNNING) {

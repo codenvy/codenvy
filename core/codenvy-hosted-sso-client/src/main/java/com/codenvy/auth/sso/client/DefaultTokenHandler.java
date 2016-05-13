@@ -15,7 +15,7 @@
 package com.codenvy.auth.sso.client;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +59,10 @@ public abstract class DefaultTokenHandler implements TokenHandler {
                                             .replaceQuery(request.getQueryString())
                                             .replaceQueryParam("cookiePresent").build().toString());
         } else {
-            User user = principal.getUser(rolesContext);
+            Subject subject = principal.getUser(rolesContext);
             EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
-            environmentContext.setUser(user);
-            chain.doFilter(requestWrapper.wrapRequest(session, request, user), response);
+            environmentContext.setSubject(subject);
+            chain.doFilter(requestWrapper.wrapRequest(session, request, subject), response);
         }
     }
 }

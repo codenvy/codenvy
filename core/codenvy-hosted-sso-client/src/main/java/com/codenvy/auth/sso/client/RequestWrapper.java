@@ -14,7 +14,7 @@
  */
 package com.codenvy.auth.sso.client;
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -28,19 +28,19 @@ import java.security.Principal;
 public class RequestWrapper {
 
     public HttpServletRequest wrapRequest(final HttpSession session, final HttpServletRequest httpReq,
-                                          final User user) {
+                                          final Subject subject) {
         return new HttpServletRequestWrapper(httpReq) {
             private final HttpSession httpSession = session;
 
             @Override
 
             public String getRemoteUser() {
-                return user.getName();
+                return subject.getUserName();
             }
 
             @Override
             public boolean isUserInRole(String role) {
-                return user.isMemberOf(role);
+                return subject.isMemberOf(role);
             }
 
             @Override
@@ -48,7 +48,7 @@ public class RequestWrapper {
                 return new Principal() {
                     @Override
                     public String getName() {
-                        return user.getName();
+                        return subject.getUserName();
                     }
                 };
             }

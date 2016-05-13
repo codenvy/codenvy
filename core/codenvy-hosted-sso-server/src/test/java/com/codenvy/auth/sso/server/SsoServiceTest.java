@@ -17,12 +17,12 @@ package com.codenvy.auth.sso.server;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
-import com.codenvy.auth.sso.shared.dto.UserDto;
+import com.codenvy.auth.sso.shared.dto.SubjectDto;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.auth.AuthenticationExceptionMapper;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
@@ -85,11 +85,11 @@ public class SsoServiceTest {
     @Test
     public void shouldValidUserIfTokenIsValid() {
         //given
-        User principal = new UserImpl("someuser", "132", "t1", null, false);
+        Subject principal = new SubjectImpl("someuser", "132", "t1", null, false);
         AccessTicket ticket = new AccessTicket("t1", principal, "default");
-        UserDto user = DtoFactory.newDto(UserDto.class)
-                                 .withName(principal.getName())
-                                 .withId(principal.getId()).withToken(principal.getToken())
+        SubjectDto user = DtoFactory.newDto(SubjectDto.class)
+                                 .withName(principal.getUserName())
+                                 .withId(principal.getUserId()).withToken(principal.getToken())
                                  .withRoles(Arrays.asList("workspace/admin", "account/owner"))
                                  .withTemporary(false);
         when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
@@ -106,7 +106,7 @@ public class SsoServiceTest {
                 .when()
                 .get("internal/sso/server/{token}");
         //then
-        assertEquals(unwrapDto(response, UserDto.class), user);
+        assertEquals(unwrapDto(response, SubjectDto.class), user);
         assertTrue(ticket.getRegisteredClients().contains("http://dev.box.com/api"));
     }
 
@@ -128,7 +128,7 @@ public class SsoServiceTest {
     @Test
     public void shouldUnregisterClientByTokenAndUrl() {
         //given
-        AccessTicket ticket = new AccessTicket("t1", new UserImpl("someuser", "132", "t1", null, false), "default");
+        AccessTicket ticket = new AccessTicket("t1", new SubjectImpl("someuser", "132", "t1", null, false), "default");
         ticket.registerClientUrl("http://dev.box.com/api");
         when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
         //when

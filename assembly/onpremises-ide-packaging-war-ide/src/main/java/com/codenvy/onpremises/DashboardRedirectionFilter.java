@@ -49,7 +49,7 @@ public class DashboardRedirectionFilter implements Filter {
         if ("GET".equals(req.getMethod())
             && !projectPattern.matcher(req.getRequestURI()).matches()
             && !context.isWorkspaceTemporary()
-            && context.getUser().getId() != null
+            && context.getSubject().getUserId() != null
             && req.getQueryString() == null
                 ) {
             resp.sendRedirect("/dashboard/");

@@ -277,6 +277,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     }
 
     private String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }

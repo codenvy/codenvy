@@ -23,6 +23,21 @@ import org.eclipse.che.api.core.ServerException;
  * @author Sergii Leschenko
  */
 public interface PermissionChecker {
+    /**
+     * @param user
+     *         user id
+     * @param domain
+     *         domain id
+     * @param instance
+     *         instance id
+     * @param action
+     *         action name
+     * @return true if the user has given permission
+     * @throws NotFoundException
+     *         when given domain is unsupported
+     * @throws ServerException
+     *         when any other error occurs during permission existence checking
+     */
     boolean hasPermission(String user, String domain, String instance, String action) throws ServerException,
                                                                                              NotFoundException;
 }

@@ -17,7 +17,7 @@ package com.codenvy.auth.sso.client;
 import com.codenvy.auth.sso.client.filter.RequestFilter;
 import com.codenvy.auth.sso.client.token.RequestTokenExtractor;
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import com.google.inject.name.Named;
 
 import org.slf4j.Logger;
@@ -147,9 +147,9 @@ public class LoginFilter implements Filter {
                 sessionStore.removeSessionByToken(principal.getToken());
                 sessionStore.saveSession(token, session);
             }
-            User user = ssoServerClient.getUser(token, clientUrl, rolesContext.getWorkspaceId(), rolesContext.getAccountId());
-            if (user != null) {
-                principal = new SsoClientPrincipal(token, clientUrl, rolesContext, user, ssoServerClient);
+            Subject subject = ssoServerClient.getSubject(token, clientUrl, rolesContext.getWorkspaceId(), rolesContext.getAccountId());
+            if (subject != null) {
+                principal = new SsoClientPrincipal(token, clientUrl, rolesContext, subject, ssoServerClient);
                 session.setAttribute("principal", principal);
             }
         }

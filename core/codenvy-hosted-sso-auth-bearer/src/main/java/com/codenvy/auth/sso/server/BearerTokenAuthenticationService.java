@@ -29,9 +29,11 @@ import com.codenvy.mail.shared.dto.EmailBeanDto;
 import com.google.common.io.Files;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.commons.lang.Deserializer;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,18 +124,23 @@ public class BearerTokenAuthenticationService {
         handler.authenticate(credentials.getToken());
         final String username =  payload.get("username");
         try {
-            User principal = userCreator.createUser(payload.get("email"), username, payload.get("firstName"), payload.get("lastName"));
+            User user = userCreator.createUser(payload.get("email"), username, payload.get("firstName"), payload.get("lastName"));
+            final Subject subject = new SubjectImpl(user.getName(),
+                                                             user.getId(),
+                                                             null,
+                                                             Collections.<String>emptyList(),
+                                                             true);
 
             Response.ResponseBuilder builder = Response.ok();
             if (tokenAccessCookie != null) {
                 AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
                 if (accessTicket != null) {
-                    if (!principal.equals(accessTicket.getPrincipal())) {
+                    if (!subject.equals(accessTicket.getPrincipal())) {
                         // DO NOT REMOVE! This log will be used in statistic analyzing
                         LOG.info("EVENT#user-changed-name# OLD-USER#{}# NEW-USER#{}#",
-                                 accessTicket.getPrincipal().getName(),
-                                 principal.getName());
-                        LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getName());
+                                 accessTicket.getPrincipal().getUserName(),
+                                 subject.getUserName());
+                        LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getUserName());
                         // DO NOT REMOVE! This log will be used in statistic analyzing
                         ticketManager.removeTicket(accessTicket.getAccessToken());
                     }
@@ -151,7 +158,7 @@ public class BearerTokenAuthenticationService {
 
             // If we obtained principal  - authentication is done.
             String token = uniqueTokenGenerator.generate();
-            ticketManager.putAccessTicket(new AccessTicket(token, principal, "bearer"));
+            ticketManager.putAccessTicket(new AccessTicket(token, subject, "bearer"));
 
             cookieBuilder.setCookies(builder, token, isSecure);
             builder.entity(Collections.singletonMap("token", token));

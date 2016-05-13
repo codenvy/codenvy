@@ -55,7 +55,7 @@ public class AccessTicketInvalidator extends TimerTask {
     public void run() {
         for (AccessTicket accessTicket : ticketManager.getAccessTickets()) {
             if (System.currentTimeMillis() > accessTicket.getCreationTime() + ticketLifeTimeSeconds * 1000) {
-                LOG.info("Initiate user {} sso logout by timeout", accessTicket.getPrincipal().getName());
+                LOG.info("Initiate user {} sso logout by timeout", accessTicket.getPrincipal().getUserName());
                 ticketManager.removeTicket(accessTicket.getAccessToken());
             }
         }

@@ -15,8 +15,9 @@
 package com.codenvy.api.dao.authentication;
 
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -30,19 +31,19 @@ import java.util.Set;
  */
 public final class AccessTicket {
     private final Set<String> registeredClients;
-    private final User        principal;
+    private final Subject     principal;
     private final String      authHandlerType;
     /** Time of ticket creation in milliseconds. */
     private       long        creationTime;
     /** Value of access cookie associated with this access key. */
     private       String      accessToken;
 
-    public AccessTicket(String accessToken, User principal, String authHandlerType) {
+    public AccessTicket(String accessToken, Subject principal, String authHandlerType) {
         this(accessToken, principal, authHandlerType, System.currentTimeMillis());
     }
 
 
-    public AccessTicket(String accessToken, User principal, String authHandlerType, long creationTime) {
+    public AccessTicket(String accessToken, Subject principal, String authHandlerType, long creationTime) {
 
         if (accessToken == null) {
             throw new IllegalArgumentException("Invalid access token: " + accessToken);
@@ -68,11 +69,11 @@ public final class AccessTicket {
         return accessToken;
     }
 
-    public User getPrincipal() {
-        return new User() {
+    public Subject getPrincipal() {
+        return new Subject() {
             @Override
-            public String getName() {
-                return principal.getName();
+            public String getUserName() {
+                return principal.getUserName();
             }
 
             @Override
@@ -86,13 +87,18 @@ public final class AccessTicket {
             }
 
             @Override
+            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
+                principal.checkPermission(domain, instance, action);
+            }
+
+            @Override
             public String getToken() {
                 return accessToken;
             }
 
             @Override
-            public String getId() {
-                return principal.getId();
+            public String getUserId() {
+                return principal.getUserId();
             }
 
             @Override

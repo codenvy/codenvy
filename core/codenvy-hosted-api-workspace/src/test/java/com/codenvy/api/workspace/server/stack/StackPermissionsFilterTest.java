@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.stack.StackService;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
@@ -74,7 +74,7 @@ public class StackPermissionsFilterTest {
     StackPermissionsFilter permissionsFilter;
 
     @Mock
-    private static User user;
+    private static Subject subject;
 
     @Mock
     StackService service;
@@ -89,12 +89,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).createStack(any());
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckPermissionsOnStackReading() throws Exception {
-        when(user.hasPermission("stack", "stack123", READ)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", READ)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -104,12 +104,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getStack("stack123");
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(READ));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
     }
 
     @Test
     public void shouldCheckPermissionsOnStackUpdating() throws Exception {
-        when(user.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -119,12 +119,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).updateStack(any(), eq("stack123"));
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
     }
 
     @Test
     public void shouldCheckPermissionsOnStackRemoving() throws Exception {
-        when(user.hasPermission("stack", "stack123", DELETE)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", DELETE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -134,7 +134,7 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).removeStack(eq("stack123"));
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(DELETE));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(DELETE));
     }
 
     @Test
@@ -147,12 +147,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(service).searchStacks(anyListOf(String.class), anyInt(), anyInt());
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckPermissionsOnIconReading() throws Exception {
-        when(user.hasPermission("stack", "stack123", READ)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", READ)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -162,12 +162,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getIcon(eq("stack123"));
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(READ));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(READ));
     }
 
     @Test
     public void shouldCheckPermissionsOnIconUploading() throws Exception {
-        when(user.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -178,12 +178,12 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).uploadIcon(any(), eq("stack123"));
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
     }
 
     @Test
     public void shouldThrowForbiddenExceptionWhenUserDoesNotHavePermissionsForIconUpdating() {
-        when(user.hasPermission("stack", "stack123", UPDATE)).thenReturn(false);
+        when(subject.hasPermission("stack", "stack123", UPDATE)).thenReturn(false);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -199,7 +199,7 @@ public class StackPermissionsFilterTest {
 
     @Test
     public void shouldCheckPermissionsOnIconRemoving() throws Exception {
-        when(user.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
+        when(subject.hasPermission("stack", "stack123", UPDATE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -209,7 +209,7 @@ public class StackPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).removeIcon(eq("stack123"));
-        verify(user).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
+        verify(subject).hasPermission(eq("stack"), eq("stack123"), eq(UPDATE));
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
@@ -226,7 +226,7 @@ public class StackPermissionsFilterTest {
     public void shouldThrowForbiddenExceptionWhenUserDoesNotHavePermissionsForPerformOperation(String path,
                                                                                                String method,
                                                                                                String action) throws Exception {
-        when(user.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+        when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
 
         Response response = request(given().auth()
                                            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -275,7 +275,7 @@ public class StackPermissionsFilterTest {
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(user);
+            EnvironmentContext.getCurrent().setSubject(subject);
         }
     }
 

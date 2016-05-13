@@ -24,7 +24,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
@@ -75,7 +75,7 @@ public class RecipePermissionsFilterTest {
     RecipePermissionsFilter permissionsFilter;
 
     @Mock
-    private static User user;
+    private static Subject subject;
 
     @Mock
     RecipeService service;
@@ -89,12 +89,12 @@ public class RecipePermissionsFilterTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 204);
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckPermissionsOnStackReading() throws Exception {
-        when(user.hasPermission("recipe", "recipe123", READ)).thenReturn(true);
+        when(subject.hasPermission("recipe", "recipe123", READ)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -104,12 +104,12 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getRecipe("recipe123");
-        verify(user).hasPermission(eq("recipe"), eq("recipe123"), eq(READ));
+        verify(subject).hasPermission(eq("recipe"), eq("recipe123"), eq(READ));
     }
 
     @Test
     public void shouldCheckPermissionsOnStackScriptReading() throws Exception {
-        when(user.hasPermission("recipe", "recipe123", READ)).thenReturn(true);
+        when(subject.hasPermission("recipe", "recipe123", READ)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -119,12 +119,12 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getRecipeScript("recipe123");
-        verify(user).hasPermission(eq("recipe"), eq("recipe123"), eq(READ));
+        verify(subject).hasPermission(eq("recipe"), eq("recipe123"), eq(READ));
     }
 
     @Test
     public void shouldCheckPermissionsOnStackUpdating() throws Exception {
-        when(user.hasPermission("recipe", "recipe123", UPDATE)).thenReturn(true);
+        when(subject.hasPermission("recipe", "recipe123", UPDATE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -136,12 +136,12 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).updateRecipe(any());
-        verify(user).hasPermission(eq("recipe"), eq("recipe123"), eq(UPDATE));
+        verify(subject).hasPermission(eq("recipe"), eq("recipe123"), eq(UPDATE));
     }
 
     @Test
     public void shouldCheckPermissionsOnStackRemoving() throws Exception {
-        when(user.hasPermission("recipe", "recipe123", DELETE)).thenReturn(true);
+        when(subject.hasPermission("recipe", "recipe123", DELETE)).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -151,12 +151,12 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).removeRecipe(eq("recipe123"));
-        verify(user).hasPermission(eq("recipe"), eq("recipe123"), eq(DELETE));
+        verify(subject).hasPermission(eq("recipe"), eq("recipe123"), eq(DELETE));
     }
 
     @Test
     public void shouldThrowForbiddenExceptionWhenUserDoesNotHavePermissionsForPerformOperationOnStackRemoving() throws Exception {
-        when(user.hasPermission("recipe", "recipe123", DELETE)).thenReturn(false);
+        when(subject.hasPermission("recipe", "recipe123", DELETE)).thenReturn(false);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -179,7 +179,7 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(service).searchRecipes(anyListOf(String.class), anyString(), anyInt(), anyInt());
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test
@@ -192,7 +192,7 @@ public class RecipePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).createRecipe(any());
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
@@ -209,7 +209,7 @@ public class RecipePermissionsFilterTest {
     public void shouldThrowForbiddenExceptionWhenUserDoesNotHavePermissionsForPerformOperation(String path,
                                                                                                String method,
                                                                                                String action) throws Exception {
-        when(user.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+        when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
 
         Response response = request(given().auth()
                                            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -256,7 +256,7 @@ public class RecipePermissionsFilterTest {
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(user);
+            EnvironmentContext.getCurrent().setSubject(subject);
         }
     }
 

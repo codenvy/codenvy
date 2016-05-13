@@ -14,7 +14,7 @@
  */
 package com.codenvy.auth.sso.client;
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,40 +27,40 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SsoClientPrincipal implements Principal {
     private static final Logger LOG = LoggerFactory.getLogger(SsoClientPrincipal.class);
 
-    private final Map<RolesContext, User> contextUserMap;
-    private final String                  clientUrl;
-    private final String                  token;
-    private final ServerClient            ssoServerClient;
-    private final String                  userName;
-    private final String                  userId;
+    private final Map<RolesContext, Subject> contextUserMap;
+    private final String                     clientUrl;
+    private final String                     token;
+    private final ServerClient               ssoServerClient;
+    private final String                     userName;
+    private final String                     userId;
 
 
     public SsoClientPrincipal(String token,
                               String clientUrl,
                               RolesContext initialContext,
-                              User initialPrincipal,
+                              Subject initialPrincipal,
                               ServerClient ssoServerClient) {
         this.clientUrl = clientUrl;
         this.token = token;
         this.ssoServerClient = ssoServerClient;
-        this.userName = initialPrincipal.getName();
-        this.userId = initialPrincipal.getId();
+        this.userName = initialPrincipal.getUserName();
+        this.userId = initialPrincipal.getUserId();
         this.contextUserMap = new ConcurrentHashMap<>();
         this.contextUserMap.put(initialContext, initialPrincipal);
     }
 
     public boolean hasUserInContext(RolesContext context) {
         if (context != null) {
-            User user = contextUserMap.get(context);
-            if (user == null) {
-                user = ssoServerClient.getUser(token, clientUrl,
-                                               context.getWorkspaceId(),
-                                               context.getAccountId());
-                if (user != null && userId.equals(user.getId())) {
-                    contextUserMap.put(context, user);
+            Subject subject = contextUserMap.get(context);
+            if (subject == null) {
+                subject = ssoServerClient.getSubject(token, clientUrl,
+                                                     context.getWorkspaceId(),
+                                                     context.getAccountId());
+                if (subject != null && userId.equals(subject.getUserId())) {
+                    contextUserMap.put(context, subject);
                 }
             }
-            return user != null;
+            return subject != null;
         }
         return true;
 
@@ -75,7 +75,7 @@ public class SsoClientPrincipal implements Principal {
         return token;
     }
 
-    public User getUser(RolesContext rolesContext) {
+    public Subject getUser(RolesContext rolesContext) {
         return contextUserMap.get(rolesContext);
     }
 
@@ -90,7 +90,7 @@ public class SsoClientPrincipal implements Principal {
 
     public boolean isUserInRole(String roleName, RolesContext context) {
 
-        User contextRoles = contextUserMap.get(context);
+        Subject contextRoles = contextUserMap.get(context);
         if (contextRoles != null) {
             return contextRoles.isMemberOf(roleName);
         }

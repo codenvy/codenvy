@@ -15,21 +15,20 @@
 package com.codenvy.auth.sso.client;
 
 import com.codenvy.auth.sso.server.SsoService;
-import com.codenvy.auth.sso.shared.dto.UserDto;
+import com.codenvy.auth.sso.shared.dto.SubjectDto;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.net.URLEncoder;
 
 /**
  * Communicates with sso server by http calls.
@@ -50,7 +49,7 @@ public class HttpSsoServerClient implements ServerClient {
     }
 
     @Override
-    public User getUser(String token, String clientUrl, String workspaceId, String accountId) {
+    public Subject getSubject(String token, String clientUrl, String workspaceId, String accountId) {
         try {
             final HttpJsonRequest currentPrincipalRequest = requestFactory.fromUrl(UriBuilder.fromUri(apiEndpoint)
                                                                                              .path(SsoService.class)
@@ -68,9 +67,9 @@ public class HttpSsoServerClient implements ServerClient {
                 currentPrincipalRequest.addQueryParam("accountid", accountId);
             }
 
-            final UserDto userDto = currentPrincipalRequest.request()
-                                                           .asDto(UserDto.class);
-            return new UserImpl(userDto.getName(), userDto.getId(), userDto.getToken(), userDto.getRoles(), userDto.isTemporary());
+            final SubjectDto subjectDto = currentPrincipalRequest.request()
+                                                           .asDto(SubjectDto.class);
+            return new SubjectImpl(subjectDto.getName(), subjectDto.getId(), subjectDto.getToken(), subjectDto.getRoles(), subjectDto.isTemporary());
         } catch (ApiException | IOException e) {
             LOG.warn(e.getLocalizedMessage());
         }

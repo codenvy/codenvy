@@ -20,7 +20,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.impl.RuntimeDelegateImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -55,7 +55,7 @@ public class FactoryServletTest {
     private HttpServletResponse res;
 
     @Mock
-    private User user;
+    private Subject subject;
 
     @Mock
     private Principal principal;
@@ -81,8 +81,8 @@ public class FactoryServletTest {
 
         String requestUrl = "http://codenvy.com/factory";
         when(req.getRequestURL()).thenReturn(new StringBuffer(requestUrl));
-        EnvironmentContext.getCurrent().setUser(user);
-        when(user.getId()).thenReturn("userId");
+        EnvironmentContext.getCurrent().setSubject(subject);
+        when(subject.getUserId()).thenReturn("userId");
     }
 
     @Test(dataProvider = "validFactoryProvider")
@@ -99,7 +99,7 @@ public class FactoryServletTest {
 
     @DataProvider(name = "validFactoryProvider")
     public Object[][] validFactoryProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // encoded
                 {"codenvy.com", null, prepareFactory()},
                 // referrer hostname is equal
@@ -116,10 +116,10 @@ public class FactoryServletTest {
 
     @DataProvider(name = "FactoryTypeProvider")
     public Object[][] factoryTypeProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // default params
                 {"codenvy.com", null, prepareFactory()},
-                };
+        };
     }
 
     private Factory prepareFactory() {

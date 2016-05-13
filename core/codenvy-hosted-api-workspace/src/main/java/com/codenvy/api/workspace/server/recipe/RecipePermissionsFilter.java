@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericMethodResource;
@@ -45,7 +45,7 @@ public class RecipePermissionsFilter extends CheMethodInvokerFilter {
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments) throws ForbiddenException, ServerException {
         final String methodName = genericMethodResource.getMethod().getName();
 
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         String action;
         String recipeId;
 
@@ -75,7 +75,7 @@ public class RecipePermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        if (!currentUser.hasPermission(RecipeDomain.DOMAIN_ID, recipeId, action)) {
+        if (!currentSubject.hasPermission(RecipeDomain.DOMAIN_ID, recipeId, action)) {
             throw new ForbiddenException("The user does not have permission to " + action + " recipe with id '" + recipeId + "'");
         }
     }

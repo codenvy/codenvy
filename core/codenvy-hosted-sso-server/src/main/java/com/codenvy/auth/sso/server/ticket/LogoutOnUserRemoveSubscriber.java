@@ -49,7 +49,7 @@ public class LogoutOnUserRemoveSubscriber {
                 if (null != event && null != event.getUserId()) {
                     String id = event.getUserId();
                     for (AccessTicket accessTicket : ticketManager.getAccessTickets()) {
-                        if (id.equals(accessTicket.getPrincipal().getId())) {
+                        if (id.equals(accessTicket.getPrincipal().getUserId())) {
                             ticketManager.removeTicket(accessTicket.getAccessToken());
                         }
                     }

@@ -14,7 +14,7 @@
  */
 package com.codenvy.auth.sso.client;
 
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Provided communication bridge between sso client and server.
@@ -23,7 +23,7 @@ import org.eclipse.che.commons.user.User;
  */
 public interface ServerClient {
     /**
-     * Get user associated with given token for the given execution context(workspaceId, accountId)
+     * Get subject associated with given token for the given execution context(workspaceId, accountId)
      *
      * @param token
      *         - sso authentication token.
@@ -35,7 +35,7 @@ public interface ServerClient {
      *         - id of account for which requested roles.
      * @return - principal with roles. If token is not valid return null.
      */
-    User getUser(String token, String clientUrl, String workspaceId, String accountId);
+    Subject getSubject(String token, String clientUrl, String workspaceId, String accountId);
 
     /**
      * Notify server about termination sso session.

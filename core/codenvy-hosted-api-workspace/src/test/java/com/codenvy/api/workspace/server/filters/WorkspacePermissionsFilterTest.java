@@ -25,7 +25,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
@@ -80,14 +80,14 @@ public class WorkspacePermissionsFilterTest {
     WorkspacePermissionsFilter permissionsFilter;
 
     @Mock
-    private static User user;
+    private static Subject subject;
 
     @Mock
     WorkspaceService service;
 
     @Test
     public void shouldCheckPermissionsByAccountDomainOnStartingFromConfig() throws Exception {
-        when(user.hasPermission("account", "account123", "createWorkspaces")).thenReturn(true);
+        when(subject.hasPermission("account", "account123", "createWorkspaces")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -97,12 +97,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).startFromConfig(any(), any(), eq("account123"));
-        verify(user).hasPermission(eq("account"), eq("account123"), eq("createWorkspaces"));
+        verify(subject).hasPermission(eq("account"), eq("account123"), eq("createWorkspaces"));
     }
 
     @Test
     public void shouldCheckPermissionsByAccountDomainOnWorkspaceCreating() throws Exception {
-        when(user.hasPermission("account", "account123", "createWorkspaces")).thenReturn(true);
+        when(subject.hasPermission("account", "account123", "createWorkspaces")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -112,7 +112,7 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).create(any(), any(), any(), eq("account123"));
-        verify(user).hasPermission(eq("account"), eq("account123"), eq("createWorkspaces"));
+        verify(subject).hasPermission(eq("account"), eq("account123"), eq("createWorkspaces"));
     }
 
     @Test
@@ -125,12 +125,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(service).getWorkspaces(any(), anyInt(), anyString());
-        verifyZeroInteractions(user);
+        verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckPermissionsOnWorkspaceRecovering() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -141,12 +141,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).recoverWorkspace(eq("workspace123"), any(), anyString());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
     public void shouldCheckPermissionsOnMachineCreating() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -157,12 +157,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).createMachine(eq("workspace123"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
     public void shouldCheckPermissionsOnWorkspaceStopping() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -173,12 +173,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).stop(eq("workspace123"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
     public void shouldCheckPermissionsOnWorkspaceStarting() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -189,12 +189,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).startById(eq("workspace123"), anyString(), anyString());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
     public void shouldCheckPermissionsOnSnapshotStarting() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -205,12 +205,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).createSnapshot(eq("workspace123"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
     public void shouldCheckPermissionsOnSnapshotGetting() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -221,12 +221,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(service).getSnapshot(eq("workspace123"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
 
     @Test
     public void shouldCheckPermissionsOnGetWorkspaceByKey() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -237,12 +237,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getByKey(eq("workspace123"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
 
     @Test
     public void shouldCheckPermissionsOnGetWorkspaceByUserNameAndWorkspaceName() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
         org.eclipse.che.api.user.server.dao.User storedUser = mock(org.eclipse.che.api.user.server.dao.User.class);
         when(storedUser.getId()).thenReturn("user123");
         when(userManager.getByName("userok")).thenReturn(storedUser);
@@ -260,12 +260,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).getByKey(eq("userok:myWorkspace"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
 
     @Test
     public void shouldCheckPermissionsOnProjectAdding() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -276,12 +276,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).addProject(eq("workspace123"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnProjectRemoving() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -291,12 +291,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).deleteProject(eq("workspace123"), eq("spring"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnProjectUpdating() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -306,12 +306,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).updateProject(eq("workspace123"), eq("spring"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnCommandAdding() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -322,12 +322,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).addCommand(eq("workspace123"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnCommandRemoving() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -337,12 +337,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).deleteCommand(eq("workspace123"), eq("run-application"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnCommandUpdating() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -352,12 +352,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).updateCommand(eq("workspace123"), eq("run-application"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnEnvironmentAdding() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -368,12 +368,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).addEnvironment(eq("workspace123"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnEnvironmentRemoving() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -383,12 +383,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).deleteEnvironment(eq("workspace123"), eq("ubuntu"));
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test
     public void shouldCheckPermissionsOnEnvironmentUpdating() throws Exception {
-        when(user.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
+        when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -398,7 +398,7 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).updateEnvironment(eq("workspace123"), eq("ubuntu"), any());
-        verify(user).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
+        verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
@@ -416,7 +416,7 @@ public class WorkspacePermissionsFilterTest {
                                                                                                String method,
                                                                                                String action)
             throws Exception {
-        when(user.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+        when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
 
         Response response = request(given().auth()
                                            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -479,7 +479,7 @@ public class WorkspacePermissionsFilterTest {
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(user);
+            EnvironmentContext.getCurrent().setSubject(subject);
         }
     }
 }

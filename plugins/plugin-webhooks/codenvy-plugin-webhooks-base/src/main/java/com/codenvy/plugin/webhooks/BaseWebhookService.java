@@ -23,12 +23,12 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.ForbiddenException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -306,17 +306,17 @@ public abstract class BaseWebhookService extends Service {
     /**
      * A user that only provides a token based on credentials configured in a property file
      */
-    protected class TokenUser implements User {
+    protected class TokenSubject implements Subject {
 
         private final Token token;
 
-        public TokenUser() throws ServerException {
+        public TokenSubject() throws ServerException {
             final Pair<String, String> credentials = getCredentials();
             token = authConnection.authenticateUser(credentials.first, credentials.second);
         }
 
         @Override
-        public String getName() {
+        public String getUserName() {
             return "token-user";
         }
 
@@ -331,12 +331,16 @@ public abstract class BaseWebhookService extends Service {
         }
 
         @Override
+        public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
+        }
+
+        @Override
         public String getToken() {
             return token.getValue();
         }
 
         @Override
-        public String getId() {
+        public String getUserId() {
             return "0000-00-0000";
         }
 

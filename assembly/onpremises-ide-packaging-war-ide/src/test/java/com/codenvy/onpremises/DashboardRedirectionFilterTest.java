@@ -16,7 +16,7 @@ package com.codenvy.onpremises;
 
 import org.eclipse.che.api.core.rest.HttpJsonHelper;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -77,7 +77,7 @@ public class DashboardRedirectionFilterTest {
         EnvironmentContext context = new EnvironmentContext();
         context.setWorkspaceId("ws-id");
         context.setWorkspaceTemporary(false);
-        context.setUser(new UserImpl("id123", "name", "token123", Arrays.asList("user"), false));
+        context.setSubject(new SubjectImpl("id123", "name", "token123", Arrays.asList("user"), false));
         EnvironmentContext.setCurrent(context);
 
         //when

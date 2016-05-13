@@ -19,9 +19,8 @@ import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +31,16 @@ import javax.ws.rs.core.UriInfo;
 
 /**
  * Authenticate user by username and password.
- * <p/>
- * In response user receive "token". This token user can use
+ *
+ * <p>In response user receive "token". This token user can use
  * to identify him in all other request to API, to do that he should pass it as query parameter.
  *
  * @author Sergii Kabashniuk
  * @author Alexander Garagatyi
- *
- *
  */
-
 public class AuthenticationDaoImpl implements AuthenticationDao {
-
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationDaoImpl.class);
+
     @Inject
     protected AuthenticationHandlerProvider handlerProvider;
     @Inject
@@ -63,12 +59,9 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
      * @param credentials
      *         - username and password
      * @return - auth token in JSON, session-based and persistent cookies
-     * @throws com.codenvy.api.auth.AuthenticationException
+     * @throws org.eclipse.che.api.auth.AuthenticationException
      */
-    public Response login(Credentials credentials, Cookie tokenAccessCookie, UriInfo uriInfo)
-            throws AuthenticationException {
-
-
+    public Response login(Credentials credentials, Cookie tokenAccessCookie, UriInfo uriInfo) throws AuthenticationException {
         if (credentials == null
             || credentials.getPassword() == null
             || credentials.getPassword().isEmpty()
@@ -91,13 +84,13 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
             }
         }
 
-        User principal = handler.authenticate(credentials.getUsername(), credentials.getPassword());
+        Subject principal = handler.authenticate(credentials.getUsername(), credentials.getPassword());
         if (principal == null) {
             throw new AuthenticationException("Provided user and password is not valid");
         }
 
         // DO NOT REMOVE! This log will be used in statistic analyzing
-        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), principal.getName());
+        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), principal.getUserName());
         Response.ResponseBuilder builder = Response.ok();
         if (tokenAccessCookie != null) {
             AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
@@ -105,9 +98,9 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
                 if (!principal.equals(accessTicket.getPrincipal())) {
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     LOG.info("EVENT#user-changed-name# OLD-USER#{}# NEW-USER#{}#",
-                             accessTicket.getPrincipal().getName(),
-                             principal.getName());
-                    LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getName());
+                             accessTicket.getPrincipal().getUserName(),
+                             principal.getUserName());
+                    LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getUserName());
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     ticketManager.removeTicket(accessTicket.getAccessToken());
                 }
@@ -149,9 +142,9 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
             response = Response.ok();
             AccessTicket accessTicket = ticketManager.removeTicket(accessToken);
             if (accessTicket != null) {
-                User userPrincipal = accessTicket.getPrincipal();
+                Subject subjectPrincipal = accessTicket.getPrincipal();
                 // DO NOT REMOVE! This log will be used in statistic analyzing
-                LOG.info("EVENT#user-sso-logged-out# USER#{}#", userPrincipal.getName());
+                LOG.info("EVENT#user-sso-logged-out# USER#{}#", subjectPrincipal.getUserName());
             } else {
                 LOG.warn("AccessTicket not found. Nothing to do.");
             }

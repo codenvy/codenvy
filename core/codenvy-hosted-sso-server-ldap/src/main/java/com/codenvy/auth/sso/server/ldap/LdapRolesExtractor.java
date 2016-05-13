@@ -59,7 +59,7 @@ public class LdapRolesExtractor implements RolesExtractor {
         if (ticket.getAuthHandlerType().equals(LdapAuthenticationHandler.HANDLER_TYPE)) {
 
             try {
-                JNDIRealm.GenericPrincipal principal = jndiRealm.getPrincipal(ticket.getPrincipal().getName());
+                JNDIRealm.GenericPrincipal principal = jndiRealm.getPrincipal(ticket.getPrincipal().getUserName());
                 Set<String> systemRoles = new HashSet<>(2);
                 if (principal.getRoles().contains(systemAdminGroupName)) {
                     systemRoles.add("system/admin");

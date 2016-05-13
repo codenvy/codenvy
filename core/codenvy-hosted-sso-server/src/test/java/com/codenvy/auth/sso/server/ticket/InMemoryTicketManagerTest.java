@@ -18,8 +18,8 @@ package com.codenvy.auth.sso.server.ticket;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.TicketManager;
 
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import org.testng.annotations.Test;
 
@@ -30,7 +30,7 @@ import static org.testng.Assert.assertNull;
 
 public class InMemoryTicketManagerTest {
     private final static String TOKEN = "123456789";
-    User userPrincipal = new UserImpl("user", "123","t1", Collections.<String>emptyList(),  false);
+    Subject subjectPrincipal = new SubjectImpl("user", "123", "t1", Collections.<String>emptyList(), false);
 
 
     @Test
@@ -39,7 +39,7 @@ public class InMemoryTicketManagerTest {
 
         assertNull(ticketManager.getAccessTicket(TOKEN));
 
-        AccessTicket expectedTicket = new AccessTicket(TOKEN, userPrincipal, "default");
+        AccessTicket expectedTicket = new AccessTicket(TOKEN, subjectPrincipal, "default");
 
         ticketManager.putAccessTicket(expectedTicket);
 
@@ -54,7 +54,7 @@ public class InMemoryTicketManagerTest {
 
         assertEquals(ticketManager.getAccessTickets().size(), 0);
 
-        AccessTicket ticket = new AccessTicket(TOKEN, userPrincipal, "default");
+        AccessTicket ticket = new AccessTicket(TOKEN, subjectPrincipal, "default");
 
         ticketManager.putAccessTicket(ticket);
 
@@ -66,7 +66,7 @@ public class InMemoryTicketManagerTest {
 
         TicketManager ticketManager = new InMemoryTicketManager();
 
-        ticketManager.putAccessTicket(new AccessTicket(TOKEN, userPrincipal, "default"));
+        ticketManager.putAccessTicket(new AccessTicket(TOKEN, subjectPrincipal, "default"));
 
         assertEquals(ticketManager.getAccessTickets().size(), 1);
 

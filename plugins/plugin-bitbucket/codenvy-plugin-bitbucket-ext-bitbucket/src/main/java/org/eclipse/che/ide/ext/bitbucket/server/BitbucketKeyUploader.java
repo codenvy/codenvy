@@ -173,6 +173,6 @@ public class BitbucketKeyUploader implements SshKeyUploader {
     }
 
     private String getUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }

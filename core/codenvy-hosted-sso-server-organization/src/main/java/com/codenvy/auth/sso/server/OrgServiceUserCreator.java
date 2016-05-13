@@ -24,18 +24,16 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.Profile;
+import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,8 +61,7 @@ public class OrgServiceUserCreator implements UserCreator {
     public User createUser(String email, String userName, String firstName, String lastName) throws IOException {
         //TODO check this method should only call if user is not exists.
         try {
-            org.eclipse.che.api.user.server.dao.User user = userDao.getByAlias(email);
-            return new UserImpl(user.getName(), user.getId(), null, Collections.<String>emptyList(), false);
+            return userDao.getByAlias(email);
         } catch (NotFoundException e) {
             if (!userSelfCreationAllowed) {
                 throw new IOException("Currently only admins can create accounts. Please contact our Admin Team for further info.");
@@ -84,10 +81,11 @@ public class OrgServiceUserCreator implements UserCreator {
             String password = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
             try {
-                userDao.create(new org.eclipse.che.api.user.server.dao.User().withId(id)
-                                                                             .withName(userName)
-                                                                             .withEmail(email)
-                                                                             .withPassword(password));
+                final User user = new User().withId(id)
+                                            .withName(userName)
+                                            .withEmail(email)
+                                            .withPassword(password);
+                userDao.create(user);
                 profileDao.create(profile);
 
                 final Map<String, String> preferences = new HashMap<>();
@@ -95,7 +93,7 @@ public class OrgServiceUserCreator implements UserCreator {
                 preferences.put("resetPassword", "true");
                 preferenceDao.setPreferences(id, preferences);
 
-                return new UserImpl(userName, id, null, Collections.<String>emptyList(), false);
+                return user;
             } catch (ConflictException | ServerException | NotFoundException e1) {
                 throw new IOException(e1.getLocalizedMessage(), e1);
             }
@@ -110,7 +108,7 @@ public class OrgServiceUserCreator implements UserCreator {
 
         String id = NameGenerator.generate(User.class.getSimpleName(), Constants.ID_LENGTH);
         try {
-            String testName = null;
+            String testName;
             while (true) {
                 testName = NameGenerator.generate("AnonymousUser_", 6);
                 try {
@@ -120,7 +118,6 @@ public class OrgServiceUserCreator implements UserCreator {
                 } catch (ApiException e) {
                     throw new IOException(e.getLocalizedMessage(), e);
                 }
-
             }
 
 
@@ -129,8 +126,9 @@ public class OrgServiceUserCreator implements UserCreator {
             String password = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
 
-            userDao.create(new org.eclipse.che.api.user.server.dao.User().withId(id).withName(anonymousUser)
-                                                                     .withPassword(password));
+            final User user = new User().withId(id).withName(anonymousUser)
+                                        .withPassword(password);
+            userDao.create(user);
 
             profileDao.create(new Profile()
                                       .withId(id)
@@ -142,7 +140,7 @@ public class OrgServiceUserCreator implements UserCreator {
             preferenceDao.setPreferences(id, preferences);
 
             LOG.info("Temporary user {} created", anonymousUser);
-            return new UserImpl(anonymousUser, id, null, Collections.<String>emptyList(), true);
+            return user;
         } catch (ApiException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }

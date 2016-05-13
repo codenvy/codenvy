@@ -21,8 +21,8 @@ import org.eclipse.che.api.auth.AuthenticationExceptionMapper;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
@@ -62,9 +62,9 @@ public class AuthenticationServiceTest {
     @Mock
     protected AuthenticationHandlerProvider handlerProvider;
     @Mock
-    protected User                          principal;
+    protected Subject                       principal;
     @Mock
-    protected User                          oldPrincipal;
+    protected Subject                       oldPrincipal;
     @Mock
     protected TicketManager                 ticketManager;
     @Mock
@@ -100,7 +100,7 @@ public class AuthenticationServiceTest {
     public void shouldAuthenticateWithCorrectParams() throws Exception {
         //given
         when(handler.authenticate(eq("user@site.com"), eq("secret")))
-                .thenReturn(new UserImpl("user@site.com", "14433", "t11", Collections.<String>emptyList(), false));
+                .thenReturn(new SubjectImpl("user@site.com", "14433", "t11", Collections.<String>emptyList(), false));
 
         doAnswer(new Answer<Object>() {
             @Override
@@ -216,8 +216,8 @@ public class AuthenticationServiceTest {
     public void shouldLogoutFirstIfUserAlreadyLoggedIn() throws Exception {
         //given
         when(handler.authenticate(eq("user@site.com"), eq("secret")))
-                .thenReturn(new UserImpl("user@site.com", "14433", "t111", Collections.<String>emptyList(), false));
-        when(oldPrincipal.getName()).thenReturn("old@site.com");
+                .thenReturn(new SubjectImpl("user@site.com", "14433", "t111", Collections.<String>emptyList(), false));
+        when(oldPrincipal.getUserName()).thenReturn("old@site.com");
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {

@@ -111,7 +111,7 @@ public class PermissionsService extends Service {
                                               @PathParam("instance") String instance) throws ServerException,
                                                                                              ConflictException,
                                                                                              NotFoundException {
-        return toDto(permissionManager.get(EnvironmentContext.getCurrent().getUser().getId(), domain, instance));
+        return toDto(permissionManager.get(EnvironmentContext.getCurrent().getSubject().getUserId(), domain, instance));
     }
 
     /**

@@ -16,8 +16,8 @@ package com.codenvy.auth.sso.server.ldap;
 
 import org.eclipse.che.api.auth.AuthenticationException;
 import com.codenvy.api.dao.authentication.AuthenticationHandler;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -34,12 +34,12 @@ public class LdapAuthenticationHandler implements AuthenticationHandler {
 
 
     @Override
-    public User authenticate(final String userId, final String password) throws AuthenticationException {
+    public Subject authenticate(final String userId, final String password) throws AuthenticationException {
         JNDIRealm.GenericPrincipal user = jndiRealm.authenticate(userId, password);
         if (user == null) {
             throw new AuthenticationException("Invalid user name or password");
         }
-        return new UserImpl(user.getName(), user.getDn(), null, Collections.<String>emptyList(), false);
+        return new SubjectImpl(user.getName(), user.getDn(), null, Collections.<String>emptyList(), false);
 
     }
 

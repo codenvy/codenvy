@@ -27,6 +27,7 @@ import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Deserializer;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +129,7 @@ public class CreateUserInterceptor implements MethodInterceptor {
 
     protected boolean isUserCreatedByAdmin() {
         EnvironmentContext context = EnvironmentContext.getCurrent();
-        org.eclipse.che.commons.user.User contextUser = context.getUser();
-        return contextUser != null && (contextUser.isMemberOf("system/admin") || contextUser.isMemberOf("system/manager"));
+        Subject contextSubject = context.getSubject();
+        return contextSubject != null && (contextSubject.isMemberOf("system/admin") || contextSubject.isMemberOf("system/manager"));
     }
 }

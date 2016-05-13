@@ -62,7 +62,7 @@ public class WorkspaceCreatorPermissionsProvider implements EventSubscriber<Work
     @Override
     public void onEvent(WorkspaceCreatedEvent event) {
         try {
-            workerDao.store(new WorkerImpl(EnvironmentContext.getCurrent().getUser().getId(),
+            workerDao.store(new WorkerImpl(EnvironmentContext.getCurrent().getSubject().getUserId(),
                                            event.getWorkspace().getId(),
                                            new ArrayList<>(new WorkspaceDomain().getAllowedActions())));
         } catch (ServerException e) {

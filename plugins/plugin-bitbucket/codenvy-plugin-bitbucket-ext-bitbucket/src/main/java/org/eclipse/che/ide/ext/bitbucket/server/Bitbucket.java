@@ -38,9 +38,7 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
-import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequests;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequestsPage;
-import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositories;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoriesPage;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoryFork;
@@ -378,6 +376,6 @@ public class Bitbucket {
     }
 
     private String getUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }

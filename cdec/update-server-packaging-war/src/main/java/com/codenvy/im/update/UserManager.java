@@ -17,7 +17,7 @@ package com.codenvy.im.update;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * @author Anatoliy Bazko
@@ -27,12 +27,12 @@ public class UserManager {
 
     public static final String ANONYMOUS_USER_NAME = "Anonymous";
 
-    public User getCurrentUser() {
-        return EnvironmentContext.getCurrent().getUser();
+    public Subject getCurrentUser() {
+        return EnvironmentContext.getCurrent().getSubject();
     }
 
     public boolean isAnonymous() {
         return getCurrentUser() == null
-               || ANONYMOUS_USER_NAME.equals(getCurrentUser().getName());
+               || ANONYMOUS_USER_NAME.equals(getCurrentUser().getUserName());
     }
 }

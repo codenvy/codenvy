@@ -54,7 +54,7 @@ public class WSO2OAuthCredentialsProvider implements CredentialsProvider {
     @Override
     public UserCredential getUserCredential() throws GitException {
         try {
-            OAuthToken token = oAuthTokenProvider.getToken(OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getUser().getId());
+            OAuthToken token = oAuthTokenProvider.getToken(OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getSubject().getUserId());
             if (token != null) {
                 return new UserCredential(token.getToken(), "x-oauth-basic", OAUTH_PROVIDER_NAME);
             }

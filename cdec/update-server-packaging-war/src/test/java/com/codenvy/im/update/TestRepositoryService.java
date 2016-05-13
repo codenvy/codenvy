@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.assured.JettyHttpServer;
 import org.mockito.ArgumentCaptor;
@@ -120,7 +120,7 @@ public class TestRepositoryService extends BaseTest {
                                                   saasUserServiceProxy,
                                                   mockEventLogger);
 
-        when(mockUserManager.getCurrentUser()).thenReturn(new UserImpl("name", TEST_USER_ID, "token", Collections.<String>emptyList(), false));
+        when(mockUserManager.getCurrentUser()).thenReturn(new SubjectImpl("name", TEST_USER_ID, "token", Collections.<String>emptyList(), false));
         super.setUp();
     }
 
@@ -355,7 +355,7 @@ public class TestRepositoryService extends BaseTest {
     @Test
     public void testSendNotificationLetterGetEmailFromName() throws Exception {
         repositoryService
-                .sendNotificationLetter("accountId", new UserImpl("name@codenvy.com", "id", "token", Collections.<String>emptyList(), false));
+                .sendNotificationLetter("accountId", new SubjectImpl("name@codenvy.com", "id", "token", Collections.<String>emptyList(), false));
         verify(mockMailUtil).sendNotificationLetter("accountId", "name@codenvy.com");
     }
 
@@ -363,7 +363,7 @@ public class TestRepositoryService extends BaseTest {
     public void testSendNotificationLetterGetEmailFromRequest() throws Exception {
         doReturn("{\"email\": \"userEmail\"}").when(mockHttpTransport).doGet(endsWith("/user"), eq("token"));
         repositoryService
-                .sendNotificationLetter("accountId", new UserImpl("name", "id", "token", Collections.<String>emptyList(), false));
+                .sendNotificationLetter("accountId", new SubjectImpl("name", "id", "token", Collections.<String>emptyList(), false));
         verify(mockMailUtil).sendNotificationLetter("accountId", "userEmail");
     }
 
@@ -397,7 +397,7 @@ public class TestRepositoryService extends BaseTest {
         doReturn(testUserIp).when(requestContext).getRemoteAddr();
 
         UserManager spyUserManager = spy(new UserManager());
-        when(spyUserManager.getCurrentUser()).thenReturn(new UserImpl(UserManager.ANONYMOUS_USER_NAME, TEST_USER_ID, "token", Collections.<String>emptyList(), false));
+        when(spyUserManager.getCurrentUser()).thenReturn(new SubjectImpl(UserManager.ANONYMOUS_USER_NAME, TEST_USER_ID, "token", Collections.<String>emptyList(), false));
 
         repositoryService = new RepositoryService("",
                                                   spyUserManager,
@@ -435,7 +435,7 @@ public class TestRepositoryService extends BaseTest {
         doReturn(testUserIp).when(requestContext).getRemoteAddr();
 
         UserManager spyUserManager = spy(new UserManager());
-        when(spyUserManager.getCurrentUser()).thenReturn(new UserImpl(ANY_NAME, TEST_USER_ID, "token", Collections.<String>emptyList(), false));
+        when(spyUserManager.getCurrentUser()).thenReturn(new SubjectImpl(ANY_NAME, TEST_USER_ID, "token", Collections.<String>emptyList(), false));
 
         repositoryService = new RepositoryService("",
                                                   spyUserManager,

@@ -15,13 +15,13 @@
 package com.codenvy.auth.sso.client;
 
 import com.codenvy.auth.sso.server.SsoService;
-import com.codenvy.auth.sso.shared.dto.UserDto;
+import com.codenvy.auth.sso.shared.dto.SubjectDto;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -81,17 +81,17 @@ public class HttpSsoServerClientTest {
 
     @Test
     public void shouldRequestUser() throws Exception {
-        final UserDto userDto = createUserDto();
-        when(response.asDto(anyObject())).thenReturn(userDto);
+        final SubjectDto subjectDto = createUserDto();
+        when(response.asDto(anyObject())).thenReturn(subjectDto);
 
-        final User user = ssoClient.getUser("token123", CLIENT_URL, null, null);
+        final Subject subject = ssoClient.getSubject("token123", CLIENT_URL, null, null);
 
-        assertEquals(user.getId(), user.getId());
-        assertEquals(user.getName(), user.getName());
-        assertEquals(user.getToken(), user.getToken());
-        assertEquals(user.isTemporary(), user.isTemporary());
-        assertTrue(user.isMemberOf("superUser"));
-        assertFalse(user.isMemberOf("user"));
+        assertEquals(subject.getUserId(), subject.getUserId());
+        assertEquals(subject.getUserName(), subject.getUserName());
+        assertEquals(subject.getToken(), subject.getToken());
+        assertEquals(subject.isTemporary(), subject.isTemporary());
+        assertTrue(subject.isMemberOf("superUser"));
+        assertFalse(subject.isMemberOf("user"));
         verify(requestFactory).fromUrl(eq(UriBuilder.fromUri(API_ENDPOINT)
                                                     .path(SsoService.class)
                                                     .path(SsoService.class, "getCurrentPrincipal")
@@ -105,17 +105,17 @@ public class HttpSsoServerClientTest {
 
     @Test
     public void shouldRequestUserWithWorkspaceAndAccountIds() throws Exception {
-        final UserDto userDto = createUserDto();
-        when(response.asDto(anyObject())).thenReturn(userDto);
+        final SubjectDto subjectDto = createUserDto();
+        when(response.asDto(anyObject())).thenReturn(subjectDto);
 
-        final User user = ssoClient.getUser("token123", CLIENT_URL, "workspace123", "account123");
+        final Subject subject = ssoClient.getSubject("token123", CLIENT_URL, "workspace123", "account123");
 
-        assertEquals(user.getId(), user.getId());
-        assertEquals(user.getName(), user.getName());
-        assertEquals(user.getToken(), user.getToken());
-        assertEquals(user.isTemporary(), user.isTemporary());
-        assertTrue(user.isMemberOf("superUser"));
-        assertFalse(user.isMemberOf("user"));
+        assertEquals(subject.getUserId(), subject.getUserId());
+        assertEquals(subject.getUserName(), subject.getUserName());
+        assertEquals(subject.getToken(), subject.getToken());
+        assertEquals(subject.isTemporary(), subject.isTemporary());
+        assertTrue(subject.isMemberOf("superUser"));
+        assertFalse(subject.isMemberOf("user"));
         verify(requestFactory).fromUrl(eq(UriBuilder.fromUri(API_ENDPOINT)
                                                     .path(SsoService.class)
                                                     .path(SsoService.class, "getCurrentPrincipal")
@@ -131,17 +131,17 @@ public class HttpSsoServerClientTest {
 
     @Test
     public void shouldRequestUserWithWorkspaceId() throws Exception {
-        final UserDto userDto = createUserDto();
-        when(response.asDto(anyObject())).thenReturn(userDto);
+        final SubjectDto subjectDto = createUserDto();
+        when(response.asDto(anyObject())).thenReturn(subjectDto);
 
-        final User user = ssoClient.getUser("token123", CLIENT_URL, "workspace123", null);
+        final Subject subject = ssoClient.getSubject("token123", CLIENT_URL, "workspace123", null);
 
-        assertEquals(user.getId(), user.getId());
-        assertEquals(user.getName(), user.getName());
-        assertEquals(user.getToken(), user.getToken());
-        assertEquals(user.isTemporary(), user.isTemporary());
-        assertTrue(user.isMemberOf("superUser"));
-        assertFalse(user.isMemberOf("user"));
+        assertEquals(subject.getUserId(), subject.getUserId());
+        assertEquals(subject.getUserName(), subject.getUserName());
+        assertEquals(subject.getToken(), subject.getToken());
+        assertEquals(subject.isTemporary(), subject.isTemporary());
+        assertTrue(subject.isMemberOf("superUser"));
+        assertFalse(subject.isMemberOf("user"));
         verify(requestFactory).fromUrl(eq(UriBuilder.fromUri(API_ENDPOINT)
                                                     .path(SsoService.class)
                                                     .path(SsoService.class, "getCurrentPrincipal")
@@ -157,17 +157,17 @@ public class HttpSsoServerClientTest {
 
     @Test
     public void shouldRequestUserWithAccountId() throws Exception {
-        final UserDto userDto = createUserDto();
-        when(response.asDto(anyObject())).thenReturn(userDto);
+        final SubjectDto subjectDto = createUserDto();
+        when(response.asDto(anyObject())).thenReturn(subjectDto);
 
-        final User user = ssoClient.getUser("token123", CLIENT_URL, null, "account123");
+        final Subject subject = ssoClient.getSubject("token123", CLIENT_URL, null, "account123");
 
-        assertEquals(user.getId(), user.getId());
-        assertEquals(user.getName(), user.getName());
-        assertEquals(user.getToken(), user.getToken());
-        assertEquals(user.isTemporary(), user.isTemporary());
-        assertTrue(user.isMemberOf("superUser"));
-        assertFalse(user.isMemberOf("user"));
+        assertEquals(subject.getUserId(), subject.getUserId());
+        assertEquals(subject.getUserName(), subject.getUserName());
+        assertEquals(subject.getToken(), subject.getToken());
+        assertEquals(subject.isTemporary(), subject.isTemporary());
+        assertTrue(subject.isMemberOf("superUser"));
+        assertFalse(subject.isMemberOf("user"));
         verify(requestFactory).fromUrl(eq(UriBuilder.fromUri(API_ENDPOINT)
                                                     .path(SsoService.class)
                                                     .path(SsoService.class, "getCurrentPrincipal")
@@ -183,13 +183,13 @@ public class HttpSsoServerClientTest {
 
     @Test
     public void shouldReturnsNullWhenSomeExceptionOccurs() throws Exception {
-        final UserDto userDto = createUserDto();
-        when(response.asDto(anyObject())).thenReturn(userDto);
+        final SubjectDto subjectDto = createUserDto();
+        when(response.asDto(anyObject())).thenReturn(subjectDto);
         when(request.request()).thenThrow(new NotFoundException("not found"));
 
-        final User user = ssoClient.getUser("token123", CLIENT_URL, "workspace123", "account123");
+        final Subject subject = ssoClient.getSubject("token123", CLIENT_URL, "workspace123", "account123");
 
-        assertNull(user);
+        assertNull(subject);
         verify(requestFactory).fromUrl(eq(UriBuilder.fromUri(API_ENDPOINT)
                                                     .path(SsoService.class)
                                                     .path(SsoService.class, "getCurrentPrincipal")
@@ -218,8 +218,8 @@ public class HttpSsoServerClientTest {
         verifyNoMoreInteractions(request);
     }
 
-    private UserDto createUserDto() {
-        return DtoFactory.newDto(UserDto.class)
+    private SubjectDto createUserDto() {
+        return DtoFactory.newDto(SubjectDto.class)
                          .withId("user123")
                          .withName("userok")
                          .withToken("token123")

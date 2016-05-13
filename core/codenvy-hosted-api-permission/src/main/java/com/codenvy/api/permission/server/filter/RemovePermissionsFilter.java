@@ -44,7 +44,7 @@ public class RemovePermissionsFilter extends CheMethodInvokerFilter {
             throws UnauthorizedException, ForbiddenException, ServerException {
         final String methodName = genericMethodResource.getMethod().getName();
         if (methodName.equals("removePermissions")) {
-            if (!EnvironmentContext.getCurrent().getUser().hasPermission(domain, instance, "setPermissions")) {
+            if (!EnvironmentContext.getCurrent().getSubject().hasPermission(domain, instance, "setPermissions")) {
                 throw new ForbiddenException("User can't edit permissions for this instance");
             }
         }

@@ -21,7 +21,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericMethodResource;
@@ -63,20 +63,20 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                                                                                                NotFoundException {
         final String methodName = genericMethodResource.getMethod().getName();
 
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         String action;
         String workspaceId;
 
         switch (methodName) {
             case "create": {
                 final String accountId = ((String)arguments[3]);
-                checkPermissionsToCreateWorkspaces(currentUser, accountId);
+                checkPermissionsToCreateWorkspaces(currentSubject, accountId);
                 return;
             }
 
             case "startFromConfig":
                 String accountId = ((String)arguments[2]);
-                checkPermissionsToCreateWorkspaces(currentUser, accountId);
+                checkPermissionsToCreateWorkspaces(currentSubject, accountId);
                 return;
 
             case "delete":
@@ -123,14 +123,14 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        if (!currentUser.hasPermission(DOMAIN_ID, workspaceId, action)) {
+        if (!currentSubject.hasPermission(DOMAIN_ID, workspaceId, action)) {
             throw new ForbiddenException("The user does not have permission to " + action + " workspace with id '" + workspaceId + "'");
         }
     }
 
-    private void checkPermissionsToCreateWorkspaces(User user, String accountId) throws ForbiddenException {
+    private void checkPermissionsToCreateWorkspaces(Subject subject, String accountId) throws ForbiddenException {
         if (!isNullOrEmpty(accountId)) {
-            if (!user.hasPermission("account", accountId, "createWorkspaces")) {
+            if (!subject.hasPermission("account", accountId, "createWorkspaces")) {
                 throw new ForbiddenException("The user does not have permission to create workspace in given account");
             }
         }
@@ -146,7 +146,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         }
         final String userName = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userName.isEmpty() ? EnvironmentContext.getCurrent().getUser().getId()
+        final String ownerId = userName.isEmpty() ? EnvironmentContext.getCurrent().getSubject().getUserId()
                                                   : userManager.getByName(userName).getId();
         return workspaceManager.getWorkspace(wsName, ownerId).getId();
     }

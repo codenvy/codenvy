@@ -127,7 +127,7 @@ public class GitHubWebhookService extends BaseWebhookService {
         LOG.debug("{}", contribution);
 
         // Set current Codenvy user
-        EnvironmentContext.getCurrent().setUser(new TokenUser());
+        EnvironmentContext.getCurrent().setSubject(new TokenSubject());
 
         // Get contribution data
         final String contribRepositoryHtmlUrl = contribution.getRepository().getHtmlUrl();
@@ -171,7 +171,7 @@ public class GitHubWebhookService extends BaseWebhookService {
         LOG.debug("{}", prEvent);
 
         // Set current Codenvy user
-        EnvironmentContext.getCurrent().setUser(new TokenUser());
+        EnvironmentContext.getCurrent().setSubject(new TokenSubject());
 
         // Check that event indicates a successful merging
         final String action = prEvent.getAction();

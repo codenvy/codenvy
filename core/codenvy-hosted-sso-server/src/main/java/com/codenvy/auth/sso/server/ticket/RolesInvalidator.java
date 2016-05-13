@@ -46,7 +46,7 @@ public class RolesInvalidator {
         for (AccessTicket ticket : ticketManager.getAccessTickets()) {
 
 
-            if (ticket.getPrincipal().getId().equals(userId)) {
+            if (ticket.getPrincipal().getUserId().equals(userId)) {
                 for (String registeredClient : ticket.getRegisteredClients()) {
 
 

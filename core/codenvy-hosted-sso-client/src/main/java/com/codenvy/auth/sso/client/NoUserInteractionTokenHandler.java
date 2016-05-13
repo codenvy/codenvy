@@ -16,7 +16,7 @@ package com.codenvy.auth.sso.client;
 
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Inject;
@@ -57,7 +57,7 @@ public class NoUserInteractionTokenHandler extends DefaultTokenHandler {
             throws IOException, ServletException {
         //go with anonymous
         EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
-        environmentContext.setUser(User.ANONYMOUS);
-        chain.doFilter(requestWrapper.wrapRequest(request.getSession(), request, User.ANONYMOUS), response);
+        environmentContext.setSubject(Subject.ANONYMOUS);
+        chain.doFilter(requestWrapper.wrapRequest(request.getSession(), request, Subject.ANONYMOUS), response);
     }
 }

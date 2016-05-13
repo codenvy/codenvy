@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.stack.StackService;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericMethodResource;
@@ -45,7 +45,7 @@ public class StackPermissionsFilter extends CheMethodInvokerFilter {
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments) throws ForbiddenException, ServerException {
         final String methodName = genericMethodResource.getMethod().getName();
 
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         String action;
         String stackId;
 
@@ -80,7 +80,7 @@ public class StackPermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        if (!currentUser.hasPermission(DOMAIN_ID, stackId, action)) {
+        if (!currentSubject.hasPermission(DOMAIN_ID, stackId, action)) {
             throw new ForbiddenException("The user does not have permission to " + action + " stack with id '" + stackId + "'");
         }
     }
