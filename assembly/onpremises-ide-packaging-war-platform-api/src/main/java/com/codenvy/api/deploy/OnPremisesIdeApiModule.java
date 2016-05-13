@@ -321,7 +321,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
 //        install(new com.codenvy.router.MachineRouterModule());
 
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.StopWorkspaceOnDestroyDevMachine.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.CleanUpNonDevMachineOnStop.class).asEagerSingleton();
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
 
