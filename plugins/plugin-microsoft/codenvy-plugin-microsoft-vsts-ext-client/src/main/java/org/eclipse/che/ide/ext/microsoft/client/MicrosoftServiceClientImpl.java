@@ -54,7 +54,7 @@ public class MicrosoftServiceClientImpl implements MicrosoftServiceClient {
     }
 
     private String getBaseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/microsoft/" + appContext.getWorkspaceId();
+        return appContext.getDevMachine().getWsAgentBaseUrl() + "/microsoft";
     }
 
     @Override

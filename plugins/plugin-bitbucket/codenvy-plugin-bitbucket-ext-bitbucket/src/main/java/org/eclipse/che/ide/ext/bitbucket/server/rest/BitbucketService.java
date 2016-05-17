@@ -50,7 +50,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Kevin Pollet
  */
-@Path("/bitbucket/{ws-id}")
+@Path("/bitbucket")
 public class BitbucketService {
     private final Bitbucket            bitbucket;
     private final BitbucketKeyUploader bitbucketKeyUploader;

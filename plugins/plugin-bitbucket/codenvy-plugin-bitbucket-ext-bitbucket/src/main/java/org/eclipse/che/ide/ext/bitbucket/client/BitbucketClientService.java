@@ -66,7 +66,7 @@ public class BitbucketClientService {
 
 
     private String getBaseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/bitbucket/" + appContext.getWorkspaceId();
+        return appContext.getDevMachine().getWsAgentBaseUrl() + "/bitbucket";
     }
 
     /**

@@ -47,7 +47,7 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
  *
  * @author Mihail Kuznyetsov
  */
-@Path("/microsoft/{ws-id}")
+@Path("/microsoft")
 @Singleton
 public class MicrosoftVstsService {
 
