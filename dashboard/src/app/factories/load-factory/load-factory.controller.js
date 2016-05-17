@@ -382,11 +382,11 @@ export class LoadFactoryCtrl {
     });
 
     let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
-    promise = projectService.importProject(workspaceId, project.name, project.source);
+    promise = projectService.importProject(project.name, project.source);
 
     // needs to update configuration of the project
     let updatePromise = promise.then(() => {
-        projectService.updateProject(workspaceId, project.name, project).$promise;
+        projectService.updateProject(project.name, project).$promise;
     }, (error) => {
       this.handleError(error);
     });
