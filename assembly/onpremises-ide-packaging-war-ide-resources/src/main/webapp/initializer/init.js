@@ -951,16 +951,9 @@ var Initializer = new function () {
      *
      **************************************************************************/
     this.setting_up_builders = function () {
-//        Initializer.setStep(2, "Setting Up Builders", "");
-
         Page.injectCss("/ide-resources/_app/css/ide01.css");
-        Page.injectScript("/ide-resources/_app/greetings/greetings.js");
         Page.injectScript("/ide-resources/_app/browserNotSupported.js");
-        //Page.injectScript("/ide-resources/_app/session.js");
-        //Page.injectScript("/ide-resources/_app/menu-additions.js");
-        //Page.injectScript("/ide-resources/_app/statistic.js");
         Page.injectScript("/ide-resources/_app/_app.nocache.js");
-
         setTimeout(Initializer.wait_for_ide_has_been_loaded, Initializer.STEP_DELAY);
     };
 
