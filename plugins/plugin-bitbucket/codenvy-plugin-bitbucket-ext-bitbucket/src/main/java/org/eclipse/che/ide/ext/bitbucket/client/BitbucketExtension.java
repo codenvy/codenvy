@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,7 +33,7 @@ public class BitbucketExtension {
     public static final String BITBUCKET_HOST = "bitbucket.org";
 
     @Inject
-    public BitbucketExtension(@NotNull final GitSshKeyUploaderRegistry uploaderRegistry,
+    public BitbucketExtension(@NotNull final SshKeyUploaderRegistry uploaderRegistry,
                               @NotNull final BitbucketSshKeyProvider bitbucketSshKeyProvider) {
 
         uploaderRegistry.registerUploader(BITBUCKET_HOST, bitbucketSshKeyProvider);
