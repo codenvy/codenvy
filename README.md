@@ -29,6 +29,7 @@ Codenvy is licensed under Codenvy Fair Source 5 for the first five users. You ca
 * Docker 1.8+
 * Maven 3.3.1+
 * Java 1.8
+* Go
 * CentOS / RHEL 7.1+
 
 ### Clone
