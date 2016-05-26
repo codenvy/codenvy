@@ -18,6 +18,7 @@ import {CodenvyAPI} from './codenvy-api.factory';
 import {CodenvyUser} from './codenvy-user.factory';
 import {CodenvyFactory} from './codenvy-factory.factory';
 import {CodenvyFactoryTemplate} from './codenvy-factory-template.factory';
+import {CodenvyMachineAuth} from './codenvy-machine-auth.factory'
 
 export class CodenvyApiConfig {
 
@@ -27,6 +28,7 @@ export class CodenvyApiConfig {
     register.factory('codenvyFactory', CodenvyFactory);
     register.factory('codenvyFactoryTemplate', CodenvyFactoryTemplate);
     register.factory('codenvyAPI', CodenvyAPI);
+    register.factory('codenvyMachineAuth', CodenvyMachineAuth);
 
   }
 }
