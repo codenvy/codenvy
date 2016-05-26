@@ -44,8 +44,6 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                "/gae-validator/*",
                "/gae-parameters/*")
                 .through(com.codenvy.service.http.WorkspaceIdEnvironmentInitializationFilter.class);
-        filterRegex("^/workspace/(?!config$|runtime$|.*:.*$).+")
-                .through(com.codenvy.service.http.WorkspaceIdEnvironmentInitializationFilter.class);
         filter("/factory/*",
                "/activity/*",
                "/workspace/*",
