@@ -201,6 +201,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
 
         //machine authentication
+        bind(com.codenvy.machine.authentication.server.MachineTokenPermissionsFilter.class);
         bind(com.codenvy.machine.authentication.server.MachineTokenRegistry.class);
         bind(com.codenvy.machine.authentication.server.MachineTokenService.class);
         bind(WorkspaceServiceLinksInjector.class).to(com.codenvy.machine.authentication.server.AuthLinksInjector.class);

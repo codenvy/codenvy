@@ -58,7 +58,11 @@ public class MachineTokenService {
     }
 
     /**
-     * Gets the access token for current user for particular workspace.
+     * Gets the access token for current user for particular workspace with following rules:
+     * <ul>
+     *   <li>If workspace is started by this user, token was generated on startup time, this method will just return it.<li/>
+     *   <li>If workspace is started by other user, but current user has permissions to use it, token will be generated on demand.<li/>
+     * <ul/>
      *
      * @param wsId
      *        id of workspace to generate token for.
@@ -74,7 +78,7 @@ public class MachineTokenService {
         final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         return newDto(MachineTokenDto.class).withUserId(userId)
                                             .withWorkspaceId(wsId)
-                                            .withMachineToken(registry.getToken(userId, wsId));
+                                            .withMachineToken(registry.getOrCreateToken(userId, wsId));
     }
 
     /**

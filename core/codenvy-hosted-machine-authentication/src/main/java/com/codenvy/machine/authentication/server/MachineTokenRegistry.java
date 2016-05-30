@@ -63,26 +63,27 @@ public class MachineTokenRegistry {
     }
 
     /**
-     * Gets machine security token for user and workspace.
+     * Gets or creates machine security token for user and workspace.
+     * For running workspace, there is always at least one token for user who performed start.
      *
      * @param userId
      *         id of user to get token
      * @param workspaceId
      *         id of workspace to get token
-     * @return machine security token
+     * @return machine security token for for given user and workspace
      * @throws NotFoundException
-     *         when no token exists for given user and workspace
+     *         when there is no running workspace with given id
      */
-    public String getToken(String userId, String workspaceId) throws NotFoundException {
-        lock.readLock().lock();
+    public String getOrCreateToken(String userId, String workspaceId) throws NotFoundException {
+        lock.writeLock().lock();
         try {
-            final String token = tokens.get(workspaceId, userId);
-            if (token == null) {
-                throw new NotFoundException(format("Token not found for user %s and workspace %s", userId, workspaceId));
+            final Map<String, String> wsRow = tokens.row(workspaceId);
+            if (wsRow.isEmpty()) {
+                throw new NotFoundException(format("No running workspace found with id %s", workspaceId));
             }
-            return token;
+            return wsRow.get(userId) == null ? generateToken(userId, workspaceId) : wsRow.get(userId);
         } finally {
-            lock.readLock().unlock();
+            lock.writeLock().unlock();
         }
     }
 

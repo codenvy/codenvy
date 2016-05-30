@@ -92,7 +92,7 @@ public class AuthDockerInstanceProvider extends DockerInstanceProvider {
     protected String getUserToken(String wsId) {
         String userToken = null;
         try {
-            userToken = tokenRegistry.getToken(EnvironmentContext.getCurrent().getSubject().getUserId(), wsId);
+            userToken = tokenRegistry.getOrCreateToken(EnvironmentContext.getCurrent().getSubject().getUserId(), wsId);
         } catch (NotFoundException ignore) {
         }
         return MoreObjects.firstNonNull(userToken, "");
