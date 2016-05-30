@@ -54,8 +54,7 @@ public class MachineTokenRegistryTest {
 
     private static boolean exists(MachineTokenRegistry registry, String user, String workspace) {
         try {
-            registry.getToken(user, workspace);
-            return true;
+            return registry.getToken(user, workspace) != null;
         } catch (NotFoundException e) {
             return false;
         }

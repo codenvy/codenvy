@@ -69,18 +69,18 @@ public class MachineTokenRegistry {
      *         id of user to get token
      * @param workspaceId
      *         id of workspace to get token
-     * @return machine security token
+     * @return machine security token or {@code null} if no token found for given user
      * @throws NotFoundException
-     *         when no token exists for given user and workspace
+     *         when there is no running workspace with given id
      */
     public String getToken(String userId, String workspaceId) throws NotFoundException {
         lock.readLock().lock();
         try {
-            final String token = tokens.get(workspaceId, userId);
-            if (token == null) {
-                throw new NotFoundException(format("Token not found for user %s and workspace %s", userId, workspaceId));
+            final Map<String, String> wsRow = tokens.row(workspaceId);
+            if (wsRow.isEmpty()) {
+                throw new NotFoundException(format("No running workspace found with id %s", workspaceId));
             }
-            return token;
+            return wsRow.get(userId);
         } finally {
             lock.readLock().unlock();
         }
