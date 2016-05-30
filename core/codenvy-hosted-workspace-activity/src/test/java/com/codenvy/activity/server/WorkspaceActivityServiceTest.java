@@ -87,18 +87,6 @@ public class WorkspaceActivityServiceTest {
         verify(workspaceActivityManager).update(eq(WORKSPACE_ID), anyLong());
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUpdatingNotOwnedWorkspace() throws NotFoundException, ServerException {
-        // given
-        when(workspaceManager.getWorkspace(WORKSPACE_ID)).thenReturn(createWorkspace("user456", WorkspaceStatus.RUNNING));
-
-        // when
-        Response response = given().when().put(SERVICE_PATH + '/' + WORKSPACE_ID);
-
-        // then
-        assertEquals(response.getStatusCode(), 403);
-    }
-
     @Test(dataProvider = "wsStatus")
     public void shouldNotUpdateWorkspaceActivityOfStartingWorkspace(WorkspaceStatus status) throws NotFoundException, ServerException {
         // given

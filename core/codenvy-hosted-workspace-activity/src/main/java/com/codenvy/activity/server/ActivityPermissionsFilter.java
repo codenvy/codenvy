@@ -29,7 +29,7 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 
 /**
- * Restricts access to methods of {@link WorkspaceActivityService} by users' permissions
+ * Restricts access to methods of {@link WorkspaceActivityService} by user's permissions
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */

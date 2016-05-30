@@ -15,6 +15,8 @@
 package com.codenvy.activity.server;
 
 import com.jayway.restassured.response.Response;
+
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.everrest.assured.EverrestJetty;
@@ -34,7 +36,9 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -67,13 +71,28 @@ public class ActivityPermissionsFilterTest {
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
                                          .when()
-                                         .get(SECURE_PATH + "/activity/workspace123");
+                                         .put(SECURE_PATH + "/activity/workspace123");
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).active(eq("workspace123"));
         verify(subject).checkPermission(DOMAIN_ID, "workspace123", USE);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUpdatingNotOwnedWorkspace() throws Exception {
+
+        when(subject.hasPermission(eq(DOMAIN_ID), eq("workspace123"), eq(USE))).thenReturn(false);
+        doThrow(new ForbiddenException("The user does not have permission to " + USE + " workspace with id 'workspace123'"))
+                .when(subject).checkPermission(anyString(), anyString(), anyString());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .put(SECURE_PATH + "/activity/workspace123");
+
+        assertEquals(response.getStatusCode(), 403);
+
     }
 
 
