@@ -56,9 +56,6 @@ public class WorkspaceActivityService extends Service {
     @Path("/{wsId}")
     public void active(@PathParam("wsId") String wsId) throws ForbiddenException, NotFoundException, ServerException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(wsId);
-        if (!workspace.getNamespace().equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-            throw new ForbiddenException("Notify activity operation allowed only for workspace owner");
-        }
         if (workspace.getStatus() == RUNNING) {
             workspaceActivityManager.update(wsId, System.currentTimeMillis());
             LOG.debug("Updated activity on workspace " + wsId);
