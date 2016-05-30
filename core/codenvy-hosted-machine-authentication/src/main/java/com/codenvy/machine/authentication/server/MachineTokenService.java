@@ -17,10 +17,12 @@ package com.codenvy.machine.authentication.server;
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -33,6 +35,8 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
+import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 
 /**
  * Machine security token service.
@@ -59,22 +63,32 @@ public class MachineTokenService {
 
     /**
      * Gets the access token for current user for particular workspace.
+     * If workspace is started by this user, token was generated on startup time, this method will just return it.
+     * If workspace is started by other user, but current user has permissions to use it, token will be generated on demand.
      *
      * @param wsId
      *        id of workspace to generate token for.
      * @return entity of machine token
      * @throws NotFoundException
      *         if no workspace exists with given id
+     * @throws ForbiddenException
+     *         if no user does not have permissions to use this workspace
      */
     @GET
     @Path("/{wsId}")
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("user")
-    public MachineTokenDto getMachineToken(@PathParam("wsId") String wsId) throws NotFoundException {
-        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    public MachineTokenDto getMachineToken(@PathParam("wsId") String wsId) throws NotFoundException, ForbiddenException {
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+        final String userId = currentSubject.getUserId();
+        String token = registry.getToken(userId, wsId);
+        if (token == null) {
+           currentSubject.checkPermission(DOMAIN_ID, wsId, USE);
+           token = registry.generateToken(userId, wsId);
+        }
         return newDto(MachineTokenDto.class).withUserId(userId)
                                             .withWorkspaceId(wsId)
-                                            .withMachineToken(registry.getToken(userId, wsId));
+                                            .withMachineToken(token);
     }
 
     /**
