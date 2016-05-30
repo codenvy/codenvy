@@ -92,9 +92,7 @@ public class ActivityPermissionsFilterTest {
                                          .put(SECURE_PATH + "/activity/workspace123");
 
         assertEquals(response.getStatusCode(), 403);
-
     }
-
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {

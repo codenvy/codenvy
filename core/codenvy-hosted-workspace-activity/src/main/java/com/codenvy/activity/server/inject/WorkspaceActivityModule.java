@@ -14,6 +14,7 @@
  */
 package com.codenvy.activity.server.inject;
 
+import com.codenvy.activity.server.ActivityPermissionsFilter;
 import com.codenvy.activity.server.WorkspaceActivityManager;
 import com.codenvy.activity.server.WorkspaceActivityService;
 import com.google.inject.AbstractModule;
@@ -22,6 +23,7 @@ public class WorkspaceActivityModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(ActivityPermissionsFilter.class);
         bind(WorkspaceActivityService.class);
         bind(WorkspaceActivityManager.class);
     }

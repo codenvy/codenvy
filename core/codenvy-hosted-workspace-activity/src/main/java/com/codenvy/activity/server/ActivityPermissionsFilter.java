@@ -51,11 +51,9 @@ public class ActivityPermissionsFilter extends CheMethodInvokerFilter {
                 action = USE;
                 break;
             }
-
             default:
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
-
         currentSubject.checkPermission(DOMAIN_ID, workspaceId, action);
     }
 }
