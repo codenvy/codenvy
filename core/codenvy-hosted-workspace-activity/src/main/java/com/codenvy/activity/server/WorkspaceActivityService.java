@@ -14,13 +14,17 @@
  */
 package com.codenvy.activity.server;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,11 +58,15 @@ public class WorkspaceActivityService extends Service {
 
     @PUT
     @Path("/{wsId}")
-    public void active(@PathParam("wsId") String wsId) throws ForbiddenException, NotFoundException, ServerException {
+    @ApiOperation(value = "Notifies workspace activity",
+                  notes = "Notifies workspace activity to prevent stop by timeout when workspace is used.")
+    @ApiResponses(@ApiResponse(code = 204, message = "Activity counted"))
+    public void active(@ApiParam(value = "Workspace id")
+                       @PathParam("wsId") String wsId) throws ForbiddenException, NotFoundException, ServerException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(wsId);
         if (workspace.getStatus() == RUNNING) {
             workspaceActivityManager.update(wsId, System.currentTimeMillis());
-            LOG.debug("Updated activity on workspace " + wsId);
+            LOG.debug("Updated activity on workspace {}", wsId);
         }
     }
 }
