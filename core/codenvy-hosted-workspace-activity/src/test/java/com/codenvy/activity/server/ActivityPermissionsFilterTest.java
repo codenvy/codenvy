@@ -103,7 +103,6 @@ public class ActivityPermissionsFilterTest {
         when(genericMethodResource.getMethod()).thenReturn(this.getClass().getDeclaredMethod("shouldThrowExceptionWhenCallingUnlistedMethod"));
         Object[] argument = new Object[0];
         permissionsFilter.filter(genericMethodResource, argument);
-
     }
 
     @Filter
