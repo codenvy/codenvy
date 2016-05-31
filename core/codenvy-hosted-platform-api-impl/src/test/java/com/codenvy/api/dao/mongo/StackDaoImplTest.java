@@ -23,10 +23,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
-import org.bson.BsonWriter;
 import org.bson.Document;
 import org.bson.codecs.DocumentCodec;
-import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -461,7 +459,7 @@ public class StackDaoImplTest extends BaseDaoTest {
         recipe.setType("dockerfile");
         recipe.setScript("FROM codenvy/jdk7\nCMD tail -f /dev/null");
 
-        final MachineSourceImpl machineSource = new MachineSourceImpl("recipe", "recipe-url");
+        final MachineSourceImpl machineSource = new MachineSourceImpl("recipe").setLocation("recipe-url");
         final MachineConfigImpl machineCfg1 = new MachineConfigImpl(true,
                                                                     "dev-machine",
                                                                     "machine-type",

@@ -53,6 +53,11 @@ import static java.util.stream.Collectors.toMap;
  */
 public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
 
+    public static final String MACHINE_SOURCE = "machineSource";
+    public static final String MACHINE_SOURCE_TYPE = "type";
+    public static final String MACHINE_SOURCE_LOCATION = "location";
+    public static final String MACHINE_SOURCE_CONTENT = "content";
+
     private Codec<Document> codec;
 
     public WorkspaceImplCodec(CodecRegistry registry) {
@@ -239,7 +244,9 @@ public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
                                                                   .setType(document.getString("type"));
         final Document sourceDocument = document.get("source", Document.class);
         if (sourceDocument != null) {
-            builder.setSource(new MachineSourceImpl(sourceDocument.getString("type"), sourceDocument.getString("location")));
+            builder.setSource(new MachineSourceImpl(sourceDocument.getString(MACHINE_SOURCE_TYPE))
+                                      .setContent(sourceDocument.getString(MACHINE_SOURCE_CONTENT))
+                                      .setLocation(sourceDocument.getString(MACHINE_SOURCE_LOCATION)));
         }
         final Document limitsDocument = document.get("limits", Document.class);
         if (limitsDocument != null) {
@@ -269,7 +276,9 @@ public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
                                                 .append("envVariables", mapAsDocumentsList(config.getEnvVariables()));
         final MachineSource source = config.getSource();
         if (source != null) {
-            document.append("source", new Document("type", source.getType()).append("location", source.getLocation()));
+            document.append("source", new Document(MACHINE_SOURCE_TYPE, source.getType())
+                    .append(MACHINE_SOURCE_LOCATION, source.getLocation())
+                    .append(MACHINE_SOURCE_CONTENT, source.getContent()));
         }
         final Limits limits = config.getLimits();
         if (limits != null) {

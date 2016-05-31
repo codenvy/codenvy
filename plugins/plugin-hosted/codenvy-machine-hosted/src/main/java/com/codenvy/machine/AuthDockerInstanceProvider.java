@@ -20,6 +20,7 @@ import com.google.common.base.MoreObjects;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -51,6 +52,7 @@ public class AuthDockerInstanceProvider extends DockerInstanceProvider {
                                       DockerMachineFactory dockerMachineFactory,
                                       DockerInstanceStopDetector dockerInstanceStopDetector,
                                       DockerContainerNameGenerator containerNameGenerator,
+                                      RecipeRetriever recipeRetriever,
                                       @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                       @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                       @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -69,6 +71,7 @@ public class AuthDockerInstanceProvider extends DockerInstanceProvider {
               dockerMachineFactory,
               dockerInstanceStopDetector,
               containerNameGenerator,
+              recipeRetriever,
               devMachineServers,
               allMachinesServers,
               devMachineSystemVolumes,

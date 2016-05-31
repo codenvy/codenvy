@@ -21,13 +21,15 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
-import org.eclipse.che.api.machine.server.spi.impl.InstanceKeyImpl;
+import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 
-import java.util.List;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_CONTENT;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_LOCATION;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_TYPE;
 
-import static com.codenvy.api.dao.mongo.MongoUtil.documentsListAsMap;
-import static com.codenvy.api.dao.mongo.MongoUtil.mapAsDocumentsList;
 
 /**
  * Encodes & decodes {@link SnapshotImpl}.
@@ -35,6 +37,7 @@ import static com.codenvy.api.dao.mongo.MongoUtil.mapAsDocumentsList;
  * @author Sergii Kabashniuk
  */
 public class SnapshotImplCodec implements Codec<SnapshotImpl> {
+
 
     private Codec<Document> codec;
 
@@ -45,6 +48,11 @@ public class SnapshotImplCodec implements Codec<SnapshotImpl> {
     @Override
     public void encode(BsonWriter writer, SnapshotImpl snapshot, EncoderContext encoderContext) {
 
+        MachineSource machineSource = snapshot.getMachineSource();
+        final Document machineSourceDocument = new Document().append(MACHINE_SOURCE_TYPE, machineSource.getType())
+                                                .append(MACHINE_SOURCE_LOCATION, machineSource.getLocation())
+                                                .append(MACHINE_SOURCE_CONTENT, machineSource.getContent());
+
         final Document document = new Document().append("_id", snapshot.getId())
                                                 .append("workspaceId", snapshot.getWorkspaceId())
                                                 .append("machineName", snapshot.getMachineName())
@@ -54,7 +62,7 @@ public class SnapshotImplCodec implements Codec<SnapshotImpl> {
                                                 .append("isDev", snapshot.isDev())
                                                 .append("creationDate", snapshot.getCreationDate())
                                                 .append("description", snapshot.getDescription())
-                                                .append("instanceKey", mapAsDocumentsList(snapshot.getInstanceKey().getFields()));
+                                                .append(MACHINE_SOURCE, machineSourceDocument);
         codec.encode(writer, document, encoderContext);
     }
 
@@ -66,6 +74,14 @@ public class SnapshotImplCodec implements Codec<SnapshotImpl> {
     @Override
     public SnapshotImpl decode(BsonReader reader, DecoderContext decoderContext) {
         final Document document = codec.decode(reader, decoderContext);
+
+        final Document machineSourceDocument = (Document)document.get(MACHINE_SOURCE);
+
+        MachineSourceImpl machineSource =
+                new MachineSourceImpl(machineSourceDocument.getString(MACHINE_SOURCE_TYPE))
+                        .setLocation(machineSourceDocument.getString(MACHINE_SOURCE_LOCATION))
+                        .setContent(machineSourceDocument.getString(MACHINE_SOURCE_CONTENT));
+
         return SnapshotImpl.builder()
                                          .setId(document.getString("_id"))
                                          .setWorkspaceId(document.getString("workspaceId"))
@@ -76,8 +92,7 @@ public class SnapshotImplCodec implements Codec<SnapshotImpl> {
                                          .setDev(document.getBoolean("isDev"))
                                          .setCreationDate(document.getLong("creationDate"))
                                          .setDescription(document.getString("description"))
-                                         .setInstanceKey(new InstanceKeyImpl(documentsListAsMap(
-                                                 (List<Document>)document.get("instanceKey"))))
+                                         .setMachineSource(machineSource)
                                          .build();
     }
 }

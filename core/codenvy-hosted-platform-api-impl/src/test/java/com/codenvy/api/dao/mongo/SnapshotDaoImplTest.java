@@ -15,7 +15,6 @@
 package com.codenvy.api.dao.mongo;
 
 import com.github.fakemongo.Fongo;
-import com.google.common.collect.ImmutableMap;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -28,7 +27,7 @@ import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
-import org.eclipse.che.api.machine.server.spi.impl.InstanceKeyImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -40,7 +39,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.codenvy.api.dao.mongo.MongoUtil.mapAsDocumentsList;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_CONTENT;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_LOCATION;
+import static com.codenvy.api.dao.mongo.WorkspaceImplCodec.MACHINE_SOURCE_TYPE;
 import static java.util.Arrays.asList;
 import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -50,7 +52,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-
 /**
  * Tests for {@link WorkspaceDaoImpl}.
  *
@@ -60,6 +61,10 @@ import static org.testng.Assert.assertTrue;
 public class SnapshotDaoImplTest {
     MongoCollection<SnapshotImpl> collection;
     SnapshotDaoImpl               snapshotDao;
+
+    private static final String CUSTOM_MACHINE_SOURCE_TYPE     = "my-custom-type";
+    private static final String CUSTOM_MACHINE_SOURCE_LOCATION = "my-custom-location";
+    private static final String CUSTOM_MACHINE_SOURCE_CONTENT  = "my-custom-content";
 
     @BeforeMethod
     public void setUpDb() {
@@ -219,7 +224,7 @@ public class SnapshotDaoImplTest {
     }
 
     @Test
-    public void testSnapshotncoding() {
+    public void testSnapshotEncoding() {
         // mocking DocumentCodec
         final DocumentCodec documentCodec = mock(DocumentCodec.class);
         when(documentCodec.getEncoderClass()).thenReturn(Document.class);
@@ -253,8 +258,10 @@ public class SnapshotDaoImplTest {
         assertEquals(result.getString("type"), snapshot.getType(), "Snapshot defaultEnvName");
 
         // check attributes
-        final List<Document> instanceKey = (List<Document>)result.get("instanceKey");
-        assertEquals(instanceKey, mapAsDocumentsList(snapshot.getInstanceKey().getFields()), "Instance key");
+        final Document machineSource = (Document) result.get(MACHINE_SOURCE);
+        assertEquals(machineSource.get(MACHINE_SOURCE_TYPE), snapshot.getMachineSource().getType());
+        assertEquals(machineSource.get(MACHINE_SOURCE_LOCATION), snapshot.getMachineSource().getLocation());
+        assertEquals(machineSource.get(MACHINE_SOURCE_CONTENT), snapshot.getMachineSource().getContent());
     }
 
     /**
@@ -273,9 +280,9 @@ public class SnapshotDaoImplTest {
      *     assert snapshot.equals(result)
      * </pre>
      *
-     * @see #testSnapshotncoding()
+     * @see #testSnapshotEncoding()
      */
-    @Test(dependsOnMethods = "testSnapshotncoding")
+    @Test(dependsOnMethods = "testSnapshotEncoding")
     public void testWorkspaceDecoding() {
         // mocking DocumentCodec
         final DocumentCodec documentCodec = mock(DocumentCodec.class);
@@ -315,7 +322,8 @@ public class SnapshotDaoImplTest {
         return SnapshotImpl.builder()
                            .generateId()
                            .setType("docker")
-                           .setInstanceKey(new InstanceKeyImpl(ImmutableMap.of("field", "value")))
+                           .setMachineSource(new MachineSourceImpl(CUSTOM_MACHINE_SOURCE_TYPE).setContent(CUSTOM_MACHINE_SOURCE_CONTENT).setLocation(
+                                   CUSTOM_MACHINE_SOURCE_LOCATION))
                            .setNamespace("user123")
                            .setWorkspaceId("workspace123")
                            .setMachineName("machine123")
