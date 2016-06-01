@@ -31,9 +31,9 @@ import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
 import org.everrest.core.resource.GenericMethodResource;
+import org.everrest.core.uri.UriPattern;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -42,6 +42,7 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.Path;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.RUN;
@@ -57,12 +58,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link MachinePermissionsFilter}.
@@ -266,6 +267,14 @@ public class MachinePermissionsFilterTest {
         verify(service).copyFilesBetweenMachines(eq("machine123"), eq("machine321"), anyString(), anyString(), anyBoolean());
         verify(subject).checkPermission(DOMAIN_ID, "workspace123", USE);
         verify(subject).checkPermission(DOMAIN_ID, "workspace321", USE);
+    }
+
+    @Test
+    public void shouldSkipMachineTokenMethod() throws Exception {
+        String pathValue = permissionsFilter.getClass().getAnnotation(Path.class).value();
+        UriPattern pattern = new UriPattern(pathValue);
+        assertTrue(pattern.match("/machine/anything/any_value", new ArrayList<>()));
+        assertFalse(pattern.match("/machine/token/any_value", new ArrayList<>()));
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
