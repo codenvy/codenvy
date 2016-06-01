@@ -41,7 +41,7 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/machine{path:(?!/token)(/+.*+)?}")
+@Path("/machine{path:(?!/token)(/.*)?}")
 public class MachinePermissionsFilter extends CheMethodInvokerFilter {
     @Inject
     private MachineManager machineManager;
