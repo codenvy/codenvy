@@ -16,6 +16,7 @@ package com.codenvy.ide.factory.client.accept;
 
 import com.codenvy.ide.factory.client.FactoryLocalizationConstant;
 import com.codenvy.ide.factory.client.utils.FactoryProjectImporter;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -25,10 +26,12 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.factory.shared.dto.Ide;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 
@@ -125,10 +128,22 @@ public class AcceptFactoryHandler {
     private void performOnProjectsLoadedActions(final Factory factory) {
         final Ide ide = factory.getIde();
         if (ide == null || ide.getOnProjectsLoaded() == null) {
+            Log.info(getClass(), "Send >>>> event");
+            eventBus.fireEvent(new FactoryAcceptedEvent(factory));
             return;
         }
         for (Action action : ide.getOnProjectsLoaded().getActions()) {
             actionManager.performAction(action.getId(), action.getProperties());
         }
+        Log.info(getClass(), "Send >>>> event");
+        new Timer() {
+
+            @Override
+            public void run() {
+                eventBus.fireEvent(new FactoryAcceptedEvent(factory));
+
+            }
+        }.schedule(1000);
+
     }
 }
