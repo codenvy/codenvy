@@ -60,19 +60,12 @@ public class MachineAsyncRequest extends AsyncRequest {
                     @Override
                     public void apply(String machine) throws OperationException {
                         MachineAsyncRequest.this.header(AUTHORIZATION, machine);
-                        MachineAsyncRequest.super.send()
-                                                 .then(new Operation<Void>() {
-                                                     @Override
-                                                     public void apply(Void arg) throws OperationException {
-                                                         resolve.apply(null);
-                                                     }
-                                                 })
-                                                 .catchError(new Operation<PromiseError>() {
-                                                     @Override
-                                                     public void apply(PromiseError arg) throws OperationException {
-                                                         reject.apply(arg);
-                                                     }
-                                                 });
+                        MachineAsyncRequest.super.send().catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError arg) throws OperationException {
+                                reject.apply(arg);
+                            }
+                        });
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override
