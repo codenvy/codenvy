@@ -41,7 +41,6 @@ import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.RolesExtractor;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.machine.authentication.server.WorkspaceServiceAuthLinksInjector;
 import com.codenvy.plugin.factory.github.factory.resolver.GithubFactoryParametersResolver;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -350,5 +349,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                  .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
         mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE)
                  .to(com.codenvy.machine.WsAgentServerProxyTransformer.class);
+
+        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
     }
 }

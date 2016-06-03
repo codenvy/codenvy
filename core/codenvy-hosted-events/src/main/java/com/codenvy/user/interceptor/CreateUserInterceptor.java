@@ -74,6 +74,10 @@ public class CreateUserInterceptor implements MethodInterceptor {
     @Named("api.endpoint")
     private String apiEndpoint;
 
+    @Inject
+    @Named("mailsender.application.from.email.address")
+    private String mailSender;
+
     //Do not remove ApiException. It used to tell dependency plugin that api-core is need not only for tests.
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable, ApiException {
@@ -110,7 +114,7 @@ public class CreateUserInterceptor implements MethodInterceptor {
 
             EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
                     .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + template)), properties))
-                    .withFrom("Codenvy <noreply@codenvy.com>")
+                    .withFrom(mailSender)
                     .withTo(userEmail)
                     .withReplyTo(null)
                     .withSubject("Welcome To Codenvy")

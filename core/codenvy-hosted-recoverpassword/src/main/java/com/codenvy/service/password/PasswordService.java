@@ -85,7 +85,7 @@ public class PasswordService {
                            UserDao userDao,
                            RecoveryStorage recoveryStorage,
                            UserProfileDao userProfileDao,
-                           @Named("password.recovery.mail.from") String mailSender,
+                           @Named("mailsender.application.from.email.address") String mailSender,
                            @Named("password.recovery.mail.subject") String recoverMailSubject,
                            @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;

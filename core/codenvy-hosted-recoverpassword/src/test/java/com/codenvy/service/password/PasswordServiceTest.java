@@ -48,6 +48,7 @@ import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.tools.DependencySupplierImpl;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
@@ -60,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import static com.jayway.restassured.RestAssured.given;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -70,6 +72,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /** Test of features from PasswordService */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
@@ -236,6 +239,23 @@ public class PasswordServiceTest {
         assertEquals(response.statusCode(), 204);
 
         verify(mailService).sendMail(any(EmailBeanDto.class));
+    }
+
+    @Test
+    public void shouldSendEmailToRecoverPassword() throws Exception {
+        when(userDao.getByAlias(USERNAME)).thenReturn(user);
+        when(recoveryStorage.generateRecoverToken(eq(USERNAME))).thenReturn(UUID);
+        ArgumentCaptor<EmailBeanDto> argumentCaptor = ArgumentCaptor.forClass(EmailBeanDto.class);
+
+        given().pathParam("username", USERNAME).post(SERVICE_PATH + "/recover/{username}");
+
+        verify(mailService).sendMail(argumentCaptor.capture());
+        EmailBeanDto argumentCaptorValue = argumentCaptor.getValue();
+        assertEquals(argumentCaptorValue.getFrom(), "Codenvy <noreply@codenvy.com>");
+        assertEquals(argumentCaptorValue.getSubject(), "Codenvy Password Recovery");
+        assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
+        assertTrue(!argumentCaptorValue.getBody().isEmpty());
+        assertTrue(argumentCaptorValue.getAttachments().size() == 1);
     }
 
     @Test

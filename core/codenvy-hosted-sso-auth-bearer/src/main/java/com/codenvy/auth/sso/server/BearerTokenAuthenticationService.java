@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -93,6 +94,9 @@ public class BearerTokenAuthenticationService {
     protected UserCreationValidator            creationValidator;
     @Inject
     protected UserCreator                      userCreator;
+    @Inject
+    @Named("mailsender.application.from.email.address")
+    protected String                           mailSender;
 
 
     /**
@@ -208,7 +212,7 @@ public class BearerTokenAuthenticationService {
 
         EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
                 .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + MAIL_TEMPLATE)), props))
-                .withFrom("Codenvy <noreply@codenvy.com>")
+                .withFrom(mailSender)
                 .withTo(validationData.getEmail())
                 .withReplyTo(null)
                 .withSubject("Verify Your Codenvy Account")

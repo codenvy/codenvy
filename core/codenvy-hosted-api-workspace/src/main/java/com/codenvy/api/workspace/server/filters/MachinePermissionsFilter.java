@@ -17,6 +17,7 @@ package com.codenvy.api.workspace.server.filters;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.MachineService;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -32,15 +33,15 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.RUN;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 
 /**
- * Restricts access to methods of {@link RecipeService} by users' permissions
+ * Restricts access to methods of {@link MachineService} by users' permissions
  *
- * <p>Filter contains rules for protecting of all methods of {@link RecipeService}.<br>
+ * <p>Filter contains rules for protecting of all methods of {@link MachineService}.<br>
  * In case when requested method is unknown filter throws {@link ForbiddenException}
  *
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/machine{path:(/.*)?}")
+@Path("/machine{path:(?!/token)(/.*)?}")
 public class MachinePermissionsFilter extends CheMethodInvokerFilter {
     @Inject
     private MachineManager machineManager;

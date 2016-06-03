@@ -31,11 +31,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class CreateUserInterceptorTest extends BaseInterceptorTest {
@@ -55,6 +57,7 @@ public class CreateUserInterceptorTest extends BaseInterceptorTest {
     @BeforeMethod
     public void setup() throws Exception {
         setInterceptorPrivateFieldValue(interceptor, "apiEndpoint", "http://localhost/api");
+        setInterceptorPrivateFieldValue(interceptor, "mailSender", "noreply@host");
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -76,7 +79,12 @@ public class CreateUserInterceptorTest extends BaseInterceptorTest {
         interceptor.invoke(invocation);
 
         verify(mailSenderClient).sendMail(argument.capture());
-
-        assertEquals(argument.getValue().getTo(), recipient);
+        EmailBeanDto argumentCaptorValue = argument.getValue();
+        assertTrue(argumentCaptorValue.getAttachments().size() == 1);
+        assertTrue(!argumentCaptorValue.getBody().isEmpty());
+        assertEquals(argumentCaptorValue.getTo(), recipient);
+        assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
+        assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
+        assertEquals(argumentCaptorValue.getSubject(), "Welcome To Codenvy");
     }
 }
