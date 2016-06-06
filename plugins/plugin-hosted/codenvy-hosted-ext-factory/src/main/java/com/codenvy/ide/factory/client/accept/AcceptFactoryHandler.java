@@ -128,22 +128,12 @@ public class AcceptFactoryHandler {
     private void performOnProjectsLoadedActions(final Factory factory) {
         final Ide ide = factory.getIde();
         if (ide == null || ide.getOnProjectsLoaded() == null) {
-            Log.info(getClass(), "Send >>>> event");
             eventBus.fireEvent(new FactoryAcceptedEvent(factory));
             return;
         }
         for (Action action : ide.getOnProjectsLoaded().getActions()) {
             actionManager.performAction(action.getId(), action.getProperties());
         }
-        Log.info(getClass(), "Send >>>> event");
-        new Timer() {
-
-            @Override
-            public void run() {
-                eventBus.fireEvent(new FactoryAcceptedEvent(factory));
-
-            }
-        }.schedule(1000);
-
+        eventBus.fireEvent(new FactoryAcceptedEvent(factory));
     }
 }
