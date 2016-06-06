@@ -29,7 +29,6 @@ import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.util.loging.Log;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
@@ -60,7 +59,12 @@ public class MachineAsyncRequest extends AsyncRequest {
                     @Override
                     public void apply(String machine) throws OperationException {
                         MachineAsyncRequest.this.header(AUTHORIZATION, machine);
-                        MachineAsyncRequest.super.send().catchError(new Operation<PromiseError>() {
+                        MachineAsyncRequest.super.send().then(new Operation<Void>() {
+                            @Override
+                            public void apply(Void arg) throws OperationException {
+                                resolve.apply(null);
+                            }
+                        }).catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
                                 reject.apply(arg);
