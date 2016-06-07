@@ -17,7 +17,6 @@ package com.codenvy.api.workspace.server.filters;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -48,13 +47,10 @@ import static com.google.api.client.repackaged.com.google.common.base.Strings.is
 @Path("/workspace{path:(/.*)?}")
 public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     private final WorkspaceManager workspaceManager;
-    private final UserManager      userManager;
 
     @Inject
-    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager,
-                                      UserManager userManager) {
+    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager) {
         this.workspaceManager = workspaceManager;
-        this.userManager = userManager;
     }
 
     @Override
@@ -98,7 +94,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "getByKey":
-                workspaceId = getWorkspaceFromKey(((String)arguments[0]));
+                workspaceId = getWorkspaceIdFromKey(((String)arguments[0]));
                 action = READ;
                 break;
 
@@ -139,15 +135,14 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     /**
      * Get workspace id from composite key.
      */
-    private String getWorkspaceFromKey(String key) throws NotFoundException, ServerException {
+    private String getWorkspaceIdFromKey(String key) throws NotFoundException, ServerException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         if (parts.length == 1) {
             return key;
         }
         final String userName = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userName.isEmpty() ? EnvironmentContext.getCurrent().getSubject().getUserId()
-                                                  : userManager.getByName(userName).getId();
-        return workspaceManager.getWorkspace(wsName, ownerId).getId();
+        final String namespace = userName.isEmpty() ? EnvironmentContext.getCurrent().getSubject().getUserName() : userName;
+        return workspaceManager.getWorkspace(wsName, namespace).getId();
     }
 }
