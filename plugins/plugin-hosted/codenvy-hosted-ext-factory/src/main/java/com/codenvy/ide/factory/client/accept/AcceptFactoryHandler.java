@@ -25,6 +25,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.factory.shared.dto.Ide;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.factory.FactoryAcceptedEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -125,10 +126,12 @@ public class AcceptFactoryHandler {
     private void performOnProjectsLoadedActions(final Factory factory) {
         final Ide ide = factory.getIde();
         if (ide == null || ide.getOnProjectsLoaded() == null) {
+            eventBus.fireEvent(new FactoryAcceptedEvent(factory));
             return;
         }
         for (Action action : ide.getOnProjectsLoaded().getActions()) {
             actionManager.performAction(action.getId(), action.getProperties());
         }
+        eventBus.fireEvent(new FactoryAcceptedEvent(factory));
     }
 }

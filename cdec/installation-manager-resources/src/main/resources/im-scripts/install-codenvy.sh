@@ -20,6 +20,7 @@
 # --docker-registry-mirror=<URL>
 # --http-proxy-for-codenvy-workspaces=<HTTP PROXY URL>
 # --https-proxy-for-codenvy-workspaces=<HTTPS PROXY URL>
+# --no-proxy=<CODENVY NO_PROXY PROPERTY>
 # --config=<PATH/URL TO CUSTOM CODENVY CONFIG>
 
 trap cleanUp EXIT
@@ -27,6 +28,7 @@ trap cleanUp EXIT
 unset HOST_NAME
 unset SYSTEM_ADMIN_NAME
 unset SYSTEM_ADMIN_PASSWORD
+unset CODENVY_NO_PROXY
 
 JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz
 JRE_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jre-8u45-linux-x64.tar.gz
@@ -173,6 +175,9 @@ setRunOptions() {
             HTTP_PROXY_FOR_CODENVY_WORKSPACES=$(echo "$var" | sed -e "s/--http-proxy-for-codenvy-workspaces=//g")
         elif [[ "$var" =~ --https-proxy-for-codenvy-workspaces=.* ]]; then
             HTTPS_PROXY_FOR_CODENVY_WORKSPACES=$(echo "$var" | sed -e "s/--https-proxy-for-codenvy-workspaces=//g")
+
+        elif [[ "$var" =~ --no-proxy=.* ]]; then
+            CODENVY_NO_PROXY=$(echo "$var" | sed -e "s/--no-proxy=//g")
 
         elif [[ "$var" =~ --config=.* ]]; then
             CUSTOM_CONFIG=$(echo "$var" | sed -e "s/--config=//g")
@@ -1029,6 +1034,10 @@ printPreInstallInfo_single() {
     fi
     if [ -n "${HTTPS_PROXY_FOR_CODENVY_WORKSPACES}" ]; then
         insertProperty "https_proxy_for_codenvy_workspaces" ${HTTPS_PROXY_FOR_CODENVY_WORKSPACES}
+    fi
+
+    if [ -n "${CODENVY_NO_PROXY}" ]; then
+        insertProperty "no_proxy" ${CODENVY_NO_PROXY}
     fi
 
     if [[ $IM_CLI == false ]]; then
