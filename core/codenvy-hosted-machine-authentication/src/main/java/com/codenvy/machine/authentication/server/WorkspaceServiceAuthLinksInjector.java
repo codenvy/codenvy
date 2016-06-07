@@ -59,10 +59,11 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceServiceAuthLinksInjector(@Named("api.endpoint") String apiEndpoint,
+    public WorkspaceServiceAuthLinksInjector(@Named("che.ide.context") String ideContext,
+                                             @Named("api.endpoint") String apiEndpoint,
                                              HttpJsonRequestFactory httpJsonRequestFactory,
                                              MachineServiceLinksInjector machineLinksInjector) {
-        super(machineLinksInjector);
+        super(ideContext, machineLinksInjector);
         this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
@@ -104,7 +105,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                            runtime.getLinks()
                                   .add(createLink("GET",
                                                   UriBuilder.fromUri(wsAgent.getUrl())
-                                                            .path("")
+                                                            .path("ws")
                                                             .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                             .build()
                                                             .toString(),
@@ -114,7 +115,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                                      .add(createLink("GET",
                                                      UriBuilder.fromUri(wsAgent.getUrl())
                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                               .path("")
+                                                               .path("/ws")
                                                                .queryParam(MACHINE_TOKEN, machineToken)
                                                                .build()
                                                                .toString(),
