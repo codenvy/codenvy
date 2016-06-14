@@ -104,7 +104,7 @@
                                             <artifactItem>
                                                 <groupId>org.eclipse.che.lib</groupId>
                                                 <artifactId>che-websocket-terminal</artifactId>
-                                                <version>${che.version}</version>
+                                                <version>${che.lib.version}</version>
                                                 <classifier>${item}</classifier>
                                                 <type>zip</type>
                                             </artifactItem>

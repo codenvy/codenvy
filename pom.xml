@@ -46,6 +46,7 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
+        <che.lib.version>4.4.0-RC1-SNAPSHOT</che.lib.version>
         <che.version>4.4.0-RC1-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
@@ -725,21 +726,21 @@
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.version}</version>
+                <version>${che.lib.version}</version>
                 <type>zip</type>
                 <classifier>linux_i386</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.version}</version>
+                <version>${che.lib.version}</version>
                 <type>zip</type>
                 <classifier>linux_arm5</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-websocket-terminal</artifactId>
-                <version>${che.version}</version>
+                <version>${che.lib.version}</version>
                 <type>zip</type>
                 <classifier>linux_arm6</classifier>
             </dependency>
