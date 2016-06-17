@@ -12,7 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.workspace.server.recipe;
+package com.codenvy.api.workspace.server.filters;
+
+import com.codenvy.api.workspace.server.recipe.RecipeCreatorPermissionsProvider;
+import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.acl.AclEntryImpl;

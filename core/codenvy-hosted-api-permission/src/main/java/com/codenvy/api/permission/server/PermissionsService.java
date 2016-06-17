@@ -92,6 +92,7 @@ public class PermissionsService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Domain of permissions is not supported"),
                    @ApiResponse(code = 409, message = "New permissions removes last 'setPermissions' of given instance"),
+                   @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during permissions storing")})
     public void storePermissions(@ApiParam(value = "The permissions to store", required = true)
                                  PermissionsDto permissionsDto) throws ServerException,
@@ -101,7 +102,6 @@ public class PermissionsService extends Service {
         checkArgument(permissionsDto != null, "Permissions descriptor required");
         checkArgument(!isNullOrEmpty(permissionsDto.getUser()), "User required");
         checkArgument(!isNullOrEmpty(permissionsDto.getDomain()), "Domain required");
-        checkArgument(!isNullOrEmpty(permissionsDto.getInstance()), "Instance required");
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
         permissionManager.storePermission(new PermissionsImpl(permissionsDto));
@@ -115,11 +115,14 @@ public class PermissionsService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The permissions successfully fetched"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
                    @ApiResponse(code = 404, message = "Permissions for current user with specified domain and instance was not found"),
+                   @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during permissions fetching")})
     public PermissionsDto getCurrentUsersPermissions(@ApiParam(value = "Domain id to retrieve user's permissions")
                                                      @PathParam("domain") String domain,
                                                      @ApiParam(value = "Instance id to retrieve user's permissions")
-                                                     @QueryParam("instance") String instance) throws ServerException, NotFoundException {
+                                                     @QueryParam("instance") String instance) throws ServerException,
+                                                                                                     NotFoundException,
+                                                                                                     ConflictException {
         return toDto(permissionManager.get(EnvironmentContext.getCurrent().getSubject().getUserId(), domain, instance));
     }
 
@@ -131,11 +134,14 @@ public class PermissionsService extends Service {
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The permissions successfully fetched"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
+                   @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during permissions fetching")})
     public List<PermissionsDto> getUsersPermissions(@ApiParam(value = "Domain id to retrieve users' permissions")
                                                     @PathParam("domain") String domain,
                                                     @ApiParam(value = "Instance id to retrieve users' permissions")
-                                                    @QueryParam("instance") String instance) throws ServerException, NotFoundException {
+                                                    @QueryParam("instance") String instance) throws ServerException,
+                                                                                                    NotFoundException,
+                                                                                                    ConflictException {
         return permissionManager.getByInstance(domain, instance)
                                 .stream()
                                 .map(this::toDto)
@@ -148,6 +154,7 @@ public class PermissionsService extends Service {
     @ApiResponses({@ApiResponse(code = 204, message = "The permissions successfully removed"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
                    @ApiResponse(code = 409, message = "User has last 'setPermissions' of given instance"),
+                   @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during permissions removing")})
     public void removePermissions(@ApiParam("Domain id to remove user's permissions")
                                   @PathParam("domain") String domain,

@@ -26,11 +26,13 @@ public class StackDomain extends AbstractPermissionsDomain {
     public static final String DOMAIN_ID = "stack";
 
     public static final String READ   = "read";
+    public static final String SEARCH = "search";
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
 
     public StackDomain() {
         super(DOMAIN_ID, ImmutableList.of(READ,
+                                          SEARCH,
                                           UPDATE,
                                           DELETE));
     }

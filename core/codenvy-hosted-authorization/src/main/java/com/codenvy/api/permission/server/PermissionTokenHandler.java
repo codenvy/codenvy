@@ -17,6 +17,7 @@ package com.codenvy.api.permission.server;
 import com.codenvy.auth.sso.client.SsoClientPrincipal;
 import com.codenvy.auth.sso.client.TokenHandler;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -99,7 +100,7 @@ public class PermissionTokenHandler implements TokenHandler {
                 return permissionChecker.hasPermission(getUserId(), domain, instance, action);
             } catch (NotFoundException nfe) {
                 return false;
-            } catch (ServerException e) {
+            } catch (ServerException | ConflictException e) {
                 LOG.error(format("Can't check permissions for user '%s' and instance '%s' of domain '%s'", getUserId(), domain, instance),
                           e);
                 throw new RuntimeException("Can't check user's permissions", e);

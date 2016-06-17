@@ -134,7 +134,7 @@ public class StackDaoImplTest extends BaseDaoTest {
                              .setTags(tags)
                              .setComponents(singletonList(stackComponent))
                              .setSource(stackSource)
-                             .setAcl(singletonList(new AclEntryImpl("creator", asList("read", "delete"))))
+                             .setAcl(singletonList(new AclEntryImpl("creator", asList("search", "delete"))))
                              .build();
         stackTest2 = StackImpl.builder()
                               .setId("testId2")
@@ -142,7 +142,7 @@ public class StackDaoImplTest extends BaseDaoTest {
                               .setScope("advanced")
                               .setSource(stackSource)
                               .setTags(tags)
-                              .setAcl(singletonList(new AclEntryImpl("creator", asList("read", "delete"))))
+                              .setAcl(singletonList(new AclEntryImpl("creator", asList("search", "delete"))))
                               .build();
     }
 

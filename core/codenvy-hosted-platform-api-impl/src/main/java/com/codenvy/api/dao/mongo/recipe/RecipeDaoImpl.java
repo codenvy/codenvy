@@ -148,7 +148,7 @@ public class RecipeDaoImpl implements RecipeDao {
     @Override
     public List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException {
         try {
-            Bson query = elemMatch("acl", and(in("actions", "read"),
+            Bson query = elemMatch("acl", and(in("actions", "search"),
                                               or(eq("user", "*"),
                                                  eq("user", user))));
             if (tags != null && !tags.isEmpty()) {

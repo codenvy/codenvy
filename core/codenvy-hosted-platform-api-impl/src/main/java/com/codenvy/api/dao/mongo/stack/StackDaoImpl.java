@@ -252,7 +252,7 @@ public class StackDaoImpl implements StackDao {
         requireNonNull(user, "User id required");
 
         try {
-            Bson query = elemMatch("acl", and(in("actions", "read"),
+            Bson query = elemMatch("acl", and(in("actions", "search"),
                                               or(eq("user", "*"),
                                                  eq("user", user))));
             if (tags != null && !tags.isEmpty()) {

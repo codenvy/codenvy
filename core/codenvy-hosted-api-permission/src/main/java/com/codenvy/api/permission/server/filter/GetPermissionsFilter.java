@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionManager;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -49,7 +50,7 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
 
     @Override
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments)
-            throws UnauthorizedException, ForbiddenException, ServerException {
+            throws UnauthorizedException, ForbiddenException, ServerException, ConflictException {
         final String methodName = genericMethodResource.getMethod().getName();
         if (methodName.equals("getUsersPermissions")) {
             final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();

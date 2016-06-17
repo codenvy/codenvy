@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
@@ -35,9 +36,12 @@ public interface PermissionChecker {
      * @return true if the user has given permission
      * @throws NotFoundException
      *         when given domain is unsupported
+     * @throws ConflictException
+     *         when given domain requires non nullable value for instance but it is null
      * @throws ServerException
      *         when any other error occurs during permission existence checking
      */
     boolean hasPermission(String user, String domain, String instance, String action) throws ServerException,
-                                                                                             NotFoundException;
+                                                                                             NotFoundException,
+                                                                                             ConflictException;
 }

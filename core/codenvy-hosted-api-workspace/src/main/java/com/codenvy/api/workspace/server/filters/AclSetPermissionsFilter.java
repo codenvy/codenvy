@@ -12,30 +12,29 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.server.filter;
+package com.codenvy.api.workspace.server.filters;
 
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
+import com.codenvy.api.workspace.server.recipe.RecipeDomain;
+import com.codenvy.api.workspace.server.stack.StackDomain;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericMethodResource;
 
 import javax.ws.rs.Path;
 
-import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
-
 /**
- * Restricts access to setting permissions of instance by users' setPermissions permission
+ * Restricts access to setting public permissions for stacks and recipes
  *
  * @author Sergii Leschenko
  */
 @Filter
 @Path("/permissions/")
-public class SetPermissionsFilter extends CheMethodInvokerFilter {
+public class AclSetPermissionsFilter extends CheMethodInvokerFilter {
     @Override
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments)
             throws UnauthorizedException, ForbiddenException, ServerException {
@@ -43,10 +42,17 @@ public class SetPermissionsFilter extends CheMethodInvokerFilter {
         if (methodName.equals("storePermissions")) {
             final PermissionsDto permissions = (PermissionsDto)arguments[0];
 
-            if (!EnvironmentContext.getCurrent().getSubject().hasPermission(permissions.getDomain(),
-                                                                            permissions.getInstance(),
-                                                                            SET_PERMISSIONS)) {
-                throw new ForbiddenException("User can't edit permissions for this instance");
+            final String domain = permissions.getDomain();
+
+            if (!RecipeDomain.DOMAIN_ID.equals(domain) && !StackDomain.DOMAIN_ID.equals(domain)) {
+                //process only recipes' and stacks' permissions
+                return;
+            }
+
+            if (permissions.getUser().equals("*")
+                && (permissions.getActions().size() != 1
+                    || !permissions.getActions().contains(RecipeDomain.READ))) {
+                throw new ForbiddenException("Public permissions support only 'read' action");
             }
         }
     }

@@ -88,9 +88,7 @@ public class PermissionManager {
 
         final PermissionsDomain permissionsDomain = getDomain(permissions.getDomain());
 
-        if (permissionsDomain.isInstanceRequired() && instance == null) {
-            throw new ConflictException("Given domain requires non nullable value for instance");
-        }
+        checkInstanceRequiring(permissionsDomain, instance);
 
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
         final Set<String> unsupportedActions = permissions.getActions()
@@ -121,7 +119,8 @@ public class PermissionManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException {
+    public PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException, ConflictException {
+        checkInstanceRequiring(domain, instance);
         return getPermissionsStorage(domain).get(user, domain, instance);
     }
 
@@ -136,7 +135,8 @@ public class PermissionManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException, NotFoundException {
+    public List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException, NotFoundException, ConflictException {
+        checkInstanceRequiring(domain, instance);
         return getPermissionsStorage(domain).getByInstance(domain, instance);
     }
 
@@ -157,6 +157,7 @@ public class PermissionManager {
      *         when any other error occurs during permissions removing
      */
     public void remove(String user, String domain, String instance) throws ConflictException, ServerException, NotFoundException {
+        checkInstanceRequiring(domain, instance);
         final PermissionsStorage permissionsStorage = getPermissionsStorage(domain);
         if (userHasLastSetPermissions(permissionsStorage, user, domain, instance)) {
             throw new ConflictException("Can't remove permissions because there is not any another user with permission 'setPermissions'");
@@ -179,7 +180,10 @@ public class PermissionManager {
      * @throws ServerException
      *         when any other error occurs during permission existence checking
      */
-    public boolean exists(String user, String domain, String instance, String action) throws ServerException, NotFoundException {
+    public boolean exists(String user, String domain, String instance, String action) throws ServerException,
+                                                                                             NotFoundException,
+                                                                                             ConflictException {
+        checkInstanceRequiring(domain, instance);
         return getDomain(domain).getAllowedActions().contains(action)
                && getPermissionsStorage(domain).exists(user, domain, instance, action);
     }
@@ -203,6 +207,16 @@ public class PermissionManager {
             throw new NotFoundException("Requested unsupported domain '" + domain + "'");
         }
         return domains.get(domain);
+    }
+
+    private void checkInstanceRequiring(String domain, String instance) throws NotFoundException, ConflictException {
+        checkInstanceRequiring(getDomain(domain), instance);
+    }
+
+    private void checkInstanceRequiring(PermissionsDomain domain, String instance) throws NotFoundException, ConflictException {
+        if (domain.isInstanceRequired() && instance == null) {
+            throw new ConflictException("Given domain requires non nullable value for instance");
+        }
     }
 
     private PermissionsStorage getPermissionsStorage(String domain) throws NotFoundException {

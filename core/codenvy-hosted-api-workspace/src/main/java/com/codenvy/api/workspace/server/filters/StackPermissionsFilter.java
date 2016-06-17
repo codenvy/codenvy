@@ -12,12 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.workspace.server.recipe;
+package com.codenvy.api.workspace.server.filters;
+
+import com.codenvy.api.workspace.server.stack.StackDomain;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.recipe.RecipeService;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
+import org.eclipse.che.api.workspace.server.stack.StackService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
@@ -26,57 +27,68 @@ import org.everrest.core.resource.GenericMethodResource;
 
 import javax.ws.rs.Path;
 
-import static com.codenvy.api.workspace.server.recipe.RecipeDomain.DELETE;
-import static com.codenvy.api.workspace.server.recipe.RecipeDomain.READ;
-import static com.codenvy.api.workspace.server.recipe.RecipeDomain.UPDATE;
+import static com.codenvy.api.workspace.server.stack.StackDomain.DELETE;
+import static com.codenvy.api.workspace.server.stack.StackDomain.DOMAIN_ID;
+import static com.codenvy.api.workspace.server.stack.StackDomain.READ;
+import static com.codenvy.api.workspace.server.stack.StackDomain.UPDATE;
 
 /**
- * Restricts access to methods of {@link RecipeService} by users' permissions
+ * Restricts access to methods of {@link StackService} by users' permissions
  *
- * <p>Filter should contain rules for protecting of all methods of {@link RecipeService}.<br>
+ * <p>Filter should contain rules for protecting of all methods of {@link StackService}.<br>
  * In case when requested method is unknown filter throws {@link ForbiddenException}
  *
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/recipe{path:(/.*)?}")
-public class RecipePermissionsFilter extends CheMethodInvokerFilter {
+@Path("/stack{path:(/.*)?}")
+public class StackPermissionsFilter extends CheMethodInvokerFilter {
     @Override
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments) throws ForbiddenException, ServerException {
         final String methodName = genericMethodResource.getMethod().getName();
 
         final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         String action;
-        String recipeId;
+        String stackId;
 
         switch (methodName) {
-            case "getRecipe":
-            case "getRecipeScript":
-                recipeId = ((String)arguments[0]);
+            case "getStack":
+            case "getIcon":
+                stackId = ((String)arguments[0]);
                 action = READ;
+
+                if (currentSubject.hasPermission(StackDomain.DOMAIN_ID, stackId, StackDomain.SEARCH)) {
+                    //allow to read stack if user has 'search' permission
+                    return;
+                }
                 break;
 
-            case "updateRecipe":
-                RecipeUpdate recipeUpdate = (RecipeUpdate)arguments[0];
-                recipeId = recipeUpdate.getId();
+            case "updateStack":
+            case "uploadIcon":
+                stackId = ((String)arguments[1]);
                 action = UPDATE;
                 break;
 
-            case "removeRecipe":
-                recipeId = ((String)arguments[0]);
+            case "removeIcon":
+                stackId = ((String)arguments[0]);
+                action = UPDATE;
+                break;
+
+            case "removeStack":
+                stackId = ((String)arguments[0]);
                 action = DELETE;
                 break;
 
-            case "createRecipe":
-            case "searchRecipes":
+            case "createStack":
+            case "searchStacks":
                 //available for all
                 return;
             default:
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        if (!currentSubject.hasPermission(RecipeDomain.DOMAIN_ID, recipeId, action)) {
-            throw new ForbiddenException("The user does not have permission to " + action + " recipe with id '" + recipeId + "'");
+        if (!currentSubject.hasPermission(DOMAIN_ID, stackId, action)) {
+            throw new ForbiddenException("The user does not have permission to " + action + " stack with id '" + stackId + "'");
         }
     }
 }

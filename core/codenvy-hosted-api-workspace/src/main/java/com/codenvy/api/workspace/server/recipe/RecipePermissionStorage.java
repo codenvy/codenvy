@@ -18,7 +18,6 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.PermissionsImpl;
 import com.codenvy.api.permission.server.dao.PermissionsStorage;
 import com.codenvy.api.permission.shared.Permissions;
-import com.codenvy.api.workspace.server.stack.StackDomain;
 import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -122,7 +121,7 @@ public class RecipePermissionStorage implements PermissionsStorage {
 
     private PermissionsImpl toPermission(String stack, AclEntryImpl acl) {
         return new PermissionsImpl(acl.getUser(),
-                                   StackDomain.DOMAIN_ID,
+                                   RecipeDomain.DOMAIN_ID,
                                    stack,
                                    acl.getActions());
     }

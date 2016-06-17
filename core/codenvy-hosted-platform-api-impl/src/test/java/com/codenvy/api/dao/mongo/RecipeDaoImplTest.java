@@ -167,7 +167,7 @@ public class RecipeDaoImplTest {
                                                    .withScript("script content")
                                                    .withType("script-type")
                                                    .withTags(asList("tag1", "tag2"))
-                                                   .withAcl(singletonList(new AclEntryImpl("user123", singletonList("read"))));
+                                                   .withAcl(singletonList(new AclEntryImpl("user123", singletonList("search"))));
         final RecipeImpl example2 = copy(example).withId("recipe234")
                                                  .withTags(asList("tag1", "tag2", "tag3"))
                                                  .withAcl(singletonList(new AclEntryImpl("user123", singletonList("update"))));
@@ -187,7 +187,7 @@ public class RecipeDaoImplTest {
                                                    .withScript("script content")
                                                    .withType("script-type")
                                                    .withTags(asList("tag1", "tag2"))
-                                                   .withAcl(singletonList(new AclEntryImpl("user123", singletonList("read"))));
+                                                   .withAcl(singletonList(new AclEntryImpl("user123", singletonList("search"))));
         final RecipeImpl example2 = copy(example).withId("recipe234")
                                                  .withTags(asList("tag1", "tag2", "tag3"));
         final RecipeImpl example3 = copy(example).withId("recipe345")
@@ -206,7 +206,7 @@ public class RecipeDaoImplTest {
 
     @Test
     public void shouldBeAbleToSearchRecipesByTags() throws Exception {
-        List<AclEntryImpl> acl = singletonList(new AclEntryImpl("user123", singletonList("read")));
+        List<AclEntryImpl> acl = singletonList(new AclEntryImpl("user123", singletonList("search")));
         final RecipeImpl example = new RecipeImpl().withId("recipe123")
                                                    .withName("name")
                                                    .withCreator("someone")
