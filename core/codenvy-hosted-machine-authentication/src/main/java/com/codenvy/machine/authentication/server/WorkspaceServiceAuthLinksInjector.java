@@ -16,11 +16,9 @@ package com.codenvy.machine.authentication.server;
 
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
-import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
@@ -46,7 +44,6 @@ import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Helps to inject {@link WorkspaceService} related links.
@@ -62,11 +59,10 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceServiceAuthLinksInjector(@Named("che.ide.context") String ideContext,
-                                             @Named("api.endpoint") String apiEndpoint,
+    public WorkspaceServiceAuthLinksInjector(@Named("api.endpoint") String apiEndpoint,
                                              HttpJsonRequestFactory httpJsonRequestFactory,
                                              MachineServiceLinksInjector machineLinksInjector) {
-        super(ideContext, machineLinksInjector);
+        super(machineLinksInjector);
         this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
@@ -108,7 +104,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                            runtime.getLinks()
                                   .add(createLink("GET",
                                                   UriBuilder.fromUri(wsAgent.getUrl())
-                                                            .path("ws")
+                                                            .path("")
                                                             .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                             .build()
                                                             .toString(),
@@ -118,14 +114,11 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                                      .add(createLink("GET",
                                                      UriBuilder.fromUri(wsAgent.getUrl())
                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                               .path("/ws")
+                                                               .path("")
                                                                .queryParam(MACHINE_TOKEN, machineToken)
                                                                .build()
                                                                .toString(),
-                                                     WSAGENT_WEBSOCKET_REFERENCE,
-                                                     ImmutableList.of(newDto(LinkParameter.class).withName(MACHINE_TOKEN)
-                                                                                                 .withDefaultValue(machineToken)
-                                                                                                 .withRequired(true))));
+                                                     WSAGENT_WEBSOCKET_REFERENCE));
                        });
 
                 servers.stream()

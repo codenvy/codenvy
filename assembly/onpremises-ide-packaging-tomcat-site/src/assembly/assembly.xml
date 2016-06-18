@@ -38,7 +38,7 @@
                 <include>com.codenvy.onpremises:onpremises-ide-packaging-war-website-codenvy</include>
             </includes>
         </dependencySet>
-        <dependencySet>
+        <!--dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
@@ -46,7 +46,7 @@
             <includes>
                 <include>com.codenvy.onpremises:onpremises-ide-packaging-war-webroot-codenvy</include>
             </includes>
-        </dependencySet>
+        </dependencySet-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
@@ -60,7 +60,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>ws.war</outputFileNameMapping>
+            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
                 <include>com.codenvy.onpremises:onpremises-ide-packaging-war-ide</include>
             </includes>

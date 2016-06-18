@@ -15,6 +15,7 @@
 package com.codenvy.onpremises.deploy;
 
 import com.codenvy.auth.sso.client.deploy.SsoClientServletModule;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.inject.DynaModule;

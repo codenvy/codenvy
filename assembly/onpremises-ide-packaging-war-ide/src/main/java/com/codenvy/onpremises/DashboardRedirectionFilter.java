@@ -15,12 +15,7 @@
 package com.codenvy.onpremises;
 
 import javax.inject.Singleton;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,7 +28,7 @@ import java.util.regex.Pattern;
  */
 @Singleton
 public class DashboardRedirectionFilter implements Filter {
-    private static Pattern projectPattern = Pattern.compile("^/ws/[^/]+?/.+");
+    private static Pattern projectPattern = Pattern.compile("^/[^/]+?/.+");
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

@@ -37,7 +37,8 @@ public class IdeModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url")).to("/site/error/error-cookies-disabled");
         bindConstant().annotatedWith(Names.named("error.page.workspace_not_found_redirect_url")).to("/site/error/error-tenant-name");
-        bindConstant().annotatedWith(Names.named("auth.sso.client_skip_filter_regexp")).to("^/ws/_sso/(.+)$");
+        bindConstant().annotatedWith(Names.named("auth.sso.client_skip_filter_regexp")).to("^/_sso/(.+)$");
+        bindConstant().annotatedWith(Names.named("auth.sso.client_allow_anonymous")).to(false);
 
         bind(RequestTokenExtractor.class).to(com.codenvy.auth.sso.client.token.ChainedTokenExtractor.class);
         bind(PermissionChecker.class).to(com.codenvy.api.permission.server.HttpPermissionCheckerImpl.class);
