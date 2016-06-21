@@ -60,7 +60,7 @@ public class MicrosoftOAuthCredentialsProvider implements CredentialsProvider {
     public UserCredential getUserCredential() throws GitException {
         try {
             OAuthToken token = oAuthTokenProvider.getToken(OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getSubject().getUserId());
-            if (token != null) {
+            if (token != null && token.getToken() != null) {
                 return new UserCredential(token.getToken(), token.getToken(), OAUTH_PROVIDER_NAME);
             }
         } catch (IOException ioEx) {
