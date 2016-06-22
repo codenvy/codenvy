@@ -113,7 +113,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
-                                         workspace.getNamespace(),
+                                         getCurrentUserId(),
                                          () -> super.startWorkspace(workspaceId, envName, accountId));
     }
 

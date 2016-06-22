@@ -19,6 +19,10 @@ import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.SubjectImpl;
+import org.mockito.ArgumentCaptor;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static com.codenvy.api.workspace.TestObjects.createConfig;
@@ -26,7 +30,9 @@ import static com.codenvy.api.workspace.TestObjects.createRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -236,5 +242,34 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               false,
                                                                                               false));
         manager.checkMaxEnvironmentRam(config);
+    }
+
+    @Test
+    public void shouldCheckRamLimitOfExecutorUserInsteadOfCreator() throws Exception {
+        final String userId = "environment_id123";
+        final EnvironmentContext context = mock(EnvironmentContext.class);
+        doReturn(new SubjectImpl("namespace", userId, "", false)).when(context).getSubject();
+        EnvironmentContext.setCurrent(context);
+
+        final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
+                                                                                              "2gb", // <- workspaces ram limit
+                                                                                              "1gb",
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              false,
+                                                                                              false));
+        final WorkspaceImpl ws = createRuntime("1gb", "1gb");
+        doReturn(ws).when(manager).getWorkspace(anyString()); // <- currently running 2gb
+        doReturn(ws).when(manager).checkRamAndPropagateStart(anyObject(), anyString(), anyString(), anyObject());
+
+        manager.startWorkspace(ws.getId(), null, null);
+
+        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+        verify(manager).checkRamAndPropagateStart(anyObject(), anyString(), argument.capture(), anyObject());
+        Assert.assertEquals(userId, argument.getValue());
+        Assert.assertNotEquals(ws.getNamespace(), argument.getValue());
     }
 }
