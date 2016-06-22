@@ -16,9 +16,11 @@ package com.codenvy.machine.authentication.server;
 
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
+import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
@@ -44,6 +46,7 @@ import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Helps to inject {@link WorkspaceService} related links.
@@ -104,7 +107,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                            runtime.getLinks()
                                   .add(createLink("GET",
                                                   UriBuilder.fromUri(wsAgent.getUrl())
-                                                            .path("")
+                                                            .path("ws")
                                                             .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                             .build()
                                                             .toString(),
@@ -114,11 +117,14 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                                      .add(createLink("GET",
                                                      UriBuilder.fromUri(wsAgent.getUrl())
                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                               .path("")
+                                                               .path("/ws")
                                                                .queryParam(MACHINE_TOKEN, machineToken)
                                                                .build()
                                                                .toString(),
-                                                     WSAGENT_WEBSOCKET_REFERENCE));
+                                                     WSAGENT_WEBSOCKET_REFERENCE,
+                                                     ImmutableList.of(newDto(LinkParameter.class).withName(MACHINE_TOKEN)
+                                                                                                 .withDefaultValue(machineToken)
+                                                                                                 .withRequired(true))));
                        });
 
                 servers.stream()
