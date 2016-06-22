@@ -18,6 +18,8 @@ import com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.WorkspaceCallbac
 import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -32,6 +34,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -244,11 +247,14 @@ public class LimitsCheckingWorkspaceManagerTest {
     }
 
     @Test
-    public void shouldCheckRamLimitOfExecutorUserInsteadOfCreator() throws Exception {
-        final String userId = "environment_id123";
-        final EnvironmentContext context = mock(EnvironmentContext.class);
-        doReturn(new SubjectImpl("namespace", userId, "", false)).when(context).getSubject();
-        EnvironmentContext.setCurrent(context);
+    public void shouldCheckRamLimitOfCreatorUserInsteadOfCurrent() throws Exception {
+        final String userId = "myuser123456";
+        final UserManager userManager = mock(UserManager.class);
+        final WorkspaceImpl ws = createRuntime("1gb", "1gb");
+        final User user = new User();
+        user.setId(userId);
+        user.setName(ws.getNamespace());
+        doReturn(user).when(userManager).getByName(eq(ws.getNamespace()));
 
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
                                                                                               "2gb", // <- workspaces ram limit
@@ -257,10 +263,10 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
+                                                                                              userManager,
                                                                                               false,
                                                                                               false));
-        final WorkspaceImpl ws = createRuntime("1gb", "1gb");
+
         doReturn(ws).when(manager).getWorkspace(anyString()); // <- currently running 2gb
         doReturn(ws).when(manager).checkRamAndPropagateStart(anyObject(), anyString(), anyString(), anyObject());
 
@@ -269,6 +275,5 @@ public class LimitsCheckingWorkspaceManagerTest {
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(manager).checkRamAndPropagateStart(anyObject(), anyString(), argument.capture(), anyObject());
         Assert.assertEquals(userId, argument.getValue());
-        Assert.assertNotEquals(ws.getNamespace(), argument.getValue());
     }
 }

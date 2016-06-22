@@ -62,6 +62,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     private static final Striped<Lock> CREATE_LOCKS   = Striped.lazyWeakLock(100);
     private static final Striped<Lock> START_LOCKS    = Striped.lazyWeakLock(100);
 
+    private final UserManager userManager;
+
     private final int  workspacesPerUser;
     private final long maxRamPerEnv;
     private final long ramPerUser;
@@ -77,7 +79,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           UserManager userManager,
                                           @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
-        super(workspaceDao, runtimes, eventService, machineManager, userManager, defaultAutoSnapshot, defaultAutoRestore);
+        super(workspaceDao, runtimes, eventService, machineManager, defaultAutoSnapshot, defaultAutoRestore);
+        this.userManager = userManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnv = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
         this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
@@ -113,7 +116,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
-                                         getCurrentUserId(),
+                                         userManager.getByName(workspace.getNamespace()).getId(),
                                          () -> super.startWorkspace(workspaceId, envName, accountId));
     }
 
