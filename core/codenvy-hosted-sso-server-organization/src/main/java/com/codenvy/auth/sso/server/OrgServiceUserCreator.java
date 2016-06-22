@@ -70,32 +70,30 @@ public class OrgServiceUserCreator implements UserCreator {
                 throw new IOException("Currently only admins can create accounts. Please contact our Admin Team for further info.");
             }
 
-            String id = NameGenerator.generate(User.class.getSimpleName().toLowerCase(), Constants.ID_LENGTH);
-
             final Map<String, String> attributes = new HashMap<>();
             attributes.put("firstName", firstName);
             attributes.put("lastName", lastName);
             attributes.put("email", email);
 
-            Profile profile = new Profile()
-                    .withId(id)
-                    .withUserId(id)
-                    .withAttributes(attributes);
-            String password = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
             try {
-
-                while (!createNonReservedUser(id, userName, email, password)) {
-                    userName = NameGenerator.generate(userName, 4);
+                User user = createNonReservedUser(userName, email);
+                while (user == null) {
+                    user = createNonReservedUser(NameGenerator.generate(userName, 4), email);
                 }
+
+                Profile profile = new Profile()
+                        .withId(user.getId())
+                        .withUserId(user.getId())
+                        .withAttributes(attributes);
                 profileDao.create(profile);
 
                 final Map<String, String> preferences = new HashMap<>();
                 preferences.put("codenvy:created", Long.toString(System.currentTimeMillis()));
                 preferences.put("resetPassword", "true");
-                preferenceDao.setPreferences(id, preferences);
+                preferenceDao.setPreferences(user.getId(), preferences);
 
-                return new User().withId(id).withName(userName).withEmail(email).withPassword(password);
+                return user;
             } catch (ConflictException | ServerException | NotFoundException e1) {
                 throw new IOException(e1.getLocalizedMessage(), e1);
             }
@@ -148,17 +146,25 @@ public class OrgServiceUserCreator implements UserCreator {
         }
     }
 
-    private boolean createNonReservedUser(String id, String username, String email, String password) throws ServerException {
+
+    /**
+     * Create user via user manager, ensuring the name is not reserved and conflicting.
+     *
+     * @param username
+     *        user name
+     * @param email
+     *        user email
+     * @return created user if succesfully created, null otherwise
+     * @throws ServerException
+     */
+    private User createNonReservedUser(String username, String email) throws ServerException {
         try {
-            userManager.create(new User().withId(id)
-                                         .withName(username)
-                                         .withEmail(email)
-                                         .withPassword(password), false);
-            return true;
-        } catch (ServerException e) {
-            throw e;
+            userManager.create(new User().withName(username).withEmail(email), false);
+            return userManager.getByName(username);
+        } catch (ServerException | NotFoundException e) {
+            throw new ServerException(e);
         } catch (ConflictException e) {
-            return false;
+            return null;
         }
     }
 }

@@ -29,11 +29,15 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -52,11 +56,16 @@ public class OrgServiceUserCreatorTest {
     @Mock
     PreferenceDao preferenceDao;
 
+    @Mock
+    User createdUser;
+
     OrgServiceUserCreator creator;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws Exception {
         creator = new OrgServiceUserCreator(manager, profileDao, preferenceDao, true);
+        when(createdUser.getId()).thenReturn("id123");
+        doReturn(createdUser).when(manager).getByName(anyString());
     }
 
     @Test
