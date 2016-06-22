@@ -115,8 +115,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                            ServerException,
                                                                            ConflictException {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
-        final User creator = userManager.getByName(workspace.getNamespace());
-        final String userId = creator != null ? creator.getId() : getCurrentUserId();
+        String userId;
+        try {
+            userId = userManager.getByName(workspace.getNamespace()).getId();
+        } catch (NotFoundException e) {
+            userId = getCurrentUserId();
+        }
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
                                          userId,

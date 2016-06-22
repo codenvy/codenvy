@@ -17,6 +17,7 @@ package com.codenvy.api.workspace;
 import com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.WorkspaceCallback;
 import com.google.common.collect.ImmutableList;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.dao.User;
@@ -36,6 +37,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -285,7 +287,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         doReturn(new SubjectImpl("name", userId,"", false)).when(context).getSubject();
         EnvironmentContext.setCurrent(context);
         final WorkspaceImpl ws = createRuntime("1gb", "1gb");
-        doReturn(null).when(userManager).getByName(eq(ws.getNamespace()));
+        doThrow(new NotFoundException("Nope")).when(userManager).getByName(eq(ws.getNamespace()));
 
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
                                                                                               "2gb", // <- workspaces ram limit
