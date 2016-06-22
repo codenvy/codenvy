@@ -49,9 +49,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Set;
 
 import static java.net.URLEncoder.encode;
 
@@ -172,6 +169,7 @@ public class SsoService {
             if (Boolean.valueOf(allowAnonymous)) {
                 // create new temp user
                 final User user = userCreator.createTemporary();
+                LOG.info("Temporary user {} {} has been created for client {}", user.getName(), user.getId(), redirectUrl);
                 final Subject anonymousSubject = new SubjectImpl(user.getName(),
                                                                  user.getId(),
                                                                  null,

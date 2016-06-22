@@ -308,7 +308,6 @@ export class LoadFactoryCtrl {
       }
 
       if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {
-        this.loadFactoryService.setCurrentProgressStep(4);
         this.finish();
       }
     });
@@ -331,11 +330,11 @@ export class LoadFactoryCtrl {
   importProjects(bus) {
     let promise = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
     promise.then(() => {
-      let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspaceId).config.projects;
+      let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
       this.detectProjectsToImport(projects, bus);
     }, (error) => {
       if (error.status !== 304) {
-        let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspaceId).config.projects;
+        let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
         this.detectProjectsToImport(projects, bus);
       } else {
         this.handleError(error);
@@ -424,7 +423,7 @@ export class LoadFactoryCtrl {
   }
 
   finish() {
-    this.loadFactoryService.goToNextStep();
+    this.loadFactoryService.setCurrentProgressStep(4);
 
     // people should go back to the dashboard after factory is initialized
     this.routeHistory.pushPath('/');

@@ -109,9 +109,19 @@ initModule.constant('codenvyDashboardConfig', {
 // See http://stackoverflow.com/questions/30978743/how-can-this-be-undefined-in-the-constructor-of-an-angular-config-class
 initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
   var tokens = {};
+
   function requestToken(workspaceId) {
-    return $injector.get('$http').get('/api/machine/token/' + workspaceId)
-                    .then((resp) => tokens[workspaceId] = resp.data.machineToken);
+
+    let promise = $injector.get('$http').get('/api/machine/token/' + workspaceId);
+
+    return promise.then((resp) => {
+      tokens[workspaceId] = resp.data.machineToken;
+      return tokens[workspaceId];
+    }, (error) => {
+      if (error.status === 304) {
+        return tokens[workspaceId];
+      }
+    });
   }
 
   function getWorkspaceId(url) {
@@ -127,7 +137,7 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
   }
 
   return {
-    request: function(config) {
+    request: (config) => {
       if (config.url.indexOf("/ext/") === -1) {
         return config || $q.when(config);
       }
@@ -138,14 +148,14 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
       }
 
       return $q.when(tokens[workspaceId] || requestToken(workspaceId))
-               .then((token) => {
-                 config.headers['Authorization'] = token;
-                 return config;
-               })
+        .then((token) => {
+          config.headers['Authorization'] = token;
+          return config;
+        })
     },
 
     responseError: (rejection) => {
-      if (rejection && rejection.config.url.indexOf("/ext/") !== -1) {
+      if (rejection && rejection.config.url.indexOf("/ext/") !== -1 && (rejection.status === 401 || rejection.status === 503)) {
         delete tokens[getWorkspaceId(rejection.config.url)];
       }
       return $q.reject(rejection);
@@ -154,7 +164,7 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
 });
 
 initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
-  $httpProvider.interceptors.push('AddMachineTokenToUrlInterceptor')
+  $httpProvider.interceptors.push('AddMachineTokenToUrlInterceptor');
   if (DEV) {
     console.log('adding auth interceptor');
     $httpProvider.interceptors.push('AuthInterceptor');
