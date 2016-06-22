@@ -80,7 +80,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>che-templates</outputDirectory>
+            <outputDirectory>templates</outputDirectory>
             <includes>
                 <include>org.eclipse.che.core:che-core-ide-templates</include>
             </includes>
