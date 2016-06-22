@@ -15,6 +15,7 @@
 package com.codenvy.auth.sso.server;
 
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
+import com.google.common.collect.Sets;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -26,6 +27,9 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collections;
+import java.util.Set;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
@@ -36,14 +40,17 @@ public class OrgServiceUserValidator implements UserCreationValidator {
     private final UserDao           userDao;
     private final UserNameValidator userNameValidator;
     private final boolean           userSelfCreationAllowed;
+    private final Set<String>       reservedNames;
 
     @Inject
     public OrgServiceUserValidator(UserDao userDao,
                                    UserNameValidator userNameValidator,
-                                   @Named("user.self.creation.allowed") boolean userSelfCreationAllowed) {
+                                   @Named("user.self.creation.allowed") boolean userSelfCreationAllowed,
+                                   @Named("user.reserved_names") String[] reservedNames) {
         this.userDao = userDao;
         this.userNameValidator = userNameValidator;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
+        this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
     @Override
@@ -62,6 +69,10 @@ public class OrgServiceUserValidator implements UserCreationValidator {
 
         if (!userNameValidator.isValidUserName(userName)) {
             throw new BadRequestException("User name must contain letters and digits only");
+        }
+
+        if (reservedNames.contains(userName.toLowerCase())) {
+            throw new ConflictException(String.format("User name \"%s\" is reserved. Please, choose another one", userName));
         }
 
         try {
