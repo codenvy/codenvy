@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -114,9 +115,11 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                            ServerException,
                                                                            ConflictException {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
+        final User creator = userManager.getByName(workspace.getNamespace());
+        final String userId = creator != null ? creator.getId() : getCurrentUserId();
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
-                                         userManager.getByName(workspace.getNamespace()).getId(),
+                                         userId,
                                          () -> super.startWorkspace(workspaceId, envName, accountId));
     }
 

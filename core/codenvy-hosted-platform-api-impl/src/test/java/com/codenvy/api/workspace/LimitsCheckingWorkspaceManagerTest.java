@@ -276,4 +276,35 @@ public class LimitsCheckingWorkspaceManagerTest {
         verify(manager).checkRamAndPropagateStart(anyObject(), anyString(), argument.capture(), anyObject());
         Assert.assertEquals(userId, argument.getValue());
     }
+
+    @Test
+    public void shouldCheckRamLimitOfCurrentUserIfCreatorNotExistsAnymore() throws Exception {
+        final String userId = "env_myuser123456";
+        final UserManager userManager = mock(UserManager.class);
+        final EnvironmentContext context = mock(EnvironmentContext.class);
+        doReturn(new SubjectImpl("name", userId,"", false)).when(context).getSubject();
+        EnvironmentContext.setCurrent(context);
+        final WorkspaceImpl ws = createRuntime("1gb", "1gb");
+        doReturn(null).when(userManager).getByName(eq(ws.getNamespace()));
+
+        final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
+                                                                                              "2gb", // <- workspaces ram limit
+                                                                                              "1gb",
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              userManager,
+                                                                                              false,
+                                                                                              false));
+
+        doReturn(ws).when(manager).getWorkspace(anyString()); // <- currently running 2gb
+        doReturn(ws).when(manager).checkRamAndPropagateStart(anyObject(), anyString(), anyString(), anyObject());
+
+        manager.startWorkspace(ws.getId(), null, null);
+
+        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+        verify(manager).checkRamAndPropagateStart(anyObject(), anyString(), argument.capture(), anyObject());
+        Assert.assertEquals(userId, argument.getValue());
+    }
 }
