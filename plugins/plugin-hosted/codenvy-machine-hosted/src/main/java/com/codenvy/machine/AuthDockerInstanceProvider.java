@@ -25,6 +25,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
@@ -50,6 +51,7 @@ public class AuthDockerInstanceProvider extends DockerInstanceProvider {
     @Inject
     public AuthDockerInstanceProvider(DockerConnector docker,
                                       DockerConnectorConfiguration dockerConnectorConfiguration,
+                                      UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                       DockerMachineFactory dockerMachineFactory,
                                       DockerInstanceStopDetector dockerInstanceStopDetector,
                                       DockerContainerNameGenerator containerNameGenerator,
@@ -70,6 +72,7 @@ public class AuthDockerInstanceProvider extends DockerInstanceProvider {
                                       MachineTokenRegistry tokenRegistry) throws IOException {
         super(docker,
               dockerConnectorConfiguration,
+              dockerCredentials,
               dockerMachineFactory,
               dockerInstanceStopDetector,
               containerNameGenerator,

@@ -76,7 +76,7 @@ export class CodenvyNavBarCtrl {
       usermanagement: '#/admin/usermanagement',
 
       // subsection
-      plugins: '#/admin/plugins',
+      plugins: '#/admin/plugins'
     };
 
     // highlight navbar menu item
@@ -94,6 +94,10 @@ export class CodenvyNavBarCtrl {
           tooltip: data.data.navbarButton.tooltip,
           link: data.data.navbarButton.link
         };
+        this.accountItems.splice(1, 0, {
+          name: data.data.navbarButton.title,
+          url: data.data.navbarButton.link
+        });
       }
     });
 
@@ -102,12 +106,14 @@ export class CodenvyNavBarCtrl {
     // account dropdown items
     this.accountItems = [
       {
-        name: 'Profile & account',
+        name: 'Profile & Account',
         url: '#/account'
       },
       {
         name: 'Logout',
-        onclick: () => { this.logout(); }
+        onclick: () => {
+          this.logout();
+        }
       }
     ];
   }

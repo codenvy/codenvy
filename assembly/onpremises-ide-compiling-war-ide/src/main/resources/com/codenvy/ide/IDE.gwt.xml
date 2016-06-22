@@ -82,7 +82,6 @@
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
-    <inherits name='org.eclipse.che.plugin.docker.ext.client.Docker'/>
 
     <!--Hosted specific -->
     <inherits name='com.codenvy.ide.profile.Profile'/>
