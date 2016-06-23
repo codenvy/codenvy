@@ -93,7 +93,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             NotFoundException {
         checkMaxEnvironmentRam(config);
         checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
-                                          "unavailable and it is impossible to check resources consumption.");
+                                          "unavailable and it is impossible to check resources limit.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
@@ -106,7 +106,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             ConflictException {
         checkMaxEnvironmentRam(config);
         checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
-                                          "unavailable and it is impossible to check resources consumption.");
+                                          "unavailable and it is impossible to check resources limit.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
