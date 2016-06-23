@@ -29,7 +29,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -115,15 +114,17 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                            ServerException,
                                                                            ConflictException {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
-        String userId;
         try {
-            userId = userManager.getByName(workspace.getNamespace()).getId();
+            userManager.getByName(workspace.getNamespace());
         } catch (NotFoundException e) {
-            userId = getCurrentUserId();
+            throw new ServerException(String.format(
+                    "Unable to start workspace %s, because its namespace owner is " +
+                    "unavailable and it is impossible to check resources consumption.",
+                    workspaceId));
         }
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
-                                         userId,
+                                         workspace.getNamespace(),
                                          () -> super.startWorkspace(workspaceId, envName, accountId));
     }
 
@@ -137,8 +138,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
         return checkRamAndPropagateStart(config,
                                          config.getDefaultEnv(),
-                                         getCurrentUserId(),
-                                         () -> super.startWorkspace(config, namespace, isTemporary, accountId));
+                                         EnvironmentContext.getCurrent().getSubject().getUserName(),
+                                                 () -> super.startWorkspace(config, namespace, isTemporary, accountId));
     }
 
     @Override
@@ -167,7 +168,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     @VisibleForTesting
     <T extends WorkspaceImpl> T checkRamAndPropagateStart(WorkspaceConfig config,
                                                           String envName,
-                                                          String user,
+                                                          String namespace,
                                                           WorkspaceCallback<T> callback) throws ServerException,
                                                                                                 NotFoundException,
                                                                                                 ConflictException {
@@ -181,10 +182,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if ram per user limit is 2GB and user currently using 1GB, then if he sends 2 separate requests to start a new
         // 1 GB workspace , it may start both of them, because currently allocated ram check is not atomic one
-        final Lock lock = START_LOCKS.get(user);
+        final Lock lock = START_LOCKS.get(namespace);
         lock.lock();
         try {
-            final List<WorkspaceImpl> workspacesPerUser = getWorkspaces(user);
+            final List<WorkspaceImpl> workspacesPerUser = getByNamespace(namespace);
             final long runningWorkspaces = workspacesPerUser.stream().filter(ws -> STOPPED != ws.getStatus()).count();
             final long currentlyUsedRamMB = workspacesPerUser.stream().filter(ws -> STOPPED != ws.getStatus())
                                                              .map(ws -> ws.getConfig()
@@ -225,7 +226,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkCountAndPropagateCreation(String user,
+    <T extends WorkspaceImpl> T checkCountAndPropagateCreation(String namespace,
                                                                WorkspaceCallback<T> callback) throws ServerException,
                                                                                                      NotFoundException,
                                                                                                      ConflictException {
@@ -235,10 +236,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if workspace per user limit is 10 and user has 9, then if he sends 2 separate requests to create
         // a new workspace, it may create both of them, because workspace count check is not atomic one
-        final Lock lock = CREATE_LOCKS.get(user);
+        final Lock lock = CREATE_LOCKS.get(namespace);
         lock.lock();
         try {
-            final List<WorkspaceImpl> workspaces = getWorkspaces(user);
+            final List<WorkspaceImpl> workspaces = getByNamespace(namespace);
             if (workspaces.size() >= workspacesPerUser) {
                 throw new LimitExceededException(format("The maximum workspaces allowed per user is set to '%d' and " +
                                                         "you are currently at that limit. This value is set by your admin with the " +
@@ -286,9 +287,5 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         return environments.stream()
                            .filter(env -> env.getName().equals(envName))
                            .findFirst();
-    }
-
-    private String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }
