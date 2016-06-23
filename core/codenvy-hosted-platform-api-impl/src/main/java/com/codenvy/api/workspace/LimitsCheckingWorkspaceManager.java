@@ -34,7 +34,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 
 import javax.inject.Inject;
@@ -93,6 +92,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             ConflictException,
                                                                             NotFoundException {
         checkMaxEnvironmentRam(config);
+        checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
+                                          "unavailable and it is impossible to check resources consumption.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
@@ -104,6 +105,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             NotFoundException,
                                                                             ConflictException {
         checkMaxEnvironmentRam(config);
+        checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
+                                          "unavailable and it is impossible to check resources consumption.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
@@ -114,14 +117,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                            ServerException,
                                                                            ConflictException {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
-        try {
-            userManager.getByName(workspace.getNamespace());
-        } catch (NotFoundException e) {
-            throw new ServerException(String.format(
-                    "Unable to start workspace %s, because its namespace owner is " +
-                    "unavailable and it is impossible to check resources consumption.",
-                    workspaceId));
-        }
+        checkNamespaceValidity(workspace.getNamespace(), String.format(
+                "Unable to start workspace %s, because its namespace owner is " +
+                "unavailable and it is impossible to check resources consumption.",
+                workspaceId));
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
                                          workspace.getNamespace(),
@@ -287,5 +286,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         return environments.stream()
                            .filter(env -> env.getName().equals(envName))
                            .findFirst();
+    }
+
+
+    private void checkNamespaceValidity(String namespace, String errorMsg) throws ServerException {
+        try {
+            userManager.getByName(namespace);
+        } catch (NotFoundException e) {
+            throw new ServerException(errorMsg);
+        }
     }
 }
