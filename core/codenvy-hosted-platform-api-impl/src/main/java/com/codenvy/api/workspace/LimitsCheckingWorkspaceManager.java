@@ -138,8 +138,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
         return checkRamAndPropagateStart(config,
                                          config.getDefaultEnv(),
-                                         EnvironmentContext.getCurrent().getSubject().getUserName(),
-                                                 () -> super.startWorkspace(config, namespace, isTemporary, accountId));
+                                         namespace,
+                                         () -> super.startWorkspace(config, namespace, isTemporary, accountId));
     }
 
     @Override
