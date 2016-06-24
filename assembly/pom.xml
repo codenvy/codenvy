@@ -30,7 +30,6 @@
     <name>Onpremises IDE :: Parent</name>
     <modules>
         <module>onpremises-ide-packaging-war-website-codenvy</module>
-        <module>onpremises-ide-packaging-war-webroot-codenvy</module>
         <module>onpremises-ide-packaging-war-factory</module>
         <module>onpremises-ide-packaging-war-platform-api</module>
         <module>onpremises-ide-packaging-war-dashboard</module>
