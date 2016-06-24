@@ -44,10 +44,10 @@ import java.util.UUID;
 public class OrgServiceUserCreator implements UserCreator {
     private static final Logger LOG = LoggerFactory.getLogger(OrgServiceUserCreator.class);
 
-    private final UserManager userManager;
+    private final UserManager    userManager;
     private final UserProfileDao profileDao;
-    private final PreferenceDao preferenceDao;
-    private final boolean userSelfCreationAllowed;
+    private final PreferenceDao  preferenceDao;
+    private final boolean        userSelfCreationAllowed;
 
     @Inject
     public OrgServiceUserCreator(UserManager userManager,
