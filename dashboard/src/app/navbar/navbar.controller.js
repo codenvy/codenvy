@@ -67,7 +67,7 @@ export class CodenvyNavBarCtrl {
     this.onpremAdminExpanded = true;
 
     this.menuItemUrl = {
-      login: '#/login',
+      login: '/site/login',
       dashboard: '#/',
       projects: '#/projects',
       workspaces: '#/workspaces',
@@ -94,7 +94,7 @@ export class CodenvyNavBarCtrl {
           tooltip: data.data.navbarButton.tooltip,
           link: data.data.navbarButton.link
         };
-        this.accountItems.splice(1, 0, {
+        this.accountItems.splice(2, 0, {
           name: data.data.navbarButton.title,
           url: data.data.navbarButton.link
         });
@@ -108,8 +108,10 @@ export class CodenvyNavBarCtrl {
       {
         name: 'Profile & Account',
         url: '#/account'
-      },
-      {
+      }, {
+        name: 'Administration',
+        url: '#/administration'
+      }, {
         name: 'Logout',
         onclick: () => {
           this.logout();

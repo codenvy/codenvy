@@ -30,6 +30,7 @@
 
 # --http-proxy-for-docker-daemon=<HTTP PROXY URL>
 # --https-proxy-for-docker-daemon=<HTTPS PROXY URL>
+# --no-proxy-for-docker-daemon=<NO_PROXY_FOR_DOCKER_DAEMON>
 
 trap cleanUp EXIT
 
@@ -98,6 +99,8 @@ CURL_PROXY_OPTION=
 DEPENDENCIES_STATUS_OFFSET=85  # fit screen width = 100 cols
 PROGRESS_FACTOR=2
 URL_REGEX="^https?:\/\/[\da-zA-Z_\-\.\/?&#+]+"
+
+MIN_OS_VERSION=7.1
 
 cleanUp() {
     setterm -cursor on
@@ -193,6 +196,8 @@ setRunOptions() {
             HTTP_PROXY_FOR_DOCKER_DAEMON=$(echo "$var" | sed -e "s/--http-proxy-for-docker-daemon=//g")
         elif [[ "$var" =~ --https-proxy-for-docker-daemon=.* ]]; then
             HTTPS_PROXY_FOR_DOCKER_DAEMON=$(echo "$var" | sed -e "s/--https-proxy-for-docker-daemon=//g")
+        elif [[ "$var" =~ --no-proxy-for-docker-daemon=.* ]]; then
+            NO_PROXY_FOR_DOCKER_DAEMON=$(echo "$var" | sed -e "s/--no-proxy-for-docker-daemon=//g")
 
         elif [[ "$var" =~ --config=.* ]]; then
             CUSTOM_CONFIG=$(echo "$var" | sed -e "s/--config=//g")
@@ -1065,6 +1070,9 @@ printPreInstallInfo_single() {
     if [ -n "${HTTPS_PROXY_FOR_DOCKER_DAEMON}" ]; then
         insertProperty "https_proxy_for_docker_daemon" ${HTTPS_PROXY_FOR_DOCKER_DAEMON}
     fi
+    if [ -n "${NO_PROXY_FOR_DOCKER_DAEMON}" ]; then
+        insertProperty "no_proxy_for_docker_daemon" ${NO_PROXY_FOR_DOCKER_DAEMON}
+    fi
 
     if [ -n "${DOCKER_REGISTRY_MIRROR}" ]; then
         insertProperty "docker_registry_mirror" ${DOCKER_REGISTRY_MIRROR}
@@ -1139,9 +1147,16 @@ doCheckAvailableResourcesLocally() {
 
     case $(uname) in
         Linux )
-            # CentOS
             if [ -f /etc/redhat-release ] ; then
-                osType="CentOS"
+                if grep 'Red Hat Enterprise Linux Server' /etc/redhat-release &> /dev/null; then
+                    # RHEL
+                    osType="RHEL"
+                    doCheckRedhatSubscription
+                else
+                    # CentOS
+                    osType="CentOS"
+                fi
+
                 osVersion=$(cat /etc/redhat-release | sed 's/.* \([0-9.]*\) .*/\1/')
                 osInfo=$(cat /etc/redhat-release | sed 's/Linux release //')
 
@@ -1164,8 +1179,8 @@ doCheckAvailableResourcesLocally() {
             ;;
     esac
 
-    # check on OS CentOS 7
-    if [[ "${osType}" != "CentOS" ||  "${osVersion}" < "7.1" ]]; then
+    # check on CentOS or RHEL OS of version >= 7.1
+    if [[ "${osType}" != "CentOS" && "${osType}" != "RHEL" || "${osVersion}" < "${MIN_OS_VERSION}" ]]; then
         osIssueFound=true
     fi
 
@@ -1259,7 +1274,7 @@ doCheckAvailableResourcesLocally() {
 
     if [[ ${osIssueFound} == true ]]; then
         println $(printError "ERROR: The OS version doesn't match requirements.")
-        println $(printWarning "NOTE: You need a CentOS 7.1 node.")
+        println $(printWarning "NOTE: You need a server with CentOS or RHEL OS of $MIN_OS_VERSION version at least.")
         println
     fi
 
@@ -1345,6 +1360,34 @@ doCheckResourceAccess() {
     fi
 
     return ${checkFailed}
+}
+
+doCheckRedhatSubscription() {
+    # check is OS registered
+    if ! sudo subscription-manager identity &> /dev/null; then
+        println $(printError "RHEL OS isn't registered.")
+        println $(printWarning "NOTE: You could use command 'sudo subscription-manager register' to register it.")
+        exit 1
+    fi
+
+    # check validity of subscription
+    if ! sudo subscription-manager status &> /dev/null; then
+        println $(printError "RHEL OS subscription is invalid.")
+        exit 1
+    fi
+
+    # check on accessibility of required repos
+    if ! sudo subscription-manager repos --list-enabled | grep 'rhel-7-server-optional-rpms' &> /dev/null; then
+        println $(printError "Required repository 'rhel-7-server-optional-rpms' isn't enabled.")
+        println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=rhel-7-server-optional-rpms' to enable it.")
+        exit 1
+    fi
+
+    if ! sudo subscription-manager repos --list-enabled | grep 'rhel-7-server-extras-rpms' &> /dev/null; then
+        println $(printError "Required repository 'rhel-7-server-extras-rpms' isn't enabled.")
+        println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=rhel-7-server-extras-rpms' to enable it.")
+        exit 1
+    fi
 }
 
 printPreInstallInfo_multi() {
@@ -1501,7 +1544,7 @@ doCheckAvailableResourcesOnNodes() {
         case $(${sshPrefix} "uname" | sed 's/\r//') in
             Linux )
                 if [[ $(${sshPrefix} "if [[ -f /etc/redhat-release ]]; then echo 1; fi" | sed 's/\r//') == 1 ]]; then
-                    osType="CentOS";
+                    osType="RHEL";
                     osVersion=$(${sshPrefix} "cat /etc/redhat-release" | sed 's/.* \([0-9.]*\) .*/\1/')
                     osInfo=$(${sshPrefix} "cat /etc/redhat-release" | sed 's/Linux release //' | sed 's/\r//')
 
@@ -1524,8 +1567,8 @@ doCheckAvailableResourcesOnNodes() {
                 ;;
         esac
 
-        # check on OS CentOS 7
-        if [[ "${osType}" != "CentOS" || "7.1" > "${osVersion}" ]]; then
+        # check on RHEL OS or CentOS of version >= 7.1
+        if [[ "${osType}" != "RHEL" || "${osVersion}" < "${MIN_OS_VERSION}" ]]; then
             osIssueFound=true
             globalOsIssueFound=true
         fi
@@ -1588,7 +1631,7 @@ doCheckAvailableResourcesOnNodes() {
         if [[ ${globalOsIssueFound} == true ]]; then
             println $(printError "ERROR: The OS version doesn't match requirements.")
             println
-            println $(printWarning "NOTE: You need a CentOS 7.1 node")
+            println $(printWarning "NOTE: You need a node with CentOS or RHEL OS of $MIN_OS_VERSION version at least.")
             exit 1;
         fi
 

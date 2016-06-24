@@ -39,7 +39,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
     private Config mockConfig;
 
     private static final String              TEST_NODE_DNS  = "localhost";
-    private static final NodeConfig.NodeType TEST_NODE_TYPE = NodeConfig.NodeType.MACHINE;
+    private static final NodeConfig.NodeType TEST_NODE_TYPE = NodeConfig.NodeType.MACHINE_NODE;
     private static final NodeConfig          TEST_NODE      = new NodeConfig(TEST_NODE_TYPE, TEST_NODE_DNS);
 
     private static final String ADDITIONAL_NODES_PROPERTY_NAME = Config.SWARM_NODES;
@@ -58,7 +58,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
         doReturn(TEST_NODE_DNS).when(mockConfig).getValueWithoutSubstitution(ADDITIONAL_NODES_PROPERTY_NAME);
         NodeConfig.NodeType result = spyConfigUtil.recognizeNodeTypeFromConfigBy(TEST_NODE_DNS);
 
-        assertEquals(result, NodeConfig.NodeType.MACHINE);
+        assertEquals(result, NodeConfig.NodeType.MACHINE_NODE);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
 
     @Test
     public void testGetPropertyNameBy() {
-        assertEquals(spyConfigUtil.getPropertyNameBy(NodeConfig.NodeType.MACHINE),
+        assertEquals(spyConfigUtil.getPropertyNameBy(NodeConfig.NodeType.MACHINE_NODE),
                      ADDITIONAL_NODES_PROPERTY_NAME);
     }
 
@@ -77,7 +77,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
     public void testGetValueWithNode(List<String> additionalNodes, String addingNodeDns, String expectedResult) {
         doReturn(additionalNodes).when(mockConfig).getAllValues(ADDITIONAL_NODES_PROPERTY_NAME,
                                                                 String.valueOf(AdditionalNodesConfigHelperCodenvy4Impl.ADDITIONAL_NODE_DELIMITER));
-        NodeConfig testNode = new NodeConfig(NodeConfig.NodeType.MACHINE, addingNodeDns);
+        NodeConfig testNode = new NodeConfig(NodeConfig.NodeType.MACHINE_NODE, addingNodeDns);
 
         String result = spyConfigUtil.getValueWithNode(testNode);
         assertEquals(result, expectedResult);
@@ -114,7 +114,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
     public void testGetValueWithoutNode(List<String> additionalNodes, String removingNodeDns, String expectedResult) {
         doReturn(additionalNodes).when(mockConfig).getAllValues(ADDITIONAL_NODES_PROPERTY_NAME,
                                                                 String.valueOf(AdditionalNodesConfigHelperCodenvy4Impl.ADDITIONAL_NODE_DELIMITER));
-        NodeConfig testNode = new NodeConfig(NodeConfig.NodeType.MACHINE, removingNodeDns);
+        NodeConfig testNode = new NodeConfig(NodeConfig.NodeType.MACHINE_NODE, removingNodeDns);
 
         String result = spyConfigUtil.getValueWithoutNode(testNode);
         assertEquals(result, expectedResult);
@@ -168,7 +168,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
 
     @Test
     public void testGetAdditionalNodeUrl() {
-        String additionalNodeUrl = spyConfigUtil.getAdditionalNodeUrl(new NodeConfig(NodeConfig.NodeType.MACHINE, TEST_NODE_DNS));
+        String additionalNodeUrl = spyConfigUtil.getAdditionalNodeUrl(new NodeConfig(NodeConfig.NodeType.MACHINE_NODE, TEST_NODE_DNS));
         assertEquals(additionalNodeUrl, "localhost:2375");
     }
 
@@ -176,14 +176,14 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
     public void testRecognizeNodeConfigFromDns() {
         doReturn("dev.com").when(mockConfig).getHostUrl();
         String dns = "node123.dev.com";
-        NodeConfig expected = new NodeConfig(NodeConfig.NodeType.MACHINE, dns);
+        NodeConfig expected = new NodeConfig(NodeConfig.NodeType.MACHINE_NODE, dns);
 
         NodeConfig actual = spyConfigUtil.recognizeNodeConfigFromDns(dns);
         assertEquals(actual, expected);
     }
 
     @Test(expectedExceptions = IllegalStateException.class,
-          expectedExceptionsMessageRegExp = "Host name of base node of type 'MACHINE' wasn't found.")
+          expectedExceptionsMessageRegExp = "Host name of base node of type 'MACHINE_NODE' wasn't found.")
     public void testRecognizeNodeConfigFromDnsWhenBaseNodeDomainUnknown() {
         spyConfigUtil.recognizeNodeConfigFromDns("some");
     }
@@ -210,7 +210,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
 
         doReturn("dev.com").when(mockConfig).getHostUrl();
 
-        Map<String, List<String>> result = spyConfigUtil.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE);
+        Map<String, List<String>> result = spyConfigUtil.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE);
         assertEquals(result.toString(), "{swarm_nodes=[test1.dev.com, test-2.dev.com, test3.dev.com]}");
     }
 
@@ -219,7 +219,7 @@ public class TestAdditionalNodesConfigHelperCodenvy4 {
         doReturn(null).when(mockConfig).getAllValues(ADDITIONAL_NODES_PROPERTY_NAME,
                                                      String.valueOf(AdditionalNodesConfigHelperCodenvy4Impl.ADDITIONAL_NODE_DELIMITER));
 
-        Map<String, List<String>> result = spyConfigUtil.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE);
+        Map<String, List<String>> result = spyConfigUtil.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE);
         assertNull(result);
     }
 }

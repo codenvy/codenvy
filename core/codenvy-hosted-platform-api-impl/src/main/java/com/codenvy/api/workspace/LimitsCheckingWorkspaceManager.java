@@ -34,7 +34,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 
 import javax.inject.Inject;
@@ -62,6 +61,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     private static final Striped<Lock> CREATE_LOCKS   = Striped.lazyWeakLock(100);
     private static final Striped<Lock> START_LOCKS    = Striped.lazyWeakLock(100);
 
+    private final UserManager userManager;
+
     private final int  workspacesPerUser;
     private final long maxRamPerEnv;
     private final long ramPerUser;
@@ -77,7 +78,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           UserManager userManager,
                                           @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
-        super(workspaceDao, runtimes, eventService, machineManager, userManager, defaultAutoSnapshot, defaultAutoRestore);
+        super(workspaceDao, runtimes, eventService, machineManager, defaultAutoSnapshot, defaultAutoRestore);
+        this.userManager = userManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnv = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
         this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
@@ -90,6 +92,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             ConflictException,
                                                                             NotFoundException {
         checkMaxEnvironmentRam(config);
+        checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
+                                          "unavailable and it is impossible to check resources limit.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
@@ -101,6 +105,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                             NotFoundException,
                                                                             ConflictException {
         checkMaxEnvironmentRam(config);
+        checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
+                                          "unavailable and it is impossible to check resources limit.");
         return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
     }
 
@@ -111,6 +117,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                            ServerException,
                                                                            ConflictException {
         final WorkspaceImpl workspace = getWorkspace(workspaceId);
+        checkNamespaceValidity(workspace.getNamespace(), String.format(
+                "Unable to start workspace %s, because its namespace owner is " +
+                "unavailable and it is impossible to check resources consumption.",
+                workspaceId));
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
                                          workspace.getNamespace(),
@@ -127,7 +137,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
         return checkRamAndPropagateStart(config,
                                          config.getDefaultEnv(),
-                                         getCurrentUserId(),
+                                         namespace,
                                          () -> super.startWorkspace(config, namespace, isTemporary, accountId));
     }
 
@@ -157,7 +167,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     @VisibleForTesting
     <T extends WorkspaceImpl> T checkRamAndPropagateStart(WorkspaceConfig config,
                                                           String envName,
-                                                          String user,
+                                                          String namespace,
                                                           WorkspaceCallback<T> callback) throws ServerException,
                                                                                                 NotFoundException,
                                                                                                 ConflictException {
@@ -171,10 +181,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if ram per user limit is 2GB and user currently using 1GB, then if he sends 2 separate requests to start a new
         // 1 GB workspace , it may start both of them, because currently allocated ram check is not atomic one
-        final Lock lock = START_LOCKS.get(user);
+        final Lock lock = START_LOCKS.get(namespace);
         lock.lock();
         try {
-            final List<WorkspaceImpl> workspacesPerUser = getWorkspaces(user);
+            final List<WorkspaceImpl> workspacesPerUser = getByNamespace(namespace);
             final long runningWorkspaces = workspacesPerUser.stream().filter(ws -> STOPPED != ws.getStatus()).count();
             final long currentlyUsedRamMB = workspacesPerUser.stream().filter(ws -> STOPPED != ws.getStatus())
                                                              .map(ws -> ws.getConfig()
@@ -215,7 +225,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkCountAndPropagateCreation(String user,
+    <T extends WorkspaceImpl> T checkCountAndPropagateCreation(String namespace,
                                                                WorkspaceCallback<T> callback) throws ServerException,
                                                                                                      NotFoundException,
                                                                                                      ConflictException {
@@ -225,10 +235,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if workspace per user limit is 10 and user has 9, then if he sends 2 separate requests to create
         // a new workspace, it may create both of them, because workspace count check is not atomic one
-        final Lock lock = CREATE_LOCKS.get(user);
+        final Lock lock = CREATE_LOCKS.get(namespace);
         lock.lock();
         try {
-            final List<WorkspaceImpl> workspaces = getWorkspaces(user);
+            final List<WorkspaceImpl> workspaces = getByNamespace(namespace);
             if (workspaces.size() >= workspacesPerUser) {
                 throw new LimitExceededException(format("The maximum workspaces allowed per user is set to '%d' and " +
                                                         "you are currently at that limit. This value is set by your admin with the " +
@@ -278,7 +288,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                            .findFirst();
     }
 
-    private String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getSubject().getUserId();
+
+    private void checkNamespaceValidity(String namespace, String errorMsg) throws ServerException {
+        try {
+            userManager.getByName(namespace);
+        } catch (NotFoundException e) {
+            throw new ServerException(errorMsg);
+        }
     }
 }

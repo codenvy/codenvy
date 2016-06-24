@@ -27,7 +27,7 @@ import static java.lang.String.format;
 /** @author Dmytro Nochevnov */
 public class AdditionalNodesConfigHelperCodenvy4Impl extends AdditionalNodesConfigHelper {
 
-    private static final List<AdditionalNode> ADDITIONAL_NODES = ImmutableList.of(AdditionalNode.MACHINE);
+    private static final List<AdditionalNode> ADDITIONAL_NODES = ImmutableList.of(AdditionalNode.MACHINE_NODE);
 
     private static final String ADDITIONAL_NODE_URL_TEMPLATE = "%1$s:2375";
 

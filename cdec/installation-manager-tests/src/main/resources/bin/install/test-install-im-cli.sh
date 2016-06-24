@@ -22,8 +22,6 @@
 printAndLog "TEST CASE: Install IM CLI"
 vagrantUp ${SINGLE_NODE_VAGRANT_FILE}
 
-INSTALL_DIRECTORY=test-codenvy
-
 installImCliClient ${LATEST_IM_CLI_CLIENT_VERSION}
 validateInstalledImCliClientVersion
 executeSshCommand "test -d /home/vagrant/codenvy/cli"

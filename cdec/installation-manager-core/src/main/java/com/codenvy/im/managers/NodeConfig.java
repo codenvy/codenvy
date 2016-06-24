@@ -34,7 +34,7 @@ public class NodeConfig {
         DATASOURCE,
         ANALYTICS,
         API,
-        MACHINE  // for Codenvy 4.0
+        MACHINE_NODE  // for Codenvy 4.0
     }
 
     private String host;

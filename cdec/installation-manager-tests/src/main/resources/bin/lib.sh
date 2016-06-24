@@ -45,11 +45,11 @@ log() {
 
 validateExitCode() {
     EXIT_CODE=$1
-    VALID_CODE=$2
+    local validCode=$2
     IS_INSTALL_CODENVY=$3
 
-    if [[ ! -z ${VALID_CODE} ]]; then
-        if [[ ${EXIT_CODE} == ${VALID_CODE} ]]; then
+    if [[ ! -z ${validCode} ]]; then
+        if [[ ${EXIT_CODE} == ${validCode} ]]; then
             return
         fi
     else
@@ -84,48 +84,48 @@ retrieveTestLogs() {
     if [[ ${INSTALL_ON_NODE} == "master.${HOST_URL}" ]]; then
         for HOST in master api analytics data site runner1 builder1 datasource; do
             # store puppet logs
-            $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo chown -R root:root /var/log/puppet")
-            $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo chmod 777 /var/log/puppet")
+            executeSshCommand --bypass-validation "sudo chown -R root:root /var/log/puppet" ${HOST}.codenvy
+            executeSshCommand --bypass-validation "sudo chmod 777 /var/log/puppet" ${HOST}.codenvy
             scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy:/var/log/puppet/puppet-agent.log ${logDirName}/puppet-agent-${HOST}.log
 
             # store messages log
-            $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo cp /var/log/messages /home/vagrant/messages")
-            $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo chmod 777 /home/vagrant/messages")
+            executeSshCommand --bypass-validation "sudo cp /var/log/messages /home/vagrant/messages" ${HOST}.codenvy
+            executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/messages" ${HOST}.codenvy
             scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy:messages ${logDirName}/messages-${HOST}
 
             if [[ ${HOST} == "api" || ${HOST} == "analytics" || ${HOST} == "site" || ${HOST} == "runner1" || ${HOST} == "builder1" ]]; then
                 # store Codenvy log
-                $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out")
-                $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo chmod 777 /home/vagrant/codenvy-catalina.out")
+                executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out" ${HOST}.codenvy
+                executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/codenvy-catalina.out" ${HOST}.codenvy
                 scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy:codenvy-catalina.out ${logDirName}/codenvy-catalina-${HOST}.out
             fi
 
             if [[ ${HOST} == "master" ]]; then
                 # store IM Server log
-                $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo cp /home/codenvy-im/codenvy-im-tomcat/logs/catalina.out /home/vagrant/im-server-catalina.out")
-                $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy "sudo chmod 777 /home/vagrant/im-server-catalina.out")
+                executeSshCommand --bypass-validation "sudo cp /home/codenvy-im/codenvy-im-tomcat/logs/catalina.out /home/vagrant/im-server-catalina.out" ${HOST}.codenvy
+                executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/im-server-catalina.out" ${HOST}.codenvy
                 scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy:im-server-catalina-${HOST}.out ${logDirName}/
             fi
         done
     else
         # store puppet logs
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo chown -R root:root /var/log/puppet")
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo chmod 777 /var/log/puppet")
+        executeSshCommand --bypass-validation "sudo chown -R root:root /var/log/puppet"
+        executeSshCommand --bypass-validation "sudo chmod 777 /var/log/puppet"
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:/var/log/puppet/puppet-agent.log ${logDirName}/
 
         # store Codenvy log
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out")
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo chmod 777 /home/vagrant/codenvy-catalina.out")
+        executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out"
+        executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/codenvy-catalina.out"
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:codenvy-catalina.out ${logDirName}/
 
         # store IM Server log
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo cp /home/codenvy-im/codenvy-im-tomcat/logs/catalina.out /home/vagrant/im-server-catalina.out")
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo chmod 777 /home/vagrant/im-server-catalina.out")
+        executeSshCommand --bypass-validation "sudo cp /home/codenvy-im/codenvy-im-tomcat/logs/catalina.out /home/vagrant/im-server-catalina.out"
+        executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/im-server-catalina.out"
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:im-server-catalina.out ${logDirName}/
 
         # store messages log
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo cp /var/log/messages /home/vagrant/messages")
-        $(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "sudo chmod 777 /home/vagrant/messages")
+        executeSshCommand --bypass-validation "sudo cp /var/log/messages /home/vagrant/messages"
+        executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/messages"
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:messages ${logDirName}/
     fi
 
@@ -134,6 +134,14 @@ retrieveTestLogs() {
 }
 
 vagrantDestroy() {
+    if [[ $RHEL_OS == true ]]; then
+        INSTALL_ON_NODE=$(detectMasterNode)
+
+        # remove RHEL OS subscription
+        executeSshCommand --bypass-validation "sudo subscription-manager remove --all"
+        executeSshCommand --bypass-validation "sudo subscription-manager unregister"
+    fi
+
     vagrant destroy -f >> ${TEST_LOG}
 }
 
@@ -167,9 +175,9 @@ installCodenvy() {
     VERSION_OPTION=""
     INSTALL_ON_NODE=$(detectMasterNode)
 
-    VALID_CODE=0
+    validCode=0
     if [[ $1 =~ --valid-exit-code=.* ]]; then
-        VALID_CODE=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
+        validCode=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
         shift
     fi
 
@@ -188,7 +196,11 @@ installCodenvy() {
 
     ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "export TERM='xterm' && bash <(curl -L -s ${UPDATE_SERVICE}/repository/public/download/install-codenvy) --suppress --license=accept ${MULTI_OPTION} ${VERSION_OPTION} $@" >> ${TEST_LOG}
     EXIT_CODE=$?
-    validateExitCode ${EXIT_CODE} ${VALID_CODE} --installCodenvy
+
+    # to get last several rows from test log file
+    OUTPUT=$(tail ${TEST_LOG})
+
+    validateExitCode ${EXIT_CODE} ${validCode} --installCodenvy
 
     logEndCommand "installCodenvy"
 }
@@ -196,6 +208,13 @@ installCodenvy() {
 installImCliClient() {
     logStartCommand "installImCliClient "$@
     INSTALL_ON_NODE=$(detectMasterNode)
+
+    local validCode=0
+    if [[ $1 =~ --valid-exit-code=.* ]]; then
+        validCode=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
+        shift
+    fi
+
     VERSION=$1
     VERSION_OPTION=""
     if [[ ! -z ${VERSION} ]]; then
@@ -204,7 +223,12 @@ installImCliClient() {
     fi
 
     ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE} "export TERM='xterm' && bash <(curl -L -s ${UPDATE_SERVICE}/repository/public/download/install-im-cli) --license=accept ${VERSION_OPTION} $@" >> ${TEST_LOG}
-    validateExitCode $?
+    EXIT_CODE=$?
+
+    # to get last several rows from test log file
+    OUTPUT=$(tail ${TEST_LOG})
+
+    validateExitCode ${EXIT_CODE} ${validCode}
 
     logEndCommand "installImCliClient"
 }
@@ -260,9 +284,9 @@ doAuth() {
 executeIMCommand() {
     logStartCommand "executeIMCommand "$@
 
-    VALID_CODE=0
+    local validCode=0
     if [[ $1 =~ --valid-exit-code=.* ]]; then
-        VALID_CODE=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
+        validCode=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
         shift
     fi
     EXECUTE_ON_NODE=$(detectMasterNode)
@@ -271,18 +295,28 @@ executeIMCommand() {
     EXIT_CODE=$?
 
     log ${OUTPUT}
-    validateExitCode ${EXIT_CODE} ${VALID_CODE}
+    validateExitCode ${EXIT_CODE} ${validCode}
 
     logEndCommand "executeIMCommand"
 }
 
+# --valid-exit-code=N
+# --bypass-validation
 executeSshCommand() {
-    logStartCommand "executeSshCommand "$@
-
-    VALID_CODE=0
+    local validCode=0
     if [[ $1 =~ --valid-exit-code=.* ]]; then
-        VALID_CODE=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
+        validCode=`echo "$1" | sed -e "s/--valid-exit-code=//g"`
         shift
+    fi
+
+    bypassValidation=false
+    if [[ $1 =~ --bypass-validation ]]; then
+        bypassValidation=true
+        shift
+    fi
+
+    if [[ $bypassValidation == false ]]; then
+        logStartCommand "executeSshCommand "$@
     fi
 
     COMMAND=$1
@@ -293,10 +327,11 @@ executeSshCommand() {
     OUTPUT=$(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${EXECUTE_ON_NODE} "${COMMAND}")
     EXIT_CODE=$?
 
-    log ${OUTPUT}
-    validateExitCode ${EXIT_CODE} ${VALID_CODE}
-
-    logEndCommand "executeSshCommand"
+    if [[ $bypassValidation == false ]]; then
+        log ${OUTPUT}
+        validateExitCode ${EXIT_CODE} ${validCode}
+        logEndCommand "executeSshCommand"
+    fi
 }
 
 detectMasterNode() {

@@ -14,7 +14,6 @@
  */
 package com.codenvy.im;
 
-
 import org.testng.annotations.Test;
 
 /** @author Anatoliy Bazko */
@@ -23,6 +22,11 @@ public class TestInstallationManagerCli extends BaseIntegrationTest {
     @Test
     public void testInstallImCli() throws Exception {
         doTest("install/test-install-im-cli.sh");
+    }
+
+    @Test
+    public void testInstallImCliInRhelOs() throws Exception {
+        doTest("install/test-install-im-cli-in-rhel-os.sh");
     }
 
     @Test

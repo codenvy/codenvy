@@ -39,7 +39,7 @@ public abstract class AdditionalNodesConfigHelper {
     enum AdditionalNode {        
         RUNNER(NodeConfig.NodeType.RUNNER, Config.ADDITIONAL_RUNNERS, NodeConfig.NodeType.RUNNER.toString().toLowerCase()),
         BUILDER(NodeConfig.NodeType.BUILDER, Config.ADDITIONAL_BUILDERS, NodeConfig.NodeType.BUILDER.toString().toLowerCase()),
-        MACHINE(NodeConfig.NodeType.MACHINE, Config.SWARM_NODES, NODE);
+        MACHINE_NODE(NodeConfig.NodeType.MACHINE_NODE, Config.SWARM_NODES, NODE);
         
         private NodeConfig.NodeType type;
         private String property;

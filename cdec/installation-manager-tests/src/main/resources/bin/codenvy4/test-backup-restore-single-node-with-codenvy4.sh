@@ -19,6 +19,7 @@
 . ./lib.sh
 
 if [[ -n "$1" ]] && [[ "$1" == "rhel" ]]; then
+    RHEL_OS=true
     printAndLog "TEST CASE: Backup and restore single-node Codenvy 4.x On Premise in RHEL OS"
     vagrantUp ${SINGLE_NODE_RHEL_VAGRANT_FILE}
 else

@@ -19,6 +19,7 @@
 . ./lib.sh
 
 if [[ -n "$1" ]] && [[ "$1" == "rhel" ]]; then
+    RHEL_OS=true
     printAndLog "TEST CASE: Install Codenvy 4.x single-node behind the proxy in RHEL OS"
     vagrantUp ${SINGLE_NODE_RHEL_VAGRANT_FILE}
 else
@@ -29,7 +30,7 @@ fi
 # install Codenvy 4.x behind the proxy
 executeSshCommand "echo '$PROXY_IP $PROXY_SERVER' | sudo tee --append /etc/hosts > /dev/null"
 
-installCodenvy ${LATEST_CODENVY4_VERSION} --http-proxy-for-installation=$HTTP_PROXY --https-proxy-for-installation=$HTTPS_PROXY --no-proxy-for-installation="'127.0.0.1|localhost'" --http-proxy-for-codenvy=$HTTP_PASSWORDLESS_PROXY --https-proxy-for-codenvy=$HTTPS_PASSWORDLESS_PROXY --no-proxy-for-codenvy="'127.0.0.1|codenvy'" --http-proxy-for-codenvy-workspaces=$HTTP_PROXY --https-proxy-for-codenvy-workspaces=$HTTPS_PROXY --no-proxy-for-codenvy-workspaces="'127.0.0.1|codenvy'" --http-proxy-for-docker-daemon=$HTTP_PASSWORDLESS_PROXY --https-proxy-for-docker-daemon=$HTTPS_PASSWORDLESS_PROXY --docker-registry-mirror=$HTTPS_PASSWORDLESS_PROXY
+installCodenvy ${LATEST_CODENVY4_VERSION} --http-proxy-for-installation=$HTTP_PROXY --https-proxy-for-installation=$HTTPS_PROXY --no-proxy-for-installation="'127.0.0.1|localhost'" --http-proxy-for-codenvy=$HTTP_PASSWORDLESS_PROXY --https-proxy-for-codenvy=$HTTPS_PASSWORDLESS_PROXY --no-proxy-for-codenvy="'127.0.0.1|codenvy'" --http-proxy-for-codenvy-workspaces=$HTTP_PROXY --https-proxy-for-codenvy-workspaces=$HTTPS_PROXY --no-proxy-for-codenvy-workspaces="'127.0.0.1|codenvy'" --http-proxy-for-docker-daemon=$HTTP_PASSWORDLESS_PROXY --https-proxy-for-docker-daemon=$HTTPS_PASSWORDLESS_PROXY --no-proxy-for-docker-daemon="'127.0.0.1|localhost'" --docker-registry-mirror=$HTTPS_PASSWORDLESS_PROXY
 validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}
 
 # validate proxy settings in system config files
@@ -70,6 +71,7 @@ validateExpectedString ".*--registry-mirror=$HTTPS_PASSWORDLESS_PROXY.*"
 executeSshCommand "cat /etc/sysconfig/docker"
 validateExpectedString ".*HTTP_PROXY=\"$HTTP_PASSWORDLESS_PROXY\".*"
 validateExpectedString ".*HTTPS_PROXY=\"$HTTPS_PASSWORDLESS_PROXY\".*"
+validateExpectedString ".*NO_PROXY=\"127.0.0.1|localhost\".*"
 
 ## check creation of workspace
 authWithoutRealmAndServerDns "admin" "password"

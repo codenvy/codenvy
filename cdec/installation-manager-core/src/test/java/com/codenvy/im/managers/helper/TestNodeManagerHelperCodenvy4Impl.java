@@ -57,7 +57,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
     private Command                     mockCommand;
 
     private static final String              TEST_NODE_DNS  = "node1.hostname";
-    private static final NodeConfig.NodeType TEST_NODE_TYPE = NodeConfig.NodeType.MACHINE;
+    private static final NodeConfig.NodeType TEST_NODE_TYPE = NodeConfig.NodeType.MACHINE_NODE;
     private static final NodeConfig          TEST_NODE      = new NodeConfig(TEST_NODE_TYPE, TEST_NODE_DNS);
 
     private static final String ADDITIONAL_NODES_PROPERTY_NAME = Config.SWARM_NODES;
@@ -122,7 +122,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
                                                           + "'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
         assertEquals(commands.get(k++).toString(), format("PuppetErrorInterrupter{ {'command'='doneState=\"Checking\"; while [ \"${doneState}\" != \"Done\" ]; do     sudo service docker status | grep 'Active: active (running)';     if [ $? -eq 0 ]; then doneState=\"Done\";     else sleep 5;     fi; done', " +
                                                           "'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'} }; looking on errors in file /var/log/puppet/puppet-agent.log locally and at the nodes: " +
-                                                          "[{'host':'node1.hostname', 'port':'22', 'privateKeyFile':'~/.ssh/id_rsa', 'type':'MACHINE'}]", SYSTEM_USER_NAME));
+                                                          "[{'host':'node1.hostname', 'port':'22', 'privateKeyFile':'~/.ssh/id_rsa', 'type':'MACHINE_NODE'}]", SYSTEM_USER_NAME));
         assertTrue(commands.get(k++).toString().matches("\\{'command'='sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back ; "
                                                         + "sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', "
                                                         + "'agent'='LocalAgent'\\}"), "Actual result: " + commands.get(11).toString());
@@ -157,9 +157,9 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         doReturn(new Config(properties)).when(mockConfigManager).loadInstalledCodenvyConfig();
 
         doReturn(ImmutableMap.of(Config.SWARM_NODES, ImmutableList.of("node1.hostname", "node2.hostname")))
-            .when(mockNodesConfigHelper).extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE);
+            .when(mockNodesConfigHelper).extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE);
 
-        doReturn(Config.SWARM_NODES).when(mockNodesConfigHelper).getPropertyNameBy(NodeConfig.NodeType.MACHINE);
+        doReturn(Config.SWARM_NODES).when(mockNodesConfigHelper).getPropertyNameBy(NodeConfig.NodeType.MACHINE_NODE);
 
         Command result = spyHelperCodenvy4.getUpdatePuppetConfigCommand(oldHostName, newHostName);
         assertNotNull(result);
@@ -246,7 +246,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
                                                         Config.SWARM_NODES, format("$host_url:2375\n%s:2375", TEST_NODE_DNS)));
         doReturn(testConfig).when(mockConfigManager).loadInstalledCodenvyConfig();
 
-        assertEquals(spyHelperCodenvy4.recognizeNodeTypeFromConfigBy(TEST_NODE_DNS), NodeConfig.NodeType.MACHINE);
+        assertEquals(spyHelperCodenvy4.recognizeNodeTypeFromConfigBy(TEST_NODE_DNS), NodeConfig.NodeType.MACHINE_NODE);
     }
 
     @Test
@@ -270,7 +270,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
     @Test
     public void testGetNodes() throws Exception {
         ImmutableMap<String, ImmutableList<String>> testNodes = ImmutableMap.of(Config.SWARM_NODES, ImmutableList.of("node1.test.com", "node2.test.com"));
-        doReturn(testNodes).when(mockNodesConfigHelper).extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE);
+        doReturn(testNodes).when(mockNodesConfigHelper).extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE);
 
         Map result = spyHelperCodenvy4.getNodes();
         assertEquals(result, new HashMap(testNodes));

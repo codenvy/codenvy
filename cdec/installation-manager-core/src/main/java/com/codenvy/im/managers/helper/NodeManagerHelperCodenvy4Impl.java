@@ -209,13 +209,13 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         List<Command> commands = new ArrayList<>();
 
         AdditionalNodesConfigHelper nodesConfigHelper = getNodesConfigHelper(config);
-        List<String> additionalNodes = nodesConfigHelper.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE).get(nodesConfigHelper.getPropertyNameBy(NodeConfig.NodeType.MACHINE));
+        List<String> additionalNodes = nodesConfigHelper.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE).get(nodesConfigHelper.getPropertyNameBy(NodeConfig.NodeType.MACHINE_NODE));
         if (additionalNodes == null) {
             return CommandLibrary.EMPTY_COMMAND;
         }
 
         for (String dns : additionalNodes) {
-            NodeConfig node = new NodeConfig(NodeConfig.NodeType.MACHINE, dns);
+            NodeConfig node = new NodeConfig(NodeConfig.NodeType.MACHINE_NODE, dns);
 
             List<Command> nodeCommands = new ArrayList<>();
 
@@ -236,7 +236,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         Config config = configManager.loadInstalledCodenvyConfig();
 
         AdditionalNodesConfigHelper helper = getNodesConfigHelper(config);
-        Map<String, List<String>> additionalMachines = helper.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE);
+        Map<String, List<String>> additionalMachines = helper.extractAdditionalNodesDns(NodeConfig.NodeType.MACHINE_NODE);
         if (additionalMachines != null) {
             return additionalMachines;
         }
@@ -250,7 +250,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         String additionalNodes = config.getValueWithoutSubstitution(Config.SWARM_NODES);   // don't substitute enclosed variables like the "$host_url"
 
         if (additionalNodes != null && additionalNodes.contains(dns)) {
-            return NodeConfig.NodeType.MACHINE;
+            return NodeConfig.NodeType.MACHINE_NODE;
         }
 
         return null;

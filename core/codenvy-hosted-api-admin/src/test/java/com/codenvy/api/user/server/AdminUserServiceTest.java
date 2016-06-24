@@ -15,47 +15,34 @@
 package com.codenvy.api.user.server;
 
 import com.codenvy.api.user.server.dao.AdminUserDao;
+import com.jayway.restassured.response.Response;
 
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
-import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.subject.Subject;
-import org.everrest.core.impl.ApplicationContextImpl;
-import org.everrest.core.impl.ApplicationProviderBinder;
-import org.everrest.core.impl.ContainerResponse;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.everrest.assured.EverrestJetty;
 import org.everrest.core.impl.EnvironmentContext;
-import org.everrest.core.impl.EverrestConfiguration;
-import org.everrest.core.impl.EverrestProcessor;
-import org.everrest.core.impl.ProviderBinder;
-import org.everrest.core.impl.ResourceBinderImpl;
-import org.everrest.core.impl.uri.UriBuilderImpl;
-import org.everrest.core.tools.DependencySupplierImpl;
-import org.everrest.core.tools.ResourceLauncher;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
+import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,11 +53,10 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Anatoliy Bazko
  */
-@Listeners(value = {MockitoTestNGListener.class})
+@Listeners(value = {MockitoTestNGListener.class, EverrestJetty.class})
 public class AdminUserServiceTest {
-
-    private final String BASE_URI     = "http://localhost/service";
-    private final String SERVICE_PATH = BASE_URI + "/admin/user";
+    @SuppressWarnings("unused")
+    ApiExceptionMapper apiExceptionMapper;
 
     @Mock
     AdminUserDao       userDao;
@@ -81,108 +67,39 @@ public class AdminUserServiceTest {
     @Mock
     SecurityContext    securityContext;
 
+    @InjectMocks
     AdminUserService userService;
-
-    ResourceLauncher launcher;
-
-    @BeforeMethod
-    public void setUp() throws Exception {
-        ResourceBinderImpl resources = new ResourceBinderImpl();
-        DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(AdminUserDao.class, userDao);
-
-        userService = new AdminUserService(userDao);
-        final Field uriField = userService.getClass()
-                                          .getSuperclass()
-                                          .getDeclaredField("uriInfo");
-        uriField.setAccessible(true);
-        uriField.set(userService, uriInfo);
-
-        resources.addResource(userService, null);
-
-        EverrestProcessor processor = new EverrestProcessor(resources,
-                                                            new ApplicationProviderBinder(),
-                                                            dependencies,
-                                                            new EverrestConfiguration(),
-                                                            null);
-        launcher = new ResourceLauncher(processor);
-        ProviderBinder providerBinder = ProviderBinder.getInstance();
-        providerBinder.addExceptionMapper(ApiExceptionMapper.class);
-        ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, providerBinder));
-        //set up user
-        final User user = createUser();
-        when(environmentContext.get(SecurityContext.class)).thenReturn(securityContext);
-
-        when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
-        when(uriInfo.getRequestUri()).thenReturn(URI.create(SERVICE_PATH));
-
-        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setSubject(new Subject() {
-
-            @Override
-            public String getUserName() {
-                return user.getEmail();
-            }
-
-            @Override
-            public boolean hasPermission(String domain, String instance, String action) {
-                return false;
-            }
-
-            @Override
-            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
-            }
-
-            @Override
-            public String getToken() {
-                return null;
-            }
-
-            @Override
-            public String getUserId() {
-                return user.getId();
-            }
-
-            @Override
-            public boolean isTemporary() {
-                return false;
-            }
-        });
-    }
-
-    private User createUser() throws NotFoundException, ServerException {
-        final User testUser = new User().withId("test_id").withEmail("test@email");
-        when(userDao.getAll(anyInt(), anyInt())).thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
-        return testUser;
-    }
 
     @Test
     public void shouldReturnAllUsers() throws Exception {
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "?maxItems=3&skipCount=4", null);
+        User testUser = new User().withId("test_id").withEmail("test@email");
+        when(userDao.getAll(anyInt(), anyInt())).thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
 
-        assertEquals(response.getStatus(), OK.getStatusCode());
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/admin/user?maxItems=3&skipCount=4");
+
+        assertEquals(response.getStatusCode(), OK.getStatusCode());
         verify(userDao).getAll(3, 4);
 
-        @SuppressWarnings("unchecked")
-        List<UserDescriptor> users = (List<UserDescriptor>)response.getEntity();
+        List<UserDescriptor> users = DtoFactory.getInstance().createListDtoFromJson(response.getBody().print(), UserDescriptor.class);
         assertEquals(users.size(), 1);
+        final UserDescriptor fetchedUser = users.get(0);
+        assertEquals(fetchedUser.getId(), testUser.getId());
+        assertEquals(fetchedUser.getEmail(), testUser.getEmail());
     }
 
     @Test
     public void shouldThrowServerErrorIfDaoThrowException() throws Exception {
         when(userDao.getAll(anyInt(), anyInt())).thenThrow(new ServerException("some error"));
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH, null);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/admin/user");
 
-        assertEquals(response.getStatus(), INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    private ContainerResponse makeRequest(String method, String path, Object entity) throws Exception {
-        Map<String, List<String>> headers = null;
-        byte[] data = null;
-        if (entity != null) {
-            headers = new HashMap<>();
-            headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_JSON));
-            data = JsonHelper.toJson(entity).getBytes();
-        }
-        return launcher.service(method, path, BASE_URI, headers, data, null, environmentContext);
+        assertEquals(response.getStatusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
+        final ServiceError serviceError = DtoFactory.getInstance().createDtoFromJson(response.body().print(), ServiceError.class);
+        assertEquals(serviceError.getMessage(), "some error");
     }
 }

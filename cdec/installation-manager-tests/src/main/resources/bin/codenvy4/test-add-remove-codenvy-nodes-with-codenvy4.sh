@@ -19,6 +19,7 @@
 . ./lib.sh
 
 if [[ -n "$1" ]] && [[ "$1" == "rhel" ]]; then
+    RHEL_OS=true
     printAndLog "TEST CASE: Add and remove Codenvy 4.x All-In-One nodes in RHEL OS"
     vagrantUp ${SINGLE_CODENVY4_RHEL_WITH_ADDITIONAL_NODES_VAGRANT_FILE}
 else
@@ -49,7 +50,7 @@ storeCodenvyLicense
 
 # add node1.${HOST_URL}
 executeIMCommand "add-node" "--codenvy-ip 192.168.56.110" "node1.${HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
 
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
@@ -87,7 +88,7 @@ executeSshCommand "sudo sed -i 's/ node1.${HOST_URL}/ node1.${NEW_HOST_URL}/' /e
 
 # remove node1.${HOST_URL}
 executeIMCommand "remove-node" "node1.${HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
 doSleep "1m"  "Wait until Docker machine takes into account /usr/local/swarm/node_list config"
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
@@ -95,7 +96,7 @@ validateExpectedString ".*Nodes\",\"1\".*\[\" ${NEW_HOST_URL}\",\"${NEW_HOST_URL
 
 # add node1.${NEW_HOST_URL}
 executeIMCommand "add-node" "node1.${NEW_HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node1.${NEW_HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${NEW_HOST_URL}\".*"
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
 validateExpectedString ".*Nodes\",\"2\".*\[\" node1.${NEW_HOST_URL}\",\"node1.${NEW_HOST_URL}:2375\"\].*\[\" ${NEW_HOST_URL}\",\"${NEW_HOST_URL}:2375\"\].*"
@@ -103,14 +104,14 @@ validateExpectedString ".*Nodes\",\"2\".*\[\" node1.${NEW_HOST_URL}\",\"node1.${
 
 # add node2
 executeIMCommand "add-node" "node2.${NEW_HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
 validateExpectedString ".*Nodes\",\"3\".*\[\" node1.${NEW_HOST_URL}\",\"node1.${NEW_HOST_URL}:2375\"\].*\[\" node2.${NEW_HOST_URL}\",\"node2.${NEW_HOST_URL}:2375\"].*\[\" ${NEW_HOST_URL}\",\"${NEW_HOST_URL}:2375\"\].*"
 
 # remove node2
 executeIMCommand "remove-node" "node2.${NEW_HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
 
 executeSshCommand "sudo find /var/lib/puppet/ssl -name node2.${NEW_HOST_URL}.pem -delete" "node2.${NEW_HOST_URL}"  # remove puppet agent certificate
 
@@ -126,14 +127,14 @@ validateExpectedString ".*Node..node2.${NEW_HOST_URL}..is.not.found.*"
 
 # add node2 again
 executeIMCommand "add-node" "node2.${NEW_HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node2.${NEW_HOST_URL}\".*"
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
 validateExpectedString ".*Nodes\",\"3\".*\[\" node1.${NEW_HOST_URL}\",\"node1.${NEW_HOST_URL}:2375\"\].*\[\" node2.${NEW_HOST_URL}\",\"node2.${NEW_HOST_URL}:2375\"].*\[\" ${NEW_HOST_URL}\",\"${NEW_HOST_URL}:2375\"\].*"
 
 # remove node1.${NEW_HOST_URL}
 executeIMCommand "remove-node" "node1.${NEW_HOST_URL}"
-validateExpectedString ".*\"type\".\:.\"MACHINE\".*\"host\".\:.\"node1.${NEW_HOST_URL}\".*"
+validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${NEW_HOST_URL}\".*"
 doSleep "1m"  "Wait until Docker machine takes into account /usr/local/swarm/node_list config"
 executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${HOST_URL}:23750/info"
