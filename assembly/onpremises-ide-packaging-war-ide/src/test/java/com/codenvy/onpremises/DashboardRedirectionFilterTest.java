@@ -94,23 +94,6 @@ public class DashboardRedirectionFilterTest {
         };
     }
 
-    @Test
-    public void shouldSkipRequestToTemporaryWs() throws Exception {
-        //given
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/ws/ws-id");
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/ws/ws-id"));
-        EnvironmentContext context = new EnvironmentContext();
-        context.setWorkspaceId("ws-id");
-        context.setWorkspaceTemporary(true);
-        EnvironmentContext.setCurrent(context);
-
-        //when
-        filter.doFilter(request, response, chain);
-
-        //then
-        verify(chain).doFilter((ServletRequest)any(ServerRequest.class), any(ServletResponse.class));
-    }
 
     @Test(dataProvider = "notGETMethodProvider")
     public void shouldSkipNotGETRequest(String method) throws Exception {
