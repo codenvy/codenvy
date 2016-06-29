@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-platform-api-client-java-parent</artifactId>
         <groupId>com.codenvy.platform-api-client-java</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-platform-api-client-java-core</artifactId>
     <packaging>bundle</packaging>

@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-microsoft-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-microsoft-vsts-pullrequest</artifactId>
     <name>Codenvy Plugin :: Microsoft :: VSTS Pull request</name>

@@ -85,7 +85,7 @@ public class InstallManagerTest extends BaseTest {
         MockitoAnnotations.initMocks(this);
 
         installManagerArtifact = spy(new InstallManagerArtifact(CODENVY_IM_BASE_DIR, UPDATE_API_ENDPOINT, DOWNLOAD_DIR, SAAS_API_ENDPOINT,transport, configManager));
-        cdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, ASSEMBLY_PROPERTIES, transport, configManager, nodeManager));
+        cdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, transport, configManager, nodeManager));
 
         installManager = spy(new InstallManager(new HashSet<>(Arrays.asList(installManagerArtifact, cdecArtifact))));
     }

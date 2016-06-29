@@ -89,7 +89,7 @@ public class DownloadManagerTest extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         initMocks(this);
-        cdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, ASSEMBLY_PROPERTIES, transport, configManager, nodeManager));
+        cdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, transport, configManager, nodeManager));
         installManagerArtifact = spy(new InstallManagerArtifact(CODENVY_IM_BASE_DIR, UPDATE_API_ENDPOINT, DOWNLOAD_DIR, SAAS_API_ENDPOINT, transport, configManager));
         downloadManager = spy(new DownloadManager(UPDATE_API_ENDPOINT,
                                                   DOWNLOAD_DIR,

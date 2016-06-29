@@ -16,12 +16,12 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.codenvy.platform-api-client-java</groupId>
     <artifactId>codenvy-platform-api-client-java-parent</artifactId>
-    <version>4.4.0-RC1-SNAPSHOT</version>
+    <version>4.5.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Platform API Client</name>
     <licenses>

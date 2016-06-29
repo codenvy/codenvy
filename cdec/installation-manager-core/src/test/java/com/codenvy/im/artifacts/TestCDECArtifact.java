@@ -97,7 +97,7 @@ public class TestCDECArtifact extends BaseTest {
         initMocks(this);
 
         spyConfigManager = spy(new ConfigManager(UPDATE_API_ENDPOINT, ETC_PUPPET, mockTransport));
-        spyCdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, ASSEMBLY_PROPERTIES, mockTransport, spyConfigManager, mockNodeManager));
+        spyCdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, mockTransport, spyConfigManager, mockNodeManager));
         spyCDECSingleServerHelper = spy(new CDECSingleServerHelper(spyCdecArtifact, spyConfigManager));
         spyCDECMultiServerHelper = spy(new CDECMultiServerHelper(spyCdecArtifact, spyConfigManager));
 
@@ -143,6 +143,9 @@ public class TestCDECArtifact extends BaseTest {
                                     "echo -n \"$test_property1\"");
 
         OSUtils.VERSION = "7";
+
+        doReturn(Paths.get(ASSEMBLY_PROPERTIES)).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_4_4_0);
+        doReturn(Paths.get(ASSEMBLY_PROPERTIES)).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_3);
     }
 
     @Test
@@ -178,7 +181,7 @@ public class TestCDECArtifact extends BaseTest {
         int steps = spyCdecArtifact.getInstallInfo(InstallType.SINGLE_SERVER).size();
         for (int i = 0; i < steps; i++) {
             options.setStep(i);
-            Command command = spyCdecArtifact.getInstallCommand(null, Paths.get("some path"), options);
+            Command command = spyCdecArtifact.getInstallCommand(Version.valueOf(CODENVY_4_VERSION), Paths.get("some path"), options);
             assertNotNull(command);
         }
     }
@@ -332,7 +335,7 @@ public class TestCDECArtifact extends BaseTest {
         int steps = spyCdecArtifact.getInstallInfo(InstallType.MULTI_SERVER).size();
         for (int i = 0; i < steps; i++) {
             options.setStep(i);
-            Command command = spyCdecArtifact.getInstallCommand(null, Paths.get("some path"), options);
+            Command command = spyCdecArtifact.getInstallCommand(Version.valueOf(CODENVY_3_VERSION), Paths.get("some path"), options);
             assertNotNull(command);
         }
     }

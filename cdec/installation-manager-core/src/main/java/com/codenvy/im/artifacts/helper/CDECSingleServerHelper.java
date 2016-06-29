@@ -190,12 +190,12 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
                                         "Launch puppet agent");
 
             case 7:
-                Command command = createCommand("doneState=\"Installing\"; " +
-                                                "testFile=\"/home/codenvy/codenvy-tomcat/logs/catalina.out\"; " +
+                Command command = createCommand(format("doneState=\"Installing\"; " +
+                                                "testFile=\"%s/logs/catalina.out\"; " +
                                                 "while [ \"${doneState}\" != \"Installed\" ]; do " +
                                                 "    if sudo test -f ${testFile}; then doneState=\"Installed\"; fi; " +
                                                 "    sleep 30; " +
-                                                "done");
+                                                "done", getPathToCodenvyRoot(versionToInstall)));
                 return new PuppetErrorInterrupter(command, configManager);
 
             case 8:

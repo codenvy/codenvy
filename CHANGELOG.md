@@ -1,5 +1,82 @@
 # Change Log
 
+## [4.4.0](https://github.com/codenvy/codenvy/tree/4.4.0) (2016-06-28)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.5...4.4.0)
+
+**Issues with no labels:**
+
+- Prompt message "Unable to get Profile" when I open IDE\(Codenvy \(Next-Generation Beta\)\) [\#333](https://github.com/codenvy/codenvy/issues/333)
+
+**Pull requests merged:**
+
+- CHE-1396 Double nav bar in some cases [\#332](https://github.com/codenvy/codenvy/pull/332) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Fix tear down steps on exit in IM CLI integration tests [\#331](https://github.com/codenvy/codenvy/pull/331) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1276: Move DockerException to package exception [\#330](https://github.com/codenvy/codenvy/pull/330) ([akorneta](https://github.com/akorneta))
+- CODENVY-309: simplify verification of RHEL subscription [\#329](https://github.com/codenvy/codenvy/pull/329) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-635: Create attachment files in separate temp directory [\#275](https://github.com/codenvy/codenvy/pull/275) ([vinokurig](https://github.com/vinokurig))
+
+## [4.3.5](https://github.com/codenvy/codenvy/tree/4.3.5) (2016-06-24)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.4...4.3.5)
+
+**Pull requests merged:**
+
+- CHE-1277 Move machines output to project perpective [\#328](https://github.com/codenvy/codenvy/pull/328) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Restore update server address for integration tests [\#327](https://github.com/codenvy/codenvy/pull/327) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-701: fix Codenvy version where the path is changed [\#326](https://github.com/codenvy/codenvy/pull/326) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Switch to temporary address updater-nightly2.codenvy-dev.com [\#325](https://github.com/codenvy/codenvy/pull/325) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-701: adapt IM CLI to use tomcat directory of Codenvy on-prem [\#323](https://github.com/codenvy/codenvy/pull/323) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix redirect to site login page on logout [\#321](https://github.com/codenvy/codenvy/pull/321) ([ashumilova](https://github.com/ashumilova))
+- CODENVY-614: rename folder che-templates to templates [\#320](https://github.com/codenvy/codenvy/pull/320) ([riuvshin](https://github.com/riuvshin))
+- Codenvy 694 Fix limits checking user on ws startup [\#319](https://github.com/codenvy/codenvy/pull/319) ([mshaposhnik](https://github.com/mshaposhnik))
+- CODENVY-644: add --no-proxy-for-docker-daemon option to bootstrap script [\#318](https://github.com/codenvy/codenvy/pull/318) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Rework AdminUserServiceTests with everrest assured [\#317](https://github.com/codenvy/codenvy/pull/317) ([sleshchenko](https://github.com/sleshchenko))
+- CODENVY-456: rename 'MACHINE' node type to 'MACHINE NODE' [\#316](https://github.com/codenvy/codenvy/pull/316) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1180: add ability to configure private docker registries [\#315](https://github.com/codenvy/codenvy/pull/315) ([olexii4](https://github.com/olexii4))
+- Fix default properties of Codenvy 4.4.0 on-prem [\#314](https://github.com/codenvy/codenvy/pull/314) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-309: check subscription of RHEL when installing Codenvy on-prem [\#313](https://github.com/codenvy/codenvy/pull/313) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add debug information in log to track anonymous user creation [\#312](https://github.com/codenvy/codenvy/pull/312) ([skabashnyuk](https://github.com/skabashnyuk))
+- CODENVY-677: fix factories loading [\#311](https://github.com/codenvy/codenvy/pull/311) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-1296: Use docker auth config saved in user preferences to start machine from private image [\#310](https://github.com/codenvy/codenvy/pull/310) ([mmorhun](https://github.com/mmorhun))
+- Ship Codenvy on-prem 4.3.4 [\#308](https://github.com/codenvy/codenvy/pull/308) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1301: add not modified condition to the machine token response [\#307](https://github.com/codenvy/codenvy/pull/307) ([olexii4](https://github.com/olexii4))
+- CHE-1342: improve navbar styles [\#301](https://github.com/codenvy/codenvy/pull/301) ([olexii4](https://github.com/olexii4))
+- add che.lib.version property [\#291](https://github.com/codenvy/codenvy/pull/291) ([riuvshin](https://github.com/riuvshin))
+
+## [4.3.4](https://github.com/codenvy/codenvy/tree/4.3.4) (2016-06-17)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.3...4.3.4)
+
+## [4.3.3](https://github.com/codenvy/codenvy/tree/4.3.3) (2016-06-17)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.2...4.3.3)
+
+**Pull requests merged:**
+
+- fix UD transitive dependency of gulp-angular-templatecache [\#306](https://github.com/codenvy/codenvy/pull/306) ([olexii4](https://github.com/olexii4))
+- CODENVY-667 Add 'search' action for stacks and recipes [\#305](https://github.com/codenvy/codenvy/pull/305) ([sleshchenko](https://github.com/sleshchenko))
+- CODENVY-666: Fix accepting of the factories by the existing URLs [\#304](https://github.com/codenvy/codenvy/pull/304) ([akorneta](https://github.com/akorneta))
+- CODENVY-446: fix script to migrate Codenvy 4.2.2 to 4.3.2 [\#302](https://github.com/codenvy/codenvy/pull/302) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1326: check recipe location exists before setting permissions [\#300](https://github.com/codenvy/codenvy/pull/300) ([ashumilova](https://github.com/ashumilova))
+- CODENVY-547: fix error of changing of non-default admin password [\#299](https://github.com/codenvy/codenvy/pull/299) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-466: fix migrate snapshot script to work around incomplete data [\#298](https://github.com/codenvy/codenvy/pull/298) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-446: update codenvy migration script; fix integration tests. [\#296](https://github.com/codenvy/codenvy/pull/296) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1095: add new UD/IDE navigation experience [\#295](https://github.com/codenvy/codenvy/pull/295) ([akurinnoy](https://github.com/akurinnoy))
+- CODENVY-446: add mongo script to update snapshots in time of migration [\#294](https://github.com/codenvy/codenvy/pull/294) ([dmytro-ndp](https://github.com/dmytro-ndp))
+
+## [4.3.2](https://github.com/codenvy/codenvy/tree/4.3.2) (2016-06-14)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.1...4.3.2)
+
+**Pull requests merged:**
+
+- CODENVY-653: fix error of logging event by using Update Server [\#293](https://github.com/codenvy/codenvy/pull/293) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix creation of user in integration test of backup/restore Codenvy 4 [\#292](https://github.com/codenvy/codenvy/pull/292) ([dmytro-ndp](https://github.com/dmytro-ndp))
+
+## [4.3.1](https://github.com/codenvy/codenvy/tree/4.3.1) (2016-06-14)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.0...4.3.1)
+
+**Pull requests merged:**
+
+- CODENVY-446: fix migration script and default codenvy properties [\#290](https://github.com/codenvy/codenvy/pull/290) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-648 Add swagger annotations for Permissions API [\#289](https://github.com/codenvy/codenvy/pull/289) ([sleshchenko](https://github.com/sleshchenko))
+
 ## [4.3.0](https://github.com/codenvy/codenvy/tree/4.3.0) (2016-06-13)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.3.0-RC1...4.3.0)
 
@@ -18,7 +95,6 @@
 - CODENVY-641: Add factory permission filter [\#278](https://github.com/codenvy/codenvy/pull/278) ([akorneta](https://github.com/akorneta))
 - Replace missing exception [\#277](https://github.com/codenvy/codenvy/pull/277) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - Revert machine token interceptor [\#276](https://github.com/codenvy/codenvy/pull/276) ([akorneta](https://github.com/akorneta))
-- CODENVY-635: Create attachment files in separate temp directory [\#275](https://github.com/codenvy/codenvy/pull/275) ([vinokurig](https://github.com/vinokurig))
 - Replace codenvy-dev.com SaaS server on a1.codenvy-dev.com [\#274](https://github.com/codenvy/codenvy/pull/274) ([dmytro-ndp](https://github.com/dmytro-ndp))
 - Fix maven groupid for wsagent artifact [\#273](https://github.com/codenvy/codenvy/pull/273) ([akorneta](https://github.com/akorneta))
 - CODENVY-27; remove interceptor as it is not needed anymore [\#272](https://github.com/codenvy/codenvy/pull/272) ([mshaposhnik](https://github.com/mshaposhnik))

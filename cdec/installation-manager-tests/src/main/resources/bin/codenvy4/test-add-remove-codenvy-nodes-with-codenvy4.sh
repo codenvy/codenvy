@@ -27,9 +27,6 @@ else
     vagrantUp ${SINGLE_CODENVY4_WITH_ADDITIONAL_NODES_VAGRANT_FILE}
 fi
 
-printAndLog "TEST CASE: Add and remove Codenvy 4.x All-In-One nodes"
-vagrantUp ${SINGLE_CODENVY4_WITH_ADDITIONAL_NODES_VAGRANT_FILE}
-
 # install Codenvy 4.x
 installCodenvy ${LATEST_CODENVY4_VERSION}
 validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}

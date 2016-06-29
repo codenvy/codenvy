@@ -37,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -280,12 +279,12 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
                     throw new IllegalArgumentException("Site node config not found.");
                 }
 
-                Command command = createCommand("doneState=\"Installing\"; " +
-                                                "testFile=\"/home/codenvy/codenvy-tomcat/logs/catalina.out\"; " +
+                Command command = createCommand(format("doneState=\"Installing\"; " +
+                                                "testFile=\"%s/logs/catalina.out\"; " +
                                                 "while [ \"${doneState}\" != \"Installed\" ]; do " +
                                                 "    if sudo test -f ${testFile}; then doneState=\"Installed\"; fi; " +
                                                 "    sleep 30; " +
-                                                "done", extractConfigFrom(config, NodeConfig.NodeType.SITE));
+                                                "done", getPathToCodenvyRoot(versionToInstall)), extractConfigFrom(config, NodeConfig.NodeType.SITE));
                 return new PuppetErrorInterrupter(command, nodeConfigs, configManager);
 
             case 8:

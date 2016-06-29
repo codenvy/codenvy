@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.che.api.core.rest.shared.dto.ApiInfo;
 
 import javax.inject.Named;
@@ -63,17 +64,13 @@ public class CDECArtifact extends AbstractArtifact {
 
     private final NodeManager nodeManager;
 
-    protected final String assemblyProperties;
-
     @Inject
     public CDECArtifact(@Named("installation-manager.update_server_endpoint") String updateEndpoint,
                         @Named("installation-manager.download_dir") String downloadDir,
-                        @Named("installation-manager.assembly_properties") String assemblyProperties,
                         HttpTransport transport,
                         ConfigManager configManager,
                         NodeManager nodeManager) {
         super(NAME, updateEndpoint, downloadDir, transport, configManager);
-        this.assemblyProperties = assemblyProperties;
         this.nodeManager = nodeManager;
     }
 
@@ -134,18 +131,33 @@ public class CDECArtifact extends AbstractArtifact {
     }
 
     protected Optional<Version> fetchAssemblyVersion() throws IOException {
-        Command command = getReadAssemblyPropertiesCommand();
+        Path pathToAssemblyProperties = getPathToAssemblyProperties(Version.VERSION_4_4_0);
+        Command command = getReadAssemblyPropertiesCommand(pathToAssemblyProperties);
         String result = command.execute().trim();
-        return result.isEmpty() ? Optional.<Version>empty() : Optional.of(Version.valueOf(result));
+        if (StringUtils.isEmpty(result)) {
+            pathToAssemblyProperties = getPathToAssemblyProperties(Version.VERSION_3);
+            command = getReadAssemblyPropertiesCommand(pathToAssemblyProperties);
+            result = command.execute().trim();
+        }
+
+        return StringUtils.isEmpty(result) ? Optional.<Version>empty() : Optional.of(Version.valueOf(result));
     }
 
-    protected Command getReadAssemblyPropertiesCommand() throws IOException {
+    /**
+     * Get path to Codenvy assembly.properties file
+     * @param codenvyVersion
+     */
+    Path getPathToAssemblyProperties(Version codenvyVersion) {
+        return getHelper().getPathToCodenvyRoot(codenvyVersion).resolve("conf/assembly.properties");
+    }
+
+    protected Command getReadAssemblyPropertiesCommand(Path pathToAssemblyProperties) throws IOException {
         String cmd = format("if sudo test -f %1$s; then " +
                             "   sudo cat %1$s " +
                             "       | grep assembly.version " +
                             "       | sed 's/assembly.version\\s*=\\s*\\(.*\\)/\\1/';" +
-                            "fi", assemblyProperties);
-        if (!assemblyProperties.startsWith("/")) { // make it works for tests
+                            "fi", pathToAssemblyProperties);
+        if (!pathToAssemblyProperties.startsWith("/")) { // make it works for tests
             cmd = cmd.replaceAll("sudo", "");
         }
 
@@ -297,6 +309,10 @@ public class CDECArtifact extends AbstractArtifact {
 
     protected CDECArtifactHelper getHelper(InstallType type) {
         return HELPERS.get(type);
+    }
+
+    protected CDECArtifactHelper getHelper() {
+        return HELPERS.get(InstallType.SINGLE_SERVER);
     }
 
     protected boolean isApiServiceAlive() {

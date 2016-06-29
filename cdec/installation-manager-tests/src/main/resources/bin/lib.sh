@@ -21,6 +21,7 @@
 trap cleanUp EXIT
 
 cleanUp() {
+    log "clean up on exit"
     vagrantDestroy
 }
 
@@ -69,12 +70,15 @@ validateExitCode() {
         printAndLog "================================================="
     fi
 
-    vagrantDestroy
     exit 1
 }
 
 retrieveTestLogs() {
     INSTALL_ON_NODE=$(detectMasterNode)
+    if [[ -z $INSTALL_ON_NODE ]]; then
+        exit
+    fi
+
     logDirName="logs/`basename "$0" | sed 's/\\.sh//g'`"
     log "Name of directory with logs: ${logDirName}"
     [[ -d "${logDirName}" ]] && exit
@@ -95,7 +99,7 @@ retrieveTestLogs() {
 
             if [[ ${HOST} == "api" || ${HOST} == "analytics" || ${HOST} == "site" || ${HOST} == "runner1" || ${HOST} == "builder1" ]]; then
                 # store Codenvy log
-                executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out" ${HOST}.codenvy
+                executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out" ${HOST}.codenvy   # for codenvy 3.x
                 executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/codenvy-catalina.out" ${HOST}.codenvy
                 scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${HOST}.codenvy:codenvy-catalina.out ${logDirName}/codenvy-catalina-${HOST}.out
             fi
@@ -114,7 +118,8 @@ retrieveTestLogs() {
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:/var/log/puppet/puppet-agent.log ${logDirName}/
 
         # store Codenvy log
-        executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out"
+        executeSshCommand --bypass-validation "sudo cp /home/codenvy/codenvy-tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out"   # for codenvy 3.x
+        executeSshCommand --bypass-validation "sudo cp /home/codenvy/tomcat/logs/catalina.out /home/vagrant/codenvy-catalina.out"           # for codenvy 4.x
         executeSshCommand --bypass-validation "sudo chmod 777 /home/vagrant/codenvy-catalina.out"
         scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${INSTALL_ON_NODE}:codenvy-catalina.out ${logDirName}/
 
@@ -135,8 +140,6 @@ retrieveTestLogs() {
 
 vagrantDestroy() {
     if [[ $RHEL_OS == true ]]; then
-        INSTALL_ON_NODE=$(detectMasterNode)
-
         # remove RHEL OS subscription
         executeSshCommand --bypass-validation "sudo subscription-manager remove --all"
         executeSshCommand --bypass-validation "sudo subscription-manager unregister"
@@ -342,8 +345,6 @@ detectMasterNode() {
         ping -c1 -q ${HOST_URL} >> /dev/null
         if [[ $? == 0 ]]; then
             echo ${HOST_URL}
-        else
-            validateExitCode 1
         fi
     fi
 }

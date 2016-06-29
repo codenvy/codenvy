@@ -20,11 +20,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-assembly-parent</artifactId>
-    <version>4.4.0-RC1-SNAPSHOT</version>
+    <version>4.5.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
@@ -46,8 +46,8 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <che.lib.version>4.4.0-RC1-SNAPSHOT</che.lib.version>
-        <che.version>4.4.0-RC1-SNAPSHOT</che.version>
+        <che.lib.version>4.5.0-RC1-SNAPSHOT</che.lib.version>
+        <che.version>4.5.0-RC1-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>

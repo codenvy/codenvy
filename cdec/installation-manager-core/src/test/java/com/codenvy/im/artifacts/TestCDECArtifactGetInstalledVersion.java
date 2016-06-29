@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -58,13 +59,32 @@ public class TestCDECArtifactGetInstalledVersion extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         initMocks(this);
-        spyCdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, ASSEMBLY_PROPERTIES, transport, configManager, nodeManager));
+        spyCdecArtifact = spy(new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, transport, configManager, nodeManager));
+        doReturn(Paths.get(ASSEMBLY_PROPERTIES)).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_4_4_0);
     }
 
     @Test
-    public void fetchAssemblyVersionFromSingleNode() throws Exception {
+    public void getPathToAssemblyProperties() throws Exception {
+        CDECArtifact testCdecArtifact = new CDECArtifact(UPDATE_API_ENDPOINT, DOWNLOAD_DIR, transport, configManager, nodeManager);
+        assertEquals(testCdecArtifact.getPathToAssemblyProperties(Version.VERSION_3), Paths.get("/home/codenvy/codenvy-tomcat/conf/assembly.properties"));
+        assertEquals(testCdecArtifact.getPathToAssemblyProperties(Version.VERSION_4_4_0), Paths.get("/home/codenvy/tomcat/conf/assembly.properties"));
+    }
+
+    @Test
+    public void fetchCodenvy3AssemblyVersionFromSingleNode() throws Exception {
         prepareSingleNodeEnv(configManager, transport);
 
+        doReturn(Paths.get(ASSEMBLY_PROPERTIES)).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_3);
+        doReturn(Paths.get("target/non-exist")).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_4_4_0);
+        assertEquals(spyCdecArtifact.fetchAssemblyVersion(), Optional.of(TEST_VERSION));
+    }
+
+    @Test
+    public void fetchCodenvy4AssemblyVersionFromSingleNode() throws Exception {
+        prepareSingleNodeEnv(configManager, transport);
+
+        doReturn(Paths.get("target/non-exist")).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_3);
+        doReturn(Paths.get(ASSEMBLY_PROPERTIES)).when(spyCdecArtifact).getPathToAssemblyProperties(Version.VERSION_4_4_0);
         assertEquals(spyCdecArtifact.fetchAssemblyVersion(), Optional.of(TEST_VERSION));
     }
 
@@ -72,12 +92,13 @@ public class TestCDECArtifactGetInstalledVersion extends BaseTest {
     public void fetchAssemblyVersionFromMultiNode() throws Exception {
         prepareMultiNodeEnv(configManager, transport);
 
-        Command readAssemblyPropertiesCommand = spyCdecArtifact.getReadAssemblyPropertiesCommand();
+        Command readAssemblyPropertiesCommand = spyCdecArtifact.getReadAssemblyPropertiesCommand(Paths.get(ASSEMBLY_PROPERTIES));
         assertEquals(readAssemblyPropertiesCommand.toString(), format("{'command'='if  test -f target/assembly.properties; then" +
-                                                                      "     cat target/assembly.properties" +
+                                                                      "     cat %s" +
                                                                       "        | grep assembly.version" +
                                                                       "        | sed 's/assembly.version\\s*=\\s*\\(.*\\)/\\1/';fi', " +
                                                                       "'agent'='{'host'='api.example.com', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}",
+                                                                      ASSEMBLY_PROPERTIES,
                                                                       SYSTEM_USER_NAME));
     }
 
@@ -125,7 +146,6 @@ public class TestCDECArtifactGetInstalledVersion extends BaseTest {
         assertFalse(spyCdecArtifact.getInstalledVersion().isPresent());
         doThrow(IllegalVersionException.class).when(spyCdecArtifact).fetchAssemblyVersion();
         assertFalse(spyCdecArtifact.getInstalledVersion().isPresent());
-
     }
 
     @Test

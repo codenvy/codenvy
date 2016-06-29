@@ -20,12 +20,12 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.codenvy.plugin</groupId>
     <artifactId>codenvy-plugin-parent</artifactId>
-    <version>4.4.0-RC1-SNAPSHOT</version>
+    <version>4.5.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Plugin Parent</name>
     <modules>

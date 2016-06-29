@@ -1084,17 +1084,6 @@ var SiteApp = new function () {
         SiteApp.errorElement = document.elementFromHTML(html);
         document.body.appendChild(SiteApp.errorElement);
 
-        document.body.addEventListener('click', function () {
-            SiteApp.errorElement.classList.remove("bounceInDown");
-            SiteApp.errorElement.classList.add("bounceOutUp");
-
-            setTimeout(function () {
-                Page.redirect("/");
-            }, 600);
-
-            //Page.redirect("/");
-        }, false);
-
         SiteApp.errorElement.classList.add("bounceInDown");
 
         if (exception) {

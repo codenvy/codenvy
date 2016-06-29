@@ -47,7 +47,7 @@ authWithoutRealmAndServerDns "admin" "new-password" "http://${NEW_HOST_URL}"
 
 # test re-install
 # remove codenvy binary
-executeSshCommand "sudo rm -rf /home/codenvy/codenvy-tomcat/webapps"
+executeSshCommand "sudo rm -rf /home/codenvy/tomcat/webapps"
 executeSshCommand "sudo rm -rf /home/codenvy-im/codenvy-im-tomcat/webapps"
 
 # preform re-install

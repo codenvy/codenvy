@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-infrastructure-parent</artifactId>
         <groupId>com.codenvy.hosted-infrastructure</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-workspace-activity-agent</artifactId>
     <name>Codenvy :: Hosted :: Workspace Activity Agent</name>

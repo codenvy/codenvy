@@ -28,16 +28,16 @@ executeSshCommand --bypass-validation "sudo subscription-manager unregister"
 
 # check verification if OS is registered
 installImCliClient --valid-exit-code=1
-validateExpectedString ".*RHEL.OS.isn't.registered.*NOTE\:.You.could.use.command.'sudo.subscription-manager.register'.to.register.it.*"
+validateExpectedString ".*RHEL.OS.subscription.is.invalid.*NOTE\:.Please,.make.sure.that.this.system.is.register.and.next.repositories.are.enabled\:.*NOTE\:.'rhel-7-server-optional-rpms',.'rhel-7-server-extras-rpms'.*"
 
 # check on accessibility of required repos
 executeSshCommand "sudo subscription-manager register --username riuvshin@codenvy.com --password codenvy --auto-attach"
 installImCliClient --valid-exit-code=1
-validateExpectedString ".*Required.repository.'rhel-7-server-optional-rpms'.isn't.enabled.*NOTE\:.You.could.use.command.'sudo.subscription-manager.repos.--enable=rhel-7-server-optional-rpms'.to.enable.it.*"
+validateExpectedString ".*Next.required.repositories.aren't.enabled\:.'rhel-7-server-optional-rpms',.'rhel-7-server-extras-rpms'.*NOTE:.You.could.use.command.'sudo.subscription-manager.repos.--enable=<repo-name>'.to.enable.them..*"
 
 executeSshCommand "sudo subscription-manager repos --enable=rhel-7-server-optional-rpms"
 installImCliClient --valid-exit-code=1
-validateExpectedString ".*Required.repository.'rhel-7-server-extras-rpms'.isn't.enabled.*NOTE\:.You.could.use.command.'sudo.subscription-manager.repos.--enable=rhel-7-server-extras-rpms'.to.enable.it.*"
+validateExpectedString ".*Next.required.repositories.aren't.enabled\:.'rhel-7-server-extras-rpms'.*NOTE:.You.could.use.command.'sudo.subscription-manager.repos.--enable=<repo-name>'.to.enable.them..*"
 
 # check on successful installation of IM CLI
 executeSshCommand "sudo subscription-manager repos --enable=rhel-7-server-extras-rpms"

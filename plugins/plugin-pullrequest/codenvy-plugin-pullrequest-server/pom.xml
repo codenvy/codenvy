@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-pullrequest-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-pullrequest-server</artifactId>
     <name>Codenvy Plugin :: Pull request :: Server</name>

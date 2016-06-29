@@ -26,9 +26,9 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -60,6 +60,17 @@ public abstract class CDECArtifactHelper {
      * @return list of commands to install Codenvy due to given version, install options and path to binaries
      */
     public abstract Command getInstallCommand(Version versionToInstall, Path pathToBinaries, InstallOptions installOptions) throws IOException;
+
+    /**
+     * @param codenvyVersion
+     * @return path to "/home/codenvy/codenvy-tomcat" for Codenvy version < 4.4.0, or
+     * path to "/home/codenvy/tomcat" for other versions of Codenvy
+     */
+    public Path getPathToCodenvyRoot(Version codenvyVersion) {
+        boolean isCodenvyVersionLessThen_4_4_0 = codenvyVersion.compareTo(Version.valueOf("4.3.4")) <= 0;
+        return Paths.get(format("/home/codenvy/%s",
+                                isCodenvyVersionLessThen_4_4_0 ? "codenvy-tomcat" : "tomcat"));
+    }
 
     /**
      * @return list of commands to update Codenvy due to given version to update, install options and path to binaries

@@ -59,6 +59,9 @@ EXTERNAL_DEPENDENCIES=("https://codenvy.com||0"
                        "http://mirror.centos.org/centos||0"
                        "http://mirrorlist.centos.org||0");
 
+RHEL_REPOS=("rhel-7-server-optional-rpms"
+            "rhel-7-server-extras-rpms");
+
 CURRENT_STEP=0
 INSTALLATION_STEPS=("Configuring system..."
                     "Installing required packages... [java]"
@@ -1363,29 +1366,29 @@ doCheckResourceAccess() {
 }
 
 doCheckRedhatSubscription() {
-    # check is OS registered
-    if ! sudo subscription-manager identity &> /dev/null; then
-        println $(printError "RHEL OS isn't registered.")
-        println $(printWarning "NOTE: You could use command 'sudo subscription-manager register' to register it.")
-        exit 1
-    fi
-
     # check validity of subscription
     if ! sudo subscription-manager status &> /dev/null; then
+        local reposToDisplay=$(printf "'%s', " "${RHEL_REPOS[@]}")
+        reposToDisplay=${reposToDisplay::-2}
+
         println $(printError "RHEL OS subscription is invalid.")
+        println $(printWarning "NOTE: Please, make sure that this system is register and next repositories are enabled:")
+        println $(printWarning "NOTE: ${reposToDisplay}")
         exit 1
     fi
 
-    # check on accessibility of required repos
-    if ! sudo subscription-manager repos --list-enabled | grep 'rhel-7-server-optional-rpms' &> /dev/null; then
-        println $(printError "Required repository 'rhel-7-server-optional-rpms' isn't enabled.")
-        println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=rhel-7-server-optional-rpms' to enable it.")
-        exit 1
-    fi
+    # check if all required repos are enabled
+    local disabledRequiredRepoToDisplay
+    local listOfEnabledRepo=$(sudo subscription-manager repos --list-enabled)
+    for repo in ${RHEL_REPOS[@]}; do
+        if ! echo $listOfEnabledRepo | grep "$repo" &> /dev/null; then
+            disabledRequiredRepoToDisplay="${disabledRequiredRepoToDisplay}'$repo', "
+        fi
+    done
 
-    if ! sudo subscription-manager repos --list-enabled | grep 'rhel-7-server-extras-rpms' &> /dev/null; then
-        println $(printError "Required repository 'rhel-7-server-extras-rpms' isn't enabled.")
-        println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=rhel-7-server-extras-rpms' to enable it.")
+    if [[ -n "$disabledRequiredRepoToDisplay" ]]; then
+        println $(printError "Next required repositories aren't enabled: ${disabledRequiredRepoToDisplay::-2}")
+        println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=<repo-name>' to enable them.")
         exit 1
     fi
 }
