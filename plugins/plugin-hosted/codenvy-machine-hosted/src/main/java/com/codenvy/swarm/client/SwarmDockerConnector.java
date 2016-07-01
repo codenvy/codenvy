@@ -17,28 +17,22 @@ package com.codenvy.swarm.client;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.base.Strings;
 
-import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
-import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
-import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
-import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
-import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
-import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.PullParams;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +52,6 @@ public class SwarmDockerConnector extends DockerConnector {
     private final NodeSelectionStrategy   strategy;
     //TODO should it be done in other way?
     private final String                  nodeDaemonScheme;
-    private final DockerConnectionFactory connectionFactory;
     private final int                     nodeDescriptionLength;
 
     @Inject
@@ -67,62 +60,31 @@ public class SwarmDockerConnector extends DockerConnector {
                                 DockerRegistryAuthResolver authManager,
                                 @Named("swarm.client.node_description_length") int nodeDescriptionLength) {
         super(connectorConfiguration, connectionFactory, authManager);
-        this.connectionFactory = connectionFactory;
         this.nodeDescriptionLength = nodeDescriptionLength;
         this.strategy = new RandomNodeSelectionStrategy();
         this.nodeDaemonScheme = "http";
     }
 
     @Override
-    public void pull(String image,
-                     String tag,
-                     String registry,
-                     ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+    public void pull(PullParams params, ProgressMonitor progressMonitor) throws IOException, InterruptedException {
         final DockerNode node = strategy.select(getAvailableNodes());
-        doPull(image, tag, registry, progressMonitor, addrToUri(node.getAddr()));
-    }
-
-    /**
-     * Overrides method to return container info extended with swarm information about docker node.
-     */
-    @Override
-    protected ContainerInfo doInspectContainer(String container, URI dockerDaemonUri) throws IOException {
-        try (final DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                                  .method("GET")
-                                                                  .path("/containers/" + container + "/json")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (HttpURLConnection.HTTP_OK != status) {
-                throw getDockerException(response);
-            }
-            return JsonHelper.fromJson(response.getInputStream(), ContainerInfo.class, null, FIRST_LETTER_LOWERCASE);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getMessage(), e);
-        }
+        super.pull(params, progressMonitor, addrToUri(node.getAddr()));
     }
 
     @Override
-    public String buildImage(String repository,
-                             ProgressMonitor progressMonitor,
-                             AuthConfigs authConfigs,
-                             boolean doForcePull,
-                             long memoryLimit,
-                             long memorySwapLimit,
-                             File... files) throws IOException, InterruptedException {
+    public String buildImage(BuildImageParams params, ProgressMonitor progressMonitor)
+            throws IOException, InterruptedException {
         try {
-            return super.buildImage(repository, progressMonitor, authConfigs, doForcePull, memoryLimit, memorySwapLimit, files);
+            return super.buildImage(params, progressMonitor);
         } catch (DockerException e) {
             throw decorateMessage(e);
         }
     }
 
-    /**
-     * Overrides method to return user-friendly error if no resource left to schedule container
-     */
     @Override
-    public ContainerCreated createContainer(ContainerConfig containerConfig, String containerName) throws IOException {
+    public ContainerCreated createContainer(CreateContainerParams params) throws IOException {
         try {
-            return super.createContainer(containerConfig, containerName);
+            return super.createContainer(params);
         } catch (DockerException e) {
             throw decorateMessage(e);
         }
@@ -185,26 +147,6 @@ public class SwarmDockerConnector extends DockerConnector {
             nodes.add(new DockerNode(node[0], node[1]));
         }
         return nodes;
-    }
-
-    /**
-     * Foreach all nodes and search for node which contains required image
-     */
-    //TODO find better solution
-    private URI getNodeUriByImage(String image) throws IOException {
-        for (DockerNode node : getAvailableNodes()) {
-            final URI uri = addrToUri(node.getAddr());
-            try {
-                doInspectImage(image, uri);
-                return uri;
-            } catch (DockerException ex) {
-                //ignore exception when image was not found
-                if (ex.getStatus() != 404) {
-                    throw ex;
-                }
-            }
-        }
-        return null;
     }
 
     //TODO find better solution

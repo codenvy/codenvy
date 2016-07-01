@@ -25,6 +25,8 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
@@ -95,10 +97,14 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public void bindWorkspace() throws MachineException {
         try {
-            final Exec exec = dockerConnector.createExec(containerId, false, "/bin/sh", "-c", "id -u && id -g");
+            final Exec exec = dockerConnector.createExec(CreateExecParams.create(containerId,
+                                                                                 new String[] {"/bin/sh",
+                                                                                               "-c",
+                                                                                               "id -u && id -g"})
+                                                                         .withDetach(false));
             final List<String> ownerIds = new ArrayList<>(4);
             final ValueHolder<String> error = new ValueHolder<>();
-            dockerConnector.startExec(exec.getId(), message -> {
+            dockerConnector.startExec(StartExecParams.create(exec.getId()), message -> {
                 if (message.getType() == LogMessage.Type.STDOUT) {
                     ownerIds.add(message.getContent());
                 } else {
