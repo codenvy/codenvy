@@ -33,7 +33,7 @@ export class CodenvyUser {
     // remote call
     this.remoteUserAPI = this.$resource('/api/user', {}, {
       findByID: {method: 'GET', url: '/api/user/:userId'},
-      findByAlias: {method: 'GET', url: '/api/user/find?alias=:alias'},
+      findByAlias: {method: 'GET', url: '/api/user/find?email=:alias'},
       inRole: {method: 'GET', url: '/api/user/inrole?role=:role&scope=:scope&scopeId=:scopeId'},
       setPassword: {
         method: 'POST', url: '/api/user/password', isArray: false,

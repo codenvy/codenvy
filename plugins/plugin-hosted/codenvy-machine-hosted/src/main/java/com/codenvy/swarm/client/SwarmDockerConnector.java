@@ -74,8 +74,7 @@ public class SwarmDockerConnector extends DockerConnector {
     }
 
     @Override
-    public String buildImage(BuildImageParams params, ProgressMonitor progressMonitor)
-            throws IOException, InterruptedException {
+    public String buildImage(BuildImageParams params, ProgressMonitor progressMonitor) throws IOException {
         try {
             return super.buildImage(params, progressMonitor);
         } catch (DockerException e) {

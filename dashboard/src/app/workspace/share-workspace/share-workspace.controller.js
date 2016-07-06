@@ -53,8 +53,10 @@ export class ShareWorkspaceController {
     this.workspaceDomain = 'workspace';
     this.recipeDomain = 'recipe';
 
-    this.workspaceId = $route.current.params.workspaceId;
+    this.namespace = $route.current.params.namespace;
+    this.workspaceName = $route.current.params.workspaceName;
 
+    this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.refreshWorkspacePermissions();
   }
 
@@ -65,7 +67,7 @@ export class ShareWorkspaceController {
     this.isLoading = true;
     this.noPermissionsError = true;
 
-    this.codenvyPermissions.fetchWorkspacePermissions(this.workspaceId).then(() => {
+    this.codenvyPermissions.fetchWorkspacePermissions(this.workspace.id).then(() => {
       this.isLoading = false;
       this.formUserList();
     }, (error) => {
@@ -85,7 +87,7 @@ export class ShareWorkspaceController {
    * Combines permissions and users data in one list.
    */
   formUserList() {
-    let permissions = this.codenvyPermissions.getWorkspacePermissions(this.workspaceId);
+    let permissions = this.codenvyPermissions.getWorkspacePermissions(this.workspace.id);
     this.users = [];
 
     permissions.forEach((permission) => {
@@ -146,7 +148,7 @@ export class ShareWorkspaceController {
     let permission = {};
     permission.user = user.id;
     permission.domain = this.workspaceDomain;
-    permission.instance = this.workspaceId;
+    permission.instance = this.workspace.id;
     permission.actions = this.actions;
 
     return this.codenvyPermissions.storePermissions(permission);
@@ -250,7 +252,7 @@ export class ShareWorkspaceController {
    * @returns {*|string}
    */
   getRecipeId() {
-    let workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
+    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
     let environments = workspace.config.environments;
     let defaultEnvName = workspace.config.defaultEnv;
 
@@ -270,7 +272,8 @@ export class ShareWorkspaceController {
     let recipePath = '/recipe/';
     let start = recipeLocation.indexOf(recipePath);
     let end = recipeLocation.indexOf('/script', start);
-    let recipeId = recipeLocation.substring(start + recipePath.length, end);
+
+    let recipeId = (start > 0 && end > 0) ? recipeLocation.substring(start + recipePath.length, end) : null;
     return recipeId;
   }
 }
