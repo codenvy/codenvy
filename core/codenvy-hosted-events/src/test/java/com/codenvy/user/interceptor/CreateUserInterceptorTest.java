@@ -20,7 +20,7 @@ import com.codenvy.user.CreationNotificationSender;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -75,7 +75,7 @@ public class CreateUserInterceptorTest {
     @Test
     public void shouldSendEmailWhenUserWasCreatedByUserServiceWithToken() throws Throwable {
         // preparing user creator's method
-        final Method method = UserService.class.getMethod("create", UserDescriptor.class, String.class, Boolean.class);
+        final Method method = UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
         when(invocation.getMethod()).thenReturn(method);
 
         final Object[] invocationArgs = new Object[method.getParameterCount()];
@@ -83,7 +83,7 @@ public class CreateUserInterceptorTest {
         when(invocation.getArguments()).thenReturn(invocationArgs);
 
         when(invocation.proceed()).thenReturn(response);
-        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDescriptor.class)
+        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDto.class)
                                                         .withEmail(recipient)
                                                         .withName("user123"));
 
@@ -95,14 +95,14 @@ public class CreateUserInterceptorTest {
     @Test
     public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
         // preparing user creator's method
-        final Method method = UserService.class.getMethod("create", UserDescriptor.class, String.class, Boolean.class);
+        final Method method = UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
         when(invocation.getMethod()).thenReturn(method);
 
         final Object[] invocationArgs = new Object[method.getParameterCount()];
         when(invocation.getArguments()).thenReturn(invocationArgs);
 
         when(invocation.proceed()).thenReturn(response);
-        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDescriptor.class)
+        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDto.class)
                                                         .withEmail(recipient)
                                                         .withName("user123"));
 

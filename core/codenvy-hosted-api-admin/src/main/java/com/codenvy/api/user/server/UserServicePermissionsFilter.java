@@ -56,8 +56,7 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
             case "getCurrent":
             case "updatePassword":
             case "getById":
-            case "getByAlias":
-            case "getByName":
+            case "find":
             case "getSettings":
                 //public methods
                 return;

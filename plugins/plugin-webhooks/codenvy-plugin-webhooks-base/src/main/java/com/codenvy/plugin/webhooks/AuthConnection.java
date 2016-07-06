@@ -54,9 +54,9 @@ public class AuthConnection {
      * Authenticate against Codenvy
      *
      * @param username
-     *         the username of the user to authenticate
+     *         the username of the user to getByAliasAndPassword
      * @param password
-     *         the password of the user to authenticate
+     *         the password of the user to getByAliasAndPassword
      * @return an auth token if authentication is successful, null otherwise
      * @throws ServerException
      */

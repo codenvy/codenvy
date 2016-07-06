@@ -21,8 +21,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class UserCreatorInterceptor implements MethodInterceptor {
     private static final Logger LOG = LoggerFactory.getLogger(UserCreatorInterceptor.class);
 
     @Inject
-    private UserDao userDao;
+    private UserManager userManager;
 
     @Inject
     private CreationNotificationSender notificationSender;
@@ -55,7 +55,7 @@ public class UserCreatorInterceptor implements MethodInterceptor {
         //UserCreator should not create user if he already exists
         final String email = (String)invocation.getArguments()[0];
         try {
-            userDao.getByAlias(email);
+            userManager.getByEmail(email);
 
             //user is already registered
             return invocation.proceed();

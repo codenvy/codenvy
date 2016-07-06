@@ -20,9 +20,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,7 @@ import static com.google.api.client.repackaged.com.google.common.base.Preconditi
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class AdminUserDaoImpl extends UserDaoImpl implements AdminUserDao {
+public class AdminUserDaoImpl extends LdapUserDao implements AdminUserDao {
 
     private static final Logger   LOG         = LoggerFactory.getLogger(AdminUserDaoImpl.class);
     private static final String[] EMPTY_ARRAY = new String[0];
@@ -53,21 +51,15 @@ public class AdminUserDaoImpl extends UserDaoImpl implements AdminUserDao {
     private final UserLdapPagination userLdapPagination;
 
     @Inject
-    public AdminUserDaoImpl(UserProfileDao profileDao,
-                            PreferenceDao preferenceDao,
-                            InitialLdapContextFactory contextFactory,
+    public AdminUserDaoImpl(InitialLdapContextFactory contextFactory,
                             @Named("user.ldap.user_container_dn") String userContainerDn,
                             @Named("user.ldap.user_dn") String userDn,
-                            @Named("user.ldap.old_user_dn") String oldUserDn,
                             UserAttributesMapper userAttributesMapper,
                             EventService eventService,
                             UserLdapPagination userLdapPagination) {
-        super(profileDao,
-              preferenceDao,
-              contextFactory,
+        super(contextFactory,
               userContainerDn,
               userDn,
-              oldUserDn,
               userAttributesMapper,
               eventService);
         this.userLdapPagination = userLdapPagination;
@@ -81,7 +73,7 @@ public class AdminUserDaoImpl extends UserDaoImpl implements AdminUserDao {
     }
 
     @Override
-    public Page<User> getAll(int maxItems, int skipCount) throws ServerException, IllegalArgumentException {
+    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException, IllegalArgumentException {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
 

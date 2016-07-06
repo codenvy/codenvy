@@ -24,11 +24,11 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.core.model.user.Profile;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.UserManager;
 
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,11 +67,11 @@ public class PasswordService {
     private static final Logger LOG           = LoggerFactory.getLogger(PasswordService.class);
     private static final String MAIL_TEMPLATE = "/email-templates/password_recovery.html";
     private static final String LOGO          = "/email-templates/header.png";
-    private static final String LOGO_CID      =  "codenvyLogo";
+    private static final String LOGO_CID      = "codenvyLogo";
 
     private final MailSenderClient mailService;
-    private final UserDao          userDao;
-    private final UserProfileDao   userProfileDao;
+    private final UserManager      userDao;
+    private final ProfileManager   profileManager;
     private final RecoveryStorage  recoveryStorage;
     private final String           mailSender;
     private final String           recoverMailSubject;
@@ -82,16 +82,16 @@ public class PasswordService {
 
     @Inject
     public PasswordService(MailSenderClient mailService,
-                           UserDao userDao,
+                           UserManager userManager,
                            RecoveryStorage recoveryStorage,
-                           UserProfileDao userProfileDao,
+                           ProfileManager profileManager,
                            @Named("mailsender.application.from.email.address") String mailSender,
                            @Named("password.recovery.mail.subject") String recoverMailSubject,
                            @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;
         this.mailService = mailService;
-        this.userDao = userDao;
-        this.userProfileDao = userProfileDao;
+        this.userDao = userManager;
+        this.profileManager = profileManager;
         this.mailSender = mailSender;
         this.recoverMailSubject = recoverMailSubject;
         this.validationMaxAge = validationMaxAge;
@@ -128,7 +128,7 @@ public class PasswordService {
             throws ServerException, NotFoundException {
         try {
             //check if user exists
-            userDao.getByAlias(mail);
+            userDao.getByEmail(mail);
 
             String uuid = recoveryStorage.generateRecoverToken(mail);
 
@@ -235,20 +235,20 @@ public class PasswordService {
 
 
         // find user and setup his/her password
-        String userName = recoveryStorage.get(uuid);
+        String email = recoveryStorage.get(uuid);
 
         try {
-            final User user = userDao.getByAlias(userName);
+            final UserImpl user = new UserImpl(userDao.getByEmail(email));
             user.setPassword(newPassword);
             userDao.update(user);
 
-            final Profile profile = userProfileDao.getById(user.getId());
+            final Profile profile = profileManager.getById(user.getId());
             if (profile.getAttributes().remove("resetPassword") != null) {
-                userProfileDao.update(profile);
+                profileManager.update(profile);
             }
         } catch (NotFoundException e) {
             // remove invalid validationData
-            throw new NotFoundException("User " + userName + " is not registered in the system.");
+            throw new NotFoundException("User " + email + " is not registered in the system.");
         } catch (ServerException e) {
             LOG.error("Error during setting user's password", e);
             throw new ServerException("Unable to setup password. Please contact support.");

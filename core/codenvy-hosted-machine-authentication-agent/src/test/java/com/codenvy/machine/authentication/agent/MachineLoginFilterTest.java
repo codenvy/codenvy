@@ -22,7 +22,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -66,7 +67,7 @@ public class MachineLoginFilterTest {
     @Mock
     HttpSession            sessionMock;
     @Mock
-    UserDescriptor         userMock;
+    UserDto                userMock;
     @Mock
     HttpJsonResponse       jsonResponseMock;
 
@@ -96,7 +97,7 @@ public class MachineLoginFilterTest {
     @Test
     public void shouldProcessingRequestThenCreateHttpSessionAndPutUserIntoHttpSession() throws Exception {
         // token service response mocking
-        when(jsonResponseMock.asDto(UserDescriptor.class)).thenReturn(userMock);
+        when(jsonResponseMock.asDto(UserDto.class)).thenReturn(userMock);
         // mocking for setting the principal in http session
         doNothing().when(sessionMock).setAttribute(anyString(), any());
 
@@ -108,7 +109,7 @@ public class MachineLoginFilterTest {
     @Test
     public void shouldProcessingRequestWithValidQueryParameterAndPutUserIntoHttpSession() throws Exception {
         // token service response mocking
-        when(jsonResponseMock.asDto(UserDescriptor.class)).thenReturn(userMock);
+        when(jsonResponseMock.asDto(UserDto.class)).thenReturn(userMock);
         // mocking for setting the principal in http session
         doNothing().when(sessionMock).setAttribute(anyString(), any());
         final HttpServletRequest requestMock = getRequestMock(null, MACHINE_TOKEN);
@@ -142,7 +143,7 @@ public class MachineLoginFilterTest {
     public void shouldNotProcessingRequestWhenApiExceptionOccurs() throws Exception {
         final String apiExMsg = "panic!";
         // token service response mocking
-        when(jsonResponseMock.asDto(UserDescriptor.class)).thenReturn(userMock);
+        when(jsonResponseMock.asDto(UserDto.class)).thenReturn(userMock);
         // mocking for setting the principal in http session
         doNothing().when(sessionMock).setAttribute(anyString(), any());
         when(httpJsonRequestMock.request()).thenThrow(new ServerException(apiExMsg));
@@ -155,7 +156,7 @@ public class MachineLoginFilterTest {
     @Test
     public void shouldNotProcessingRequestWithInvalidTokenAndShowUnauthorisedServletResponse() throws Exception {
         // token service response mocking
-        when(jsonResponseMock.asDto(UserDescriptor.class)).thenReturn(userMock);
+        when(jsonResponseMock.asDto(UserDto.class)).thenReturn(userMock);
         // mocking for setting the principal in http session
         doNothing().when(sessionMock).setAttribute(anyString(), any());
         when(httpJsonRequestMock.request()).thenThrow(new NotFoundException("User with token " + MACHINE_TOKEN + " Not found"));

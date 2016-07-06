@@ -20,7 +20,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CR
 import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD;
 
 /**
- * Intercepts {@link UserService#create(UserDescriptor, String, Boolean)} method.
+ * Intercepts {@link UserService#create(UserDto, String, Boolean)} method.
  *
  * <p>The purpose of the interceptor is to send "welcome to codenvy" email to user after its creation.
  *
@@ -55,7 +55,7 @@ public class CreateUserInterceptor implements MethodInterceptor {
         String userEmail;
         try {
             final Response response = (Response)proceed;
-            final UserDescriptor createdUser = (UserDescriptor)response.getEntity();
+            final UserDto createdUser = (UserDto)response.getEntity();
             userName = createdUser.getName();
             userEmail = createdUser.getEmail();
 

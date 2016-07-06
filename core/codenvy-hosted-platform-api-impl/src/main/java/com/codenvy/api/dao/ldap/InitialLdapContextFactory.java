@@ -18,6 +18,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.naming.NamingException;
 import javax.naming.ldap.InitialLdapContext;
@@ -36,15 +37,15 @@ import static javax.naming.Context.SECURITY_PRINCIPAL;
 @Singleton
 public class InitialLdapContextFactory {
 
-    private final String providerUrl;
-    private final String systemDn;
-    private final String systemPassword;
-    private final String authType;
-    private final String usePool;
-    private final String initPoolSize;
-    private final String maxPoolSize;
-    private final String prefPoolSize;
-    private final String poolTimeout;
+    private final Provider<String> serverUrlProvider;
+    private final String           systemDn;
+    private final String           systemPassword;
+    private final String           authType;
+    private final String           usePool;
+    private final String           initPoolSize;
+    private final String           maxPoolSize;
+    private final String           prefPoolSize;
+    private final String           poolTimeout;
 
     /**
      * Creates instance of {@link InitialLdapContextFactory}
@@ -77,7 +78,7 @@ public class InitialLdapContextFactory {
      *         Make sense ONLY if parameter {@code usePool} is equals to "true".
      */
     @Inject
-    public InitialLdapContextFactory(@Named(PROVIDER_URL) String providerUrl,
+    public InitialLdapContextFactory(@Named(PROVIDER_URL) Provider<String> providerUrl,
                                      @Nullable @Named(SECURITY_PRINCIPAL) String systemDn,
                                      @Nullable @Named(SECURITY_CREDENTIALS) String systemPassword,
                                      @Nullable @Named(SECURITY_AUTHENTICATION) String authType,
@@ -86,7 +87,7 @@ public class InitialLdapContextFactory {
                                      @Nullable @Named("com.sun.jndi.ldap.connect.pool.maxsize") String maxPoolSize,
                                      @Nullable @Named("com.sun.jndi.ldap.connect.pool.prefsize") String prefPoolSize,
                                      @Nullable @Named("com.sun.jndi.ldap.connect.pool.timeout") String poolTimeout) {
-        this.providerUrl = providerUrl;
+        this.serverUrlProvider = providerUrl;
         this.systemDn = systemDn;
         this.systemPassword = systemPassword;
         this.authType = authType;
@@ -108,7 +109,7 @@ public class InitialLdapContextFactory {
         final Hashtable<String, String> env = new Hashtable<>();
         env.put("java.naming.ldap.deleteRDN", "false");
         env.put(INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(PROVIDER_URL, providerUrl);
+        env.put(PROVIDER_URL, serverUrlProvider.get());
         if (authType != null) {
             env.put(SECURITY_AUTHENTICATION, authType);
         }
@@ -151,7 +152,7 @@ public class InitialLdapContextFactory {
     public InitialLdapContext createContext(String principal, String password) throws NamingException {
         final Hashtable<String, String> env = new Hashtable<>();
         env.put(INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(PROVIDER_URL, providerUrl);
+        env.put(PROVIDER_URL, serverUrlProvider.get());
         if (authType != null) {
             env.put(SECURITY_AUTHENTICATION, authType);
         }

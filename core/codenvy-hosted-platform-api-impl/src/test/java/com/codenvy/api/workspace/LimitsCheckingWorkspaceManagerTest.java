@@ -19,9 +19,10 @@ import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.mockito.ArgumentCaptor;
 import org.testng.Assert;
@@ -251,7 +252,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldCheckRamLimitOfCreatorUserInsteadOfCurrent() throws Exception {
         final UserManager userManager = mock(UserManager.class);
         final WorkspaceImpl ws = createRuntime("1gb", "1gb");
-        final User user = new User();
+        final UserImpl user = new UserImpl("id", "email", ws.getNamespace());
         user.setName(ws.getNamespace());
         doReturn(user).when(userManager).getByName(eq(ws.getNamespace()));
 

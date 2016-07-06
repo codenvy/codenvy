@@ -19,16 +19,20 @@ import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.server.UserLinksInjector;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.impl.EnvironmentContext;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -43,6 +47,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,13 +71,20 @@ public class AdminUserServiceTest {
     EnvironmentContext environmentContext;
     @Mock
     SecurityContext    securityContext;
+    @Mock
+    UserLinksInjector linksInjector;
 
     @InjectMocks
     AdminUserService userService;
 
+    @BeforeMethod
+    public void init() {
+        when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);
+    }
+
     @Test
     public void shouldReturnAllUsers() throws Exception {
-        User testUser = new User().withId("test_id").withEmail("test@email");
+        UserImpl testUser = new UserImpl("test_id", "test@email", "name");
         when(userDao.getAll(anyInt(), anyInt())).thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
 
         final Response response = given().auth()
@@ -83,9 +95,9 @@ public class AdminUserServiceTest {
         assertEquals(response.getStatusCode(), OK.getStatusCode());
         verify(userDao).getAll(3, 4);
 
-        List<UserDescriptor> users = DtoFactory.getInstance().createListDtoFromJson(response.getBody().print(), UserDescriptor.class);
+        List<UserDto> users = DtoFactory.getInstance().createListDtoFromJson(response.getBody().print(), UserDto.class);
         assertEquals(users.size(), 1);
-        final UserDescriptor fetchedUser = users.get(0);
+        final UserDto fetchedUser = users.get(0);
         assertEquals(fetchedUser.getId(), testUser.getId());
         assertEquals(fetchedUser.getEmail(), testUser.getEmail());
     }

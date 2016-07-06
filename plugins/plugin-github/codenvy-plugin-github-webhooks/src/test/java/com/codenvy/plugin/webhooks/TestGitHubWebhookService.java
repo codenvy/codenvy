@@ -18,7 +18,7 @@ import com.codenvy.plugin.webhooks.github.GitHubWebhookService;
 
 import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,7 +67,7 @@ public class TestGitHubWebhookService {
 
         // Prepare userConnection
         UserConnection mockUserConnection = mock(UserConnection.class);
-        UserDescriptor mockUser = mock(UserDescriptor.class);
+        UserDto mockUser = mock(UserDto.class);
         when(mockUser.getId()).thenReturn(FAKE_USER_ID);
         when(mockUserConnection.getCurrentUser()).thenReturn(mockUser);
 

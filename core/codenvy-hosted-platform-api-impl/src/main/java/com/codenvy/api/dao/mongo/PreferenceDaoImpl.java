@@ -14,10 +14,9 @@
  */
 package com.codenvy.api.dao.mongo;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mongodb.BasicDBObject;
@@ -29,7 +28,6 @@ import com.mongodb.MongoException;
 import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.codenvy.api.dao.mongo.MongoUtil.asDBList;
@@ -83,23 +81,19 @@ public class PreferenceDaoImpl implements PreferenceDao {
 
     private static final String PREFERENCES_COLLECTION = "organization.storage.db.preferences.collection";
 
-    private final UserDao      userDao;
     private final DBCollection collection;
 
     @Inject
     public PreferenceDaoImpl(@Named("mongo.db.organization") DB database,
-                             UserDao userDao,
                              @Named(PREFERENCES_COLLECTION) String collectionName) {
         this.collection = database.getCollection(collectionName);
-        this.userDao = userDao;
     }
 
     @Override
-    public void setPreferences(String userId, Map<String, String> preferences) throws ServerException, NotFoundException {
+    public void setPreferences(String userId, Map<String, String> preferences) throws ServerException {
         if (preferences == null) {
             throw new IllegalArgumentException("Not null preferences required");
         }
-        checkUserExists(userId);
         if (preferences.isEmpty()) {
             remove(userId);
         } else {
@@ -169,9 +163,5 @@ public class PreferenceDaoImpl implements PreferenceDao {
             }
         }
         return filtered;
-    }
-
-    private void checkUserExists(String userId) throws NotFoundException, ServerException {
-        userDao.getById(userId);
     }
 }

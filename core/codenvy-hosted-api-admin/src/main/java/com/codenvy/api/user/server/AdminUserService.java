@@ -27,7 +27,9 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.user.server.DtoConverter;
+import org.eclipse.che.api.user.server.UserLinksInjector;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -38,8 +40,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.user.server.DtoConverter.toDescriptor;
-import static org.eclipse.che.api.user.server.LinksInjector.injectLinks;
 
 /**
  * Provides REST API for admin user management.
@@ -50,11 +50,13 @@ import static org.eclipse.che.api.user.server.LinksInjector.injectLinks;
 @Path("/admin/user")
 public class AdminUserService extends Service {
 
-    private final AdminUserDao adminUserDao;
+    private final AdminUserDao      adminUserDao;
+    private final UserLinksInjector linksInjector;
 
     @Inject
-    public AdminUserService(AdminUserDao adminUserDao) {
+    public AdminUserService(AdminUserDao adminUserDao, UserLinksInjector linksInjector) {
         this.adminUserDao = adminUserDao;
+        this.linksInjector = linksInjector;
     }
 
     /**
@@ -81,9 +83,9 @@ public class AdminUserService extends Service {
                            @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
             throws ServerException, BadRequestException {
         try {
-            final Page<User> usersPage = adminUserDao.getAll(maxItems, skipCount);
+            final Page<UserImpl> usersPage = adminUserDao.getAll(maxItems, skipCount);
             return Response.ok()
-                           .entity(usersPage.getItems(user -> injectLinks(toDescriptor(user), getServiceContext())))
+                           .entity(usersPage.getItems(user -> linksInjector.injectLinks(DtoConverter.asDto(user), getServiceContext())))
                            .header("Link", createLinkHeader(usersPage))
                            .build();
         } catch (IllegalArgumentException e) {

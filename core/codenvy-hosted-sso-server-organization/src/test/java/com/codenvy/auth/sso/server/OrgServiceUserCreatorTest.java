@@ -16,10 +16,10 @@ package com.codenvy.auth.sso.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -34,7 +34,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,10 +50,10 @@ public class OrgServiceUserCreatorTest {
     UserManager manager;
 
     @Mock
-    UserProfileDao profileDao;
+    ProfileManager profileDao;
 
     @Mock
-    PreferenceDao preferenceDao;
+    PreferenceManager preferenceDao;
 
     @Mock
     User createdUser;
@@ -70,7 +69,7 @@ public class OrgServiceUserCreatorTest {
 
     @Test
     public void shouldCreateUser() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByAlias(anyObject());
+        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
 
         creator.createUser("user@codenvy.com", "test", "John", "Doe");
 
@@ -81,7 +80,7 @@ public class OrgServiceUserCreatorTest {
 
     @Test
     public void shouldCreateUserWithGeneratedNameOnConflict() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByAlias(anyObject());
+        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
         doAnswer(invocation -> {
             for (Object arg : invocation.getArguments()) {
                 if (arg instanceof User && ((User)arg).getName().equals("reserved")) {

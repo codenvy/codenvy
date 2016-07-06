@@ -40,7 +40,7 @@ public class UserProfileServicePermissionsFilter extends CheMethodInvokerFilter 
         final String methodName = genericMethodResource.getMethod().getName();
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         switch (methodName) {
-            case "update":
+            case "updateAttributesById":
                 subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
                 break;
             default:

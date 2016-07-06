@@ -20,8 +20,8 @@ import com.codenvy.user.CreationNotificationSender;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -54,7 +54,7 @@ public class UserCreatorInterceptorTest {
     @Mock
     private UserCreator      userCreator;
     @Mock
-    private UserDao          userDao;
+    private UserManager      userManager;
     @Mock
     CreationNotificationSender notificationSender;
 
@@ -82,7 +82,7 @@ public class UserCreatorInterceptorTest {
 
         when(user.getEmail()).thenReturn(recipient);
         when(user.getName()).thenReturn("user123");
-        when(userDao.getByAlias(recipient)).thenThrow(new NotFoundException(""));
+        when(userManager.getByEmail(recipient)).thenThrow(new NotFoundException(""));
 
         when(invocation.getArguments()).thenReturn(new Object[] {recipient});
 

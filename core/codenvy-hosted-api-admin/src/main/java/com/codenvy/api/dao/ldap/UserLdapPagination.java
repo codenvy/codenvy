@@ -16,7 +16,7 @@ package com.codenvy.api.dao.ldap;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +80,8 @@ public class UserLdapPagination {
      * There is no way to skip some entries to get the desired page. That's why {@link UserLdapPagination} is introduce to construct
      * special filter to add skip behaviour to Ldap.
      */
-    public List<User> get(int maxItems, int skipCount) throws NamingException, IOException {
-        List<User> result = new ArrayList<>();
+    public List<UserImpl> get(int maxItems, int skipCount) throws NamingException, IOException {
+        List<UserImpl> result = new ArrayList<>();
 
         byte[] cookie = null;
 
@@ -106,7 +106,7 @@ public class UserLdapPagination {
                         SearchResult item = enumeration.next();
 
                         if (skipCount < curNum && curNum <= skipCount + maxItems) {
-                            User user = mapper.fromAttributes(item.getAttributes());
+                            UserImpl user = mapper.fromAttributes(item.getAttributes());
                             result.add(user);
 
                             if (curNum == skipCount + maxItems) {

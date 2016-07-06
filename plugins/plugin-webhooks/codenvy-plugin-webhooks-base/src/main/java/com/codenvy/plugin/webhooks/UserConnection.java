@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +55,13 @@ public class UserConnection {
      * @return the current user or null if an error occurred during the call to 'getCurrent'
      * @throws org.eclipse.che.api.core.ServerException
      */
-    public UserDescriptor getCurrentUser() throws ServerException {
+    public UserDto getCurrentUser() throws ServerException {
         String url = fromUri(baseUrl).path(UserService.class).path(UserService.class, "getCurrent").build().toString();
-        UserDescriptor user;
+        UserDto user;
         HttpJsonRequest httpJsonRequest = httpJsonRequestFactory.fromUrl(url).useGetMethod();
         try {
             HttpJsonResponse response = httpJsonRequest.request();
-            user = response.asDto(UserDescriptor.class);
+            user = response.asDto(UserDto.class);
 
         } catch (IOException | ApiException e) {
             LOG.error(e.getLocalizedMessage(), e);

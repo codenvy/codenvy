@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -93,7 +93,7 @@ public class UserServicePermissionsFilterTest {
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
                                          .when()
-                                         .post(SECURE_PATH + "/user/create?token=token123");
+                                         .post(SECURE_PATH + "/user?token=token123");
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).create(eq(null), eq("token123"), anyBoolean());
@@ -102,17 +102,17 @@ public class UserServicePermissionsFilterTest {
 
     @Test
     public void shouldCheckPermissionsOnUserCreationFromEntity() throws Exception {
-        final UserDescriptor userToCreate = DtoFactory.newDto(UserDescriptor.class)
-                                                      .withId("user123")
-                                                      .withEmail("test @test.com")
-                                                      .withPassword("***");
+        final UserDto userToCreate = DtoFactory.newDto(UserDto.class)
+                                               .withId("user123")
+                                               .withEmail("test @test.com")
+                                               .withPassword("***");
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
                                          .body(userToCreate)
                                          .when()
-                                         .post(SECURE_PATH + "/user/create");
+                                         .post(SECURE_PATH + "/user");
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).create(any(), eq(null), anyBoolean());
@@ -164,8 +164,7 @@ public class UserServicePermissionsFilterTest {
                 {"getCurrent"},
                 {"updatePassword"},
                 {"getById"},
-                {"getByAlias"},
-                {"getByName"},
+                {"find"},
                 {"getSettings"}
         };
     }

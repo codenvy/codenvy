@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonHelper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -106,7 +106,7 @@ public class ZendeskRedirectServlet extends HttpServlet {
         try {
             Link link = DtoFactory.getInstance().createDto(Link.class).withMethod("GET")
                                   .withHref(UriBuilder.fromUri(apiEndpoint).path("profile").build().toString());
-            final ProfileDescriptor profile = HttpJsonHelper.request(ProfileDescriptor.class, link);
+            final ProfileDto profile = HttpJsonHelper.request(ProfileDto.class, link);
 
             String name = profile.getAttributes().get("firstName");
             String lastName = profile.getAttributes().get("lastName");

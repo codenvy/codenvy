@@ -14,15 +14,16 @@
  */
 package com.codenvy.api.dao.ldap;
 
+import com.codenvy.api.dao.ldap.LdapCloser.CloseableSupplier;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.spi.ProfileDao;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
@@ -31,21 +32,21 @@ import javax.naming.ldap.InitialLdapContext;
 
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
- * LDAP based implementation of {@link UserProfileDao}
+ * LDAP based implementation of {@link ProfileDao}.
  *
  * @author Eugene Voevodin
  */
-public class UserProfileDaoImpl implements UserProfileDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserProfileDaoImpl.class);
+@Singleton
+public class LdapProfileDao implements ProfileDao {
 
     private final InitialLdapContextFactory contextFactory;
     private final ProfileAttributesMapper   attributesMapper;
 
     @Inject
-    public UserProfileDaoImpl(InitialLdapContextFactory contextFactory, ProfileAttributesMapper attributesMapper) {
+    public LdapProfileDao(InitialLdapContextFactory contextFactory, ProfileAttributesMapper attributesMapper) {
         this.contextFactory = contextFactory;
         this.attributesMapper = attributesMapper;
     }
@@ -54,7 +55,7 @@ public class UserProfileDaoImpl implements UserProfileDao {
      * Not supported for this implementation, nothing will be done
      */
     @Override
-    public void create(Profile profile) throws ServerException {
+    public void create(ProfileImpl profile) throws ServerException {
         try {
             update(profile);
         } catch (NotFoundException e) {
@@ -69,30 +70,28 @@ public class UserProfileDaoImpl implements UserProfileDao {
     public void remove(String id) throws ServerException {
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void update(Profile profile) throws NotFoundException, ServerException {
-        final String id = profile.getId();
-        final Profile existing = getById(id);
-        InitialLdapContext context = null;
+    public void update(ProfileImpl profile) throws NotFoundException, ServerException {
+        requireNonNull(profile, "Required non-null profile");
+        final String id = profile.getUserId();
+        final ProfileImpl existing = getById(id);
         try {
             final ModificationItem[] mods = attributesMapper.createModifications(existing.getAttributes(), profile.getAttributes());
             if (mods.length > 0) {
-                context = contextFactory.createContext();
-                context.modifyAttributes(attributesMapper.getProfileDn(id), mods);
+                try (CloseableSupplier<InitialLdapContext> contextSup = LdapCloser.wrapCloseable(contextFactory.createContext())) {
+                    contextSup.get().modifyAttributes(attributesMapper.getProfileDn(id), mods);
+                }
             }
         } catch (NamingException ex) {
-            throw new ServerException(format("Unable to update profile '%s'", profile.getId()));
-        } finally {
-            close(context);
+            throw new ServerException(format("Unable to update profile '%s'", profile.getUserId()));
         }
     }
 
-    /** {@inheritDoc} */
     @Override
-    public Profile getById(String id) throws NotFoundException, ServerException {
+    public ProfileImpl getById(String id) throws NotFoundException, ServerException {
+        requireNonNull(id, "Required non-null id");
         try {
-            final Profile profile = doGetById(id);
+            final ProfileImpl profile = doGetById(id);
             if (profile == null) {
                 throw new NotFoundException(format("Profile with id '%s' was not found", id));
             }
@@ -102,19 +101,14 @@ public class UserProfileDaoImpl implements UserProfileDao {
         }
     }
 
-    private Profile doGetById(String id) throws NamingException {
-        Profile profile = null;
-        InitialLdapContext context = null;
-        try {
-            context = contextFactory.createContext();
-            final Attributes attributes = getProfileAttributes(context, id);
+    private ProfileImpl doGetById(String id) throws NamingException {
+        try (CloseableSupplier<InitialLdapContext> contextSup = LdapCloser.wrapCloseable(contextFactory.createContext()))  {
+            final Attributes attributes = getProfileAttributes(contextSup.get(), id);
             if (attributes != null) {
-                profile = attributesMapper.asProfile(attributes);
+                return attributesMapper.asProfile(attributes);
             }
-        } finally {
-            close(context);
         }
-        return profile;
+        return null;
     }
 
     private Attributes getProfileAttributes(InitialLdapContext ctx, String id) throws NamingException {
@@ -122,16 +116,6 @@ public class UserProfileDaoImpl implements UserProfileDao {
             return ctx.getAttributes(attributesMapper.getProfileDn(id));
         } catch (NameNotFoundException nnfEx) {
             return null;
-        }
-    }
-
-    private void close(InitialLdapContext context) {
-        if (context != null) {
-            try {
-                context.close();
-            } catch (NamingException namingEx) {
-                LOG.error(namingEx.getMessage(), namingEx);
-            }
         }
     }
 }

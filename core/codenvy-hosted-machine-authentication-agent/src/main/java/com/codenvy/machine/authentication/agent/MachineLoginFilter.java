@@ -19,7 +19,7 @@ import com.codenvy.auth.sso.client.token.RequestTokenExtractor;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -87,11 +87,11 @@ public class MachineLoginFilter implements Filter {
             return;
         }
         try {
-            final UserDescriptor userDescriptor = requestFactory.fromUrl(tokenServiceEndpoint + "/user/" + machineToken)
+            final UserDto userDescriptor = requestFactory.fromUrl(tokenServiceEndpoint + "/user/" + machineToken)
                                                                 .useGetMethod()
                                                                 .setAuthorizationHeader(machineToken)
                                                                 .request()
-                                                                .asDto(UserDescriptor.class);
+                                                                .asDto(UserDto.class);
             final Subject machineUser = new SubjectImpl(userDescriptor.getName(),
                                                         userDescriptor.getId(),
                                                         machineToken,

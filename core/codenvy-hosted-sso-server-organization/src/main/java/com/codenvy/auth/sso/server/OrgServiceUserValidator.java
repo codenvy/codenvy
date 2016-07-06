@@ -21,13 +21,12 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.UserNameValidator;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.UserValidator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -37,18 +36,18 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public class OrgServiceUserValidator implements UserCreationValidator {
 
-    private final UserDao           userDao;
-    private final UserNameValidator userNameValidator;
-    private final boolean           userSelfCreationAllowed;
-    private final Set<String>       reservedNames;
+    private final UserManager   userDao;
+    private final UserValidator userValidator;
+    private final boolean       userSelfCreationAllowed;
+    private final Set<String>   reservedNames;
 
     @Inject
-    public OrgServiceUserValidator(UserDao userDao,
-                                   UserNameValidator userNameValidator,
+    public OrgServiceUserValidator(UserManager userDao,
+                                   UserValidator userValidator,
                                    @Named("user.self.creation.allowed") boolean userSelfCreationAllowed,
                                    @Named("user.reserved_names") String[] reservedNames) {
         this.userDao = userDao;
-        this.userNameValidator = userNameValidator;
+        this.userValidator = userValidator;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
         this.reservedNames = Sets.newHashSet(reservedNames);
     }
@@ -67,7 +66,7 @@ public class OrgServiceUserValidator implements UserCreationValidator {
             throw new BadRequestException("User name cannot be empty or null");
         }
 
-        if (!userNameValidator.isValidUserName(userName)) {
+        if (!userValidator.isValidName(userName)) {
             throw new BadRequestException("User name must contain letters and digits only");
         }
 
@@ -76,7 +75,7 @@ public class OrgServiceUserValidator implements UserCreationValidator {
         }
 
         try {
-            userDao.getByAlias(email);
+            userDao.getByEmail(email);
             throw new ConflictException("User with given email already exists. Please, choose another one.");
         } catch (NotFoundException e) {
             // ok

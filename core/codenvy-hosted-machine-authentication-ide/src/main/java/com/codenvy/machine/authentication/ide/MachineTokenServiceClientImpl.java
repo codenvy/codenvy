@@ -19,7 +19,7 @@ import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -56,8 +56,8 @@ public class MachineTokenServiceClientImpl implements MachineTokenServiceClient 
     }
 
     @Override
-    public Promise<UserDescriptor> getUserByToken(String token) {
+    public Promise<UserDto> getUserByToken(String token) {
         return asyncRequestFactory.createGetRequest(baseUrl + "user/" + token)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(UserDescriptor.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(UserDto.class));
     }
 }

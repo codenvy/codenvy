@@ -17,7 +17,7 @@ package com.codenvy.machine.authentication.ide;
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 
 /**
  * GWT Client for MachineToken Service.
@@ -28,5 +28,5 @@ public interface MachineTokenServiceClient {
 
     Promise<MachineTokenDto> getMachineToken();
 
-    Promise<UserDescriptor> getUserByToken(String token);
+    Promise<UserDto> getUserByToken(String token);
 }

@@ -16,8 +16,8 @@ package com.codenvy.api.user.server.dao;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.server.spi.UserDao;
 
 /**
  * @author Anatoliy Bazko
@@ -37,5 +37,5 @@ public interface AdminUserDao extends UserDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    Page<User> getAll(int maxItems, int skipCount) throws ServerException;
+    Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException;
 }

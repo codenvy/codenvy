@@ -15,12 +15,10 @@
 package com.codenvy.api.dao.mongo;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -46,21 +44,18 @@ import static org.testng.Assert.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class PreferenceDaoTest extends BaseDaoTest {
 
-    private UserDao       userDao;
     private PreferenceDao preferenceDao;
 
     @BeforeMethod
     public void setUp() throws Exception {
         final String collectionName = "preferences";
         setUp(collectionName);
-        userDao = mock(UserDao.class);
-        preferenceDao = new PreferenceDaoImpl(db, userDao, collectionName);
+        preferenceDao = new PreferenceDaoImpl(db, collectionName);
     }
 
     @Test
     public void shouldBeAbleToSetPreferences() throws Exception {
         final String userId = "test-user-id";
-        when(userDao.getById(userId)).thenReturn(mock(User.class));
         final Map<String, String> preferences = createPreferences();
 
         preferenceDao.setPreferences(userId, preferences);
@@ -70,19 +65,9 @@ public class PreferenceDaoTest extends BaseDaoTest {
         assertEquals(asMap(preferencesDocument.get("preferences")), preferences);
     }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldNotBeAbleToSetPreferencesIfUserDoesNotExist() throws Exception {
-        final String userId = "test-user-id";
-        when(userDao.getById(userId)).thenThrow(new NotFoundException(""));
-        final Map<String, String> preferences = createPreferences();
-
-        preferenceDao.setPreferences(userId, preferences);
-    }
-
     @Test
     public void shouldRemovePreferencesWhenPreferencesAreEmpty() throws Exception {
         final String userId = "test-user-id";
-        when(userDao.getById(userId)).thenReturn(mock(User.class));
 
         preferenceDao.setPreferences(userId, new HashMap<String, String>());
 
@@ -93,7 +78,6 @@ public class PreferenceDaoTest extends BaseDaoTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldNotPersistNullPreferences() throws Exception {
         final String userId = "test-user-id";
-        when(userDao.getById(userId)).thenReturn(mock(User.class));
 
         preferenceDao.setPreferences(userId, null);
     }

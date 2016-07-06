@@ -29,8 +29,8 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.UserNameValidator;
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserValidator;
 import org.eclipse.che.commons.lang.Deserializer;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -94,7 +94,7 @@ public class BearerTokenAuthenticationService {
     @Inject
     protected UserCreator                      userCreator;
     @Inject
-    protected UserNameValidator                userNameValidator;
+    protected UserValidator                    userNameValidator;
     @Inject
     @Named("mailsender.application.from.email.address")
     protected String                           mailSender;

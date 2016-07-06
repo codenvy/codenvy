@@ -22,7 +22,7 @@ import com.codenvy.mail.MailSenderClient;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.security.oauth.OAuthAuthenticationException;
 import org.eclipse.che.security.oauth.OAuthAuthenticator;
@@ -54,7 +54,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     @Mock
     private OAuthAuthenticator                         authenticator;
     @Mock
-    private UserDao                                    userDao;
+    private UserManager                                userManager;
     @Mock
     private ServletConfig                              servletConfig;
     @Mock
@@ -84,7 +84,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     @Test
     public void shouldParseFirstAndLastNames() throws OAuthAuthenticationException, ApiException {
         when(googleUser.getName()).thenReturn("Mark Downey");
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);
@@ -98,7 +98,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     public void shouldParseFirstNames() throws OAuthAuthenticationException, ServletException, ApiException {
 
         when(googleUser.getName()).thenReturn("Mark");
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);
@@ -111,7 +111,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     public void shouldParseFirstNamesAndTrim() throws OAuthAuthenticationException, ServletException, ApiException {
         when(googleUser.getName()).thenReturn("  Mark   ");
 
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);
@@ -124,7 +124,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     public void shouldIgnoreOneSpaceName() throws OAuthAuthenticationException, ServletException, ApiException {
         when(googleUser.getName()).thenReturn(" ");
 
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);
@@ -137,7 +137,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     public void shouldTrimSpaces() throws OAuthAuthenticationException, ServletException, ApiException {
         when(googleUser.getName()).thenReturn("   Mark    Downey    ");
 
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);
@@ -154,7 +154,7 @@ public class CreateUserWithCapturedProfileInfoTest {
         when(googleUser.getName()).thenReturn("Mark Tyler Downey Jewel");
 
 
-        when(userDao.getByAlias(USERNAME)).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(USERNAME)).thenThrow(NotFoundException.class);
         when(authenticator.getUser(TOKEN)).thenReturn(googleUser);
 
         Map res = oAuthLoginServlet.createProfileInfo(USERNAME, authenticator, TOKEN);

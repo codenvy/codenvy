@@ -15,9 +15,9 @@
 package com.codenvy.auth.sso.server;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.TokenValidator;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 
@@ -38,6 +38,6 @@ public class BearerTokenValidator implements TokenValidator {
         String username =  handler.getPayload(token).get("username");
         if (username == null || !handler.isValid(token))
             throw new ConflictException("Cannot create user - authentication token is invalid. Request a new one.");
-        return new User().withEmail(payload.get("email")).withName(payload.get("username"));
+        return new UserImpl(null, payload.get("email"), payload.get("username"));
     }
 }

@@ -724,6 +724,12 @@
                 <version>${org.apache.sshd.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-user</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-websocket-terminal</artifactId>
                 <version>${che.lib.version}</version>

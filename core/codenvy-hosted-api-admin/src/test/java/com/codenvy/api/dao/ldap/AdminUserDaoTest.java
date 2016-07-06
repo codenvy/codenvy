@@ -18,9 +18,7 @@ import com.codenvy.api.user.server.dao.AdminUserDao;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -37,20 +35,15 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class AdminUserDaoTest extends BaseTest {
 
-    @Mock
-    UserProfileDao profileDao;
-    @Mock
-    PreferenceDao  preferenceDao;
-
     UserLdapPagination        userLdapPagination;
     AdminUserDao              userDao;
     InitialLdapContextFactory factory;
     UserAttributesMapper      mapper;
-    User[]                    users;
+    UserImpl[]                users;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        factory = spy(new InitialLdapContextFactory(embeddedLdapServer.getUrl(),
+        factory = spy(new InitialLdapContextFactory(() -> embeddedLdapServer.getUrl(),
                                                     null,
                                                     null,
                                                     null,
@@ -61,46 +54,31 @@ public class AdminUserDaoTest extends BaseTest {
                                                     null));
         mapper = spy(new UserAttributesMapper());
         userLdapPagination = new UserLdapPagination("dc=codenvy;dc=com", mapper, factory);
-        userDao = new AdminUserDaoImpl(profileDao,
-                                       preferenceDao,
-                                       factory,
+        userDao = new AdminUserDaoImpl(factory,
                                        "dc=codenvy;dc=com",
                                        "uid",
-                                       "cn",
                                        mapper,
                                        new EventService(),
                                        userLdapPagination);
-        users = new User[] {
-                new User().withId("1")
-                          .withEmail("user1@mail.com")
-                          .withName("user1")
-                          .withPassword("secret")
-                        .withAliases(singletonList("user1@mail.com")),
-                new User().withId("2")
-                          .withName("user2")
-                          .withEmail("user2@mail.com")
-                          .withPassword("secret")
-                        .withAliases(singletonList("user2@mail.com")),
-                new User().withId("3")
-                          .withName("user3")
-                          .withEmail("user3@mail.com")
-                          .withPassword("secret")
-                        .withAliases(singletonList("user3@mail.com"))
+        users = new UserImpl[] {
+                new UserImpl("1", "user1@mail.com", "user1", "secret", singletonList("user1@mail.com")),
+                new UserImpl("2", "user2@mail.com", "user2", "secret", singletonList("user2@mail.com")),
+                new UserImpl("3", "user3@mail.com", "user3", "secret", singletonList("user3@mail.com"))
         };
-        for (User user : users) {
+        for (UserImpl user : users) {
             userDao.create(user);
         }
     }
 
     @Test
     public void getAllShouldReturnEmptyListIfNoMoreUsers() throws Exception {
-        List<User> users = userDao.getAll(1, 4).getItems();
+        List<UserImpl> users = userDao.getAll(1, 4).getItems();
         assertTrue(users.isEmpty());
     }
 
     @Test
     public void getAllShouldReturnPageByPage() throws Exception {
-        List<User> users = userDao.getAll(2, 0).getItems();
+        List<UserImpl> users = userDao.getAll(2, 0).getItems();
         assertEquals(users.size(), 2);
         assertEquals(users.get(0).getId(), "1");
         assertEquals(users.get(1).getId(), "2");
@@ -117,7 +95,7 @@ public class AdminUserDaoTest extends BaseTest {
 
     @Test
     public void getAllShouldReturnAllUsersWithinSingleResponse() throws Exception {
-        List<User> users = userDao.getAll(4, 0).getItems();
+        List<UserImpl> users = userDao.getAll(4, 0).getItems();
         assertEquals(users.size(), 3);
         assertEquals(users.get(0).getId(), "1");
         assertEquals(users.get(1).getId(), "2");
@@ -126,7 +104,7 @@ public class AdminUserDaoTest extends BaseTest {
 
     @Test
     public void getAllShouldReturnRestUsers() throws Exception {
-        List<User> users = userDao.getAll(3, 1).getItems();
+        List<UserImpl> users = userDao.getAll(3, 1).getItems();
         assertEquals(users.size(), 2);
         assertEquals(users.get(0).getId(), "2");
         assertEquals(users.get(1).getId(), "3");
@@ -144,7 +122,7 @@ public class AdminUserDaoTest extends BaseTest {
 
     @Test
     public void shouldReturnCorrectTotalCountAlongWithRequestedUsers() throws Exception {
-        final Page<User> page = userDao.getAll(2, 0);
+        final Page<UserImpl> page = userDao.getAll(2, 0);
 
         assertEquals(page.getItems().size(), 2);
         assertEquals(page.getTotalItemsCount(), 3);

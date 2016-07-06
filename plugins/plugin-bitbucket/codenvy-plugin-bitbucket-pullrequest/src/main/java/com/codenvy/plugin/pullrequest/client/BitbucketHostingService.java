@@ -25,7 +25,6 @@ import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
 import com.codenvy.plugin.pullrequest.client.dto.Repository;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -46,13 +45,8 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoryFork;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
-import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.security.oauth.JsOAuthWindow;
-import org.eclipse.che.security.oauth.OAuthCallback;
-import org.eclipse.che.security.oauth.OAuthStatus;
 
 import javax.validation.constraints.NotNull;
 import javax.inject.Inject;
@@ -361,7 +355,7 @@ public class BitbucketHostingService implements VcsHostingService {
             return Promises.reject(JsPromiseError.create("Error accessing current workspace"));
         }
         final String authUrl = baseUrl
-                               + "/oauth/authenticate?oauth_provider=bitbucket&userId=" + user.getProfile().getId()
+                               + "/oauth/authenticate?oauth_provider=bitbucket&userId=" + user.getProfile().getUserId()
                                + "&redirect_after_login="
                                + Window.Location.getProtocol() + "//"
                                + Window.Location.getHost() + "/ws/"

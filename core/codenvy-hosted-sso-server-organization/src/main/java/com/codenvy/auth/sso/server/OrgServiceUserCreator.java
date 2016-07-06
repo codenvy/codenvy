@@ -21,12 +21,14 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.Profile;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.Constants;
+import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,19 +46,19 @@ import java.util.UUID;
 public class OrgServiceUserCreator implements UserCreator {
     private static final Logger LOG = LoggerFactory.getLogger(OrgServiceUserCreator.class);
 
-    private final UserManager    userManager;
-    private final UserProfileDao profileDao;
-    private final PreferenceDao  preferenceDao;
-    private final boolean        userSelfCreationAllowed;
+    private final UserManager       userManager;
+    private final ProfileManager    profileManager;
+    private final PreferenceManager preferenceManager;
+    private final boolean           userSelfCreationAllowed;
 
     @Inject
     public OrgServiceUserCreator(UserManager userManager,
-                                 UserProfileDao profileDao,
-                                 PreferenceDao preferenceDao,
+                                 ProfileManager profileManager,
+                                 PreferenceManager preferenceManager,
                                  @Named("user.self.creation.allowed") boolean userSelfCreationAllowed) {
         this.userManager = userManager;
-        this.profileDao = profileDao;
-        this.preferenceDao = preferenceDao;
+        this.profileManager = profileManager;
+        this.preferenceManager = preferenceManager;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
     }
 
@@ -64,7 +66,7 @@ public class OrgServiceUserCreator implements UserCreator {
     public User createUser(String email, String userName, String firstName, String lastName) throws IOException {
         //TODO check this method should only call if user is not exists.
         try {
-            return userManager.getByAlias(email);
+            return userManager.getByEmail(email);
         } catch (NotFoundException e) {
             if (!userSelfCreationAllowed) {
                 throw new IOException("Currently only admins can create accounts. Please contact our Admin Team for further info.");
@@ -82,19 +84,16 @@ public class OrgServiceUserCreator implements UserCreator {
                     user = createNonReservedUser(NameGenerator.generate(userName, 4), email);
                 }
 
-                Profile profile = new Profile()
-                        .withId(user.getId())
-                        .withUserId(user.getId())
-                        .withAttributes(attributes);
-                profileDao.create(profile);
+                Profile profile = new ProfileImpl(user.getId(), attributes);
+                profileManager.create(profile);
 
                 final Map<String, String> preferences = new HashMap<>();
                 preferences.put("codenvy:created", Long.toString(System.currentTimeMillis()));
                 preferences.put("resetPassword", "true");
-                preferenceDao.setPreferences(user.getId(), preferences);
+                preferenceManager.save(user.getId(), preferences);
 
                 return user;
-            } catch (ConflictException | ServerException | NotFoundException e1) {
+            } catch (ConflictException | ServerException e1) {
                 throw new IOException(e1.getLocalizedMessage(), e1);
             }
         } catch (ServerException e) {
@@ -126,18 +125,17 @@ public class OrgServiceUserCreator implements UserCreator {
             String password = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
 
-            final User user = new User().withId(id).withName(anonymousUser)
-                                        .withPassword(password);
+            final UserImpl user = new UserImpl(id);
+            user.setName(anonymousUser);
+            user.setPassword(password);
             userManager.create(user, true);
 
-            profileDao.create(new Profile()
-                                      .withId(id)
-                                      .withUserId(id));
+            profileManager.create(new ProfileImpl(id));
 
             final Map<String, String> preferences = new HashMap<>();
             preferences.put("temporary", String.valueOf(true));
             preferences.put("codenvy:created", Long.toString(System.currentTimeMillis()));
-            preferenceDao.setPreferences(id, preferences);
+            preferenceManager.save(id, preferences);
 
             LOG.info("Temporary user {} created", anonymousUser);
             return user;
@@ -159,7 +157,7 @@ public class OrgServiceUserCreator implements UserCreator {
      */
     private User createNonReservedUser(String username, String email) throws ServerException {
         try {
-            userManager.create(new User().withName(username).withEmail(email), false);
+            userManager.create(new UserImpl(null, email, username), false);
             return userManager.getByName(username);
         } catch (ServerException | NotFoundException e) {
             throw new ServerException(e);

@@ -15,7 +15,7 @@
 package com.codenvy.auth.sso.server.organization;
 
 
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.core.model.user.User;
 
 import java.io.IOException;
 

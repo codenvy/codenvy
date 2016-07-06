@@ -18,7 +18,7 @@ import com.codenvy.im.utils.HttpTransport;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class SaasUserServiceProxy {
     /** @return the current user's email */
     public String getUserEmail(String accessToken) throws IOException {
         String requestUrl = combinePaths(saasApiEndpoint, "user");
-        UserDescriptor descriptor = createDtoFromJson(transport.doGet(requestUrl, accessToken), UserDescriptor.class);
+        UserDto descriptor = createDtoFromJson(transport.doGet(requestUrl, accessToken), UserDto.class);
         return descriptor.getEmail();
     }
 }

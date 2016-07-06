@@ -14,7 +14,7 @@
  */
 package com.codenvy.ide.hosted.client.informers;
 
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedHandler;
@@ -85,11 +85,11 @@ public class HttpSessionDestroyedInformer implements HttpSessionDestroyedHandler
      * Tries to restore the session by asking an API method.
      */
     private void tryRestoreSession() {
-        userServiceClient.getCurrentUser(new AsyncRequestCallback<UserDescriptor>(
-                dtoUnmarshallerFactory.newUnmarshaller(UserDescriptor.class)) {
+        userServiceClient.getCurrentUser(new AsyncRequestCallback<UserDto>(
+                dtoUnmarshallerFactory.newUnmarshaller(UserDto.class)) {
             @Override
-            protected void onSuccess(UserDescriptor result) {
-                if (!appContext.getCurrentUser().getProfile().getId().equals(result.getId())) {
+            protected void onSuccess(UserDto result) {
+                if (!appContext.getCurrentUser().getProfile().getUserId().equals(result.getId())) {
                     showPromptToLogin();
                 }
             }

@@ -17,7 +17,8 @@ package com.codenvy.auth.sso.server;
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
 import com.codenvy.api.dao.authentication.AuthenticationHandler;
-import org.eclipse.che.api.user.server.dao.UserDao;
+
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 

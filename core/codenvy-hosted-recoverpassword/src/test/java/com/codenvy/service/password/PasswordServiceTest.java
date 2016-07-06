@@ -39,18 +39,18 @@ import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.tools.DependencySupplierImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
@@ -67,6 +67,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -80,24 +81,23 @@ public class PasswordServiceTest {
     private static final String SERVICE_PATH = "/password";
     private static final String NEW_PASSWORD = "new password";
     private static final String UUID         = java.util.UUID.randomUUID().toString();
-    private static final String USERNAME     = "user@mail.com";
+    private static final String USER_EMAIL   = "user@mail.com";
 
     @Mock
     private MailSenderClient mailService;
 
     @Mock
-    private UserDao userDao;
+    private UserManager userManager;
 
     @Mock
-    private UserProfileDao userProfileDao;
+    private ProfileManager profileManager;
 
     @Mock
     private RecoveryStorage recoveryStorage;
 
     @Mock
-    private Profile profile;
+    private ProfileImpl profile;
 
-    @Spy
     private User user;
 
     private PasswordService passService;
@@ -108,27 +108,27 @@ public class PasswordServiceTest {
     @BeforeMethod
     public void setup() throws Exception {
         passService = new PasswordService(mailService,
-                                          userDao,
+                                          userManager,
                                           recoveryStorage,
-                                          userProfileDao,
+                                          profileManager,
                                           "Codenvy <noreply@codenvy.com>",
                                           "Codenvy Password Recovery",
                                           1);
+        user = spy(new UserImpl(UUID, USER_EMAIL, USER_EMAIL));
 
-        doReturn(USERNAME).when(user).getEmail();
+        doReturn(USER_EMAIL).when(user).getEmail();
         DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(UserDao.class, userDao);
-        dependencies.addComponent(UserProfileDao.class, userProfileDao);
-
+        dependencies.addComponent(UserManager.class, userManager);
+        dependencies.addComponent(ProfileManager.class, profileManager);
     }
 
     @Test
     public void shouldBeAbleToSetupPass() throws Exception {
         when(recoveryStorage.isValid(UUID)).thenReturn(true);
-        when(recoveryStorage.get(UUID)).thenReturn(USERNAME);
-        when(userDao.getByAlias(USERNAME)).thenReturn(user);
+        when(recoveryStorage.get(UUID)).thenReturn(USER_EMAIL);
+        when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
         doReturn("userId").when(user).getId();
-        when(userProfileDao.getById(eq("userId"))).thenReturn(profile);
+        when(profileManager.getById(eq("userId"))).thenReturn(profile);
         when(profile.getAttributes()).thenReturn(Collections.<String, String>emptyMap());
 
         Response response =
@@ -137,17 +137,17 @@ public class PasswordServiceTest {
         assertEquals(response.statusCode(), 204);
 
         verify(recoveryStorage).remove(UUID);
-        verify(userDao).update(any(User.class));
-        verify(userProfileDao, never()).update(profile);
+        verify(userManager).update(any(User.class));
+        verify(profileManager, never()).update(profile);
     }
 
     @Test
     public void shouldBeAbleToSetupPassAndRemoveResetPassFlagFromProfile() throws Exception {
         when(recoveryStorage.isValid(UUID)).thenReturn(true);
-        when(recoveryStorage.get(UUID)).thenReturn(USERNAME);
-        when(userDao.getByAlias(USERNAME)).thenReturn(user);
+        when(recoveryStorage.get(UUID)).thenReturn(USER_EMAIL);
+        when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
         doReturn("userId").when(user).getId();
-        when(userProfileDao.getById(eq("userId"))).thenReturn(profile);
+        when(profileManager.getById(eq("userId"))).thenReturn(profile);
         when(profile.getAttributes()).thenReturn(new HashMap<String, String>() {{
             put("resetPassword", "true");
         }});
@@ -158,8 +158,8 @@ public class PasswordServiceTest {
         assertEquals(response.statusCode(), 204);
 
         verify(recoveryStorage).remove(UUID);
-        verify(userDao).update(any(User.class));
-        verify(userProfileDao).update(profile);
+        verify(userManager).update(any(User.class));
+        verify(profileManager).update(profile);
     }
 
     @Test
@@ -173,30 +173,30 @@ public class PasswordServiceTest {
         assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Setup password token is incorrect or has expired");
 
         verify(recoveryStorage, times(1)).remove(UUID);
-        verifyZeroInteractions(userDao);
+        verifyZeroInteractions(userManager);
     }
 
     @Test
     public void shouldRespond404OnSetupPassForNonRegisteredUser() throws Exception {
         when(recoveryStorage.isValid(UUID)).thenReturn(true);
-        when(recoveryStorage.get(UUID)).thenReturn(USERNAME);
-        doThrow(new NotFoundException(USERNAME)).when(userDao).getByAlias(USERNAME);
+        when(recoveryStorage.get(UUID)).thenReturn(USER_EMAIL);
+        doThrow(new NotFoundException(USER_EMAIL)).when(userManager).getByEmail(USER_EMAIL);
 
         Response response =
                 given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 404);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USERNAME + " is not registered in the system.");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USER_EMAIL + " is not registered in the system.");
         verify(recoveryStorage, times(1)).remove(UUID);
-        verify(userDao, never()).update(eq(user));
+        verify(userManager, never()).update(eq(user));
     }
 
     @Test
     public void shouldRespond500IfOtherErrorOccursOnSetupPass() throws Exception {
         when(recoveryStorage.isValid(UUID)).thenReturn(true);
-        when(recoveryStorage.get(UUID)).thenReturn(USERNAME);
-        when(userDao.getByAlias(USERNAME)).thenReturn(user);
-        doThrow(new ServerException("test")).when(userDao).update(any(User.class));
+        when(recoveryStorage.get(UUID)).thenReturn(USER_EMAIL);
+        when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
+        doThrow(new ServerException("test")).when(userManager).update(any(User.class));
 
         Response response =
                 given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
@@ -206,7 +206,7 @@ public class PasswordServiceTest {
                      "Unable to setup password. Please contact support.");
 
         verify(recoveryStorage, times(1)).remove(UUID);
-        verify(userDao).update(any(User.class));
+        verify(userManager).update(any(User.class));
     }
 
     @Test
@@ -232,9 +232,9 @@ public class PasswordServiceTest {
 
     @Test
     public void shouldBeAbleToRecoverPassword(ITestContext ctx) throws Exception {
-        when(userDao.getByAlias(USERNAME)).thenReturn(user);
-        when(recoveryStorage.generateRecoverToken(eq(USERNAME))).thenReturn(UUID);
-        Response response = given().pathParam("username", USERNAME).when().post(SERVICE_PATH + "/recover/{username}");
+        when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
+        when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
+        Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 
         assertEquals(response.statusCode(), 204);
 
@@ -243,11 +243,11 @@ public class PasswordServiceTest {
 
     @Test
     public void shouldSendEmailToRecoverPassword() throws Exception {
-        when(userDao.getByAlias(USERNAME)).thenReturn(user);
-        when(recoveryStorage.generateRecoverToken(eq(USERNAME))).thenReturn(UUID);
+        when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
+        when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
         ArgumentCaptor<EmailBeanDto> argumentCaptor = ArgumentCaptor.forClass(EmailBeanDto.class);
 
-        given().pathParam("username", USERNAME).post(SERVICE_PATH + "/recover/{username}");
+        given().pathParam("username", USER_EMAIL).post(SERVICE_PATH + "/recover/{username}");
 
         verify(mailService).sendMail(argumentCaptor.capture());
         EmailBeanDto argumentCaptorValue = argumentCaptor.getValue();
@@ -260,12 +260,12 @@ public class PasswordServiceTest {
 
     @Test
     public void shouldSetResponseStatus404IfUserIsntRegistered() throws Exception {
-        when(userDao.getByAlias(eq(USERNAME))).thenThrow(NotFoundException.class);
+        when(userManager.getByEmail(eq(USER_EMAIL))).thenThrow(NotFoundException.class);
 
-        Response response = given().pathParam("username", USERNAME).when().post(SERVICE_PATH + "/recover/{username}");
+        Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 
         assertEquals(response.statusCode(), 404);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USERNAME + " is not registered in the system.");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USER_EMAIL + " is not registered in the system.");
         verifyZeroInteractions(mailService);
         verifyZeroInteractions(recoveryStorage);
     }
@@ -274,7 +274,7 @@ public class PasswordServiceTest {
     public void shouldRespond500IfProblemOnEmailSendingOccurs() throws Exception {
         doThrow(new ApiException("error")).when(mailService).sendMail(any(EmailBeanDto.class));
 
-        Response response = given().pathParam("username", USERNAME).when().post(SERVICE_PATH + "/recover/{username}");
+        Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 
         assertEquals(response.statusCode(), 500);
         assertEquals(unwrapDto(response, ServiceError.class).getMessage(),

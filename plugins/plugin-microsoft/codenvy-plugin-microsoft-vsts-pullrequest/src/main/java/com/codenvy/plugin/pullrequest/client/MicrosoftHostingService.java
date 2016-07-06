@@ -23,12 +23,9 @@ import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import com.codenvy.plugin.pullrequest.client.dto.HostUser;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
@@ -270,7 +267,7 @@ public class MicrosoftHostingService implements VcsHostingService {
             return Promises.reject(JsPromiseError.create("Error accessing current workspace"));
         }
         final String authUrl = baseUrl
-                               + "/oauth/authenticate?oauth_provider=microsoft&userId=" + user.getProfile().getId()
+                               + "/oauth/authenticate?oauth_provider=microsoft&userId=" + user.getProfile().getUserId()
                                + "&scope=vso.code_manage%20vso.code_status&redirect_after_login="
                                + Window.Location.getProtocol() + "//"
                                + Window.Location.getHost() + "/ws/"

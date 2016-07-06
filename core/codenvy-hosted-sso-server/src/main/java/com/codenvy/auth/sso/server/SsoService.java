@@ -23,7 +23,7 @@ import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.auth.sso.shared.dto.SubjectDto;
 
 import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
