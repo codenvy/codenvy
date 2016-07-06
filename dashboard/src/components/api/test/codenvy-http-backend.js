@@ -66,7 +66,7 @@ export class CodenvyHttpBackend {
     }
     var userEmailKeys = this.userEmailMap.keys();
     for (let key of userEmailKeys) {
-      this.httpBackend.when('GET', '/api/user/find?alias=' + key).respond(this.userEmailMap.get(key));
+      this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
   }
 

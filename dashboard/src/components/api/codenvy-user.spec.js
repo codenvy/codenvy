@@ -155,7 +155,7 @@ describe('CodenvyUser', () => {
       factory.fetchUserByAlias(email);
 
       // expecting GETs
-      httpBackend.expectGET('/api/user/find?alias=' + email);
+      httpBackend.expectGET('/api/user/find?email=' + email);
 
       // flush command
       httpBackend.flush();
