@@ -74,15 +74,53 @@ public class CommandLibrary {
         return createReplaceCommand(file, replacingToken, replacement, true);
     }
 
+    public static Command createReplaceCommand(Path file, String replacingToken, String replacement, NodeConfig node) throws AgentException {
+        return createCommand(getReplaceCommand(file.toString(), replacingToken, replacement, true), node);
+    }
+
+    public static Command createReplaceCommand(String file, String replacingToken, String replacement, boolean withSudo) {
+        return createCommand(getReplaceCommand(file, replacingToken, replacement, withSudo));
+    }
+
     /**
      * The idea is to treat file as a single line and replace text respectively.
      */
-    public static Command createReplaceCommand(String file, String replacingToken, String replacement, boolean withSudo) {
-        String cmd = format("sudo cat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|%1$s|%2$2s|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %3$s",
-                            replacingToken,
-                            replacement.replace("\\$", "\\\\$").replace("\n", "\\n").replace("|", "\\|").replace("&", "\\&"), // http://sed.sourceforge.net/sedfaq3.html: "To enter a literal ampersand on the RHS, type '\&'."
-                            file);
-        return createCommand(withSudo ? cmd : cmd.replace("sudo ", ""));
+    private static String getReplaceCommand(String file, String replacingToken, String replacement, boolean withSudo) {
+
+        String command = format("sudo cat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|%1$s|%2$2s|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %3$s",
+                               replacingToken,
+                               replacement.replace("\\$", "\\\\$").replace("\n", "\\n").replace("|", "\\|").replace("&", "\\&"),
+                               file);
+
+        return withSudo ? command : command.replaceAll("sudo ", "");
+    }
+
+    /**
+     * Update existed text in the file, or append it to the end of file if replacement pattern doesn't find.
+     * @param fileToUpdate
+     * @param textToPutIntoFile  (symbol "$" doesn't supported)
+     * @param replacementPattern
+     * @param node
+     * @return command to update file
+     * @throws IOException
+     */
+    public static Command createUpdateFileCommand(Path fileToUpdate, String textToPutIntoFile, String replacementPattern, NodeConfig node) throws IOException {
+        return SimpleCommand.createCommand(getUpdateFileCommand(fileToUpdate, textToPutIntoFile, replacementPattern, true),
+                                           node);
+    }
+
+    static String getUpdateFileCommand(Path fileToUpdate, String textToPutIntoFile, String replacementPattern, boolean withSudo) {
+        String command = format("if test -n \"%3$s\" && sudo grep -Eq \"%3$s\" \"%1$s\"; then\n"
+                               + "  sudo sed -i \"s|%3$s|%2$s|\" \"%1$s\" &> /dev/null\n"        // replace
+                               + "fi\n"
+                               + "if ! sudo grep -Eq \"^%4$s$\" \"%1$s\"; then\n"
+                               + "  echo \"%4$s\" | sudo tee --append \"%1$s\" &> /dev/null\n"   // append
+                               + "fi",
+                               fileToUpdate,
+                               textToPutIntoFile.replace("\\$", "\\\\$").replace("\"", "\\\"").replace("\n", "\\n").replace("|", "\\|").replace("&", "\\&"),
+                               replacementPattern,
+                               textToPutIntoFile.replace("\"", "\\\""));
+        return withSudo ? command : command.replaceAll("sudo ", "");
     }
 
     public static Command createFileRestoreOrBackupCommand(final String file) {

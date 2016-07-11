@@ -184,8 +184,10 @@ installCodenvy() {
         shift
     fi
 
+    # copy ssh key to master node
+    scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key -P 2222 ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1:./.ssh/id_rsa >> ${TEST_LOG}
+
     if [[ ${INSTALL_ON_NODE} == "master.${HOST_URL}" ]]; then
-        scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key -P 2222 ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1:./.ssh/id_rsa >> ${TEST_LOG}
         MULTI_OPTION="--multi"
     fi
 

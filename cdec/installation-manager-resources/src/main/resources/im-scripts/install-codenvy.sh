@@ -1352,9 +1352,9 @@ doCheckResourceAccess() {
     local checkFailed=0
 
     if [[ "${cookie}" == "" ]]; then
-        wget --timeout=10 --tries=5 --quiet --spider ${url} || checkFailed=1
+        wget --timeout=20 --tries=5 --quiet --spider ${url} || checkFailed=1
     else
-        wget --timeout=10 --tries=5 --quiet --spider --no-cookies --no-check-certificate --header "${cookie}" ${url} || checkFailed=1
+        wget --timeout=20 --tries=5 --quiet --spider --no-cookies --no-check-certificate --header "${cookie}" ${url} || checkFailed=1
     fi
 
     if [[ ${printStatus} == true ]]; then

@@ -49,7 +49,7 @@ initModule.config(['$routeProvider', ($routeProvider) => {
       controllerAs: 'loginCtrl'
     })
     .accessOtherWise({
-      redirectTo: '/projects'
+      redirectTo: '/workspaces'
     });
 
 }]);

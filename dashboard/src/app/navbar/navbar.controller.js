@@ -69,7 +69,6 @@ export class CodenvyNavBarCtrl {
     this.menuItemUrl = {
       login: '/site/login',
       dashboard: '#/',
-      projects: '#/projects',
       workspaces: '#/workspaces',
       factories: '#/factories',
       administration: '#/onprem/administration',
@@ -133,10 +132,6 @@ export class CodenvyNavBarCtrl {
 
   getWorkspacesNumber() {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
-  }
-
-  getProjectsNumber() {
-    return this.cheAPI.cheWorkspace.getAllProjects().length;
   }
 
   getFactoriesNumber() {

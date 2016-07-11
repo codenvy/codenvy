@@ -31,9 +31,6 @@ fi
 installCodenvy ${LATEST_CODENVY4_VERSION}
 validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}
 
-# copy ssh key to codenvy node
-scp -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key -P 2222 ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1:./.ssh/id_rsa >> ${TEST_LOG}
-
 # throw error if no --codenvy-ip is used
 executeIMCommand "--valid-exit-code=1" "add-node" "node1.${HOST_URL}"
 validateExpectedString ".*Use.the.following.syntax\:.add-node.--codenvy-ip.<CODENVY_IP_ADDRESS>.<NODE_DNS>.*"

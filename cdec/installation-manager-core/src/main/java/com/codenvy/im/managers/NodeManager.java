@@ -72,7 +72,9 @@ public class NodeManager {
             throw new IllegalArgumentException("This type of node isn't supported");
         }
 
-        validate(addingNode);
+        if (! getHelper().isDefaultNode(addingNode, config.getHostUrl())) {
+            validate(addingNode);
+        }
 
         Command addNodeCommand = getHelper().getAddNodeCommand(addingNode, property);
         addNodeCommand.execute();

@@ -82,7 +82,7 @@ end
 ##################
 # HOSTS RULES
 ##################
-config.vm.provision "shell", inline: "echo -e \"nameserver 8.8.8.8\n\" >> /etc/resolv.conf"
+config.vm.provision "shell", inline: "echo -e \"nameserver 172.19.20.192\n\" >> /etc/resolv.conf"
 
 config.vm.provision :hosts do |config|
 config.add_host '192.168.56.15', ['node1.codenvy']

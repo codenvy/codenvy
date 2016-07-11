@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -106,6 +107,28 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
 
     @Test
     public void testGetAddNodeCommand() throws Exception {
+        System.setProperty("http.proxyUser", "user1");
+        System.setProperty("http.proxyPassword", "passwd1");
+        System.setProperty("http.proxyHost", "host1");
+        System.setProperty("http.proxyPort", "1111");
+
+        System.setProperty("http.nonProxyHosts", "127.0.0.1|codenvy");
+
+        System.setProperty("https.proxyUser", "user2");
+        System.setProperty("https.proxyPassword", "passwd2");
+        System.setProperty("https.proxyHost", "host2");
+        System.setProperty("https.proxyPort", "2222");
+
+        doReturn(new Config(ImmutableMap.of("host_url", TEST_HOST_URL,
+                                            Config.VERSION, "4.0.0",
+                                            Config.SWARM_NODES, "$host_url:2375"))).when(mockConfigManager).loadInstalledCodenvyConfig();
+
+        doReturn(ImmutableMap.of(Config.SYSTEM_HTTP_PROXY, "http://user1:passwd1@host1.com:1111",
+                                 Config.SYSTEM_HTTPS_PROXY, "https://user2:passwd2@host2.com:2222",
+                                 Config.SYSTEM_NO_PROXY, "127.0.0.1|codenvy")).when(mockConfigManager).obtainProxyProperties();
+
+        doReturn(InstallType.SINGLE_SERVER).when(mockConfigManager).detectInstallationType();
+
         doReturn(TEST_NODE_DNS + ":2375").when(mockNodeConfigHelper).getNodeUrl(TEST_NODE);
 
         Command result = spyHelperCodenvy4.getAddNodeCommand(TEST_NODE, ADDITIONAL_NODES_PROPERTY_NAME);
@@ -117,6 +140,43 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
 
         assertEquals(commands.get(k++).toString(), "{'command'='if [[ \"$(grep \"node1.hostname\" /etc/puppet/autosign.conf)\" == \"\" ]]; then sudo sh -c \"echo -e 'node1.hostname' >> /etc/puppet/autosign.conf\"; fi', "
                                                    + "'agent'='LocalAgent'}");
+        assertEquals(commands.get(k++).toString(), format("[{'command'='if test -n \"^proxy=.*$\" && sudo grep -Eq \"^proxy=.*$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  sudo sed -i \"s|^proxy=.*$|proxy=http://host1.com:1111|\" \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^proxy=http://host1.com:1111$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  echo \"proxy=http://host1.com:1111\" | sudo tee --append \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^proxy_username=.*$\" && sudo grep -Eq \"^proxy_username=.*$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  sudo sed -i \"s|^proxy_username=.*$|proxy_username=user1|\" \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^proxy_username=user1$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  echo \"proxy_username=user1\" | sudo tee --append \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^proxy_password=.*$\" && sudo grep -Eq \"^proxy_password=.*$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  sudo sed -i \"s|^proxy_password=.*$|proxy_password=passwd1|\" \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^proxy_password=passwd1$\" \"/etc/yum.conf\"; then\n"
+                                                          + "  echo \"proxy_password=passwd1\" | sudo tee --append \"/etc/yum.conf\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^use_proxy=.*$\" && sudo grep -Eq \"^use_proxy=.*$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  sudo sed -i \"s|^use_proxy=.*$|use_proxy=on|\" \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^use_proxy=on$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  echo \"use_proxy=on\" | sudo tee --append \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^http_proxy=.*$\" && sudo grep -Eq \"^http_proxy=.*$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  sudo sed -i \"s|^http_proxy=.*$|http_proxy=http://user1:passwd1@host1.com:1111|\" \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^http_proxy=http://user1:passwd1@host1.com:1111$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  echo \"http_proxy=http://user1:passwd1@host1.com:1111\" | sudo tee --append \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^https_proxy=.*$\" && sudo grep -Eq \"^https_proxy=.*$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  sudo sed -i \"s|^https_proxy=.*$|https_proxy=https://user2:passwd2@host2.com:2222|\" \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^https_proxy=https://user2:passwd2@host2.com:2222$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  echo \"https_proxy=https://user2:passwd2@host2.com:2222\" | sudo tee --append \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}, {'command'='if test -n \"^no_proxy=.*$\" && sudo grep -Eq \"^no_proxy=.*$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  sudo sed -i \"s|^no_proxy=.*$|no_proxy='127.0.0.1\\|codenvy'|\" \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi\n"
+                                                          + "if ! sudo grep -Eq \"^no_proxy='127.0.0.1|codenvy'$\" \"/etc/wgetrc\"; then\n"
+                                                          + "  echo \"no_proxy='127.0.0.1|codenvy'\" | sudo tee --append \"/etc/wgetrc\" &> /dev/null\n"
+                                                          + "fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}]", SYSTEM_USER_NAME));
+
         assertEquals(commands.get(k++).toString(), format("{'command'='if sudo test -d /var/lib/puppet/ssl; then   sudo find /var/lib/puppet/ssl -name node1.hostname.pem -delete; fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
         assertEquals(commands.get(k++).toString(), "{'command'='yum clean all', 'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), format("{'command'='if [[ \"$(yum list installed | grep puppetlabs-release)\" == \"\" ]]; then   sudo yum -y -q install https://yum.puppetlabs.com/el/7/products/x86_64/puppetlabs-release-7-11.noarch.rpm; fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
@@ -127,9 +187,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         assertTrue(commands.get(k++).toString().matches(".*'command'='sudo cp /etc/puppet/puppet.conf /etc/puppet/puppet.conf.back ; "
                                                         + "sudo cp /etc/puppet/puppet.conf /etc/puppet/puppet.conf.back.[0-9]+.*"), "Actual result: " + commands.get(5).toString());
         assertEquals(commands.get(k++).toString(), format("{'command'='if [[ \"$(grep \"server = hostname\" /etc/puppet/puppet.conf)\" == \"\" ]]; then   sudo sed -i 's/\\[main\\]/\\[main\\]\\n    server = hostname\\n    runinterval = 420\\n    configtimeout = 600\\n/g' /etc/puppet/puppet.conf;   sudo sed -i 's/\\[agent\\]/\\[agent\\]\\n    show_diff = true\\n    pluginsync = true\\n    report = false\\n    default_schedules = false\\n    certname = node1.hostname\\n/g' /etc/puppet/puppet.conf; fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
-        assertEquals(commands.get(k++).toString(), format("{'command'='if [[ \"$(grep \"PUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" /etc/sysconfig/puppetagent)\" == \"\" ]]; then   sudo sh -c 'echo -e \"\\nPUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" >> /etc/sysconfig/puppetagent'; fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
-        assertEquals(commands.get(k++).toString(), format("{'command'='sudo systemctl start puppet', "
-                                                          + "'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
+        assertEquals(commands.get(k++).toString(), format("{'command'='if [[ \"$(sudo grep \"PUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" /etc/sysconfig/puppetagent)\" == \"\" ]]; then   sudo sh -c 'echo -e \"\\nPUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" >> /etc/sysconfig/puppetagent'; fi', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay --logdest=/var/log/puppet/puppet-agent.log; exit 0;', "
                                                           + "'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
         assertEquals(commands.get(k++).toString(), format("PuppetErrorInterrupter{ {'command'='doneState=\"Checking\"; while [ \"${doneState}\" != \"Done\" ]; do     sudo service docker status | grep 'Active: active (running)';     if [ $? -eq 0 ]; then doneState=\"Done\";     else sleep 5;     fi; done', " +
@@ -384,5 +442,20 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         doReturn(0).when(mockNodeConfigHelper).getNodeNumber();
         spyHelperCodenvy4.validateLicense();
         verify(mockLicenseManager, never()).load();
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        System.clearProperty("http.proxyUser");
+        System.clearProperty("http.proxyPassword");
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+
+        System.clearProperty("http.nonProxyHosts");
+
+        System.clearProperty("https.proxyUser");
+        System.clearProperty("https.proxyPassword");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
     }
 }

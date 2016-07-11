@@ -14,6 +14,7 @@
  */
 package com.codenvy.im.managers.helper;
 
+import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import com.codenvy.im.commands.Command;
 import com.codenvy.im.commands.CommandLibrary;
 import com.codenvy.im.commands.MacroCommand;
@@ -32,6 +33,7 @@ import com.codenvy.im.managers.UnknownInstallationTypeException;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,12 +45,17 @@ import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentComma
 import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createWaitServiceActiveCommand;
 import static com.codenvy.im.commands.SimpleCommand.createCommand;
+import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Dmytro Nochevnov
  */
 public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
+    public static final String YUM_CONF_FILE = "/etc/yum.conf";
+    public static final String WGETRC_FILE   = "/etc/wgetrc";
+
     private CodenvyLicenseManager licenseManager;
 
     public NodeManagerHelperCodenvy4Impl(ConfigManager configManager, CodenvyLicenseManager licenseManager) {
@@ -64,7 +71,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         List<Command> commands = new ArrayList<>();
 
         try {
-            if (! isDefaultNode(node, config.getHostUrl())) {
+            if (!isDefaultNode(node, config.getHostUrl())) {
                 // add node into the autosign list of puppet master
                 commands.add(createCommand(format("if [[ \"$(grep \"%1$s\" /etc/puppet/autosign.conf)\" == \"\" ]]; "
                                                   + "then sudo sh -c \"echo -e '%1$s' >> /etc/puppet/autosign.conf\"; "
@@ -77,6 +84,9 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                 } else {
                     puppetMasterNodeDns = config.getHostUrl();
                 }
+
+                // setup proxy settings
+                commands.add(obtainSetupProxySettingsCommand(node));
 
                 // remove outdated certificate of agent from puppet agent, if exists
                 commands.add(createCommand(format("if sudo test -d /var/lib/puppet/ssl; then "
@@ -111,12 +121,9 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                                            node));
 
                 // log puppet messages into the /var/log/puppet/puppet-agent.log file instead of /var/log/messages
-                commands.add(createCommand("if [[ \"$(grep \"PUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" /etc/sysconfig/puppetagent)\" == \"\" ]]; then "
+                commands.add(createCommand("if [[ \"$(sudo grep \"PUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" /etc/sysconfig/puppetagent)\" == \"\" ]]; then "
                                            + "  sudo sh -c 'echo -e \"\\nPUPPET_EXTRA_OPTS=--logdest /var/log/puppet/puppet-agent.log\" >> /etc/sysconfig/puppetagent'; "
                                            + "fi", node));
-
-                // start puppet agent
-                commands.add(createCommand("sudo systemctl start puppet", node));
 
                 // force applying updated puppet config at the adding node
                 commands.add(createForcePuppetAgentCommand(node));
@@ -290,7 +297,82 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         }
     }
 
-    private boolean isDefaultNode(NodeConfig node, String hostUrl) {
+    public boolean isDefaultNode(NodeConfig node, String hostUrl) {
         return node.getHost().equals(hostUrl);
     }
+
+    /** @return commands to setup next settings carefully (without duplication)
+     # In /etc/yum.conf:
+     proxy={Config.SYSTEM_HTTP_PROXY : without_credentials}
+     proxy_username={"http.proxyUser"}
+     proxy_password={"http.proxyPassword"}
+
+     # In /etc/wgetrc:
+     use_proxy=on
+     http_proxy={Config.SYSTEM_HTTP_PROXY}
+     https_proxy={SYSTEM_HTTPS_PROXY}
+     no_proxy='{Config.SYSTEM_NO_PROXY}'
+     * @param node
+     */
+    private Command obtainSetupProxySettingsCommand(NodeConfig node) throws IOException {
+        List<Command> commands = new ArrayList<>();
+
+        // prepare list of commands to setup /etc/yum.conf file
+        Map<String, String> codenvyProxySettings = configManager.obtainProxyProperties();
+        String httpProxy = codenvyProxySettings.get(Config.SYSTEM_HTTP_PROXY);
+        if (!isNullOrEmpty(httpProxy)) {
+            String httpProxyWithoutCredentials = httpProxy.replaceAll("(https?://).*@(.*)", "$1$2");
+            commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(YUM_CONF_FILE),
+                                                                format("proxy=%s", httpProxyWithoutCredentials),
+                                                                "^proxy=.*$",
+                                                                node));
+        }
+
+        SystemProxySettings javaProxySettings = SystemProxySettings.create();
+        if (!isNullOrEmpty(javaProxySettings.getHttpUser())) {
+            commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(YUM_CONF_FILE),
+                                                                format("proxy_username=%s", javaProxySettings.getHttpUser()),
+                                                                "^proxy_username=.*$",
+                                                                node));
+
+            if (nonNull(javaProxySettings.getHttpPassword())) {
+                commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(YUM_CONF_FILE),
+                                                                    format("proxy_password=%s", javaProxySettings.getHttpPassword()),
+                                                                    "^proxy_password=.*$",
+                                                                    node));
+            }
+        }
+
+        // prepare list of commands to setup /etc/wgetrc file
+        if (codenvyProxySettings.keySet().size() > 0) {
+            commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(WGETRC_FILE),
+                                                                "use_proxy=on",
+                                                                "^use_proxy=.*$",
+                                                                node));
+
+            if (codenvyProxySettings.containsKey(Config.SYSTEM_HTTP_PROXY)) {
+                commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(WGETRC_FILE),
+                                                                    format("http_proxy=%s", codenvyProxySettings.get(Config.SYSTEM_HTTP_PROXY)),
+                                                                    "^http_proxy=.*$",
+                                                                    node));
+            }
+
+            if (codenvyProxySettings.containsKey(Config.SYSTEM_HTTPS_PROXY)) {
+                commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(WGETRC_FILE),
+                                                                    format("https_proxy=%s", codenvyProxySettings.get(Config.SYSTEM_HTTPS_PROXY)),
+                                                                    "^https_proxy=.*$",
+                                                                    node));
+            }
+
+            if (codenvyProxySettings.containsKey(Config.SYSTEM_NO_PROXY)) {
+                commands.add(CommandLibrary.createUpdateFileCommand(Paths.get(WGETRC_FILE),
+                                                                    format("no_proxy='%s'", codenvyProxySettings.get(Config.SYSTEM_NO_PROXY)),
+                                                                    "^no_proxy=.*$",
+                                                                    node));
+            }
+        }
+
+        return new MacroCommand(commands, "Commands to setup proxy settings");
+    }
+
 }

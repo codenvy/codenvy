@@ -234,6 +234,11 @@ public class NodeManagerHelperCodenvy3Impl extends NodeManagerHelper {
     }
 
     @Override
+    public boolean isDefaultNode(NodeConfig node, String hostUrl) {
+        return false;
+    }
+
+    @Override
     public NodeConfigHelper getNodeConfigHelper(Config config) {
         return new NodeConfigHelperCodenvy3Impl(config);
     }

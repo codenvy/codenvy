@@ -92,4 +92,6 @@ public abstract class NodeManagerHelper {
     }
 
     abstract public void validateLicense() throws IOException;
+
+    abstract public boolean isDefaultNode(NodeConfig node, String hostUrl);
 }

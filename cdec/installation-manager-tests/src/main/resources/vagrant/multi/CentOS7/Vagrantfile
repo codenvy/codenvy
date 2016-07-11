@@ -179,6 +179,6 @@ config.add_host '192.168.56.19', ['master.codenvy']
 config.add_host '127.0.0.1', ['localhost4'] # for zabbix server - to insure sending emails using IPv4 from 127.0.0.1
 end
 
-config.vm.provision "shell", inline: "echo -e \"nameserver 8.8.8.8\n\" >> /etc/resolv.conf"
+config.vm.provision "shell", inline: "echo -e \"nameserver 172.19.20.192\n\" >> /etc/resolv.conf"
 
 end

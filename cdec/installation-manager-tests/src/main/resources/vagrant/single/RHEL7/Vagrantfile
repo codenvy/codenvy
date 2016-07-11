@@ -31,5 +31,5 @@ Vagrant.configure(2) do |config|
 
   # Adding hosts rules
   config.vm.provision "shell", inline: "echo -e \"127.0.0.1 localhost\" > /etc/hosts"
-  config.vm.provision "shell", inline: "echo -e \"nameserver 8.8.8.8\n\" >> /etc/resolv.conf"
+  config.vm.provision "shell", inline: "echo -e \"nameserver 172.19.20.192\n\" >> /etc/resolv.conf"
 end

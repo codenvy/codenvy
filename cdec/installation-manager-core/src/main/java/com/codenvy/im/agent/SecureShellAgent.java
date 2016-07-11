@@ -55,8 +55,7 @@ public class SecureShellAgent extends AbstractAgent {
     @Override
     public String execute(String command) throws AgentException, ConnectionException {
         try {
-            // we need to recreate session each execute time to avoid error "com.jcraft.jsch.JSchException: socket is not established" in
-            // PuppetErrorInterrupter
+            // we need to recreate session each execute time to avoid error "com.jcraft.jsch.JSchException: socket is not established" in PuppetErrorInterrupter
             session = getSession(session.getHost(), session.getPort(), session.getUserName());
             session.connect();
         } catch (Exception e) {

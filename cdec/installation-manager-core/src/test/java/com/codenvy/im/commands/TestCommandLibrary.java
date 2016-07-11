@@ -21,10 +21,12 @@ import com.codenvy.im.managers.InstallType;
 import com.codenvy.im.managers.NodeConfig;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -33,6 +35,7 @@ import static com.codenvy.im.commands.CommandLibrary.createFileBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createFileRestoreOrBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
+import static com.codenvy.im.commands.CommandLibrary.createUpdateFileCommand;
 import static com.codenvy.im.commands.CommandLibrary.getFileRestoreOrBackupCommand;
 import static java.lang.String.format;
 import static java.nio.file.Files.createDirectories;
@@ -44,8 +47,9 @@ import static org.testng.Assert.assertTrue;
 
 /** @author Dmytro Nochevnov */
 public class TestCommandLibrary extends BaseTest {
-    public static NodeConfig testApiNode  = new NodeConfig(NodeConfig.NodeType.API, "localhost");
+    public static NodeConfig testApiNode = new NodeConfig(NodeConfig.NodeType.API, "localhost");
     public static NodeConfig testDataNode = new NodeConfig(NodeConfig.NodeType.DATA, "127.0.0.1");
+    public static final Path TEST_FILE = Paths.get("target/testFile");
 
     @BeforeMethod
     public void setup() {
@@ -65,13 +69,12 @@ public class TestCommandLibrary extends BaseTest {
 
     @Test
     public void testCreateLocalPropertyReplaceMultiplyLineCommand() throws IOException {
-        Path testFile = Paths.get("target/testFile");
-        write(testFile.toFile(), "$property=\"a\n" +
+        write(TEST_FILE.toFile(), "$property=\"a\n" +
                                  "b\n" +
                                  "c\n" +
                                  "\"\n");
 
-        Command testCommand = createPropertyReplaceCommand(testFile.toString(), "$property", "1\n" +
+        Command testCommand = createPropertyReplaceCommand(TEST_FILE.toString(), "$property", "1\n" +
                                                                                              "2\n" +
                                                                                              "3\n", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
@@ -83,7 +86,7 @@ public class TestCommandLibrary extends BaseTest {
 
         testCommand.execute();
 
-        String content = readFileToString(testFile.toFile());
+        String content = readFileToString(TEST_FILE.toFile());
         assertEquals(content, "$property = \"1\n" +
                               "2\n" +
                               "3\n" +
@@ -92,10 +95,9 @@ public class TestCommandLibrary extends BaseTest {
 
     @Test
     public void testCreateLocalReplaceCommand() throws IOException {
-        Path testFile = Paths.get("target/testFile");
-        write(testFile.toFile(), "old\n");
+        write(TEST_FILE.toFile(), "old\n");
 
-        Command testCommand = createReplaceCommand(testFile.toString(), "old", "\\$new | &&", false);
+        Command testCommand = createReplaceCommand(TEST_FILE.toString(), "old", "\\$new | &&", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
                                              "| sed ':a;N;$!ba;s/\\n/~n/g' " +
                                              "| sed 's|old|\\\\$new \\| \\&\\&|g' " +
@@ -103,16 +105,15 @@ public class TestCommandLibrary extends BaseTest {
                                              "&& mv tmp.tmp target/testFile', 'agent'='LocalAgent'}");
         testCommand.execute();
 
-        String content = readFileToString(testFile.toFile());
+        String content = readFileToString(TEST_FILE.toFile());
         assertEquals(content, "\\$new | &&\n");
     }
 
     @Test
     public void testCreateLocalReplaceMultiplyLineCommand() throws IOException {
-        Path testFile = Paths.get("target/testFile");
-        write(testFile.toFile(), "old\n");
+        write(TEST_FILE.toFile(), "old\n");
 
-        Command testCommand = createReplaceCommand(testFile.toString(), "old", "new\nnew\nnew\n", false);
+        Command testCommand = createReplaceCommand(TEST_FILE.toString(), "old", "new\nnew\nnew\n", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
                                              "| sed ':a;N;$!ba;s/\\n/~n/g' " +
                                              "| sed 's|old|new\\nnew\\nnew\\n|g' " +
@@ -120,11 +121,51 @@ public class TestCommandLibrary extends BaseTest {
                                              "&& mv tmp.tmp target/testFile', 'agent'='LocalAgent'}");
         testCommand.execute();
 
-        String content = readFileToString(testFile.toFile());
+        String content = readFileToString(TEST_FILE.toFile());
         assertEquals(content, "new\n" +
                               "new\n" +
                               "new\n" +
                               "\n");
+    }
+
+    @Test
+    public void testCreateUpdateFileCommand() throws IOException {
+        Command testCommand = createUpdateFileCommand(TEST_FILE, "pr2='value\"|&3\n'", "^pr2=.*", testApiNode);
+        assertEquals(testCommand.toString(), format("{'command'='if test -n \"^pr2=.*\" && sudo grep -Eq \"^pr2=.*\" \"target/testFile\"; then\n"
+                                                    + "  sudo sed -i \"s|^pr2=.*|pr2='value\\\"\\|\\&3\\n'|\" \"target/testFile\" &> /dev/null\n"
+                                                    + "fi\n"
+                                                    + "if ! sudo grep -Eq \"^pr2='value\\\"|&3\n'$\" \"target/testFile\"; then\n"
+                                                    + "  echo \"pr2='value\\\"|&3\n'\" | sudo tee --append \"target/testFile\" &> /dev/null\n"
+                                                    + "fi', 'agent'='{'host'='localhost', 'port'='22', 'user'='%s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
+    }
+
+    @Test
+    public void testUpdateByUpdateFileCommand() throws IOException {
+        write(TEST_FILE.toFile(), "#pr2=\n"
+                                  + "pr2=value2\n"
+                                  + "pr3=\n");
+
+        Command testCommand = SimpleCommand.createCommand(CommandLibrary.getUpdateFileCommand(TEST_FILE, "pr2='value\"|&3\n'", "^pr2=.*", false));
+        testCommand.execute();
+
+        String content = readFileToString(TEST_FILE.toFile());
+        assertEquals(content, "#pr2=\n"
+                              + "pr2='value\"|&3\n'\n"
+                              + "pr3=\n", testCommand.toString());
+    }
+
+    @Test
+    public void testAppendByUpdateFileCommand() throws IOException {
+        write(TEST_FILE.toFile(), "#pr2=\n"
+                                  + "pr3=value3\n");
+
+        Command testCommand = SimpleCommand.createCommand(CommandLibrary.getUpdateFileCommand(TEST_FILE, "pr2='value\"|&3\n'", "^pr2=.*", false));
+        testCommand.execute();
+
+        String content = readFileToString(TEST_FILE.toFile());
+        assertEquals(content, "#pr2=\n"
+                              + "pr3=value3\n"
+                              + "pr2='value\"|&3\n'\n", testCommand.toString());
     }
 
     @Test
@@ -435,5 +476,10 @@ public class TestCommandLibrary extends BaseTest {
 
         command = CommandLibrary.createChmodCommand("007", Paths.get("file"), false);
         assertEquals(command.toString(), "{'command'='chmod 007 file', 'agent'='LocalAgent'}");
+    }
+
+    @AfterMethod
+    public void tearDown() throws IOException {
+        Files.deleteIfExists(TEST_FILE);
     }
 }
