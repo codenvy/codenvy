@@ -14,8 +14,8 @@
  */
 package com.codenvy.im.utils;
 
-import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Singleton;
@@ -24,9 +24,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -36,10 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.codenvy.im.utils.Commons.copyInterruptable;
-import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
-import static java.nio.file.Files.newOutputStream;
 import static java.lang.String.format;
-import static java.util.Objects.nonNull;
+import static java.nio.file.Files.newOutputStream;
 import static java.util.regex.Pattern.compile;
 import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
@@ -163,14 +159,6 @@ public class HttpTransport {
         return connection;
     }
 
-    void setDefaultAuthenticator(final String proxyUser, final char[] proxyPassword) {
-        Authenticator.setDefault(new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(proxyUser, proxyPassword);
-            }
-        });
-    }
-
     private String request(String path,
                            String method,
                            @Nullable Object body,
@@ -180,7 +168,7 @@ public class HttpTransport {
 
         try {
             conn = openConnection(path, accessToken);
-            request(method, body, expectedContentType, conn, Protocol.obtainProtocol(path));
+            request(method, body, expectedContentType, conn);
             return readAndCloseQuietly(conn.getInputStream());
         } catch (SocketTimeoutException e) { // catch exception and throw a new one with proper message
             URL url = new URL(path);
@@ -196,7 +184,7 @@ public class HttpTransport {
         final HttpURLConnection conn = openConnection(path, null);
 
         try {
-            request(method, null, expectedContentType, conn, Protocol.obtainProtocol(path));
+            request(method, null, expectedContentType, conn);
 
             String headerField = conn.getHeaderField("Content-Disposition");
             if (headerField == null) {
@@ -232,73 +220,36 @@ public class HttpTransport {
     private void request(String method,
                          @Nullable Object body,
                          @Nullable String expectedContentType,
-                         HttpURLConnection conn,
-                         Protocol protocol) throws IOException {
-        if (Objects.isNull(protocol)) {
-            throw new IllegalArgumentException("Protocol is unknown.");
-        }
+                         HttpURLConnection conn) throws IOException {
+        ProxyAuthenticator.initAuthenticator(conn.getURL().toString());
 
-        considerAuthenticatedProxy(protocol);
-
-        conn.setConnectTimeout(30 * 1000);
-        conn.setRequestMethod(method);
-        if (body != null) {
-            conn.addRequestProperty("content-type", "application/json");
-            conn.setDoOutput(true);
-            try (OutputStream output = conn.getOutputStream()) {
-                output.write(DtoFactory.getInstance().toJson(body).getBytes("UTF-8"));
-            }
-        }
-        final int responseCode = conn.getResponseCode();
-
-        if ((responseCode / 100) != 2) {
-            InputStream in = conn.getErrorStream();
-            if (in == null) {
-                in = conn.getInputStream();
+        try {
+            conn.setConnectTimeout(30 * 1000);
+            conn.setRequestMethod(method);
+            if (body != null) {
+                conn.addRequestProperty("content-type", "application/json");
+                conn.setDoOutput(true);
+                try (OutputStream output = conn.getOutputStream()) {
+                    output.write(DtoFactory.getInstance().toJson(body).getBytes("UTF-8"));
+                }
             }
 
-            throw new HttpException(responseCode, readAndCloseQuietly(in));
+            final int responseCode = conn.getResponseCode();
+            if ((responseCode / 100) != 2) {
+                InputStream in = conn.getErrorStream();
+                if (in == null) {
+                    in = conn.getInputStream();
+                }
+
+                throw new HttpException(responseCode, readAndCloseQuietly(in));
+            }
+        } finally {
+            ProxyAuthenticator.resetAuthenticator();
         }
 
         final String contentType = conn.getContentType();
         if (contentType != null && !contentType.equalsIgnoreCase(expectedContentType)) {
             throw new IOException("Unsupported type of response from remote server.");
-        }
-    }
-
-    /**
-     * "An optional user name, if required (as it is with a few FTP servers).
-     * The password, is present, follows the user name, separated from it by a colon; the user name and optional password are followed by a commercial at sign "@".
-     *
-     * @see <a href="http://www.w3.org/Addressing/URL/url-spec.txt">http://www.w3.org/Addressing/URL/url-spec.txt</a>
-     */
-    private void considerAuthenticatedProxy(Protocol protocol) {
-        SystemProxySettings systemProxySettings = SystemProxySettings.create();
-        String proxyUser = null;
-        String proxyPassword = null;
-
-        switch (protocol) {
-            case HTTP:
-                proxyUser = systemProxySettings.getHttpUser();
-                proxyPassword = systemProxySettings.getHttpPassword();
-                break;
-
-            case HTTPS:
-                proxyUser = systemProxySettings.getHttpsUser();
-                proxyPassword = systemProxySettings.getHttpsPassword();
-                break;
-
-            default:
-                break;
-        }
-
-        if (!isNullOrEmpty(proxyUser)) {
-            char[] proxyPasswordChar = new char[]{};
-            if (nonNull(proxyPassword)) {
-                proxyPasswordChar = proxyPassword.toCharArray();
-            }
-
-            setDefaultAuthenticator(proxyUser, proxyPasswordChar);
         }
     }
 }

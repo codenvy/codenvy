@@ -46,9 +46,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Alexander Garagatyi
  */
 public class RemoteDockerNode implements DockerNode {
-    private static final Logger LOG = getLogger(RemoteDockerNode.class);
-
-    private static final Pattern NODE_ADDRESS = Pattern.compile(
+    private static final Logger  LOG                  = getLogger(RemoteDockerNode.class);
+    private static final String  ERROR_MESSAGE_PREFIX = "Can't detect container user ids to chown backed up files of workspace ";
+    private static final Pattern NODE_ADDRESS         = Pattern.compile(
             "((?<protocol>[a-zA-Z])://)?" +
             // http://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
             "(?<host>(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))" +
@@ -102,25 +102,24 @@ public class RemoteDockerNode implements DockerNode {
                                                                                                "-c",
                                                                                                "id -u && id -g"})
                                                                          .withDetach(false));
-            final List<String> ownerIds = new ArrayList<>(4);
-            final ValueHolder<String> error = new ValueHolder<>();
-            dockerConnector.startExec(StartExecParams.create(exec.getId()), message -> {
-                if (message.getType() == LogMessage.Type.STDOUT) {
-                    ownerIds.add(message.getContent());
-                } else {
-                    LOG.error("Can't detect container user ids to chown backed up workspace " + workspaceId + "files. " + message);
-                    error.set("Can't detect container user ids to chown backed up workspace " + workspaceId + "files");
+            final List<String> execOutputs = new ArrayList<>();
+            final ValueHolder<Boolean> hasFailed = new ValueHolder<>(false);
+            dockerConnector.startExec(StartExecParams.create(exec.getId()), logMessage -> {
+                if (logMessage.getType() != LogMessage.Type.STDOUT) {
+                    hasFailed.set(true);
                 }
+                execOutputs.add(logMessage.getContent());
             });
 
-            if (error.get() != null) {
-                throw new MachineException(error.get());
+            if (hasFailed.get() || execOutputs.size() < 2) {
+                LOG.error("{} {}. Docker output: {}", ERROR_MESSAGE_PREFIX, workspaceId, execOutputs);
+                throw new MachineException(ERROR_MESSAGE_PREFIX + workspaceId);
             }
 
             backupManager.restoreWorkspaceBackup(workspaceId,
                                                  hostProjectsFolder,
-                                                 ownerIds.get(0),
-                                                 ownerIds.get(1),
+                                                 execOutputs.get(0),
+                                                 execOutputs.get(1),
                                                  nodeHost);
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);

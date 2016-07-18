@@ -259,7 +259,7 @@ setupProxy() {
     fi
 
     if [ -n "$no_proxy" ]; then
-        PROXY_OPTS="$PROXY_OPTS -Dhttp.nonProxyHosts='$no_proxy'"
+        PROXY_OPTS="$PROXY_OPTS -Dhttp.nonProxyHosts='$(echo "$no_proxy" | tr ',' '|')'"  # replace comma separator on pipeline one
     fi
 
     if [[ $PROXY_OPTS != "" ]]; then

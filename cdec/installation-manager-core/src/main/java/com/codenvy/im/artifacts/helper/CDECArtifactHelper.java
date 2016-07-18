@@ -104,5 +104,5 @@ public abstract class CDECArtifactHelper {
     }
 
     /** @return list of commands to update puppet.conf files of puppet server and puppet agent */
-    public abstract Command getUpdatePuppetConfigCommand(Config config, String oldHostName, String newHostName);
+    public abstract Command getUpdateHostnameCommand(Config config, String oldHostName, String newHostName);
 }

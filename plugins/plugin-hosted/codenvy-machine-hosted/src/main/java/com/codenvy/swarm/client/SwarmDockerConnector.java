@@ -67,8 +67,14 @@ public class SwarmDockerConnector extends DockerConnector {
         this.nodeDaemonScheme = "http";
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Very unstable behavior with multiple nodes, try to workaround somehow
+     */
+    @Deprecated
     @Override
-    public void pull(PullParams params, ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+    public void pull(PullParams params, ProgressMonitor progressMonitor) throws IOException {
         final DockerNode node = strategy.select(getAvailableNodes());
         super.pull(params, progressMonitor, addrToUri(node.getAddr()));
     }

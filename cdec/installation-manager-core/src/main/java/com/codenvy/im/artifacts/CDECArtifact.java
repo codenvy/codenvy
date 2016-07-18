@@ -14,16 +14,19 @@
  */
 package com.codenvy.im.artifacts;
 
+import com.codenvy.im.agent.AgentException;
 import com.codenvy.im.artifacts.helper.CDECArtifactHelper;
 import com.codenvy.im.artifacts.helper.CDECMultiServerHelper;
 import com.codenvy.im.artifacts.helper.CDECSingleServerHelper;
 import com.codenvy.im.commands.Command;
+import com.codenvy.im.commands.CommandLibrary;
 import com.codenvy.im.managers.BackupConfig;
 import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.InstallOptions;
 import com.codenvy.im.managers.InstallType;
 import com.codenvy.im.managers.NodeConfig;
+import com.codenvy.im.managers.NodeException;
 import com.codenvy.im.managers.NodeManager;
 import com.codenvy.im.managers.PropertiesNotFoundException;
 import com.codenvy.im.managers.UnknownInstallationTypeException;
@@ -266,7 +269,19 @@ public class CDECArtifact extends AbstractArtifact {
         String currentHostName = config.getHostUrl();
         String newHostName = propertiesToUpdate.get(Config.HOST_URL);
         if (newHostName != null && !newHostName.equals(currentHostName)) {
-            Command commands = helper.getUpdatePuppetConfigCommand(config, currentHostName, newHostName);
+            Command checkAccessToHostCommand = CommandLibrary.createCheckAccessToHostCommand(newHostName);
+            try {
+                checkAccessToHostCommand.execute();
+            } catch (IOException e) {
+                String errorMessage = e.getMessage();
+                if (e.getCause() instanceof AgentException) {
+                    errorMessage = format("The hostname '%s' isn't available or wrong.", newHostName);
+                }
+
+                throw new IOException(errorMessage, e);
+            }
+
+            Command commands = helper.getUpdateHostnameCommand(config, currentHostName, newHostName);
             commands.execute();
 
             nodeManager.updatePuppetConfig(currentHostName, newHostName);

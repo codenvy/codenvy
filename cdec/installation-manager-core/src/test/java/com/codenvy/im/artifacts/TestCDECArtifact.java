@@ -753,7 +753,25 @@ public class TestCDECArtifact extends BaseTest {
 
     @Test
     public void testUpdateCodenvyConfig() throws IOException {
-        String newHostName = "c";
+        String newHostName = "localhost";
+        Map<String, String> properties = ImmutableMap.of(Config.HOST_URL, newHostName);
+
+        String oldHostName = "a";
+        Config testConfig = new Config(ImmutableMap.of(Config.HOST_URL, oldHostName, "property2", "b"));
+        doReturn(testConfig).when(spyConfigManager).loadInstalledCodenvyConfig();
+
+        doReturn(InstallType.MULTI_SERVER).when(spyConfigManager).detectInstallationType();
+
+        doReturn(mockCommand).when(spyCDECMultiServerHelper).getUpdateConfigCommand(testConfig, properties);
+
+        spyCdecArtifact.updateConfig(properties);
+        verify(spyCDECMultiServerHelper).getUpdateConfigCommand(testConfig, properties);
+        verify(mockNodeManager).updatePuppetConfig(oldHostName, newHostName);
+    }
+
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "The hostname '20348520381283.com' isn't available or wrong.")
+    public void testUpdateCodenvyConfigWithWrongHostname() throws IOException {
+        String newHostName = "20348520381283.com";
         Map<String, String> properties = ImmutableMap.of(Config.HOST_URL, newHostName);
 
         String oldHostName = "a";
@@ -791,7 +809,6 @@ public class TestCDECArtifact extends BaseTest {
         fail("There should be PropertiesNotFoundExceptions thrown");
     }
 
-
     @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "error")
     public void testChangeCodenvyConfigWhenCommandException() throws IOException {
         Map<String, String> properties = ImmutableMap.of("a", "c");
@@ -822,7 +839,7 @@ public class TestCDECArtifact extends BaseTest {
 
         CDECSingleServerHelper testHelper = new CDECSingleServerHelper(spyCdecArtifact, spyConfigManager);
 
-        MacroCommand updatePuppetConfigCommand = (MacroCommand) testHelper.getUpdatePuppetConfigCommand(testConfig, oldHostName, newHostName);
+        MacroCommand updatePuppetConfigCommand = (MacroCommand) testHelper.getUpdateHostnameCommand(testConfig, oldHostName, newHostName);
         List<Command> commands = updatePuppetConfigCommand.getCommands();
         k = 0;
         assertEquals(commands.size(), 8);
@@ -901,7 +918,7 @@ public class TestCDECArtifact extends BaseTest {
 
         CDECSingleServerHelper testHelper = new CDECSingleServerHelper(spyCdecArtifact, spyConfigManager);
 
-        MacroCommand updatePuppetConfigCommand = (MacroCommand) testHelper.getUpdatePuppetConfigCommand(testConfig, oldHostName, newHostName);
+        MacroCommand updatePuppetConfigCommand = (MacroCommand) testHelper.getUpdateHostnameCommand(testConfig, oldHostName, newHostName);
         List<Command> commands = updatePuppetConfigCommand.getCommands();
         assertEquals(commands.size(), 10);
         k = 0;

@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -194,52 +195,20 @@ public class TestHttpTransport {
         verification.run();
     }
 
-    @Test(dataProvider = "testConsideringAuthenticatedProxyData")
-    public void testConsideringAuthenticatedHttpsProxy(String username, String password, Runnable verification) throws IOException {
+    @Test
+    public void testConsideringAuthenticatedHttpsProxy() throws IOException {
         String httpsPath = "https://localhost";
 
-        if (username != null) {
-            System.setProperty("https.proxyUser", username);
-        }
-
-        if (password != null) {
-            System.setProperty("https.proxyPassword", password);
-        }
+        System.setProperty("https.proxyUser", "user1");
+        System.setProperty("https.proxyPassword", "passw1");
 
         HttpURLConnection mockConnection = mock(HttpURLConnection.class);
+        doReturn(new URL(httpsPath)).when(mockConnection).getURL();
         doReturn(200).when(mockConnection).getResponseCode();
 
         doReturn(mockConnection).when(spyHttpTransport).openConnection(httpsPath, null);
 
         spyHttpTransport.doGet(httpsPath);
-        verification.run();
-    }
-
-    @DataProvider
-    public Object[][] testConsideringAuthenticatedProxyData() {
-        return new Object[][]{
-            {null, null, (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport, never()).setDefaultAuthenticator(any(), any());
-            }},
-            {"", null, (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport, never()).setDefaultAuthenticator(any(), any());
-            }},
-            {null, "", (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport, never()).setDefaultAuthenticator(any(), any());
-            }},
-            {null, "pass", (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport, never()).setDefaultAuthenticator(any(), any());
-            }},
-            {"test", null, (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport).setDefaultAuthenticator("test", new char[]{});
-            }},
-            {"test", "", (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport).setDefaultAuthenticator("test", "".toCharArray());
-            }},
-            {"test", "pass", (Runnable) () ->  {
-                Mockito.verify(spyHttpTransport).setDefaultAuthenticator("test", "pass".toCharArray());
-            }}
-        };
     }
 
     @AfterMethod

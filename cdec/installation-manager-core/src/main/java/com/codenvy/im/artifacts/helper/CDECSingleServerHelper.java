@@ -532,7 +532,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
     }
 
     @Override
-    public Command getUpdatePuppetConfigCommand(Config config, String oldHostName, String newHostName) {
+    public Command getUpdateHostnameCommand(Config config, String oldHostName, String newHostName) {
         List<Command> commands = new ArrayList<>();
 
         // update "node <hostname>" statement in puppet manifest file

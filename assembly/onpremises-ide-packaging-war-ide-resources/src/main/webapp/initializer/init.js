@@ -1070,13 +1070,12 @@ var SiteApp = new function () {
 
     this.onError = function (message, exception) {
         Initializer.hide();
-        document.body.style["background-color"] = "#373737";
+        document.body.style["background-color"] = "#32373B";
 
         var html = "" +
             "<div style='position: absolute; left:0px; right:0px; top:0px; bottom:0px; overflow:hidden;'>" +
             "<div id='error-panel' class='select-ws-error'>" +
             "<div class='select-ws-logo'></div>" +
-            "<hr class='select-ws-line'>" +
             "<div id='select-ws-error-message' class='select-ws-error-message'>" + message + "</div>" +
             "</div>" +
             "</div>";

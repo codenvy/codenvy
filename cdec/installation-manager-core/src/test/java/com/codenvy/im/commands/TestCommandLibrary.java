@@ -478,6 +478,12 @@ public class TestCommandLibrary extends BaseTest {
         assertEquals(command.toString(), "{'command'='chmod 007 file', 'agent'='LocalAgent'}");
     }
 
+    @Test
+    public void testCreateCheckAccessToHostCommand() {
+        Command command = CommandLibrary.createCheckAccessToHostCommand("host");
+        assertEquals(command.toString(), "{'command'='ping -c 1 'host' &> /dev/null', 'agent'='LocalAgent'}");
+    }
+
     @AfterMethod
     public void tearDown() throws IOException {
         Files.deleteIfExists(TEST_FILE);

@@ -80,7 +80,7 @@ public abstract class NodeManagerHelper {
     /**
      * Check sudo rights without password on node.
      */
-    public Command getValidateSudoRightsWithoutPasswordCommand(NodeConfig node) throws IOException {
+    public Command getValidateSudoRightsCommand(NodeConfig node) throws IOException {
         return CommandLibrary.createCheckSudoRightsWithoutPasswordCommand(node);
     }
 

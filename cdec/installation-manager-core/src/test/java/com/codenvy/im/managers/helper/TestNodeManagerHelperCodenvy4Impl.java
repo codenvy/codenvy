@@ -347,7 +347,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
     public void testValidateSudoRightsWithoutPasswordCommand() throws Exception {
         prepareSingleNodeEnv(mockConfigManager);
 
-        assertEquals(spyHelperCodenvy4.getValidateSudoRightsWithoutPasswordCommand(TEST_NODE).toString(),
+        assertEquals(spyHelperCodenvy4.getValidateSudoRightsCommand(TEST_NODE).toString(),
                      format("{'command'='sudo -k -n true 2> /dev/null', 'agent'='{'host'='node1.hostname', 'port'='22', 'user'='%1$s', 'identity'='[~/.ssh/id_rsa]'}'}", SYSTEM_USER_NAME));
     }
 

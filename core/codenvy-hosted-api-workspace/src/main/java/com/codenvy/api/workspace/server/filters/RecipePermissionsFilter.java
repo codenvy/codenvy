@@ -41,7 +41,7 @@ import static com.codenvy.api.workspace.server.recipe.RecipeDomain.UPDATE;
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/recipe{path:(/.*)?}")
+@Path("/recipe{path:(?!/script)(/.*)?}")
 public class RecipePermissionsFilter extends CheMethodInvokerFilter {
     @Override
     public void filter(GenericMethodResource genericMethodResource, Object[] arguments) throws ForbiddenException, ServerException {

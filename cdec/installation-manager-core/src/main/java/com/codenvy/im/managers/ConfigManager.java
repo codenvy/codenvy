@@ -370,11 +370,11 @@ public class ConfigManager {
      */
     public String getApiEndpoint() throws IOException {
         InstallType installType = detectInstallationType();
+        Config config = loadInstalledCodenvyConfig(installType);
         if (installType == InstallType.SINGLE_SERVER) {
-            // in single-node installation it's not required to modify '/etc/hosts' on the server where Codenvy is being installed
-            return "http://localhost/api";
+            // need localhost here instead of '$host_url" because it seems HttpTransport doesn't take System property "http.nonProxyHosts" into account
+            return format("%s://localhost/api", config.getValue("host_protocol"));
         } else {
-            Config config = loadInstalledCodenvyConfig(installType);
             return format("%s://%s/api", config.getValue("host_protocol"), config.getValue("host_url"));
         }
     }

@@ -615,8 +615,12 @@ public class TestConfigManager extends BaseTest {
     @Test
     public void testGetApiEndpointSingleServer() throws Exception {
         doReturn(InstallType.SINGLE_SERVER).when(spyConfigManager).detectInstallationType();
+        String protocol = "https";
+        String hostUrl = "codenvy.com";
+        doReturn(new Config(ImmutableMap.of("host_protocol", protocol, "host_url", hostUrl)))
+            .when(spyConfigManager).loadInstalledCodenvyConfig(InstallType.SINGLE_SERVER);
 
-        assertEquals(spyConfigManager.getApiEndpoint(), "http://localhost/api");
+        assertEquals(spyConfigManager.getApiEndpoint(), protocol + "://localhost/api");
     }
 
     @Test

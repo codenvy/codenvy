@@ -125,9 +125,9 @@ public class NodeManager {
     }
 
     void validate(NodeConfig node) throws IOException {
-        Command validateSudoRightsWithoutPasswordCommand = getHelper().getValidateSudoRightsWithoutPasswordCommand(node);
+        Command validateSudoRightsCommand = getHelper().getValidateSudoRightsCommand(node);
         try {
-            validateSudoRightsWithoutPasswordCommand.execute();
+            validateSudoRightsCommand.execute();
         } catch (IOException e) {
             String errorMessage = e.getMessage();
             if (e.getCause() instanceof AgentException) {

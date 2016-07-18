@@ -21,8 +21,9 @@
 printAndLog "TEST CASE: Update single-node Codenvy with non-default admin name and password from binary with Codenvy 4"
 vagrantUp ${SINGLE_NODE_VAGRANT_FILE}
 
-installCodenvy ${PREV_CODENVY4_VERSION} --systemAdminName="newadmin" --systemAdminPassword="new-password"
+installCodenvy ${PREV_CODENVY4_VERSION} --systemAdminName="newadmin" --systemAdminPassword="new-password" --disable-monitoring-tools
 validateInstalledCodenvyVersion ${PREV_CODENVY4_VERSION}
+executeSshCommand "cat codenvy/codenvy.properties | grep 'install_monitoring_tools=false'"
 authWithoutRealmAndServerDns "newadmin" "new-password"
 
 executeIMCommand "download" "codenvy" "${LATEST_CODENVY4_VERSION}"

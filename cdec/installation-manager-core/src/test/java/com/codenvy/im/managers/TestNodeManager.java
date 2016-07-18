@@ -166,7 +166,7 @@ public class TestNodeManager extends BaseTest {
     public void testValidateSingleServerNode() throws Exception {
         prepareSingleNodeEnv(mockConfigManager);
 
-        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
         doReturn(mockCommand).when(mockHelper).getValidatePuppetMasterAccessibilityCommand(HOSTNAME, TEST_NODE);
         spyManager.validate(TEST_NODE);
 
@@ -177,7 +177,7 @@ public class TestNodeManager extends BaseTest {
     public void testValidateMultiServerNode() throws Exception {
         prepareMultiNodeEnv(mockConfigManager);
 
-        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
 
         doReturn(HOSTNAME).when(mockConfigManager).fetchMasterHostName();
         doReturn(mockCommand).when(mockHelper).getValidatePuppetMasterAccessibilityCommand(HOSTNAME, TEST_NODE);
@@ -193,7 +193,7 @@ public class TestNodeManager extends BaseTest {
 
         doReturn(HOSTNAME).when(mockConfigManager).fetchMasterHostName();
 
-        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
 
         doThrow(new AgentException("agent error")).when(mockHelper).getValidatePuppetMasterAccessibilityCommand(HOSTNAME, TEST_NODE);
         spyManager.validate(TEST_NODE);
@@ -203,7 +203,7 @@ public class TestNodeManager extends BaseTest {
     public void testValidateSudoRightsWithoutPasswordCommandException() throws Exception {
         prepareSingleNodeEnv(mockConfigManager);
 
-        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
         doThrow(new CommandException("command error", new AgentException("agent error", null))).when(mockCommand).execute();
 
         spyManager.validate(TEST_NODE);
@@ -213,7 +213,7 @@ public class TestNodeManager extends BaseTest {
     public void testValidatePuppetMasterAccessibilityCommandException() throws Exception {
         prepareSingleNodeEnv(mockConfigManager);
 
-        doReturn(mock(Command.class)).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mock(Command.class)).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
         doReturn(mockCommand).when(mockHelper).getValidatePuppetMasterAccessibilityCommand(HOSTNAME, TEST_NODE);
         doThrow(new CommandException("command error", new AgentException("agent error", null))).when(mockCommand).execute();
 
@@ -224,7 +224,7 @@ public class TestNodeManager extends BaseTest {
     public void testValidateNodeConnectionException() throws Exception {
         prepareSingleNodeEnv(mockConfigManager);
 
-        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsWithoutPasswordCommand(TEST_NODE);
+        doReturn(mockCommand).when(mockHelper).getValidateSudoRightsCommand(TEST_NODE);
         doThrow(new CommandException("command error", new ConnectionException("Connection error", null))).when(mockCommand).execute();
 
         spyManager.validate(TEST_NODE);

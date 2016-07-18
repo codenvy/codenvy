@@ -333,7 +333,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding()
-                                       .to(com.codenvy.machine.AuthDockerInstanceProvider.class);
+                                       .to(com.codenvy.machine.HostedDockerInstanceProvider.class);
         bind(WsAgentLauncher.class).to(com.codenvy.machine.launcher.WsAgentWithAuthLauncherImpl.class);
 
         //workspace activity service

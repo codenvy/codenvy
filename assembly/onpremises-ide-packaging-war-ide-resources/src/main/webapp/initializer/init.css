@@ -216,10 +216,8 @@ body {
     width: 600px;
     left: 50%;
     margin-left: -300px;
-    
-    background-color: #EEE;
     top: 50px;
-    background-color: #373737;
+    background-color: transparent;
 }
 
 .select-ws-error {
@@ -248,15 +246,6 @@ body {
     text-align: center;
     color: #ddd;
     box-sizing: border-box;
-}
-
-.select-ws-line {
-    display: block;
-    width: 100px;    
-    box-sizing: border-box;
-    border-bottom-style: inset;
-    border-width: 1px;
-    color: #f3f3f3;
 }
 
 .select-ws-descr {
@@ -313,11 +302,11 @@ body {
     position: relative;
     width: 700px;
     height: 120px;
-    font-family: Roboto, sans-serif;
-    font-size: 20px;
+    font-family: 'Open Sans';
+    font-size: 14px;
     font-weight: 400;    
     box-sizing: border-box;
-    color: red;
+    color: #ff2424;
     display: table-cell;
     text-align: center;
     vertical-align: middle;

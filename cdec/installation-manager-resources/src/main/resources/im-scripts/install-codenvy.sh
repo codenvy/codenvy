@@ -32,6 +32,8 @@
 # --https-proxy-for-docker-daemon=<HTTPS PROXY URL>
 # --no-proxy-for-docker-daemon=<NO_PROXY_FOR_DOCKER_DAEMON>
 
+# --disable-monitoring-tools
+
 trap cleanUp EXIT
 
 unset HOST_NAME
@@ -131,11 +133,11 @@ validateExitCode() {
 setRunOptions() {
     ARTIFACT="codenvy"
     CODENVY_TYPE="single"
-    IM_CLI=false
     SILENT=false
     SUPPRESS=false
     LICENSE_ACCEPTED=false
     INSTALL_DIR=./codenvy
+    DISABLE_MONITORING_TOOLS=false
 
     for var in "$@"; do
         if [[ "$var" == "--multi" ]]; then
@@ -148,7 +150,6 @@ setRunOptions() {
             SUPPRESS=true
 
         elif [[ "$var" == "--im-cli" ]]; then
-            IM_CLI=true
             ARTIFACT="installation-manager-cli"
 
         elif [[ "$var" =~ --version=.* ]]; then
@@ -204,6 +205,10 @@ setRunOptions() {
 
         elif [[ "$var" =~ --config=.* ]]; then
             CUSTOM_CONFIG=$(echo "$var" | sed -e "s/--config=//g")
+
+        elif [[ "$var" == "--disable-monitoring-tools" ]]; then
+            DISABLE_MONITORING_TOOLS=true
+
         fi
     done
 
@@ -546,6 +551,10 @@ doUpdateDownloadProgress() {
 }
 
 doInstallCodenvy() {
+    if [[ ${DISABLE_MONITORING_TOOLS} == true ]]; then
+        insertProperty "install_monitoring_tools" "false"
+    fi
+
     for ((STEP=1; STEP<=9; STEP++));  do
         if [ ${STEP} == 9 ]; then
             setStepIndicator $(( $STEP+3 ))
@@ -685,7 +694,7 @@ installJava() {
 installIm() {
     local imUrl="https://codenvy.com/update/repository/public/download/installation-manager-cli"
 
-    if [[ $IM_CLI == true ]]; then
+    if [[ "${ARTIFACT}" == "installation-manager-cli" ]]; then
         imUrl=${imUrl}"/"${VERSION}
     fi
     echo "${imUrl}" >> ${INSTALL_LOG}
@@ -1051,6 +1060,10 @@ printPreInstallInfo_single() {
         println
     fi
 
+    if [[ ${DISABLE_MONITORING_TOOLS} == true ]]; then
+        insertProperty "install_monitoring_tools" "false"
+    fi
+
     if [ -n "${SYSTEM_ADMIN_NAME}" ]; then
         insertProperty "admin_ldap_user_name" ${SYSTEM_ADMIN_NAME}
     fi
@@ -1064,6 +1077,11 @@ printPreInstallInfo_single() {
     fi
 
     if [ -n "${HOST_NAME}" ]; then
+        if [ "$(validateHostname "${HOST_NAME}")" != "success" ]; then
+            println $(printError "ERROR: The hostname '${HOST_NAME}' isn't available or wrong.")
+            exit 1
+        fi
+
         insertProperty "host_url" ${HOST_NAME}
     fi
 
@@ -1101,7 +1119,7 @@ printPreInstallInfo_single() {
         insertProperty "no_proxy_for_codenvy_workspaces" ${NO_PROXY_FOR_CODENVY_WORKSPACES}
     fi
 
-    if [[ $IM_CLI == false ]]; then
+    if [[ "${ARTIFACT}" == "codenvy" ]]; then
         doCheckAvailablePorts_single
     fi
 }
@@ -1420,6 +1438,10 @@ printPreInstallInfo_multi() {
         println
     fi
 
+    if [[ ${DISABLE_MONITORING_TOOLS} == true ]]; then
+        insertProperty "install_monitoring_tools" "false"
+    fi
+
     if [ -n "${SYSTEM_ADMIN_NAME}" ]; then
         insertProperty "admin_ldap_user_name" ${SYSTEM_ADMIN_NAME}
     fi
@@ -1475,7 +1497,7 @@ printPreInstallInfo_multi() {
 
     doCheckAvailableResourcesOnNodes
 
-    if [[ $IM_CLI == false ]]; then
+    if [[ "${ARTIFACT}" == "codenvy" ]]; then
         doCheckAvailablePorts_multi
     fi
 

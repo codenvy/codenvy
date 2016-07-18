@@ -365,16 +365,16 @@ fetchJsonParameter() {
 # --verbose
 doHttpRequest() {
     for var in "$@"; do
-        if [[ "$var" =~ --content-type=.* ]]; then
+        if [[ "$var" =~ --content-type=.+ ]]; then
             CONTENT_TYPE_OPTION=`echo "-H \"Content-Type: $var\"" | sed -e "s/--content-type=//g"`
 
-        elif [[ "$var" =~ --body=.* ]]; then
+        elif [[ "$var" =~ --body=.+ ]]; then
             local BODY_OPTION=`echo "-d '$var'" | sed -e "s/--body=//g"`
 
-        elif [[ "$var" =~ --url=.* ]]; then
+        elif [[ "$var" =~ --url=.+ ]]; then
             local URL=`echo "'$var'" | sed -e "s/--url=//g"`
 
-        elif [[ "$var" =~ --method=.* ]]; then
+        elif [[ "$var" =~ --method=.+ ]]; then
             local METHOD_OPTION=`echo "-X $var" | sed -e "s/--method=//g"`
             
         elif [[ "$var" == "--output-http-code" ]]; then
@@ -383,7 +383,7 @@ doHttpRequest() {
         elif [[ "$var" == "--verbose" ]]; then
             local VERBOSE_OPTION="-v"
 
-        elif [[ "$var" =~ --cookie=.* ]]; then
+        elif [[ "$var" =~ --cookie=.+ ]]; then
             local COOKIE_OPTION=$(echo "-H \"Cookie: session-access-key=$var\"" | sed -e "s/--cookie=//g")
 
         fi

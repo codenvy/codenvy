@@ -820,7 +820,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
     }
 
     @Override
-    public Command getUpdatePuppetConfigCommand(Config config, String oldHostName, String newHostName) {
+    public Command getUpdateHostnameCommand(Config config, String oldHostName, String newHostName) {
         return CommandLibrary.EMPTY_COMMAND;
     }
 }

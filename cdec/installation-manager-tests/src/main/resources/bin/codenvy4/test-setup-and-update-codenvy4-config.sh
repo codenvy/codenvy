@@ -23,6 +23,12 @@ printAndLog "TEST CASE: Setup and update Codenvy 4.x On Premise configuration"
 
 vagrantUp ${SINGLE_NODE_VAGRANT_FILE}
 
+WRONG_HOST_NAME="2420810283108022.com"
+installCodenvy --valid-exit-code=1 ${LATEST_CODENVY4_VERSION} --hostname=$WRONG_HOST_NAME
+validateExpectedString ".*ERROR:.The.hostname.'$WRONG_HOST_NAME'.isn't.available.or.wrong..*"
+
+executeSshCommand "rm -f codenvy/codenvy.properties"
+
 installCodenvy ${LATEST_CODENVY4_VERSION} --config=${CUSTOM_SINGLE_NODE_LATEST_VERSION_CONFIG_URL}
 validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}
 
@@ -41,6 +47,13 @@ validateExpectedString ".*$PROPERTY_TO_TEST=$VALUE_TO_UPDATE.*"
 
 executeIMCommand "config $PROPERTY_TO_TEST"
 validateExpectedString ".*$PROPERTY_TO_TEST=$VALUE_TO_UPDATE.*"
+
+# should fail on wrong host url
+executeIMCommand --valid-exit-code=1 "config --hostname=$WRONG_HOST_NAME"
+validateExpectedString ".*The.hostname.'$WRONG_HOST_NAME'.isn't.available.or.wrong..*"
+
+executeSshCommand --valid-exit-code=1 "echo y | codenvy config 'host_url' $WRONG_HOST_NAME"
+validateExpectedString ".*The.hostname.'$WRONG_HOST_NAME'.isn't.available.or.wrong..*"
 
 # validate using custom config file
 PATH_TO_INSTALL_DIR=codenvy

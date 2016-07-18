@@ -45,6 +45,11 @@ public class CommandLibrary {
     /** @return Empty command which returns empty string after execution */
     public static final Command EMPTY_COMMAND = new EmptyCommand();
 
+    /** @return Command to ping host by dns */
+    public static Command createCheckAccessToHostCommand(String dns) {
+        return createCommand(format("ping -c 1 '%s' &> /dev/null", dns));
+    }
+
     public enum PatchType {
         BEFORE_UPDATE, AFTER_UPDATE
     }
