@@ -20,7 +20,7 @@
     <parent>
         <artifactId>onpremises-ide-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>4.5.0-RC1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
     </parent>
     <artifactId>onpremises-ide-packaging-tomcat-site</artifactId>
     <packaging>pom</packaging>
@@ -39,11 +39,6 @@
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
             <artifactId>onpremises-ide-packaging-war-ide-resources</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-webroot-codenvy</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
