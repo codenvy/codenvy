@@ -31,6 +31,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.event.SelectionChangedEvent;
+import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -81,9 +83,9 @@ public class ContributionExtension {
         this.hostingServiceProvider = vcsHostingServiceProvider;
         this.vcsServiceProvider = vcsServiceProvider;
 
-        eventBus.addHandler(CurrentProjectChangedEvent.TYPE, new CurrentProjectChangedHandler() {
+        eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedHandler() {
             @Override
-            public void onCurrentProjectChanged(CurrentProjectChangedEvent event) {
+            public void onSelectionChanged(SelectionChangedEvent event) {
                 final Project rootProject = appContext.getRootProject();
                 if (rootProject == null) {
                     return;
