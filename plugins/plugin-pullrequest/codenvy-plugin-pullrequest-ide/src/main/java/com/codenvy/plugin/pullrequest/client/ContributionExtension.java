@@ -33,8 +33,6 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
