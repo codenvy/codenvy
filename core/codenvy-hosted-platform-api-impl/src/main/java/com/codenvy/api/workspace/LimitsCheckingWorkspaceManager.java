@@ -87,33 +87,30 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     @Override
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
-                                         String namespace,
-                                         @Nullable String accountId) throws ServerException,
-                                                                            ConflictException,
-                                                                            NotFoundException {
+                                         String namespace) throws ServerException,
+                                                                  ConflictException,
+                                                                  NotFoundException {
         checkMaxEnvironmentRam(config);
         checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
                                           "unavailable and it is impossible to check resources limit.");
-        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, accountId));
+        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace));
     }
 
     @Override
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
                                          String namespace,
-                                         Map<String, String> attributes,
-                                         @Nullable String accountId) throws ServerException,
-                                                                            NotFoundException,
-                                                                            ConflictException {
+                                         Map<String, String> attributes) throws ServerException,
+                                                                                NotFoundException,
+                                                                                ConflictException {
         checkMaxEnvironmentRam(config);
         checkNamespaceValidity(namespace, "Unable to create workspace because its namespace owner is " +
                                           "unavailable and it is impossible to check resources limit.");
-        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, attributes, accountId));
+        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, attributes));
     }
 
     @Override
     public WorkspaceImpl startWorkspace(String workspaceId,
                                         @Nullable String envName,
-                                        @Nullable String accountId,
                                         @Nullable Boolean restore) throws NotFoundException,
                                                                           ServerException,
                                                                           ConflictException {
@@ -125,21 +122,20 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         return checkRamAndPropagateStart(workspace.getConfig(),
                                          envName,
                                          workspace.getNamespace(),
-                                         () -> super.startWorkspace(workspaceId, envName, accountId, restore));
+                                         () -> super.startWorkspace(workspaceId, envName, restore));
     }
 
     @Override
     public WorkspaceImpl startWorkspace(WorkspaceConfig config,
                                         String namespace,
-                                        boolean isTemporary,
-                                        @Nullable String accountId) throws ServerException,
-                                                                           NotFoundException,
-                                                                           ConflictException {
+                                        boolean isTemporary) throws ServerException,
+                                                                    NotFoundException,
+                                                                    ConflictException {
         checkMaxEnvironmentRam(config);
         return checkRamAndPropagateStart(config,
                                          config.getDefaultEnv(),
                                          namespace,
-                                         () -> super.startWorkspace(config, namespace, isTemporary, accountId));
+                                         () -> super.startWorkspace(config, namespace, isTemporary));
     }
 
     @Override
