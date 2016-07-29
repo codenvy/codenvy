@@ -30,7 +30,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -63,8 +62,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     private static final Striped<Lock> START_LOCKS                = Striped.lazyWeakLock(100);
     private static final long          BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
-    private final UserManager       userManager;
     private final EnvironmentParser environmentParser;
+    private final AccountManager accountManager;
 
     private final int  workspacesPerUser;
     private final long maxRamPerEnvMB;
@@ -78,7 +77,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           WorkspaceDao workspaceDao,
                                           WorkspaceRuntimes runtimes,
                                           EventService eventService,
-                                          UserManager userManager,
                                           SnapshotDao snapshotDao,
                                           AccountManager accountManager,
                                           EnvironmentParser environmentParser,
@@ -86,7 +84,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
                                           @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB) {
         super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
-        this.userManager = userManager;
+        this.accountManager = accountManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
         this.ramPerUserMB = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
@@ -304,7 +302,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     private void checkNamespaceValidity(String namespace, String errorMsg) throws ServerException {
         try {
-            userManager.getByName(namespace);
+            accountManager.getByName(namespace);
         } catch (NotFoundException e) {
             throw new ServerException(errorMsg);
         }
