@@ -19,13 +19,14 @@ import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -50,6 +51,9 @@ import static org.mockito.Mockito.verify;
  * @author Yevhenii Voevodin
  */
 public class LimitsCheckingWorkspaceManagerTest {
+    @Mock
+    SnapshotDao snapshotDao;
+
 
     @Test(expectedExceptions = LimitExceededException.class,
           expectedExceptionsMessageRegExp = "The maximum workspaces allowed per user is set to '2' and you are currently at that limit. " +
@@ -263,8 +267,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               userManager,
+                                                                                              snapshotDao,
                                                                                               false,
                                                                                               false));
 
@@ -294,8 +298,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               userManager,
+                                                                                              snapshotDao,
                                                                                               false,
                                                                                               false));
         doReturn(ws).when(manager).getWorkspace(anyString()); // <- currently running 2gb

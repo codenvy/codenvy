@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.Mock;

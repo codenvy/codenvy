@@ -53,20 +53,20 @@ import com.google.inject.name.Names;
 import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
+import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
+import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.FactoryService;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.server.recipe.providers.RecipeProvider;
-import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
 import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
@@ -285,7 +285,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new InstrumentationModule());
         bind(org.eclipse.che.api.ssh.server.SshService.class);
-        bind(org.eclipse.che.api.machine.server.MachineService.class);
+        bind(org.eclipse.che.api.environment.server.MachineService.class);
         bind(org.eclipse.che.api.machine.server.dao.SnapshotDao.class).to(com.codenvy.api.dao.mongo.SnapshotDaoImpl.class);
         bind(com.mongodb.DB.class).annotatedWith(Names.named("mongo.db.machine"))
                                   .toProvider(com.codenvy.api.dao.mongo.MachineMongoDBProvider.class);
@@ -303,7 +303,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                           .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
@@ -345,7 +345,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
 
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
                 MapBinder.newMapBinder(binder(),

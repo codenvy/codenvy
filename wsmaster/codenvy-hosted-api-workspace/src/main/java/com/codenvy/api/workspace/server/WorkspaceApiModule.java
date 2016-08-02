@@ -15,16 +15,15 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.dao.PermissionsStorage;
-import com.codenvy.api.workspace.server.filters.MachinePermissionsFilter;
+import com.codenvy.api.workspace.server.filters.AclSetPermissionsFilter;
+import com.codenvy.api.workspace.server.filters.RecipePermissionsFilter;
 import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
+import com.codenvy.api.workspace.server.filters.StackPermissionsFilter;
 import com.codenvy.api.workspace.server.filters.WorkspacePermissionsFilter;
 import com.codenvy.api.workspace.server.recipe.RecipeCreatorPermissionsProvider;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionStorage;
-import com.codenvy.api.workspace.server.filters.RecipePermissionsFilter;
-import com.codenvy.api.workspace.server.filters.AclSetPermissionsFilter;
 import com.codenvy.api.workspace.server.stack.StackCreatorPermissionsProvider;
 import com.codenvy.api.workspace.server.stack.StackPermissionStorage;
-import com.codenvy.api.workspace.server.filters.StackPermissionsFilter;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
@@ -42,7 +41,6 @@ public class WorkspaceApiModule extends AbstractModule {
     protected void configure() {
         bind(WorkspacePermissionsFilter.class);
         bind(RecipePermissionsFilter.class);
-        bind(MachinePermissionsFilter.class);
         bind(StackPermissionsFilter.class);
         bind(AclSetPermissionsFilter.class);
         bind(RecipeScriptDownloadPermissionFilter.class);

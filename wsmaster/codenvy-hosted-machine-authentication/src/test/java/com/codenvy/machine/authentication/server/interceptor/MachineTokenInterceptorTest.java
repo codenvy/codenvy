@@ -23,7 +23,8 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.environment.server.MachineProcessManager;
+import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -73,11 +74,12 @@ public class MachineTokenInterceptorTest {
                 bind(WorkspaceDao.class).toInstance(mock(WorkspaceDao.class));
                 bind(WorkspaceRuntimes.class).toInstance(mock(WorkspaceRuntimes.class));
                 bind(EventService.class).toInstance(mock(EventService.class));
-                bind(MachineManager.class).toInstance(mock(MachineManager.class));
+                bind(MachineProcessManager.class).toInstance(mock(MachineProcessManager.class));
                 bind(UserManager.class).toInstance(mock(UserManager.class));
                 bindConstant().annotatedWith(Names.named("workspace.runtime.auto_restore")).to(false);
                 bindConstant().annotatedWith(Names.named("workspace.runtime.auto_snapshot")).to(false);
                 bind(WorkspaceManager.class);
+                bind(SnapshotDao.class).toInstance(mock(SnapshotDao.class));
 
                 bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 

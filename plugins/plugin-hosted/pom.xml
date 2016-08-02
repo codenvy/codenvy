@@ -33,7 +33,6 @@
         <module>codenvy-hosted-ext-profile</module>
         <module>codenvy-hosted-ext-hosted</module>
         <module>codenvy-machine-hosted</module>
-        <module>codenvy-router-machine</module>
     </modules>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>

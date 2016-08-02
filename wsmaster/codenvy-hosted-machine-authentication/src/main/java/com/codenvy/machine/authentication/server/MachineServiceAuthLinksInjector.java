@@ -21,7 +21,8 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
+import org.eclipse.che.api.environment.server.MachineService;
+import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 
 /**
- * Helps to inject {@link org.eclipse.che.api.machine.server.MachineService} related links.
+ * Helps to inject {@link MachineService} related links.
  *
  * @author Anton Korneta
  */

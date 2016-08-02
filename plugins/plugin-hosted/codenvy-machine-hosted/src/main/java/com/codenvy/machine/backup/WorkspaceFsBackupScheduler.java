@@ -20,10 +20,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class WorkspaceFsBackupScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceFsBackupScheduler.class);
 
     private final long                 syncTimeoutMillisecond;
-    private final MachineManager       machineManager;
+    private final WorkspaceRuntimes    workspaceRuntimes;
     private final MachineBackupManager backupManager;
 
     private final Map<String, Long>             lastMachineSynchronizationTime;
@@ -57,10 +58,10 @@ public class WorkspaceFsBackupScheduler {
     private final ConcurrentMap<String, String> devMachinesBackupsInProgress;
 
     @Inject
-    public WorkspaceFsBackupScheduler(MachineManager machineManager,
+    public WorkspaceFsBackupScheduler(WorkspaceRuntimes workspaceRuntimes,
                                       MachineBackupManager backupManager,
                                       @Named("machine.backup.backup_period_second") long syncTimeoutSecond) {
-        this.machineManager = machineManager;
+        this.workspaceRuntimes = workspaceRuntimes;
         this.backupManager = backupManager;
         this.syncTimeoutMillisecond = TimeUnit.SECONDS.toMillis(syncTimeoutSecond);
 
@@ -71,40 +72,46 @@ public class WorkspaceFsBackupScheduler {
 
     @ScheduleRate(initialDelay = 1, period = 1, unit = TimeUnit.MINUTES)
     public void scheduleBackup() {
-        try {
-            for (final MachineImpl machine : machineManager.getMachines()) {
-                final String machineId = machine.getId();
+        for (Map.Entry<String, WorkspaceRuntimes.WorkspaceState> wsStateEntry :
+                workspaceRuntimes.getWorkspaces().entrySet()) {
 
-                if (machine.getConfig().isDev() &&
-                    machine.getStatus() == MachineStatus.RUNNING &&
-                    isTimeToBackup(machineId)) {
+            try {
+                WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor = workspaceRuntimes.get(wsStateEntry.getKey());
+                if (runtimeDescriptor.getRuntimeStatus().equals(WorkspaceStatus.RUNNING)) {
 
-                    executor.execute(() -> {
-                        // don't start new backup if previous one is in progress
-                        if (devMachinesBackupsInProgress.putIfAbsent(machineId, machineId) == null) {
-                            try {
-                                backupWorkspaceInMachine(machine);
+                    MachineImpl devMachine = runtimeDescriptor.getRuntime().getDevMachine();
+                    String machineId = devMachine.getId();
 
-                                lastMachineSynchronizationTime.put(machine.getId(), System.currentTimeMillis());
-                            } catch (NotFoundException ignore) {
-                                // it is ok, machine was stopped while this backup task was in the executor queue
-                            } catch (ServerException e) {
-                                LOG.error(e.getLocalizedMessage(), e);
-                            } finally {
-                                devMachinesBackupsInProgress.remove(machineId);
+                    if (isTimeToBackup(machineId)) {
+                        executor.execute(() -> {
+                            // don't start new backup if previous one is in progress
+                            if (devMachinesBackupsInProgress.putIfAbsent(machineId, machineId) == null) {
+                                try {
+                                    backupWorkspaceInMachine(devMachine);
+
+                                    lastMachineSynchronizationTime.put(machineId, System.currentTimeMillis());
+                                } catch (NotFoundException ignore) {
+                                    // it is ok, machine was stopped while this backup task was in the executor queue
+                                } catch (ServerException e) {
+                                    LOG.error(e.getLocalizedMessage(), e);
+                                } finally {
+                                    devMachinesBackupsInProgress.remove(machineId);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
+            } catch (NotFoundException e) {
+                // it's ok, means that ws is stopped
+            } catch (ServerException e) {
+                LOG.error(e.getLocalizedMessage(), e);
             }
-        } catch (ServerException e) {
-            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 
     @VisibleForTesting
     void backupWorkspaceInMachine(MachineImpl machine) throws NotFoundException, ServerException {
-        final Instance machineInstance = machineManager.getInstance(machine.getId());
+        final Instance machineInstance = workspaceRuntimes.getMachine(machine.getWorkspaceId(), machine.getId());
         // for case if this task is in the executor queue and user stopped this machine before execution
         if (machineInstance.getStatus() != MachineStatus.RUNNING) {
             return;

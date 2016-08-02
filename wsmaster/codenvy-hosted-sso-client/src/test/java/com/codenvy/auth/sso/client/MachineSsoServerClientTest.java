@@ -18,7 +18,6 @@ import com.codenvy.auth.sso.shared.dto.SubjectDto;
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -26,7 +25,7 @@ import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

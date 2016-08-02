@@ -27,7 +27,7 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -74,11 +74,11 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           WorkspaceDao workspaceDao,
                                           WorkspaceRuntimes runtimes,
                                           EventService eventService,
-                                          MachineManager machineManager,
                                           UserManager userManager,
+                                          SnapshotDao snapshotDao,
                                           @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
-        super(workspaceDao, runtimes, eventService, machineManager, defaultAutoSnapshot, defaultAutoRestore);
+        super(workspaceDao, runtimes, eventService, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
         this.userManager = userManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnv = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);

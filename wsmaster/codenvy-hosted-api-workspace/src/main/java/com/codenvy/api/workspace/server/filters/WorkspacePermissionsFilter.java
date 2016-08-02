@@ -33,6 +33,7 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.DELETE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.READ;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.RUN;
+import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
 
 /**
@@ -70,32 +71,37 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 return;
             }
 
-            case "startFromConfig":
+            case "startFromConfig": {
                 String accountId = ((String)arguments[2]);
                 checkPermissionsToCreateWorkspaces(currentSubject, accountId);
                 return;
+            }
 
-            case "delete":
+            case "delete": {
                 workspaceId = ((String)arguments[0]);
                 action = DELETE;
                 break;
-            case "createMachine":
+            }
+
             case "stop":
             case "startById":
-            case "createSnapshot":
+            case "createSnapshot": {
                 workspaceId = ((String)arguments[0]);
                 action = RUN;
                 break;
+            }
 
-            case "getSnapshot":
+            case "getSnapshot": {
                 workspaceId = ((String)arguments[0]);
                 action = READ;
                 break;
+            }
 
-            case "getByKey":
+            case "getByKey": {
                 workspaceId = getWorkspaceIdFromKey(((String)arguments[0]));
                 action = READ;
                 break;
+            }
 
             case "update":
             case "addProject":
@@ -106,13 +112,34 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
             case "updateEnvironment":
             case "addCommand":
             case "deleteCommand":
-            case "updateCommand":
+            case "updateCommand": {
                 workspaceId = ((String)arguments[0]);
                 action = CONFIGURE;
                 break;
+            }
 
-            case "getWorkspaces": //method accessible to every user
+            case "getWorkspaces": {//method accessible to every user
                 return;
+            }
+
+            // MachineService methods
+            case "startMachine" :
+            case "stopMachine" : {
+                workspaceId = ((String)arguments[0]);
+                action = RUN;
+                break;
+            }
+
+            case "getMachineById":
+            case "getMachines" :
+            case "executeCommandInMachine" :
+            case "getProcesses" :
+            case "stopProcess" :
+            case "getProcessLogs" : {
+                workspaceId = ((String)arguments[0]);
+                action = USE;
+                break;
+            }
 
             default:
                 throw new ForbiddenException("The user does not have permission to perform this operation");
