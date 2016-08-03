@@ -60,5 +60,6 @@
         <module>codenvy-hosted-api-admin</module>
         <module>codenvy-hosted-api-organization</module>
         <module>codenvy-hosted-system-ram</module>
+        <module>codenvy-hosted-api-resource</module>
     </modules>
 </project>
