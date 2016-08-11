@@ -38,7 +38,6 @@ public class WorkspaceApiModule extends AbstractModule {
         bind(RecipeScriptDownloadPermissionFilter.class);
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
-        bind(WorkspacePermissionsRemover.class).asEagerSingleton();
 
         Multibinder<PermissionsStorage> storages = Multibinder.newSetBinder(binder(),
                                                                             PermissionsStorage.class);

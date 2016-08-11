@@ -38,7 +38,7 @@ import java.util.ArrayList;
  */
 @Singleton
 public class WorkspaceCreatorPermissionsProvider implements EventSubscriber<WorkspaceCreatedEvent> {
-    private static final Logger LOG = LoggerFactory.getLogger(WorkspacePermissionsRemover.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceCreatorPermissionsProvider.class);
 
     private final WorkerDao    workerDao;
     private final EventService eventService;
