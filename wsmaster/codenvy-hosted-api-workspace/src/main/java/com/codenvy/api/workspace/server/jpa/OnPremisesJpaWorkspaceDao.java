@@ -20,6 +20,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -35,22 +37,28 @@ import java.util.List;
 @Singleton
 public class OnPremisesJpaWorkspaceDao extends JpaWorkspaceDao {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OnPremisesJpaWorkspaceDao.class);
+
     @Inject
     private Provider<EntityManager> manager;
 
     @Override
     @Transactional
     public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
-        final String query = "SELECT ws FROM Worker worker, Workspace ws " +
-                             "          WHERE worker.workspaceId = ws.id " +
-                             "          AND 'read' MEMBER OF worker.actions " +
-                             "          AND worker.userId = :userId ";
+
+        final String query = "SELECT ws FROM Workspace ws   " +
+                             "          JOIN Worker worker  " +
+                             "               ON worker.userId = :userId AND ws.id =  worker.workspaceId" +
+                             "          WHERE 'read' MEMBER OF worker.actions  ";
+
+
         try {
             return manager.get()
                           .createQuery(query, WorkspaceImpl.class)
                           .setParameter("userId", userId)
                           .getResultList();
         } catch (RuntimeException x) {
+            LOG.error(x.getMessage());
             throw new ServerException(x.getLocalizedMessage(), x);
         }
     }

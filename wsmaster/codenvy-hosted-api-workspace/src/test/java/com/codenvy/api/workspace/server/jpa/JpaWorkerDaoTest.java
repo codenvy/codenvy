@@ -51,12 +51,22 @@ public class JpaWorkerDaoTest {
 
     WorkerImpl[] workers;
 
+    UserImpl[] users;
+
+    WorkspaceImpl[] workspaces;
+
     @BeforeClass
     public void setupEntities() throws Exception {
         workers = new WorkerImpl[]{new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
                                    new WorkerImpl("ws1", "user2", Arrays.asList("read", "use")),
                                    new WorkerImpl("ws2", "user1", Arrays.asList("read", "run")),
                                    new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure"))};
+
+        users = new UserImpl[]{new UserImpl("user1", "user1@com.com", "usr1"),
+                               new UserImpl("user2", "user2@com.com", "usr2")};
+
+        workspaces = new WorkspaceImpl[]{new WorkspaceImpl("ws1", "ns1", new WorkspaceConfigImpl("","","cfg1", null,null,null)),
+                                         new WorkspaceImpl("ws2", "ns2", new WorkspaceConfigImpl("","","cfg2", null,null,null))};
 
         Injector injector = Guice.createInjector(new WorkerTckModule(), new WorkerJpaModule());
         manager = injector.getInstance(EntityManager.class);
@@ -71,6 +81,14 @@ public class JpaWorkerDaoTest {
     @BeforeMethod
     public void setUp() throws Exception {
         manager.getTransaction().begin();
+        for (UserImpl user : users) {
+            manager.persist(user);
+        }
+
+        for (WorkspaceImpl ws : workspaces) {
+            manager.persist(ws);
+        }
+
         for (WorkerImpl worker : workers) {
             manager.persist(worker);
         }
@@ -81,9 +99,20 @@ public class JpaWorkerDaoTest {
     @AfterMethod
     public void cleanup() {
         manager.getTransaction().begin();
+
         manager.createQuery("SELECT e FROM Worker e", WorkerImpl.class)
                .getResultList()
                .forEach(manager::remove);
+
+        manager.createQuery("SELECT u FROM Usr u", UserImpl.class)
+               .getResultList()
+               .forEach(manager::remove);
+
+        manager.createQuery("SELECT w FROM Workspace w", WorkspaceImpl.class)
+               .getResultList()
+               .forEach(manager::remove);
+
+
         manager.getTransaction().commit();
     }
 

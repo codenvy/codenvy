@@ -19,18 +19,17 @@ import com.codenvy.api.workspace.server.model.Worker;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.persistence.annotations.PrivateOwned;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,18 +55,19 @@ public class WorkerImpl implements Worker {
     @Id
     private String userId;
 
-    @ManyToOne
-    @JoinColumn(name = "user", insertable = false, updatable = false)
+    @OneToOne
+    @JoinColumn(name = "userId", insertable = false, updatable = false)
     private UserImpl user;
 
     @Id
     private String workspaceId;
 
     @OneToOne
-    @JoinColumn(name = "workspace", insertable = false, updatable = false)
+    @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
     private WorkspaceImpl workspace;
 
     @ElementCollection
+    @CollectionTable(indexes = @Index(columnList = "actions"))
     private List<String> actions;
 
     public WorkerImpl() {
