@@ -189,7 +189,7 @@ public class JpaIntegrationTckModule extends TckModule {
                     .map(user -> new UserImpl(user.getId(),
                                               user.getEmail(),
                                               user.getName(),
-                                              encryptor.encrypt(user.getPassword()),
+                                              user.getPassword() != null ? encryptor.encrypt(user.getPassword()) : null,
                                               user.getAliases()))
                     .forEach(manager::persist);
         }
