@@ -112,7 +112,6 @@ public class JpaWorkerDaoTest {
                .getResultList()
                .forEach(manager::remove);
 
-
         manager.getTransaction().commit();
     }
 
