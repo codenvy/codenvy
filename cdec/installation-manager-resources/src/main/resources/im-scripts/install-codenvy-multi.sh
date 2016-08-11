@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bash <(curl -L -s https://start.codenvy.com/install-single) --multi $@
+bash <(curl -L -s https://get.codenvy.com) --multi $@

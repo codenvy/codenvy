@@ -57,7 +57,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>mail.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.hosted-infrastructure:codenvy-hosted-mail-server</include>
+                <include>com.codenvy.onpremises.wsmaster:codenvy-hosted-mail-server</include>
             </includes>
         </dependencySet>
         <dependencySet>

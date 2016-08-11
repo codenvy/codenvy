@@ -25,7 +25,7 @@
 # For example: ./patch-and-upload-codenvy-bundle.sh ngt cdec-bundle-4.1.1.zip 4.1.1 4.0.1
 # 1) repack "cdec-bundle-4.1.1.zip" into "/tmp/bundle/codenvy/4.1.1/codenvy-4.1.1.zip" with enclosed directory "/patches" with content from the directory "installation-manager-resources/src/main/resources/patches/4.1.1"
 # 2) create "/tmp/bundle/codenvy/4.1.1/.properties" file where "previous-version=4.0.1"
-# 3) upload "/tmp/bundle/codenvy/4.1.1/codenvy-4.1.1.zip" and "/tmp/bundle/codenvy/4.1.1/.properties" files into the directory "/home/codenvy/update-server-repository/codenvy/4.1.1" at the "ngt" server, that is Night Update Server with IP=172.19.11.153
+# 3) upload "/tmp/bundle/codenvy/4.1.1/codenvy-4.1.1.zip" and "/tmp/bundle/codenvy/4.1.1/.properties" files into the directory "/home/codenvy/update-server-repository/codenvy/4.1.1" at the "ngt" server, that is Night Update Server with IP=updater.nightly4.codenvy-stg.com
 
 SERVER=$1
 
@@ -57,7 +57,7 @@ elif [ "${SERVER}" == "ngt" ]; then
     echo "============[ Nightly will be updated ]=============="
     SSH_KEY_NAME=~/.ssh/as1-cldide_cl-server.skey
     SSH_AS_USER_NAME=codenvy
-    AS_IP=172.19.11.153
+    AS_IP=updater.nightly4.codenvy-stg.com
 else
     echo "Unknown server destination"
     exit 1

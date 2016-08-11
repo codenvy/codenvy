@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bash <(curl -L -s https://start.codenvy.com/install-single) --im-cli --suppress $@
+bash <(curl -L -s https://get.codenvy.com) --im-cli --suppress $@

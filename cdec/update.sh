@@ -29,7 +29,7 @@ elif [ "$1" == "stg" ]; then
 elif [ "$1" == "ngt" ]; then
     SSH_KEY_NAME=as1-cldide_cl-server.skey
     SSH_AS_USER_NAME=codenvy
-    AS_IP=172.19.11.153
+    AS_IP=updater.nightly4.codenvy-stg.com
     echo "============[ Nightly will be updated ]=============="
 else
     echo "Unknown server destination"

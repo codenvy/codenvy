@@ -406,7 +406,6 @@
                         </resource>
                     </webResources>
                     <packagingExcludes>WEB-INF/lib/*gwt*.jar,WEB-INF/lib/gin-*.jar,WEB-INF/lib/*codemirror-resources*.jar</packagingExcludes>
-                    <archiveClasses>true</archiveClasses>
                 </configuration>
             </plugin>
         </plugins>
