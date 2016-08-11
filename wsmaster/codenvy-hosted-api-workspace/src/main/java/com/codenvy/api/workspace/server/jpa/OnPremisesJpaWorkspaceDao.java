@@ -37,8 +37,6 @@ import java.util.List;
 @Singleton
 public class OnPremisesJpaWorkspaceDao extends JpaWorkspaceDao {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OnPremisesJpaWorkspaceDao.class);
-
     @Inject
     private Provider<EntityManager> manager;
 
@@ -57,8 +55,7 @@ public class OnPremisesJpaWorkspaceDao extends JpaWorkspaceDao {
                           .setParameter("userId", userId)
                           .getResultList();
         } catch (RuntimeException x) {
-            LOG.error(x.getMessage());
-            throw new ServerException(x.getLocalizedMessage(), x);
+           throw new ServerException(x.getLocalizedMessage(), x);
         }
     }
 }
