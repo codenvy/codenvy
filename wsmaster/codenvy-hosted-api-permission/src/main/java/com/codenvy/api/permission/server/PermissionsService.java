@@ -20,8 +20,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.api.permission.shared.Permissions;
-import com.codenvy.api.permission.shared.PermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.shared.model.Permissions;
+import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.codenvy.api.permission.shared.dto.DomainDto;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
 
@@ -58,11 +59,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Api(value = "/permissions", description = "Permissions REST API")
 @Path("/permissions")
 public class PermissionsService extends Service {
-    private final PermissionManager permissionManager;
+    private final PermissionsManager permissionsManager;
 
     @Inject
-    public PermissionsService(PermissionManager permissionManager) {
-        this.permissionManager = permissionManager;
+    public PermissionsService(PermissionsManager permissionsManager) {
+        this.permissionsManager = permissionsManager;
     }
 
     @GET
@@ -76,12 +77,12 @@ public class PermissionsService extends Service {
     public List<DomainDto> getSupportedDomains(@ApiParam("Id of requested domain")
                                                @QueryParam("domain") String domainId) throws NotFoundException {
         if (isNullOrEmpty(domainId)) {
-            return permissionManager.getDomains()
-                                    .stream()
-                                    .map(this::asDto)
-                                    .collect(Collectors.toList());
+            return permissionsManager.getDomains()
+                                     .stream()
+                                     .map(this::asDto)
+                                     .collect(Collectors.toList());
         } else {
-            return singletonList(asDto(permissionManager.getDomain(domainId)));
+            return singletonList(asDto(permissionsManager.getDomain(domainId)));
         }
     }
 
@@ -100,11 +101,11 @@ public class PermissionsService extends Service {
                                                                        ConflictException,
                                                                        NotFoundException {
         checkArgument(permissionsDto != null, "Permissions descriptor required");
-        checkArgument(!isNullOrEmpty(permissionsDto.getUser()), "User required");
+        checkArgument(!isNullOrEmpty(permissionsDto.getUserId()), "User required");
         checkArgument(!isNullOrEmpty(permissionsDto.getDomainId()), "Domain required");
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
-        permissionManager.storePermission(new PermissionsImpl(permissionsDto));
+        permissionsManager.storePermission(new PermissionsImpl(permissionsDto));
     }
 
     @GET
@@ -123,7 +124,7 @@ public class PermissionsService extends Service {
                                                      @QueryParam("instance") String instance) throws ServerException,
                                                                                                      NotFoundException,
                                                                                                      ConflictException {
-        return toDto(permissionManager.get(EnvironmentContext.getCurrent().getSubject().getUserId(), domain, instance));
+        return toDto(permissionsManager.get(EnvironmentContext.getCurrent().getSubject().getUserId(), domain, instance));
     }
 
     @GET
@@ -142,7 +143,7 @@ public class PermissionsService extends Service {
                                                     @QueryParam("instance") String instance) throws ServerException,
                                                                                                     NotFoundException,
                                                                                                     ConflictException {
-        return permissionManager.getByInstance(domain, instance)
+        return permissionsManager.getByInstance(domain, instance)
                                 .stream()
                                 .map(this::toDto)
                                 .collect(Collectors.toList());
@@ -162,7 +163,7 @@ public class PermissionsService extends Service {
                                   @QueryParam("instance") String instance,
                                   @ApiParam(value = "User id", required = true)
                                   @QueryParam("user") @Required String user) throws ConflictException, ServerException, NotFoundException {
-        permissionManager.remove(user, domain, instance);
+        permissionsManager.remove(user, domain, instance);
     }
 
     private DomainDto asDto(PermissionsDomain domain) {
@@ -179,9 +180,9 @@ public class PermissionsService extends Service {
 
     private PermissionsDto toDto(Permissions permissions) {
         return DtoFactory.newDto(PermissionsDto.class)
-                         .withUser(permissions.getUser())
-                         .withDomain(permissions.getDomain())
-                         .withInstance(permissions.getInstance())
+                         .withUserId(permissions.getUserId())
+                         .withDomainId(permissions.getDomainId())
+                         .withInstanceId(permissions.getInstanceId())
                          .withActions(permissions.getActions());
     }
 }

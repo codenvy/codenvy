@@ -75,15 +75,15 @@ import static com.mongodb.client.model.Filters.in;
  * @author Sergii Leschenko
  */
 @Singleton
-public class CommonPermissionsStorage implements PermissionsDao {
+public class CommonPermissionsDao implements PermissionsDao {
     private final MongoCollection<PermissionsImpl> collection;
 
     private final Map<String, AbstractPermissionsDomain> idToDomain;
 
     @Inject
-    public CommonPermissionsStorage(@Named("mongo.db.organization") MongoDatabase database,
-                                    @Named("organization.storage.db.permission.collection") String collectionName,
-                                    @CommonDomains Set<AbstractPermissionsDomain> permissionsDomains) throws IOException {
+    public CommonPermissionsDao(@Named("mongo.db.organization") MongoDatabase database,
+                                @Named("organization.storage.db.permission.collection") String collectionName,
+                                @CommonDomains Set<AbstractPermissionsDomain> permissionsDomains) throws IOException {
         collection = database.getCollection(collectionName, PermissionsImpl.class);
         collection.createIndex(new Document("user", 1).append("domain", 1).append("instance", 1), new IndexOptions().unique(true));
 

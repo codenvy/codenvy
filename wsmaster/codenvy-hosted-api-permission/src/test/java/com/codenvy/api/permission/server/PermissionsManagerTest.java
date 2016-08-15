@@ -14,8 +14,10 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.shared.Permissions;
-import com.codenvy.api.permission.shared.PermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.Permissions;
+import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -43,98 +45,98 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Tests for {@link PermissionManager}
+ * Tests for {@link PermissionsManager}
  *
  * @author Sergii Leschenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class PermissionManagerTest {
+public class PermissionsManagerTest {
     @Mock
-    private PermissionsStorage permissionsStorage;
+    private PermissionsDao permissionsDao;
 
-    private PermissionManager permissionManager;
+    private PermissionsManager permissionsManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(permissionsStorage.getDomains()).thenReturn(ImmutableSet.of(new TestDomain()));
+        when(permissionsDao.getDomains()).thenReturn(ImmutableSet.of(new TestDomain()));
 
-        permissionManager = new PermissionManager(ImmutableSet.of(permissionsStorage));
+        permissionsManager = new PermissionsManager(ImmutableSet.of(permissionsDao));
     }
 
     @Test(expectedExceptions = ServerException.class,
           expectedExceptionsMessageRegExp = "Permissions Domain 'test' should be stored in only one storage. " +
-                                            "Duplicated in class com.codenvy.api.permission.server.dao.PermissionsStorage.* and class com.codenvy.api.permission.server.dao.PermissionsStorage.*")
+                                            "Duplicated in class com.codenvy.api.permission.server.spi.PermissionsDao.* and class com.codenvy.api.permission.server.spi.PermissionsDao.*")
     public void shouldThrowExceptionIfThereAreTwoStoragesWhichServeOneDomain() throws Exception {
-        PermissionsStorage anotherStorage = mock(PermissionsStorage.class);
+        PermissionsDao anotherStorage = mock(PermissionsDao.class);
         when(anotherStorage.getDomains()).thenReturn(ImmutableSet.of(new TestDomain()));
 
-        permissionManager = new PermissionManager(ImmutableSet.of(permissionsStorage, anotherStorage));
+        permissionsManager = new PermissionsManager(ImmutableSet.of(permissionsDao, anotherStorage));
     }
 
     @Test
     public void shouldBeAbleToStorePermissions() throws Exception {
         final PermissionsImpl permissions = new PermissionsImpl("user", "test", "test123", singletonList(SET_PERMISSIONS));
 
-        permissionManager.storePermission(permissions);
+        permissionsManager.storePermission(permissions);
 
-        verify(permissionsStorage).store(eq(permissions));
+        verify(permissionsDao).store(eq(permissions));
     }
 
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Can't edit permissions because there is not any another user with permission 'setPermissions'")
     public void shouldNotStorePermissionsWhenItRemoveLastSetPermissions() throws Exception {
-        when(permissionsStorage.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
-        when(permissionsStorage.getByInstance("test", "test123"))
+        when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
+        when(permissionsDao.getByInstance("test", "test123"))
                 .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
 
-        permissionManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
+        permissionsManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
     }
 
     @Test
     public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAll() throws Exception {
-        when(permissionsStorage.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
-        when(permissionsStorage.getByInstance("test", "test123"))
+        when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
+        when(permissionsDao.getByInstance("test", "test123"))
                 .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
 
-        permissionManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
+        permissionsManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
 
-        verify(permissionsStorage, never()).getByInstance(anyString(), anyString());
+        verify(permissionsDao, never()).getByInstance(anyString(), anyString());
     }
 
     @Test
     public void shouldBeAbleToDeletePermissions() throws Exception {
-        permissionManager.remove("user", "test", "test123");
+        permissionsManager.remove("user", "test", "test123");
 
-        verify(permissionsStorage).remove(eq("user"), eq("test"), eq("test123"));
+        verify(permissionsDao).remove(eq("user"), eq("test"), eq("test123"));
     }
 
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Can't remove permissions because there is not any another user with permission 'setPermissions'")
     public void shouldNotRemovePermissionsWhenItContainsLastSetPermissionsAction() throws Exception {
-        when(permissionsStorage.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
-        when(permissionsStorage.getByInstance("test", "test123"))
+        when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
+        when(permissionsDao.getByInstance("test", "test123"))
                 .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
 
-        permissionManager.remove("user", "test", "test123");
+        permissionsManager.remove("user", "test", "test123");
     }
 
     @Test
     public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAllOnRemove() throws Exception {
-        when(permissionsStorage.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
-        when(permissionsStorage.getByInstance("test", "test123"))
+        when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
+        when(permissionsDao.getByInstance("test", "test123"))
                 .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
 
-        permissionManager.remove("user", "test", "test123");
+        permissionsManager.remove("user", "test", "test123");
 
-        verify(permissionsStorage, never()).getByInstance(anyString(), anyString());
+        verify(permissionsDao, never()).getByInstance(anyString(), anyString());
     }
 
     @Test
     public void shouldBeAbleToGetPermissionsByUserAndDomainAndInstance() throws Exception {
         final PermissionsImpl permissions = new PermissionsImpl("user", "test", "test123", singletonList("read"));
-        when(permissionsStorage.get("user", "test", "test123")).thenReturn(permissions);
+        when(permissionsDao.get("user", "test", "test123")).thenReturn(permissions);
 
-        final Permissions fetchedPermissions = permissionManager.get("user", "test", "test123");
+        final Permissions fetchedPermissions = permissionsManager.get("user", "test", "test123");
 
         assertEquals(permissions, fetchedPermissions);
     }
@@ -144,9 +146,9 @@ public class PermissionManagerTest {
         final PermissionsImpl firstPermissions = new PermissionsImpl("user", "test", "test123", singletonList("read"));
         final PermissionsImpl secondPermissions = new PermissionsImpl("user1", "test", "test123", singletonList("read"));
 
-        when(permissionsStorage.getByInstance("test", "test123")).thenReturn(Arrays.asList(firstPermissions, secondPermissions));
+        when(permissionsDao.getByInstance("test", "test123")).thenReturn(Arrays.asList(firstPermissions, secondPermissions));
 
-        final List<PermissionsImpl> fetchedPermissions = permissionManager.getByInstance("test", "test123");
+        final List<PermissionsImpl> fetchedPermissions = permissionsManager.getByInstance("test", "test123");
 
         assertEquals(fetchedPermissions.size(), 2);
         assertTrue(fetchedPermissions.contains(firstPermissions));
@@ -155,16 +157,16 @@ public class PermissionManagerTest {
 
     @Test
     public void shouldBeAbleToCheckPermissionExistence() throws Exception {
-        when(permissionsStorage.exists("user", "test", "test123", "use")).thenReturn(true);
-        when(permissionsStorage.exists("user", "test", "test123", "update")).thenReturn(false);
+        when(permissionsDao.exists("user", "test", "test123", "use")).thenReturn(true);
+        when(permissionsDao.exists("user", "test", "test123", "update")).thenReturn(false);
 
-        assertTrue(permissionManager.exists("user", "test", "test123", "use"));
-        assertFalse(permissionManager.exists("user", "test", "test123", "update"));
+        assertTrue(permissionsManager.exists("user", "test", "test123", "use"));
+        assertFalse(permissionsManager.exists("user", "test", "test123", "update"));
     }
 
     @Test
     public void shouldBeAbleToDomains() throws Exception {
-        final List<AbstractPermissionsDomain> domains = permissionManager.getDomains();
+        final List<AbstractPermissionsDomain> domains = permissionsManager.getDomains();
 
         assertEquals(domains.size(), 1);
         assertTrue(domains.contains(new TestDomain()));
@@ -172,7 +174,7 @@ public class PermissionManagerTest {
 
     @Test
     public void shouldBeAbleToDomainActions() throws Exception {
-        final PermissionsDomain testDomain = permissionManager.getDomain("test");
+        final PermissionsDomain testDomain = permissionsManager.getDomain("test");
         final List<String> allowedActions = testDomain.getAllowedActions();
 
         assertEquals(allowedActions.size(), 5);
@@ -182,7 +184,7 @@ public class PermissionManagerTest {
     @Test(expectedExceptions = NotFoundException.class,
           expectedExceptionsMessageRegExp = "Requested unsupported domain 'unsupported'")
     public void shouldThrowExceptionWhenRequestedUnsupportedDomain() throws Exception {
-        permissionManager.getDomain("unsupported");
+        permissionsManager.getDomain("unsupported");
     }
 
     public class TestDomain extends AbstractPermissionsDomain {

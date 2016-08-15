@@ -14,8 +14,9 @@
  */
 package com.codenvy.api.permission.server.filter;
 
-import com.codenvy.api.permission.server.PermissionManager;
+import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -59,7 +60,7 @@ public class GetPermissionsFilterTest {
     static Subject subject;
 
     @Mock
-    PermissionManager permissionManager;
+    PermissionsManager permissionsManager;
 
     @Mock
     PermissionsService permissionsService;
@@ -74,7 +75,7 @@ public class GetPermissionsFilterTest {
 
     @Test
     public void shouldRespond403IfUserDoesNotHaveAnyPermissionsForInstance() throws Exception {
-        when(permissionManager.get("user123", "test", "test123")).thenThrow(new NotFoundException(""));
+        when(permissionsManager.get("user123", "test", "test123")).thenThrow(new NotFoundException(""));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -89,10 +90,10 @@ public class GetPermissionsFilterTest {
 
     @Test
     public void shouldDoChainIfUserHasAnyPermissionsForInstance() throws Exception {
-        when(permissionManager.get("user123", "test", "test123")).thenReturn(new PermissionsImpl("user123",
-                                                                                                 "test",
-                                                                                                 "test123",
-                                                                                                 singletonList("read")));
+        when(permissionsManager.get("user123", "test", "test123")).thenReturn(new PermissionsImpl("user123",
+                                                                                                  "test",
+                                                                                                  "test123",
+                                                                                                  singletonList("read")));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)

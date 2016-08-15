@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace.server;
 
+import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.filters.MachinePermissionsFilter;
 import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
 import com.codenvy.api.workspace.server.filters.WorkspacePermissionsFilter;
@@ -35,8 +36,8 @@ public class WorkspaceApiModule extends AbstractModule {
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
 
-        Multibinder<PermissionsStorage> storages = Multibinder.newSetBinder(binder(),
-                                                                            PermissionsStorage.class);
-        storages.addBinding().to(WorkspacePermissionStorage.class);
+        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
+                                                                            PermissionsDao.class);
+        storages.addBinding().to(WorkspacePermissionDao.class);
     }
 }

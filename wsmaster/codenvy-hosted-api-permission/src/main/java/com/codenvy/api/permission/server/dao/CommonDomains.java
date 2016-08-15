@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation for binding domains which will store their permissions in {@link CommonPermissionsStorage}.
+ * Annotation for binding domains which will store their permissions in {@link CommonPermissionsDao}.
  *
  * @author Sergii Leschenko
  */

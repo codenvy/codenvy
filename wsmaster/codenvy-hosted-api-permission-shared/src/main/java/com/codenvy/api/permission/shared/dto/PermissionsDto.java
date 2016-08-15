@@ -28,23 +28,23 @@ public interface PermissionsDto extends Permissions {
     @Override
     String getUserId();
 
-    void setUser(String user);
+    void setUserId (String userId);
 
-    PermissionsDto withUser(String user);
+    PermissionsDto withUserId(String userId);
 
     @Override
     String getDomainId();
 
-    void setDomain(String domain);
+    void setDomainId(String domainId);
 
-    PermissionsDto withDomain(String domain);
+    PermissionsDto withDomainId(String domainId);
 
     @Override
     String getInstanceId();
 
-    void setInstance(String instance);
+    void setInstanceId(String instanceId);
 
-    PermissionsDto withInstance(String instance);
+    PermissionsDto withInstanceId(String instanceId);
 
     @Override
     List<String> getActions();

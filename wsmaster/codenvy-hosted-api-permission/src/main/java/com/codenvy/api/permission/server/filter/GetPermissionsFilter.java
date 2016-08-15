@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server.filter;
 
-import com.codenvy.api.permission.server.PermissionManager;
+import com.codenvy.api.permission.server.PermissionsManager;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -46,7 +46,7 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
     private String instance;
 
     @Inject
-    PermissionManager permissionManager;
+    PermissionsManager permissionsManager;
 
     @Override
     public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
@@ -55,7 +55,7 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
         if (methodName.equals("getUsersPermissions")) {
             final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             try {
-                permissionManager.get(userId, domain, instance);
+                permissionsManager.get(userId, domain, instance);
                 //user should have ability to see another users' permissions if he has any permission there
             } catch (NotFoundException e) {
                 throw new ForbiddenException("User is not authorized to perform this operation");

@@ -15,6 +15,7 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.google.common.collect.ImmutableSet;
@@ -44,17 +45,17 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Tests for {@link WorkspacePermissionStorage}
+ * Tests for {@link WorkspacePermissionDao}
  *
  * @author Sergii Leschenko
  */
 @Listeners(value = {MockitoTestNGListener.class})
-public class WorkspacePermissionStorageTest {
+public class WorkspacePermissionDaoTest {
     @Mock
     WorkerDao workerDao;
 
     @InjectMocks
-    WorkspacePermissionStorage permissionStorage;
+    WorkspacePermissionDao permissionStorage;
 
     @Test
     public void shouldBeAbleToStorePermissions() throws Exception {

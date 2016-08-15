@@ -21,22 +21,22 @@ import org.eclipse.che.api.core.ServerException;
 import javax.inject.Inject;
 
 /**
- * Implementation of {@link PermissionChecker} that use {@link PermissionManager} for checking
+ * Implementation of {@link PermissionChecker} that use {@link PermissionsManager} for checking
  *
  * @author Sergii Leschenko
  */
 public class PermissionCheckerImpl implements PermissionChecker {
-    private final PermissionManager permissionManager;
+    private final PermissionsManager permissionsManager;
 
     @Inject
-    public PermissionCheckerImpl(PermissionManager permissionManager) {
-        this.permissionManager = permissionManager;
+    public PermissionCheckerImpl(PermissionsManager permissionsManager) {
+        this.permissionsManager = permissionsManager;
     }
 
     @Override
     public boolean hasPermission(String user, String domain, String instance, String action) throws ServerException,
                                                                                                     NotFoundException,
                                                                                                     ConflictException {
-        return permissionManager.exists(user, domain, instance, action);
+        return permissionsManager.exists(user, domain, instance, action);
     }
 }

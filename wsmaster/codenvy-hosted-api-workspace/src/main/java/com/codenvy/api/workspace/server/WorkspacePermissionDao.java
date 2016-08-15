@@ -15,7 +15,9 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.shared.Permissions;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.model.Worker;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
@@ -31,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link PermissionsStorage} for storing permissions of {@link WorkspaceDomain}
+ * Implementation of {@link PermissionsDao} for storing permissions of {@link WorkspaceDomain}
  *
  * <p>This implementation adapts {@link Permissions} and {@link Worker} and use
  * {@link WorkerDao} as storage of permissions
@@ -39,12 +41,12 @@ import java.util.stream.Collectors;
  * @author Sergii Leschenko
  */
 @Singleton
-public class WorkspacePermissionStorage implements PermissionsStorage {
+public class WorkspacePermissionDao implements PermissionsDao {
     private final Set<AbstractPermissionsDomain> supportedDomain;
     private final WorkerDao                      workerDao;
 
     @Inject
-    public WorkspacePermissionStorage(WorkerDao workerDao) {
+    public WorkspacePermissionDao(WorkerDao workerDao) {
         this.workerDao = workerDao;
         this.supportedDomain = ImmutableSet.of(new WorkspaceDomain());
     }
@@ -56,8 +58,8 @@ public class WorkspacePermissionStorage implements PermissionsStorage {
 
     @Override
     public void store(PermissionsImpl permissions) throws ServerException {
-        workerDao.store(new WorkerImpl(permissions.getInstance(),
-                                       permissions.getUser(),
+        workerDao.store(new WorkerImpl(permissions.getInstanceId(),
+                                       permissions.getUserId(),
                                        permissions.getActions()));
     }
 

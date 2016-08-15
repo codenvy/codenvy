@@ -15,7 +15,8 @@
 package com.codenvy.api.permission.server.dao;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.shared.Permissions;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.github.fakemongo.Fongo;
 import com.google.common.collect.ImmutableSet;
 import com.mongodb.MongoClient;
@@ -49,7 +50,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Tests for {@link CommonPermissionsStorage}
+ * Tests for {@link CommonPermissionsDao}
  *
  * @author Sergii Leschenko
  */
@@ -57,7 +58,7 @@ import static org.testng.Assert.assertEquals;
 public class CommonPermissionStorageTest {
 
     private MongoCollection<PermissionsImpl> collection;
-    private CommonPermissionsStorage         permissionStorage;
+    private CommonPermissionsDao             permissionStorage;
 
     @BeforeMethod
     public void setUpDb() throws Exception {
@@ -67,7 +68,7 @@ public class CommonPermissionStorageTest {
                                             .withCodecRegistry(fromRegistries(defaultRegistry,
                                                                               fromCodecs(new PermissionsImplCodec(defaultRegistry))));
         collection = database.getCollection("permissions", PermissionsImpl.class);
-        permissionStorage = new CommonPermissionsStorage(database, "permissions", ImmutableSet.of(new TestDomain()));
+        permissionStorage = new CommonPermissionsDao(database, "permissions", ImmutableSet.of(new TestDomain()));
     }
 
     @Test
@@ -76,9 +77,9 @@ public class CommonPermissionStorageTest {
 
         permissionStorage.store(permissions);
 
-        final Permissions result = collection.find(and(eq("user", permissions.getUser()),
-                                                       eq("domain", permissions.getDomain()),
-                                                       eq("instance", permissions.getInstance())))
+        final Permissions result = collection.find(and(eq("user", permissions.getUserId()),
+                                                       eq("domain", permissions.getDomainId()),
+                                                       eq("instance", permissions.getInstanceId())))
                                              .first();
         assertEquals(result, permissions);
     }
@@ -89,13 +90,13 @@ public class CommonPermissionStorageTest {
         permissionStorage.store(oldPermissions);
 
         PermissionsImpl newPermissions =
-                new PermissionsImpl(oldPermissions.getUser(), oldPermissions.getDomain(), oldPermissions.getInstance(),
+                new PermissionsImpl(oldPermissions.getUserId(), oldPermissions.getDomainId(), oldPermissions.getInstanceId(),
                                     singletonList("read"));
         permissionStorage.store(newPermissions);
 
-        final Permissions result = collection.find(and(eq("user", newPermissions.getUser()),
-                                                       eq("domain", newPermissions.getDomain()),
-                                                       eq("instance", newPermissions.getInstance())))
+        final Permissions result = collection.find(and(eq("user", newPermissions.getUserId()),
+                                                       eq("domain", newPermissions.getDomainId()),
+                                                       eq("instance", newPermissions.getInstanceId())))
                                              .first();
         assertEquals(result, newPermissions);
     }
@@ -109,7 +110,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowServerExceptionWhenMongoExceptionWasThrewOnPermissionsStoring() throws Exception {
         final MongoDatabase db = mockDatabase(col -> doThrow(mock(MongoException.class)).when(col).replaceOne(any(), any(), any()));
 
-        new CommonPermissionsStorage(db, "permissions", ImmutableSet.of(new TestDomain())).store(createPermissions());
+        new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).store(createPermissions());
     }
 
     @Test
@@ -117,11 +118,11 @@ public class CommonPermissionStorageTest {
         final PermissionsImpl permissions = createPermissions();
         collection.insertOne(permissions);
 
-        permissionStorage.remove(permissions.getUser(), permissions.getDomain(), permissions.getInstance());
+        permissionStorage.remove(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
 
-        assertEquals(collection.count(and(eq("user", permissions.getUser()),
-                                          eq("domain", permissions.getDomain()),
-                                          eq("instance", permissions.getInstance()))),
+        assertEquals(collection.count(and(eq("user", permissions.getUserId()),
+                                          eq("domain", permissions.getDomainId()),
+                                          eq("instance", permissions.getInstanceId()))),
                      0);
     }
 
@@ -135,7 +136,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowServerExceptionWhenMongoExceptionWasThrewOnPermissionsRemoving() throws Exception {
         final MongoDatabase db = mockDatabase(col -> doThrow(mock(MongoException.class)).when(col).deleteOne(any()));
 
-        new CommonPermissionsStorage(db, "permissions", ImmutableSet.of(new TestDomain())).remove("user", "test", "test123");
+        new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).remove("user", "test", "test123");
     }
 
     @Test
@@ -144,7 +145,7 @@ public class CommonPermissionStorageTest {
         collection.insertOne(permissions);
         collection.insertOne(new PermissionsImpl("user", "domain", "otherTest", singletonList("read")));
 
-        final List<PermissionsImpl> result = permissionStorage.getByInstance(permissions.getDomain(), permissions.getInstance());
+        final List<PermissionsImpl> result = permissionStorage.getByInstance(permissions.getDomainId(), permissions.getInstanceId());
 
         assertEquals(result.size(), 1);
         assertEquals(result.get(0), permissions);
@@ -154,7 +155,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowServerExceptionWhenMongoExceptionWasThrewOnGettingPermissionsByInstance() throws Exception {
         final MongoDatabase db = mockDatabase(col -> doThrow(mock(MongoException.class)).when(col).find((Bson)any()));
 
-        new CommonPermissionsStorage(db, "permissions", ImmutableSet.of(new TestDomain())).getByInstance("domain", "test123");
+        new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).getByInstance("domain", "test123");
     }
 
     @Test
@@ -162,7 +163,7 @@ public class CommonPermissionStorageTest {
         final PermissionsImpl permissions = createPermissions();
         collection.insertOne(permissions);
 
-        final Permissions result = permissionStorage.get(permissions.getUser(), permissions.getDomain(), permissions.getInstance());
+        final Permissions result = permissionStorage.get(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
 
         assertEquals(result, permissions);
     }
@@ -179,7 +180,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowServerExceptionWhenMongoExceptionWasThrewOnGettingPermissions() throws Exception {
         final MongoDatabase db = mockDatabase(col -> doThrow(mock(MongoException.class)).when(col).find((Bson)any()));
 
-        new CommonPermissionsStorage(db, "permissions", ImmutableSet.of(new TestDomain())).get("user", "domain", "test123");
+        new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).get("user", "domain", "test123");
     }
 
     @Test
@@ -188,9 +189,9 @@ public class CommonPermissionStorageTest {
         collection.insertOne(permissions);
 
         final boolean readPermissionExisted =
-                permissionStorage.exists(permissions.getUser(), permissions.getDomain(), permissions.getInstance(), "read");
+                permissionStorage.exists(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId(), "read");
         final boolean fakePermissionExisted =
-                permissionStorage.exists(permissions.getUser(), permissions.getDomain(), permissions.getInstance(), "fake");
+                permissionStorage.exists(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId(), "fake");
 
         assertEquals(readPermissionExisted, permissions.getActions().contains("read"));
         assertEquals(fakePermissionExisted, permissions.getActions().contains("fake"));
@@ -200,7 +201,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowServerExceptionWhenMongoExceptionWasThrewOnCheckinngPermissionExistence() throws Exception {
         final MongoDatabase db = mockDatabase(col -> doThrow(mock(MongoException.class)).when(col).find((Bson)any()));
 
-        new CommonPermissionsStorage(db, "permissions", ImmutableSet.of(new TestDomain())).exists("user", "domain", "test123", "read");
+        new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).exists("user", "domain", "test123", "read");
     }
 
     private PermissionsImpl createPermissions() {
