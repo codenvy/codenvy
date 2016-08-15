@@ -15,7 +15,6 @@
 package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionManager;
-import com.codenvy.api.permission.server.PermissionsImpl;
 import com.codenvy.api.permission.server.PermissionsService;
 import com.jayway.restassured.response.Response;
 

@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.dao.PermissionsStorage;
 import com.codenvy.api.permission.shared.Permissions;
 import com.codenvy.api.permission.shared.PermissionsDomain;
 import com.google.common.collect.ImmutableSet;

@@ -101,7 +101,7 @@ public class PermissionsService extends Service {
                                                                        NotFoundException {
         checkArgument(permissionsDto != null, "Permissions descriptor required");
         checkArgument(!isNullOrEmpty(permissionsDto.getUser()), "User required");
-        checkArgument(!isNullOrEmpty(permissionsDto.getDomain()), "Domain required");
+        checkArgument(!isNullOrEmpty(permissionsDto.getDomainId()), "Domain required");
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
         permissionManager.storePermission(new PermissionsImpl(permissionsDto));

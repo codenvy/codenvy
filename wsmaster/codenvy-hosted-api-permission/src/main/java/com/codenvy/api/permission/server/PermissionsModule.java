@@ -15,9 +15,8 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.dao.CommonDomains;
-import com.codenvy.api.permission.server.dao.CommonPermissionStorage;
+import com.codenvy.api.permission.server.dao.CommonPermissionsStorage;
 import com.codenvy.api.permission.server.dao.PermissionsImplCodec;
-import com.codenvy.api.permission.server.dao.PermissionsStorage;
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
@@ -52,7 +51,7 @@ public class PermissionsModule extends AbstractModule {
 
         Multibinder<PermissionsStorage> storages = Multibinder.newSetBinder(binder(),
                                                                             PermissionsStorage.class);
-        storages.addBinding().to(CommonPermissionStorage.class);
+        storages.addBinding().to(CommonPermissionsStorage.class);
 
         final Multibinder<CodecProvider> binder = Multibinder.newSetBinder(binder(), CodecProvider.class);
         binder.addBinding().toInstance(new CodecProvider() {

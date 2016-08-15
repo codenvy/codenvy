@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.shared.dto;
 
-import com.codenvy.api.permission.shared.PermissionsDomain;
+import com.codenvy.api.permission.shared.model.Permissions;
 
 import org.eclipse.che.dto.shared.DTO;
 
@@ -24,25 +24,32 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 @DTO
-public interface DomainDto extends PermissionsDomain {
+public interface PermissionsDto extends Permissions {
     @Override
-    String getId();
+    String getUserId();
 
-    void setId(String id);
+    void setUser(String user);
 
-    DomainDto withId(String id);
-
-    @Override
-    List<String> getAllowedActions();
-
-    void setAllowedActions(List<String> allowedActions);
-
-    DomainDto withAllowedActions(List<String> allowedActions);
+    PermissionsDto withUser(String user);
 
     @Override
-    Boolean isInstanceRequired();
+    String getDomainId();
 
-    void setInstanceRequired(Boolean isInstanceRequired);
+    void setDomain(String domain);
 
-    DomainDto withInstanceRequired(Boolean isInstanceRequired);
+    PermissionsDto withDomain(String domain);
+
+    @Override
+    String getInstanceId();
+
+    void setInstance(String instance);
+
+    PermissionsDto withInstance(String instance);
+
+    @Override
+    List<String> getActions();
+
+    void setActions(List<String> actions);
+
+    PermissionsDto withActions(List<String> actions);
 }

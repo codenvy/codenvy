@@ -14,8 +14,9 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.dao.PermissionsStorage;
-import com.codenvy.api.permission.shared.PermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -42,17 +43,17 @@ import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PE
  */
 @Singleton
 public class PermissionManager {
-    private final Map<String, PermissionsStorage>        domainToStorage;
+    private final Map<String, PermissionsDao>            domainToStorage;
     private final Map<String, AbstractPermissionsDomain> domains;
 
     @Inject
-    public PermissionManager(Set<PermissionsStorage> storages) throws ServerException {
-        Map<String, PermissionsStorage> domainToStorage = new HashMap<>();
+    public PermissionManager(Set<PermissionsDao> storages) throws ServerException {
+        Map<String, PermissionsDao> domainToStorage = new HashMap<>();
         Map<String, AbstractPermissionsDomain> domains = new HashMap<>();
-        for (PermissionsStorage storage : storages) {
+        for (PermissionsDao storage : storages) {
             for (AbstractPermissionsDomain domain : storage.getDomains()) {
                 domains.put(domain.getId(), domain);
-                PermissionsStorage oldStorage = domainToStorage.put(domain.getId(), storage);
+                PermissionsDao oldStorage = domainToStorage.put(domain.getId(), storage);
                 if (oldStorage != null) {
                     throw new ServerException("Permissions Domain '" + domain.getId() + "' should be stored in only one storage. " +
                                               "Duplicated in " + storage.getClass() + " and " + oldStorage.getClass());
@@ -76,17 +77,17 @@ public class PermissionManager {
      *         when any other error occurs during permissions storing
      */
     public void storePermission(PermissionsImpl permissions) throws ServerException, ConflictException, NotFoundException {
-        final String domain = permissions.getDomain();
-        final String instance = permissions.getInstance();
-        final String user = permissions.getUser();
+        final String domain = permissions.getDomainId();
+        final String instance = permissions.getInstanceId();
+        final String user = permissions.getUserId();
 
-        final PermissionsStorage permissionsStorage = getPermissionsStorage(domain);
+        final PermissionsDao permissionsStorage = getPermissionsStorage(domain);
         if (!permissions.getActions().contains(SET_PERMISSIONS)
             && userHasLastSetPermissions(permissionsStorage, user, domain, instance)) {
             throw new ConflictException("Can't edit permissions because there is not any another user with permission 'setPermissions'");
         }
 
-        final PermissionsDomain permissionsDomain = getDomain(permissions.getDomain());
+        final PermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
 
         checkInstanceRequiring(permissionsDomain, instance);
 
@@ -96,7 +97,7 @@ public class PermissionManager {
                                                           .filter(action -> !allowedActions.contains(action))
                                                           .collect(Collectors.toSet());
         if (!unsupportedActions.isEmpty()) {
-            throw new ConflictException("Domain with id '" + permissions.getDomain() + "' doesn't support next action(s): " +
+            throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support next action(s): " +
                                         unsupportedActions.stream()
                                                           .collect(Collectors.joining(", ")));
         }
@@ -233,7 +234,7 @@ public class PermissionManager {
             return permissionsStorage.exists(user, domain, instance, SET_PERMISSIONS)
                    && !permissionsStorage.getByInstance(domain, instance)
                                          .stream()
-                                         .anyMatch(permission -> !permission.getUser().equals(user)
+                                         .anyMatch(permission -> !permission.getUserId().equals(user)
                                                                  && permission.getActions().contains(SET_PERMISSIONS));
         } catch (NotFoundException e) {
             return true;

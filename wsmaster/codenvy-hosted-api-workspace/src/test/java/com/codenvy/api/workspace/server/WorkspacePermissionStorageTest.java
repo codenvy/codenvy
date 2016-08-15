@@ -15,7 +15,6 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.PermissionsImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.google.common.collect.ImmutableSet;

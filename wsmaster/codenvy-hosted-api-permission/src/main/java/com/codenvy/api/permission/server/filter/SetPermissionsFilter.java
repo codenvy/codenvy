@@ -43,8 +43,8 @@ public class SetPermissionsFilter extends CheMethodInvokerFilter {
         if (methodName.equals("storePermissions")) {
             final PermissionsDto permissions = (PermissionsDto)arguments[0];
 
-            if (!EnvironmentContext.getCurrent().getSubject().hasPermission(permissions.getDomain(),
-                                                                            permissions.getInstance(),
+            if (!EnvironmentContext.getCurrent().getSubject().hasPermission(permissions.getDomainId(),
+                                                                            permissions.getInstanceId(),
                                                                             SET_PERMISSIONS)) {
                 throw new ForbiddenException("User can't edit permissions for this instance");
             }

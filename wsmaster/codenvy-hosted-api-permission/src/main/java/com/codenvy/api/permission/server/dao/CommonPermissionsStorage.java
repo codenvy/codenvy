@@ -15,8 +15,9 @@
 package com.codenvy.api.permission.server.dao;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.PermissionsImpl;
-import com.codenvy.api.permission.shared.Permissions;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -44,7 +45,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
 
 /**
- * Common implementation for {@link PermissionsStorage} based on MongoDB storage.
+ * Common implementation for {@link PermissionsDao} based on MongoDB storage.
  *
  * <p>Stores permissions of domains that bound by {@link CommonDomains}
  *
@@ -74,15 +75,15 @@ import static com.mongodb.client.model.Filters.in;
  * @author Sergii Leschenko
  */
 @Singleton
-public class CommonPermissionStorage implements PermissionsStorage {
+public class CommonPermissionsStorage implements PermissionsDao {
     private final MongoCollection<PermissionsImpl> collection;
 
     private final Map<String, AbstractPermissionsDomain> idToDomain;
 
     @Inject
-    public CommonPermissionStorage(@Named("mongo.db.organization") MongoDatabase database,
-                                   @Named("organization.storage.db.permission.collection") String collectionName,
-                                   @CommonDomains Set<AbstractPermissionsDomain> permissionsDomains) throws IOException {
+    public CommonPermissionsStorage(@Named("mongo.db.organization") MongoDatabase database,
+                                    @Named("organization.storage.db.permission.collection") String collectionName,
+                                    @CommonDomains Set<AbstractPermissionsDomain> permissionsDomains) throws IOException {
         collection = database.getCollection(collectionName, PermissionsImpl.class);
         collection.createIndex(new Document("user", 1).append("domain", 1).append("instance", 1), new IndexOptions().unique(true));
 
@@ -100,9 +101,9 @@ public class CommonPermissionStorage implements PermissionsStorage {
     @Override
     public void store(PermissionsImpl permissions) throws ServerException {
         try {
-            collection.replaceOne(and(eq("user", permissions.getUser()),
-                                      eq("domain", permissions.getDomain()),
-                                      eq("instance", permissions.getInstance())),
+            collection.replaceOne(and(eq("user", permissions.getUserId()),
+                                      eq("domain", permissions.getDomainId()),
+                                      eq("instance", permissions.getInstanceId())),
                                   permissions,
                                   new UpdateOptions().upsert(true));
         } catch (MongoException e) {

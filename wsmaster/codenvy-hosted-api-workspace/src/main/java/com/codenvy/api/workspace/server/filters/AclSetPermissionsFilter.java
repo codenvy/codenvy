@@ -42,14 +42,14 @@ public class AclSetPermissionsFilter extends CheMethodInvokerFilter {
         if (methodName.equals("storePermissions")) {
             final PermissionsDto permissions = (PermissionsDto)arguments[0];
 
-            final String domain = permissions.getDomain();
+            final String domain = permissions.getDomainId();
 
             if (!RecipeDomain.DOMAIN_ID.equals(domain) && !StackDomain.DOMAIN_ID.equals(domain)) {
                 //process only recipes' and stacks' permissions
                 return;
             }
 
-            if (permissions.getUser().equals("*")
+            if (permissions.getUserId().equals("*")
                 && (permissions.getActions().size() != 1
                     || !permissions.getActions().contains(RecipeDomain.READ))) {
                 throw new ForbiddenException("Public permissions support only 'read' action");

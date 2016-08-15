@@ -12,10 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.server.dao;
+package com.codenvy.api.permission.server.spi;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author gazarenkov
  * @author Sergii Leschenko
  */
-public interface PermissionsStorage {
+public interface PermissionsDao {
     /**
      * @return store of domains this storage is able to maintain
      */

@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.dao.mongo;
 
-import com.codenvy.api.permission.server.PermissionsImpl;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 
 import org.bson.BsonReader;

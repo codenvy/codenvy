@@ -12,29 +12,37 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.shared;
+package com.codenvy.api.permission.shared.dto;
+
+import com.codenvy.api.permission.shared.model.PermissionsDomain;
+
+import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
 /**
- * Describes permissions domain
- *
  * @author Sergii Leschenko
- * @author gazarenkov
  */
-public interface PermissionsDomain {
-    /**
-     * @return id of permissions domain
-     */
+@DTO
+public interface DomainDto extends PermissionsDomain {
+    @Override
     String getId();
 
-    /**
-     * @return true if domain requires non nullable value for instance field or false otherwise
-     */
+    void setId(String id);
+
+    DomainDto withId(String id);
+
+    @Override
+    List<String> getAllowedActions();
+
+    void setAllowedActions(List<String> allowedActions);
+
+    DomainDto withAllowedActions(List<String> allowedActions);
+
+    @Override
     Boolean isInstanceRequired();
 
-    /**
-     * @return list actions which are allowed for domain
-     */
-    List<String> getAllowedActions();
+    void setInstanceRequired(Boolean isInstanceRequired);
+
+    DomainDto withInstanceRequired(Boolean isInstanceRequired);
 }

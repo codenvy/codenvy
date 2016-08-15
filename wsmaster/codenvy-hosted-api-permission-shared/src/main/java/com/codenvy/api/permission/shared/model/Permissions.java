@@ -12,44 +12,40 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.shared.dto;
+package com.codenvy.api.permission.shared.model;
 
-import com.codenvy.api.permission.shared.Permissions;
-
-import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
 
 /**
+ * Represents users' permissions to access to some resources
+ *
  * @author Sergii Leschenko
  */
-@DTO
-public interface PermissionsDto extends Permissions {
-    @Override
-    String getUser();
+public interface Permissions {
+    /**
+     * Returns used id
+     *
+     * <p>Note: also supported '*' for marking all users
+     */
+    String getUserId();
 
-    void setUser(String user);
+    /**
+     * Returns domain id
+     */
+    String getDomainId();
 
-    PermissionsDto withUser(String user);
+    /**
+     * Returns instance id. It is optional and can be null if domain supports it
+     *
+     * @see {@link PermissionsDomain#isInstanceRequired()}
+     */
+    @Nullable
+    String getInstanceId();
 
-    @Override
-    String getDomain();
-
-    void setDomain(String domain);
-
-    PermissionsDto withDomain(String domain);
-
-    @Override
-    String getInstance();
-
-    void setInstance(String instance);
-
-    PermissionsDto withInstance(String instance);
-
-    @Override
+    /**
+     * List of actions which user can perform for particular instance
+     */
     List<String> getActions();
-
-    void setActions(List<String> actions);
-
-    PermissionsDto withActions(List<String> actions);
 }

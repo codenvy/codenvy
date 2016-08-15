@@ -12,40 +12,29 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.shared;
-
-import org.eclipse.che.commons.annotation.Nullable;
+package com.codenvy.api.permission.shared.model;
 
 import java.util.List;
 
 /**
- * Represents users' permissions to access to some resources
+ * Describes permissions domain
  *
  * @author Sergii Leschenko
+ * @author gazarenkov
  */
-public interface Permissions {
+public interface PermissionsDomain {
     /**
-     * Returns used id
-     *
-     * <p>Note: also supported '*' for marking all users
+     * @return id of permissions domain
      */
-    String getUser();
+    String getId();
 
     /**
-     * Returns domain id
+     * @return true if domain requires non nullable value for instance field or false otherwise
      */
-    String getDomain();
+    Boolean isInstanceRequired();
 
     /**
-     * Returns instance id. It is optional and can be null if domain supports it
-     *
-     * @see {@link PermissionsDomain#isInstanceRequired()}
+     * @return list actions which are allowed for domain
      */
-    @Nullable
-    String getInstance();
-
-    /**
-     * List of actions which user can perform for particular instance
-     */
-    List<String> getActions();
+    List<String> getAllowedActions();
 }

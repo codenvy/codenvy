@@ -51,5 +51,6 @@
         <module>codenvy-integration-tck-jpa</module>
         <module>codenvy-hosted-authorization</module>
         <module>codenvy-hosted-api-factory</module>
+        <module>codenvy-hosted-api-permission-shared</module>
     </modules>
 </project>

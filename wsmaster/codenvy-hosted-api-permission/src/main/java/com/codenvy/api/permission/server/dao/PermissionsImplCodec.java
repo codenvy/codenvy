@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server.dao;
 
-import com.codenvy.api.permission.server.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
 
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
@@ -54,9 +54,9 @@ public class PermissionsImplCodec implements Codec<PermissionsImpl> {
 
     @Override
     public void encode(BsonWriter writer, PermissionsImpl permissions, EncoderContext encoderContext) {
-        final Document document = new Document().append("user", permissions.getUser())
-                                                .append("domain", permissions.getDomain())
-                                                .append("instance", permissions.getInstance())
+        final Document document = new Document().append("user", permissions.getUserId())
+                                                .append("domain", permissions.getDomainId())
+                                                .append("instance", permissions.getInstanceId())
                                                 .append("actions", permissions.getActions());
 
         codec.encode(writer, document, encoderContext);
