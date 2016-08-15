@@ -36,8 +36,7 @@ public class WorkspaceApiModule extends AbstractModule {
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
 
-        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                            PermissionsDao.class);
+        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(), PermissionsDao.class);
         storages.addBinding().to(WorkspacePermissionDao.class);
     }
 }
