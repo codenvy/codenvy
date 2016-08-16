@@ -16,6 +16,11 @@ package com.codenvy.api.permission.server.model.impl;
 
 import com.codenvy.api.permission.shared.model.Permissions;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,10 +30,17 @@ import java.util.Objects;
  *
  * @author Sergii Leschenko
  */
+@Entity(name = "Permissions")
+@IdClass(PermissionsPrimaryKey.class)
 public class PermissionsImpl implements Permissions {
+
+    @Id
     private String       userId;
+    @Transient
     private String       domainId;
+    @Id
     private String       instanceId;
+    @ElementCollection
     private List<String> actions;
 
     public PermissionsImpl() {

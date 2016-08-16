@@ -53,11 +53,11 @@ public interface PermissionsDao {
     void store(PermissionsImpl permissions) throws ServerException, NotFoundException;
 
     /**
-     * @param user
+     * @param userId
      *         user id
-     * @param domain
+     * @param domainId
      *         domain id
-     * @param instance
+     * @param instanceId
      *         instance id
      * @return user's permissions for specified instance
      * @throws NotFoundException
@@ -65,12 +65,12 @@ public interface PermissionsDao {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException;
+    PermissionsImpl get(String userId, String domainId, String instanceId) throws ServerException, NotFoundException;
 
     /**
-     * @param domain
+     * @param domainId
      *         domain id
-     * @param instance
+     * @param instanceId
      *         instance id
      * @return set of permissions
      * @throws NotFoundException
@@ -78,14 +78,14 @@ public interface PermissionsDao {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException, NotFoundException;
+    List<PermissionsImpl> getByInstance(String domainId, String instanceId) throws ServerException, NotFoundException;
 
     /**
-     * @param user
+     * @param userId
      *         user id
-     * @param domain
+     * @param domainId
      *         domain id
-     * @param instance
+     * @param instanceId
      *         instance id
      * @param action
      *         action name
@@ -93,21 +93,21 @@ public interface PermissionsDao {
      * @throws ServerException
      *         when any other error occurs during permission existence checking
      */
-    boolean exists(String user, String domain, String instance, String action) throws ServerException;
+    boolean exists(String userId, String domainId, String instanceId, String action) throws ServerException;
 
     /**
      * Removes permissions of user related to the particular instance of specified domain
      *
-     * @param user
+     * @param userId
      *         user id
-     * @param domain
+     * @param domainId
      *         domain id
-     * @param instance
+     * @param instanceId
      *         instance id
      * @throws NotFoundException
      *         when permissions with given user and domain and instance was not found
      * @throws ServerException
      *         when any other error occurs during permissions removing
      */
-    void remove(String user, String domain, String instance) throws ServerException, NotFoundException;
+    void remove(String userId, String domainId, String instanceId) throws ServerException, NotFoundException;
 }
