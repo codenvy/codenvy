@@ -20,6 +20,10 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,17 +35,26 @@ import java.util.Objects;
  * @author Sergii Leschenko
  */
 @Entity(name = "Permissions")
+@Inheritance(strategy = InheritanceType.JOINED)
+@NamedQueries(
+        {
+                @NamedQuery(name = "Permissions.getByDomainAndInstance",
+                            query = "SELECT permissions " +
+                                    "FROM Permissions permissions " +
+                                    "WHERE permissions.instanceId = :instanceId")
+        }
+)
 @IdClass(PermissionsPrimaryKey.class)
 public class PermissionsImpl implements Permissions {
 
     @Id
-    private String       userId;
+    protected String       userId;
     @Transient
-    private String       domainId;
+    protected String       domainId;
     @Id
-    private String       instanceId;
+    protected String       instanceId;
     @ElementCollection
-    private List<String> actions;
+    protected List<String> actions;
 
     public PermissionsImpl() {
 

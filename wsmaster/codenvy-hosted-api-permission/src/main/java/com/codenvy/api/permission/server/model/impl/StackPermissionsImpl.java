@@ -19,6 +19,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
 import java.util.List;
 
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -28,7 +29,7 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
  */
 
 @Entity(name = "StackPermissions")
-public abstract class StackPermissionsImpl extends PermissionsImpl {
+public class StackPermissionsImpl extends PermissionsImpl {
 
     public static final String  DOMAIN = "stack";
 
@@ -50,5 +51,10 @@ public abstract class StackPermissionsImpl extends PermissionsImpl {
 
     public StackPermissionsImpl(String userId, String instanceId, List<String> actions) {
         super(userId, DOMAIN, instanceId, actions);
+    }
+
+    @PostLoad
+    public void setDomain() {
+        this.domainId = DOMAIN;
     }
 }

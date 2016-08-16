@@ -15,17 +15,20 @@
 package com.codenvy.api.permission.server.model.impl;
 
 
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
+import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
 import java.util.List;
 
 /**
  * @author Max Shaposhnik
  *
  */
+@Entity(name = "RecipePermissions")
 public class RecipePermissionsImpl extends PermissionsImpl {
 
     public static final String DOMAIN = "recipe";
@@ -36,7 +39,7 @@ public class RecipePermissionsImpl extends PermissionsImpl {
 
     @OneToOne
     @JoinColumn(name = "instanceId", insertable = false, updatable = false)
-    private Recipe recipe;
+    private RecipeImpl recipe;
 
     public RecipePermissionsImpl() {
 
@@ -48,5 +51,10 @@ public class RecipePermissionsImpl extends PermissionsImpl {
 
     public RecipePermissionsImpl(String userId, String instanceId, List<String> actions) {
         super(userId, DOMAIN, instanceId, actions);
+    }
+
+    @PostLoad
+    public void setDomain() {
+        this.domainId = DOMAIN;
     }
 }
