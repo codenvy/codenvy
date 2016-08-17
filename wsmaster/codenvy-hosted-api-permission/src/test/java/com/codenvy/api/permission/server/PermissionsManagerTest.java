@@ -187,7 +187,7 @@ public class PermissionsManagerTest {
         permissionsManager.getDomain("unsupported");
     }
 
-    public class TestDomain extends AbstractPermissionsDomain {
+    public static class TestDomain extends AbstractPermissionsDomain {
         public TestDomain() {
             super("test", Arrays.asList("read", "write", "use", "delete"));
         }

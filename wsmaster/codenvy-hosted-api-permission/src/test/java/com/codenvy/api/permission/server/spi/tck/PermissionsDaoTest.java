@@ -16,16 +16,11 @@ package com.codenvy.api.permission.server.spi.tck;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
-import com.codenvy.api.permission.server.model.impl.RecipePermissionsImpl;
-import com.codenvy.api.permission.server.model.impl.StackPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
@@ -57,35 +52,15 @@ public class PermissionsDaoTest {
     @Inject
     private TckRepository<PermissionsImpl> permissionsRepository;
 
-    @Inject
-    private TckRepository<UserImpl> userRepository;
-
-    @Inject
-    private TckRepository<StackImpl> stackRepository;
-
-    @Inject
-    private TckRepository<RecipeImpl> recipeRepository;
-
-
     PermissionsImpl[] permissions;
 
     @BeforeMethod
     public void setUp() throws TckRepositoryException {
-        permissions = new PermissionsImpl[]{new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "run")),
-                                            new StackPermissionsImpl("user2", "stack2", Arrays.asList("read", "use")),
-                                            new RecipePermissionsImpl("user1", "recipe1", Arrays.asList("read", "run")),
-                                            new RecipePermissionsImpl("user2", "recipe2", Arrays.asList("read", "use", "run", "configure"))};
-
-        userRepository.createAll(Arrays.asList(new UserImpl("user", "user@com.com", "usr"),
-                                               new UserImpl("user1", "user1@com.com", "usr1"),
-                                               new UserImpl("user2", "user2@com.com", "usr2")));
-
-        stackRepository.createAll(Arrays.asList(new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
-                                                new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)));
-
-        recipeRepository.createAll(Arrays.asList(new RecipeImpl("recipe1", null, null, null, null, null, null),
-                                                 new RecipeImpl("recipe2", null, null, null, null, null, null)));
-
+        permissions = new PermissionsImpl[]{new TestPermissionsImpl1("user1", "domain1", "stack1", Arrays.asList("read", "use", "run")),
+                                            new TestPermissionsImpl1("user2", "domain1",  "stack2", Arrays.asList("read", "use")),
+                                            new TestPermissionsImpl2("user1", "domain2", "recipe1", Arrays.asList("read", "run")),
+                                            new TestPermissionsImpl2("user2", "domain2", "recipe2", Arrays.asList("read", "use", "run", "configure")),
+                                            new TestPermissionsImpl2("user1", "domain2",  null , Arrays.asList("read", "run"))};
 
         permissionsRepository.createAll(Arrays.asList(permissions));
 
@@ -93,21 +68,18 @@ public class PermissionsDaoTest {
 
     @AfterMethod
     public void cleanUp() throws TckRepositoryException {
-        stackRepository.removeAll();
-        recipeRepository.removeAll();
         permissionsRepository.removeAll();
-        userRepository.removeAll();
     }
 
 
     /* PermissionsDao.store() tests */
     @Test
     public void shouldStorePermissions() throws Exception {
-        final PermissionsImpl permissions = new StackPermissionsImpl("user", "stack", Arrays.asList("read", "use"));
+        final PermissionsImpl permissions = new TestPermissionsImpl1("user", "domain1", "instance", Arrays.asList("read", "use"));
 
         permissionsDao.store(permissions);
 
-        final Permissions result = permissionsDao.get("user", "stack", permissions.getInstanceId());
+        final Permissions result = permissionsDao.get(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
         assertEquals(permissions, result);
     }
 
@@ -126,7 +98,7 @@ public class PermissionsDaoTest {
                                     singletonList("read"));
         permissionsDao.store(newPermissions);
 
-        final Permissions result = permissionsDao.get("user1", "stack", oldPermissions.getInstanceId());
+        final Permissions result = permissionsDao.get(oldPermissions.getUserId(), oldPermissions.getDomainId(), oldPermissions.getInstanceId());
 
         assertEquals(newPermissions, result);
     }
@@ -175,7 +147,7 @@ public class PermissionsDaoTest {
 
         final List<PermissionsImpl> result = permissionsDao.getByInstance(permissions[2].getDomainId(), permissions[2].getInstanceId());
 
-        assertEquals(result.size(), 1);
+        assertEquals(1, result.size());
         assertEquals(permissions[2],result.get(0));
     }
 
@@ -199,10 +171,10 @@ public class PermissionsDaoTest {
         final Permissions result2 = permissionsDao.get(permissions[2].getUserId(), permissions[2].getDomainId(),
                                                        permissions[2].getInstanceId());
 
-        assertTrue(result1 instanceof StackPermissionsImpl);
+        assertTrue(result1 instanceof TestPermissionsImpl1);
         assertEquals(result1, permissions[0]);
 
-        assertTrue(result2 instanceof RecipePermissionsImpl);
+        assertTrue(result2 instanceof TestPermissionsImpl2);
         assertEquals(result2, permissions[2]);
 
     }

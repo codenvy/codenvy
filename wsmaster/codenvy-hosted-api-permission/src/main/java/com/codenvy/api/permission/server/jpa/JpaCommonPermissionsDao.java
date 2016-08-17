@@ -17,7 +17,6 @@ package com.codenvy.api.permission.server.jpa;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.dao.CommonDomains;
 import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
-import com.codenvy.api.permission.server.model.impl.PermissionsPrimaryKey;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.persist.Transactional;
@@ -29,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -79,12 +79,16 @@ public class JpaCommonPermissionsDao implements PermissionsDao {
         requireNonNull(domainId, "Domain identifier required");
         requireNonNull(instanceId, "Instance identifier required");
         try {
-            final PermissionsImpl result = managerProvider.get().find(PermissionsImpl.class, new PermissionsPrimaryKey(userId, instanceId));
-            if (result == null) {
-                throw new NotFoundException(
-                        format("Permissions of user '%s' on domain '%s' with id '%s' was not found.", userId, domainId, instanceId));
-            }
+            final PermissionsImpl result = managerProvider.get()
+                                                          .createNamedQuery("Permissions.getByUserDomainAndInstance", PermissionsImpl.class)
+                                                          .setParameter("instanceId", instanceId)
+                                                          .setParameter("userId", userId)
+                                                          .setParameter("domainId", domainId)
+                                                          .getSingleResult();
             return result;
+        } catch (NoResultException n) {
+            throw new NotFoundException(
+                    format("Permissions of user '%s' on domain '%s' with id '%s' was not found.", userId, domainId, instanceId));
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -99,6 +103,7 @@ public class JpaCommonPermissionsDao implements PermissionsDao {
             return managerProvider.get()
                                   .createNamedQuery("Permissions.getByDomainAndInstance", PermissionsImpl.class)
                                   .setParameter("instanceId", instanceId)
+                                  .setParameter("domainId", domainId)
                                   .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
@@ -113,8 +118,15 @@ public class JpaCommonPermissionsDao implements PermissionsDao {
         requireNonNull(instanceId, "Instance identifier required");
         requireNonNull(action, "Action required");
         try {
-            final PermissionsImpl result = managerProvider.get().find(PermissionsImpl.class, new PermissionsPrimaryKey(userId, instanceId));
-            return result != null && result.getActions().contains(action);
+            final PermissionsImpl result = managerProvider.get()
+                                                          .createNamedQuery("Permissions.getByUserDomainAndInstance", PermissionsImpl.class)
+                                                          .setParameter("instanceId", instanceId)
+                                                          .setParameter("userId", userId)
+                                                          .setParameter("domainId", domainId)
+                                                          .getSingleResult();
+            return result.getActions().contains(action);
+        } catch (NoResultException n) {
+            return false;
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -134,15 +146,34 @@ public class JpaCommonPermissionsDao implements PermissionsDao {
     }
 
     @Transactional
-    protected void doCreate(PermissionsImpl entity) {
-        managerProvider.get().merge(entity);
+    protected void doCreate(PermissionsImpl entity) throws ServerException {
+        EntityManager manager = managerProvider.get();
+        try {
+            final PermissionsImpl result = manager.createNamedQuery("Permissions.getByUserDomainAndInstance", PermissionsImpl.class)
+                                                  .setParameter("instanceId", entity.getInstanceId())
+                                                  .setParameter("userId", entity.getUserId())
+                                                  .setParameter("domainId", entity.getDomainId())
+                                                  .getSingleResult();
+            result.getActions().clear();
+            result.getActions().addAll(entity.getActions());
+        } catch (NoResultException n) {
+            manager.persist(entity);
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 
     @Transactional
     protected void doRemove(String userId, String domainId, String instanceId) throws NotFoundException {
         EntityManager manager = managerProvider.get();
-        final PermissionsImpl entity = manager.find(PermissionsImpl.class, new PermissionsPrimaryKey(userId, instanceId));
-        if (entity == null) {
+        PermissionsImpl entity;
+        try {
+            entity = manager.createNamedQuery("Permissions.getByUserDomainAndInstance", PermissionsImpl.class)
+                            .setParameter("instanceId", instanceId)
+                            .setParameter("userId", userId)
+                            .setParameter("domainId", domainId)
+                            .getSingleResult();
+        } catch (NoResultException e) {
             throw new NotFoundException(
                     format("Permissions of user '%s' on domain '%s' with id '%s' was not found.", userId, domainId, instanceId));
         }

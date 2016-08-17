@@ -12,26 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.permission.server.model.impl;
+package com.codenvy.api.workspace.server.recipe;
 
+
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
 import java.util.List;
-
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 
 /**
  * @author Max Shaposhnik
+ *
  */
-
-@Entity(name = "StackPermissions")
-public class StackPermissionsImpl extends PermissionsImpl {
-
-    public static final String  DOMAIN = "stack";
+@Entity(name = "RecipePermissions")
+@DiscriminatorValue(RecipeDomain.DOMAIN_ID)
+public class RecipePermissionsImpl extends PermissionsImpl {
 
     @OneToOne
     @JoinColumn(name = "userId", insertable = false, updatable = false)
@@ -39,22 +40,17 @@ public class StackPermissionsImpl extends PermissionsImpl {
 
     @OneToOne
     @JoinColumn(name = "instanceId", insertable = false, updatable = false)
-    private StackImpl stack;
+    private RecipeImpl recipe;
 
-    public  StackPermissionsImpl() {
+    public RecipePermissionsImpl() {
 
     }
 
-    public StackPermissionsImpl(StackPermissionsImpl stackPermissions) {
-        super(stackPermissions.getUserId(), DOMAIN, stackPermissions.getInstanceId(), stackPermissions.getActions());
+    public RecipePermissionsImpl(RecipePermissionsImpl recipePermissions) {
+        super(recipePermissions.getUserId(), RecipeDomain.DOMAIN_ID, recipePermissions.getInstanceId(), recipePermissions.getActions());
     }
 
-    public StackPermissionsImpl(String userId, String instanceId, List<String> actions) {
-        super(userId, DOMAIN, instanceId, actions);
-    }
-
-    @PostLoad
-    public void setDomain() {
-        this.domainId = DOMAIN;
+    public RecipePermissionsImpl(String userId, String instanceId, List<String> actions) {
+        super(userId, RecipeDomain.DOMAIN_ID, instanceId, actions);
     }
 }

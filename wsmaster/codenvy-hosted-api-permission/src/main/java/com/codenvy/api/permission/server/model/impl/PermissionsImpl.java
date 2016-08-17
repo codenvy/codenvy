@@ -16,15 +16,19 @@ package com.codenvy.api.permission.server.model.impl;
 
 import com.codenvy.api.permission.shared.model.Permissions;
 
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.Transient;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,22 +40,35 @@ import java.util.Objects;
  */
 @Entity(name = "Permissions")
 @Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "domainId")
 @NamedQueries(
         {
                 @NamedQuery(name = "Permissions.getByDomainAndInstance",
                             query = "SELECT permissions " +
                                     "FROM Permissions permissions " +
-                                    "WHERE permissions.instanceId = :instanceId")
+                                    "WHERE permissions.instanceId = :instanceId " +
+                                    "AND permissions.domainId = :domainId "),
+                @NamedQuery(name = "Permissions.getByUserDomainAndInstance",
+                            query = "SELECT permissions " +
+                                    "FROM Permissions permissions " +
+                                    "WHERE permissions.instanceId = :instanceId " +
+                                    "AND permissions.userId = :userId  " +
+                                    "AND permissions.domainId = :domainId ")
+
         }
 )
-@IdClass(PermissionsPrimaryKey.class)
-public class PermissionsImpl implements Permissions {
+
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "domainId", "instanceId"}))
+public  class PermissionsImpl implements Permissions {
 
     @Id
-    protected String       userId;
-    @Transient
-    protected String       domainId;
-    @Id
+    @GeneratedValue
+    protected String id;
+
+    protected String userId;
+
+    protected String domainId;
+
     protected String       instanceId;
     @ElementCollection
     protected List<String> actions;
