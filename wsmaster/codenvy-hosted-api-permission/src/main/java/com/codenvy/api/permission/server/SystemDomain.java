@@ -14,8 +14,13 @@
  */
 package com.codenvy.api.permission.server;
 
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,5 +48,22 @@ public class SystemDomain extends AbstractPermissionsDomain {
                             Stream.of(MANAGE_CODENVY_ACTION))
                     .collect(Collectors.toList()),
               false);
+    }
+
+
+    @Entity(name = "SystemPermissions")
+    @DiscriminatorValue(DOMAIN_ID)
+    public class SystemPermissionsImpl extends PermissionsImpl {
+        public SystemPermissionsImpl() {
+
+        }
+
+        public SystemPermissionsImpl(SystemPermissionsImpl systemPermissions) {
+            super(systemPermissions.getUserId(), DOMAIN_ID, null, systemPermissions.getActions());
+        }
+
+        public SystemPermissionsImpl(String userId, List<String> actions) {
+            super(userId, DOMAIN_ID, null, actions);
+        }
     }
 }

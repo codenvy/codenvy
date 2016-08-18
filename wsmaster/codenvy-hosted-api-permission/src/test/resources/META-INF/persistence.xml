@@ -20,8 +20,11 @@
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>com.codenvy.api.permission.server.model.impl.PermissionsImpl</class>
-        <class>com.codenvy.api.permission.server.spi.tck.TestPermissionsImpl1</class>\
+        <class>com.codenvy.api.permission.server.spi.tck.TestPermissionsImpl1</class>
         <class>com.codenvy.api.permission.server.spi.tck.TestPermissionsImpl2</class>
+
+        <class>org.eclipse.che.account.spi.AccountImpl</class>
+        <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
@@ -32,7 +35,7 @@
             <property name="eclipselink.exception-handler" value="org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler"/>
             <property name="eclipselink.target-server" value="None"/>
             <property name="eclipselink.ddl-generation" value="create-tables"/>
-            <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="SEVERE"/>
         </properties>

@@ -23,7 +23,14 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -43,6 +50,8 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaCommonPermissionsDao implements PermissionsDao {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaCommonPermissionsDao.class);
 
     private final Map<String, AbstractPermissionsDomain> idToDomain;
 
@@ -178,5 +187,44 @@ public class JpaCommonPermissionsDao implements PermissionsDao {
                     format("Permissions of user '%s' on domain '%s' with id '%s' was not found.", userId, domainId, instanceId));
         }
         manager.remove(entity);
+    }
+
+
+    @Singleton
+    public static class RemovePermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        private PermissionsDao    permissionsDao;
+        @Inject
+        private Provider<EntityManager> managerProvider;
+
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                List<PermissionsImpl> toRemove = managerProvider.get()
+                                                                .createQuery(" SELECT permissions " +
+                                                                             " FROM Permissions permissions " +
+                                                                             " WHERE permissions.userId = :userId", PermissionsImpl.class)
+                                                                .setParameter("userId", event.getUser().getId())
+                                                                .getResultList();
+                for (PermissionsImpl permissions : toRemove) {
+                    permissionsDao.remove(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
+            }
+        }
     }
 }

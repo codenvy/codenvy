@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
+import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableList;
 
