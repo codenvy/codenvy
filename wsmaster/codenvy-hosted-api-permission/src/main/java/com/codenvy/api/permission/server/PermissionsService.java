@@ -105,7 +105,7 @@ public class PermissionsService extends Service {
         checkArgument(!isNullOrEmpty(permissionsDto.getDomainId()), "Domain required");
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
-        permissionsManager.storePermission(new AbstractPermissions(permissionsDto));
+        permissionsManager.storePermission(permissionsDto);
     }
 
     @GET

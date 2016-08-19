@@ -14,17 +14,19 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
-import com.codenvy.api.workspace.server.spi.WorkerDao;
-import com.google.inject.AbstractModule;
+import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.workspace.server.stack.StackDomain;
+import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
+
+import java.io.IOException;
 
 /**
- *
  * @author Max Shaposhnik
+ *
  */
-public class WorkerJpaModule extends AbstractModule {
+public class JpaStackPermissionsDao extends AbstractPermissionsDao<StackPermissionsImpl> {
 
-    @Override
-    protected void configure() {
-      bind(WorkerDao.class).to(JpaWorkerDao.class);
+    public JpaStackPermissionsDao() throws IOException {
+        super(new StackDomain(), StackPermissionsImpl.class,  "");
     }
 }

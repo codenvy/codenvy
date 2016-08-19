@@ -15,20 +15,14 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.dao.CommonDomains;
-import com.codenvy.api.permission.server.dao.CommonPermissionsDao;
-import com.codenvy.api.permission.server.dao.PermissionsImplCodec;
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
-import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-
-import org.bson.codecs.Codec;
-import org.bson.codecs.configuration.CodecProvider;
-import org.bson.codecs.configuration.CodecRegistry;
 
 /**
  * @author Sergii Leschenko
@@ -51,21 +45,8 @@ public class PermissionsModule extends AbstractModule {
                                                                                                              CommonDomains.class);
         permissionsDomainMultibinder.addBinding().to(SystemDomain.class);
 
-        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                            PermissionsDao.class);
-        storages.addBinding().to(CommonPermissionsDao.class);
-
-        final Multibinder<CodecProvider> binder = Multibinder.newSetBinder(binder(), CodecProvider.class);
-        binder.addBinding().toInstance(new CodecProvider() {
-            @Override
-            public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
-                if (clazz == AbstractPermissions.class) {
-                    @SuppressWarnings("unchecked")
-                    final Codec<T> codec = (Codec<T>)new PermissionsImplCodec(registry);
-                    return codec;
-                }
-                return null;
-            }
-        });
+        Multibinder<AbstractPermissionsDao> storages = Multibinder.newSetBinder(binder(),
+                                                                        AbstractPermissionsDao.class);
+        storages.addBinding().to(JpaSystemPermissionsDao.class);
     }
 }

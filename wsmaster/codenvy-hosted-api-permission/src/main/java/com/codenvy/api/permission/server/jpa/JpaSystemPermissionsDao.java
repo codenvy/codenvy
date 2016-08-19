@@ -14,17 +14,20 @@
  */
 package com.codenvy.api.permission.server.jpa;
 
-import com.codenvy.api.permission.server.spi.PermissionsDao;
-import com.google.inject.AbstractModule;
+import com.codenvy.api.permission.server.SystemDomain;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author Max Shaposhnik
  *
  */
-public class PermissionsJpaModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(PermissionsDao.class).to(AbstractPermissionsDao.class);
-        bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
+public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemDomain.SystemPermissionsImpl> {
+    @Inject
+    public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) throws IOException {
+        super(new SystemDomain(allowedActions), SystemDomain.SystemPermissionsImpl.class, "");
     }
 }

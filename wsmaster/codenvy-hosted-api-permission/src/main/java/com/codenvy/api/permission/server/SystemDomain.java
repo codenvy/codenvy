@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  *
  * @author Sergii Leschenko
  */
-public class SystemDomain extends AbstractPermissionsDomain {
+public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemPermissionsImpl> {
     public static final String SYSTEM_DOMAIN_ACTIONS = "system.domain.actions";
     public static final String DOMAIN_ID             = "system";
     public static final String MANAGE_CODENVY_ACTION = "manageCodenvy";
@@ -52,24 +52,28 @@ public class SystemDomain extends AbstractPermissionsDomain {
     }
 
     @Override
-    public Permissions createEntity(String userId, String instanceId, List<String> allowedActions) {
-        return new SystemAbstractPermissions(userId, allowedActions);
+    public SystemPermissionsImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+        return new SystemPermissionsImpl(userId, allowedActions);
     }
 
 
-    @Entity(name = "SystemPermissions")
-    @DiscriminatorValue(DOMAIN_ID)
-    public class SystemAbstractPermissions extends AbstractPermissions {
-        public SystemAbstractPermissions() {
+    public class SystemPermissionsImpl extends AbstractPermissions {
+        public SystemPermissionsImpl() {
 
         }
 
-        public SystemAbstractPermissions(SystemAbstractPermissions systemPermissions) {
-            super(systemPermissions.getUserId(), DOMAIN_ID, null, systemPermissions.getActions());
-        }
-
-        public SystemAbstractPermissions(String userId, List<String> actions) {
+        public SystemPermissionsImpl(String userId, List<String> actions) {
             super(userId, DOMAIN_ID, null, actions);
+        }
+
+        @Override
+        public String getInstanceId() {
+            return null;
+        }
+
+        @Override
+        public String getDomainId() {
+            return DOMAIN_ID;
         }
     }
 }

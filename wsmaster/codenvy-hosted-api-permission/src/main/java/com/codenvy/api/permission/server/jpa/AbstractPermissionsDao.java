@@ -67,19 +67,19 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
     }
 
     @Override
-    public T get(String userId, String instanceId) throws ServerException, NotFoundException {
+    public T get(String userId, String instanceId) throws ServerException {
         return null;
     }
 
     @Override
-    public List<T> getByInstance(String instanceId) throws ServerException, NotFoundException {
+    public List<T> getByInstance(String instanceId) throws ServerException  {
         return managerProvider.get()
                               .createQuery(getByInstanceQuery, clazz)
                               .getResultList();
     }
 
     @Override
-    public List<T> getByUser(String userId) throws ServerException, NotFoundException {
+    public List<T> getByUser(String userId) throws ServerException {
         return null;
     }
 
@@ -89,7 +89,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
     }
 
     @Override
-    public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
+    public void remove(String userId, String instanceId) throws ServerException {
 
     }
 }

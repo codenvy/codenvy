@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableMap;
 
@@ -75,117 +76,118 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions storing
      */
-    public void storePermission(AbstractPermissions permissions) throws ServerException, ConflictException, NotFoundException {
-        final String domain = permissions.getDomainId();
-        final String instance = permissions.getInstanceId();
-        final String user = permissions.getUserId();
+    public void storePermission(Permissions permissions) throws ServerException, ConflictException, NotFoundException {
+        final String domainId = permissions.getDomainId();
+        final String instanceId = permissions.getInstanceId();
+        final String userId = permissions.getUserId();
 
-        final PermissionsDao permissionsStorage = getPermissionsDao(domain);
+        final PermissionsDao permissionsStorage = getPermissionsDao(domainId);
         if (!permissions.getActions().contains(SET_PERMISSIONS)
-            && userHasLastSetPermissions(permissionsStorage, user, domain, instance)) {
+            && userHasLastSetPermissions(permissionsStorage, userId, instanceId)) {
             throw new ConflictException("Can't edit permissions because there is not any another user with permission 'setPermissions'");
         }
 
-        final PermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
+        final AbstractPermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
+        final AbstractPermissions permissionsInstance = permissionsDomain.createEntity(userId, instanceId, permissions.getActions());
 
-        checkInstanceRequiring(permissionsDomain, instance);
+        checkInstanceRequiring(permissionsDomain, instanceId);
 
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
-        final Set<String> unsupportedActions = permissions.getActions()
-                                                          .stream()
-                                                          .filter(action -> !allowedActions.contains(action))
-                                                          .collect(Collectors.toSet());
+        final Set<String> unsupportedActions = permissionsInstance.getActions()
+                                                                  .stream()
+                                                                  .filter(action -> !allowedActions.contains(action))
+                                                                  .collect(Collectors.toSet());
         if (!unsupportedActions.isEmpty()) {
             throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support next action(s): " +
                                         unsupportedActions.stream()
                                                           .collect(Collectors.joining(", ")));
         }
 
-        permissionsStorage.store(permissions);
+        permissionsStorage.store(permissionsInstance);
     }
 
     /**
-     * @param user
-     *         user id
-     * @param domain
-     *         domain id
-     * @param instance
-     *         instance id
-     * @return user's permissions for specified instance
+     * @param userId
+     *         userId id
+     * @param domainId
+     *         domainId id
+     * @param instanceId
+     *         instanceId id
+     * @return userId's permissions for specified instanceId
      * @throws NotFoundException
-     *         when given domain is unsupported
+     *         when given domainId is unsupported
      * @throws NotFoundException
-     *         when permissions with given user and domain and instance was not found
+     *         when permissions with given userId and domainId and instanceId was not found
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public AbstractPermissions get(String user, String domain, String instance) throws ServerException, NotFoundException, ConflictException {
-        checkInstanceRequiring(domain, instance);
-        return getPermissionsDao(domain).get(user, domain, instance);
+    public AbstractPermissions get(String userId, String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
+        checkInstanceRequiring(domainId, instanceId);
+        return getPermissionsDao(domainId).get(userId, instanceId);
     }
 
     /**
-     * @param domain
-     *         domain id
-     * @param instance
-     *         instance id
+     * @param domainId
+     *         domainId id
+     * @param instanceId
+     *         instanceId id
      * @return set of permissions
      * @throws NotFoundException
-     *         when given domain is unsupported
+     *         when given domainId is unsupported
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public List<AbstractPermissions> getByInstance(String domain, String instance) throws ServerException, NotFoundException, ConflictException {
-        checkInstanceRequiring(domain, instance);
-        return getPermissionsDao(domain).getByInstance(domain, instance);
+    public List<AbstractPermissions> getByInstance(String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
+        checkInstanceRequiring(domainId, instanceId);
+        return getPermissionsDao(domainId).getByInstance(instanceId);
     }
 
     /**
-     * Removes permissions of user related to the particular instance of specified domain
+     * Removes permissions of userId related to the particular instanceId of specified domainId
      *
-     * @param user
-     *         user id
-     * @param domain
-     *         domain id
-     * @param instance
-     *         instance id
+     * @param userId
+     *         userId id
+     * @param domainId
+     *         domainId id
+     * @param instanceId
+     *         instanceId id
      * @throws NotFoundException
-     *         when given domain is unsupported
+     *         when given domainId is unsupported
      * @throws ConflictException
-     *         when removes last 'setPermissions' of given instance
+     *         when removes last 'setPermissions' of given instanceId
      * @throws ServerException
      *         when any other error occurs during permissions removing
      */
-    public void remove(String user, String domain, String instance) throws ConflictException, ServerException, NotFoundException {
-        checkInstanceRequiring(domain, instance);
-        final PermissionsDao permissionsStorage = getPermissionsDao(domain);
-        if (userHasLastSetPermissions(permissionsStorage, user, domain, instance)) {
-            throw new ConflictException("Can't remove permissions because there is not any another user with permission 'setPermissions'");
+    public void remove(String userId, String domainId, String instanceId) throws ConflictException, ServerException, NotFoundException {
+        checkInstanceRequiring(domainId, instanceId);
+        final PermissionsDao permissionsStorage = getPermissionsDao(domainId);
+        if (userHasLastSetPermissions(permissionsStorage, userId, instanceId)) {
+            throw new ConflictException("Can't remove permissions because there is not any another userId with permission 'setPermissions'");
         }
-        permissionsStorage.remove(user, domain, instance);
+        permissionsStorage.remove(userId, instanceId);
     }
 
     /**
-     * @param user
-     *         user id
-     * @param domain
-     *         domain id
-     * @param instance
-     *         instance id
+     * @param userId
+     *         userId id
+     * @param domainId
+     *         domainId id
+     * @param instanceId
+     *         instanceId id
      * @param action
      *         action name
      * @return true if the permission exists
      * @throws NotFoundException
-     *         when given domain is unsupported
+     *         when given domainId is unsupported
      * @throws ServerException
      *         when any other error occurs during permission existence checking
      */
-    public boolean exists(String user, String domain, String instance, String action) throws ServerException,
+    public boolean exists(String userId, String domainId, String instanceId, String action) throws ServerException,
                                                                                              NotFoundException,
                                                                                              ConflictException {
-        checkInstanceRequiring(domain, instance);
-        return getDomain(domain).getAllowedActions().contains(action)
-               && getPermissionsDao(domain).exists(user, domain, instance, action);
+        checkInstanceRequiring(domainId, instanceId);
+        return getDomain(domainId).getAllowedActions().contains(action)
+               && getPermissionsDao(domainId).exists(userId, instanceId, action);
     }
 
     /**
@@ -201,7 +203,7 @@ public class PermissionsManager {
      * @throws NotFoundException
      *         when given domain is unsupported
      */
-    public PermissionsDomain getDomain(String domain) throws NotFoundException {
+    public AbstractPermissionsDomain getDomain(String domain) throws NotFoundException {
         final AbstractPermissionsDomain permissionsDomain = domains.get(domain);
         if (permissionsDomain == null) {
             throw new NotFoundException("Requested unsupported domain '" + domain + "'");
@@ -227,13 +229,13 @@ public class PermissionsManager {
         return permissionsStorage;
     }
 
-    private boolean userHasLastSetPermissions(PermissionsDao permissionsStorage, String user, String domain, String instance)
+    private boolean userHasLastSetPermissions(PermissionsDao<AbstractPermissions> permissionsStorage, String userId, String instanceId)
             throws ServerException, ConflictException {
         try {
-            return permissionsStorage.exists(user, domain, instance, SET_PERMISSIONS)
-                   && !permissionsStorage.getByInstance(domain, instance)
+            return permissionsStorage.exists(userId, instanceId, SET_PERMISSIONS)
+                   && !permissionsStorage.getByInstance(instanceId)
                                          .stream()
-                                         .anyMatch(permission -> !permission.getUserId().equals(user)
+                                         .anyMatch(permission -> !permission.getUserId().equals(userId)
                                                                  && permission.getActions().contains(SET_PERMISSIONS));
         } catch (NotFoundException e) {
             return true;
