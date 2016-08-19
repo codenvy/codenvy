@@ -90,8 +90,6 @@ public class PermissionsManager {
         final AbstractPermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
         final AbstractPermissions permissionsEntity = permissionsDomain.createEntity(userId, instanceId, permissions.getActions());
 
-        checkInstanceRequiring(permissionsDomain, instanceId);
-
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
         final Set<String> unsupportedActions = permissionsEntity.getActions()
                                                                   .stream()
@@ -122,7 +120,6 @@ public class PermissionsManager {
      *         when any other error occurs during permissions fetching
      */
     public AbstractPermissions get(String userId, String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
-        checkInstanceRequiring(domainId, instanceId);
         return getPermissionsDao(domainId).get(userId, instanceId);
     }
 
@@ -138,7 +135,6 @@ public class PermissionsManager {
      *         when any other error occurs during permissions fetching
      */
     public List<AbstractPermissions> getByInstance(String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
-        checkInstanceRequiring(domainId, instanceId);
         return getPermissionsDao(domainId).getByInstance(instanceId);
     }
 
@@ -159,7 +155,6 @@ public class PermissionsManager {
      *         when any other error occurs during permissions removing
      */
     public void remove(String userId, String domainId, String instanceId) throws ConflictException, ServerException, NotFoundException {
-        checkInstanceRequiring(domainId, instanceId);
         final PermissionsDao permissionsStorage = getPermissionsDao(domainId);
         if (userHasLastSetPermissions(permissionsStorage, userId, instanceId)) {
             throw new ConflictException("Can't remove permissions because there is not any another userId with permission 'setPermissions'");
@@ -185,7 +180,6 @@ public class PermissionsManager {
     public boolean exists(String userId, String domainId, String instanceId, String action) throws ServerException,
                                                                                              NotFoundException,
                                                                                              ConflictException {
-        checkInstanceRequiring(domainId, instanceId);
         return getDomain(domainId).getAllowedActions().contains(action)
                && getPermissionsDao(domainId).exists(userId, instanceId, action);
     }
@@ -211,15 +205,6 @@ public class PermissionsManager {
         return domains.get(domain);
     }
 
-    private void checkInstanceRequiring(String domain, String instance) throws NotFoundException, ConflictException {
-        checkInstanceRequiring(getDomain(domain), instance);
-    }
-
-    private void checkInstanceRequiring(PermissionsDomain domain, String instance) throws NotFoundException, ConflictException {
-        if (domain.isInstanceRequired() && instance == null) {
-            throw new ConflictException("Given domain requires non nullable value for instance");
-        }
-    }
 
     private PermissionsDao getPermissionsDao(String domain) throws NotFoundException {
         final PermissionsDao permissionsStorage = domainToDao.get(domain);

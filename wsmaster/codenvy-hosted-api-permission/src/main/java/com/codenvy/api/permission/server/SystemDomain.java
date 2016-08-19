@@ -52,7 +52,7 @@ public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemP
     }
 
     @Override
-    public SystemPermissionsImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+    public SystemPermissionsImpl doCreateEntity(String userId, String instanceId, List<String> allowedActions) {
         return new SystemPermissionsImpl(userId, allowedActions);
     }
 

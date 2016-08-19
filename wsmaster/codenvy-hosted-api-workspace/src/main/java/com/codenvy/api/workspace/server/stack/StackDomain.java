@@ -41,7 +41,7 @@ public class StackDomain extends AbstractPermissionsDomain<StackPermissionsImpl>
     }
 
     @Override
-    public StackPermissionsImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+    public StackPermissionsImpl doCreateEntity(String userId, String instanceId, List<String> allowedActions) {
         return new StackPermissionsImpl(userId, instanceId, allowedActions);
     }
 }

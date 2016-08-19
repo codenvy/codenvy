@@ -45,7 +45,7 @@ public class WorkspaceDomain extends AbstractPermissionsDomain<WorkerImpl> {
     }
 
     @Override
-    public WorkerImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+    public WorkerImpl doCreateEntity(String userId, String instanceId, List<String> allowedActions) {
         return new WorkerImpl(instanceId, userId, allowedActions);
     }
 }

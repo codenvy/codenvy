@@ -15,9 +15,10 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableList;
+
+import org.eclipse.che.api.core.ConflictException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -65,7 +66,14 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
         return requiresInstance;
     }
 
-    public abstract T createEntity(String userId, String instanceId, List<String> allowedActions);
+    public T createEntity(String userId, String instanceId, List<String> allowedActions) throws ConflictException{
+        if (isInstanceRequired() && instanceId ==null) {
+            throw new ConflictException("Given domain requires non nullable value for instance");
+        }
+        return doCreateEntity(userId, instanceId, allowedActions);
+    }
+
+    protected abstract T doCreateEntity(String userId, String instanceId, List<String> allowedActions);
 
     @Override
     public boolean equals(Object obj) {
