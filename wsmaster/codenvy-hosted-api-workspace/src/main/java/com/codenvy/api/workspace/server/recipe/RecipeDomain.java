@@ -41,7 +41,7 @@ public class RecipeDomain extends AbstractPermissionsDomain<RecipePermissionsImp
     }
 
     @Override
-    public RecipePermissionsImpl doCreateEntity(String userId, String instanceId, List<String> allowedActions) {
+    public RecipePermissionsImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
         return new RecipePermissionsImpl(userId, instanceId, allowedActions);
     }
 }

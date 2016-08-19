@@ -66,14 +66,14 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
         return requiresInstance;
     }
 
-    public T createEntity(String userId, String instanceId, List<String> allowedActions) throws ConflictException{
-        if (isInstanceRequired() && instanceId ==null) {
-            throw new ConflictException("Given domain requires non nullable value for instance");
+    public T newInstance(String userId, String instanceId, List<String> allowedActions) throws ConflictException{
+        if (isInstanceRequired() && instanceId == null) {
+            throw new ConflictException("Given domain requires non nullable value for instanceId");
         }
-        return doCreateEntity(userId, instanceId, allowedActions);
+        return doCreateInstance(userId, instanceId, allowedActions);
     }
 
-    protected abstract T doCreateEntity(String userId, String instanceId, List<String> allowedActions);
+    protected abstract T doCreateInstance(String userId, String instanceId, List<String> allowedActions);
 
     @Override
     public boolean equals(Object obj) {

@@ -17,7 +17,6 @@ package com.codenvy.api.permission.server;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
-import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -88,7 +87,7 @@ public class PermissionsManager {
         }
 
         final AbstractPermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
-        final AbstractPermissions permissionsEntity = permissionsDomain.createEntity(userId, instanceId, permissions.getActions());
+        final AbstractPermissions permissionsEntity = permissionsDomain.newInstance(userId, instanceId, permissions.getActions());
 
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
         final Set<String> unsupportedActions = permissionsEntity.getActions()
@@ -106,11 +105,11 @@ public class PermissionsManager {
 
     /**
      * @param userId
-     *         userId id
+     *         user id
      * @param domainId
-     *         domainId id
+     *         domain id
      * @param instanceId
-     *         instanceId id
+     *         instance id
      * @return userId's permissions for specified instanceId
      * @throws NotFoundException
      *         when given domainId is unsupported
@@ -125,9 +124,9 @@ public class PermissionsManager {
 
     /**
      * @param domainId
-     *         domainId id
+     *         domain id
      * @param instanceId
-     *         instanceId id
+     *         instance id
      * @return set of permissions
      * @throws NotFoundException
      *         when given domainId is unsupported
@@ -142,11 +141,11 @@ public class PermissionsManager {
      * Removes permissions of userId related to the particular instanceId of specified domainId
      *
      * @param userId
-     *         userId id
+     *         user id
      * @param domainId
-     *         domainId id
+     *         domain id
      * @param instanceId
-     *         instanceId id
+     *         instance id
      * @throws NotFoundException
      *         when given domainId is unsupported
      * @throws ConflictException
@@ -164,11 +163,11 @@ public class PermissionsManager {
 
     /**
      * @param userId
-     *         userId id
+     *         user id
      * @param domainId
-     *         domainId id
+     *         domain id
      * @param instanceId
-     *         instanceId id
+     *         instance id
      * @param action
      *         action name
      * @return true if the permission exists
