@@ -69,13 +69,14 @@ public class WorkerDaoTest {
                                    new WorkerImpl("ws2", "user1", Arrays.asList("read", "run")),
                                    new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure"))};
 
-        userRepository.createAll(Arrays.asList(new UserImpl("user0", "user0@com.com", "usr0"),
-                                               new UserImpl("user1", "user1@com.com", "usr1"),
-                                               new UserImpl("user2", "user2@com.com", "usr2")));
+        final UserImpl[] users = new UserImpl[] {new UserImpl("user0", "user0@com.com", "usr0"),
+                                                 new UserImpl("user1", "user1@com.com", "usr1"),
+                                                 new UserImpl("user2", "user2@com.com", "usr2")};
+        userRepository.createAll(Arrays.asList(users));
 
-        workspaceRepository.createAll(Arrays.asList(new WorkspaceImpl("ws0", "ns0", new WorkspaceConfigImpl("","","cfg0", null,null,null)),
-                                                    new WorkspaceImpl("ws1", "ns1", new WorkspaceConfigImpl("","","cfg1", null,null,null)),
-                                                    new WorkspaceImpl("ws2", "ns2", new WorkspaceConfigImpl("","","cfg2", null,null,null))));
+        workspaceRepository.createAll(Arrays.asList(new WorkspaceImpl("ws0", users[0].getAccount(), new WorkspaceConfigImpl("","","cfg0", null,null,null)),
+                                                    new WorkspaceImpl("ws1", users[1].getAccount(), new WorkspaceConfigImpl("","","cfg1", null,null,null)),
+                                                    new WorkspaceImpl("ws2", users[2].getAccount(), new WorkspaceConfigImpl("","","cfg2", null,null,null))));
 
         workerRepository.createAll(Arrays.asList(workers));
 

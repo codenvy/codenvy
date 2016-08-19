@@ -1,5 +1,98 @@
 # Change Log
 
+## [4.7.0-RC1](https://github.com/codenvy/codenvy/tree/4.7.0-RC1) (2016-08-16)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.6.2...4.7.0-RC1)
+
+**Issues with no labels:**
+
+- Integration tests of installation manager failed because of lack of RHEL subscription [\#575](https://github.com/codenvy/codenvy/issues/575)
+- Puppet doesn't change /etc/hosts [\#574](https://github.com/codenvy/codenvy/issues/574)
+- Workspace Connection Error at creation [\#567](https://github.com/codenvy/codenvy/issues/567)
+- NPE on some old accounts [\#564](https://github.com/codenvy/codenvy/issues/564)
+- API don't remove container when entrypoint is invalid and conatainer state is "Exited" [\#563](https://github.com/codenvy/codenvy/issues/563)
+- netstat deprecated and not available on some centos 7 distributions [\#560](https://github.com/codenvy/codenvy/issues/560)
+- Wrong behavior while creating new account [\#550](https://github.com/codenvy/codenvy/issues/550)
+- Default admin name of zabbix is "Admin", not "admin" [\#547](https://github.com/codenvy/codenvy/issues/547)
+- Issue with snapshots [\#541](https://github.com/codenvy/codenvy/issues/541)
+- Not able to connect with external database on 3306 port [\#534](https://github.com/codenvy/codenvy/issues/534)
+- Populate a new Codenvy installation with some defaults [\#531](https://github.com/codenvy/codenvy/issues/531)
+- Starting auxiliary machines inside workspace during the build [\#519](https://github.com/codenvy/codenvy/issues/519)
+- Can't checkout git repo in version 4.5.1 [\#476](https://github.com/codenvy/codenvy/issues/476)
+- Create a script for diagnostic and collect needed info for support in case of troubleshooting [\#413](https://github.com/codenvy/codenvy/issues/413)
+- Create migration tool to migrate from LDAP/MongoDB to PostgreSQL [\#397](https://github.com/codenvy/codenvy/issues/397)
+
+**Pull requests merged:**
+
+- Fix codenvy wsagent groupId [\#585](https://github.com/codenvy/codenvy/pull/585) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- \(\#575\) fix unregistering the RHEL system in IM integration tests [\#576](https://github.com/codenvy/codenvy/pull/576) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- \(\#547\) fix zabbix admin name in default Codenvy on-prem properties [\#569](https://github.com/codenvy/codenvy/pull/569) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- \(\#560\) replace deprecated 'netstat' command by 'ss' [\#568](https://github.com/codenvy/codenvy/pull/568) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix config of installation manager integration tests [\#559](https://github.com/codenvy/codenvy/pull/559) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-550 Fix mail server groupId [\#558](https://github.com/codenvy/codenvy/pull/558) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Fix update.sh to use updater.nightly4.codenvy-stg.com [\#556](https://github.com/codenvy/codenvy/pull/556) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Installation manager [\#555](https://github.com/codenvy/codenvy/pull/555) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add default properties and migration script of Codenvy on-prem 4.6.2 [\#553](https://github.com/codenvy/codenvy/pull/553) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add integration tests for JPA DAOs on PostgreSQL database [\#551](https://github.com/codenvy/codenvy/pull/551) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Makes WorkspaceDAO to respect workers on get by user [\#542](https://github.com/codenvy/codenvy/pull/542) ([mshaposhnik](https://github.com/mshaposhnik))
+
+## [4.6.2](https://github.com/codenvy/codenvy/tree/4.6.2) (2016-08-09)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.6.1...4.6.2)
+
+**Issues with no labels:**
+
+- Import from github [\#528](https://github.com/codenvy/codenvy/issues/528)
+- Share a workspace: User not found message when sharing a workspace [\#509](https://github.com/codenvy/codenvy/issues/509)
+- Factories with open file action do not got to the workspace [\#507](https://github.com/codenvy/codenvy/issues/507)
+- Timeout for custome stack [\#493](https://github.com/codenvy/codenvy/issues/493)
+- Update codenvy config and update of Codenvy version hung up on https://\<hostname\> address [\#459](https://github.com/codenvy/codenvy/issues/459)
+- Support of AWS ECR dynamic passwords [\#453](https://github.com/codenvy/codenvy/issues/453)
+
+**Pull requests merged:**
+
+- Codenvy 507 [\#540](https://github.com/codenvy/codenvy/pull/540) ([olexii4](https://github.com/olexii4))
+- refactoring of GitException [\#538](https://github.com/codenvy/codenvy/pull/538) ([vinokurig](https://github.com/vinokurig))
+- \(\#459\) fix requesting to Codenvy API throught HTTPS [\#536](https://github.com/codenvy/codenvy/pull/536) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Create WorkerDao implementation on jpa [\#523](https://github.com/codenvy/codenvy/pull/523) ([mshaposhnik](https://github.com/mshaposhnik))
+- CODENVY-509: add user not found message in share workspace widget [\#522](https://github.com/codenvy/codenvy/pull/522) ([ashumilova](https://github.com/ashumilova))
+- CODENVY-453: Add support of AWS ECR dynamic passwords [\#521](https://github.com/codenvy/codenvy/pull/521) ([mmorhun](https://github.com/mmorhun))
+
+## [4.6.1](https://github.com/codenvy/codenvy/tree/4.6.1) (2016-08-04)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/4.6.0...4.6.1)
+
+**Issues with no labels:**
+
+- Installation manager doesn't store empty codenvy property [\#512](https://github.com/codenvy/codenvy/issues/512)
+- FIND command will not scal [\#500](https://github.com/codenvy/codenvy/issues/500)
+- Snapshot restore not happening [\#492](https://github.com/codenvy/codenvy/issues/492)
+- PULL reports Failed to get private ssh key [\#491](https://github.com/codenvy/codenvy/issues/491)
+- Check if workspace backup performed on docker service restart or stop [\#482](https://github.com/codenvy/codenvy/issues/482)
+- Add record '127.0.0.1 \<new-hostname\>' into /etc/hosts when changing Codenvy on-prem hostname [\#464](https://github.com/codenvy/codenvy/issues/464)
+- Investigate possible ways to integrate support of AWS ECR dynamic passwords in Codenvy [\#463](https://github.com/codenvy/codenvy/issues/463)
+- Docker machine impl doesn't stop and remove containers if script that restores projects FS fails [\#447](https://github.com/codenvy/codenvy/issues/447)
+- Describe configuration changes for 4.6 release [\#432](https://github.com/codenvy/codenvy/issues/432)
+- Validate options of Codenvy bootstrap script [\#404](https://github.com/codenvy/codenvy/issues/404)
+- Convert Chrome Store listing to beta.codenvy.com [\#402](https://github.com/codenvy/codenvy/issues/402)
+- Create JPA based CommonPermissionsStorage [\#395](https://github.com/codenvy/codenvy/issues/395)
+- Create a page to be displayed after user is deleted [\#389](https://github.com/codenvy/codenvy/issues/389)
+- Adding documentation to use alternative IDE [\#369](https://github.com/codenvy/codenvy/issues/369)
+
+**Pull requests merged:**
+
+- \(\#464\) update /etc/hosts when changing Codenvy hostname [\#517](https://github.com/codenvy/codenvy/pull/517) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-2033 Remove Che Git Provider module [\#513](https://github.com/codenvy/codenvy/pull/513) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Add ability to store empty codenvy properties [\#511](https://github.com/codenvy/codenvy/pull/511) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix tests to conform ErrorProne rules [\#510](https://github.com/codenvy/codenvy/pull/510) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- remove an old assets [\#506](https://github.com/codenvy/codenvy/pull/506) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- Add redirect to account deleted page [\#504](https://github.com/codenvy/codenvy/pull/504) ([ashumilova](https://github.com/ashumilova))
+- fixup! \(\#404\) validate options of Codenvy bootstrap script [\#503](https://github.com/codenvy/codenvy/pull/503) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CODENVY-380 Create a page to be displayed after user is deleted [\#498](https://github.com/codenvy/codenvy/pull/498) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- \(\#496\) add Codenvy on-prem 4.6.0 properies and migration script [\#497](https://github.com/codenvy/codenvy/pull/497) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- \(\#404\) validate options of Codenvy bootstrap script [\#495](https://github.com/codenvy/codenvy/pull/495) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- CHE-1989 Fix permissions checking in according to new namespace concept [\#486](https://github.com/codenvy/codenvy/pull/486) ([sleshchenko](https://github.com/sleshchenko))
+- corrected javadoc [\#363](https://github.com/codenvy/codenvy/pull/363) ([torzsmokus](https://github.com/torzsmokus))
+- CHE-1369: rework UD to listen to environment channels [\#348](https://github.com/codenvy/codenvy/pull/348) ([ashumilova](https://github.com/ashumilova))
+- \[WP\] Codenvy source code structural refactoring [\#322](https://github.com/codenvy/codenvy/pull/322) ([skabashnyuk](https://github.com/skabashnyuk))
+
 ## [4.6.0](https://github.com/codenvy/codenvy/tree/4.6.0) (2016-08-01)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.5.1...4.6.0)
 
@@ -17,13 +110,12 @@
 - help plz cant find my data when added some git [\#417](https://github.com/codenvy/codenvy/issues/417)
 - Sometimes machine.ws\_agent.run\_command can't execute properly [\#405](https://github.com/codenvy/codenvy/issues/405)
 - PreferenceDao implementation on JPA [\#393](https://github.com/codenvy/codenvy/issues/393)
-- FactoryDao implementation on JPA [\#392](https://github.com/codenvy/codenvy/issues/392)
 - Codenvy standalone server. Workspaces creation hanging. [\#390](https://github.com/codenvy/codenvy/issues/390)
 - How to run python script? [\#385](https://github.com/codenvy/codenvy/issues/385)
 - OAuth with github appears to be broken [\#357](https://github.com/codenvy/codenvy/issues/357)
 - Maven dependencies not resolved by IDE [\#351](https://github.com/codenvy/codenvy/issues/351)
+- Release and ship codenvy 4.6.0 [\#496](https://github.com/codenvy/codenvy/issues/496)
 - Backup subs-system removes projects of workspace in some cases [\#488](https://github.com/codenvy/codenvy/issues/488)
-- Milestone Summary 4.6.0 [\#478](https://github.com/codenvy/codenvy/issues/478)
 - Missing pull request panel [\#458](https://github.com/codenvy/codenvy/issues/458)
 - On beta in logs \[ERROR\] \[m.b.WorkspaceFsBackupScheduler 84\] - Machine machine???? is not found [\#454](https://github.com/codenvy/codenvy/issues/454)
 - Codenvy 4.6.0 on-prem integration test of backup/restore failed [\#452](https://github.com/codenvy/codenvy/issues/452)

@@ -16,30 +16,25 @@ package com.codenvy.api.workspace.server.filters;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
-import javax.inject.Inject;
 import javax.ws.rs.Path;
 
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 
 /**
- * Restricts access to methods of {@link org.eclipse.che.ide.ext.machine.server.RecipeScriptDownloadService} by users' permissions
+ * Restricts access to methods of {@link org.eclipse.che.api.workspace.server.RecipeScriptDownloadService} by users' permissions
  *
  * @author Mihail Kuznyetsov.
  */
 @Filter
 @Path("/recipe/script{path:(/.*)?}")
 public class RecipeScriptDownloadPermissionFilter extends CheMethodInvokerFilter {
-    @Inject
-    private MachineManager machineManager;
-
     @Override
     protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException {
 
@@ -51,8 +46,7 @@ public class RecipeScriptDownloadPermissionFilter extends CheMethodInvokerFilter
 
             switch (methodName) {
                 case "getRecipeScript": {
-                    String machineId = ((String)arguments[0]);
-                    workspaceId = machineManager.getMachine(machineId).getWorkspaceId();
+                    workspaceId = ((String)arguments[0]);
                     action = USE;
                     break;
                 }

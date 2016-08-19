@@ -20,11 +20,11 @@
     <parent>
         <artifactId>codenvy-plugin-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>codenvy-plugin-hosted-parent</artifactId>
-    <version>4.7.0-SNAPSHOT</version>
+    <version>4.7.0-RC2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Plugin :: Hosted :: Parent</name>
     <modules>
@@ -33,7 +33,6 @@
         <module>codenvy-hosted-ext-profile</module>
         <module>codenvy-hosted-ext-hosted</module>
         <module>codenvy-machine-hosted</module>
-        <module>codenvy-router-machine</module>
     </modules>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>

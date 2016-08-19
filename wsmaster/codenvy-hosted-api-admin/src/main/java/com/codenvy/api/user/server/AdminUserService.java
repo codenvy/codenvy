@@ -20,8 +20,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.api.user.server.dao.AdminUserDao;
-
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -29,6 +27,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.user.server.DtoConverter;
 import org.eclipse.che.api.user.server.UserLinksInjector;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Inject;
@@ -50,12 +49,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/admin/user")
 public class AdminUserService extends Service {
 
-    private final AdminUserDao      adminUserDao;
+    private final UserManager       userManager;
     private final UserLinksInjector linksInjector;
 
     @Inject
-    public AdminUserService(AdminUserDao adminUserDao, UserLinksInjector linksInjector) {
-        this.adminUserDao = adminUserDao;
+    public AdminUserService(UserManager userManager, UserLinksInjector linksInjector) {
+        this.userManager = userManager;
         this.linksInjector = linksInjector;
     }
 
@@ -83,7 +82,7 @@ public class AdminUserService extends Service {
                            @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
             throws ServerException, BadRequestException {
         try {
-            final Page<UserImpl> usersPage = adminUserDao.getAll(maxItems, skipCount);
+            final Page<UserImpl> usersPage = userManager.getAll(maxItems, skipCount);
             return Response.ok()
                            .entity(usersPage.getItems(user -> linksInjector.injectLinks(DtoConverter.asDto(user), getServiceContext())))
                            .header("Link", createLinkHeader(usersPage))

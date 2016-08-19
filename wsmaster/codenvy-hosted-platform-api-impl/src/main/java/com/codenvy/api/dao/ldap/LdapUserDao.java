@@ -19,6 +19,7 @@ import com.codenvy.api.event.user.RemoveUserEvent;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.user.User;
@@ -255,6 +256,11 @@ public class LdapUserDao implements UserDao {
         } catch (NamingException e) {
             throw new ServerException(format("Unable get user '%s'", email), e);
         }
+    }
+
+    @Override
+    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+        throw new UnsupportedOperationException();
     }
 
     private UserImpl doGetByAttribute(String name, String value) throws NamingException {

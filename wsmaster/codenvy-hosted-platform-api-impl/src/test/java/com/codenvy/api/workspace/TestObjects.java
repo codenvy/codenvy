@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -65,7 +66,7 @@ public final class TestObjects {
                                                                                                              machineConfigs)))
                                                           .setDefaultEnv("dev-env")
                                                           .build())
-                            .setNamespace(owner)
+                            .setAccount(new AccountImpl("accountId", owner, "test"))
                             .setTemporary(false)
                             .setStatus(WorkspaceStatus.STOPPED)
                             .build();

@@ -29,7 +29,6 @@ public class WorkspaceApiModule extends AbstractModule {
     protected void configure() {
         bind(WorkspacePermissionsFilter.class);
 //        bind(RecipePermissionsFilter.class);
-        bind(MachinePermissionsFilter.class);
 //        bind(StackPermissionsFilter.class);
 //        bind(AclSetPermissionsFilter.class);
         bind(RecipeScriptDownloadPermissionFilter.class);

@@ -139,10 +139,6 @@ retrieveTestLogs() {
 }
 
 vagrantDestroy() {
-    # remove RHEL OS subscription
-    executeSshCommand --bypass-validation "sudo subscription-manager remove --all"
-    executeSshCommand --bypass-validation "sudo subscription-manager unregister"
-
     vagrant destroy -f >> ${TEST_LOG}
 }
 
@@ -326,8 +322,9 @@ executeSshCommand() {
     OUTPUT=$(ssh -o StrictHostKeyChecking=no -i ~/.vagrant.d/insecure_private_key vagrant@${EXECUTE_ON_NODE} "${COMMAND}")
     EXIT_CODE=$?
 
+    log ${OUTPUT}
+
     if [[ $bypassValidation == false ]]; then
-        log ${OUTPUT}
         validateExitCode ${EXIT_CODE} ${validCode}
         logEndCommand "executeSshCommand"
     fi

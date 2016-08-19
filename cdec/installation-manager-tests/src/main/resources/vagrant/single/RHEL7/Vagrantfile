@@ -22,8 +22,6 @@ Vagrant.configure(2) do |config|
   sudo subscription-manager register --username riuvshin@codenvy.com --password codenvy --auto-attach
   sudo subscription-manager repos --enable=rhel-7-server-optional-rpms
   sudo subscription-manager repos --enable=rhel-7-server-extras-rpms
-
-  sudo yum install net-tools -y
   SHELL
 
   config.vm.provision "shell", inline: $script
@@ -31,4 +29,11 @@ Vagrant.configure(2) do |config|
   # Adding hosts rules
   config.vm.provision "shell", inline: "echo -e \"127.0.0.1 localhost\" > /etc/hosts"
   config.vm.provision "shell", inline: "echo -e \"nameserver 172.19.20.192\n\" >> /etc/resolv.conf"
+
+  # run some script before the guest is destroyed;.
+  # execute next command to install 'vagrant-trigger' plugin to be able to trigger event: "vagrant plugin install vagrant-triggers"
+  config.trigger.before :destroy do
+    run_remote "bash -c 'sudo subscription-manager unregister'"
+  end
+
 end

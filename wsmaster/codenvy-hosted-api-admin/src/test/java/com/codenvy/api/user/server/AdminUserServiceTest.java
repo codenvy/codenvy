@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.user.server;
 
-import com.codenvy.api.user.server.dao.AdminUserDao;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.Page;
@@ -23,6 +22,7 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.user.server.UserLinksInjector;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -64,7 +64,7 @@ public class AdminUserServiceTest {
     ApiExceptionMapper apiExceptionMapper;
 
     @Mock
-    AdminUserDao       userDao;
+    UserManager        userManager;
     @Mock
     UriInfo            uriInfo;
     @Mock
@@ -72,7 +72,7 @@ public class AdminUserServiceTest {
     @Mock
     SecurityContext    securityContext;
     @Mock
-    UserLinksInjector linksInjector;
+    UserLinksInjector  linksInjector;
 
     @InjectMocks
     AdminUserService userService;
@@ -85,7 +85,7 @@ public class AdminUserServiceTest {
     @Test
     public void shouldReturnAllUsers() throws Exception {
         UserImpl testUser = new UserImpl("test_id", "test@email", "name");
-        when(userDao.getAll(anyInt(), anyInt())).thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
+        when(userManager.getAll(anyInt(), anyInt())).thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -93,7 +93,7 @@ public class AdminUserServiceTest {
                                          .get(SECURE_PATH + "/admin/user?maxItems=3&skipCount=4");
 
         assertEquals(response.getStatusCode(), OK.getStatusCode());
-        verify(userDao).getAll(3, 4);
+        verify(userManager).getAll(3, 4);
 
         List<UserDto> users = DtoFactory.getInstance().createListDtoFromJson(response.getBody().print(), UserDto.class);
         assertEquals(users.size(), 1);
@@ -104,7 +104,7 @@ public class AdminUserServiceTest {
 
     @Test
     public void shouldThrowServerErrorIfDaoThrowException() throws Exception {
-        when(userDao.getAll(anyInt(), anyInt())).thenThrow(new ServerException("some error"));
+        when(userManager.getAll(anyInt(), anyInt())).thenThrow(new ServerException("some error"));
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()

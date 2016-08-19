@@ -17,35 +17,24 @@ package com.codenvy.machine.backup;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
-import org.mockito.InOrder;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static java.lang.Thread.sleep;
-import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -53,7 +42,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -66,12 +55,12 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceFsBackupSchedulerTest {
-    private static final int FAKE_BACKUP_TIME_MS = 1500;
+    private static final int    FAKE_BACKUP_TIME_MS = 1500;
+    private static final String WORKSPACE_ID_1      = "testWorkspaceId-1";
+    private static final String WORKSPACE_ID_2      = "testWorkspaceId-2";
 
     @Mock
-    private MachineManager machineManager;
-    @Mock
-    private Recipe         recipe;
+    private WorkspaceRuntimes workspaceRuntimes;
 
     @Mock
     private MachineBackupManager backupManager;
@@ -82,102 +71,67 @@ public class WorkspaceFsBackupSchedulerTest {
 
     MachineImpl machine2;
 
-    final List<MachineImpl> machines = new ArrayList<>();
-
     @Mock
     private Instance machineInstance;
 
     @Mock
     private InstanceNode node;
 
+    private Map<String, WorkspaceRuntimes.WorkspaceState> workspaces;
+
     @BeforeMethod
     public void setUp() throws Exception {
-        scheduler = spy(new WorkspaceFsBackupScheduler(machineManager, backupManager, 5 * 60));
-
-        when(machineManager.getMachines()).thenReturn(machines);
-        when(machineInstance.getStatus()).thenReturn(MachineStatus.RUNNING);
-
-        machine1 = new MachineImpl(new MachineConfigImpl(true,
-                                                         "displayName1",
-                                                         "type1",
-                                                         new MachineSourceImpl("sourcetype1", "location1", "content1"),
-                                                         new LimitsImpl(1024),
-                                                         Arrays.asList(new ServerConfImpl("ref1",
-                                                                                          "8080",
-                                                                                          "https",
-                                                                                          "some/path"),
-                                                                       new ServerConfImpl("ref2",
-                                                                                          "9090/udp",
-                                                                                          "someprotocol",
-                                                                                          "/some/path")),
-                                                         Collections.singletonMap("key1", "value1")),
-                                   "id1",
-                                   "workspaceId1",
-                                   "envName1",
-                                   "owner1",
-                                   MachineStatus.RUNNING,
-                                   new MachineRuntimeInfoImpl(singletonMap("var1", "value1"),
-                                                              singletonMap("prop1", "pvalue1"),
-                                                              singletonMap("8080", new ServerImpl("ref1",
-                                                                                                  "http",
-                                                                                                  "address1",
-                                                                                                  "some/path",
-                                                                                                  "url1"))));
-
-        machine2 = new MachineImpl(new MachineConfigImpl(true,
-                                                         "displayName2",
-                                                         "type2",
-                                                         new MachineSourceImpl("sourcetype2", "location2", "content2"),
-                                                         new LimitsImpl(1024),
-                                                         Arrays.asList(new ServerConfImpl("ref1",
-                                                                                          "8080",
-                                                                                          "https",
-                                                                                          "some/path"),
-                                                                       new ServerConfImpl("ref2",
-                                                                                          "9090/udp",
-                                                                                          "someprotocol",
-                                                                                          "/some/path")),
-                                                         Collections.singletonMap("key1", "value1")),
-                                   "id2",
-                                   "workspaceId2",
-                                   "envName1",
-                                   "owner2",
-                                   MachineStatus.RUNNING,
-                                   new MachineRuntimeInfoImpl(singletonMap("var2", "value2"),
-                                                              singletonMap("prop2", "pvalue2"),
-                                                              singletonMap("8080", new ServerImpl("ref2",
-                                                                                                  "https",
-                                                                                                  "address2",
-                                                                                                  "/some/path",
-                                                                                                  "url2"))));
-
-        machines.add(machine1);
-        machines.add(machine2);
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 5 * 60));
 
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
+
+        workspaces = new LinkedHashMap<>();
+
+        machine1 = addWorkspace(WORKSPACE_ID_1, "id1");
+        machine2 = addWorkspace(WORKSPACE_ID_2, "id2");
+        when(workspaceRuntimes.getWorkspaces()).thenReturn(workspaces);
+
+
+        when(machineInstance.getStatus()).thenReturn(MachineStatus.RUNNING);
     }
 
-    @AfterMethod
-    public void tearDown() throws Exception {
-        machines.clear();
+    private MachineImpl addWorkspace(String wsId, String machineId) throws Exception {
+        MachineImpl devMachine = mock(MachineImpl.class);
+        when(devMachine.getId()).thenReturn(machineId);
+        when(devMachine.getWorkspaceId()).thenReturn(wsId);
+        WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor = mock(WorkspaceRuntimes.RuntimeDescriptor.class);
+        WorkspaceRuntimes.WorkspaceState workspaceState =
+                new WorkspaceRuntimes.WorkspaceState(WorkspaceStatus.RUNNING, "some_env");
+        workspaces.put(wsId, workspaceState);
+        when(runtimeDescriptor.getRuntimeStatus()).thenReturn(WorkspaceStatus.RUNNING);
+        WorkspaceRuntimeImpl workspaceRuntime = mock(WorkspaceRuntimeImpl.class);
+        when(runtimeDescriptor.getRuntime()).thenReturn(workspaceRuntime);
+        when(workspaceRuntime.getDevMachine()).thenReturn(devMachine);
+        when(workspaceRuntimes.get(wsId)).thenReturn(runtimeDescriptor);
+        when(workspaceRuntimes.getMachine(wsId, machineId)).thenReturn(machineInstance);
+
+        return devMachine;
     }
 
     @Test
     public void shouldBackupWs() throws Exception {
         // given
-        when(machineManager.getInstance("id1")).thenReturn(machineInstance);
+        when(workspaceRuntimes.getMachine(WORKSPACE_ID_1, "id1")).thenReturn(machineInstance);
         when(machineInstance.getNode()).thenReturn(node);
         when(node.getHost()).thenReturn("192.168.0.1");
-        when(node.getProjectsFolder()).thenReturn("/workspace1");
+        when(node.getProjectsFolder()).thenReturn("/" + WORKSPACE_ID_1);
         doCallRealMethod().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
+        MachineImpl devMachine = mock(MachineImpl.class);
+        when(devMachine.getId()).thenReturn("id1");
+        when(devMachine.getWorkspaceId()).thenReturn(WORKSPACE_ID_1);
 
         // when
-        scheduler.backupWorkspaceInMachine(machine1);
+        scheduler.backupWorkspaceInMachine(devMachine);
 
         // then
-        verify(machineManager).getInstance("id1");
+        verify(workspaceRuntimes).getMachine(WORKSPACE_ID_1, "id1");
         verify(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
-        verify(backupManager).backupWorkspace("workspaceId1", "/workspace1", "192.168.0.1");
+        verify(backupManager).backupWorkspace(WORKSPACE_ID_1, "/" + WORKSPACE_ID_1, "192.168.0.1");
     }
 
     @Test
@@ -186,108 +140,104 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine2));
+        for (Map.Entry<String, WorkspaceRuntimes.WorkspaceState> workspaceState : workspaces.entrySet()) {
+            verify(scheduler, timeout(2000))
+                    .backupWorkspaceInMachine(eq(workspaceRuntimes.get(workspaceState.getKey())
+                                                                  .getRuntime()
+                                                                  .getDevMachine()));
+        }
     }
 
     @Test
-    public void shouldBackupOtherMachinesIfBackupOfPreviousFails() throws Exception {
+    public void shouldBackupOtherWorkspacesIfBackupOfPreviousFails() throws Exception {
         // given
+        MachineImpl machine3 = addWorkspace("testWsId3", "id3");
+        MachineImpl machine4 = addWorkspace("testWsId4", "id4");
+        MachineImpl machine5 = addWorkspace("testWsId5", "id5");
         doThrow(new ServerException("server exception")).when(scheduler).backupWorkspaceInMachine(eq(machine1));
-        doNothing().when(scheduler).backupWorkspaceInMachine(eq(machine2));
 
         // when
         scheduler.scheduleBackup();
 
         // then
-        // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
-        InOrder inOrder = inOrder(scheduler);
-        // ensure that backup of first machine was started and its fails doesn't affect backup of next machine
-        inOrder.verify(scheduler).backupWorkspaceInMachine(eq(machine1));
-        inOrder.verify(scheduler).backupWorkspaceInMachine(eq(machine2));
-    }
-
-    @Test
-    public void shouldNotBackupWorkspaceOfNonDevMachines() throws Exception {
-        // given
-        machines.clear();
-        machines.add(machine1);
-        machines.add(MachineImpl.builder()
-                                .fromMachine(machine2)
-                                .setConfig(MachineConfigImpl.builder()
-                                                            .fromConfig(machine2.getConfig())
-                                                            .setDev(false)
-                                                            .build())
-                                .build());
-
-        // when
-        scheduler.scheduleBackup();
-
-        // then
-        // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
-        verify(scheduler, never()).backupWorkspaceInMachine(eq(machine2));
+        verify(scheduler).backupWorkspaceInMachine(eq(machine1));
+        verify(scheduler).backupWorkspaceInMachine(eq(machine2));
+        verify(scheduler).backupWorkspaceInMachine(eq(machine3));
+        verify(scheduler).backupWorkspaceInMachine(eq(machine4));
+        verify(scheduler).backupWorkspaceInMachine(eq(machine5));
     }
 
     @Test
     public void shouldNotBackupMachinesWithNonRunningStatus() throws Exception {
         // given
-        final MachineImpl creatingMachine = new MachineImpl(machine2);
-        creatingMachine.setStatus(MachineStatus.CREATING);
-        machines.add(creatingMachine);
-        final MachineImpl destroyingMachine = new MachineImpl(machine2);
-        destroyingMachine.setStatus(MachineStatus.DESTROYING);
-        machines.add(destroyingMachine);
+        MachineImpl creating = addWorkspace("ws3", "ms3");
+        Instance creatingInstance = mock(Instance.class);
+        when(creating.getStatus()).thenReturn(MachineStatus.CREATING);
+        when(creatingInstance.getNode()).thenReturn(node);
+        when(workspaceRuntimes.getMachine("ws3", "ms3")).thenReturn(creatingInstance);
+
+        MachineImpl destroying = addWorkspace("ws4", "ms4");
+        Instance destroyingInstance = mock(Instance.class);
+        when(destroying.getStatus()).thenReturn(MachineStatus.DESTROYING);
+        when(destroyingInstance.getNode()).thenReturn(node);
+        when(workspaceRuntimes.getMachine("ws4", "ms4")).thenReturn(destroyingInstance);
+
+        when(workspaceRuntimes.getMachine(WORKSPACE_ID_1, "id1")).thenReturn(machineInstance);
+        when(machineInstance.getNode()).thenReturn(node);
+        when(node.getHost()).thenReturn("192.168.0.1");
+        when(node.getProjectsFolder()).thenReturn("/" + WORKSPACE_ID_1);
+        doNothing().when(backupManager).backupWorkspace(anyString(), anyString(), anyString());
+        doCallRealMethod().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         // when
         scheduler.scheduleBackup();
 
         // then
         // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
-        verify(scheduler, timeout(1000).never()).backupWorkspaceInMachine(eq(creatingMachine));
-        verify(scheduler, timeout(1000).never()).backupWorkspaceInMachine(eq(destroyingMachine));
+        verify(backupManager, timeout(1000)).backupWorkspace(eq(WORKSPACE_ID_1), anyString(), anyString());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws3"), anyString(), anyString());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws4"), anyString(), anyString());
     }
 
     @Test
-    public void shouldNotBackupAnythingIfMachinesListRetrievalFails() throws Exception {
+    public void shouldNotBackupAnythingIfWorkspaceRetrievalFails() throws Exception {
         // given
-        when(machineManager.getMachines()).thenThrow(new MachineException(""));
+        when(workspaceRuntimes.get(anyString())).thenThrow(new NotFoundException(""));
 
         // when
         scheduler.scheduleBackup();
 
         // then
-        verify(machineManager).getMachines();
+        verify(workspaceRuntimes).getWorkspaces();
+        verify(workspaceRuntimes, times(2)).get(anyString());
         verify(scheduler, never()).backupWorkspaceInMachine(any(MachineImpl.class));
     }
 
     @Test
     public void shouldNotBackupMachineIfElapsedTimeFromLastSyncTooSmall() throws Exception {
         // given
-        machines.clear();
-        machines.add(machine1);
+        workspaces.clear();
+        MachineImpl machine = addWorkspace("ws3", "ms3");
         scheduler.scheduleBackup();
 
         // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
+        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine));
 
         // when
         // second synchronization
         scheduler.scheduleBackup();
 
-        verify(machineManager, times(2)).getMachines();
-        verify(scheduler, times(2)).isTimeToBackup(machine1.getId());
-        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine1));
+        verify(workspaceRuntimes, times(2)).get(anyString());
+        verify(scheduler, times(2)).isTimeToBackup(machine.getId());
+        verify(scheduler, timeout(2000)).backupWorkspaceInMachine(eq(machine));
     }
 
     @Test
     public void shouldBackupMachineFsIfLastSyncTimeoutIsExpired() throws Exception {
         // given
-        machines.clear();
-        machines.add(machine1);
-        scheduler = spy(new WorkspaceFsBackupScheduler(machineManager, backupManager, 0));
+        workspaces.clear();
+        MachineImpl machine = addWorkspace("ws3", "ms3");
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 0));
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         scheduler.scheduleBackup();
@@ -300,16 +250,16 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(machineManager, times(2)).getMachines();
-        verify(scheduler, timeout(2000).times(2)).backupWorkspaceInMachine(eq(machine1));
+        verify(workspaceRuntimes, times(2)).get(anyString());
+        verify(scheduler, timeout(2000).times(2)).backupWorkspaceInMachine(eq(machine));
     }
 
     @Test
     public void shouldNotBackupMachineFsIfPreviousBackupIsStillRunning() throws Exception {
         // given
-        machines.clear();
-        machines.add(machine1);
-        scheduler = spy(new WorkspaceFsBackupScheduler(machineManager, backupManager, 0));
+        workspaces.clear();
+        MachineImpl machine = addWorkspace("ws3", "ms3");
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 0));
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -325,14 +275,14 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(machineManager, times(2)).getMachines();
-        verify(scheduler, timeout(2000).times(1)).backupWorkspaceInMachine(eq(machine1));
+        verify(workspaceRuntimes, times(2)).get(anyString());
+        verify(scheduler, timeout(2000).times(1)).backupWorkspaceInMachine(eq(machine));
     }
 
     @Test
     public void shouldSkipWorkspaceBackupIfMachineAlreadyStopped() throws Exception {
         // given
-        when(machineManager.getInstance(anyString())).thenThrow(new NotFoundException(""));
+        when(workspaceRuntimes.getMachine(anyString(), anyString())).thenThrow(new NotFoundException(""));
 
         // when
         scheduler.scheduleBackup();

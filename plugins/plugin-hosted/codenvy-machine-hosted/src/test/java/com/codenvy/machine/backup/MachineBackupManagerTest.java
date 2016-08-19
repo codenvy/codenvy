@@ -15,6 +15,7 @@
 package com.codenvy.machine.backup;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -231,7 +232,7 @@ public class MachineBackupManagerTest {
         // start restore process
         execute(() -> backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS));
 
-        voidWaitingAnswer.waitCall(1_000);
+        voidWaitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
         // when
         try {
             // start another restore process
@@ -240,7 +241,7 @@ public class MachineBackupManagerTest {
         } finally {
             // then
             // complete waiting answer
-            voidWaitingAnswer.complete();
+            voidWaitingAnswer.completeAnswer();
             verify(backupManager, timeout(100).times(1)).execute(anyObject(), anyInt());
         }
     }
@@ -260,7 +261,7 @@ public class MachineBackupManagerTest {
         // start restore process
         execute(() -> backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS));
 
-        voidWaitingAnswer.waitCall(1_000);
+        voidWaitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
         try {
             // start another restore process
             backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
@@ -274,7 +275,7 @@ public class MachineBackupManagerTest {
             backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
         } finally {
             // complete waiting answer
-            voidWaitingAnswer.complete();
+            voidWaitingAnswer.completeAnswer();
             verify(backupManager, timeout(100).times(1)).execute(anyObject(), anyInt());
         }
     }
@@ -542,61 +543,5 @@ public class MachineBackupManagerTest {
                 LOG.error(e.getLocalizedMessage(), e);
             }
         });
-    }
-
-    private static class WaitingAnswer<T> implements Answer<T> {
-        private T    result         = null;
-        // wait 1 second by default
-        private long maxWaitingTime = 1_000;
-
-        private volatile boolean isDone   = false;
-        private volatile boolean isCalled = false;
-
-        public WaitingAnswer() {}
-
-        public WaitingAnswer(long maxWaitingTime) {
-            this.maxWaitingTime = maxWaitingTime;
-        }
-
-        public WaitingAnswer(T result) {
-            this.result = result;
-        }
-
-        public WaitingAnswer(T result, long maxWaitingTime) {
-            this.result = result;
-            this.maxWaitingTime = maxWaitingTime;
-        }
-
-        public void complete() {
-            synchronized (this) {
-                isDone = true;
-                notifyAll();
-            }
-        }
-
-        public void waitCall(long milliseconds) throws InterruptedException {
-            long startWaitingTime = System.currentTimeMillis();
-            synchronized (this) {
-                while (!isCalled && System.currentTimeMillis() - startWaitingTime < milliseconds) {
-                    wait(1_000);
-                }
-            }
-        }
-
-        @Override
-        public T answer(InvocationOnMock invocationOnMock) throws Throwable {
-            isCalled = true;
-            // notify if someone is waiting for invocation of answer
-            synchronized (this) {
-                notifyAll();
-            }
-            long startWaitingTime = System.currentTimeMillis();
-            synchronized (this) {
-                while (!isDone && System.currentTimeMillis() - startWaitingTime < maxWaitingTime) {
-                    wait(maxWaitingTime);
-                }
-            }
-            return result;
-        }
     }
 }

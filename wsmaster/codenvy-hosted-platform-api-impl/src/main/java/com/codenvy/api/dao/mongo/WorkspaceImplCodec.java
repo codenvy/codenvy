@@ -102,7 +102,8 @@ public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
                                                           .setEnvironments(environments)
                                                           .build())
                             .setAttributes(documentsListAsMap(attributes))
-                            .setNamespace(document.getString("namespace"))
+                                    //TODO rework with migration tool
+//                            .setNamespace(document.getString("namespace"))
                             .setName(document.getString("name"))
                             .build();
     }

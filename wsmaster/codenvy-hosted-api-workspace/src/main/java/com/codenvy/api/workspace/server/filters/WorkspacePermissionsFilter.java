@@ -36,6 +36,7 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.DELETE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.READ;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.RUN;
+import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 
 /**
  * Restricts access to methods of {@link WorkspaceService} by users' permissions
@@ -88,7 +89,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 key = ((String)arguments[0]);
                 action = DELETE;
                 break;
-            case "createMachine":
+
             case "stop":
             case "startById":
             case "createSnapshot":
@@ -118,6 +119,23 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
             case "updateCommand":
                 key = ((String)arguments[0]);
                 action = CONFIGURE;
+                break;
+
+            // MachineService methods
+            case "startMachine" :
+            case "stopMachine" :
+                key = ((String)arguments[0]);
+                action = RUN;
+                break;
+
+            case "getMachineById":
+            case "getMachines" :
+            case "executeCommandInMachine" :
+            case "getProcesses" :
+            case "stopProcess" :
+            case "getProcessLogs" :
+                key = ((String)arguments[0]);
+                action = USE;
                 break;
 
             default:

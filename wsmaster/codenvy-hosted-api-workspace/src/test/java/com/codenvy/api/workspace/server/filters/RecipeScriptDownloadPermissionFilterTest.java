@@ -17,11 +17,9 @@ package com.codenvy.api.workspace.server.filters;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.workspace.server.RecipeScriptDownloadService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.ide.ext.machine.server.RecipeScriptDownloadService;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
@@ -58,10 +56,6 @@ public class RecipeScriptDownloadPermissionFilterTest {
     @Mock
     private static Subject subject;
     @Mock
-    MachineManager                       manager;
-    @Mock
-    MachineImpl                          machine;
-    @Mock
     RecipeScriptDownloadService          service;
     @InjectMocks
     RecipeScriptDownloadPermissionFilter filter;
@@ -69,16 +63,14 @@ public class RecipeScriptDownloadPermissionFilterTest {
     @Test
     public void shouldCheckPermission() throws Exception {
         when(subject.hasPermission(eq(DOMAIN_ID), eq("machine123"), eq(USE))).thenReturn(true);
-        when(manager.getMachine(eq("machine123"))).thenReturn(machine);
-        when(machine.getWorkspaceId()).thenReturn("workspace123");
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
-                                         .get(SECURE_PATH + "/recipe/script/machine123");
+                                         .get(SECURE_PATH + "/recipe/script/workspace123/machine123");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(service).getRecipeScript(eq("machine123"));
+        verify(service).getRecipeScript(eq("workspace123"), eq("machine123"));
         verify(subject).checkPermission(DOMAIN_ID, "workspace123", USE);
     }
 

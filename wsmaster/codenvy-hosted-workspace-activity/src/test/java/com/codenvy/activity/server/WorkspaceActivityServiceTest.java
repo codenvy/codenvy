@@ -16,6 +16,7 @@ package com.codenvy.activity.server;
 
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -120,7 +121,7 @@ public class WorkspaceActivityServiceTest {
 
         return WorkspaceImpl.builder().setConfig(config)
                                                .generateId()
-                                               .setNamespace(namespace)
+                                               .setAccount(new AccountImpl("accountId", namespace, "test"))
                                                .setStatus(status)
                                                .build();
     }

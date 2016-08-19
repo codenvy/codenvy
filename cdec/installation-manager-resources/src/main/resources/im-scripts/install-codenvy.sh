@@ -292,9 +292,6 @@ doConfigureSystem() {
 
     doEvalWaitReconnection installPackageIfNeed unzip
     validateExitCode $?
-
-    doEvalWaitReconnection installPackageIfNeed net-tools
-    validateExitCode $?
 }
 
 configureProxySettings() {
@@ -892,14 +889,14 @@ doCheckPortRemote() {
     local protocol=$1
     local port=$2
     local host=$3
-    OUTPUT=$(ssh -o LogLevel=quiet -o StrictHostKeyChecking=no -t ${host} "netstat -ano | egrep LISTEN | egrep ${protocol} | egrep ':${host}\s'")
+    OUTPUT=$(ssh -o LogLevel=quiet -o StrictHostKeyChecking=no -t ${host} "ss -ano | egrep LISTEN | egrep ${protocol} | egrep ':${host}\s'")
     echo ${OUTPUT}
 }
 
 doCheckPortLocal() {
     local protocol=$1
     local port=$2
-    OUTPUT=$(netstat -ano | egrep LISTEN | egrep ${protocol} | egrep ":${port}\s")
+    OUTPUT=$(ss -ano | egrep LISTEN | egrep ${protocol} | egrep ":${port}\s")
     echo ${OUTPUT}
 }
 

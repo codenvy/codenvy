@@ -217,9 +217,15 @@ public class JpaIntegrationTckModule extends TckModule {
                                     Collections.emptyList(),
                                     Collections.emptyList(),
                                     Collections.emptyList());
-            manager.persist(new WorkspaceImpl("workspace-0", "test0", config));
-            manager.persist(new WorkspaceImpl("workspace-1", "test1", config));
-            manager.persist(new WorkspaceImpl("workspace-id", "test2", config));
+            final AccountImpl[] accounts = new AccountImpl[] {new AccountImpl("id1", "test0", "test"),
+                                                              new AccountImpl("id1", "test1", "test"),
+                                                              new AccountImpl("id1", "test2", "test")};
+            manager.persist(accounts[0]);
+            manager.persist(accounts[1]);
+            manager.persist(accounts[2]);
+            manager.persist(new WorkspaceImpl("workspace-0", accounts[0], config));
+            manager.persist(new WorkspaceImpl("workspace-1", accounts[1], config));
+            manager.persist(new WorkspaceImpl("workspace-id", accounts[2], config));
             for (SnapshotImpl snapshot : snapshots) {
                 manager.persist(snapshot);
             }

@@ -20,7 +20,6 @@ import com.codenvy.api.dao.mongo.OrganizationMongoDatabaseProvider;
 import com.codenvy.api.factory.FactoryMongoDatabaseProvider;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
-import com.codenvy.api.user.server.dao.AdminUserDao;
 import com.codenvy.api.workspace.server.jpa.OnPremisesWorkspaceJpaModule;
 import com.codenvy.api.workspace.server.jpa.WorkerJpaModule;
 import com.codenvy.auth.aws.ecr.AwsEcrAuthResolver;
@@ -50,11 +49,13 @@ import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
 import org.eclipse.che.api.auth.AuthenticationDao;
+import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
+import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -62,12 +63,10 @@ import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.FactoryService;
 import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.server.recipe.providers.RecipeProvider;
-import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
 import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
@@ -174,7 +173,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         //user-workspace-account
 
 //        bind(WorkspaceDao.class).to(WorkspaceDaoImpl.class);
-//        bind(UserDao.class).to(LdapUserDao.class);
 //        bind(ProfileDao.class).to(LdapProfileDao.class);
 //        bind(AdminUserDao.class).to(AdminUserDaoImpl.class);
 //        bind(PreferenceDao.class).to(com.codenvy.api.dao.mongo.PreferenceDaoImpl.class);
@@ -191,7 +189,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new MachineJpaModule());
         bind(FactoryDao.class).to(JpaFactoryDao.class);
         bind(AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
-        bind(AdminUserDao.class).to(com.codenvy.api.dao.jpa.JpaAdminUserDao.class);
         bind(RecipeLoader.class);
         final Multibinder<String> recipeBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"));
         recipeBinder.addBinding().toProvider(RecipeProvider.class);
@@ -291,7 +288,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new InstrumentationModule());
         bind(org.eclipse.che.api.ssh.server.SshService.class);
-        bind(org.eclipse.che.api.machine.server.MachineService.class);
+        bind(org.eclipse.che.api.environment.server.MachineService.class);
+        bind(org.eclipse.che.api.machine.server.spi.SnapshotDao.class).to(com.codenvy.api.dao.mongo.SnapshotDaoImpl.class);
         bind(com.mongodb.DB.class).annotatedWith(Names.named("mongo.db.machine"))
                                   .toProvider(com.codenvy.api.dao.mongo.MachineMongoDBProvider.class);
 
@@ -308,7 +306,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                           .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
@@ -350,7 +348,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
 
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
                 MapBinder.newMapBinder(binder(),
