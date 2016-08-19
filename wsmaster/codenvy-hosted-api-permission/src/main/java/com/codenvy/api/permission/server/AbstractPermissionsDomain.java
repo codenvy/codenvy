@@ -61,7 +61,6 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
     }
 
     @Override
-
     public Boolean isInstanceRequired() {
         return requiresInstance;
     }

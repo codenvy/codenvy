@@ -88,12 +88,12 @@ public class PermissionsManager {
         }
 
         final AbstractPermissionsDomain permissionsDomain = getDomain(permissions.getDomainId());
-        final AbstractPermissions permissionsInstance = permissionsDomain.createEntity(userId, instanceId, permissions.getActions());
+        final AbstractPermissions permissionsEntity = permissionsDomain.createEntity(userId, instanceId, permissions.getActions());
 
         checkInstanceRequiring(permissionsDomain, instanceId);
 
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
-        final Set<String> unsupportedActions = permissionsInstance.getActions()
+        final Set<String> unsupportedActions = permissionsEntity.getActions()
                                                                   .stream()
                                                                   .filter(action -> !allowedActions.contains(action))
                                                                   .collect(Collectors.toSet());
@@ -103,7 +103,7 @@ public class PermissionsManager {
                                                           .collect(Collectors.joining(", ")));
         }
 
-        permissionsStorage.store(permissionsInstance);
+        permissionsStorage.store(permissionsEntity);
     }
 
     /**
