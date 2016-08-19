@@ -19,13 +19,31 @@ import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 
 
+import org.eclipse.che.api.core.ServerException;
+
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Max Shaposhnik
  */
 public class JpaRecipePermissionsDao extends AbstractPermissionsDao<RecipePermissionsImpl> {
     public JpaRecipePermissionsDao() throws IOException {
-        super(new RecipeDomain(), RecipePermissionsImpl.class,  "");
+        super(new RecipeDomain(), RecipePermissionsImpl.class);
+    }
+
+    @Override
+    public RecipePermissionsImpl get(String userId, String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<RecipePermissionsImpl> getByInstance(String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<RecipePermissionsImpl> getByUser(String userId) throws ServerException {
+        return null;
     }
 }

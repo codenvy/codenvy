@@ -18,7 +18,10 @@ import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackDomain;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 
+import org.eclipse.che.api.core.ServerException;
+
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Max Shaposhnik
@@ -27,6 +30,21 @@ import java.io.IOException;
 public class JpaStackPermissionsDao extends AbstractPermissionsDao<StackPermissionsImpl> {
 
     public JpaStackPermissionsDao() throws IOException {
-        super(new StackDomain(), StackPermissionsImpl.class,  "");
+        super(new StackDomain(), StackPermissionsImpl.class);
+    }
+
+    @Override
+    public StackPermissionsImpl get(String userId, String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<StackPermissionsImpl> getByInstance(String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<StackPermissionsImpl> getByUser(String userId) throws ServerException {
+        return null;
     }
 }

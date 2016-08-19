@@ -55,7 +55,7 @@ public interface WorkerDao {
      * @throws ServerException
      *         when any other error occurs during worker fetching
      */
-    WorkerImpl getWorker(String workspaceId, String userId) throws  ServerException;
+    WorkerImpl getWorker(String workspaceId, String userId) throws  ServerException, NotFoundException;
 
     /**
      * Removes worker

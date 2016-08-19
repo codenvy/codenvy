@@ -16,9 +16,12 @@ package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.SystemDomain;
 
+import org.eclipse.che.api.core.ServerException;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,6 +31,21 @@ import java.util.Set;
 public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemDomain.SystemPermissionsImpl> {
     @Inject
     public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) throws IOException {
-        super(new SystemDomain(allowedActions), SystemDomain.SystemPermissionsImpl.class, "");
+        super(new SystemDomain(allowedActions), SystemDomain.SystemPermissionsImpl.class);
+    }
+
+    @Override
+    public SystemDomain.SystemPermissionsImpl get(String userId, String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<SystemDomain.SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
+        return null;
+    }
+
+    @Override
+    public List<SystemDomain.SystemPermissionsImpl> getByUser(String userId) throws ServerException {
+        return null;
     }
 }

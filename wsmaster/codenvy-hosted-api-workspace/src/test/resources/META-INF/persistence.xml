@@ -19,6 +19,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence persistence_1_0.xsd" version="1.0">
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <class>com.codenvy.api.permission.server.model.impl.AbstractPermissions</class>
         <class>com.codenvy.api.workspace.server.model.impl.WorkerImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl</class>
