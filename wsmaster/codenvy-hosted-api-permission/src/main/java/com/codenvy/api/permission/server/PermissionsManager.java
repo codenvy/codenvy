@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableMap;
@@ -51,13 +51,12 @@ public class PermissionsManager {
         Map<String, PermissionsDao> domainToDao = new HashMap<>();
         Map<String, AbstractPermissionsDomain> domains = new HashMap<>();
         for (PermissionsDao storage : storages) {
-            for (AbstractPermissionsDomain domain : storage.getDomains()) {
-                domains.put(domain.getId(), domain);
-                PermissionsDao oldStorage = domainToDao.put(domain.getId(), storage);
-                if (oldStorage != null) {
-                    throw new ServerException("Permissions Domain '" + domain.getId() + "' should be stored in only one storage. " +
-                                              "Duplicated in " + storage.getClass() + " and " + oldStorage.getClass());
-                }
+            AbstractPermissionsDomain domain = storage.getDomain();
+            domains.put(domain.getId(), domain);
+            PermissionsDao oldStorage = domainToDao.put(domain.getId(), storage);
+            if (oldStorage != null) {
+                throw new ServerException("Permissions Domain '" + domain.getId() + "' should be stored in only one storage. " +
+                                          "Duplicated in " + storage.getClass() + " and " + oldStorage.getClass());
             }
         }
         this.domainToDao = ImmutableMap.copyOf(domainToDao);
@@ -76,7 +75,7 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions storing
      */
-    public void storePermission(PermissionsImpl permissions) throws ServerException, ConflictException, NotFoundException {
+    public void storePermission(AbstractPermissions permissions) throws ServerException, ConflictException, NotFoundException {
         final String domain = permissions.getDomainId();
         final String instance = permissions.getInstanceId();
         final String user = permissions.getUserId();
@@ -120,7 +119,7 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException, ConflictException {
+    public AbstractPermissions get(String user, String domain, String instance) throws ServerException, NotFoundException, ConflictException {
         checkInstanceRequiring(domain, instance);
         return getPermissionsDao(domain).get(user, domain, instance);
     }
@@ -136,7 +135,7 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException, NotFoundException, ConflictException {
+    public List<AbstractPermissions> getByInstance(String domain, String instance) throws ServerException, NotFoundException, ConflictException {
         checkInstanceRequiring(domain, instance);
         return getPermissionsDao(domain).getByInstance(domain, instance);
     }

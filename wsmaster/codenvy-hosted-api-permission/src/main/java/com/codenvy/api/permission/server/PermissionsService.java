@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.codenvy.api.permission.shared.dto.DomainDto;
@@ -105,7 +105,7 @@ public class PermissionsService extends Service {
         checkArgument(!isNullOrEmpty(permissionsDto.getDomainId()), "Domain required");
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
-        permissionsManager.storePermission(new PermissionsImpl(permissionsDto));
+        permissionsManager.storePermission(new AbstractPermissions(permissionsDto));
     }
 
     @GET

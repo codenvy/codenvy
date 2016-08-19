@@ -16,7 +16,7 @@ package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.PermissionsService;
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -90,7 +90,7 @@ public class GetPermissionsFilterTest {
 
     @Test
     public void shouldDoChainIfUserHasAnyPermissionsForInstance() throws Exception {
-        when(permissionsManager.get("user123", "test", "test123")).thenReturn(new PermissionsImpl("user123",
+        when(permissionsManager.get("user123", "test", "test123")).thenReturn(new AbstractPermissions("user123",
                                                                                                   "test",
                                                                                                   "test123",
                                                                                                   singletonList("read")));

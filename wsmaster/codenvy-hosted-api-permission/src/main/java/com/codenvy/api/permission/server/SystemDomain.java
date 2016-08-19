@@ -14,7 +14,8 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.permission.shared.model.Permissions;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -50,19 +51,24 @@ public class SystemDomain extends AbstractPermissionsDomain {
               false);
     }
 
+    @Override
+    public Permissions createEntity(String userId, String instanceId, List<String> allowedActions) {
+        return new SystemAbstractPermissions(userId, allowedActions);
+    }
+
 
     @Entity(name = "SystemPermissions")
     @DiscriminatorValue(DOMAIN_ID)
-    public class SystemPermissionsImpl extends PermissionsImpl {
-        public SystemPermissionsImpl() {
+    public class SystemAbstractPermissions extends AbstractPermissions {
+        public SystemAbstractPermissions() {
 
         }
 
-        public SystemPermissionsImpl(SystemPermissionsImpl systemPermissions) {
+        public SystemAbstractPermissions(SystemAbstractPermissions systemPermissions) {
             super(systemPermissions.getUserId(), DOMAIN_ID, null, systemPermissions.getActions());
         }
 
-        public SystemPermissionsImpl(String userId, List<String> actions) {
+        public SystemAbstractPermissions(String userId, List<String> actions) {
             super(userId, DOMAIN_ID, null, actions);
         }
     }

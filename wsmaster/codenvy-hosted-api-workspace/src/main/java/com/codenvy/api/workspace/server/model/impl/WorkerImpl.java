@@ -14,7 +14,8 @@
  */
 package com.codenvy.api.workspace.server.model.impl;
 
-import com.codenvy.api.workspace.server.jpa.WorkerPrimaryKey;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.workspace.server.model.Worker;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -37,38 +38,10 @@ import java.util.Objects;
 /**
  * @author Sergii Leschenko
  */
-@Entity(name = "Worker")
-@NamedQueries(
-        {
-                @NamedQuery(name = "Worker.getByWorkspaceId",
-                            query = "SELECT worker " +
-                                    "FROM Worker worker " +
-                                    "WHERE worker.workspaceId = :workspaceId "),
-                @NamedQuery(name = "Worker.getByUserId",
-                            query = "SELECT worker " +
-                                    "FROM Worker worker " +
-                                    "WHERE worker.userId = :userId ")
-        }
-)
-@IdClass(WorkerPrimaryKey.class)
-public class WorkerImpl implements Worker {
-    @Id
+public class WorkerImpl extends AbstractPermissions implements Worker {
     private String userId;
 
-    @OneToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
-    private UserImpl user;
-
-    @Id
     private String workspaceId;
-
-    @OneToOne
-    @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
-    private WorkspaceImpl workspace;
-
-    @ElementCollection
-    @CollectionTable(indexes = @Index(columnList = "actions"))
-    private List<String> actions;
 
     public WorkerImpl() {
     }
@@ -85,6 +58,16 @@ public class WorkerImpl implements Worker {
     @Override
     public String getUserId() {
         return userId;
+    }
+
+    @Override
+    public String getInstanceId() {
+        return workspaceId;
+    }
+
+    @Override
+    public String getDomainId() {
+        return WorkspaceDomain.DOMAIN_ID;
     }
 
     @Override

@@ -15,14 +15,17 @@
 package com.codenvy.api.workspace.server.stack;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 /**
  * Domain for storing stacks' permissions
  *
  * @author Sergii Leschenko
  */
-public class StackDomain extends AbstractPermissionsDomain {
+public class StackDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {
     public static final String DOMAIN_ID = "stack";
 
     public static final String READ   = "read";
@@ -35,5 +38,10 @@ public class StackDomain extends AbstractPermissionsDomain {
                                           SEARCH,
                                           UPDATE,
                                           DELETE));
+    }
+
+    @Override
+    public StackPermissionsImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+        return new StackPermissionsImpl(userId, instanceId, allowedActions);
     }
 }

@@ -14,7 +14,8 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableList;
 
@@ -30,7 +31,7 @@ import java.util.Set;
  *
  * @author Sergii Leschenko
  */
-public abstract class AbstractPermissionsDomain implements PermissionsDomain {
+public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> implements PermissionsDomain {
     public static final String SET_PERMISSIONS  = "setPermissions";
 
     private final String       id;
@@ -60,9 +61,12 @@ public abstract class AbstractPermissionsDomain implements PermissionsDomain {
     }
 
     @Override
+
     public Boolean isInstanceRequired() {
         return requiresInstance;
     }
+
+    public abstract T createEntity(String userId, String instanceId, List<String> allowedActions);
 
     @Override
     public boolean equals(Object obj) {

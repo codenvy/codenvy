@@ -15,7 +15,7 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
@@ -57,19 +57,19 @@ public class WorkspacePermissionDao implements PermissionsDao {
     }
 
     @Override
-    public void store(PermissionsImpl permissions) throws ServerException {
+    public void store(AbstractPermissions permissions) throws ServerException {
         workerDao.store(new WorkerImpl(permissions.getInstanceId(),
                                        permissions.getUserId(),
                                        permissions.getActions()));
     }
 
     @Override
-    public PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException {
+    public AbstractPermissions get(String user, String domain, String instance) throws ServerException, NotFoundException {
         return toPermission(workerDao.getWorker(instance, user));
     }
 
     @Override
-    public List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException {
+    public List<AbstractPermissions> getByInstance(String domain, String instance) throws ServerException {
         return toPermissions(workerDao.getWorkers(instance));
     }
 
@@ -89,14 +89,14 @@ public class WorkspacePermissionDao implements PermissionsDao {
         workerDao.removeWorker(instance, user);
     }
 
-    private PermissionsImpl toPermission(WorkerImpl worker) {
-        return new PermissionsImpl(worker.getUserId(),
+    private AbstractPermissions toPermission(WorkerImpl worker) {
+        return new AbstractPermissions(worker.getUserId(),
                                    WorkspaceDomain.DOMAIN_ID,
                                    worker.getWorkspaceId(),
                                    worker.getActions());
     }
 
-    private List<PermissionsImpl> toPermissions(List<WorkerImpl> workers) {
+    private List<AbstractPermissions> toPermissions(List<WorkerImpl> workers) {
         return workers.stream()
                       .map(this::toPermission)
                       .collect(Collectors.toList());

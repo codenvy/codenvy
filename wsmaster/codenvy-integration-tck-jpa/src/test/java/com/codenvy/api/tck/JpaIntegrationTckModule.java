@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.tck;
 
-import com.codenvy.api.workspace.server.jpa.JpaWorkerDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.google.inject.Singleton;

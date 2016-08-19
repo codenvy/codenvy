@@ -15,7 +15,7 @@
 package com.codenvy.api.workspace.server.recipe;
 
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -30,27 +30,23 @@ import java.util.List;
  * @author Max Shaposhnik
  *
  */
-@Entity(name = "RecipePermissions")
-@DiscriminatorValue(RecipeDomain.DOMAIN_ID)
-public class RecipePermissionsImpl extends PermissionsImpl {
-
-    @OneToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
-    private UserImpl user;
-
-    @OneToOne
-    @JoinColumn(name = "instanceId", insertable = false, updatable = false)
-    private RecipeImpl recipe;
+public class RecipePermissionsImpl extends AbstractPermissions {
+    private String recipeId;
 
     public RecipePermissionsImpl() {
 
     }
 
-    public RecipePermissionsImpl(RecipePermissionsImpl recipePermissions) {
-        super(recipePermissions.getUserId(), RecipeDomain.DOMAIN_ID, recipePermissions.getInstanceId(), recipePermissions.getActions());
+    public RecipePermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
     }
 
-    public RecipePermissionsImpl(String userId, String instanceId, List<String> actions) {
-        super(userId, RecipeDomain.DOMAIN_ID, instanceId, actions);
+    @Override
+    public String getInstanceId() {
+        return recipeId;
+    }
+
+    @Override
+    public String getDomainId() {
+        return RecipeDomain.DOMAIN_ID;
     }
 }

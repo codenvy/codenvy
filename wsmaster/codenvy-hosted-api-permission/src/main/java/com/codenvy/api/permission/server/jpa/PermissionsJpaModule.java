@@ -24,7 +24,7 @@ import com.google.inject.AbstractModule;
 public class PermissionsJpaModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(PermissionsDao.class).to(JpaCommonPermissionsDao.class);
-        bind(JpaCommonPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
+        bind(PermissionsDao.class).to(AbstractPermissionsDao.class);
+        bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
     }
 }

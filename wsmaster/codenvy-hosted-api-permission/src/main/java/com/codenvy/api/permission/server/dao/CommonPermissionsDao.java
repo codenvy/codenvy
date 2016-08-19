@@ -15,7 +15,7 @@
 package com.codenvy.api.permission.server.dao;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableMap;
@@ -76,7 +76,7 @@ import static com.mongodb.client.model.Filters.in;
  */
 @Singleton
 public class CommonPermissionsDao implements PermissionsDao {
-    private final MongoCollection<PermissionsImpl> collection;
+    private final MongoCollection<AbstractPermissions> collection;
 
     private final Map<String, AbstractPermissionsDomain> idToDomain;
 
@@ -84,7 +84,7 @@ public class CommonPermissionsDao implements PermissionsDao {
     public CommonPermissionsDao(@Named("mongo.db.organization") MongoDatabase database,
                                 @Named("organization.storage.db.permission.collection") String collectionName,
                                 @CommonDomains Set<AbstractPermissionsDomain> permissionsDomains) throws IOException {
-        collection = database.getCollection(collectionName, PermissionsImpl.class);
+        collection = database.getCollection(collectionName, AbstractPermissions.class);
         collection.createIndex(new Document("user", 1).append("domain", 1).append("instance", 1), new IndexOptions().unique(true));
 
         final ImmutableMap.Builder<String, AbstractPermissionsDomain> mapBuilder = ImmutableMap.builder();
@@ -99,7 +99,7 @@ public class CommonPermissionsDao implements PermissionsDao {
     }
 
     @Override
-    public void store(PermissionsImpl permissions) throws ServerException {
+    public void store(AbstractPermissions permissions) throws ServerException {
         try {
             collection.replaceOne(and(eq("user", permissions.getUserId()),
                                       eq("domain", permissions.getDomainId()),
@@ -127,8 +127,8 @@ public class CommonPermissionsDao implements PermissionsDao {
     }
 
     @Override
-    public PermissionsImpl get(String user, String domain, String instance) throws ServerException, NotFoundException {
-        PermissionsImpl found;
+    public AbstractPermissions get(String user, String domain, String instance) throws ServerException, NotFoundException {
+        AbstractPermissions found;
         try {
             found = collection.find(and(eq("user", user),
                                         eq("domain", domain),
@@ -147,7 +147,7 @@ public class CommonPermissionsDao implements PermissionsDao {
     }
 
     @Override
-    public List<PermissionsImpl> getByInstance(String domain, String instance) throws ServerException {
+    public List<AbstractPermissions> getByInstance(String domain, String instance) throws ServerException {
         try {
             return collection.find(and(eq("domain", domain),
                                        eq("instance", instance)))

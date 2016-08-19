@@ -15,7 +15,7 @@
 package com.codenvy.api.permission.server.dao;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.github.fakemongo.Fongo;
 import com.google.common.collect.ImmutableSet;
@@ -57,8 +57,8 @@ import static org.testng.Assert.assertEquals;
 @Listeners(MockitoTestNGListener.class)
 public class CommonPermissionStorageTest {
 
-    private MongoCollection<PermissionsImpl> collection;
-    private CommonPermissionsDao             permissionStorage;
+    private MongoCollection<AbstractPermissions> collection;
+    private CommonPermissionsDao                 permissionStorage;
 
     @BeforeMethod
     public void setUpDb() throws Exception {
@@ -67,13 +67,13 @@ public class CommonPermissionStorageTest {
         final MongoDatabase database = fongo.getDatabase("permissions")
                                             .withCodecRegistry(fromRegistries(defaultRegistry,
                                                                               fromCodecs(new PermissionsImplCodec(defaultRegistry))));
-        collection = database.getCollection("permissions", PermissionsImpl.class);
+        collection = database.getCollection("permissions", AbstractPermissions.class);
         permissionStorage = new CommonPermissionsDao(database, "permissions", ImmutableSet.of(new TestDomain()));
     }
 
     @Test
     public void shouldStorePermissions() throws Exception {
-        final PermissionsImpl permissions = createPermissions();
+        final AbstractPermissions permissions = createPermissions();
 
         permissionStorage.store(permissions);
 
@@ -86,12 +86,12 @@ public class CommonPermissionStorageTest {
 
     @Test
     public void shouldUpdatePermissionsWhenItHasAlreadyExisted() throws Exception {
-        PermissionsImpl oldPermissions = createPermissions();
+        AbstractPermissions oldPermissions = createPermissions();
         permissionStorage.store(oldPermissions);
 
-        PermissionsImpl newPermissions =
-                new PermissionsImpl(oldPermissions.getUserId(), oldPermissions.getDomainId(), oldPermissions.getInstanceId(),
-                                    singletonList("read"));
+        AbstractPermissions newPermissions =
+                new AbstractPermissions(oldPermissions.getUserId(), oldPermissions.getDomainId(), oldPermissions.getInstanceId(),
+                                        singletonList("read"));
         permissionStorage.store(newPermissions);
 
         final Permissions result = collection.find(and(eq("user", newPermissions.getUserId()),
@@ -115,7 +115,7 @@ public class CommonPermissionStorageTest {
 
     @Test
     public void shouldRemovePermissions() throws Exception {
-        final PermissionsImpl permissions = createPermissions();
+        final AbstractPermissions permissions = createPermissions();
         collection.insertOne(permissions);
 
         permissionStorage.remove(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
@@ -141,11 +141,11 @@ public class CommonPermissionStorageTest {
 
     @Test
     public void shouldBeAbleToGetPermissionsByInstance() throws Exception {
-        final PermissionsImpl permissions = createPermissions();
+        final AbstractPermissions permissions = createPermissions();
         collection.insertOne(permissions);
-        collection.insertOne(new PermissionsImpl("user", "domain", "otherTest", singletonList("read")));
+        collection.insertOne(new AbstractPermissions("user", "domain", "otherTest", singletonList("read")));
 
-        final List<PermissionsImpl> result = permissionStorage.getByInstance(permissions.getDomainId(), permissions.getInstanceId());
+        final List<AbstractPermissions> result = permissionStorage.getByInstance(permissions.getDomainId(), permissions.getInstanceId());
 
         assertEquals(result.size(), 1);
         assertEquals(result.get(0), permissions);
@@ -160,7 +160,7 @@ public class CommonPermissionStorageTest {
 
     @Test
     public void shouldBeAbleToGetPermissions() throws Exception {
-        final PermissionsImpl permissions = createPermissions();
+        final AbstractPermissions permissions = createPermissions();
         collection.insertOne(permissions);
 
         final Permissions result = permissionStorage.get(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId());
@@ -173,7 +173,7 @@ public class CommonPermissionStorageTest {
     public void shouldThrowNotFoundExceptionWhenThereIsNotAnyPermissionsForGivenUserAndDomainAndInstance() throws Exception {
         final Permissions result = permissionStorage.get("user", "domain", "instance");
 
-        assertEquals(result, new PermissionsImpl("user", "domain", "instance", emptyList()));
+        assertEquals(result, new AbstractPermissions("user", "domain", "instance", emptyList()));
     }
 
     @Test(expectedExceptions = ServerException.class)
@@ -185,7 +185,7 @@ public class CommonPermissionStorageTest {
 
     @Test
     public void shouldBeAbleToCheckPermissionExistence() throws Exception {
-        final PermissionsImpl permissions = createPermissions();
+        final AbstractPermissions permissions = createPermissions();
         collection.insertOne(permissions);
 
         final boolean readPermissionExisted =
@@ -204,8 +204,8 @@ public class CommonPermissionStorageTest {
         new CommonPermissionsDao(db, "permissions", ImmutableSet.of(new TestDomain())).exists("user", "domain", "test123", "read");
     }
 
-    private PermissionsImpl createPermissions() {
-        return new PermissionsImpl("user",
+    private AbstractPermissions createPermissions() {
+        return new AbstractPermissions("user",
                                    "test",
                                    "test123",
                                    Arrays.asList("read", "write", "use", "delete"));
@@ -217,13 +217,13 @@ public class CommonPermissionStorageTest {
         }
     }
 
-    private MongoDatabase mockDatabase(Consumer<MongoCollection<PermissionsImpl>> consumer) {
+    private MongoDatabase mockDatabase(Consumer<MongoCollection<AbstractPermissions>> consumer) {
         @SuppressWarnings("unchecked")
-        final MongoCollection<PermissionsImpl> collection = mock(MongoCollection.class);
+        final MongoCollection<AbstractPermissions> collection = mock(MongoCollection.class);
         consumer.accept(collection);
 
         final MongoDatabase database = mock(MongoDatabase.class);
-        when(database.getCollection("permissions", PermissionsImpl.class)).thenReturn(collection);
+        when(database.getCollection("permissions", AbstractPermissions.class)).thenReturn(collection);
 
         return database;
     }

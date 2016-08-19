@@ -15,14 +15,17 @@
 package com.codenvy.api.workspace.server.recipe;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 /**
  * Domain for storing recipes' permissions
  *
  * @author Sergii Leschenko
  */
-public class RecipeDomain extends AbstractPermissionsDomain {
+public class RecipeDomain extends AbstractPermissionsDomain<RecipePermissionsImpl> {
     public static final String DOMAIN_ID = "recipe";
 
     public static final String READ   = "read";
@@ -35,5 +38,10 @@ public class RecipeDomain extends AbstractPermissionsDomain {
                                           SEARCH,
                                           UPDATE,
                                           DELETE));
+    }
+
+    @Override
+    public RecipePermissionsImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+        return new RecipePermissionsImpl(userId, instanceId, allowedActions);
     }
 }

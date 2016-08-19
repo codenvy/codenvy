@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server.dao;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
@@ -27,11 +27,11 @@ import org.bson.codecs.configuration.CodecRegistry;
 import java.util.List;
 
 /**
- * Encodes & decodes {@link PermissionsImpl}.
+ * Encodes & decodes {@link AbstractPermissions}.
  *
  * @author Sergii Leschenko
  */
-public class PermissionsImplCodec implements Codec<PermissionsImpl> {
+public class PermissionsImplCodec implements Codec<AbstractPermissions> {
 
     private Codec<Document> codec;
 
@@ -40,20 +40,20 @@ public class PermissionsImplCodec implements Codec<PermissionsImpl> {
     }
 
     @Override
-    public PermissionsImpl decode(BsonReader reader, DecoderContext decoderContext) {
+    public AbstractPermissions decode(BsonReader reader, DecoderContext decoderContext) {
         final Document document = codec.decode(reader, decoderContext);
 
         @SuppressWarnings("unchecked") // 'actions' fields is aways list
         final List<String> actions = (List<String>)document.get("actions");
 
-        return new PermissionsImpl(document.getString("user"),
+        return new AbstractPermissions(document.getString("user"),
                                    document.getString("domain"),
                                    document.getString("instance"),
                                    actions);
     }
 
     @Override
-    public void encode(BsonWriter writer, PermissionsImpl permissions, EncoderContext encoderContext) {
+    public void encode(BsonWriter writer, AbstractPermissions permissions, EncoderContext encoderContext) {
         final Document document = new Document().append("user", permissions.getUserId())
                                                 .append("domain", permissions.getDomainId())
                                                 .append("instance", permissions.getInstanceId())
@@ -63,7 +63,7 @@ public class PermissionsImplCodec implements Codec<PermissionsImpl> {
     }
 
     @Override
-    public Class<PermissionsImpl> getEncoderClass() {
-        return PermissionsImpl.class;
+    public Class<AbstractPermissions> getEncoderClass() {
+        return AbstractPermissions.class;
     }
 }

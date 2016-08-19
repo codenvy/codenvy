@@ -20,7 +20,7 @@ import com.codenvy.api.permission.server.dao.PermissionsImplCodec;
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -59,7 +59,7 @@ public class PermissionsModule extends AbstractModule {
         binder.addBinding().toInstance(new CodecProvider() {
             @Override
             public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
-                if (clazz == PermissionsImpl.class) {
+                if (clazz == AbstractPermissions.class) {
                     @SuppressWarnings("unchecked")
                     final Codec<T> codec = (Codec<T>)new PermissionsImplCodec(registry);
                     return codec;

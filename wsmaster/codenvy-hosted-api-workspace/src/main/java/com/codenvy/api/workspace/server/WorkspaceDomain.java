@@ -15,14 +15,19 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.shared.model.Permissions;
+import com.codenvy.api.workspace.server.model.Worker;
+import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 /**
  * Domain for storing workspaces' permissions
  *
  * @author Sergii Leschenko
  */
-public class WorkspaceDomain extends AbstractPermissionsDomain {
+public class WorkspaceDomain extends AbstractPermissionsDomain<WorkerImpl> {
     public static final String READ      = "read";
     public static final String RUN       = "run";
     public static final String USE       = "use";
@@ -37,5 +42,10 @@ public class WorkspaceDomain extends AbstractPermissionsDomain {
                                           USE,
                                           CONFIGURE,
                                           DELETE));
+    }
+
+    @Override
+    public WorkerImpl createEntity(String userId, String instanceId, List<String> allowedActions) {
+        return new WorkerImpl(instanceId, userId, allowedActions);
     }
 }

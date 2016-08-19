@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.workspace.server.stack;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
@@ -30,20 +30,22 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
  * @author Max Shaposhnik
  */
 
-@Entity(name = "StackPermissions")
-@DiscriminatorValue(StackDomain.DOMAIN_ID)
-public class StackPermissionsImpl extends PermissionsImpl {
+public class StackPermissionsImpl extends AbstractPermissions {
 
-    @OneToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
-    private UserImpl user;
+    private String stackId;
 
-    @OneToOne
-    @JoinColumn(name = "instanceId", insertable = false, updatable = false)
-    private StackImpl stack;
+    public StackPermissionsImpl() {
 
-    public  StackPermissionsImpl() {
+    }
 
+    @Override
+    public String getInstanceId() {
+        return stackId;
+    }
+
+    @Override
+    public String getDomainId() {
+        return StackDomain.DOMAIN_ID;
     }
 
     public StackPermissionsImpl(StackPermissionsImpl stackPermissions) {

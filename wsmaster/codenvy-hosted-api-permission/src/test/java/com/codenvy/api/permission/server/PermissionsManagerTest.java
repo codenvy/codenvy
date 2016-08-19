@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.model.impl.PermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
@@ -75,7 +75,7 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldBeAbleToStorePermissions() throws Exception {
-        final PermissionsImpl permissions = new PermissionsImpl("user", "test", "test123", singletonList(SET_PERMISSIONS));
+        final AbstractPermissions permissions = new AbstractPermissions("user", "test", "test123", singletonList(SET_PERMISSIONS));
 
         permissionsManager.storePermission(permissions);
 
@@ -87,18 +87,18 @@ public class PermissionsManagerTest {
     public void shouldNotStorePermissionsWhenItRemoveLastSetPermissions() throws Exception {
         when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
         when(permissionsDao.getByInstance("test", "test123"))
-                .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
+                .thenReturn(singletonList(new AbstractPermissions("user", "test", "test123", singletonList("delete"))));
 
-        permissionsManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
+        permissionsManager.storePermission(new AbstractPermissions("user", "test", "test123", singletonList("delete")));
     }
 
     @Test
     public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAll() throws Exception {
         when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
         when(permissionsDao.getByInstance("test", "test123"))
-                .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
+                .thenReturn(singletonList(new AbstractPermissions("user", "test", "test123", singletonList("delete"))));
 
-        permissionsManager.storePermission(new PermissionsImpl("user", "test", "test123", singletonList("delete")));
+        permissionsManager.storePermission(new AbstractPermissions("user", "test", "test123", singletonList("delete")));
 
         verify(permissionsDao, never()).getByInstance(anyString(), anyString());
     }
@@ -115,7 +115,7 @@ public class PermissionsManagerTest {
     public void shouldNotRemovePermissionsWhenItContainsLastSetPermissionsAction() throws Exception {
         when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(true);
         when(permissionsDao.getByInstance("test", "test123"))
-                .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
+                .thenReturn(singletonList(new AbstractPermissions("user", "test", "test123", singletonList("delete"))));
 
         permissionsManager.remove("user", "test", "test123");
     }
@@ -124,7 +124,7 @@ public class PermissionsManagerTest {
     public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAllOnRemove() throws Exception {
         when(permissionsDao.exists("user", "test", "test123", SET_PERMISSIONS)).thenReturn(false);
         when(permissionsDao.getByInstance("test", "test123"))
-                .thenReturn(singletonList(new PermissionsImpl("user", "test", "test123", singletonList("delete"))));
+                .thenReturn(singletonList(new AbstractPermissions("user", "test", "test123", singletonList("delete"))));
 
         permissionsManager.remove("user", "test", "test123");
 
@@ -133,7 +133,7 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldBeAbleToGetPermissionsByUserAndDomainAndInstance() throws Exception {
-        final PermissionsImpl permissions = new PermissionsImpl("user", "test", "test123", singletonList("read"));
+        final AbstractPermissions permissions = new AbstractPermissions("user", "test", "test123", singletonList("read"));
         when(permissionsDao.get("user", "test", "test123")).thenReturn(permissions);
 
         final Permissions fetchedPermissions = permissionsManager.get("user", "test", "test123");
@@ -143,12 +143,12 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldBeAbleToGetPermissionsByInstance() throws Exception {
-        final PermissionsImpl firstPermissions = new PermissionsImpl("user", "test", "test123", singletonList("read"));
-        final PermissionsImpl secondPermissions = new PermissionsImpl("user1", "test", "test123", singletonList("read"));
+        final AbstractPermissions firstPermissions = new AbstractPermissions("user", "test", "test123", singletonList("read"));
+        final AbstractPermissions secondPermissions = new AbstractPermissions("user1", "test", "test123", singletonList("read"));
 
         when(permissionsDao.getByInstance("test", "test123")).thenReturn(Arrays.asList(firstPermissions, secondPermissions));
 
-        final List<PermissionsImpl> fetchedPermissions = permissionsManager.getByInstance("test", "test123");
+        final List<AbstractPermissions> fetchedPermissions = permissionsManager.getByInstance("test", "test123");
 
         assertEquals(fetchedPermissions.size(), 2);
         assertTrue(fetchedPermissions.contains(firstPermissions));
