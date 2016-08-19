@@ -16,15 +16,8 @@ package com.codenvy.api.workspace.server.stack;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import java.util.List;
 
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 
 /**
  * @author Max Shaposhnik
@@ -38,6 +31,16 @@ public class StackPermissionsImpl extends AbstractPermissions {
 
     }
 
+    public StackPermissionsImpl(StackPermissionsImpl stackPermissions) {
+        super(stackPermissions.getUserId(), stackPermissions.getActions());
+        this.stackId = stackPermissions.getInstanceId();
+    }
+
+    public StackPermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
+        super(userId, allowedActions);
+        this.stackId = instanceId;
+    }
+
     @Override
     public String getInstanceId() {
         return stackId;
@@ -46,13 +49,5 @@ public class StackPermissionsImpl extends AbstractPermissions {
     @Override
     public String getDomainId() {
         return StackDomain.DOMAIN_ID;
-    }
-
-    public StackPermissionsImpl(StackPermissionsImpl stackPermissions) {
-        super(stackPermissions.getUserId(), StackDomain.DOMAIN_ID, stackPermissions.getInstanceId(), stackPermissions.getActions());
-    }
-
-    public StackPermissionsImpl(String userId, String instanceId, List<String> actions) {
-        super(userId, StackDomain.DOMAIN_ID, instanceId, actions);
     }
 }

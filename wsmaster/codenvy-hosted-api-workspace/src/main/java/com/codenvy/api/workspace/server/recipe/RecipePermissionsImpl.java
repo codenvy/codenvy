@@ -17,13 +17,6 @@ package com.codenvy.api.workspace.server.recipe;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import java.util.List;
 
 /**
@@ -38,6 +31,8 @@ public class RecipePermissionsImpl extends AbstractPermissions {
     }
 
     public RecipePermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
+        super(userId, allowedActions);
+        this.recipeId = instanceId;
     }
 
     @Override

@@ -35,6 +35,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
@@ -88,22 +90,22 @@ public class GetPermissionsFilterTest {
         verifyZeroInteractions(permissionsService);
     }
 
-//    @Test
-//    public void shouldDoChainIfUserHasAnyPermissionsForInstance() throws Exception {
-//        when(permissionsManager.get("user123", "test", "test123")).thenReturn(new AbstractPermissions("user123",
-//                                                                                                  "test",
-//                                                                                                  "test123",
-//                                                                                                  singletonList("read")));
-//
-//        final Response response = given().auth()
-//                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                         .contentType("application/json")
-//                                         .when()
-//                                         .get(SECURE_PATH + "/permissions/test/all?instance=test123");
-//
-//        assertEquals(response.getStatusCode(), 200);
-//        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"));
-//    }
+    @Test
+    public void shouldDoChainIfUserHasAnyPermissionsForInstance() throws Exception {
+        when(permissionsManager.get("user123", "test", "test123")).thenReturn(new TestPermissions("user123",
+                                                                                                  "test",
+                                                                                                  "test123",
+                                                                                                  singletonList("read")));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/permissions/test/all?instance=test123");
+
+        assertEquals(response.getStatusCode(), 200);
+        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"));
+    }
 
     private static String unwrapError(Response response) {
         return unwrapDto(response, ServiceError.class).getMessage();
@@ -117,6 +119,28 @@ public class GetPermissionsFilterTest {
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext.getCurrent().setSubject(subject);
+        }
+    }
+
+    private class TestPermissions extends AbstractPermissions {
+
+        String domainId;
+        String instanceId;
+
+        public TestPermissions(String userId, String domainId, String instanceId, List<String> allowedActions) {
+            super(userId, allowedActions);
+            this.domainId = domainId;
+            this.instanceId = instanceId;
+        }
+
+        @Override
+        public String getInstanceId() {
+            return instanceId;
+        }
+
+        @Override
+        public String getDomainId() {
+            return domainId;
         }
     }
 }

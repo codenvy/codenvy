@@ -15,12 +15,9 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-import com.codenvy.api.permission.shared.model.Permissions;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,7 +60,7 @@ public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemP
         }
 
         public SystemPermissionsImpl(String userId, List<String> actions) {
-            super(userId, DOMAIN_ID, null, actions);
+            super(userId, actions);
         }
 
         @Override

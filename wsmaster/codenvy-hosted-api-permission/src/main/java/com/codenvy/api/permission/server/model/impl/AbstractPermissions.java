@@ -36,10 +36,10 @@ public abstract class AbstractPermissions implements Permissions {
     }
 
     public AbstractPermissions(Permissions permissions) {
-        this(permissions.getUserId(), permissions.getDomainId(), permissions.getInstanceId(), permissions.getActions());
+        this(permissions.getUserId(), permissions.getActions());
     }
 
-    public AbstractPermissions(String userId, String domainId, String instanceId, List<String> actions) {
+    public AbstractPermissions(String userId, List<String> actions) {
         this.userId = userId;
         this.actions = new ArrayList<>(actions);
     }
