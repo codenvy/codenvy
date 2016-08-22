@@ -28,7 +28,6 @@ import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
 import com.codenvy.api.user.server.dao.AdminUserDao;
 import com.codenvy.api.workspace.server.dao.WorkerDao;
-import com.codenvy.auth.aws.ecr.AwsEcrAuthResolver;
 import com.codenvy.auth.sso.client.ServerClient;
 import com.codenvy.auth.sso.client.TokenHandler;
 import com.codenvy.auth.sso.client.filter.ConjunctionRequestFilter;
@@ -45,15 +44,12 @@ import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolver;
 import com.google.inject.AbstractModule;
-import com.google.inject.Key;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
@@ -295,52 +291,15 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new ScheduleModule());
 
-        bind(org.eclipse.che.plugin.docker.client.DockerConnector.class).to(com.codenvy.swarm.client.SwarmDockerConnector.class);
-        bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
-                .to(AwsEcrAuthResolver.class);
-
-        bind(String.class).annotatedWith(Names.named("machine.docker.machine_env"))
-                          .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
-
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
-
-        install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
+        install(new com.codenvy.MachineHostedModule());
 
         install(new com.codenvy.api.permission.server.PermissionsModule());
         install(new com.codenvy.api.workspace.server.WorkspaceApiModule());
 
-        install(new FactoryModuleBuilder()
-                        .implement(org.eclipse.che.api.machine.server.spi.Instance.class,
-                                   org.eclipse.che.plugin.docker.machine.DockerInstance.class)
-                        .implement(org.eclipse.che.api.machine.server.spi.InstanceProcess.class,
-                                   org.eclipse.che.plugin.docker.machine.DockerProcess.class)
-                        .implement(org.eclipse.che.plugin.docker.machine.node.DockerNode.class,
-                                   com.codenvy.machine.RemoteDockerNode.class)
-                        .implement(org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo.class,
-                                   com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
-                        .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
-
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
 
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
-
         bind(com.codenvy.machine.backup.WorkspaceFsBackupScheduler.class).asEagerSingleton();
-
-        bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint"))
-                          .to(Key.get(String.class, Names.named("api.endpoint")));
-
-//        install(new com.codenvy.router.MachineRouterModule());
-
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
-
-        install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
-        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
-                Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
-        machineImageProviderMultibinder.addBinding()
-                                       .to(com.codenvy.machine.HostedDockerInstanceProvider.class);
-        bind(WsAgentLauncher.class).to(com.codenvy.machine.launcher.WsAgentWithAuthLauncherImpl.class);
 
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
