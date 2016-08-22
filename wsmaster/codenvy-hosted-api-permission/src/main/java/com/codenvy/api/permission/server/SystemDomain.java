@@ -18,6 +18,9 @@ import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,6 +57,15 @@ public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemP
     }
 
 
+    @Entity(name = "SystemPermissions")
+    @NamedQueries(
+            {
+                    @NamedQuery(name = "SystemPermissions.getByUserId",
+                                query = "SELECT recipe " +
+                                        "FROM RecipePermissions recipe " +
+                                        "WHERE recipe.userId = :userId ")
+            }
+    )
     public class SystemPermissionsImpl extends AbstractPermissions {
         public SystemPermissionsImpl() {
 

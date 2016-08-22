@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.SystemDomain;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
@@ -23,6 +24,9 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Max Shaposhnik
@@ -35,17 +39,29 @@ public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemDomain
     }
 
     @Override
-    public SystemDomain.SystemPermissionsImpl get(String userId, String instanceId) throws ServerException {
-        return null;
+    public SystemDomain.SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
+        List<SystemDomain.SystemPermissionsImpl> existed = getByUser(userId);
+        if (existed.isEmpty()) {
+            throw new NotFoundException(format("System permissions for user '%s' not found", userId));
+        }
+        return existed.get(0);
     }
 
     @Override
     public List<SystemDomain.SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
-        return null;
+        throw new ServerException("This operation is not supported for system permissions.");
     }
 
     @Override
     public List<SystemDomain.SystemPermissionsImpl> getByUser(String userId) throws ServerException {
-        return null;
+        requireNonNull(userId, "User identifier required");
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("SystemPermissions.getByUserId", SystemDomain.SystemPermissionsImpl.class)
+                                  .setParameter("userId", userId)
+                                  .getResultList();
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 }

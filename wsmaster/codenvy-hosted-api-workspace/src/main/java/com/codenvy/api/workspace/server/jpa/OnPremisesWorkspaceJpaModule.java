@@ -14,7 +14,14 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.workspace.server.recipe.RecipeDomain;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
+import com.codenvy.api.workspace.server.stack.StackDomain;
+import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 
@@ -25,5 +32,11 @@ public class OnPremisesWorkspaceJpaModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(JpaWorkspaceDao.class).to(OnPremisesJpaWorkspaceDao.class);
+
+        bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {}).to(StackDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {}).to(RecipeDomain.class);
+
+        bind(new TypeLiteral<PermissionsDao<RecipePermissionsImpl>>() {}).to(JpaRecipePermissionsDao.class);
+        bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {}).to(JpaStackPermissionsDao.class);
     }
 }
