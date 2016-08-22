@@ -51,7 +51,6 @@ import java.util.Objects;
                                     "AND worker.userId = :userId")
         }
 )
-
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "workspaceId"}))
 public class WorkerImpl extends AbstractPermissions implements Worker {
 

@@ -14,36 +14,78 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
-import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
+import com.google.inject.persist.Transactional;
 
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Max Shaposhnik
  */
+@Singleton
 public class JpaRecipePermissionsDao extends AbstractPermissionsDao<RecipePermissionsImpl> {
-    public JpaRecipePermissionsDao() throws IOException {
-        super(new RecipeDomain(), RecipePermissionsImpl.class);
+
+    @Inject
+    public JpaRecipePermissionsDao(AbstractPermissionsDomain<RecipePermissionsImpl> domain) throws IOException {
+        super(domain, RecipePermissionsImpl.class);
     }
 
     @Override
-    public RecipePermissionsImpl get(String userId, String instanceId) throws ServerException {
-        return null;
+    @Transactional
+    public RecipePermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
+        requireNonNull(instanceId, "Stack identifier required");
+        requireNonNull(userId, "User identifier required");
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByUserAndRecipeId", RecipePermissionsImpl.class)
+                                  .setParameter("recipeId", instanceId)
+                                  .setParameter("userId", userId)
+                                  .getSingleResult();
+        } catch (NoResultException e) {
+            throw new NotFoundException(format("Permissions on recipe '%s' of user '%s' was not found.", instanceId, userId));
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
+    @Transactional
     public List<RecipePermissionsImpl> getByInstance(String instanceId) throws ServerException {
-        return null;
+        requireNonNull(instanceId, "Stack identifier required");
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByRecipeId", RecipePermissionsImpl.class)
+                                  .setParameter("recipeId", instanceId)
+                                  .getResultList();
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
+    @Transactional
     public List<RecipePermissionsImpl> getByUser(String userId) throws ServerException {
-        return null;
+        requireNonNull(userId, "User identifier required");
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByUserId", RecipePermissionsImpl.class)
+                                  .setParameter("userId", userId)
+                                  .getResultList();
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 }

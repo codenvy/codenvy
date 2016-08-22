@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
 import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
@@ -23,6 +24,8 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
@@ -34,11 +37,12 @@ import static java.util.Objects.requireNonNull;
  * @author Max Shaposhnik
  *
  */
+@Singleton
 public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements WorkerDao
 {
-
-    public JpaWorkerDao() throws IOException {
-        super(new WorkspaceDomain(), WorkerImpl.class);
+    @Inject
+    public JpaWorkerDao(AbstractPermissionsDomain<WorkerImpl> supportedDomain) throws IOException {
+        super(supportedDomain, WorkerImpl.class);
     }
 
     @Override

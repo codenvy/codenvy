@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.dao.CommonDomains;
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
@@ -40,10 +39,6 @@ public class PermissionsModule extends AbstractModule {
                                  String.class,
                                  Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
 
-        final Multibinder<AbstractPermissionsDomain> permissionsDomainMultibinder = Multibinder.newSetBinder(binder(),
-                                                                                                             AbstractPermissionsDomain.class,
-                                                                                                             CommonDomains.class);
-        permissionsDomainMultibinder.addBinding().to(SystemDomain.class);
 
         Multibinder<AbstractPermissionsDao> storages = Multibinder.newSetBinder(binder(),
                                                                         AbstractPermissionsDao.class);

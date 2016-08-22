@@ -28,12 +28,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Function;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -82,6 +79,9 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
     @Override
     @Transactional
     public boolean exists(String userId, String instanceId, String action) throws ServerException {
+        requireNonNull(instanceId, "Instance identifier required");
+        requireNonNull(userId, "User identifier required");
+        requireNonNull(action, "Action name required");
         T permissions;
         try {
             permissions = get(userId, instanceId);

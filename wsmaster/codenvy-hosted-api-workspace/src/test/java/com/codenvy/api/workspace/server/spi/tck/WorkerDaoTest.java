@@ -14,6 +14,8 @@
  */
 package com.codenvy.api.workspace.server.spi.tck;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 
@@ -193,5 +195,16 @@ public class WorkerDaoTest {
     @Test(expectedExceptions = ServerException.class)
     public void shouldThrowNotFoundExceptionOnRemoveIfWorkerWithSuchUserIdDoesNotExist() throws Exception {
         workerDao.removeWorker("ws1", "unexisted_user");
+    }
+
+    public static class TestDomain extends AbstractPermissionsDomain<WorkerImpl> {
+        public TestDomain() {
+            super("workspace", Arrays.asList("read", "write", "use", "delete"));
+        }
+
+        @Override
+        protected WorkerImpl doCreateInstance(String userId, String instanceId, List allowedActions) {
+            return null;
+        }
     }
 }

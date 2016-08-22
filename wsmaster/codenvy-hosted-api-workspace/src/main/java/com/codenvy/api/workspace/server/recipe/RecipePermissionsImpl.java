@@ -17,14 +17,49 @@ package com.codenvy.api.workspace.server.recipe;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Max Shaposhnik
  *
  */
+@Entity(name = "RecipePermissions")
+@NamedQueries(
+        {
+                @NamedQuery(name = "RecipePermissions.getByRecipeId",
+                            query = "SELECT recipe " +
+                                    "FROM RecipePermissions recipe " +
+                                    "WHERE recipe.recipeId = :recipeId "),
+                @NamedQuery(name = "RecipePermissions.getByUserId",
+                            query = "SELECT recipe " +
+                                    "FROM RecipePermissions recipe " +
+                                    "WHERE recipe.userId = :userId "),
+                @NamedQuery(name = "RecipePermissions.getByUserAndRecipeId",
+                            query = "SELECT recipe " +
+                                    "FROM RecipePermissions recipe " +
+                                    "WHERE recipe.recipeId = :recipeId " +
+                                    "AND recipe.userId = :userId")
+        }
+)
+
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "recipeId"}))
 public class RecipePermissionsImpl extends AbstractPermissions {
+
     private String recipeId;
+
+    @OneToOne
+    @JoinColumn(name = "recipeId", insertable = false, updatable = false)
+    private RecipeImpl recipe;
 
     public RecipePermissionsImpl() {
 
@@ -43,5 +78,33 @@ public class RecipePermissionsImpl extends AbstractPermissions {
     @Override
     public String getDomainId() {
         return RecipeDomain.DOMAIN_ID;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof RecipePermissionsImpl)) return false;
+        final RecipePermissionsImpl other = (RecipePermissionsImpl)obj;
+        return Objects.equals(userId, other.userId) &&
+               Objects.equals(recipeId, other.recipeId) &&
+               actions.equals(other.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(userId);
+        hash = 31 * hash + Objects.hashCode(recipeId);
+        hash = 31 * hash + actions.hashCode();
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "RecipePermissionsImpl{" +
+               "userId='" + userId + '\'' +
+               ", recipeId='" + recipeId + '\'' +
+               ", actions=" + actions +
+               '}';
     }
 }

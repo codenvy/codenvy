@@ -16,16 +16,50 @@ package com.codenvy.api.workspace.server.stack;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
  * @author Max Shaposhnik
  */
 
+@Entity(name = "StackPermissions")
+@NamedQueries(
+        {
+                @NamedQuery(name = "StackPermissions.getByStackId",
+                            query = "SELECT stack " +
+                                    "FROM StackPermissions stack " +
+                                    "WHERE stack.stackId = :stackId "),
+                @NamedQuery(name = "StackPermissions.getByUserId",
+                            query = "SELECT stack " +
+                                    "FROM StackPermissions stack " +
+                                    "WHERE stack.userId = :userId "),
+                @NamedQuery(name = "StackPermissions.getByUserAndStackId",
+                            query = "SELECT stack " +
+                                    "FROM StackPermissions stack " +
+                                    "WHERE stack.stackId = :stackId " +
+                                    "AND stack.userId = :userId")
+        }
+)
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "stackId"}))
 public class StackPermissionsImpl extends AbstractPermissions {
 
     private String stackId;
+
+    @OneToOne
+    @JoinColumn(name = "stackId", insertable = false, updatable = false)
+    private StackImpl stack;
+
 
     public StackPermissionsImpl() {
 
@@ -49,5 +83,34 @@ public class StackPermissionsImpl extends AbstractPermissions {
     @Override
     public String getDomainId() {
         return StackDomain.DOMAIN_ID;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof StackPermissionsImpl)) return false;
+        final StackPermissionsImpl other = (StackPermissionsImpl)obj;
+        return Objects.equals(userId, other.userId) &&
+               Objects.equals(stackId, other.stackId) &&
+               actions.equals(other.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(userId);
+        hash = 31 * hash + Objects.hashCode(stackId);
+        hash = 31 * hash + actions.hashCode();
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "StackPermissionsImpl{" +
+               "userId='" + userId + '\'' +
+               ", stackId='" + stackId + '\'' +
+               ", actions=" + actions +
+               '}';
     }
 }
