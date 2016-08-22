@@ -15,6 +15,7 @@
 package com.codenvy.api;
 
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.user.server.AdminUserCreator;
 import com.codenvy.api.user.server.AdminUserService;
 import com.codenvy.api.user.server.AdminUserServicePermissionsFilter;
 import com.codenvy.api.user.server.UserProfileServicePermissionsFilter;
@@ -42,5 +43,6 @@ public class AdminApiModule extends AbstractModule {
         bind(AdminUserServicePermissionsFilter.class);
         bind(UserProfileServicePermissionsFilter.class);
         bind(UserServicePermissionsFilter.class);
+        bind(AdminUserCreator.class);
     }
 }

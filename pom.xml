@@ -53,7 +53,6 @@
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>
         <com.dumbster.version>1.6</com.dumbster.version>
         <com.github.cloudfoundry-community.nats-client.version>0.5.1</com.github.cloudfoundry-community.nats-client.version>
-        <com.github.fakemongo.version>2.0.5</com.github.fakemongo.version>
         <com.license4j.version>4.6.0</com.license4j.version>
         <com.nimbusds.version>3.0</com.nimbusds.version>
         <commons-configuration.version>1.10</commons-configuration.version>
@@ -638,11 +637,6 @@
                 <groupId>com.github.cloudfoundry-community</groupId>
                 <artifactId>nats-client</artifactId>
                 <version>${com.github.cloudfoundry-community.nats-client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.fakemongo</groupId>
-                <artifactId>fongo</artifactId>
-                <version>${com.github.fakemongo.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>

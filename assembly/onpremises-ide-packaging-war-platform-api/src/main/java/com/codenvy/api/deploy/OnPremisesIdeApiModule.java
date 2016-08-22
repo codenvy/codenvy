@@ -15,9 +15,6 @@
 package com.codenvy.api.deploy;
 
 import com.codenvy.api.AdminApiModule;
-import com.codenvy.api.dao.mongo.MachineMongoDatabaseProvider;
-import com.codenvy.api.dao.mongo.OrganizationMongoDatabaseProvider;
-import com.codenvy.api.factory.FactoryMongoDatabaseProvider;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
 import com.codenvy.api.workspace.server.jpa.OnPremisesWorkspaceJpaModule;
@@ -45,9 +42,10 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
-import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
+import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationService;
@@ -143,17 +141,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
 
-        //factory
-        bind(com.mongodb.DB.class).annotatedWith(Names.named("mongo.db.organization"))
-                                  .toProvider(com.codenvy.api.dao.mongo.OrganizationMongoDBProvider.class);
-
-        bind(MongoDatabase.class).annotatedWith(Names.named("mongo.db.organization"))
-                                 .toProvider(OrganizationMongoDatabaseProvider.class);
-
-        bind(MongoDatabase.class).annotatedWith(Names.named("mongo.db.factory"))
-                                 .toProvider(FactoryMongoDatabaseProvider.class);
-
-
         bind(FactoryAcceptValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
         bind(FactoryCreateValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
         bind(FactoryEditValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
@@ -170,14 +157,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.project.server.handlers.ProjectHandler.class);
 
 
-        //user-workspace-account
-
-//        bind(WorkspaceDao.class).to(WorkspaceDaoImpl.class);
-//        bind(ProfileDao.class).to(LdapProfileDao.class);
-//        bind(AdminUserDao.class).to(AdminUserDaoImpl.class);
-//        bind(PreferenceDao.class).to(com.codenvy.api.dao.mongo.PreferenceDaoImpl.class);
-//        bind(RecipeDao.class).to(com.codenvy.api.dao.mongo.recipe.RecipeDaoImpl.class);
-
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
@@ -187,6 +166,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new WorkerJpaModule());
         install(new OnPremisesWorkspaceJpaModule());
         install(new MachineJpaModule());
+        bind(AccountDao.class).to(JpaAccountDao.class);
         bind(FactoryDao.class).to(JpaFactoryDao.class);
         bind(AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
         bind(RecipeLoader.class);
@@ -196,7 +176,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bind(StackService.class);
         bind(StackLoader.class);
-//        bind(StackDao.class).to(com.codenvy.api.dao.mongo.stack.StackDaoImpl.class);
 
         bind(WorkspaceValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
         bind(WorkspaceManager.class).to(com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.class);
@@ -289,12 +268,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new InstrumentationModule());
         bind(org.eclipse.che.api.ssh.server.SshService.class);
         bind(org.eclipse.che.api.environment.server.MachineService.class);
-        bind(org.eclipse.che.api.machine.server.spi.SnapshotDao.class).to(com.codenvy.api.dao.mongo.SnapshotDaoImpl.class);
-        bind(com.mongodb.DB.class).annotatedWith(Names.named("mongo.db.machine"))
-                                  .toProvider(com.codenvy.api.dao.mongo.MachineMongoDBProvider.class);
-
-        bind(MongoDatabase.class).annotatedWith(Names.named("mongo.db.machine"))
-                                 .toProvider(MachineMongoDatabaseProvider.class);
 
         install(new ScheduleModule());
 

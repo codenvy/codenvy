@@ -15,6 +15,10 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.dao.CommonDomains;
+<<<<<<< HEAD
+=======
+import com.codenvy.api.permission.server.dao.PermissionsStorage;
+>>>>>>> jpa-integration
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
