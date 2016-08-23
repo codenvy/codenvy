@@ -28,9 +28,9 @@ import java.util.List;
 @NamedQueries(
         {
                 @NamedQuery(name = "SystemPermissions.getByUserId",
-                            query = "SELECT recipe " +
-                                    "FROM RecipePermissions recipe " +
-                                    "WHERE recipe.userId = :userId ")
+                            query = "SELECT permissions " +
+                                    "FROM SystemPermissions permissions " +
+                                    "WHERE permissions.userId = :userId ")
         }
 )
 public class SystemPermissionsImpl extends AbstractPermissions {

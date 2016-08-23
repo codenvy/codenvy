@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
+import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -30,6 +31,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * JPA based implementation of system permissions DAO.
+ *
  * @author Max Shaposhnik
  */
 public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermissionsImpl> {
@@ -39,6 +42,7 @@ public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermis
     }
 
     @Override
+    @Transactional
     public SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         List<SystemPermissionsImpl> existed = getByUser(userId);
         if (existed.isEmpty()) {
@@ -48,11 +52,13 @@ public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermis
     }
 
     @Override
+    @Transactional
     public List<SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
         throw new ServerException("This operation is not supported for system permissions.");
     }
 
     @Override
+    @Transactional
     public List<SystemPermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
         try {
