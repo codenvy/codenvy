@@ -16,14 +16,20 @@ package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
-import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
@@ -40,13 +46,16 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements WorkerDao
 {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaWorkerDao.class);
+
     @Inject
     public JpaWorkerDao(AbstractPermissionsDomain<WorkerImpl> supportedDomain) throws IOException {
         super(supportedDomain, WorkerImpl.class);
     }
 
     @Override
-    public WorkerImpl getWorker(String workspaceId, String userId) throws  ServerException, NotFoundException {
+    public WorkerImpl getWorker(String workspaceId, String userId) throws ServerException, NotFoundException {
         return get(userId, workspaceId);
     }
 
@@ -113,6 +122,35 @@ public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements 
                                   .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Singleton
+    public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber implements EventSubscriber<BeforeWorkspaceRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        private WorkerDao    workerDao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeWorkspaceRemovedEvent event) {
+            try {
+                for (WorkerImpl worker : workerDao.getWorkers(event.getWorkspace().getId())) {
+                    workerDao.removeWorker(worker.getWorkspaceId(), worker.getUserId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove workers before workspace '%s' is removed", event.getWorkspace().getId()), x);
+            }
         }
     }
 }

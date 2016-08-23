@@ -25,6 +25,8 @@ public class WorkerJpaModule extends AbstractModule {
 
     @Override
     protected void configure() {
-      bind(WorkerDao.class).to(JpaWorkerDao.class);
+
+        bind(WorkerDao.class).to(JpaWorkerDao.class);
+        bind(JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
     }
 }

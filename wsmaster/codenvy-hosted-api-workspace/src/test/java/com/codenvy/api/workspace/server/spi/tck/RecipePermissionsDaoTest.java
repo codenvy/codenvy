@@ -36,6 +36,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -159,7 +160,7 @@ public class RecipePermissionsDaoTest {
         final List<RecipePermissionsImpl> result = dao.getByInstance(permissions[2].getInstanceId());
 
         assertEquals(2, result.size());
-        assertEquals(permissions[2],result.get(0));
+        assertTrue(result.contains(permissions[2]) && result.contains(permissions[3]));
     }
 
 
