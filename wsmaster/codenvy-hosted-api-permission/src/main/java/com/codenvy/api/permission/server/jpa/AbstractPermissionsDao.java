@@ -21,9 +21,14 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -31,6 +36,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -121,4 +127,35 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
             throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
+
+
+    @Singleton
+    public static class RemovePermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        private AbstractPermissionsDao<AbstractPermissions>    dao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
+                    dao.remove(permissions.getInstanceId(), permissions.getUserId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove workers before user '%s' is removed", event.getUser().getId()), x);
+            }
+        }
+    }
+
 }

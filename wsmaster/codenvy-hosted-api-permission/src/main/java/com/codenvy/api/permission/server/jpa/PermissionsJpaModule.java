@@ -30,5 +30,6 @@ public class PermissionsJpaModule extends AbstractModule {
 
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemDomain.SystemPermissionsImpl>>() {}).to(SystemDomain.class);
         bind(new TypeLiteral<PermissionsDao<SystemDomain.SystemPermissionsImpl>>() {}).to(JpaSystemPermissionsDao.class);
+        bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
     }
 }
