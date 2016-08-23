@@ -156,7 +156,7 @@ public class PermissionsManager {
     public void remove(String userId, String domainId, String instanceId) throws ConflictException, ServerException, NotFoundException {
         final PermissionsDao permissionsStorage = getPermissionsDao(domainId);
         if (userHasLastSetPermissions(permissionsStorage, userId, instanceId)) {
-            throw new ConflictException("Can't remove permissions because there is not any another userId with permission 'setPermissions'");
+            throw new ConflictException("Can't remove permissions because there is not any another user with permission 'setPermissions'");
         }
         permissionsStorage.remove(userId, instanceId);
     }
