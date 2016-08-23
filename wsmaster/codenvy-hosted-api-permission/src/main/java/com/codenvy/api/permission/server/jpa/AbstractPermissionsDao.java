@@ -68,15 +68,12 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
     }
 
     @Override
-    @Transactional
     public abstract T get(String userId, String instanceId) throws ServerException, NotFoundException;
 
     @Override
-    @Transactional
     public abstract List<T> getByInstance(String instanceId) throws ServerException;
 
     @Override
-    @Transactional
     public abstract List<T> getByUser(String userId) throws ServerException;
 
     @Override

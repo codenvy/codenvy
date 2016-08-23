@@ -68,7 +68,6 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
 
     /*
     * Creates new instance of the entity related to this domain.
-    *
     */
     public T newInstance(String userId, String instanceId, List<String> allowedActions) throws ConflictException{
         if (isInstanceRequired() && instanceId == null) {

@@ -56,7 +56,4 @@ public class SystemDomain extends AbstractPermissionsDomain<SystemPermissionsImp
     public SystemPermissionsImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
         return new SystemPermissionsImpl(userId, allowedActions);
     }
-
-
-
 }
