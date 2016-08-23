@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.inject.AbstractModule;
@@ -33,8 +34,8 @@ public class PermissionsJpaModule extends AbstractModule {
 
         bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
 
-        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                        PermissionsDao.class);
+        Multibinder<PermissionsDao<? extends AbstractPermissions>> storages = Multibinder.newSetBinder(binder(),
+                                                                        new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {});
         storages.addBinding().to(JpaSystemPermissionsDao.class);
     }
 }

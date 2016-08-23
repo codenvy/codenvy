@@ -131,7 +131,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         @Inject
         private EventService eventService;
         @Inject
-        Set<PermissionsDao> storages;
+        Set<PermissionsDao<? extends AbstractPermissions>> storages;
 
         @PostConstruct
         public void subscribe() {
