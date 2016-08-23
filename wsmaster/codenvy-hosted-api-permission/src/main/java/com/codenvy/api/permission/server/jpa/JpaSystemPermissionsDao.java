@@ -15,6 +15,7 @@
 package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -30,17 +31,16 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * @author Max Shaposhnik
- *
  */
-public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemDomain.SystemPermissionsImpl> {
+public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermissionsImpl> {
     @Inject
     public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) throws IOException {
-        super(new SystemDomain(allowedActions), SystemDomain.SystemPermissionsImpl.class);
+        super(new SystemDomain(allowedActions));
     }
 
     @Override
-    public SystemDomain.SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
-        List<SystemDomain.SystemPermissionsImpl> existed = getByUser(userId);
+    public SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
+        List<SystemPermissionsImpl> existed = getByUser(userId);
         if (existed.isEmpty()) {
             throw new NotFoundException(format("System permissions for user '%s' not found", userId));
         }
@@ -48,16 +48,16 @@ public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemDomain
     }
 
     @Override
-    public List<SystemDomain.SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
+    public List<SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
         throw new ServerException("This operation is not supported for system permissions.");
     }
 
     @Override
-    public List<SystemDomain.SystemPermissionsImpl> getByUser(String userId) throws ServerException {
+    public List<SystemPermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
         try {
             return managerProvider.get()
-                                  .createNamedQuery("SystemPermissions.getByUserId", SystemDomain.SystemPermissionsImpl.class)
+                                  .createNamedQuery("SystemPermissions.getByUserId", SystemPermissionsImpl.class)
                                   .setParameter("userId", userId)
                                   .getResultList();
         } catch (RuntimeException e) {

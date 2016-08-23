@@ -41,7 +41,6 @@ import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author Max Shaposhnik
- *
  */
 @Guice(moduleFactory = TckModuleFactory.class)
 @Test(suiteName = "StackPermissionsDaoTck")

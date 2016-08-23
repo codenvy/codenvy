@@ -33,6 +33,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * JPA based implementation of recipe permissions DAO.
  * @author Max Shaposhnik
  */
 @Singleton
@@ -40,7 +41,7 @@ public class JpaRecipePermissionsDao extends AbstractPermissionsDao<RecipePermis
 
     @Inject
     public JpaRecipePermissionsDao(AbstractPermissionsDomain<RecipePermissionsImpl> domain) throws IOException {
-        super(domain, RecipePermissionsImpl.class);
+        super(domain);
     }
 
     @Override

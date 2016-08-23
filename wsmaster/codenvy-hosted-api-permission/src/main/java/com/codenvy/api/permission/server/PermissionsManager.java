@@ -91,9 +91,9 @@ public class PermissionsManager {
 
         final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
         final Set<String> unsupportedActions = permissionsEntity.getActions()
-                                                                  .stream()
-                                                                  .filter(action -> !allowedActions.contains(action))
-                                                                  .collect(Collectors.toSet());
+                                                                .stream()
+                                                                .filter(action -> !allowedActions.contains(action))
+                                                                .collect(Collectors.toSet());
         if (!unsupportedActions.isEmpty()) {
             throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support next action(s): " +
                                         unsupportedActions.stream()
@@ -118,7 +118,8 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public AbstractPermissions get(String userId, String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
+    public AbstractPermissions get(String userId, String domainId, String instanceId)
+            throws ServerException, NotFoundException, ConflictException {
         return getPermissionsDao(domainId).get(userId, instanceId);
     }
 
@@ -133,7 +134,8 @@ public class PermissionsManager {
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    public List<AbstractPermissions> getByInstance(String domainId, String instanceId) throws ServerException, NotFoundException, ConflictException {
+    public List<AbstractPermissions> getByInstance(String domainId, String instanceId)
+            throws ServerException, NotFoundException, ConflictException {
         return getPermissionsDao(domainId).getByInstance(instanceId);
     }
 
@@ -177,8 +179,8 @@ public class PermissionsManager {
      *         when any other error occurs during permission existence checking
      */
     public boolean exists(String userId, String domainId, String instanceId, String action) throws ServerException,
-                                                                                             NotFoundException,
-                                                                                             ConflictException {
+                                                                                                   NotFoundException,
+                                                                                                   ConflictException {
         return getDomain(domainId).getAllowedActions().contains(action)
                && getPermissionsDao(domainId).exists(userId, instanceId, action);
     }

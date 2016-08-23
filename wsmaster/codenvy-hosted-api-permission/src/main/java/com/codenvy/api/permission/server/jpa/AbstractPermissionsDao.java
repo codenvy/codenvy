@@ -45,7 +45,6 @@ import static java.util.Objects.requireNonNull;
  */
 public abstract class AbstractPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPermissionsDao.class);
-    private final Class<T>                     clazz;
     private final AbstractPermissionsDomain<T> supportedDomain;
 
 
@@ -53,10 +52,8 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
     protected Provider<EntityManager> managerProvider;
 
     @Inject
-    public AbstractPermissionsDao(AbstractPermissionsDomain<T> supportedDomain,
-                                  Class<T> clazz) throws IOException {
+    public AbstractPermissionsDao(AbstractPermissionsDomain<T> supportedDomain) throws IOException {
         this.supportedDomain = supportedDomain;
-        this.clazz = clazz;
     }
 
     @Override
@@ -149,7 +146,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         @Override
         public void onEvent(BeforeUserRemovedEvent event) {
             try {
-                for (PermissionsDao<? extends AbstractPermissions> dao : storages) {
+                for (PermissionsDao <? extends AbstractPermissions> dao : storages) {
                     for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
                         dao.remove(permissions.getUserId(), permissions.getInstanceId());
                     }

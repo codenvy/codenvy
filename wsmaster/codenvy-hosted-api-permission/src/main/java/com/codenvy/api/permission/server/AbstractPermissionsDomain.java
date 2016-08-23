@@ -66,6 +66,10 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
         return requiresInstance;
     }
 
+    /*
+    * Creates new instance of the entity related to this domain.
+    *
+    */
     public T newInstance(String userId, String instanceId, List<String> allowedActions) throws ConflictException{
         if (isInstanceRequired() && instanceId == null) {
             throw new ConflictException("Given domain requires non nullable value for instanceId");

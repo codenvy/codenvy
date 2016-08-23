@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -23,13 +24,12 @@ import com.google.inject.multibindings.Multibinder;
 
 /**
  * @author Max Shaposhnik
- *
  */
 public class PermissionsJpaModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        bind(new TypeLiteral<AbstractPermissionsDomain<SystemDomain.SystemPermissionsImpl>>() {}).to(SystemDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemDomain.class);
 
         bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
 

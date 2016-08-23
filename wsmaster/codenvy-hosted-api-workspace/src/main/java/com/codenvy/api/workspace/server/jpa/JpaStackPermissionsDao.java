@@ -32,15 +32,16 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * @author Max Shaposhnik
+ * JPA based implementation of stack permissions DAO.
  *
+ * @author Max Shaposhnik
  */
 @Singleton
 public class JpaStackPermissionsDao extends AbstractPermissionsDao<StackPermissionsImpl> {
 
     @Inject
     public JpaStackPermissionsDao(AbstractPermissionsDomain<StackPermissionsImpl> domain) throws IOException {
-        super(domain, StackPermissionsImpl.class);
+        super(domain);
     }
 
     @Override

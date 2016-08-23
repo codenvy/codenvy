@@ -15,6 +15,7 @@
 package com.codenvy.api.permission.server;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,7 +38,7 @@ import java.util.stream.Stream;
  *
  * @author Sergii Leschenko
  */
-public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemPermissionsImpl> {
+public class SystemDomain extends AbstractPermissionsDomain<SystemPermissionsImpl> {
     public static final String SYSTEM_DOMAIN_ACTIONS = "system.domain.actions";
     public static final String DOMAIN_ID             = "system";
     public static final String MANAGE_CODENVY_ACTION = "manageCodenvy";
@@ -57,32 +58,5 @@ public class SystemDomain extends AbstractPermissionsDomain<SystemDomain.SystemP
     }
 
 
-    @Entity(name = "SystemPermissions")
-    @NamedQueries(
-            {
-                    @NamedQuery(name = "SystemPermissions.getByUserId",
-                                query = "SELECT recipe " +
-                                        "FROM RecipePermissions recipe " +
-                                        "WHERE recipe.userId = :userId ")
-            }
-    )
-    public class SystemPermissionsImpl extends AbstractPermissions {
-        public SystemPermissionsImpl() {
 
-        }
-
-        public SystemPermissionsImpl(String userId, List<String> actions) {
-            super(userId, actions);
-        }
-
-        @Override
-        public String getInstanceId() {
-            return null;
-        }
-
-        @Override
-        public String getDomainId() {
-            return DOMAIN_ID;
-        }
-    }
 }

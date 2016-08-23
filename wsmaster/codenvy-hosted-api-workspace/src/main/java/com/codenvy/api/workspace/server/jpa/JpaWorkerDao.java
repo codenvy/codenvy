@@ -40,8 +40,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * @author Max Shaposhnik
+ * JPA based implementation of worker DAO.
  *
+ * @author Max Shaposhnik
  */
 @Singleton
 public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements WorkerDao
@@ -51,7 +52,7 @@ public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements 
 
     @Inject
     public JpaWorkerDao(AbstractPermissionsDomain<WorkerImpl> supportedDomain) throws IOException {
-        super(supportedDomain, WorkerImpl.class);
+        super(supportedDomain);
     }
 
     @Override

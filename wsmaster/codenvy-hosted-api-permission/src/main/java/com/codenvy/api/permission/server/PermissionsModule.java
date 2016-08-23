@@ -40,8 +40,5 @@ public class PermissionsModule extends AbstractModule {
         Multibinder.newSetBinder(binder(),
                                  String.class,
                                  Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
-
-
-
     }
 }

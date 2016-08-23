@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author Max Shaposhnik
  *
+ *
+ * @author Max Shaposhnik
  */
 @Entity(name = "RecipePermissions")
 @NamedQueries(
