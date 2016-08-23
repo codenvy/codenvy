@@ -296,6 +296,12 @@
                 <type>war</type>
             </dependency>
             <dependency>
+                <groupId>com.codenvy.onpremises</groupId>
+                <artifactId>onpremises-ide-packaging-zip-terminal</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.onpremises.wsagent</groupId>
                 <artifactId>codenvy-hosted-machine-authentication-agent</artifactId>
                 <version>${project.version}</version>

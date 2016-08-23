@@ -15,11 +15,9 @@
 package com.codenvy.machine.backup;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterMethod;
@@ -31,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +45,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,11 +82,10 @@ public class MachineBackupManagerTest {
     private static final String[] RESTORE_WORKSPACE_COMMAND             =
             {RESTORE_SCRIPT, ABSOLUTE_PATH_TO_WORKSPACE_DIR, RESTORE_SCRIPT, RESTORE_SCRIPT, USER_ID, USER_GID};
 
-    private static final int FAKE_BACKUP_TIME_MS = 2000;
-
     @Mock
     private WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder;
 
+    @Captor
     private ArgumentCaptor<String[]> cmdCaptor;
 
     private ExecutorService executor;
@@ -107,15 +104,7 @@ public class MachineBackupManagerTest {
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
 
-        cmdCaptor = ArgumentCaptor.forClass(String[].class);
-
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                sleep(FAKE_BACKUP_TIME_MS);
-                return null;
-            }
-        }).when(backupManager).execute(anyObject(), anyInt());
+        doNothing().when(backupManager).execute(anyObject(), anyInt());
 
         executor = Executors.newFixedThreadPool(5);
     }
@@ -126,8 +115,7 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldBeAbleBackupWorkspace() throws ServerException, InterruptedException, IOException, TimeoutException {
-        doNothing().when(backupManager).execute(anyObject(), anyInt());
+    public void shouldBeAbleBackupWorkspace() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
 
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
@@ -139,12 +127,7 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldNotBackupWorkspaceAfterBackupWithCleanup() throws InterruptedException,
-                                                                        IOException,
-                                                                        TimeoutException,
-                                                                        ServerException {
-        doNothing().when(backupManager).execute(anyObject(), anyInt());
-
+    public void shouldNotBackupWorkspaceAfterBackupWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
         backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
 
@@ -154,9 +137,7 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldBeAbleBackupWorkspaceWithCleanup() throws ServerException, InterruptedException, IOException, TimeoutException {
-        doNothing().when(backupManager).execute(anyObject(), anyInt());
-
+    public void shouldBeAbleBackupWorkspaceWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
         backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
 
@@ -179,44 +160,34 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldIgnoreNewBackupRequestIfPreviousOneHasBeenJustStarted() throws InterruptedException, IOException, TimeoutException {
+    public void shouldIgnoreNewBackupRequestIfPreviousOneHasBeenJustStarted() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        executeNewBackup();
+        // when
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
 
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(anyObject(), anyInt());
     }
 
     @Test
-    public void shouldIgnoreNewBackupRequestIfOldHasNotFinishedYet() throws InterruptedException, IOException, TimeoutException {
+    public void shouldIgnoreAllNewBackupRequestsIfOldHasNotFinishedYet() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 2);
-        executeNewBackup();
+        // when
+        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup, 5);
 
+        backupFreezer.unfreeze();
         awaitFinalization();
 
-        verify(backupManager, times(1)).execute(anyObject(), anyInt());
-    }
-
-    @Test
-    public void shouldIgnoreAllNewBackupRequestIfOldHasNotFinishedYet() throws InterruptedException, IOException, TimeoutException {
-        injectWorkspaceLock(WORKSPACE_ID);
-
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-
-        awaitFinalization();
-
+        // then
         verify(backupManager, times(1)).execute(anyObject(), anyInt());
     }
 
@@ -225,14 +196,8 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionOnNewRestoreIfAnotherOneIsInProgress() throws Exception {
         // given
-        // on exec call wait until answer is not completed
-        WaitingAnswer<Void> voidWaitingAnswer = new WaitingAnswer<>();
-        doAnswer(voidWaitingAnswer).when(backupManager).execute(anyVararg(), anyInt());
+        ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
 
-        // start restore process
-        execute(() -> backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS));
-
-        voidWaitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
         // when
         try {
             // start another restore process
@@ -240,9 +205,9 @@ public class MachineBackupManagerTest {
             fail("Second call of restore should throw an exception");
         } finally {
             // then
-            // complete waiting answer
-            voidWaitingAnswer.completeAnswer();
-            verify(backupManager, timeout(100).times(1)).execute(anyObject(), anyInt());
+            restoreFreezer.unfreeze();
+            awaitFinalization();
+            verify(backupManager, times(1)).execute(anyObject(), anyInt());
         }
     }
 
@@ -254,14 +219,8 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionOnNewRestoreIfAnotherOneIsInProgressAndAnotherRestoreFailed() throws Exception {
         // given
-        // on exec call wait until answer is not completed
-        WaitingAnswer<Void> voidWaitingAnswer = new WaitingAnswer<>();
-        doAnswer(voidWaitingAnswer).when(backupManager).execute(anyVararg(), anyInt());
+        ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
 
-        // start restore process
-        execute(() -> backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS));
-
-        voidWaitingAnswer.waitAnswerCall(1, TimeUnit.SECONDS);
         try {
             // start another restore process
             backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
@@ -273,10 +232,12 @@ public class MachineBackupManagerTest {
             // when
             // start yet another restore process
             backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
+            fail("Third call of restore should throw an exception");
         } finally {
             // complete waiting answer
-            voidWaitingAnswer.completeAnswer();
-            verify(backupManager, timeout(100).times(1)).execute(anyObject(), anyInt());
+            restoreFreezer.unfreeze();
+            awaitFinalization();
+            verify(backupManager, times(1)).execute(anyObject(), anyInt());
         }
     }
 
@@ -316,95 +277,128 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldIgnoreRestoreIfBackupHasNotFinishedYet() throws InterruptedException, IOException, TimeoutException {
+    public void shouldThrowExceptionWhenStartRestoreIfBackupHasNotFinishedYet() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 2);
-        executeNewRestore();
+        // when
+        try {
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
+            fail("Restore should not be performed while backup is in progress");
+        } catch (ServerException ignore) {}
 
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
     @Test
-    public void shouldIgnoreOthersBackupsAndRestoresWhileBackupInProgress() throws InterruptedException, TimeoutException, IOException {
+    public void shouldIgnoreOthersBackupsAndFailOnRestoresWhileBackupInProgress() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewRestore();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewRestore();
+        // when
+        executeTasksSimultaneouslyWithBarrier(this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore);
 
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
-    @Test
-    public void shouldIgnoreOthersBackupsAndRestoresWhileRestoreInProgress() throws InterruptedException, TimeoutException, IOException {
-        executeNewRestore();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewRestore();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        executeNewRestore();
 
+    @Test
+    public void shouldIgnoreOthersBackupsAndFailOnRestoresWhileRestoreInProgress() throws Exception {
+        // given
+        ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
+
+        // when
+        executeTasksSimultaneouslyWithBarrier(this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore);
+
+        restoreFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
     @Test
-    public void shouldIgnoreBackupIfRestoreHasNotFinishedYet() throws InterruptedException, IOException, TimeoutException {
-        executeNewRestore();
-        sleep(FAKE_BACKUP_TIME_MS / 2);
-        executeNewBackup();
+    public void shouldIgnoreBackupIfRestoreHasNotFinishedYet() throws Exception {
+        // given
+        ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
 
+        // when
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
+
+        restoreFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
     @Test
-    public void shouldProcessOnlyOneBackupAtTheSameTime() throws InterruptedException, IOException, TimeoutException {
+    public void shouldProcessOnlyOneBackupAtTheSameTime() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        executeNewRestore();
-        executeNewBackup();
-        executeNewRestore();
-        executeNewBackup();
+        // when
+        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup, 5);
 
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
-
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
     @Test
-    public void shouldBackupWithCleanupAfterFinishOfCurrentBackup() throws InterruptedException, TimeoutException, IOException {
+    public void shouldBackupWithCleanupAfterFinishOfCurrentBackup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
+    }
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 2);
-        executeNewBackupWithCleanup();
+    @Test
+    public void shouldQueuedBackupWithCleanupAfterBackup() throws Exception {
+        // given
+        injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
+        // then
+        executor.execute(this::runBackupWithCleanup);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
+
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
-
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -416,18 +410,19 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldBackupWithCleanupAfterFinishOfCurrentBackupButNotStartAnotherBackup() throws InterruptedException,
-                                                                                                   TimeoutException,
-                                                                                                   IOException {
+    public void shouldBackupWithCleanupAfterFinishOfCurrentBackupButNotStartAnotherBackup() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackupWithCleanup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
+        // then
+        executor.execute(this::runBackupWithCleanup);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
 
+        backupFreezer.unfreeze();
         awaitFinalization();
+
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
 
         verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
 
@@ -435,80 +430,102 @@ public class MachineBackupManagerTest {
     }
 
     @Test
-    public void shouldBackupWithCleanupAfterFinishOfCurrentBackupButNotStartRestore() throws InterruptedException,
-                                                                                             TimeoutException,
-                                                                                             IOException {
+    public void shouldIgnoreAllBackupsAndFailOnRestoresWhileBackupWithCleanupInQueueAfterBackup() throws Exception {
+        // given
         injectWorkspaceLock(WORKSPACE_ID);
+        ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackupWithCleanup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewRestore();
+        // when
+        executor.execute(this::runBackupWithCleanup);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
 
+        // after
+        executeTasksSimultaneouslyWithBarrier(this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore,
+                                              this::runBackup,
+                                              this::runRestore);
+
+        backupFreezer.unfreeze();
         awaitFinalization();
 
+        // then
         verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
-
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
-    @Test
-    public void shouldIgnoreAllBackupsAndRestoresWhileBackupWithCleanupInQueueAfterBackup() throws InterruptedException,
-                                                                                                   TimeoutException,
-                                                                                                   IOException {
-        injectWorkspaceLock(WORKSPACE_ID);
+    /**
+     * Runs processes to do specified task simultaneously and wait until they finish.
+     *
+     * @param task
+     *        specifies task which will be run
+     * @param times
+     *         number of parallel jobs with specified task
+     * @throws InterruptedException
+     */
+    private void executeTaskNTimesSimultaneouslyWithBarrier(Runnable task, int times) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(times);
 
-        executeNewBackup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackupWithCleanup();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        executeNewRestore();
-        sleep(FAKE_BACKUP_TIME_MS / 4);
-        executeNewBackup();
-        executeNewRestore();
+        for (int i = 0; i < times; i++) {
+            executor.execute(() -> {
+                task.run();
+                latch.countDown();
+            });
+        }
 
-        awaitFinalization();
-
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
-
-        assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
+        latch.await();
     }
 
-    private void executeNewBackup() {
-        executor.execute(() -> {
-            try {
-                backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
-            } catch (ServerException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-        });
+    /**
+     * Runs given tasks simultaneously and wait until they finish.
+     *
+     * @param tasks
+     *        tasks to run
+     * @throws InterruptedException
+     */
+    private void executeTasksSimultaneouslyWithBarrier(Runnable ... tasks) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(tasks.length);
+
+        for (Runnable task : tasks) {
+            executor.execute(() -> {
+                task.run();
+                latch.countDown();
+            });
+        }
+
+        latch.await();
     }
 
-    private void executeNewBackupWithCleanup() {
-        executor.execute(() -> {
-            try {
-                backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
-            } catch (ServerException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-        });
+    private void runBackup() {
+        try {
+            backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
+        } catch (ServerException e) {
+            LOG.error(e.getMessage());
+        }
     }
 
-    private void executeNewRestore() {
-        executor.execute(() -> {
-            try {
-                backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
-            } catch (ServerException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-        });
+    private void runBackupWithCleanup() {
+        try {
+            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS);
+        } catch (ServerException e) {
+            LOG.error(e.getMessage());
+        }
+    }
+
+    private void runRestore() {
+        try {
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS);
+        } catch (ServerException e) {
+            LOG.error(e.getMessage());
+        }
     }
 
     private void awaitFinalization() throws InterruptedException {
         executor.shutdown();
-        if (!executor.awaitTermination(2 * FAKE_BACKUP_TIME_MS + 1000, TimeUnit.MILLISECONDS)) {
+        if (!executor.awaitTermination(1_000, TimeUnit.MILLISECONDS)) {
             fail("Operation is hanged up. Terminated.");
         }
     }
@@ -524,24 +541,80 @@ public class MachineBackupManagerTest {
         try {
             Field locks = MachineBackupManager.class.getDeclaredField("workspacesBackupLocks");
             locks.setAccessible(true);
-            ((ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager)).put(workspaceId, new ReentrantLock());
+            @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
+            ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
+                    (ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager);
+            workspacesBackupLocks.put(workspaceId, new ReentrantLock());
         } catch (NoSuchFieldException | IllegalAccessException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }
 
-    @FunctionalInterface
-    private interface Task {
-        void run() throws Exception;
+    /**
+     * Wait until lock of specified workspace will be locked.
+     *
+     * @param workspaceId
+     *         workspace id to which loch belongs
+     * @param queueLength
+     *         length of queue for lock workspace's lock
+     * @return true if lock is locked, false if lock doesn't exist
+     */
+    private boolean waitUntilWorkspaceLockLockedWithQueueLength(String workspaceId, int queueLength) {
+        ReentrantLock lock;
+        try {
+            Field locks = MachineBackupManager.class.getDeclaredField("workspacesBackupLocks");
+            locks.setAccessible(true);
+            @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
+            ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
+                    (ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager);
+            lock = workspacesBackupLocks.get(workspaceId);
+            if (lock != null) {
+                while (!lock.isLocked() || lock.getQueueLength() != queueLength) {
+                    sleep(10);
+                }
+                return true;
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        } catch (InterruptedException ignore) {
+            // ok, exit
+        }
+        return false;
     }
 
-    private void execute(Task task) {
-        executor.execute(() -> {
-            try {
-                task.run();
-            } catch (Exception e) {
-                LOG.error(e.getLocalizedMessage(), e);
+    private ThreadFreezer startNewProcessAndFreeze(Runnable backupType) throws Exception {
+        CountDownLatch releaseProcessLatch = new CountDownLatch(1);
+
+        final CountDownLatch invokeProcessLatch = new CountDownLatch(1);
+        doAnswer((invocationOnMock) -> {
+            if (invokeProcessLatch.getCount() > 0) {
+                invokeProcessLatch.countDown();
+                releaseProcessLatch.await();
             }
-        });
+            return null;
+        }).when(backupManager).execute(anyVararg(), anyInt());
+
+        executor.execute(backupType);
+
+        invokeProcessLatch.await();
+        doNothing().when(backupManager).execute(anyVararg(), anyInt());
+
+        return new ThreadFreezer(releaseProcessLatch);
     }
+
+    private static class ThreadFreezer {
+        private CountDownLatch latch;
+
+        ThreadFreezer(CountDownLatch latch) {
+            if (latch.getCount() != 1) {
+                throw new RuntimeException("Count down latch should have only 1 step to go");
+            }
+            this.latch = latch;
+        }
+
+        void unfreeze() {
+            latch.countDown();
+        }
+    }
+
 }
