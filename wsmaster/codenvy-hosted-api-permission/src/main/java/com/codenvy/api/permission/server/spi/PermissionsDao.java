@@ -21,7 +21,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * General contract of storage for permissions.

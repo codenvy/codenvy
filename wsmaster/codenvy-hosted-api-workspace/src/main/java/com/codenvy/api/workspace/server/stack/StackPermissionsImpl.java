@@ -65,11 +65,6 @@ public class StackPermissionsImpl extends AbstractPermissions {
 
     }
 
-    public StackPermissionsImpl(StackPermissionsImpl stackPermissions) {
-        super(stackPermissions.getUserId(), stackPermissions.getActions());
-        this.stackId = stackPermissions.getInstanceId();
-    }
-
     public StackPermissionsImpl(String userId, String instanceId, List<String> allowedActions) {
         super(userId, allowedActions);
         this.stackId = instanceId;

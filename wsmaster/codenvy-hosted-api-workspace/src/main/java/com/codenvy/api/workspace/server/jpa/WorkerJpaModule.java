@@ -15,8 +15,6 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
-import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;

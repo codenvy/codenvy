@@ -18,13 +18,9 @@ import com.codenvy.api.permission.shared.model.Permissions;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;

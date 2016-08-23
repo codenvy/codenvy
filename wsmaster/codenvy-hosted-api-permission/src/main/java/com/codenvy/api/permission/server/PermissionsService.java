@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.codenvy.api.permission.shared.dto.DomainDto;

@@ -15,7 +15,6 @@
 package com.codenvy.api.workspace.server.recipe;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;

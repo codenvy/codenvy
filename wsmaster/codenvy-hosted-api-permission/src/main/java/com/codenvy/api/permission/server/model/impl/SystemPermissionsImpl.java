@@ -20,6 +20,7 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Max Shaposhnik
@@ -50,5 +51,31 @@ public class SystemPermissionsImpl extends AbstractPermissions {
     @Override
     public String getDomainId() {
         return SystemDomain.DOMAIN_ID;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof SystemPermissionsImpl)) return false;
+        final SystemPermissionsImpl other = (SystemPermissionsImpl)obj;
+        return Objects.equals(userId, other.userId) &&
+               Objects.equals(actions, other.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(userId);
+        hash = 31 * hash + Objects.hashCode(actions);
+        return hash;
+    }
+
+
+    @Override
+    public String toString() {
+        return "SystemPermissions{" +
+               "user='" + userId + '\'' +
+               ", actions=" + actions +
+               '}';
     }
 }
