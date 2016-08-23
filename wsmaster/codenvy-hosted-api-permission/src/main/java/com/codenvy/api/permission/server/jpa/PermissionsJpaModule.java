@@ -19,6 +19,7 @@ import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
 
 /**
  * @author Max Shaposhnik
@@ -29,7 +30,11 @@ public class PermissionsJpaModule extends AbstractModule {
     protected void configure() {
 
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemDomain.SystemPermissionsImpl>>() {}).to(SystemDomain.class);
-        bind(new TypeLiteral<PermissionsDao<SystemDomain.SystemPermissionsImpl>>() {}).to(JpaSystemPermissionsDao.class);
+
         bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
+
+        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
+                                                                        PermissionsDao.class);
+        storages.addBinding().to(JpaSystemPermissionsDao.class);
     }
 }

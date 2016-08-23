@@ -14,13 +14,19 @@
  */
 package com.codenvy.api.workspace.server;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
 import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
 import com.codenvy.api.workspace.server.filters.WorkspacePermissionsFilter;
 import com.codenvy.api.workspace.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaWorkerDao;
+import com.codenvy.api.workspace.server.recipe.RecipeDomain;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
+import com.codenvy.api.workspace.server.stack.StackDomain;
+import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 /**
@@ -37,10 +43,5 @@ public class WorkspaceApiModule extends AbstractModule {
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
 
-        Multibinder<AbstractPermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                                AbstractPermissionsDao.class);
-        storages.addBinding().to(JpaWorkerDao.class);
-        storages.addBinding().to(JpaRecipePermissionsDao.class);
-        storages.addBinding().to(JpaStackPermissionsDao.class);
     }
 }

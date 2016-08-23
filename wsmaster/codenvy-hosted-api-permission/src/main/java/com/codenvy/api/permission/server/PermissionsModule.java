@@ -19,6 +19,8 @@ import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
 import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -40,8 +42,6 @@ public class PermissionsModule extends AbstractModule {
                                  Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
 
 
-        Multibinder<AbstractPermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                        AbstractPermissionsDao.class);
-        storages.addBinding().to(JpaSystemPermissionsDao.class);
+
     }
 }

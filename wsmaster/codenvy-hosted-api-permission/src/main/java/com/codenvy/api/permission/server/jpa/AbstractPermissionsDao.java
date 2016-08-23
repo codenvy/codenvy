@@ -35,6 +35,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -42,7 +43,6 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Max Shaposhnik
  */
-@Singleton
 public abstract class AbstractPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPermissionsDao.class);
     private final Class<T>                     clazz;
@@ -134,7 +134,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         @Inject
         private EventService eventService;
         @Inject
-        private AbstractPermissionsDao<AbstractPermissions>    dao;
+        Set<PermissionsDao> storages;
 
         @PostConstruct
         public void subscribe() {
@@ -149,8 +149,10 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         @Override
         public void onEvent(BeforeUserRemovedEvent event) {
             try {
-                for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
-                    dao.remove(permissions.getInstanceId(), permissions.getUserId());
+                for (PermissionsDao<? extends AbstractPermissions> dao : storages) {
+                    for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
+                        dao.remove(permissions.getUserId(), permissions.getInstanceId());
+                    }
                 }
             } catch (Exception x) {
                 LOG.error(format("Couldn't remove workers before user '%s' is removed", event.getUser().getId()), x);

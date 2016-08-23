@@ -15,10 +15,14 @@
 package com.codenvy.api.workspace.server.jpa;
 
 
+import com.codenvy.api.permission.server.PermissionsModule;
+import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.PermissionsJpaModule;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -46,6 +50,8 @@ public class JpaWorkerDaoTest {
 
     private JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber removeWorkersBeforeWorkspaceRemovedEventSubscriber;
 
+    private AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber removeWorkersBeforeUserRemovedEventSubscriber;
+
     WorkerImpl[] workers;
 
     UserImpl[] users;
@@ -62,14 +68,18 @@ public class JpaWorkerDaoTest {
         users = new UserImpl[]{new UserImpl("user1", "user1@com.com", "usr1"),
                                new UserImpl("user2", "user2@com.com", "usr2")};
 
-        workspaces = new WorkspaceImpl[]{new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("","","cfg1", null,null,null)),
-                                         new WorkspaceImpl("ws2", users[1].getAccount(), new WorkspaceConfigImpl("","","cfg2", null,null,null))};
+        workspaces = new WorkspaceImpl[]{
+                new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null)),
+                new WorkspaceImpl("ws2", users[1].getAccount(), new WorkspaceConfigImpl("", "", "cfg2", null, null, null))};
 
-        Injector injector = Guice.createInjector(new WorkerTckModule(), new WorkerJpaModule());
+        Injector injector = Guice.createInjector(new WorkerTckModule(), new WorkerJpaModule(), new PermissionsModule(), new PermissionsJpaModule());
         manager = injector.getInstance(EntityManager.class);
         workerDao = injector.getInstance(JpaWorkerDao.class);
         removeWorkersBeforeWorkspaceRemovedEventSubscriber = injector.getInstance(
                 JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
+
+        removeWorkersBeforeUserRemovedEventSubscriber =
+                injector.getInstance(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -118,5 +128,12 @@ public class JpaWorkerDaoTest {
         BeforeWorkspaceRemovedEvent event = new BeforeWorkspaceRemovedEvent(workspaces[0]);
         removeWorkersBeforeWorkspaceRemovedEventSubscriber.onEvent(event);
         assertTrue(workerDao.getWorkers("ws1").isEmpty());
+    }
+
+    @Test
+    public void shouldRemoveWorkersWhenUserIsRemoved() throws Exception {
+        BeforeUserRemovedEvent event =  new BeforeUserRemovedEvent(new UserImpl("user1", "email@co.com", "user"));
+        removeWorkersBeforeUserRemovedEventSubscriber.onEvent(event);
+        assertTrue(workerDao.getWorkersByUser("user1").isEmpty());
     }
 }
