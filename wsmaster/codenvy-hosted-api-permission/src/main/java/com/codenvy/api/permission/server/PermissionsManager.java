@@ -47,7 +47,7 @@ public class PermissionsManager {
     private final Map<String, AbstractPermissionsDomain> domains;
 
     @Inject
-    public PermissionsManager(Set<PermissionsDao> storages) throws ServerException {
+    public PermissionsManager(Set<PermissionsDao<? extends AbstractPermissions>> storages) throws ServerException {
         Map<String, PermissionsDao> domainToDao = new HashMap<>();
         Map<String, AbstractPermissionsDomain> domains = new HashMap<>();
         for (PermissionsDao storage : storages) {

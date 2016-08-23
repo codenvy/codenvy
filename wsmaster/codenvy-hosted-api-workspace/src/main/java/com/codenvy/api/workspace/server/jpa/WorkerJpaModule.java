@@ -17,6 +17,7 @@ package com.codenvy.api.workspace.server.jpa;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
 import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
@@ -43,8 +44,8 @@ public class WorkerJpaModule extends AbstractModule {
         bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {}).to(StackDomain.class);
 
 
-        Multibinder<PermissionsDao> storages = Multibinder.newSetBinder(binder(),
-                                                                        PermissionsDao.class);
+        Multibinder<PermissionsDao<? extends AbstractPermissions>> storages =
+                Multibinder.newSetBinder(binder(),new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {});
         storages.addBinding().to(JpaWorkerDao.class);
         storages.addBinding().to(JpaRecipePermissionsDao.class);
         storages.addBinding().to(JpaStackPermissionsDao.class);
