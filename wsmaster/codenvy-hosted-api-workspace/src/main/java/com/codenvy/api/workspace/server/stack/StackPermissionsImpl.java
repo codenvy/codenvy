@@ -20,9 +20,9 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.List;
@@ -56,7 +56,7 @@ public class StackPermissionsImpl extends AbstractPermissions {
 
     private String stackId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "stackId", insertable = false, updatable = false)
     private StackImpl stack;
 

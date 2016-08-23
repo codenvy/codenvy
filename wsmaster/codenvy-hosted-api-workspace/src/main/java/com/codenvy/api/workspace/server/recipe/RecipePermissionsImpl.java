@@ -21,9 +21,9 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.List;
@@ -58,7 +58,7 @@ public class RecipePermissionsImpl extends AbstractPermissions {
 
     private String recipeId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "recipeId", insertable = false, updatable = false)
     private RecipeImpl recipe;
 
