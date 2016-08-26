@@ -14,9 +14,18 @@
  */
 package com.codenvy.api.workspace.server;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
 import com.codenvy.api.workspace.server.filters.WorkspacePermissionsFilter;
+import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
+import com.codenvy.api.workspace.server.recipe.RecipeDomain;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
+import com.codenvy.api.workspace.server.stack.StackDomain;
+import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
+
+import org.eclipse.che.api.core.model.workspace.Workspace;
 
 /**
  * @author Sergii Leschenko
