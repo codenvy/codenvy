@@ -213,14 +213,14 @@ public class JpaIntegrationTckModule extends TckModule {
         public void createAll(Collection<? extends SnapshotImpl> snapshots) throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
             WorkspaceConfig config = new WorkspaceConfigImpl("name",
-                                    "description",
-                                    "defaultEnv",
-                                    Collections.emptyList(),
-                                    Collections.emptyList(),
-                                    Collections.emptyList());
+                                                             "description",
+                                                             "defaultEnv",
+                                                             Collections.emptyList(),
+                                                             Collections.emptyList(),
+                                                             Collections.emptyList());
             final AccountImpl[] accounts = new AccountImpl[] {new AccountImpl("id1", "test0", "test"),
-                                                              new AccountImpl("id1", "test1", "test"),
-                                                              new AccountImpl("id1", "test2", "test")};
+                                                              new AccountImpl("id2", "test1", "test"),
+                                                              new AccountImpl("id3", "test2", "test")};
             manager.persist(accounts[0]);
             manager.persist(accounts[1]);
             manager.persist(accounts[2]);
@@ -241,6 +241,9 @@ public class JpaIntegrationTckModule extends TckModule {
             manager.createQuery("SELECT workspaces FROM Workspace workspaces", WorkspaceImpl.class)
                    .getResultList()
                    .forEach(manager::remove);
+            manager.createQuery("SELECT acc FROM Account acc", AccountImpl.class)
+                   .getResultList()
+                   .forEach(manager::remove);
         }
     }
 
@@ -254,20 +257,13 @@ public class JpaIntegrationTckModule extends TckModule {
         @Override
         public void createAll(Collection<? extends FactoryImpl> factories) throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
-            for (FactoryImpl factory : factories) {
-                final String id = factory.getCreator().getUserId();
-                manager.persist(new UserImpl(id, "email_" + id, "name_" + id));
-                manager.persist(factory);
-            }
+            factories.forEach(manager::persist);
         }
 
         @Override
         public void removeAll() throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
             manager.createQuery("SELECT factory FROM Factory factory", FactoryImpl.class)
-                   .getResultList()
-                   .forEach(manager::remove);
-            manager.createQuery("SELECT users FROM Usr users", UserImpl.class)
                    .getResultList()
                    .forEach(manager::remove);
         }
