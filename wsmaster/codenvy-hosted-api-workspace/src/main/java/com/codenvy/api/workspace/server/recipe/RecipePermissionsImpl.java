@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- *
+ * Recipe permissions data object.
  *
  * @author Max Shaposhnik
  */

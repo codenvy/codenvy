@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Data object for {@link Worker}
+ *
  * @author Sergii Leschenko
  */
 @Entity(name = "Worker")

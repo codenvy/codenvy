@@ -17,6 +17,7 @@ package com.codenvy.api.permission.server.jpa;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -41,7 +42,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * @author Max Shaposhnik
+ *  Basic JPA DAO implementation for {@link Permissions} objects.
+ *
+ *  @author Max Shaposhnik
  */
 public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJpaPermissionsDao.class);

@@ -31,6 +31,8 @@ import java.util.Objects;
 
 
 /**
+ * Stack permissions data object.
+ *
  * @author Max Shaposhnik
  */
 

@@ -22,9 +22,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import java.util.List;
-import java.util.Objects;
 
 /**
+ * System permissions data object.
+ *
  * @author Max Shaposhnik
  */
 @Entity(name = "SystemPermissions")
