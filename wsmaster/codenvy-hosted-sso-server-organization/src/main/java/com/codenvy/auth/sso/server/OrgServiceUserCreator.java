@@ -73,8 +73,12 @@ public class OrgServiceUserCreator implements UserCreator {
             }
 
             final Map<String, String> attributes = new HashMap<>();
-            attributes.put("firstName", firstName);
-            attributes.put("lastName", lastName);
+            if (firstName != null) {
+                attributes.put("firstName", firstName);
+            }
+            if (lastName != null) {
+                attributes.put("lastName", lastName);
+            }
             attributes.put("email", email);
 
 

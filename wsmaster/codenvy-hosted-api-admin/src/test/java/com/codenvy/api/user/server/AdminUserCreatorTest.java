@@ -77,12 +77,12 @@ public class AdminUserCreatorTest {
         injector.getInstance(AdminUserCreator.class);
 
         verify(userManager).getById(NAME);
-        verify(userManager).create(new UserImpl(NAME, PASSWORD, NAME, EMAIL, emptyList()), false);
+        verify(userManager).create(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList()), false);
     }
 
     @Test
     public void shouldNotCreateAdminWhenItAlreadyExists() throws Exception {
-        final UserImpl user = new UserImpl(NAME, PASSWORD, NAME, EMAIL, emptyList());
+        final UserImpl user = new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList());
         when(userManager.getById(NAME)).thenReturn(user);
         injector.getInstance(AdminUserCreator.class);
 

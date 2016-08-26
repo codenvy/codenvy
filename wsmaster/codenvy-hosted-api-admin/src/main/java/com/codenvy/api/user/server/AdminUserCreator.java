@@ -67,7 +67,7 @@ public class AdminUserCreator {
             userManager.getById(name);
         } catch (NotFoundException ex) {
             try {
-                userManager.create(new UserImpl(name, password, name, email, emptyList()), false);
+                userManager.create(new UserImpl(name, email, name, password, emptyList()), false);
                 LOG.info("Admin user '" + name + "' successfully created");
             } catch (ConflictException cfEx) {
                 LOG.warn("Admin user creation failed", cfEx.getLocalizedMessage());
