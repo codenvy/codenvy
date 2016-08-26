@@ -17,7 +17,6 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
-import com.codenvy.api.workspace.server.jpa.OnPremisesWorkspaceJpaModule;
 import com.codenvy.api.workspace.server.jpa.WorkerJpaModule;
 import com.codenvy.auth.aws.ecr.AwsEcrAuthResolver;
 import com.codenvy.auth.sso.client.ServerClient;

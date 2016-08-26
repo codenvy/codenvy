@@ -14,11 +14,26 @@
  */
 package com.codenvy.api.tck;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
+import com.codenvy.api.permission.server.spi.tck.SystemPermissionsDaoTest;
+import com.codenvy.api.workspace.server.jpa.JpaRecipePermissionsDao;
+import com.codenvy.api.workspace.server.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaWorkerDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
+import com.codenvy.api.workspace.server.spi.tck.RecipePermissionsDaoTest;
+import com.codenvy.api.workspace.server.spi.tck.StackPermissionsDaoTest;
+import com.codenvy.api.workspace.server.spi.tck.WorkerDaoTest;
+import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
@@ -123,6 +138,21 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).to(SnapshotJpaTckRepository.class);
         //api ssh
         bind(new TypeLiteral<TckRepository<SshPairImpl>>() {}).toInstance(new JpaTckRepository<>(SshPairImpl.class));
+        //api permission
+        bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
+        bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
+        bind(new TypeLiteral<TckRepository<SystemPermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(SystemPermissionsImpl.class));
+
+        bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {}).to(JpaStackPermissionsDao.class);
+        bind(new TypeLiteral<PermissionsDao<RecipePermissionsImpl>>() {}).to(JpaRecipePermissionsDao.class);
+        bind(new TypeLiteral<PermissionsDao<SystemPermissionsImpl>>() {}).to(JpaSystemPermissionsDao.class);
+
+        //permissions domains
+        bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {}).to(RecipePermissionsDaoTest.TestDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {}).to(StackPermissionsDaoTest.TestDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {}).to(WorkerDaoTest.TestDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemPermissionsDaoTest.TestDomain.class);
+
 
         //dao
         //api-account
@@ -146,6 +176,11 @@ public class JpaIntegrationTckModule extends TckModule {
         // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
         bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
         bind(org.eclipse.che.api.core.postgresql.jdbc.jpa.eclipselink.PostgreSqlExceptionHandler.class);
+
+        //Creates empty multibinder to avoid error during container starting
+        Multibinder.newSetBinder(binder(),
+                                 String.class,
+                                 Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
     }
 
 
