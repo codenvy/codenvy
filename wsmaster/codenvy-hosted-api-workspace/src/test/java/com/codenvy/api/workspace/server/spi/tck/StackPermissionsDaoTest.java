@@ -126,8 +126,6 @@ public class StackPermissionsDaoTest {
         assertEquals(dao.getDomain(), new TestDomain());
     }
 
-
-
     /* StackPermissionsDao.remove() tests */
     @Test
     public void shouldRemovePermissions() throws Exception {

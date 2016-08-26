@@ -81,26 +81,6 @@ public class StackPermissionsImpl extends AbstractPermissions {
         return StackDomain.DOMAIN_ID;
     }
 
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof StackPermissionsImpl)) return false;
-        final StackPermissionsImpl other = (StackPermissionsImpl)obj;
-        return Objects.equals(userId, other.userId) &&
-               Objects.equals(stackId, other.stackId) &&
-               actions.equals(other.actions);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(userId);
-        hash = 31 * hash + Objects.hashCode(stackId);
-        hash = 31 * hash + actions.hashCode();
-        return hash;
-    }
-
     @Override
     public String toString() {
         return "StackPermissionsImpl{" +

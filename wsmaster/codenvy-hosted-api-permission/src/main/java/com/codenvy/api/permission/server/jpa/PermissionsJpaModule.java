@@ -32,7 +32,7 @@ public class PermissionsJpaModule extends AbstractModule {
 
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemDomain.class);
 
-        bind(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
+        bind(AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
 
         Multibinder<PermissionsDao<? extends AbstractPermissions>> storages = Multibinder.newSetBinder(binder(),
                                                                         new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {});

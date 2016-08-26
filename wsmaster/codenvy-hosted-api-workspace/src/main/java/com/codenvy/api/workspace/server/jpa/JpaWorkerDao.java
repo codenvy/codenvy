@@ -15,7 +15,7 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.google.inject.persist.Transactional;
@@ -45,8 +45,7 @@ import static java.util.Objects.requireNonNull;
  * @author Max Shaposhnik
  */
 @Singleton
-public class JpaWorkerDao extends AbstractPermissionsDao<WorkerImpl> implements WorkerDao
-{
+public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implements WorkerDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaWorkerDao.class);
 

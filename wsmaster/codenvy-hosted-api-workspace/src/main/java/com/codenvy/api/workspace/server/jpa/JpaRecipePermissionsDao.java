@@ -15,7 +15,7 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.google.inject.persist.Transactional;
 
@@ -37,7 +37,7 @@ import static java.util.Objects.requireNonNull;
  * @author Max Shaposhnik
  */
 @Singleton
-public class JpaRecipePermissionsDao extends AbstractPermissionsDao<RecipePermissionsImpl> {
+public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePermissionsImpl> {
 
     @Inject
     public JpaRecipePermissionsDao(AbstractPermissionsDomain<RecipePermissionsImpl> domain) throws IOException {

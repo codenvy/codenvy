@@ -16,7 +16,6 @@ package com.codenvy.api.permission.server.model.impl;
 
 import com.codenvy.api.permission.server.SystemDomain;
 
-import javax.inject.Singleton;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
@@ -38,7 +37,6 @@ import java.util.Objects;
         }
 )
 @Table(indexes = @Index(columnList = "userId", unique = true))
-@Singleton
 public class SystemPermissionsImpl extends AbstractPermissions {
 
     public SystemPermissionsImpl() {
@@ -57,24 +55,6 @@ public class SystemPermissionsImpl extends AbstractPermissions {
     public String getDomainId() {
         return SystemDomain.DOMAIN_ID;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof SystemPermissionsImpl)) return false;
-        final SystemPermissionsImpl other = (SystemPermissionsImpl)obj;
-        return Objects.equals(userId, other.userId) &&
-               Objects.equals(actions, other.actions);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(userId);
-        hash = 31 * hash + Objects.hashCode(actions);
-        return hash;
-    }
-
 
     @Override
     public String toString() {

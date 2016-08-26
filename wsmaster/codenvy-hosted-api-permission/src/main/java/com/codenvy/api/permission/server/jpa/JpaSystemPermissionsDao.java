@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,8 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Max Shaposhnik
  */
-public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermissionsImpl> {
+@Singleton
+public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPermissionsImpl> {
     @Inject
     public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) throws IOException {
         super(new SystemDomain(allowedActions));
@@ -44,11 +46,11 @@ public class JpaSystemPermissionsDao extends AbstractPermissionsDao<SystemPermis
     @Override
     @Transactional
     public SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
-        List<SystemPermissionsImpl> existed = getByUser(userId);
-        if (existed.isEmpty()) {
+        List<SystemPermissionsImpl> existent = getByUser(userId);
+        if (existent.isEmpty()) {
             throw new NotFoundException(format("System permissions for user '%s' not found", userId));
         }
-        return existed.get(0);
+        return existent.get(0);
     }
 
     @Override

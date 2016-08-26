@@ -125,8 +125,6 @@ public class RecipePermissionsDaoTest {
         assertEquals(dao.getDomain(), new TestDomain());
     }
 
-
-
     /* RecipePermissionsDao.remove() tests */
     @Test
     public void shouldRemovePermissions() throws Exception {

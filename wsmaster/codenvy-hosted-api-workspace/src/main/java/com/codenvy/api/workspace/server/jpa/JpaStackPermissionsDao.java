@@ -15,7 +15,7 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
-import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
@@ -37,7 +37,7 @@ import static java.util.Objects.requireNonNull;
  * @author Max Shaposhnik
  */
 @Singleton
-public class JpaStackPermissionsDao extends AbstractPermissionsDao<StackPermissionsImpl> {
+public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermissionsImpl> {
 
     @Inject
     public JpaStackPermissionsDao(AbstractPermissionsDomain<StackPermissionsImpl> domain) throws IOException {

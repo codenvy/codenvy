@@ -85,25 +85,6 @@ public class WorkerImpl extends AbstractPermissions implements Worker {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof WorkerImpl)) return false;
-        final WorkerImpl other = (WorkerImpl)obj;
-        return Objects.equals(userId, other.userId) &&
-               Objects.equals(workspaceId, other.workspaceId) &&
-               actions.equals(other.actions);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(userId);
-        hash = 31 * hash + Objects.hashCode(workspaceId);
-        hash = 31 * hash + actions.hashCode();
-        return hash;
-    }
-
-    @Override
     public String toString() {
         return "WorkerImpl{" +
                "userId='" + userId + '\'' +

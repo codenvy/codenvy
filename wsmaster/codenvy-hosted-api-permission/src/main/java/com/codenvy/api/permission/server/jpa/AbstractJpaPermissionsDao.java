@@ -43,16 +43,15 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Max Shaposhnik
  */
-public abstract class AbstractPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractPermissionsDao.class);
+public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractJpaPermissionsDao.class);
     private final AbstractPermissionsDomain<T> supportedDomain;
 
 
     @Inject
     protected Provider<EntityManager> managerProvider;
 
-    @Inject
-    public AbstractPermissionsDao(AbstractPermissionsDomain<T> supportedDomain) throws IOException {
+    public AbstractJpaPermissionsDao(AbstractPermissionsDomain<T> supportedDomain) throws IOException {
         this.supportedDomain = supportedDomain;
     }
 
@@ -88,7 +87,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         } catch (NotFoundException e) {
             return false;
         }
-        return  permissions != null && permissions.getActions().contains(action);
+        return permissions.getActions().contains(action);
     }
 
     @Override
@@ -143,7 +142,7 @@ public abstract class AbstractPermissionsDao<T extends AbstractPermissions> impl
         @Override
         public void onEvent(BeforeUserRemovedEvent event) {
             try {
-                for (PermissionsDao <? extends AbstractPermissions> dao : storages) {
+                for (PermissionsDao<? extends AbstractPermissions> dao : storages) {
                     for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
                         dao.remove(permissions.getUserId(), permissions.getInstanceId());
                     }

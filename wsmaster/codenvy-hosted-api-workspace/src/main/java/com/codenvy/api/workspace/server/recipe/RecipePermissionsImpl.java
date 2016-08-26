@@ -83,25 +83,6 @@ public class RecipePermissionsImpl extends AbstractPermissions {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof RecipePermissionsImpl)) return false;
-        final RecipePermissionsImpl other = (RecipePermissionsImpl)obj;
-        return Objects.equals(userId, other.userId) &&
-               Objects.equals(recipeId, other.recipeId) &&
-               actions.equals(other.actions);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(userId);
-        hash = 31 * hash + Objects.hashCode(recipeId);
-        hash = 31 * hash + actions.hashCode();
-        return hash;
-    }
-
-    @Override
     public String toString() {
         return "RecipePermissionsImpl{" +
                "userId='" + userId + '\'' +

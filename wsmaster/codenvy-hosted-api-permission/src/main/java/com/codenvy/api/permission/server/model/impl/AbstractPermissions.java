@@ -96,15 +96,19 @@ public abstract class AbstractPermissions implements Permissions {
         if (this == obj) return true;
         if (!(obj instanceof AbstractPermissions)) return false;
         final AbstractPermissions other = (AbstractPermissions)obj;
-        return Objects.equals(userId, other.userId) &&
-               Objects.equals(actions, other.actions);
+        return Objects.equals(getUserId(), other.getUserId()) &&
+               Objects.equals(getInstanceId(), other.getInstanceId()) &&
+               Objects.equals(getDomainId(), other.getDomainId()) &&
+               Objects.equals(getActions(), other.getActions());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + Objects.hashCode(userId);
-        hash = 31 * hash + Objects.hashCode(actions);
+        hash = 31 * hash + Objects.hashCode(getUserId());
+        hash = 31 * hash + Objects.hashCode(getInstanceId());
+        hash = 31 * hash + Objects.hashCode(getDomainId());
+        hash = 31 * hash + Objects.hashCode(getActions());
         return hash;
     }
 

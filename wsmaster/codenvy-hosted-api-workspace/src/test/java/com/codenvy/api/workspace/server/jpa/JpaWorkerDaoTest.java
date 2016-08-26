@@ -16,7 +16,7 @@ package com.codenvy.api.workspace.server.jpa;
 
 
 import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.AbstractPermissionsDao;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.permission.server.jpa.PermissionsJpaModule;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.google.inject.AbstractModule;
@@ -57,7 +57,7 @@ public class JpaWorkerDaoTest {
 
     private JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber removeWorkersBeforeWorkspaceRemovedEventSubscriber;
 
-    private AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber removeWorkersBeforeUserRemovedEventSubscriber;
+    private AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber removeWorkersBeforeUserRemovedEventSubscriber;
 
     WorkerImpl[] workers;
 
@@ -87,7 +87,7 @@ public class JpaWorkerDaoTest {
                 JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
 
         removeWorkersBeforeUserRemovedEventSubscriber =
-                injector.getInstance(AbstractPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class);
+                injector.getInstance(AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
