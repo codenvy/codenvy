@@ -19,6 +19,7 @@ import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -51,7 +52,7 @@ import java.util.Objects;
                                     "AND stack.userId = :userId")
         }
 )
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "stackId"}))
+@Table(indexes = @Index(columnList = "userId, stackId", unique = true))
 public class StackPermissionsImpl extends AbstractPermissions {
 
     private String stackId;

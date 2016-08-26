@@ -20,6 +20,7 @@ import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -53,7 +54,7 @@ import java.util.Objects;
         }
 )
 
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "recipeId"}))
+@Table(indexes = @Index(columnList = "userId, recipeId", unique = true))
 public class RecipePermissionsImpl extends AbstractPermissions {
 
     private String recipeId;

@@ -21,6 +21,7 @@ import com.codenvy.api.workspace.server.model.Worker;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -51,7 +52,7 @@ import java.util.Objects;
                                     "AND worker.userId = :userId")
         }
 )
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "workspaceId"}))
+@Table(indexes = @Index(columnList = "userId, workspaceId", unique = true))
 public class WorkerImpl extends AbstractPermissions implements Worker {
 
     private String workspaceId;

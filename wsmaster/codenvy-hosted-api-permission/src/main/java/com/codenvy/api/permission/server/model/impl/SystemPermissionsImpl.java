@@ -16,9 +16,12 @@ package com.codenvy.api.permission.server.model.impl;
 
 import com.codenvy.api.permission.server.SystemDomain;
 
+import javax.inject.Singleton;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +37,8 @@ import java.util.Objects;
                                     "WHERE permissions.userId = :userId ")
         }
 )
+@Table(indexes = @Index(columnList = "userId", unique = true))
+@Singleton
 public class SystemPermissionsImpl extends AbstractPermissions {
 
     public SystemPermissionsImpl() {
