@@ -32,8 +32,8 @@
         <module>wsmaster</module>
         <module>wsagent</module>
         <module>plugins</module>
-        <module>dashboard</module>
-        <module>site</module>
+        <!--module>dashboard</module-->
+        <!--module>site</module-->
         <module>platform-api-client-java</module>
         <module>cli</module>
         <module>cdec</module>
@@ -190,14 +190,14 @@
                 <groupId>com.codenvy.lib</groupId>
                 <artifactId>codenvy-websocket-terminal</artifactId>
                 <version>${project.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.lib</groupId>
                 <artifactId>codenvy-websocket-terminal</artifactId>
                 <version>${project.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
@@ -228,7 +228,7 @@
                 <groupId>com.codenvy.onpremises</groupId>
                 <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
                 <version>${project.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
@@ -734,6 +734,13 @@
                 <artifactId>che-core-api-user</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.lib.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>

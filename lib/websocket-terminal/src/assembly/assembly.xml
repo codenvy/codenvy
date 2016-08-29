@@ -21,7 +21,7 @@
     <includeBaseDirectory>true</includeBaseDirectory>
     <baseDirectory>terminal</baseDirectory>
     <formats>
-        <format>zip</format>
+        <format>tar.gz</format>
     </formats>
     <fileSets>
         <fileSet>

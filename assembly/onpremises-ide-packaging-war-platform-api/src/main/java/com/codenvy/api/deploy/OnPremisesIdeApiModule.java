@@ -53,7 +53,7 @@ import com.google.inject.name.Names;
 import com.mongodb.client.MongoDatabase;
 import com.palominolabs.metrics.guice.InstrumentationModule;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
@@ -303,7 +303,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                           .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
@@ -340,12 +339,22 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding()
                                        .to(com.codenvy.machine.HostedDockerInstanceProvider.class);
-        bind(WsAgentLauncher.class).to(com.codenvy.machine.launcher.WsAgentWithAuthLauncherImpl.class);
+
+        bindConstant().annotatedWith(Names.named("machine.agent.max_start_time_ms")).to(120000);
+        bindConstant().annotatedWith(Names.named("machine.agent.ping_delay_ms")).to(2000);
+
+        bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
+                .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
+
+        Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
+        agentLaunchers.addBinding().to(com.codenvy.machine.launcher.WsAgentWithAuthLauncherImpl.class);
+        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);
+        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.SshAgentLauncherImpl.class);
+
+        install(new org.eclipse.che.api.agent.server.AgentModule());
 
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
-
-        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
                 MapBinder.newMapBinder(binder(),

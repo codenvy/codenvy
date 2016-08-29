@@ -54,6 +54,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -473,7 +474,8 @@ public class StackDaoImplTest extends BaseDaoTest {
                                                                                               "9090/udp",
                                                                                               "someprotocol",
                                                                                               "/some/path")),
-                                                                    singletonMap("key1", "value1"));
+                                                                    singletonMap("key1", "value1"),
+                                                                    Collections.emptyList());
         final MachineConfigImpl machineCfg2 = new MachineConfigImpl(false,
                                                                     "non-dev-machine",
                                                                     "machine-type-2",
@@ -487,7 +489,8 @@ public class StackDaoImplTest extends BaseDaoTest {
                                                                                               "9090/udp",
                                                                                               "someprotocol",
                                                                                               "/some/path")),
-                                                                    singletonMap("key1", "value1"));
+                                                                    singletonMap("key1", "value1"),
+                                                                    Collections.emptyList());
 
         final EnvironmentImpl env1 = new EnvironmentImpl("my-environment", recipe, asList(machineCfg1, machineCfg2));
         final EnvironmentImpl env2 = new EnvironmentImpl("my-environment-2", recipe, singletonList(machineCfg1));

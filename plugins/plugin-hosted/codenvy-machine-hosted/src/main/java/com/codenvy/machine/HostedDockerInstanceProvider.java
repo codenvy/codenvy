@@ -35,6 +35,7 @@ import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.machine.DockerAgentConfigApplier;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
@@ -87,7 +88,8 @@ public class HostedDockerInstanceProvider extends DockerInstanceProvider {
                                         @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                         @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
                                         @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
-                                        MachineTokenRegistry tokenRegistry) throws IOException {
+                                        MachineTokenRegistry tokenRegistry,
+                                        DockerAgentConfigApplier configApplier) throws IOException {
         super(docker,
               dockerConnectorConfiguration,
               dockerCredentials,
@@ -95,6 +97,7 @@ public class HostedDockerInstanceProvider extends DockerInstanceProvider {
               dockerInstanceStopDetector,
               containerNameGenerator,
               recipeRetriever,
+              configApplier,
               devMachineServers,
               allMachinesServers,
               devMachineSystemVolumes,

@@ -38,6 +38,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
+import org.eclipse.che.plugin.docker.machine.DockerAgentConfigApplier;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
@@ -93,6 +94,8 @@ public class HostedDockerInstanceProviderTest {
     private RecipeRetriever                               recipeRetriever;
     @Mock
     private MachineTokenRegistry                          machineTokenRegistry;
+    @Mock
+    private DockerAgentConfigApplier                      configApplier;
 
     private DockerInstanceProvider dockerInstanceProvider;
 
@@ -118,6 +121,7 @@ public class HostedDockerInstanceProviderTest {
                                                                 dockerInstanceStopDetector,
                                                                 containerNameGenerator,
                                                                 recipeRetriever,
+                                                                configApplier,
                                                                 Collections.emptySet(),
                                                                 Collections.emptySet(),
                                                                 Collections.emptySet(),
@@ -170,7 +174,8 @@ public class HostedDockerInstanceProviderTest {
                                                                   Collections.emptySet(),
                                                                   SNAPSHOT_USE_REGISTRY,
                                                                   MEMORY_SWAP_MULTIPLIER,
-                                                                  machineTokenRegistry);
+                                                                  machineTokenRegistry,
+                                                                  configApplier);
 
         createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(true)
                                                                                         .build())
@@ -211,7 +216,8 @@ public class HostedDockerInstanceProviderTest {
                                                                                                       "9090/udp",
                                                                                                       "someprotocol",
                                                                                                       null)),
-                                                                            Collections.singletonMap("key1", "value1")));
+                                                                            Collections.singletonMap("key1", "value1"),
+                                                                            Collections.emptyList()));
     }
 
 }

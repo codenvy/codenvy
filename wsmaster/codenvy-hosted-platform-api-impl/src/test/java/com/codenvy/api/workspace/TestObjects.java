@@ -109,7 +109,8 @@ public final class TestObjects {
                                      new LimitsImpl(ramLimit),
                                      Arrays.asList(new ServerConfImpl("ref1", "8080/tcp", "https", "some/path"),
                                                    new ServerConfImpl("ref2", "9090/udp", "protocol", "/some/path")),
-                                     Collections.singletonMap("key1", "value1"));
+                                     Collections.singletonMap("key1", "value1"),
+                                     Collections.emptyList());
     }
 
     /** Creates machine impl based on configuration. */
