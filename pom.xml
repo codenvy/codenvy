@@ -32,8 +32,8 @@
         <module>wsmaster</module>
         <module>wsagent</module>
         <module>plugins</module>
-        <!--module>dashboard</module-->
-        <!--module>site</module-->
+        <module>dashboard</module>
+        <module>site</module>
         <module>platform-api-client-java</module>
         <module>cli</module>
         <module>cdec</module>
@@ -229,6 +229,12 @@
                 <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises</groupId>
+                <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
