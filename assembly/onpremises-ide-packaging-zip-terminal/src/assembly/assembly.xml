@@ -19,6 +19,7 @@
     <id>terminal-zip</id>
     <formats>
         <format>tar.gz</format>
+        <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
@@ -26,7 +27,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
             <includes>
-                <include>com.codenvy.lib:codenvy-websocket-terminal:tar.gz:linux_amd64</include>
+                <include>com.codenvy.lib:codenvy-websocket-terminal:zip:linux_amd64</include>
             </includes>
         </dependencySet>
     </dependencySets>

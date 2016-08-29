@@ -201,6 +201,20 @@
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
+                <groupId>com.codenvy.lib</groupId>
+                <artifactId>codenvy-websocket-terminal</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.lib</groupId>
+                <artifactId>codenvy-websocket-terminal</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm7</classifier>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
                 <artifactId>onpremises-ide-compiling-war-ide</artifactId>
                 <version>${project.version}</version>

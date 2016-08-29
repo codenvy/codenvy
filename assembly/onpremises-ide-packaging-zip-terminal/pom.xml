@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.codenvy.lib</groupId>
             <artifactId>codenvy-websocket-terminal</artifactId>
-            <type>tar.gz</type>
+            <type>zip</type>
             <classifier>linux_amd64</classifier>
         </dependency>
     </dependencies>
