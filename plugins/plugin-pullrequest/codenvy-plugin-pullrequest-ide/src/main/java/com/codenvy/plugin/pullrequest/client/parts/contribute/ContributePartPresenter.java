@@ -85,6 +85,8 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
     private final DialogFactory               dialogFactory;
     private final Map<String, StagesProvider> stagesProviders;
 
+    private boolean isInitialPullRequest;
+
     @Inject
     public ContributePartPresenter(final ContributePartView view,
                                    final ContributeMessages messages,
@@ -137,6 +139,8 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
         eventBus.addHandler(ContextPropertyChangeEvent.TYPE, this);
         eventBus.addHandler(CurrentContextChangedEvent.TYPE, this);
         eventBus.addHandler(ContextInvalidatedEvent.TYPE, this);
+
+        isInitialPullRequest = true;
     }
 
     public void open() {
@@ -358,12 +362,9 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
             if (context.getStatus() == WorkflowStatus.READY_TO_UPDATE_PR) {
                 final List<ViewUpdate> updates = new ArrayList<>();
                 // Display status message
-                final String message;
-                if (context.isUpdateMode()) {
-                    message = messages.contributePartStatusSectionContributionUpdatedMessage();
-                } else {
-                    message = messages.contributePartStatusSectionContributionCreatedMessage();
-                }
+                final String message = isInitialPullRequest ? messages.contributePartStatusSectionContributionCreatedMessage()
+                                                            : messages.contributePartStatusSectionContributionUpdatedMessage();
+                isInitialPullRequest = false;
                 context.getViewState().setStatusMessage(message, false);
                 updates.add(new StatusMessageUpdate());
 
