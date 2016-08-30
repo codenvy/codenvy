@@ -14,11 +14,9 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
-
 import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
-import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -27,11 +25,9 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
@@ -46,48 +42,44 @@ import java.util.Arrays;
 import static org.testng.Assert.assertTrue;
 
 /**
- * JPA-specific (non-TCK compliant) tests of {@link JpaWorkerDao}
  * @author Max Shaposhnik
  */
-public class JpaWorkerDaoTest {
+public class JpaRecipePermissionsDaoTest {
 
     private EntityManager manager;
 
-    private JpaWorkerDao workerDao;
+    private JpaRecipePermissionsDao dao;
 
-    private JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber removeWorkersBeforeWorkspaceRemovedEventSubscriber;
 
-    private AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber removeWorkersBeforeUserRemovedEventSubscriber;
+    private JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber removePermissionsBeforeRecipeRemovedEventSubscriber;
 
-    WorkerImpl[] workers;
+
+    RecipePermissionsImpl[] permissionses;
 
     UserImpl[] users;
 
-    WorkspaceImpl[] workspaces;
+    RecipeImpl[] recipes;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        workers = new WorkerImpl[]{new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
-                                   new WorkerImpl("ws1", "user2", Arrays.asList("read", "use")),
-                                   new WorkerImpl("ws2", "user1", Arrays.asList("read", "run")),
-                                   new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure"))};
+        permissionses = new RecipePermissionsImpl[]{new RecipePermissionsImpl("user1", "recipe1", Arrays.asList("read", "use", "run")),
+                                   new RecipePermissionsImpl("user2", "recipe1", Arrays.asList("read", "use")),
+                                   new RecipePermissionsImpl("user1", "recipe2", Arrays.asList("read", "run")),
+                                   new RecipePermissionsImpl("user2", "recipe2", Arrays.asList("read", "use", "run", "configure"))};
 
         users = new UserImpl[]{new UserImpl("user1", "user1@com.com", "usr1"),
                                new UserImpl("user2", "user2@com.com", "usr2")};
 
-        workspaces = new WorkspaceImpl[]{
-                new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null)),
-                new WorkspaceImpl("ws2", users[1].getAccount(), new WorkspaceConfigImpl("", "", "cfg2", null, null, null))};
+        recipes = new RecipeImpl[]{
+                new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
+                new RecipeImpl("recipe2", "rc2", null, null, null, null, null)};
 
         Injector injector =
                 Guice.createInjector(new TestModule(), new PermissionsJpaModule(), new PermissionsModule(), new SystemPermissionsJpaModule());
         manager = injector.getInstance(EntityManager.class);
-        workerDao = injector.getInstance(JpaWorkerDao.class);
-        removeWorkersBeforeWorkspaceRemovedEventSubscriber = injector.getInstance(
-                JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
-
-        removeWorkersBeforeUserRemovedEventSubscriber =
-                injector.getInstance(AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class);
+        dao = injector.getInstance(JpaRecipePermissionsDao.class);
+        removePermissionsBeforeRecipeRemovedEventSubscriber = injector.getInstance(
+                JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -97,12 +89,12 @@ public class JpaWorkerDaoTest {
             manager.persist(user);
         }
 
-        for (WorkspaceImpl ws : workspaces) {
-            manager.persist(ws);
+        for (RecipeImpl recipe : recipes) {
+            manager.persist(recipe);
         }
 
-        for (WorkerImpl worker : workers) {
-            manager.persist(worker);
+        for (RecipePermissionsImpl recipePermissions : permissionses) {
+            manager.persist(recipePermissions);
         }
         manager.getTransaction().commit();
         manager.clear();
@@ -112,11 +104,11 @@ public class JpaWorkerDaoTest {
     public void cleanup() {
         manager.getTransaction().begin();
 
-        manager.createQuery("SELECT e FROM Worker e", WorkerImpl.class)
+        manager.createQuery("SELECT p FROM RecipePermissions p", RecipePermissionsImpl.class)
                .getResultList()
                .forEach(manager::remove);
 
-        manager.createQuery("SELECT w FROM Workspace w", WorkspaceImpl.class)
+        manager.createQuery("SELECT r FROM Recipe r", RecipeImpl.class)
                .getResultList()
                .forEach(manager::remove);
 
@@ -133,16 +125,9 @@ public class JpaWorkerDaoTest {
 
     @Test
     public void shouldRemoveWorkersWhenWorkspaceIsRemoved() throws Exception {
-        BeforeWorkspaceRemovedEvent event = new BeforeWorkspaceRemovedEvent(workspaces[0]);
-        removeWorkersBeforeWorkspaceRemovedEventSubscriber.onEvent(event);
-        assertTrue(workerDao.getWorkers("ws1").isEmpty());
-    }
-
-    @Test
-    public void shouldRemoveWorkersWhenUserIsRemoved() throws Exception {
-        BeforeUserRemovedEvent event =  new BeforeUserRemovedEvent(new UserImpl("user1", "email@co.com", "user"));
-        removeWorkersBeforeUserRemovedEventSubscriber.onEvent(event);
-        assertTrue(workerDao.getWorkersByUser("user1").isEmpty());
+        BeforeRecipeRemovedEvent event = new BeforeRecipeRemovedEvent(recipes[0]);
+        removePermissionsBeforeRecipeRemovedEventSubscriber.onEvent(event);
+        assertTrue(dao.getByInstance("recipe1").isEmpty());
     }
 
 
@@ -150,10 +135,9 @@ public class JpaWorkerDaoTest {
 
         @Override
         protected void configure() {
-            bind(new TypeLiteral<TckRepository<WorkerImpl>>() {}).toInstance(new JpaTckRepository<>(WorkerImpl.class));
+            bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
             bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-
-            bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
+            bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
 
             install(new JpaPersistModule("main"));
             bind(JpaInitializer.class).asEagerSingleton();
@@ -161,4 +145,5 @@ public class JpaWorkerDaoTest {
             bind(org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler.class);
         }
     }
+
 }

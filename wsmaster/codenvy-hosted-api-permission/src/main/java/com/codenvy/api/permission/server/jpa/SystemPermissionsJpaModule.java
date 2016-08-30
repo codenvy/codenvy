@@ -26,7 +26,7 @@ import com.google.inject.multibindings.Multibinder;
 /**
  * @author Max Shaposhnik
  */
-public class PermissionsJpaModule extends AbstractModule {
+public class SystemPermissionsJpaModule extends AbstractModule {
     @Override
     protected void configure() {
 

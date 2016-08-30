@@ -151,7 +151,7 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
                     }
                 }
             } catch (Exception x) {
-                LOG.error(format("Couldn't remove workers before user '%s' is removed", event.getUser().getId()), x);
+                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
             }
         }
     }

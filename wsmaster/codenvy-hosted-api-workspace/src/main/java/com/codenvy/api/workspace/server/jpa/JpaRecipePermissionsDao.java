@@ -22,7 +22,14 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
@@ -38,6 +45,8 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePermissionsImpl> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaRecipePermissionsDao.class);
 
     @Inject
     public JpaRecipePermissionsDao(AbstractPermissionsDomain<RecipePermissionsImpl> domain) throws IOException {
@@ -87,6 +96,36 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
                                   .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+
+    @Singleton
+    public static class RemovePermissionsBeforeRecipeRemovedEventSubscriber implements EventSubscriber<BeforeRecipeRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        JpaRecipePermissionsDao dao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeRecipeRemovedEvent event) {
+            try {
+                for (RecipePermissionsImpl permissions : dao.getByInstance(event.getRecipe().getId())) {
+                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getRecipe().getId()), x);
+            }
         }
     }
 }

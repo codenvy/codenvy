@@ -29,18 +29,20 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 /**
- *
  * @author Max Shaposhnik
  */
-public class WorkerJpaModule extends AbstractModule {
+public class PermissionsJpaModule extends AbstractModule {
 
     @Override
     protected void configure() {
 
         bind(WorkerDao.class).to(JpaWorkerDao.class);
         bind(JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
+        bind(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class).asEagerSingleton();
+        bind(JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class).asEagerSingleton();
 
-        bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {}).to(RecipeDomain.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<RecipePermissionsImpl>>() {
+        }).to(RecipeDomain.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {}).to(StackDomain.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {}).to(WorkspaceDomain.class);
 

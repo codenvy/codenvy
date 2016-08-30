@@ -16,12 +16,20 @@ package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
+import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
@@ -38,6 +46,8 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermissionsImpl> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaStackPermissionsDao.class);
 
     @Inject
     public JpaStackPermissionsDao(AbstractPermissionsDomain<StackPermissionsImpl> domain) throws IOException {
@@ -87,6 +97,35 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
                                   .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Singleton
+    public static class RemovePermissionsBeforeStackRemovedEventSubscriber implements EventSubscriber<BeforeStackRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        JpaStackPermissionsDao dao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeStackRemovedEvent event) {
+            try {
+                for (StackPermissionsImpl permissions : dao.getByInstance(event.getStack().getId())) {
+                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getStack().getId()), x);
+            }
         }
     }
 }
