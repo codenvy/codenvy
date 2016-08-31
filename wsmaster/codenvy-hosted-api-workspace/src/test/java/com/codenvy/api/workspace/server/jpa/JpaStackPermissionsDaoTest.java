@@ -42,8 +42,7 @@ import java.util.Arrays;
 import static org.testng.Assert.assertTrue;
 
 /**
- * @author Max Shaposhnik (mshaposhnik@codenvy.com) on 8/30/16.
- * @version $Id: $
+ * @author Max Shaposhnik
  */
 public class JpaStackPermissionsDaoTest {
     private EntityManager manager;

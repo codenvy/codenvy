@@ -103,7 +103,6 @@ public class RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber imp
                     }
                 }
             }
-
         } catch (Exception x) {
             LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
         }
