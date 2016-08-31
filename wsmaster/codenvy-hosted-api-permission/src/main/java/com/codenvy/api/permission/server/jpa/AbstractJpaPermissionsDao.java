@@ -22,23 +22,13 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -47,9 +37,8 @@ import static java.util.Objects.requireNonNull;
  *  @author Max Shaposhnik
  */
 public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> implements PermissionsDao<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractJpaPermissionsDao.class);
-    private final AbstractPermissionsDomain<T> supportedDomain;
 
+    private final AbstractPermissionsDomain<T> supportedDomain;
 
     @Inject
     protected Provider<EntityManager> managerProvider;
@@ -123,37 +112,4 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
             throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
-
-
-    @Singleton
-    public static class RemovePermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
-        @Inject
-        private EventService eventService;
-        @Inject
-        Set<PermissionsDao<? extends AbstractPermissions>> storages;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this);
-        }
-
-        @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (PermissionsDao<? extends AbstractPermissions> dao : storages) {
-                    for (AbstractPermissions permissions : dao.getByUser(event.getUser().getId())) {
-                        dao.remove(permissions.getUserId(), permissions.getInstanceId());
-                    }
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
-            }
-        }
-    }
-
 }

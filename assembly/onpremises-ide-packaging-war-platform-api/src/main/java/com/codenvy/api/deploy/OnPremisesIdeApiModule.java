@@ -17,7 +17,12 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
+<<<<<<< HEAD
 import com.codenvy.api.workspace.server.jpa.PermissionsJpaModule;
+=======
+import com.codenvy.api.workspace.server.jpa.OnPremisesJpaWorkspaceDao;
+import com.codenvy.api.workspace.server.jpa.WorkerJpaModule;
+>>>>>>> jpa-integration
 import com.codenvy.auth.aws.ecr.AwsEcrAuthResolver;
 import com.codenvy.auth.sso.client.ServerClient;
 import com.codenvy.auth.sso.client.TokenHandler;
@@ -79,6 +84,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.WorkspaceServiceLinksInjector;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.stack.StackService;
@@ -163,10 +169,10 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new SshJpaModule());
         install(new WorkspaceJpaModule());
         install(new PermissionsJpaModule());
-        install(new OnPremisesWorkspaceJpaModule());
         install(new MachineJpaModule());
         bind(AccountDao.class).to(JpaAccountDao.class);
         bind(FactoryDao.class).to(JpaFactoryDao.class);
+        bind(JpaWorkspaceDao.class).to(OnPremisesJpaWorkspaceDao.class);
         bind(AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
         bind(RecipeLoader.class);
         final Multibinder<String> recipeBinder = Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"));

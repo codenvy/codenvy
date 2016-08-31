@@ -57,8 +57,6 @@ public class JpaWorkerDaoTest {
 
     private JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber removeWorkersBeforeWorkspaceRemovedEventSubscriber;
 
-    private AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber removeWorkersBeforeUserRemovedEventSubscriber;
-
     WorkerImpl[] workers;
 
     UserImpl[] users;
@@ -85,9 +83,6 @@ public class JpaWorkerDaoTest {
         workerDao = injector.getInstance(JpaWorkerDao.class);
         removeWorkersBeforeWorkspaceRemovedEventSubscriber = injector.getInstance(
                 JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
-
-        removeWorkersBeforeUserRemovedEventSubscriber =
-                injector.getInstance(AbstractJpaPermissionsDao.RemovePermissionsBeforeUserRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -137,14 +132,6 @@ public class JpaWorkerDaoTest {
         removeWorkersBeforeWorkspaceRemovedEventSubscriber.onEvent(event);
         assertTrue(workerDao.getWorkers("ws1").isEmpty());
     }
-
-    @Test
-    public void shouldRemoveWorkersWhenUserIsRemoved() throws Exception {
-        BeforeUserRemovedEvent event =  new BeforeUserRemovedEvent(new UserImpl("user1", "email@co.com", "user"));
-        removeWorkersBeforeUserRemovedEventSubscriber.onEvent(event);
-        assertTrue(workerDao.getWorkersByUser("user1").isEmpty());
-    }
-
 
     private class TestModule extends AbstractModule {
 

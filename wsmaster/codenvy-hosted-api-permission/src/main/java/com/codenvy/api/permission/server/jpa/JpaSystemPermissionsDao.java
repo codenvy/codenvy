@@ -20,7 +20,14 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -38,6 +45,9 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPermissionsImpl> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractJpaPermissionsDao.class);
+
     @Inject
     public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) throws IOException {
         super(new SystemDomain(allowedActions));
@@ -70,6 +80,35 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
                                   .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Singleton
+    public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        JpaSystemPermissionsDao dao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
+                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
+            }
         }
     }
 }

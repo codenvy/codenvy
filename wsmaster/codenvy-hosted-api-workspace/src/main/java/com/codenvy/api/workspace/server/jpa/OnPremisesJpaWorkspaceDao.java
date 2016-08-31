@@ -53,7 +53,7 @@ public class OnPremisesJpaWorkspaceDao extends JpaWorkspaceDao {
                           .setParameter("userId", userId)
                           .getResultList();
         } catch (RuntimeException x) {
-           throw new ServerException(x.getLocalizedMessage(), x);
+            throw new ServerException(x.getLocalizedMessage(), x);
         }
     }
 }
