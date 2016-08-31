@@ -17,12 +17,8 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.user.server.AdminUserService;
-<<<<<<< HEAD
 import com.codenvy.api.workspace.server.jpa.PermissionsJpaModule;
-=======
 import com.codenvy.api.workspace.server.jpa.OnPremisesJpaWorkspaceDao;
-import com.codenvy.api.workspace.server.jpa.WorkerJpaModule;
->>>>>>> jpa-integration
 import com.codenvy.auth.aws.ecr.AwsEcrAuthResolver;
 import com.codenvy.auth.sso.client.ServerClient;
 import com.codenvy.auth.sso.client.TokenHandler;
