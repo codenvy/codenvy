@@ -26,9 +26,8 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
+import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -64,10 +63,11 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     private static final long          BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
     private final UserManager       userManager;
-    private final ComposeFileParser composeFileParser;
+    private final EnvironmentParser environmentParser;
     private final int               workspacesPerUser;
     private final long              maxRamPerEnvMB;
     private final long              ramPerUserMB;
+    private final long              defaultMachineMemorySizeBytes;
 
     @Inject
     public LimitsCheckingWorkspaceManager(@Named("limits.user.workspaces.count") int workspacesPerUser,
@@ -78,15 +78,17 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           EventService eventService,
                                           UserManager userManager,
                                           SnapshotDao snapshotDao,
+                                          EnvironmentParser environmentParser,
                                           @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
-                                          ComposeFileParser composeFileParser) {
+                                          @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB) {
         super(workspaceDao, runtimes, eventService, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
         this.userManager = userManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
         this.ramPerUserMB = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
-        this.composeFileParser = composeFileParser;
+        this.environmentParser = environmentParser;
+        this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
     }
 
     @Override
@@ -285,12 +287,19 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in environment in megabytes.
      */
     private long sumRam(Environment environment) throws ServerException {
-        ComposeEnvironmentImpl composeEnvironment = composeFileParser.parse(environment);
-        long sumBytes = composeEnvironment.getServices()
-                                          .values()
-                                          .stream()
-                                          .mapToLong(ComposeServiceImpl::getMemLimit)
-                                          .sum();
+        ComposeEnvironmentImpl composeEnv = environmentParser.parse(environment);
+
+        long sumBytes = composeEnv.getServices()
+                                  .values()
+                                  .stream()
+                                  .mapToLong(value -> {
+                                      if (value.getMemLimit() == null || value.getMemLimit() == 0) {
+                                          return defaultMachineMemorySizeBytes;
+                                      } else {
+                                          return value.getMemLimit();
+                                      }
+                                  })
+                                  .sum();
         return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
     }
 

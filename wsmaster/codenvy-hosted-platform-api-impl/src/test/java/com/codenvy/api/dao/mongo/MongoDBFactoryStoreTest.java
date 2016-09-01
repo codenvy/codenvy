@@ -104,7 +104,8 @@ public class MongoDBFactoryStoreTest {
                                                               .withProperties(singletonMap("prop", "value"));
         ExtendedMachineDto machine =
                 newDto(ExtendedMachineDto.class).withAgents(singletonList("some-agent"))
-                                                .withServers(singletonMap("some-reference", conf2Dto));
+                                                .withServers(singletonMap("some-reference", conf2Dto))
+                                                .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L));
         EnvironmentDto environmentDto = newDto(EnvironmentDto.class)
                 .withRecipe(newDto(EnvironmentRecipeDto.class).withContent("content")
                                                               .withType("type")

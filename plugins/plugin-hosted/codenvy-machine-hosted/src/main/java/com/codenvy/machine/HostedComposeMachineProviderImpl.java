@@ -172,20 +172,40 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor) throws MachineException {
+        File workDir = null;
         try {
-            docker.buildImage(BuildImageParams.create(service.getBuild().getContext())
-                                              .withDockerfile(service.getBuild().getDockerfile())
-                                              .withForceRemoveIntermediateContainers(true)
-                                              .withRepository(machineImageName)
-                                              .withAuthConfigs(dockerCredentials.getCredentials())
-                                              .withDoForcePull(doForcePullOnBuild)
-                                              .withMemoryLimit(service.getMemLimit())
-                                              .withMemorySwapLimit(-1)
-                                              // don't build an image on a node under maintenance
-                                              .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE),
-                              progressMonitor);
+            BuildImageParams buildImageParams;
+            if (service.getBuild() != null &&
+                service.getBuild().getContext() == null &&
+                service.getBuild().getDockerfile() != null) {
+
+                workDir = Files.createTempDirectory(null).toFile();
+                final File dockerfileFile = new File(workDir, "Dockerfile");
+                try (FileWriter output = new FileWriter(dockerfileFile)) {
+                    output.append(service.getBuild().getDockerfile());
+                }
+
+                buildImageParams = BuildImageParams.create(dockerfileFile);
+            } else {
+                buildImageParams = BuildImageParams.create(service.getBuild().getContext())
+                                                   .withDockerfile(service.getBuild().getDockerfile());
+            }
+            buildImageParams.withForceRemoveIntermediateContainers(true)
+                            .withRepository(machineImageName)
+                            .withAuthConfigs(dockerCredentials.getCredentials())
+                            .withDoForcePull(doForcePullOnBuild)
+                            .withMemoryLimit(service.getMemLimit())
+                            .withMemorySwapLimit(-1)
+                            // don't build an image on a node under maintenance
+                            .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE);
+
+            docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
+        } finally {
+            if (workDir != null) {
+                FileCleaner.addFile(workDir);
+            }
         }
     }
 }

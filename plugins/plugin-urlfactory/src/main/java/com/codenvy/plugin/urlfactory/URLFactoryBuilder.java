@@ -16,10 +16,6 @@ package com.codenvy.plugin.urlfactory;
 
 import com.google.common.base.Strings;
 
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.environment.server.compose.model.BuildContextImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
@@ -50,8 +46,7 @@ public class URLFactoryBuilder {
     /**
      * Default docker type (if repository has no dockerfile)
      */
-    protected static final String DEFAULT_DOCKER_TYPE = "image";
-    protected static final long   MEMORY_LIMIT_BYTES  = 2000L * 1024L * 1024L;
+    protected static final String MEMORY_LIMIT_BYTES  = Long.toString(2000L * 1024L * 1024L);
     protected static final String MACHINE_NAME        = "ws-machine";
 
     /**
@@ -66,12 +61,11 @@ public class URLFactoryBuilder {
     @Inject
     private URLFetcher URLFetcher;
 
-    @Inject
-    private ComposeFileParser composeFileParser;
-
     /**
      * Build a default factory using the provided json file or create default one
-     * @param createFactoryParams optional parameters
+     *
+     * @param createFactoryParams
+     *         optional parameters
      * @return a factory
      */
     public Factory createFactory(CreateFactoryParams createFactoryParams) {
@@ -91,40 +85,41 @@ public class URLFactoryBuilder {
 
     /**
      * Help to generate default workspace configuration
-     * @param environmentName the name of the environment to create
-     * @param name the name of the workspace
-     * @param dockerFileLocation the optional location for codenvy dockerfile to use
+     *
+     * @param environmentName
+     *         the name of the environment to create
+     * @param name
+     *         the name of the workspace
+     * @param dockerFileLocation
+     *         the optional location for codenvy dockerfile to use
      * @return a workspace configuration
      */
     public WorkspaceConfigDto buildWorkspaceConfig(String environmentName,
                                                    String name,
                                                    String dockerFileLocation) {
 
-        ComposeServiceImpl composeService = new ComposeServiceImpl().withMemLimit(MEMORY_LIMIT_BYTES);
-
         // if remote repository contains a codenvy docker file, use it
         // else use the default image.
+        EnvironmentRecipeDto recipeDto;
         if (dockerFileLocation != null && URLChecker.exists(dockerFileLocation)) {
-            composeService.setBuild(new BuildContextImpl().withContext(dockerFileLocation));
+            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(dockerFileLocation)
+                                                          .withType("dockerfile")
+                                                          .withContentType("text/x-dockerfile");
         } else {
-            composeService.setImage(DEFAULT_DOCKER_IMAGE);
+            recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
+                                                          .withType("dockerimage");
         }
-
-        ComposeEnvironmentImpl composeEnv =
-                new ComposeEnvironmentImpl().withServices(singletonMap(MACHINE_NAME, composeService));
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                     .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
-        EnvironmentDto environmentDto = newDto(EnvironmentDto.class)
-                .withRecipe(newDto(EnvironmentRecipeDto.class).withContent(composeFileParser.toYaml(composeEnv))
-                                                              .withContentType("application/x-yaml")
-                                                              .withType("compose"))
-                .withMachines(singletonMap(MACHINE_NAME,
-                                           newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))));
+        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
+                                                                    .withMachines(singletonMap(MACHINE_NAME, machine));
 
         // workspace configuration using the environment
         return newDto(WorkspaceConfigDto.class)
-                         .withDefaultEnv(environmentName)
-                         .withEnvironments(singletonMap(environmentName, environmentDto))
-                         .withName(name);
+                .withDefaultEnv(environmentName)
+                .withEnvironments(singletonMap(environmentName, environmentDto))
+                .withName(name);
     }
 }

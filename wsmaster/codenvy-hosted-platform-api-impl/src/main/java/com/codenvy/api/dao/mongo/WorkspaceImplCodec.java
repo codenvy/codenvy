@@ -213,11 +213,11 @@ public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
         @SuppressWarnings("unchecked") // machines field is always map
         Map<String, Document> machinesDocuments = (Map<String, Document>)document.get("machines");
         if (machinesDocuments != null) {
-            Map<String, ExtendedMachineImpl> machines = machinesDocuments.entrySet()
-                                                                         .stream()
-                                                                         .collect(toMap(Map.Entry::getKey,
-                                                                                        entry -> asExtendedMachine(
-                                                                                                entry.getValue())));
+            Map<String, ExtendedMachineImpl> machines =
+                    machinesDocuments.entrySet()
+                                     .stream()
+                                     .collect(toMap(Map.Entry::getKey,
+                                                    entry -> asExtendedMachine(entry.getValue())));
             environment.setMachines(machines);
         }
         return environment;
@@ -258,21 +258,29 @@ public class WorkspaceImplCodec implements Codec<WorkspaceImpl> {
                                                                              entry -> asServerConf2(entry.getValue())));
             machine.setServers(servers);
         }
+        @SuppressWarnings("unchecked")
+        List<Document> attributes = (List<Document>)document.get("attributes");
+        if (attributes != null) {
+            machine.setAttributes(documentsListAsMap(attributes));
+        }
 
         return machine;
     }
 
-    private static Document asDocument(ExtendedMachineImpl extendedMachine) {
+    private static Document asDocument(ExtendedMachineImpl machine) {
         Document document = new Document();
-        document.append("agents", extendedMachine.getAgents());
+        document.append("agents", machine.getAgents());
 
-        if (extendedMachine.getServers() != null) {
-            Map<String, Document> servers = extendedMachine.getServers()
-                                                           .entrySet()
-                                                           .stream()
-                                                           .collect(toMap(Map.Entry::getKey,
-                                                                          entry -> asDocument(entry.getValue())));
+        if (machine.getServers() != null) {
+            Map<String, Document> servers = machine.getServers()
+                                                   .entrySet()
+                                                   .stream()
+                                                   .collect(toMap(Map.Entry::getKey,
+                                                                  entry -> asDocument(entry.getValue())));
             document.append("servers", servers);
+        }
+        if (machine.getAttributes() != null) {
+            document.append("attributes", mapAsDocumentsList(machine.getAttributes()));
         }
 
         return document;

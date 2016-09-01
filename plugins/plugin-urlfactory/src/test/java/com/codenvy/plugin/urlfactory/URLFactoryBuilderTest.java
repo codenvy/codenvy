@@ -14,10 +14,6 @@
  */
 package com.codenvy.plugin.urlfactory;
 
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.environment.server.compose.model.BuildContextImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
@@ -26,12 +22,9 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
-import java.net.URI;
 
 import static com.codenvy.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
 import static com.codenvy.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
@@ -64,10 +57,6 @@ public class URLFactoryBuilderTest {
     @Mock
     private URLFetcher URLFetcher;
 
-    // spy is needed for injection
-    @Spy
-    private ComposeFileParser composeFileParser = new ComposeFileParser(URI.create("localhost:8080"));
-
     /**
      * Tested instance.
      */
@@ -78,20 +67,17 @@ public class URLFactoryBuilderTest {
      * Check if not specifying a custom docker file we have the default value
      */
     @Test
-    public void checkDefaultDockerfile() throws Exception {
+    public void checkDefaultImage() throws Exception {
 
-        ComposeServiceImpl composeService = new ComposeServiceImpl().withMemLimit(MEMORY_LIMIT_BYTES);
-        composeService.setImage(DEFAULT_DOCKER_IMAGE);
-        ComposeEnvironmentImpl composeEnv =
-                new ComposeEnvironmentImpl().withServices(singletonMap(MACHINE_NAME, composeService));
+        EnvironmentRecipeDto recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
+                                                                           .withType("dockerimage");
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                     .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
-        EnvironmentDto environmentDto = newDto(EnvironmentDto.class)
-                .withRecipe(newDto(EnvironmentRecipeDto.class).withContent(composeFileParser.toYaml(composeEnv))
-                                                              .withContentType("application/x-yaml")
-                                                              .withType("compose"))
-                .withMachines(singletonMap(MACHINE_NAME,
-                                           newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))));
+        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
+                                                                    .withMachines(singletonMap(MACHINE_NAME, machine));
+        // setup environment
         WorkspaceConfigDto expectedWsConfig = newDto(WorkspaceConfigDto.class)
                 .withDefaultEnv("foo")
                 .withEnvironments(singletonMap("foo", environmentDto))
@@ -110,18 +96,16 @@ public class URLFactoryBuilderTest {
     public void checkWithCustomDockerfile() throws Exception {
 
         String myLocation = "http://foo-location";
-        ComposeServiceImpl composeService = new ComposeServiceImpl().withMemLimit(MEMORY_LIMIT_BYTES);
-        composeService.setBuild(new BuildContextImpl().withContext(myLocation));
-        ComposeEnvironmentImpl composeEnv =
-                new ComposeEnvironmentImpl().withServices(singletonMap(MACHINE_NAME, composeService));
+        EnvironmentRecipeDto recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(myLocation)
+                                                                           .withType("dockerfile")
+                                                                           .withContentType("text/x-dockerfile");
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                     .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
-        EnvironmentDto environmentDto = newDto(EnvironmentDto.class)
-                .withRecipe(newDto(EnvironmentRecipeDto.class).withContent(composeFileParser.toYaml(composeEnv))
-                                                              .withContentType("application/x-yaml")
-                                                              .withType("compose"))
-                .withMachines(singletonMap(MACHINE_NAME,
-                                           newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))));
+        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
+                                                                    .withMachines(singletonMap(MACHINE_NAME, machine));
+
         WorkspaceConfigDto expectedWsConfig = newDto(WorkspaceConfigDto.class)
                 .withDefaultEnv("foo")
                 .withEnvironments(singletonMap("foo", environmentDto))
@@ -141,18 +125,15 @@ public class URLFactoryBuilderTest {
     public void checkWithNonAccessibleCustomDockerfile() throws Exception {
 
         String myLocation = "http://foo-location";
-        ComposeServiceImpl composeService = new ComposeServiceImpl().withMemLimit(MEMORY_LIMIT_BYTES);
-        composeService.setImage(DEFAULT_DOCKER_IMAGE);
-        ComposeEnvironmentImpl composeEnv =
-                new ComposeEnvironmentImpl().withServices(singletonMap(MACHINE_NAME, composeService));
+        EnvironmentRecipeDto recipeDto = newDto(EnvironmentRecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE)
+                                                                           .withType("dockerimage");
+        ExtendedMachineDto machine = newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                     .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         // setup environment
-        EnvironmentDto environmentDto = newDto(EnvironmentDto.class)
-                .withRecipe(newDto(EnvironmentRecipeDto.class).withContent(composeFileParser.toYaml(composeEnv))
-                                                              .withContentType("application/x-yaml")
-                                                              .withType("compose"))
-                .withMachines(singletonMap(MACHINE_NAME,
-                                           newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))));
+        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(recipeDto)
+                                                                    .withMachines(singletonMap(MACHINE_NAME, machine));
+
         WorkspaceConfigDto expectedWsConfig = newDto(WorkspaceConfigDto.class)
                 .withDefaultEnv("foo")
                 .withEnvironments(singletonMap("foo", environmentDto))
