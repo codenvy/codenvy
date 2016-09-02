@@ -16,7 +16,6 @@ package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
-import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.stack.StackDomain;
 
@@ -26,7 +25,6 @@ import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +43,9 @@ import static java.lang.String.format;
  *
  * @author Max Shaposhnik
  */
-public class RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
 
     @Inject
     Set<PermissionsDao<? extends AbstractPermissions>> storages;

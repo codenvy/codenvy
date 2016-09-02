@@ -19,7 +19,7 @@ import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.jpa.PermissionsJpaModule;
-import com.codenvy.api.workspace.server.jpa.RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber;
+import com.codenvy.api.workspace.server.jpa.RemovePermissionsOnLastUserRemovedEventSubscriber;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
@@ -266,7 +266,7 @@ public class JpaEntitiesCascadeRemovalTest {
     @DataProvider(name = "beforeRemoveRollbackActions")
     public Object[][] beforeRemoveActions() {
         return new Class[][]{
-                {RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber.class}
+                {RemovePermissionsOnLastUserRemovedEventSubscriber.class}
         };
     }
 
