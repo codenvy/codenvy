@@ -14,12 +14,10 @@
  */
 package com.codenvy.api.workspace.server.jpa.cascaderemoval;
 
-import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaStackPermissionsDao;
-import com.codenvy.api.workspace.server.jpa.JpaWorkerDao;
 import com.codenvy.api.workspace.server.jpa.PermissionsJpaModule;
 import com.codenvy.api.workspace.server.jpa.RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;
@@ -44,7 +42,6 @@ import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
-import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao.RemoveFactoriesBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
@@ -52,20 +49,15 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
-import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -82,7 +74,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -111,31 +102,33 @@ import static org.testng.Assert.fail;
  */
 public class JpaEntitiesCascadeRemovalTest {
 
-    private Injector                                           injector;
-    private EventService                                       eventService;
-    private PreferenceDao                                      preferenceDao;
-    private UserDao                                            userDao;
-    private ProfileDao                                         profileDao;
-    private WorkspaceDao                                       workspaceDao;
-    private SnapshotDao                                        snapshotDao;
-    private SshDao                                             sshDao;
-    private FactoryDao                                         factoryDao;
-    private RecipeDao                                          recipeDao;
-    private StackDao                                           stackDao;
-    private WorkerDao                                          workerDao;
-    private JpaRecipePermissionsDao                            recipePermissionsDao;
-    private JpaStackPermissionsDao                             stackPermissionsDao;
+    private Injector                injector;
+    private EventService            eventService;
+    private PreferenceDao           preferenceDao;
+    private UserDao                 userDao;
+    private ProfileDao              profileDao;
+    private WorkspaceDao            workspaceDao;
+    private SnapshotDao             snapshotDao;
+    private SshDao                  sshDao;
+    private FactoryDao              factoryDao;
+    private RecipeDao               recipeDao;
+    private StackDao                stackDao;
+    private WorkerDao               workerDao;
+    private JpaRecipePermissionsDao recipePermissionsDao;
+    private JpaStackPermissionsDao  stackPermissionsDao;
 
     /** User is a root of dependency tree. */
     private UserImpl user;
 
     private UserImpl user2;
 
+
     /** Profile depends on user. */
     private ProfileImpl profile;
 
     /** Preferences depend on user. */
     private Map<String, String> preferences;
+
 
     /** Workspaces depend on user. */
     private WorkspaceImpl workspace1;
@@ -164,8 +157,8 @@ public class JpaEntitiesCascadeRemovalTest {
     private RecipeImpl recipe2;
 
     /** Stack depend on user via permissions */
-    private StackImpl  stack1;
-    private StackImpl  stack2;
+    private StackImpl stack1;
+    private StackImpl stack2;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -200,16 +193,14 @@ public class JpaEntitiesCascadeRemovalTest {
         workerDao = injector.getInstance(WorkerDao.class);
 
         TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>> lit =
-                new TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>>() {};
+                new TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>>() {
+                };
         Key<Set<PermissionsDao<? extends AbstractPermissions>>> key = Key.get(lit);
-        for (Iterator<PermissionsDao<? extends AbstractPermissions>> it = injector.getInstance(key).iterator(); it.hasNext(); ) {
-            PermissionsDao<? extends AbstractPermissions> dao = it.next();
+        for (PermissionsDao<? extends AbstractPermissions> dao : injector.getInstance(key)) {
             if (dao.getDomain().getId().equals(RecipeDomain.DOMAIN_ID)) {
                 recipePermissionsDao = (JpaRecipePermissionsDao)dao;
             } else if (dao.getDomain().getId().equals(StackDomain.DOMAIN_ID)) {
                 stackPermissionsDao = (JpaStackPermissionsDao)dao;
-            } else {
-                continue;
             }
         }
     }

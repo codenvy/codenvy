@@ -38,6 +38,7 @@ public class PermissionsJpaModule extends AbstractModule {
 
         bind(WorkerDao.class).to(JpaWorkerDao.class);
         bind(JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
+        bind(JpaWorkerDao.RemoveSystemPermissionsBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
         bind(RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class).asEagerSingleton();

@@ -16,6 +16,7 @@ package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.google.inject.persist.Transactional;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,6 +152,35 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
                 }
             } catch (Exception x) {
                 LOG.error(format("Couldn't remove workers before workspace '%s' is removed", event.getWorkspace().getId()), x);
+            }
+        }
+    }
+
+    @Singleton
+    public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private EventService eventService;
+        @Inject
+        private WorkerDao    dao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                for (WorkerImpl worker : dao.getWorkersByUser(event.getUser().getId())) {
+                    dao.removeWorker(worker.getInstanceId(), worker.getUserId());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
             }
         }
     }

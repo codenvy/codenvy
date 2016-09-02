@@ -53,9 +53,6 @@ public class RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber imp
     Set<PermissionsDao<? extends AbstractPermissions>> storages;
 
     @Inject
-    JpaWorkspaceDao workspaceDao;
-
-    @Inject
     JpaStackDao stackDao;
 
     @Inject
@@ -84,10 +81,6 @@ public class RemovePermissionsOnLastSetPermissionsUserRemovedEventSubscriber imp
                                .noneMatch(permissions1 -> permissions1.getActions().contains(SET_PERMISSIONS) &&
                                                           !permissions1.getUserId().equals(event.getUser().getId()))) {
                         switch (permissions.getDomainId()) {
-                            case WorkspaceDomain.DOMAIN_ID: {
-                                workspaceDao.remove(permissions.getInstanceId());
-                                break;
-                            }
                             case StackDomain.DOMAIN_ID: {
                                 stackDao.remove(permissions.getInstanceId());
                                 break;
