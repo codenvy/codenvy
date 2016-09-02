@@ -14,6 +14,8 @@
  */
 package com.codenvy.organization.spi.tck.jpa;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
@@ -40,6 +42,8 @@ public class OrganizationJpaTckModule extends TckModule {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+
+        bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
         bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).toInstance(new JpaTckRepository<>(OrganizationImpl.class));
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));

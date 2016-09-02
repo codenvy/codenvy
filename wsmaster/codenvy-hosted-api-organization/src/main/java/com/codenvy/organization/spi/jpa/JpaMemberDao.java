@@ -14,6 +14,8 @@
  */
 package com.codenvy.organization.spi.jpa;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
@@ -36,6 +38,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,27 +51,27 @@ import static java.util.Objects.requireNonNull;
  * @author Sergii Leschenko
  */
 @Singleton
-public class JpaMemberDao implements MemberDao {
+public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implements MemberDao {
     private static final Logger LOG = LoggerFactory.getLogger(JpaMemberDao.class);
 
-    private final Provider<EntityManager> managerProvider;
-
     @Inject
-    public JpaMemberDao(Provider<EntityManager> managerProvider) {
-        this.managerProvider = managerProvider;
+    public JpaMemberDao(AbstractPermissionsDomain<MemberImpl> supportedDomain) throws IOException {
+        super(supportedDomain);
     }
 
     @Override
-    public void store(MemberImpl newMember) throws ServerException {
-        requireNonNull(newMember, "Required non-null member");
-        try {
-            doStore(newMember);
-        } catch (IntegrityConstraintViolationException e) {
-            throw new ServerException("Could not store member for non-existent user or organization");
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
+    public MemberImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
+        return getMember(instanceId, userId);
+    }
 
+    @Override
+    public List<MemberImpl> getByInstance(String instanceId) throws ServerException {
+        return getMembers(instanceId);
+    }
+
+    @Override
+    public List<MemberImpl> getByUser(String userId) throws ServerException {
+        return getMemberships(userId);
     }
 
     @Override
@@ -139,21 +142,6 @@ public class JpaMemberDao implements MemberDao {
                           .getResultList();
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    @Transactional
-    protected void doStore(MemberImpl newMember) {
-        final EntityManager manager = managerProvider.get();
-        try {
-            manager.createNamedQuery("Member.getMember", MemberImpl.class)
-                   .setParameter("userId", newMember.getUserId())
-                   .setParameter("organizationId", newMember.getOrganizationId())
-                   .getSingleResult();
-
-            manager.merge(newMember);
-        } catch (NoResultException e) {
-            manager.persist(newMember);
         }
     }
 

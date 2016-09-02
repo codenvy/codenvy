@@ -14,15 +14,19 @@
  */
 package com.codenvy.organization.api;
 
-import com.codenvy.api.permission.server.dao.PermissionsStorage;
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.organization.api.permissions.OrganizationCreatorPermissionsProvider;
-import com.codenvy.organization.api.permissions.OrganizationPermissionStorage;
+import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.api.permissions.OrganizationPermissionsFilter;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 /**
@@ -32,17 +36,20 @@ public class OrganizationModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(OrganizationDao.class).to(JpaOrganizationDao.class);
-        bind(MemberDao.class).to(JpaMemberDao.class);
 
         bind(OrganizationService.class);
         bind(OrganizationPermissionsFilter.class);
 
+        bind(MemberDao.class).to(JpaMemberDao.class);
         bind(JpaMemberDao.RemoveMembersBeforeOrganizationRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaMemberDao.RemoveMembersBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
 
         bind(OrganizationCreatorPermissionsProvider.class).asEagerSingleton();
-        Multibinder<PermissionsStorage> storages = Multibinder.newSetBinder(binder(),
-                                                                            PermissionsStorage.class);
-        storages.addBinding().to(OrganizationPermissionStorage.class);
+
+        bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
+
+        Multibinder<PermissionsDao<? extends AbstractPermissions>> storages =
+                Multibinder.newSetBinder(binder(), new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {});
+        storages.addBinding().to(JpaMemberDao.class);
     }
 }

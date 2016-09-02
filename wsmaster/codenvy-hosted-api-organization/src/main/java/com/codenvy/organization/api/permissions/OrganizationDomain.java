@@ -15,8 +15,10 @@
 package com.codenvy.organization.api.permissions;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.organization.spi.impl.MemberImpl;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Domain for storing organizations' permissions
@@ -33,12 +35,17 @@ public class OrganizationDomain extends AbstractPermissionsDomain<MemberImpl> {
     public static final String CREATE_WORKSPACES       = "createWorkspaces";
     public static final String MANAGE_WORKSPACES       = "manageWorkspaces";
 
-    protected OrganizationDomain() {
+    public OrganizationDomain() {
         super(DOMAIN_ID, Arrays.asList(UPDATE,
                                        DELETE,
                                        MANAGE_SUBORGANIZATIONS,
                                        MANAGE_RESOURCES,
                                        CREATE_WORKSPACES,
                                        MANAGE_WORKSPACES));
+    }
+
+    @Override
+    protected MemberImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
+        return new MemberImpl(userId, instanceId, allowedActions);
     }
 }

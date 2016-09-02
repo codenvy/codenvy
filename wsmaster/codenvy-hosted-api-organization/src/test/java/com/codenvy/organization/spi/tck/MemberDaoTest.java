@@ -114,14 +114,14 @@ public class MemberDaoTest {
     }
 
     @Test(expectedExceptions = ServerException.class)
-    public void shouldThrowConflictExceptionOnStoringMemberForNonExistenceUser() throws Exception {
+    public void shouldThrowServerExceptionOnStoringMemberForNonExistenceUser() throws Exception {
         final MemberImpl toCreate = new MemberImpl("non-existence", members[0].getOrganizationId(), singletonList("read"));
 
         memberDao.store(toCreate);
     }
 
     @Test(expectedExceptions = ServerException.class)
-    public void shouldThrowConflictExceptionOnStoringMemberForNonExistenceOrganization() throws Exception {
+    public void shouldThrowServerExceptionOnStoringMemberForNonExistenceOrganization() throws Exception {
         final MemberImpl toCreate = new MemberImpl(members[0].getUserId(), "non-existence", singletonList("read"));
 
         memberDao.store(toCreate);
