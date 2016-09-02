@@ -340,9 +340,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         machineImageProviderMultibinder.addBinding()
                                        .to(com.codenvy.machine.HostedDockerInstanceProvider.class);
 
-        bindConstant().annotatedWith(Names.named("machine.agent.max_start_time_ms")).to(120000);
-        bindConstant().annotatedWith(Names.named("machine.agent.ping_delay_ms")).to(2000);
-
         bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
                 .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
 

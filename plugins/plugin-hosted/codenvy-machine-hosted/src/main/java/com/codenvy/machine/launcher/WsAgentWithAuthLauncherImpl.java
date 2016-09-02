@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,6 +49,7 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
     @Inject
     public WsAgentWithAuthLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
                                        HttpJsonRequestFactory httpJsonRequestFactory,
+                                       @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
                                        @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                        @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
                                        @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
@@ -55,6 +57,7 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
                                        @Named("api.endpoint") String apiEndpoint) {
         super(machineProcessManagerProvider,
               httpJsonRequestFactory,
+              wsAgentRunCommand,
               wsAgentMaxStartTimeMs,
               wsAgentPingDelayMs,
               wsAgentPingConnectionTimeoutMs,
