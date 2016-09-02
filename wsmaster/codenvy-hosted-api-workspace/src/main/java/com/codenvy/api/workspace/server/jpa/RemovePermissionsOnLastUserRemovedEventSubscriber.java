@@ -87,8 +87,6 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
                                 recipeDao.remove(permissions.getInstanceId());
                                 break;
                             }
-                            default: {
-                            }
                         }
 
                     }
