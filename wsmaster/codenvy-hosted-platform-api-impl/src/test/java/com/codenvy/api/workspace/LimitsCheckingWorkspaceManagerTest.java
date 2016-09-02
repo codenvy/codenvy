@@ -295,7 +295,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         final WorkspaceImpl ws = createRuntime("1gb", "1gb");
         final UserImpl user = new UserImpl("id", "email", ws.getNamespace());
         user.setName(ws.getNamespace());
-        doReturn(user).when(accountManager).getByName(eq(ws.getNamespace()));
+        doReturn(user.getAccount()).when(accountManager).getByName(eq(ws.getNamespace()));
 
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
                                                                                               "2gb", // <- workspaces ram limit

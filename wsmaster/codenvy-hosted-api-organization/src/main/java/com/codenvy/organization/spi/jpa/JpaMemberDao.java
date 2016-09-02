@@ -189,33 +189,4 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
             }
         }
     }
-
-    @Singleton
-    public static class RemoveMembersBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
-        @Inject
-        private EventService eventService;
-        @Inject
-        private MemberDao    memberDao;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this);
-        }
-
-        @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (MemberImpl member : memberDao.getMemberships(event.getUser().getId())) {
-                    memberDao.remove(member.getOrganizationId(), member.getUserId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove members before user '%s' is removed", event.getUser().getId()), x);
-            }
-        }
-    }
 }

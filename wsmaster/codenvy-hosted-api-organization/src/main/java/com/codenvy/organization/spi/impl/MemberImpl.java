@@ -20,7 +20,6 @@ import com.codenvy.organization.shared.model.Member;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -55,7 +54,8 @@ import java.util.List;
                                     "WHERE m.userId = :userId")
         }
 )
-@Table(indexes = @Index(columnList = "userId, organizationId", unique = true))
+@Table(indexes = {@Index(columnList = "userId, organizationId", unique = true),
+                  @Index(columnList = "organizationId")})
 public class MemberImpl extends AbstractPermissions implements Member {
     @Column
     private String organizationId;

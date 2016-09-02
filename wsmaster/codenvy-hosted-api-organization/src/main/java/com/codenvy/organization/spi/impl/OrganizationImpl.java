@@ -19,13 +19,18 @@ import com.codenvy.organization.spi.jpa.OrganizationEntityListener;
 
 import org.eclipse.che.account.spi.AccountImpl;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Objects;
 
 /**
@@ -40,15 +45,23 @@ import java.util.Objects;
                 @NamedQuery(name = "Organization.getByName",
                             query = "SELECT o " +
                                     "FROM Organization o " +
-                                    "WHERE o.name = :name"),
+                                    "WHERE o.account.name = :name"),
                 @NamedQuery(name = "Organizations.getByParent",
                             query = "SELECT o " +
                                     "FROM Organization o " +
                                     "WHERE o.parent = :parent")
         }
 )
-public class OrganizationImpl extends AccountImpl implements Organization {
+@Table(indexes = {@Index(columnList = "parent")})
+public class OrganizationImpl implements Organization {
     public static final String ORGANIZATIONAL_ACCOUNT = "organizational";
+
+    @Id
+    private String id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(nullable = false)
+    private AccountImpl account;
 
     @Column
     private String parent;
@@ -60,14 +73,14 @@ public class OrganizationImpl extends AccountImpl implements Organization {
     public OrganizationImpl() {}
 
     public OrganizationImpl(Organization organization) {
-        this.id = organization.getId();
-        this.name = organization.getName();
-        this.parent = organization.getParent();
+        this(organization.getId(),
+             organization.getName(),
+             organization.getParent());
     }
 
     public OrganizationImpl(String id, String name, String parent) {
         this.id = id;
-        this.name = name;
+        this.account = new AccountImpl(id, name, ORGANIZATIONAL_ACCOUNT);
         this.parent = parent;
     }
 
@@ -80,16 +93,16 @@ public class OrganizationImpl extends AccountImpl implements Organization {
     }
 
     public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getType() {
-        return ORGANIZATIONAL_ACCOUNT;
+        if (account != null) {
+            return account.getName();
+        }
+        return null;
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (account != null) {
+            account.setName(name);
+        }
     }
 
     public String getParent() {
@@ -102,26 +115,32 @@ public class OrganizationImpl extends AccountImpl implements Organization {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrganizationImpl)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OrganizationImpl)) {
+            return false;
+        }
         OrganizationImpl that = (OrganizationImpl)o;
         return Objects.equals(id, that.id)
-               && Objects.equals(name, that.name)
+               && Objects.equals(getName(), that.getName())
                && Objects.equals(parent, that.parent);
     }
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        return 31 * hash + Objects.hashCode(parent);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(getName());
+        hash = 31 * hash + Objects.hashCode(parent);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "OrganizationImpl{" +
                "id='" + id + '\'' +
-               ", name='" + name + '\'' +
+               ", name='" + getName() + '\'' +
                ", parent='" + parent + '\'' +
                '}';
     }
