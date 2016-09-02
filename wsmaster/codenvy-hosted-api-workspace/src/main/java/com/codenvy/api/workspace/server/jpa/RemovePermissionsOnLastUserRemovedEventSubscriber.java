@@ -74,9 +74,10 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
         try {
             for (PermissionsDao<? extends AbstractPermissions> storage : storages) {
                 for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
-                    // This place is potentially source of race condition, e.g.
-                    // if two separate threads removing two users with setPermissions in the same time,
-                    // each thread sees another user permissions, and does not removing the domain object (stack or recipe).
+                    // This method can  potentially be source of race conditions,
+                    // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
+                    // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
+                    // deleted when it's not required anymore.
                     // As a result, a solitary objects may be present in the DB.
                     if (storage.getByInstance(permissions.getInstanceId())
                                .stream()

@@ -16,7 +16,6 @@ package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
-import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
@@ -55,21 +54,10 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     }
 
     @Override
-    @Transactional
     public StackPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Stack identifier required");
         requireNonNull(userId, "User identifier required");
-        try {
-            return managerProvider.get()
-                                  .createNamedQuery("StackPermissions.getByUserAndStackId", StackPermissionsImpl.class)
-                                  .setParameter("stackId", instanceId)
-                                  .setParameter("userId", userId)
-                                  .getSingleResult();
-        } catch (NoResultException e) {
-            throw new NotFoundException(format("Permissions on stack '%s' of user '%s' was not found.", instanceId, userId));
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
+        return doGet(userId, instanceId);
     }
 
     @Override
@@ -95,6 +83,21 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
                                   .createNamedQuery("StackPermissions.getByUserId", StackPermissionsImpl.class)
                                   .setParameter("userId", userId)
                                   .getResultList();
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Transactional
+    protected StackPermissionsImpl doGet(String userId, String instanceId) throws ServerException, NotFoundException {
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("StackPermissions.getByUserAndStackId", StackPermissionsImpl.class)
+                                  .setParameter("stackId", instanceId)
+                                  .setParameter("userId", userId)
+                                  .getSingleResult();
+        } catch (NoResultException e) {
+            throw new NotFoundException(format("Permissions on stack '%s' of user '%s' was not found.", instanceId, userId));
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }

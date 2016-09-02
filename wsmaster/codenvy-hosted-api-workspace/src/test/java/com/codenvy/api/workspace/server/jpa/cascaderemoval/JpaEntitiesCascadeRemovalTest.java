@@ -32,7 +32,6 @@ import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
-import com.google.inject.util.Types;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;

@@ -54,21 +54,10 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
     }
 
     @Override
-    @Transactional
     public RecipePermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Stack identifier required");
         requireNonNull(userId, "User identifier required");
-        try {
-            return managerProvider.get()
-                                  .createNamedQuery("RecipePermissions.getByUserAndRecipeId", RecipePermissionsImpl.class)
-                                  .setParameter("recipeId", instanceId)
-                                  .setParameter("userId", userId)
-                                  .getSingleResult();
-        } catch (NoResultException e) {
-            throw new NotFoundException(format("Permissions on recipe '%s' of user '%s' was not found.", instanceId, userId));
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
+        return doGet(userId, instanceId);
     }
 
     @Override
@@ -94,6 +83,21 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
                                   .createNamedQuery("RecipePermissions.getByUserId", RecipePermissionsImpl.class)
                                   .setParameter("userId", userId)
                                   .getResultList();
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Transactional
+    protected RecipePermissionsImpl doGet(String userId, String instanceId) throws ServerException, NotFoundException {
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByUserAndRecipeId", RecipePermissionsImpl.class)
+                                  .setParameter("recipeId", instanceId)
+                                  .setParameter("userId", userId)
+                                  .getSingleResult();
+        } catch (NoResultException e) {
+            throw new NotFoundException(format("Permissions on recipe '%s' of user '%s' was not found.", instanceId, userId));
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
