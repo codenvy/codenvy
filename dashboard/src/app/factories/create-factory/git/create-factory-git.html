@@ -10,18 +10,19 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<form name="createFactoryGitForm">
-  <div layout="row" flex></div>
-  <che-input che-form="createFactoryGitForm"
-              che-name="remoteGitURL"
-              che-label-name="Git URL"
-              che-place-holder="Url of the git repository"
-              ng-model="createFactoryGitCtrl.location"
-              git-url
-              required>
-    <div ng-message="gitUrl">Invalid Git URL</div>
-    <div ng-message="required">A repository URL is required.</div>
-  </che-input>
-
-
-</form>
+<che-label-container che-label-name="Git URL">
+  <form name="createFactoryGitForm">
+    <div class="create-factory-git-input">
+      <che-input che-form="createFactoryGitForm"
+                 che-name="remoteGitURL"
+                 che-place-holder="Repository URL"
+                 che-width="auto"
+                 ng-model="createFactoryGitCtrl.location"
+                 git-url
+                 required>
+        <div ng-message="gitUrl">Invalid Git URL</div>
+        <div ng-message="required">A repository URL is required.</div>
+      </che-input>
+    </div>
+  </form>
+</che-label-container>

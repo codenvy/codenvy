@@ -34,9 +34,5 @@ BINARIES="/home/vagrant/codenvy/updates/codenvy/${LATEST_CODENVY4_VERSION}/coden
 executeIMCommand "install" "--binaries=$BINARIES" "codenvy" "${LATEST_CODENVY4_VERSION}"
 validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}
 
-# test changing password
-executeIMCommand "password" "new-password" "new2-password"
-authWithoutRealmAndServerDns "newadmin" "new2-password"
-
 printAndLog "RESULT: PASSED"
 vagrantDestroy

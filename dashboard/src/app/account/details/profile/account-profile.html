@@ -1,51 +1,61 @@
-<che-input che-form="profileInformationForm"
-           che-name="firstName"
-           che-label-name="First name"
-           che-place-holder="First Name"
-            ng-model="accountCtrl.profileAttributes.firstName"
-            required
-            ng-maxlength="128">
-  <div ng-message="required">A name is required.</div>
-  <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-</che-input>
-<che-input che-form="profileInformationForm"
-           che-name="lastName"
-           che-label-name="Last name"
-           che-place-holder="Last Name"
-            ng-model="accountCtrl.profileAttributes.lastName"
-            required
-            ng-maxlength="128">
-  <div ng-message="required">A last name is required.</div>
-  <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-</che-input>
+<che-label-container che-label-name="First Name">
+  <che-input che-form="profileInformationForm"
+             che-name="firstName"
+             che-place-holder="First Name"
+             ng-model="accountCtrl.profileAttributes.firstName"
+             required
+             ng-maxlength="128">
+    <div ng-message="required">A name is required.</div>
+    <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+  </che-input>
+</che-label-container>
 
-<che-input che-form="profileInformationForm"
-           che-name="phone"
-           che-label-name="Phone"
-           che-place-holder="phone"
-           che-pattern="(^[+]{0,1}[0-9-]{0,}$)"
-            ng-model="accountCtrl.profileAttributes.phone"
-            ng-maxlength="15"
-            ng-minlength="4">
-  <div ng-message="pattern">Should be numbers and may start with a '+'.</div>
-  <div ng-message="minlength">The phone number has to be more than 4 characters long.</div>
-  <div ng-message="maxlength">The phone number has to be less than 15 characters long.</div>
-</che-input>
-<che-select  che-label-name="Country"
-             che-option-values="accountProfileController.countries"
-             che-place-holder="Select Your Country"
-             che-value="accountCtrl.profileAttributes.country">
-</che-select>
-<che-input che-form="profileInformationForm"
-            che-name="department"
-            che-label-name="Company"
-            che-place-holder="Company"
-            ng-model="accountCtrl.profileAttributes.employer"
-            ng-maxlength="128">
-  <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-</che-input>
-<che-select  che-label-name="Role"
-             che-option-values="accountProfileController.jobs"
-             che-place-holder="Select Your Role"
-             che-value="accountCtrl.profileAttributes.jobtitle">
-</che-select>
+<che-label-container che-label-name="Last Name">
+  <che-input che-form="profileInformationForm"
+             che-name="lastName"
+             che-place-holder="Last Name"
+             ng-model="accountCtrl.profileAttributes.lastName"
+             required
+             ng-maxlength="128">
+    <div ng-message="required">A last name is required.</div>
+    <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+  </che-input>
+</che-label-container>
+
+<che-label-container che-label-name="Phone">
+  <che-input che-form="profileInformationForm"
+             che-name="phone"
+             che-place-holder="phone"
+             che-pattern="(^[+]{0,1}[0-9-]{0,}$)"
+             ng-model="accountCtrl.profileAttributes.phone"
+             ng-maxlength="15"
+             ng-minlength="4">
+    <div ng-message="pattern">Should be numbers and may start with a '+'.</div>
+    <div ng-message="minlength">The phone number has to be more than 4 characters long.</div>
+    <div ng-message="maxlength">The phone number has to be less than 15 characters long.</div>
+  </che-input>
+</che-label-container>
+
+<che-label-container che-label-name="Country">
+  <che-select  che-option-values="accountProfileController.countries"
+               che-place-holder="Select Your Country"
+               che-value="accountCtrl.profileAttributes.country">
+  </che-select>
+</che-label-container>
+
+<che-label-container che-label-name="Company">
+  <che-input che-form="profileInformationForm"
+             che-name="department"
+             che-place-holder="Company"
+             ng-model="accountCtrl.profileAttributes.employer"
+             ng-maxlength="128">
+    <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+  </che-input>
+</che-label-container>
+
+<che-label-container che-label-name="Role">
+  <che-select  che-option-values="accountProfileController.jobs"
+               che-place-holder="Select Your Role"
+               che-value="accountCtrl.profileAttributes.jobtitle">
+  </che-select>
+</che-label-container>

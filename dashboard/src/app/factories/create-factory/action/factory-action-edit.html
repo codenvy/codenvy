@@ -1,16 +1,28 @@
-<md-dialog flex="50" class="factory-add-action-dialog">
+<md-dialog flex="50">
   <form name="editActionForm">
     <che-panel che-title="Edit Action">
 
       <md-dialog-content>
+        <div ng-if="factoryActionDialogEditCtrl.selectedValue.name">
         <che-input focusable
                    che-name="Editing"
                    che-form="editActionForm"
                    che-label-name="Param"
                    required
-                   ng-model="factoryActionDialogEditCtrl.selectedValue">
+                   ng-model="factoryActionDialogEditCtrl.selectedValue.name">
           <div ng-message="required">Param is required</div>
         </che-input>
+        </div>
+        <div ng-if="factoryActionDialogEditCtrl.selectedValue.file">
+        <che-input focusable
+                   che-name="Editing"
+                   che-form="editActionForm"
+                   che-label-name="Param"
+                   required
+                   ng-model="factoryActionDialogEditCtrl.selectedValue.file">
+          <div ng-message="required">Param is required</div>
+        </che-input>
+        </div>
       </md-dialog-content>
       <div class="md-actions">
         <md-button ng-click="factoryActionDialogEditCtrl.abort()" tabindex="0" type="button">Cancel</md-button>

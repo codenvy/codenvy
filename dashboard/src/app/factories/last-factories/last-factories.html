@@ -17,15 +17,24 @@
     from Codenvy S.A..
 
 -->
-<che-panel che-title="Recent Factories" che-title-icon="material-design icon-ic_widgets_24px">
+<dashboard-panel panel-title="Recent Factories">
+
   <md-progress-linear md-mode="indeterminate"
                       ng-show="lastFactoriesController.isLoading"></md-progress-linear>
+
   <div class="dashboard-last-factories" ng-show="!lastFactoriesController.isLoading">
-    <span ng-show="lastFactoriesController.getFactories().length === 0">No factories found</span>
+    <div class="dashboard-add-button">
+      <che-button-primary che-button-title="Create Factory"
+                          ng-href="#/factories/create-factory"></che-button-primary>
+    </div>
+
+    <span ng-show="lastFactoriesController.getFactories().length === 0" class="last-factories-empty-label">No factories found</span>
+
     <che-list ng-show="lastFactoriesController.getFactories().length > 0">
-      <cdvy-factory-item
-        ng-repeat="factory in lastFactoriesController.getFactories() | orderBy:lastFactoriesController.factoriesOrderBy | limitTo:lastFactoriesController.maxItems"
-        cdvy-factory="factory" cdvy-is-selectable="false"/>
+      <cdvy-factory-item layout="row"
+                         ng-repeat="factory in lastFactoriesController.getFactories() | orderBy:lastFactoriesController.factoriesOrderBy | limitTo:lastFactoriesController.maxItems"
+                         cdvy-factory="factory"
+                         cdvy-is-selectable="false"/>
     </che-list>
   </div>
-</che-panel>
+</dashboard-panel>

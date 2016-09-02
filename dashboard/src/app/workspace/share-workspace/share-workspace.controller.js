@@ -28,13 +28,15 @@ export class ShareWorkspaceController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, codenvyUser, codenvyPermissions, cheNotification, $mdConstant, $route, $q, lodash) {
+  constructor(cheWorkspace, codenvyUser, codenvyPermissions, cheNotification, $mdDialog, $document, $mdConstant, $route, $q, lodash) {
     "ngInject";
 
     this.cheWorkspace = cheWorkspace;
     this.codenvyUser = codenvyUser;
     this.codenvyPermissions = codenvyPermissions;
     this.cheNotification = cheNotification;
+    this.$mdDialog = $mdDialog;
+    this.$document = $document;
     this.$q = $q;
     this.lodash = lodash;
 
@@ -59,7 +61,28 @@ export class ShareWorkspaceController {
     this.workspaceName = $route.current.params.workspaceName;
 
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
-    this.refreshWorkspacePermissions();
+    if (this.workspace) {
+      this.refreshWorkspacePermissions();
+    } else {
+      this.isLoading = true;
+      let promise = this.cheWorkspace.fetchWorkspaces();
+
+      promise.then(() => {
+        this.isLoading = false;
+        this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
+        this.refreshWorkspacePermissions();
+      }, (error) => {
+        this.isLoading = false;
+        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to update workspace data.');
+      });
+    }
+
+    this.userOrderBy = 'email';
+    this.userFilter = {email: ''};
+    this.usersSelectedStatus = {};
+    this.isNoSelected = true;
+    this.isAllSelected = false;
+    this.isBulkChecked = false;
   }
 
   /**
@@ -138,6 +161,167 @@ export class ShareWorkspaceController {
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to share workspace.');
+    });
+
+    return permissionPromises;
+  }
+
+  /**
+   * Check all users in list
+   */
+  selectAllUsers() {
+    this.users.forEach((user) => {
+      this.usersSelectedStatus[user.id] = true;
+    });
+  }
+
+  /**
+   * Uncheck all users in list
+   */
+  deselectAllUsers() {
+    this.users.forEach((user) => {
+      this.usersSelectedStatus[user.id] = false;
+    });
+  }
+
+  /**
+   * Change bulk selection value
+   */
+  changeBulkSelection() {
+    if (this.isBulkChecked) {
+      this.deselectAllUsers();
+      this.isBulkChecked = false;
+    } else {
+      this.selectAllUsers();
+      this.isBulkChecked = true;
+    }
+    this.updateSelectedStatus();
+  }
+
+  /**
+   * Update users selected status
+   */
+  updateSelectedStatus() {
+    this.isNoSelected = true;
+    this.isAllSelected = true;
+
+    this.users.forEach((user) => {
+      if (this.usersSelectedStatus[user.id]) {
+        this.isNoSelected = false;
+      } else {
+        this.isAllSelected = false;
+      }
+    });
+
+    if (this.isNoSelected) {
+      this.isBulkChecked = false;
+      return;
+    }
+
+    if (this.isAllSelected) {
+      this.isBulkChecked = true;
+    }
+  }
+
+  /**
+   * Removes all selected users permissions for current workspace
+   */
+  deleteSelectedWorkspaceMembers() {
+    let usersSelectedStatusKeys = Object.keys(this.usersSelectedStatus);
+    let checkedUsers = [];
+
+    if (!usersSelectedStatusKeys.length) {
+      this.cheNotification.showError('No such workspace members.');
+      return;
+    }
+
+    this.users.forEach((user) => {
+      usersSelectedStatusKeys.forEach((key) => {
+        if (user.id === key && this.usersSelectedStatus[key] === true) {
+          checkedUsers.push(user);
+        }
+      });
+    });
+
+    let queueLength = checkedUsers.length;
+    if (!queueLength) {
+      this.cheNotification.showError('No such workspace member.');
+      return;
+    }
+
+    let confirmationPromise = this.showDeleteConfirmation(queueLength);
+    confirmationPromise.then(() => {
+      let numberToDelete = queueLength;
+      let isError = false;
+      let deleteUserPromises = [];
+      let currentUserEmail;
+      checkedUsers.forEach((user) => {
+        currentUserEmail = user.email;
+        this.usersSelectedStatus[user.id] = false;
+        let promise = this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instance, user.id);
+        promise.then(() => {
+          queueLength--;
+        }, (error) => {
+          isError = true;
+          this.$log.error('Cannot delete permissions: ', error);
+        });
+        deleteUserPromises.push(promise);
+      });
+
+      this.$q.all(deleteUserPromises).finally(() => {
+        this.refreshWorkspacePermissions();
+        if (isError) {
+          this.cheNotification.showError('Delete failed.');
+        } else {
+          if (numberToDelete === 1) {
+            this.cheNotification.showInfo(currentUserEmail + 'has been removed.');
+          } else {
+            this.cheNotification.showInfo('Selected numbers have been removed.');
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Show confirmation popup before delete
+   * @param numberToDelete
+   * @returns {*}
+   */
+  showDeleteConfirmation(numberToDelete) {
+    let confirmTitle = 'Would you like to delete ';
+    if (numberToDelete > 1) {
+      confirmTitle += 'these ' + numberToDelete + ' members?';
+    } else {
+      confirmTitle += 'this selected member?';
+    }
+    let confirm = this.$mdDialog.confirm()
+      .title(confirmTitle)
+      .ariaLabel('Remove members')
+      .ok('Delete!')
+      .cancel('Cancel')
+      .clickOutsideToClose(true);
+
+    return this.$mdDialog.show(confirm);
+  }
+
+
+  /**
+   * Add new workspace member. Show the dialog
+   * @param  event - the $event
+   */
+  showAddMembersDialog(event) {
+    let parentEl = angular.element(this.$document.body);
+
+    this.$mdDialog.show({
+      targetEvent: event,
+      bindToController: true,
+      clickOutsideToClose: true,
+      controller: 'AddMemberController',
+      controllerAs: 'addMemberController',
+      locals: {callbackController: this},
+      parent: parentEl,
+      templateUrl: 'app/workspace/share-workspace/add-members/add-members.html'
     });
   }
 
@@ -235,7 +419,7 @@ export class ShareWorkspaceController {
     this.existingUsers.delete(email);
 
     this.lodash.remove(this.notExistingUsers, (data) => {
-        return email === data;
+      return email === data;
     });
   }
 
@@ -273,7 +457,7 @@ export class ShareWorkspaceController {
     let defaultEnvName = workspace.config.defaultEnv;
 
     let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === defaultEnvName;
+      return environment.name === defaultEnvName;
     });
 
     let devMachine = this.lodash.find(defaultEnvironment.machineConfigs, (config) => {

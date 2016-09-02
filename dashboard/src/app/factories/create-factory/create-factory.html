@@ -17,217 +17,101 @@
     from Codenvy S.A..
 
 -->
-<che-toolbar che-title="{{createFactoryCtrl.title}}"></che-toolbar>
-<div flex class="create-factory-share-header-widget" ng-if="createFactoryCtrl.flow === 'configure'" layout-align="center center"
-     layout="column">
-  <div layout="row" layout-fill layout-align="start center">
-    <div class="create-factory-share-header-widget-icon"><i class="chefont cheico-rocket-chefont icon">&nbsp;</i></div>
-    <div layout="row" layout-fill layout-align="center center">
-      <div class="create-factory-share-header-widget-badge"><a target="_blank" href="{{createFactoryCtrl.factoryLink}}"><img
-        ng-src="{{createFactoryCtrl.factoryBadgeUrl}}"></a></div>
-      <div class="create-factory-share-header-widget-markdown">{{createFactoryCtrl.factoryLink}}</div>
-      <a class="create-factory-share-header-small-button" tooltip="{{valueLinkCopy === createFactoryCtrl.factoryLink ? 'Copied' : 'Copy'}}"
-         clip-copy="createFactoryCtrl.factoryLink" clip-click="valueLinkCopy=createFactoryCtrl.factoryLink">Copy URL</a>
-      <a class="create-factory-share-header-small-button" tooltip="{{valueMDCopy === createFactoryCtrl.markdown ? 'Copied' : 'Copy'}}"
-         clip-copy="createFactoryCtrl.markdown" clip-click="valueMDCopy=createFactoryCtrl.markdown">Copy Markdown</a>
-    </div>
-  </div>
-</div>
+<che-toolbar che-title="New Factory From"></che-toolbar>
 
-
-<md-content md-scroll-y flex md-theme="maincontent-theme">
-  <md-progress-linear md-mode="indeterminate" class="create-factory-progress" ng-show="createFactoryCtrl.isLoading"></md-progress-linear>
+<md-content md-scroll-y flex md-theme="default">
+  <md-progress-linear md-mode="indeterminate" class="create-factory-progress"
+                      ng-show="createFactoryCtrl.isLoading"></md-progress-linear>
   <div class="create-factory" ng-hide="createFactoryCtrl.isLoading">
-    <div ng-show="createFactoryCtrl.flow === 'source'">
 
-      <che-panel che-title="Select Source"
-                 che-tooltip="Choose where the initial source code for this project will come from.">
-        <md-tabs md-dynamic-height="true" md-stretch-tabs="never" md-center-tabs="false" md-selected="selectedIndex" md-border-bottom="true"
-                 class="factory-select-source-details">
-          <md-tab>
-            <md-tab-label>
-              <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Git Repository</span>
-            </md-tab-label>
-            <md-tab-body>
-              <div layout="row" layout-align="start center" class="create-factory-git-content">
-                <cdvy-create-factory-git cdvy-git-location="createFactoryCtrl.gitLocation" layout-fill layout-align="start start"></cdvy-create-factory-git>
-              </div>
-            </md-tab-body>
-          </md-tab>
-          <md-tab>
-            <md-tab-label>
-              <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Github</span>
-            </md-tab-label>
-            <md-tab-body>
-              <form name="createFactoryGitHubForm">
-                <create-project-github che-form="createFactoryGitHubForm"
-                                       che-repository-model="createFactoryCtrl.selectedGitHubRepository"
-                                       che-repository-select="createFactoryCtrl.selectGitHubRepository()"
-                                       layout="column"></create-project-github>
-              </form>
-            </md-tab-body>
-          </md-tab>
-          <md-tab>
-            <md-tab-label>
-              <md-icon md-font-icon="fa fa-server" class="che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Workspaces</span>
-            </md-tab-label>
-            <md-tab-body>
-              <cdvy-factory-from-workspace cdvy-factory-content="createFactoryCtrl.factoryContent"
-                                           cdvy-is-loading="createFactoryCtrl.isLoading"
-                                           cdvy-is-importing="createFactoryCtrl.isImporting"></cdvy-factory-from-workspace>
-            </md-tab-body>
-          </md-tab>
-          <md-tab>
-            <md-tab-label>
-              <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Config File</span>
-            </md-tab-label>
-            <md-tab-body>
-              <div layout-fill layout="row" layout-align="start center">
-                <cdvy-factory-from-file cdvy-factory-content="createFactoryCtrl.factoryContent"
-                                        cdvy-is-importing="createFactoryCtrl.isImporting" layout="column" flex></cdvy-factory-from-file>
-              </div>
-            </md-tab-body>
-          </md-tab>
-          <md-tab>
-            <md-tab-label>
-              <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Template</span>
-            </md-tab-label>
-            <md-tab-body>
-              <div layout-fill layout="row" layout-align="start center">
-                <cdvy-factory-from-template cdvy-factory-content="createFactoryCtrl.factoryContent"
-                                            cdvy-is-importing="createFactoryCtrl.isImporting" layout="column" flex></cdvy-factory-from-template>
-              </div>
-            </md-tab-body>
-          </md-tab>
-        </md-tabs>
-      </che-panel>
-
-      <div layout="row" layout-align="end end">
-        <che-button-primary id="create-factory-next-button"
-                            che-button-title="Next"
-                            ng-click="createFactoryCtrl.createFactoryByContent(createFactoryCtrl.factoryContent)"
-                            ng-disabled="!createFactoryCtrl.factoryContent || createFactoryCtrl.isImporting || createFactoryCtrl.isLoading"></che-button-primary>
-      </div>
-    </div>
-    <div ng-if="createFactoryCtrl.flow === 'configure'">
-
-      <ng-form name="factoryMetadataForm">
-        <che-panel che-title="Name" ng-init="createFactoryCtrl.setFactoryMetadataForm(factoryMetadataForm)" che-tooltip="Name of the factory">
-          <che-input che-form="factoryMetadataForm"
+    <!-- Name -->
+    <che-label-container che-label-name="Name">
+      <ng-form name="createFactoryForm">
+        <div layout="column" class="create-factory-input"
+             ng-init="createFactoryCtrl.setForm(createFactoryForm)">
+          <che-input che-form="createFactoryForm"
                      che-name="name"
-                     che-label-name="Name"
                      che-place-holder="Name of the factory"
-                     ng-model="createFactoryCtrl.factoryObject.name"
+                     aria-label="Name of the factory"
+                     ng-model="createFactoryCtrl.name"
                      ng-trim
                      ng-minlength="3"
                      ng-maxlength="20"
                      ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
-            <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start only with
-              digits, latin letters or underscores
-            </div>
-            <div ng-message="minlength">The name has to be more then 3 characters long.</div>
-            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-          </che-input>
-        </che-panel>
-      </ng-form>
-
-
-      <che-panel che-title="Configure Stack"
-                 che-tooltip="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
-        <md-radio-group ng-sow="createFactoryCtrl.workspaces.length" ng-model="createFactoryCtrl.stackRecipeMode">
-          <md-radio-button value="current-recipe">Use current recipe</md-radio-button>
-          <div ng-if="createFactoryCtrl.stackRecipeMode === 'current-recipe'">
-            <div class="create-factory-existing-recipe">
-              <a href="{{createFactoryCtrl.factoryObject.workspace.environments[0].machineConfigs[0].source.location}}" target="_blank">{{createFactoryCtrl.factoryObject.workspace.environments[0].machineConfigs[0].source.location}}</a>
-            </div>
-
-          </div>
-          <md-radio-button value="from-stack">Configure recipe from a stack</md-radio-button>
-        </md-radio-group>
-        <div ng-if="createFactoryCtrl.stackRecipeMode === 'from-stack'">
-        <che-workspace-select-stack che-tab-name="tabName"
-                                    che-on-tab-change="createFactoryCtrl.setStackTab(tabName)"
-                                    che-stack="stack"
-                                    che-stack-change="createFactoryCtrl.cheStackLibrarySelecter(stack)"
-                                    che-recipe-script="createFactoryCtrl.recipeScript"
-                                    che-recipe-url="createFactoryCtrl.recipeUrl"></che-workspace-select-stack>
-        <che-button-primary che-button-title="Validate" ng-click="createFactoryCtrl.validateStack()"></che-button-primary>
-        </div>
-      </che-panel>
-      <ng-form name="workspaceInformationForm">
-        <che-panel che-title="Workspace"
-                   che-tooltip="A workspace contains projects and runtime environments.">
-          <che-input che-form="workspaceInformationForm"
-                     che-name="name"
-                     che-label-name="Name"
-                     che-place-holder="Name of the workspace"
-                     ng-model="createFactoryCtrl.factoryObject.workspace.name"
-                     required
-                     ng-minlength="3"
-                     ng-maxlength="20"
-                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
             <div ng-message="required">A name is required.</div>
-            <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
-              letters or underscores
+            <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start
+              only
+              with digits, latin letters or underscores
             </div>
             <div ng-message="minlength">The name has to be more then 3 characters long.</div>
             <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
           </che-input>
-          <che-workspace-ram-allocation-slider
-            ng-model="createFactoryCtrl.factoryObject.workspace.environments[0].machineConfigs[0].limits.ram"></che-workspace-ram-allocation-slider>
-        </che-panel>
+        </div>
       </ng-form>
+    </che-label-container>
 
-
-      <che-panel che-title="Configure Commands"
-                 che-tooltip="Commands are processes that are invoked by users from a dropdown in the IDE.">
-        <div class="factory-commands-panel">
-          <md-content layout="column" layout-fill>
-            <cdvy-factory-command cdvy-factory-object="createFactoryCtrl.factoryObject"></cdvy-factory-command>
-          </md-content>
-        </div>
-      </che-panel>
-
-      <che-panel che-title="Configure Actions"
-                 che-tooltip="Tell the IDE to perform additional actions after the workspace is loaded.">
-        <div class="factory-actions-panel">
-          <md-content layout="column" layout-fill>
-            <!-- almost no action is possible at this lifecycle
-            <cdvy-factory-action-box cdvy-lifecycle="onAppLoaded"
-                                     cdvy-action-title="Actions executed after IDE is loaded"
-                                     cdvy-callback-controller="createFactoryCtrl"
-                                     cdvy-factory-object="createFactoryCtrl.factoryObject"></cdvy-factory-action-box>
-            -->
-            <cdvy-factory-action-box cdvy-lifecycle="onProjectsLoaded"
-                                     cdvy-action-title="Actions executed after projects are loaded"
-                                     cdvy-callback-controller="createFactoryCtrl"
-                                     cdvy-factory-object="createFactoryCtrl.factoryObject"></cdvy-factory-action-box>
-          </md-content>
-        </div>
-      </che-panel>
-
-
-      <che-panel che-title="JSON"
-                 ng-class="{ 'disabled-state': !createFactoryCtrl.factoryContent }">
-        <div class="factory-configuration-panel">
-          <md-content layout="column" layout-fill>
-            <div class="json-editor" ng-if="createFactoryCtrl.factoryContent !== null">
-              <textarea ui-codemirror ng-model="createFactoryCtrl.factoryContent"></textarea>
+    <!--Factory source-->
+    <che-label-container che-label-name="Source"
+                         class="che-label-container-last">
+      <md-tabs md-dynamic-height="true" md-stretch-tabs="auto" md-center-tabs="false" md-selected="selectedIndex"
+               md-border-bottom="true"
+               class="factory-select-source-details">
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-server" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Workspace</span>
+          </md-tab-label>
+          <md-tab-body>
+            <cdvy-factory-from-workspace cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                         cdvy-is-loading="createFactoryCtrl.isLoading"
+                                         cdvy-is-importing="createFactoryCtrl.isImporting"></cdvy-factory-from-workspace>
+          </md-tab-body>
+        </md-tab>
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Git</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout="row" layout-align="start center" class="create-factory-git-content">
+              <cdvy-create-factory-git cdvy-git-location="createFactoryCtrl.gitLocation" layout-fill
+                                       layout-align="start start"></cdvy-create-factory-git>
             </div>
-          </md-content>
-          <a href="https://codenvy.readme.io/docs/factories" target="_blank">Factory configuration docs</a>
-        </div>
-      </che-panel>
-      <che-button-primary id="create-project-button-import"
-                          che-button-title="Done"
-                          ng-click="createFactoryCtrl.finishFlow()"
-                          ng-disabled="!createFactoryCtrl.factoryContent"
-                          class="projects-create-project-button"></che-button-primary>
-    </div>
+          </md-tab-body>
+        </md-tab>
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Config</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout-fill layout="row" layout-align="start center">
+              <cdvy-factory-from-file cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                      cdvy-is-importing="createFactoryCtrl.isImporting" layout="column"
+                                      flex></cdvy-factory-from-file>
+            </div>
+          </md-tab-body>
+        </md-tab>
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-magic" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">Template</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout-fill layout="row" layout-align="start center">
+              <cdvy-factory-from-template cdvy-factory-content="createFactoryCtrl.factoryContent"
+                                          cdvy-is-importing="createFactoryCtrl.isImporting" layout="column"
+                                          flex></cdvy-factory-from-template>
+            </div>
+          </md-tab-body>
+        </md-tab>
+      </md-tabs>
+    </che-label-container>
+
+    <!--button 'Create'-->
+    <che-button-primary id="create-factory-next-button"
+                        che-button-title="Create"
+                        ng-click="createFactoryCtrl.createFactoryByContent(createFactoryCtrl.factoryContent)"
+                        ng-disabled="createFactoryCtrl.isFormInvalid() || !createFactoryCtrl.factoryContent || createFactoryCtrl.isImporting || createFactoryCtrl.isLoading"></che-button-primary>
   </div>
 </md-content>

@@ -32,9 +32,6 @@ fetchJsonParameter "file"
 BACKUP_AT_START=${OUTPUT}
 
 # modify data: add account, workspace, project, user, factory
-executeIMCommand "password" "password" "new-password"
-auth "admin" "new-password"
-
 doPost "application/json" "{\"name\":\"account-1\"}" "http://${HOST_URL}/api/account?token=${TOKEN}"
 fetchJsonParameter "id"
 ACCOUNT_ID=${OUTPUT}
@@ -89,7 +86,7 @@ validateExpectedString ".*Factory.*not.found.*"
 executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}
 
 # check if modified data was restored correctly
-auth "admin" "new-password"
+auth "admin" "password"
 
 doGet "http://${HOST_URL}/api/account/${ACCOUNT_ID}?token=${TOKEN}"
 validateExpectedString ".*account-1.*"

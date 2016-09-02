@@ -15,90 +15,29 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-
-.admins-user-management .password-prompt .progress
-  height 6px
-
-.admins-user-management .user-list-title
-  background-color $form-element-border-color
-  padding 15px
-
-.admins-user-management .user-management-content
-  margin 15px 0 15px 15px
-  overflow visible
-
-.user-management-content .list-small md-list
-  margin-bottom 90px
-
-.user-management-content .admin-user-list
-  max-height 800px
-  overflow-y scroll
-
-.user-management-content .user-row
-  min-height 56px
-
-.user-management-content .user-face
-  che-developers-face()
-  flex-shrink 0
-  margin-left 10px
-  margin-right 15px
-
-.user-management-content .user-email
-  color $label-secondary-color
-
-.user-management-content .user-description
-  color $label-info-color
-
-.user-management-content .user-email,
-.user-management-content .user-description
-  text-overflow ellipsis
-  white-space nowrap
-  overflow hidden
-  margin 5px
-
-.user-management-content .user-actions
-  color $label-info-color
-  cursor pointer
-  height 24px
-  font-size 24px
-  line-height 24px
-  margin-right 15px
-
-.user-management-content .add-button-container
-  position static
-  flex-shrink 0
-  flex-grow 0
-  width 0
-
-.user-management-content .add-button-container button
-  top 0
-  right 0
-  margin 2px 12px 0 0
-  position absolute
-
-.user-management-content .list-side-big
-  width 80px
-
-.onprem-license .license-form
-  width 100%
-
-.onprem-license .license-form .input-part,
-.onprem-license .license-form .buttons-part
-  float left
-
-.paging-buttons-area
-  margin-top 10px
-  margin-right 80px
-  text-align right
-
-.paging-buttons-area .md-button
-  border 1px solid $mouse-gray-color
-  border-radius 0;
-  margin 10px 0 0 5px
-  padding 0
-  min-width 40px
-  min-height 40px
-
-.paging-buttons-area .md-button:disabled
-  border 1px solid $cat-gray-color
-  background-color $cat-gray-color !important
+.admins-user-management
+  .user-email,
+  .user-description
+    max-width 100%
+  .user-description
+    color $label-info-color
+  .user-face
+    che-developers-face()
+    height 16px
+    width 16px
+    margin-top 3px
+    margin-right 5px
+  .paging-buttons-area
+    margin-top 10px
+    margin-right 80px
+    text-align right
+    .md-button
+      border 1px solid $mouse-gray-color
+      border-radius 0;
+      margin 10px 0 0 5px
+      padding 0
+      min-width 40px
+      min-height 40px
+    .md-button:disabled
+      border 1px solid $cat-gray-color
+      background-color $cat-gray-color !important

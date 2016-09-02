@@ -17,34 +17,15 @@
     from Codenvy S.A..
 
 -->
-<che-toolbar che-title="{{factoryDetailsCtrl.factory.originFactory.name ? factoryDetailsCtrl.factory.originFactory.name : factoryDetailsCtrl.factory.originFactory.id}}"
-             che-title-icons-controller="factoryDetailsCtrl"
-             che-button-name="Open"
-             che-button-href="{{factoryDetailsCtrl.factory.idURL}}"
-             che-button-href-target="_blank"
-             che-breadcrumb-title="All factories"
-             che-breadcrumb-href="#/factories">
+<che-toolbar
+  che-title="{{factoryDetailsCtrl.factory.originFactory.name ? factoryDetailsCtrl.factory.originFactory.name : factoryDetailsCtrl.factory.originFactory.id}}"
+  che-title-icons-controller="factoryDetailsCtrl"
+  che-button-name="Open"
+  che-button-href="{{factoryDetailsCtrl.factory.idURL}}"
+  che-button-href-target="_blank"
+  che-breadcrumb-title="All factories"
+  che-breadcrumb-href="#/factories">
 </che-toolbar>
-<md-content md-scroll-y flex class="factory-details" md-theme="maincontent-theme">
-  <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="factoryDetailsCtrl.selectedTabIndex" class="project-details-menu">
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_bookmark_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Information</span>
-      </md-tab-label>
-      <md-tab-body>
-        <cdvy-factory-information cdvy-factory="factoryDetailsCtrl.factory"></cdvy-factory-information>
-        <cdvy-delete-factory cdvy-factory="factoryDetailsCtrl.factory"></cdvy-delete-factory>
-      </md-tab-body>
-    </md-tab>
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Configuration</span>
-      </md-tab-label>
-      <md-tab-body>
-        <cdvy-factory-configuration cdvy-factory="factoryDetailsCtrl.factory"></cdvy-factory-configuration>
-      </md-tab-body>
-    </md-tab>
-  </md-tabs>
+<md-content md-scroll-y flex class="factory-details factory-details-content">
+  <cdvy-factory-information cdvy-factory="factoryDetailsCtrl.factory"></cdvy-factory-information>
 </md-content>

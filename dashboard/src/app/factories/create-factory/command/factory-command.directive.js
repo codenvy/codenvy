@@ -37,7 +37,8 @@ export class FactoryCommand {
 
     // scope values
     this.scope = {
-      factoryObject: '=cdvyFactoryObject'
+      factoryObject: '=cdvyFactoryObject',
+      onChange: '&cdvyOnChange'
     };
   }
 

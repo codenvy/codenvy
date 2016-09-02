@@ -42,9 +42,6 @@
             <action class="com.codenvy.im.cli.command.RestoreCommand"/>
         </command>
         <command>
-            <action class="com.codenvy.im.cli.command.ChangeAdminPasswordCommand"/>
-        </command>
-        <command>
             <action class="com.codenvy.im.cli.command.VersionCommand"/>
         </command>
     </command-bundle>

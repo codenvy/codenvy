@@ -822,10 +822,6 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
 
     @Override
     public Command getUpdateHostnameCommand(Config config, String oldHostName, String newHostName) {
-        // add <127.0.0.1 new-hostname> record into the /etc/hosts on master
-        return createAppendTextIfAbsentToFileCommand(Paths.get("/etc/hosts"),
-                                                     format("\n127.0.0.1 %1$s", newHostName),
-                                                     format("^127.0.0.1.*\\s%1$s\\s.*$|^127.0.0.1.*\\s%1$s$", newHostName)
-        );
+        return CommandLibrary.EMPTY_COMMAND;
     }
 }

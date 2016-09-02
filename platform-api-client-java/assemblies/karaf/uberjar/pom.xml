@@ -16,7 +16,7 @@
     <parent>
         <artifactId>assemblies-karaf</artifactId>
         <groupId>com.codenvy.platform-api-client-java</groupId>
-        <version>4.7.0-RC2-SNAPSHOT</version>
+        <version>4.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>assemblies-karaf-uberjar</artifactId>
     <packaging>feature</packaging>

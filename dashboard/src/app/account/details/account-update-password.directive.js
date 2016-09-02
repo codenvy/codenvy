@@ -43,14 +43,14 @@ export class AccountUpdatePassword {
   link($scope) {
     $scope.$watch('changePasswordForm.$pristine', () => {
       $scope.$watch('newPassword', (newVal) => {
-        if ($scope.changePasswordForm.$invalid || ($scope.confirmPassword !== newVal)) {
+        if (!$scope.changePasswordForm || $scope.changePasswordForm.$invalid || ($scope.confirmPassword !== newVal)) {
           $scope.password = null;
           return;
         }
         $scope.password = newVal;
       });
       $scope.$watch('confirmPassword', (newVal) => {
-        if ($scope.changePasswordForm.newPassword.$invalid || ($scope.newPassword !== newVal)) {
+        if (!$scope.changePasswordForm || $scope.changePasswordForm.newPassword.$invalid || ($scope.newPassword !== newVal)) {
           $scope.password = null;
           return;
         }

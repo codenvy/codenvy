@@ -17,44 +17,177 @@
     from Codenvy S.A..
 
 -->
-<che-panel che-title="Factory Information">
-  <ng-form name="factoryInformationForm">
-    <che-input che-form="factoryInformationForm"
-               che-name="name"
-               che-label-name="Name"
-               che-place-holder="Name of the factory"
-               ng-model="factoryInformationCtrl.copyOriginFactory.name"
-               required
-               ng-trim
-               ng-minlength="3"
-               ng-maxlength="20"
-               ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
-      <div ng-message="required">A name is required.</div>
-      <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start only
-        with digits, latin letters or underscores
+<div class="factory-information" ng-if="factoryInformationCtrl.copyOriginFactory">
+  <!-- Name -->
+  <che-label-container che-label-name="Name">
+    <div layout="column" class="factory-information-input">
+      <ng-form name="factoryInformationForm">
+        <che-input che-form="factoryInformationForm"
+                   ng-init="factoryInformationCtrl.factoryInformationForm = factoryInformationForm"
+                   che-name="name"
+                   che-place-holder="Name of the factory"
+                   aria-label="Name of the factory"
+                   ng-model="factoryInformationCtrl.copyOriginFactory.name"
+                   ng-change="factoryInformationCtrl.updateFactory()"
+                   ng-trim
+                   ng-minlength="3"
+                   ng-maxlength="20"
+                   ng-pattern="/^[ A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start
+            only
+            with digits, latin letters or underscores
+          </div>
+          <div ng-message="minlength">The name has to be more then 3 characters long.</div>
+          <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+        </che-input>
+      </ng-form>
+    </div>
+  </che-label-container>
+
+  <!-- URL -->
+  <che-label-container che-label-name="URL">
+    <che-text-info ng-show="factoryInformationCtrl.factory.nameURL"
+                   che-text="factoryInformationCtrl.factory.nameURL ? factoryInformationCtrl.factory.nameURL : 'No value'"
+                   che-href="factoryInformationCtrl.factory.nameURL"
+                   che-copy-clipboard="true"
+                   class="factory-information-panel-item"></che-text-info>
+    <che-text-info che-text="factoryInformationCtrl.factory.idURL ? factoryInformationCtrl.factory.idURL : 'No value'"
+                   che-href="factoryInformationCtrl.factory.idURL"
+                   che-copy-clipboard="true"
+                   class="factory-information-panel-item"></che-text-info>
+  </che-label-container>
+
+  <!-- Creation Date -->
+  <che-label-container che-label-name="Creation Date">
+    <che-text-info
+      che-text="factoryInformationCtrl.factory.originFactory.creator.created | amDateFormat:'Do MMMM YYYY'">
+    </che-text-info>
+  </che-label-container>
+
+  <!--Stack-->
+  <che-label-container che-label-name="Configure Stack"
+                       che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
+    <md-radio-group ng-model="factoryInformationCtrl.stackRecipeMode">
+      <md-radio-button value="current-recipe">Use current recipe</md-radio-button>
+      <div ng-if="factoryInformationCtrl.stackRecipeMode === 'current-recipe'">
+        <div>
+          <a href="{{factoryInformationCtrl.copyOriginFactory.workspace.environments[0].machineConfigs[0].source.location}}"
+            target="_blank">{{factoryInformationCtrl.copyOriginFactory.workspace.environments[0].machineConfigs[0].source.location}}</a>
+        </div>
+
       </div>
-      <div ng-message="minlength">The name has to be more then 3 characters long.</div>
-      <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-    </che-input>
-  </ng-form>
-  <che-text-info ng-show="factoryInformationCtrl.factory.nameURL"
-                 che-label-name="URL"
-                 che-text="factoryInformationCtrl.factory.nameURL ? factoryInformationCtrl.factory.nameURL : 'No value'"
-                 che-href="factoryInformationCtrl.factory.nameURL"
-                 che-copy-clipboard="true"
-                 class="factory-information-panel-spacing factory-information-panel-item factory-information-panel-url"></che-text-info>
-  <che-text-info che-label-name="{{factoryInformationCtrl.factory.nameURL ? '' : 'URL'}}"
-                 che-text="factoryInformationCtrl.factory.idURL ? factoryInformationCtrl.factory.idURL : 'No value'"
-                 che-href="factoryInformationCtrl.factory.idURL"
-                 che-copy-clipboard="true"
-                 class="{{factoryInformationCtrl.factory.nameURL ? 'factory-information-panel-item che-text-info-subline' : 'factory-information-panel-spacing factory-information-panel-item factory-information-panel-url'}}"></che-text-info>
-  <che-text-info che-label-name="Creation Date"
-                 class="factory-information-panel-spacing factory-information-panel-caption"
-                 che-text="factoryInformationCtrl.factory.originFactory.creator.created | amDateFormat:'Do MMMM YYYY'">
-  </che-text-info>
-  <che-button-primary
-    ng-disabled="factoryInformationForm.$invalid
-                 || (factoryInformationCtrl.copyOriginFactory.name === factoryInformationCtrl.factory.originFactory.name)"
-    che-button-title="Update" name="updateButton"
-    ng-click="factoryInformationCtrl.updateFactory(factoryInformationCtrl.copyOriginFactory)"></che-button-primary>
-</che-panel>
+      <md-radio-button value="from-stack">Configure recipe from a stack</md-radio-button>
+    </md-radio-group>
+    <div ng-if="factoryInformationCtrl.stackRecipeMode === 'from-stack'">
+      <che-workspace-select-stack che-tab-name="tabName"
+                                  che-on-tab-change="factoryInformationCtrl.setStackTab(tabName)"
+                                  che-stack="stack"
+                                  che-stack-change="factoryInformationCtrl.cheStackLibrarySelecter(stack)"
+                                  che-recipe-script="factoryInformationCtrl.recipeScript"
+                                  che-recipe-url="factoryInformationCtrl.recipeUrl"></che-workspace-select-stack>
+      <che-button-primary che-button-title="Validate"
+                          ng-click="factoryInformationCtrl.validateStack()"></che-button-primary>
+    </div>
+  </che-label-container>
+
+  <che-label-container che-label-name="Workspace"
+                       che-label-description="A workspace contains projects and runtime environments.">
+    <!--Workspace name-->
+    <che-label-container che-label-name="Name">
+      <ng-form name="factoryInformationForm">
+        <div class="factory-information-input">
+          <che-input che-form="factoryInformationForm"
+                     che-name="name"
+                     che-place-holder="Name of the workspace"
+                     aria-label="Name of the workspace"
+                     ng-model="factoryInformationCtrl.copyOriginFactory.workspace.name"
+                     ng-change="factoryInformationCtrl.updateFactory()"
+                     required
+                     ng-minlength="3"
+                     ng-maxlength="20"
+                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+            <div ng-message="required">A name is required.</div>
+            <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start
+              only with digits, latin
+              letters or underscores
+            </div>
+            <div ng-message="minlength">The name has to be more then 3 characters long.</div>
+            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          </che-input>
+        </div>
+      </ng-form>
+    </che-label-container>
+    <!--Workspace RAM-->
+    <che-label-container che-label-name="RAM">
+      <ng-form name="factoryInformationForm">
+        <che-workspace-ram-allocation-slider
+          ng-model="factoryInformationCtrl.copyOriginFactory.workspace.environments[0].machineConfigs[0].limits.ram"
+          che-on-change="factoryInformationCtrl.updateFactory()"></che-workspace-ram-allocation-slider>
+      </ng-form>
+    </che-label-container>
+  </che-label-container>
+
+  <!-- Configure commands -->
+  <che-label-container che-label-name="Configure Commands"
+                       che-label-description="Commands are processes that are invoked by users from a dropdown in the IDE.">
+    <cdvy-factory-command cdvy-factory-object="factoryInformationCtrl.copyOriginFactory"
+                          cdvy-on-change="factoryInformationCtrl.updateFactory()"></cdvy-factory-command>
+  </che-label-container>
+
+  <!-- Configure actions -->
+  <che-label-container che-label-name="Configure Actions"
+                       che-label-description="Tell the IDE to perform additional actions after the workspace is loaded.">
+    <!-- almost no action is possible at this lifecycle
+    <cdvy-factory-action-box cdvy-lifecycle="onAppLoaded"
+                             cdvy-action-title="Actions executed after IDE is loaded"
+                             cdvy-callback-controller="factoryInformationCtrl"
+                             cdvy-factory-object="factoryInformationCtrl.factoryObject"></cdvy-factory-action-box>
+    -->
+    <cdvy-factory-action-box cdvy-lifecycle="onProjectsLoaded"
+                             cdvy-callback-controller="factoryInformationCtrl"
+                             cdvy-factory-object="factoryInformationCtrl.copyOriginFactory"
+                             cdvy-on-change="factoryInformationCtrl.updateFactory()"></cdvy-factory-action-box>
+  </che-label-container>
+
+  <!-- Configuration -->
+  <che-label-container che-label-name="Configuration"
+                       che-label-description="JSON definition of the factory."
+                       ng-class="{ 'disabled-state': !factoryInformationCtrl.factoryContent }">
+    <div class="factory-configuration-panel">
+      <md-content layout="column" layout-fill>
+        <div class="json-editor" ng-if="factoryInformationCtrl.factoryContent !== null">
+          <textarea ui-codemirror="factoryInformationCtrl.editorOptions"
+                    ng-model="factoryInformationCtrl.factoryContent"
+                    aria-label="Factory configuration editor"
+                    ng-focus="factoryInformationCtrl.factoryEditorOnFocus()"></textarea>
+        </div>
+      </md-content>
+      <div layout="row" flex>
+        <div>
+          <a href="https://codenvy.readme.io/docs/factories" target="_blank">Factory configuration docs</a>
+        </div>
+        <div layout="row" layout-align="end start" flex>
+          <div>
+            <che-button-default che-button-title="Reload"
+                                ng-click="factoryInformationCtrl.factoryEditorReset()"></che-button-default>
+          </div>
+          <div class="factory-information-update-button">
+            <che-button-primary che-button-title="Update"
+                                ng-disabled="factoryInformationCtrl.factoryContent === factoryInformationCtrl.$filter('json')(factoryInformationCtrl.copyOriginFactory, 2);"
+                                ng-click="factoryInformationCtrl.updateFactoryContent()"></che-button-primary>
+          </div>
+        </div>
+      </div>
+    </div>
+  </che-label-container>
+
+  <!-- Delete button -->
+  <che-label-container class="factory-delete-label"
+                       che-label-name="Delete Factory"
+                       che-label-description="This is irreversible.">
+    <che-button-danger che-button-title="Delete"
+                       ng-click="factoryInformationCtrl.deleteFactory($event)"></che-button-danger>
+  </che-label-container>
+
+</div>

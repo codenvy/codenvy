@@ -27,10 +27,6 @@ validateInstalledCodenvyVersion
 
 auth "admin" "password"
 
-# change admin's password
-executeIMCommand "password" "password" "new-password"
-auth "admin" "new-password"
-
 # change Codenvy hostname
 executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "data.${HOST_URL}"
 executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "api.${HOST_URL}"
@@ -39,6 +35,7 @@ executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "
 executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "builder1.${HOST_URL}"
 executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "datasource.${HOST_URL}"
 executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "analytics.${HOST_URL}"
+executeSshCommand "sudo sed -i 's/ ${HOST_URL}/ test.${HOST_URL}/' /etc/hosts" "master.${HOST_URL}"
 
 executeIMCommand "config" "--hostname" "${NEW_HOST_URL}"
 
@@ -55,7 +52,7 @@ executeSshCommand "sudo cat /home/codenvy-im/codenvy-im-data/conf/installation-m
 
 executeSshCommand "sudo grep \"api.endpoint=http://${NEW_HOST_URL}/api\" /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
 
-auth "admin" "new-password" "http://${NEW_HOST_URL}"
+auth "admin" "password" "http://${NEW_HOST_URL}"
 
 # test re-install
 # remove codenvy binaries

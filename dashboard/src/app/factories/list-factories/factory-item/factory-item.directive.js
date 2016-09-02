@@ -42,7 +42,8 @@ export class CodenvyFactoryItem {
       factory: '=cdvyFactory',
       isChecked: '=cdvyChecked',
       isSelectable: '=cdvyIsSelectable',
-      isSelect: '=?ngModel'
+      isSelect: '=?ngModel',
+      onCheckboxClick: '&?cdvyOnCheckboxClick'
     };
 
   }

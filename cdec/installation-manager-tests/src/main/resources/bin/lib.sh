@@ -270,7 +270,7 @@ doAuth() {
     EXIT_CODE=$?
 
     log ${OUTPUT}
-    validateExitCode $?
+    validateExitCode ${EXIT_CODE}
 
     fetchJsonParameter "value"
     TOKEN=${OUTPUT}

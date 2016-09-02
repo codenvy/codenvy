@@ -331,15 +331,6 @@ public class TestInstallationManagerFacade extends BaseTest {
     }
 
     @Test
-    public void testChangeAdminPassword() throws Exception {
-        byte[] curPwd = "curPassword".getBytes("UTF-8");
-        byte[] newPwd = "newPassword".getBytes("UTF-8");
-
-        installationManagerFacade.changeAdminPassword(curPwd, newPwd);
-        verify(ldapManager).changeAdminPassword(curPwd, newPwd);
-    }
-
-    @Test
     public void testStoreProperties() throws Exception {
         Map<String, String> properties = ImmutableMap.of("x", "y");
 

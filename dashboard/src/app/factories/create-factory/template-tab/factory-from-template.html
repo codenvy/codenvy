@@ -18,16 +18,16 @@
 
 -->
 <div class="factory-from-template" layout="row" flex layout-align="start center">
-  <label flex="15">Select Template: </label>
-
-  <div layout="column" flex="85">
-    <che-toggle ng-model="factoryFromTemplateCtrl.templateName">
-      <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
-                         che-font-icon="material-design icon-ic_unfold_less_24px"
-                         che-title="minimal"></che-toggle-button>
-      <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
-                          che-font-icon="material-design icon-ic_unfold_more_24px"
-                          che-title="complete"></che-toggle-button>
-    </che-toggle>
-  </div>
+  <che-label-container che-label-name="Select Template">
+    <div layout="column">
+      <che-toggle ng-model="factoryFromTemplateCtrl.templateName">
+        <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
+                           che-font-icon="material-design icon-ic_unfold_less_24px"
+                           che-title="minimal"></che-toggle-button>
+        <che-toggle-button ng-click="factoryFromTemplateCtrl.getFactoryTemplate(factoryFromTemplateCtrl.templateName)"
+                           che-font-icon="material-design icon-ic_unfold_more_24px"
+                           che-title="complete"></che-toggle-button>
+      </che-toggle>
+    </div>
+  </che-label-container>
 </div>

@@ -1,7 +1,0 @@
-<div ng-show="{{factoryActionCtrl.actionName === factoryActionCtrl.action.id}}" layout="row" layout-align="start center" ng-init="name=factoryActionCtrl.action.properties[factoryActionCtrl.actionProperty]">
-  <md-icon class="md-icon-actions" md-font-icon="fa fa-times-circle" ng-click="factoryActionCtrl.callbackController.removeAction(factoryActionCtrl.actionGroup, factoryActionCtrl.action)"></md-icon>
-  <che-button-default che-button-icon="{{factoryActionCtrl.actionIcon}}"
-                      tooltip="{{factoryActionCtrl.actionName}}"
-                      ng-click="factoryActionCtrl.editAction($event);"
-                      che-button-title="{{name.length > 20 ? '...' : ''}}{{name | limitTo: 20:name.length-20}}"></che-button-default>
-</div>

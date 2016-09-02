@@ -22,7 +22,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -35,7 +34,7 @@ import java.util.Map;
  * @author Sergii Leschenko
  */
 @Singleton
-public class GreetingPartPresenter extends BasePresenter implements GreetingPartView.ActionDelegate, HasView {
+public class GreetingPartPresenter extends BasePresenter implements GreetingPartView.ActionDelegate {
     private static final String DEFAULT_TITLE = "Greeting";
 
     private final WorkspaceAgent      workspaceAgent;

@@ -14,8 +14,6 @@
  */
 'use strict';
 
-import {DeleteFactoryCtrl} from '../information-tab/delete-factory/delete-factory.controller';
-import {DeleteFactory} from '../information-tab/delete-factory/delete-factory.directive';
 import {FactoryInformationCtrl} from '../information-tab/factory-information/factory-information.controller';
 import {FactoryInformation} from '../information-tab/factory-information/factory-information.directive';
 
@@ -23,9 +21,6 @@ import {FactoryInformation} from '../information-tab/factory-information/factory
 export class InformationTabConfig {
 
   constructor(register) {
-    register.controller('DeleteFactoryCtrl', DeleteFactoryCtrl);
-    register.directive('cdvyDeleteFactory', DeleteFactory);
-
     register.controller('FactoryInformationCtrl', FactoryInformationCtrl);
     register.directive('cdvyFactoryInformation', FactoryInformation);
   }

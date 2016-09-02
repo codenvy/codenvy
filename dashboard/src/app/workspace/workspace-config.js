@@ -19,6 +19,7 @@ import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 
 import {UserItem} from './share-workspace/user-item/user-item.directive';
 import {UserItemController} from './share-workspace/user-item/user-item.controller';
+import {AddMemberController} from './share-workspace/add-members/add-members.controller';
 
 export class WorkspaceConfig {
 
@@ -28,5 +29,7 @@ export class WorkspaceConfig {
 
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
+
+    register.controller('AddMemberController', AddMemberController);
   }
 }

@@ -24,11 +24,12 @@ export class AdminsUserManagementCtrl {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($document, $mdMedia, $mdDialog, codenvyAPI, cheNotification) {
+  constructor($q, lodash, $document, $mdDialog, codenvyAPI, cheNotification) {
     'ngInject';
 
+    this.$q = $q;
+    this.lodash = lodash;
     this.$document = $document;
-    this.$mdMedia = $mdMedia;
     this.$mdDialog = $mdDialog;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
@@ -40,6 +41,13 @@ export class AdminsUserManagementCtrl {
 
     this.users = [];
     this.usersMap = codenvyAPI.getUser().getUsersMap();
+
+    this.userOrderBy = 'name';
+    this.userFilter = {name: ''};
+    this.usersSelectedStatus = {};
+    this.isNoSelected = true;
+    this.isAllSelected = false;
+    this.isBulkChecked = false;
 
     if (this.usersMap && this.usersMap.size > 1) {
       this.updateUsers();
@@ -60,6 +68,187 @@ export class AdminsUserManagementCtrl {
   }
 
   /**
+   * Check all users in list
+   */
+  selectAllUsers() {
+    this.users.forEach((user) => {
+      this.usersSelectedStatus[user.id] = true;
+    });
+  }
+
+  /**
+   * Uncheck all users in list
+   */
+  deselectAllUsers() {
+    this.users.forEach((user) => {
+      this.usersSelectedStatus[user.id] = false;
+    });
+  }
+
+  /**
+   * Change bulk selection value
+   */
+  changeBulkSelection() {
+    if (this.isBulkChecked) {
+      this.deselectAllUsers();
+      this.isBulkChecked = false;
+    } else {
+      this.selectAllUsers();
+      this.isBulkChecked = true;
+    }
+    this.updateSelectedStatus();
+  }
+
+  /**
+   * Update users selected status
+   */
+  updateSelectedStatus() {
+    this.isNoSelected = true;
+    this.isAllSelected = true;
+
+    this.users.forEach((user) => {
+      if (this.usersSelectedStatus[user.id]) {
+        this.isNoSelected = false;
+      } else {
+        this.isAllSelected = false;
+      }
+    });
+
+    if (this.isNoSelected) {
+      this.isBulkChecked = false;
+      return;
+    }
+
+    if (this.isAllSelected) {
+      this.isBulkChecked = true;
+    }
+  }
+
+  /**
+   * User clicked on the - action to remove the user. Show the dialog
+   * @param  event - the $event
+   * @param user - the selected user
+   */
+  removeUser(event, user) {
+    let confirm = this.$mdDialog.confirm()
+      .title('Would you like to remove user ' + user.email + ' ?')
+      .content('Please confirm for the user removal.')
+      .ariaLabel('Remove user')
+      .ok('Remove')
+      .cancel('Cancel')
+      .clickOutsideToClose(true)
+      .targetEvent(event);
+    this.$mdDialog.show(confirm).then(() => {
+      this.isLoading = true;
+      let promise = this.codenvyAPI.getUser().deleteUserById(user.id);
+      promise.then(() => {
+        this.isLoading = false;
+        this.updateUsers();
+      }, (error) => {
+        this.isLoading = false;
+        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Delete user failed.');
+      });
+    });
+  }
+
+  /**
+   * Delete all selected users
+   */
+  deleteSelectedUsers() {
+    let usersSelectedStatusKeys = Object.keys(this.usersSelectedStatus);
+    let checkedUsersKeys = [];
+
+    if (!usersSelectedStatusKeys.length) {
+      this.cheNotification.showError('No such users.');
+      return;
+    }
+
+    usersSelectedStatusKeys.forEach((key) => {
+      if (this.usersSelectedStatus[key] === true) {
+        checkedUsersKeys.push(key);
+      }
+    });
+
+    let queueLength = checkedUsersKeys.length;
+    if (!queueLength) {
+      this.cheNotification.showError('No such user.');
+      return;
+    }
+
+    let confirmationPromise = this.showDeleteUsersConfirmation(queueLength);
+
+    confirmationPromise.then(() => {
+
+      let numberToDelete = queueLength;
+      let isError = false;
+      let deleteUserPromises = [];
+      let currentUserId;
+
+      checkedUsersKeys.forEach((userId) => {
+        currentUserId = userId;
+        this.usersSelectedStatus[userId] = false;
+
+        let promise = this.codenvyAPI.getUser().deleteUserById(userId);
+        promise.then(() => {
+          queueLength--;
+        }, (error) => {
+          isError = true;
+          this.$log.error('Cannot delete user: ', error);
+        });
+        deleteUserPromises.push(promise);
+      });
+
+      this.$q.all(deleteUserPromises).finally(() => {
+        this.isLoading = true;
+        let promise = this.codenvyAPI.getUser().fetchUsersPage(this.pagesInfo.currentPageNumber);
+
+        promise.then(() => {
+          this.isLoading = false;
+          this.updateUsers();
+          this.updateSelectedStatus();
+        }, (error) => {
+          this.isLoading = false;
+          this.$log.error(error);
+        });
+        if (isError) {
+          this.cheNotification.showError('Delete failed.');
+        } else {
+          if (numberToDelete === 1) {
+            let currentUser = this.lodash.find(this.users, (user) => {
+              return user.id === currentUserId;
+            });
+            this.cheNotification.showInfo(currentUser ? currentUser.email + 'has been removed.' : 'Selected user has been removed.');
+          } else {
+            this.cheNotification.showInfo('Selected users have been removed.');
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Show confirmation popup before delete
+   * @param numberToDelete
+   * @returns {*}
+   */
+  showDeleteUsersConfirmation(numberToDelete) {
+    let confirmTitle = 'Would you like to delete ';
+    if (numberToDelete > 1) {
+      confirmTitle += 'these ' + numberToDelete + ' users?';
+    } else {
+      confirmTitle += 'this selected user?';
+    }
+    let confirm = this.$mdDialog.confirm()
+      .title(confirmTitle)
+      .ariaLabel('Remove users')
+      .ok('Delete!')
+      .cancel('Cancel')
+      .clickOutsideToClose(true);
+
+    return this.$mdDialog.show(confirm);
+  }
+
+  /**
    * Update users array
    */
   updateUsers() {
@@ -75,11 +264,14 @@ export class AdminsUserManagementCtrl {
    * @param pageKey - the key of page
    */
   fetchUsersPage(pageKey) {
+    this.isLoading = true;
     let promise = this.codenvyAPI.getUser().fetchUsersPage(pageKey);
 
     promise.then(() => {
+      this.isLoading = false;
       this.updateUsers();
     }, (error) => {
+      this.isLoading = false;
       if (error.status === 304) {
         this.updateUsers();
       } else {
@@ -113,7 +305,7 @@ export class AdminsUserManagementCtrl {
   }
 
   /**
-   * Admin clicked on the + button to add a new user. Show the dialog
+   * Add a new user. Show the dialog
    * @param  event - the $event
    */
   showAddUserDialog(event) {
@@ -128,33 +320,6 @@ export class AdminsUserManagementCtrl {
       locals: {callbackController: this},
       parent: parentEl,
       templateUrl: 'app/admin/user-management/add-user/add-user.html'
-    });
-  }
-
-  /**
-   * User clicked on the - button to remove the user. Show the dialog
-   * @param  event - the $event
-   * @param user - the selected user
-   */
-  removeUser(event, user) {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to remove user ' + user.email + ' ?')
-      .content('Please confirm for the user removal.')
-      .ariaLabel('Remove user')
-      .ok('Remove')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
-      this.isLoading = true;
-      let promise = this.codenvyAPI.getUser().deleteUserById(user.id);
-      promise.then(() => {
-        this.isLoading = false;
-        this.updateUsers();
-      }, (error) => {
-        this.isLoading = false;
-        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Delete user failed.');
-      });
     });
   }
 }

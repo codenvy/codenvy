@@ -28,8 +28,7 @@ validateInstalledCodenvyVersion ${LATEST_CODENVY4_VERSION}
 authWithoutRealmAndServerDns "admin" "password"
 
 # change admin's password
-executeIMCommand "password" "password" "new-password"
-authWithoutRealmAndServerDns "admin" "new-password"
+authWithoutRealmAndServerDns "admin" "password"
 
 # change Codenvy hostname
 executeIMCommand "config" "--hostname" "${NEW_HOST_URL}"
@@ -42,7 +41,7 @@ executeSshCommand "sudo grep \"api.endpoint=http://${NEW_HOST_URL}/api\" /home/c
 executeSshCommand "sudo cat /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
 executeSshCommand "sudo grep \"api.endpoint=http://${NEW_HOST_URL}/api\" /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
 
-authWithoutRealmAndServerDns "admin" "new-password" "http://${NEW_HOST_URL}"
+authWithoutRealmAndServerDns "admin" "password" "http://${NEW_HOST_URL}"
 
 # test re-install
 # remove codenvy binary

@@ -28,13 +28,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.testng.Assert.assertEquals;
 
@@ -59,30 +54,8 @@ public class LdapManagerCodenvy3Test extends BaseLdapTest {
         initMocks(this);
 
         prepareSingleNodeEnv(mockConfigManager);
-        spyLdapManager = spy(new LdapManager(mockConfigManager, mockTransport));
+        spyLdapManager = spy(new LdapManager(mockConfigManager));
         doReturn(EmbeddedADS.ADS_SECURITY_PRINCIPAL).when(spyLdapManager).getRootPrincipal();
-    }
-
-    @Test
-    public void shouldChangeAdminPassword() throws Exception {
-        byte[] curPwd = "curPwd".getBytes("UTF-8");
-        byte[] newPwd = "newPwd".getBytes("UTF-8");
-        doNothing().when(spyLdapManager).validateCurrentPassword(eq(curPwd), any(Config.class));
-
-        spyLdapManager.changeAdminPassword(curPwd, newPwd);
-
-        Config testConfig = mockConfigManager.loadInstalledCodenvyConfig();
-        verify(spyLdapManager).connect(testConfig, EmbeddedADS.ADS_SECURITY_PRINCIPAL, EmbeddedADS.ADS_SECURITY_CREDENTIALS);
-        verify(spyLdapManager).validateCurrentPassword(eq(curPwd), eq(testConfig));
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void shouldThrowExceptionIfPasswordValidationFailed() throws Exception {
-        byte[] curPwd = "curPwd".getBytes("UTF-8");
-        byte[] newPwd = "newPwd".getBytes("UTF-8");
-        doThrow(new IllegalStateException()).when(spyLdapManager).validateCurrentPassword(eq(curPwd), any(Config.class));
-
-        spyLdapManager.changeAdminPassword(curPwd, newPwd);
     }
 
     @Test
@@ -98,7 +71,7 @@ public class LdapManagerCodenvy3Test extends BaseLdapTest {
     @Test(expectedExceptions = UnsupportedArtifactVersionException.class,
         expectedExceptionsMessageRegExp = "Version '1.0.0' of artifact 'codenvy' is not supported")
     public void shouldThrowUnsupportedArtifactVersionExceptionWhenGetRootPrincipal() throws Exception {
-        LdapManager spyLdapManager = spy(new LdapManager(mockConfigManager, mockTransport));
+        LdapManager spyLdapManager = spy(new LdapManager(mockConfigManager));
         doReturn(new Config(ImmutableMap.of(Config.VERSION, UNSUPPORTED_VERSION)))
             .when(mockConfigManager).loadInstalledCodenvyConfig();
 

@@ -34,6 +34,8 @@
 
 # --disable-monitoring-tools
 
+# --skip-post-flight-check
+
 trap cleanUp EXIT
 
 unset HOST_NAME
@@ -52,7 +54,6 @@ PUPPET_SERVER_PACKAGE=puppet-server-3.8.6-1.el7.noarch
 EXTERNAL_DEPENDENCIES=("https://codenvy.com||0"
                        "https://install.codenvycorp.com||0"
                        "http://dl.fedoraproject.org/pub/epel/||1"
-                       "https://repo.mongodb.org/yum/redhat/||0"
                        "http://nginx.org/packages/centos/||1"
                        "http://yum.postgresql.org/||0"
                        "https://yum.puppetlabs.com/||1"
@@ -94,6 +95,7 @@ TIMER_PID=
 PRINTER_PID=
 LINE_UPDATER_PID=
 DOWNLOAD_PROGRESS_UPDATER_PID=
+LOADER_PID=
 
 STEP_LINE=
 PUPPET_LINE=
@@ -116,6 +118,7 @@ cleanUp() {
     killInternetAccessChecker
     killFooterUpdater
     killDownloadProgressUpdater
+    killLoader
 }
 
 validateExitCode() {
@@ -140,6 +143,7 @@ setRunOptions() {
     LICENSE_ACCEPTED=false
     INSTALL_DIR=./codenvy
     DISABLE_MONITORING_TOOLS=false
+    SKIP_POST_FLIGHT_CHECK=false
 
     local i=0
 
@@ -212,6 +216,9 @@ setRunOptions() {
 
         elif [[ "$var" == "--disable-monitoring-tools" ]]; then
             DISABLE_MONITORING_TOOLS=true
+
+        elif [[ "$var" == "--skip-post-flight-check" ]]; then
+            SKIP_POST_FLIGHT_CHECK=true
 
         else
             UNRECOGNIZED_PARAMETERS[$((i++))]="$var"
@@ -817,6 +824,14 @@ askProperty() {
 insertProperty() {
     local value=$(echo $2 | sed -r 's/[|]/\\|/g')  # replace "|" on "\|" for sed command
     sed -i "s|$1=.*|$1=$value|g" "${CONFIG}"
+}
+
+# read value of property from the ${CONFIG} file where properties are stored in view of "<name> = <value>"
+# $1 - property name
+readProperty() {
+    local property=$1
+    local value=$(sed '/^\#/d' "${CONFIG}" | grep "^\s*$property\s*="  | tail -n 1 | cut -d "=" -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    echo $value
 }
 
 
@@ -1888,25 +1903,65 @@ doUpdateInternetAccessChecker() {
     return ${checkFailed}
 }
 
+################ Loader
+runLoader() {
+    updateLoader &
+    LOADER_PID=$!
+}
+
+killLoader() {
+    if [ -n "${LOADER_PID}" ]; then
+        kill -KILL ${LOADER_PID} &>/dev/null
+    fi
+}
+
+continueLoader() {
+    if [ -n "${LOADER_PID}" ]; then
+        cursorSave
+        kill -SIGCONT ${LOADER_PID} &>/dev/null
+    fi
+}
+
+pauseLoader() {
+    if [ -n "${LOADER_PID}" ]; then
+        kill -SIGSTOP ${LOADER_PID} &>/dev/null
+    fi
+}
+
+updateLoader() {
+    CHAR_CHANGE_TIMEOUT_SEC=0.25
+    LOADER_CHARS=('-' '\\' '|' '/')
+
+    for ((;;)) do
+        for char in ${LOADER_CHARS[@]}; do
+            cursorSave
+            sleep ${CHAR_CHANGE_TIMEOUT_SEC}
+            echo -en ${char}
+            cursorRestore
+        done
+    done
+}
+
+
 printPostInstallInfo_codenvy() {
     if [ -z ${SYSTEM_ADMIN_NAME} ]; then
-        SYSTEM_ADMIN_NAME=$(grep admin_ldap_user_name= ${CONFIG} | cut -d '=' -f2)
+        SYSTEM_ADMIN_NAME=$(readProperty "admin_ldap_user_name")
     fi
 
     if [ -z ${SYSTEM_ADMIN_PASSWORD} ]; then
         if [[ "${VERSION}" =~ ^(4).* ]]; then
-            SYSTEM_ADMIN_PASSWORD=$(grep admin_ldap_password= ${CONFIG} | cut -d '=' -f2)
+            SYSTEM_ADMIN_PASSWORD=$(readProperty "admin_ldap_password")
         else
-            SYSTEM_ADMIN_PASSWORD=$(grep system_ldap_password= ${CONFIG} | cut -d '=' -f2)
+            SYSTEM_ADMIN_PASSWORD=$(readProperty "system_ldap_password")
         fi
     fi
 
     if [ -z ${HOST_NAME} ]; then
-        HOST_NAME=$(grep host_url\\s*=\\s*.* "${CONFIG}" | sed 's/host_url\s*=\s*\(.*\)/\1/')
+        HOST_NAME=$(readProperty "host_url")
     fi
 
     println
-    println "Codenvy is ready: $(printImportantLink "http://$HOST_NAME")"
+    println "Codenvy at:       $(printImportantLink "http://$HOST_NAME")"
     println "Admin user name:  $(printImportantInfo $SYSTEM_ADMIN_NAME)"
     println "Admin password:   $(printImportantInfo $SYSTEM_ADMIN_PASSWORD)"
     println
@@ -1916,6 +1971,141 @@ printPostInstallInfo_codenvy() {
 printPostInstallInfo_installation-manager-cli() {
     println
     println "Codenvy Installation Manager is installed into ${INSTALL_DIR}/cli directory"
+}
+
+
+# $1 - admin name
+# $2 - admin password
+# $3 - version of check tool
+#
+# return 1 on error
+postFlightCheckOfCodenvy() {
+    local adminName="$1"
+    local adminPassword="$2"
+    local imageVersion="$3"
+
+    if [[ $SKIP_POST_FLIGHT_CHECK == true ]]; then
+        return
+    fi
+
+    echo "Verifying installation..." >> ${INSTALL_LOG}
+
+    println
+    printPrompt
+    echo -en "$(printf "%-73s" "Verifying installation...")"
+
+    runLoader
+
+    # load che-test tool
+    pullDockerImage "codenvy/che-test:${imageVersion}"
+    if [[ $? != 0 ]]; then
+        return 1
+    fi
+
+    # load che-ip tool
+    pullDockerImage "codenvy/che-ip:${imageVersion}"
+    if [[ $? != 0 ]]; then
+        return 1
+    fi
+
+    # run che-test tool
+    runDockerTool "codenvy/che-test:${imageVersion}" \
+                  "post-flight-check" \
+                  "$adminName" \
+                  "$adminPassword" \
+                  "Codenvy is installed, but basic post-flight API tests failed. We have this error message:"
+
+    if [[ $? != 0 ]]; then
+        return 1
+    fi
+}
+
+# $1 - docker image
+#
+# return 1 on error
+pullDockerImage() {
+    local image=$1
+    local errorMessage
+
+    continueLoader
+    errorMessage=$(sudo docker pull "$image" 2>&1)
+
+    if [[ $? != 0 ]]; then
+        pauseLoader
+
+        echo "Error of loading 'codenvy/che-test' docker image: '$errorMessage'" >> ${INSTALL_LOG}
+
+        echo -e "$(printError "[NOT OK]")"
+        println
+        println $(printError "Unexpected error occurred. See ${INSTALL_LOG} for more details")
+
+        return 1
+    fi
+
+    pauseLoader
+}
+
+# $1 - docker image
+# $2 - command
+# $3 - user
+# $4 - password
+# $5 - error message prefix
+#
+# return 1 on error
+runDockerTool() {
+    local image=$1
+    local command=$2
+    local user=$3
+    local password=$4
+    local errorMessagePrefix=$5
+
+    continueLoader
+    local errorMessage=$( { sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$image" "$command" \
+                                                                                                       --user="$user" \
+                                                                                                       --password="$password" \
+                                                                                                       --logger-prefix-off \
+                                                                                                       --quiet \
+                                                                                                       --port=80 2>&3 1>&1 3>&- | {
+       i=1
+       while IFS= read -r line; do
+          pauseLoader
+
+          if [[ $i > 1 ]]; then
+             echo -e "$(printSuccess "[OK]")"
+
+             echo -e " [OK]" >> ${INSTALL_LOG}
+          else
+             echo -e ' ' # clean up loader
+          fi
+
+          echo -en "$line" >> ${INSTALL_LOG}
+
+          echo -en "\e[34m[CODENVY] \e[0m$((i++)). "
+          echo -en "$(printf "%-70s" "$line")"
+
+          continueLoader
+       done;
+    } } 3>&1 1>&2 | {
+       read -r error;
+       echo "$error"
+    } )
+
+    pauseLoader
+
+    if [[ -n "$errorMessage" ]]; then
+        echo -e " [NOT OK]" >> ${INSTALL_LOG}
+        echo "$errorMessage" >> ${INSTALL_LOG}
+
+        echo -e "$(printError "[NOT OK]")"
+        println
+        println $(printError "$errorMessagePrefix")
+        println $(printError "'$errorMessage'")
+
+        return 1
+    else
+        echo -e $(printSuccess "[OK]")
+        echo -e " [OK]" >> ${INSTALL_LOG}
+    fi
 }
 
 
@@ -1978,5 +2168,14 @@ fi
 pauseTimer
 pauseInternetAccessChecker
 pauseFooterUpdater
+
+if [[ "${ARTIFACT}" == "codenvy" ]] && [[ "${VERSION}" =~ ^(4).* ]]; then
+    adminName=$(readProperty 'admin_ldap_user_name')
+    adminPassword=$(readProperty 'admin_ldap_password')
+    toolVersion=$(if [[ "${VERSION}" =~ .*SNAPSHOT$ ]]; then echo "nightly"; else echo ${VERSION}; fi)
+
+    postFlightCheckOfCodenvy "$adminName" "$adminPassword" "$toolVersion"
+    println
+fi
 
 printPostInstallInfo_${ARTIFACT}

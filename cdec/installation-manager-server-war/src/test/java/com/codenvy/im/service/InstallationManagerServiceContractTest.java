@@ -673,31 +673,6 @@ public class InstallationManagerServiceContractTest extends BaseContractTest {
     }
 
     @Test
-    public void testChangeAdminPassword() {
-        testContract(
-            "password",                                          // path
-            null,                                             // query parameters
-            "{" +
-            "\"currentPassword\":\"current\"," +
-            "\"newPassword\":\"new\"" +
-            "}",                                             // request body
-            ContentType.JSON,                                // consume content type
-            null,                                             // produce content type
-            HttpMethod.POST,                                // HTTP method
-            null,                                             // response body
-            Response.Status.OK,                       // response status
-            null,                                             // before test
-            () -> {
-                try {
-                    verify(mockFacade).changeAdminPassword("current".getBytes("UTF-8"), "new".getBytes("UTF-8"));
-                } catch (Exception e) {
-                    fail(e.getMessage(), e);
-                }
-            }                                                 // assertion
-        );
-    }
-
-    @Test
     public void shouldReturn500ErrorOnWrongEventJson() {
         StringBuilder eventWithTooManyParameters = new StringBuilder("{" +
                                             "\"type\":\"CDEC_FIRST_LOGIN\"," +

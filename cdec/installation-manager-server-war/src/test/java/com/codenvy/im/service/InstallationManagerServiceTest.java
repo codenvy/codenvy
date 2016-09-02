@@ -758,36 +758,6 @@ public class InstallationManagerServiceTest {
         verify(mockFacade, never()).logSaasAnalyticsEvent(any(Event.class), any(String.class));
     }
 
-    @Test
-    public void shouldChangeAdminPassword() throws Exception {
-        String currentPassword = "current";
-        String newPassword = "new";
-
-        service.changeAdminPassword(ImmutableMap.of("currentPassword", currentPassword, "newPassword", newPassword));
-
-        verify(mockFacade).changeAdminPassword(currentPassword.getBytes("UTF-8"), newPassword.getBytes("UTF-8"));
-    }
-
-    @Test
-    public void shouldThrowBadRequestIfCurrentPasswordNotSpecified() throws Exception {
-        String newPassword = "new";
-
-        Response response = service.changeAdminPassword(ImmutableMap.of("newPassword", newPassword));
-
-        verify(mockFacade, never()).changeAdminPassword(any(), any());
-        assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
-    }
-
-    @Test
-    public void shouldThrowBadRequestIfNewPasswordNotSpecified() throws Exception {
-        String currentPassword = "current";
-
-        Response response = service.changeAdminPassword(ImmutableMap.of("currentPassword", currentPassword));
-
-        verify(mockFacade, never()).changeAdminPassword(any(), any());
-        assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
-    }
-
     private void assertOkResponse(Response result) throws IOException {
         assertEquals(result.getStatus(), Response.Status.OK.getStatusCode());
     }

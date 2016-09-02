@@ -1,59 +1,74 @@
 <form name="commandsForm">
-  <div class="factory-commands-widget" layout="column">
-    <div layout="row" layout-align="start start">
-
-      <che-input che-form="commandsForm"
-                 che-name="name"
-                 che-place-holder="Name of the command"
-                 ng-model="factoryCommandCtrl.commandLineName"
-                 required
-                 ng-minlength="1"
-                 ng-maxlength="20"
-                 ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-        <div ng-message="required">A name is required.</div>
-        <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
-          letters or underscores
-        </div>
-        <div ng-message="minlength">The name has to be more than 1 character long.</div>
-        <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-      </che-input>
-      <che-input che-form="commandsForm"
-                 che-name="commandLine"
-                 flex="50"
-                 che-place-holder="Command Line: example: mvn clean install -f ${current.project.path}"
-                 ng-model="factoryCommandCtrl.commandLine"
-                 required
-                 ng-minlength="1"
-                 ng-maxlength="500">
-        <div ng-message="required">A name is required.</div>
-        <div ng-message="minlength">The name has to be more than 1 character long.</div>
-        <div ng-message="maxlength">The name has to be less than 500 characters long.</div>
-      </che-input>
+  <div class="factory-commands-panel" layout="column">
+    <div layout="column" layout-align="start start">
+      <div layout="row" layout-align="start start"
+           class="factory-commands-input">
+        <che-input che-form="commandsForm"
+                   che-name="name"
+                   che-place-holder="Name of the command"
+                   aria-label="Name of the command"
+                   ng-model="factoryCommandCtrl.commandLineName"
+                   required
+                   ng-minlength="1"
+                   ng-maxlength="20"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only
+            with digits, latin
+            letters or underscores
+          </div>
+          <div ng-message="minlength">The name has to be more than 1 character long.</div>
+          <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+        </che-input>
+        <che-input che-form="commandsForm"
+                   che-name="commandLine"
+                   aria-label="Command"
+                   che-place-holder="Command Line: example: mvn clean install -f ${current.project.path}"
+                   che-width="auto"
+                   ng-model="factoryCommandCtrl.commandLine"
+                   required
+                   ng-minlength="1"
+                   ng-maxlength="500">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="minlength">The name has to be more than 1 character long.</div>
+          <div ng-message="maxlength">The name has to be less than 500 characters long.</div>
+        </che-input>
+      </div>
       <che-button-primary che-button-title="Add"
                           ng-click="factoryCommandCtrl.addCommand()"
                           ng-disabled="commandsForm.$invalid"></che-button-primary>
     </div>
 
-    <div ng-if="factoryCommandCtrl.factoryObject.workspace.commands.length > 0">
-    <che-list-title che-icon="fa fa-terminal" >
-      <span class="projects-list-workspace-name">Commands</span>
-    </che-list-title>
-    <che-list>
-      <che-list-item ng-repeat="command in factoryCommandCtrl.factoryObject.workspace.commands" flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
-        <div layout-gt-sm="row" flex="100" layout-align="start center">
-          <div flex="30" layout="column" layout-align-gt="start center" layout-align-md="start center" layout-align-sm="center center">
-            {{command.name}}
+    <div ng-if="factoryCommandCtrl.factoryObject.workspace.commands.length > 0"
+         class="factory-commands-list">
+      <che-list>
+        <che-list-item ng-repeat="command in factoryCommandCtrl.factoryObject.workspace.commands"
+                       flex="100">
+          <div layout="row" flex>
+            <div layout="column"
+                 layout-align="start start"
+                 class="factory-commands-row-command-name">
+              <span>{{command.name}}</span>
+            </div>
+            <div flex
+                 layout="column"
+                 layout-align="start start"
+                 ng-click="factoryCommandCtrl.editCommand($event, $index)"
+                 class="factory-commands-row-command">
+              {{command.commandLine}}
+            </div>
+            <div flex="10" layout="row" layout-align="center start"
+                 class="che-list-actions">
+              <div ng-click="factoryCommandCtrl.removeCommand($index)" class="factory-commands-widget-actions">
+                <span class="fa fa-times-circle"></span>
+              </div>
+              <div ng-click="factoryCommandCtrl.editCommand($event, $index)" class="factory-commands-widget-actions">
+                <span class="fa fa-edit"></span>
+              </div>
+            </div>
           </div>
-          <div flex="80" layout-align="center center" class="factory-commands-widget-commandline" ng-click="factoryCommandCtrl.editCommand($event, $index)">
-            {{command.commandLine}}
-          </div>
-          <div flex="10" class="" layout-align="center center">
-            <md-icon ng-show="hover" class="factory-commands-widget-actionicons" md-font-icon="fa fa-times-circle" ng-click="factoryCommandCtrl.removeCommand($index)"></md-icon>
-            <md-icon ng-show="hover" class="factory-commands-widget-actionicons" md-font-icon="fa fa-edit" ng-click="factoryCommandCtrl.editCommand($event, $index)"></md-icon>
-          </div>
-        </div>
-      </che-list-item>
-    </che-list>
+        </che-list-item>
+      </che-list>
     </div>
   </div>
 </form>

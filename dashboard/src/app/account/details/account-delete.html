@@ -17,13 +17,5 @@
     from Codenvy S.A..
 
 -->
-<che-panel class="delete-account" che-title="Delete Account">
-  <div layout="row" flex layout-align="space-around start">
-    <label flex="15">Delete your account is irreversible</label>
-
-    <div layout="column" flex="85">
-      <che-button-danger che-button-title="Delete this account"
-                          ng-click="accountDeleteCtrl.deleteAccount()"/>
-    </div>
-  </div>
-</che-panel>
+<che-button-danger che-button-title="Delete this account"
+                   ng-click="accountDeleteCtrl.deleteAccount()"/>

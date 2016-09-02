@@ -21,7 +21,7 @@ export class AccountCtrl {
    * @ngInject for Dependency injection
    * @author Oleksii Orel
    */
-  constructor($routeParams, $location, cheAPI, codenvyAPI, cheNotification, $rootScope) {
+  constructor($routeParams, $location, cheAPI, codenvyAPI, cheNotification, $rootScope, $timeout, $scope) {
     this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
@@ -59,6 +59,23 @@ export class AccountCtrl {
     this.resetPasswordForm = false;
 
     $rootScope.showIDE = false;
+
+    this.timeoutPromise;
+    $scope.$watch(() => {return this.profileAttributes}, () => {
+      if (!$scope.profileInformationForm || $scope.profileInformationForm.$invalid) {
+        return;
+      }
+      $timeout.cancel(this.timeoutPromise);
+
+      this.timeoutPromise = $timeout(() => {
+        this.setProfileAttributes();
+      }, 500);
+    }, true);
+    $scope.$on('$destroy', () => {
+      if (this.timeoutPromise) {
+        $timeout.cancel(this.timeoutPromise);
+      }
+    });
   }
 
   /**

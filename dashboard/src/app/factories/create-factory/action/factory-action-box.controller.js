@@ -29,26 +29,43 @@ export class FactoryActionBoxController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
+
+    this.actions = [];
+    this.actions.push({name : 'RunCommand', id: 'runcommand'});
+    this.actions.push({name : 'openFile', id: 'openfile'});
+    this.selectedAction = this.actions[0].id;
   }
 
   /**
-   * User clicked on the + button to add a new action. Show the dialog
-   * @param $event
+   * Edit the action based on the provided index
+   * @param $event the mouse event
+   * @param index the index in the array of factory actions
    */
-  addAction($event) {
+  editAction($event, index) {
+    let action = this.factoryObject.ide[this.lifecycle].actions[index];
     this.$mdDialog.show({
       targetEvent: $event,
-      controller: 'FactoryActionDialogAddController',
-      controllerAs: 'factoryActionDialogAddCtrl',
+      controller: 'FactoryActionDialogEditController',
+      controllerAs: 'factoryActionDialogEditCtrl',
       bindToController: true,
       clickOutsideToClose: true,
-      locals: { callbackController: this},
-      templateUrl: 'app/factories/create-factory/action/factory-action-widget-dialog-add.html'
+      locals: {
+        callbackController: this,
+        index: index,
+        // selectedAction: action
+        selectedValue: action.properties
+      },
+      templateUrl: 'app/factories/create-factory/action/factory-action-edit.html'
     });
   }
 
+  callbackEditAction(index, newValue) {
+    this.factoryObject.ide[this.lifecycle].actions[index].properties = newValue;
 
-  callbackAddAction(actionKey, actionParam) {
+    this.onChange();
+  }
+
+  addAction() {
     if (!this.factoryObject.ide) {
       this.factoryObject.ide = {};
     }
@@ -58,17 +75,17 @@ export class FactoryActionBoxController {
     }
 
     var actionToAdd;
-    if ('openfile' === actionKey) {
+    if ('openfile' === this.selectedAction) {
       actionToAdd = {
         "properties": {
-          "file": actionParam
+          "file": this.selectedParam
         },
         "id": "openFile"
       };
-    } else if ('runcommand' === actionKey) {
+    } else if ('runcommand' === this.selectedAction) {
       actionToAdd = {
         "properties": {
-          "name": actionParam
+          "name": this.selectedParam
         },
         "id": "runCommand"
       };
@@ -76,5 +93,17 @@ export class FactoryActionBoxController {
     if (actionToAdd) {
       this.factoryObject.ide[this.lifecycle].actions.push(actionToAdd);
     }
+
+    this.onChange();
+  }
+
+  /**
+   * Remove action based on the provided index
+   * @param index the index in the array of factory actions
+   */
+  removeAction(index) {
+    this.factoryObject.ide[this.lifecycle].actions.splice(index, 1);
+
+    this.onChange();
   }
 }

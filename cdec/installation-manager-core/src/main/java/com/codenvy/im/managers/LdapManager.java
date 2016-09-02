@@ -14,28 +14,21 @@
  */
 package com.codenvy.im.managers;
 
-import com.codenvy.api.dao.authentication.SSHAPasswordEncryptor;
 import com.codenvy.im.artifacts.ArtifactFactory;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.UnsupportedArtifactVersionException;
 import com.codenvy.im.managers.helper.LdapManagerHelper;
 import com.codenvy.im.managers.helper.LdapManagerHelperCodenvy3Impl;
 import com.codenvy.im.managers.helper.LdapManagerHelperCodenvy4Impl;
-import com.codenvy.im.utils.HttpTransport;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.auth.shared.dto.Credentials;
-import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import java.io.IOException;
@@ -43,7 +36,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.codenvy.im.utils.Commons.combinePaths;
 import static java.lang.String.format;
 
 /**
@@ -54,52 +46,16 @@ import static java.lang.String.format;
 public class LdapManager {
 
     private final ConfigManager configManager;
-    private final HttpTransport httpTransport;
-
     private final Map<Integer, LdapManagerHelper> HELPERS;
 
     @Inject
-    public LdapManager(ConfigManager configManager, HttpTransport httpTransport) throws IOException {
+    public LdapManager(ConfigManager configManager) throws IOException {
         this.configManager = configManager;
-        this.httpTransport = httpTransport;
 
         HELPERS = ImmutableMap.of(
             3, new LdapManagerHelperCodenvy3Impl(configManager),
             4, new LdapManagerHelperCodenvy4Impl(configManager)
         );
-    }
-
-    /**
-     * Modify Codenvy admin password.
-     *
-     * @throws IOException
-     *         if any error occurred
-     * @throws java.lang.IllegalStateException
-     *         if current password is invalid
-     */
-    public void changeAdminPassword(byte[] currentPassword, byte[] newPassword) throws IOException, IllegalStateException {
-        Config config = configManager.loadInstalledCodenvyConfig();
-
-        validateCurrentPassword(currentPassword, config);
-
-        try {
-            InitialDirContext ldapContext = connect(config, getRootPrincipal(), config.getValue(Config.USER_LDAP_PASSWORD));
-
-            try {
-                SSHAPasswordEncryptor sshaPasswordEncryptor = new SSHAPasswordEncryptor();
-                String encryptedPwd = new String(sshaPasswordEncryptor.encrypt(newPassword), "UTF-8");
-
-                ModificationItem[] mods = new ModificationItem[]{
-                    new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("userPassword", encryptedPwd))
-                };
-
-                ldapContext.modifyAttributes(getHelper().getNameOfObjectToChangePassword(), mods);
-            } finally {
-                ldapContext.close();
-            }
-        } catch (Exception e) {
-            throw new IOException(format("Error in changing an admin password: %s" , e.getMessage()), e);
-        }
     }
 
     /**
@@ -143,20 +99,6 @@ public class LdapManager {
         }
 
         return resultCounter;
-    }
-
-    protected void validateCurrentPassword(byte[] currentPassword, Config config) throws IOException {
-        Credentials credentials = DtoFactory.newDto(Credentials.class);
-        credentials.setPassword(new String(currentPassword, "UTF-8"));
-        credentials.setUsername(config.getValue(Config.ADMIN_LDAP_USER_NAME));
-        credentials.setRealm(getHelper().getRealm());
-
-        String requestUrl = combinePaths(configManager.getApiEndpoint(), "/auth/login");
-        try {
-            httpTransport.doPost(requestUrl, credentials);
-        } catch (IOException e) {
-            throw new IllegalStateException("Invalid current password");
-        }
     }
 
     InitialDirContext connect(Config config, String secutiryPrincipal, String securityCredentials) throws NamingException, IOException {

@@ -1,11 +1,28 @@
-.factory-information-panel-spacing
-  margin-top 10px
+.factory-information-panel-item:not(:last-child)
+  margin-bottom  10px
 
-.factory-information-panel-item > div
-  margin-bottom  5px
+.factory-information .che-label-container-content .factory-information-input
+  margin-top -6px
 
-.factory-information-panel-caption span
-  flex 1 1 85% !important
+.factory-information .disabled-state
+  cursor not-allowed
+  background-color transparent
 
-.factory-information-panel-url span
-  flex 1 1 80% !important
+.factory-information
+  overflow auto
+  min-height calc(100vh - 152px)
+  background-color $white-color !important
+  padding 0 14px
+
+  button
+    margin 0 30px 0 0
+
+  .che-label-container-content .factory-information-input
+    margin-top -6px
+
+  .factory-information-update-button button
+    margin-right 0
+
+  .json-editor
+    font-size 12px
+    margin-bottom 20px

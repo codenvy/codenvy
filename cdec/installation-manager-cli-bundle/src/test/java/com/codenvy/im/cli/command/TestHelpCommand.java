@@ -64,7 +64,6 @@ public class TestHelpCommand extends AbstractTestCommand {
                                    + "config      Get installation manager configuration\n"
                                    + "download    Download artifacts or print the list of installed ones\n"
                                    + "install     Install, update artifact or print the list of already installed ones\n"
-                                   + "password    Change Codenvy admin password\n"
                                    + "remove-node Remove Codenvy node\n"
                                    + "restore     Restore Codenvy data\n"
                                    + "version     Print the list of available latest versions and installed ones\n"

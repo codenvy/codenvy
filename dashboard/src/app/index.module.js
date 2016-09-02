@@ -29,6 +29,48 @@ import {WorkspaceConfig} from './workspace/workspace-config';
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
   'ngResource', 'ngRoute', 'ngPasswordStrength', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
 
+// add a global resolve flag on all routes (user needs to be resolved first)
+initModule.config(['$routeProvider', ($routeProvider) => {
+  $routeProvider.accessWhen = (path, route) => {
+    route.resolve || (route.resolve = {});
+    route.resolve.app = ['cheBranding', '$q', 'chePreferences', (cheBranding, $q, chePreferences) => {
+      let deferred = $q.defer();
+      if (chePreferences.getPreferences() || DEV) {
+        deferred.resolve();
+      } else {
+        chePreferences.fetchPreferences().then(() => {
+          deferred.resolve();
+        }, (error) => {
+          deferred.reject(error);
+        });
+      }
+
+      return deferred.promise;
+    }];
+
+    return $routeProvider.when(path, route);
+  };
+
+  $routeProvider.accessOtherWise = (route) => {
+    route.resolve || (route.resolve = {});
+    route.resolve.app = ['$q', 'chePreferences', ($q, chePreferences) => {
+      let deferred = $q.defer();
+      if (chePreferences.getPreferences() || DEV) {
+        deferred.resolve();
+      } else {
+        chePreferences.fetchPreferences().then(() => {
+          deferred.resolve();
+        }, (error) => {
+          deferred.reject(error);
+        });
+      }
+
+      return deferred.promise;
+    }];
+    return $routeProvider.otherwise(route);
+  };
+
+}]);
 
 // Development mode is set to TRUE
 // the build assembly (pom.xml) will replace this mode by false when building the application
@@ -71,7 +113,7 @@ initModule.run(['$rootScope', '$routeParams', 'nagMessageService', 'cheUIElement
       nagMessageService.createLicenseMessage();
       cheUIElementsInjectorService.addElementForInjection('dashboardPageContent', 'recentFactories', '<cdvy-last-factories></cdvy-last-factories>');
     });
-}]);
+  }]);
 
 // add interceptors
 initModule.factory('AuthInterceptor', ($window, $cookies, $q, $location, $log) => {

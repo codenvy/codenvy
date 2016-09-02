@@ -16,7 +16,6 @@
 
 import {FactoryDetailsCtrl} from '../factory-details/factory-details.controller';
 import {InformationTabConfig} from './information-tab/information-tab-config';
-import {ConfigurationTabConfig} from './configuration-tab/configuration-tab-config';
 
 
 export class FactoryDetailsConfig {
@@ -40,7 +39,6 @@ export class FactoryDetailsConfig {
 
     // config files
     new InformationTabConfig(register);
-    new ConfigurationTabConfig(register);
 
   }
 }

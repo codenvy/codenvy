@@ -23,12 +23,9 @@ import {FactoryFromFileCtrl} from '../create-factory/config-file-tab/factory-fro
 import {FactoryFromFile} from '../create-factory/config-file-tab/factory-from-file.directive';
 import {FactoryFromTemplateCtrl} from '../create-factory/template-tab/factory-from-template.controller';
 import {FactoryFromTemplate} from '../create-factory/template-tab/factory-from-template.directive';
-import {FactoryActionController} from './action/factory-action-widget.controller';
-import {FactoryAction} from './action/factory-action-widget.directive';
 import {FactoryActionBoxController} from './action/factory-action-box.controller';
 import {FactoryActionBox} from './action/factory-action-box.directive';
-import {FactoryActionDialogAddController} from './action/factory-action-widget-dialog-add.controller';
-import {FactoryActionDialogEditController} from './action/factory-action-widget-dialog-edit.controller';
+import {FactoryActionDialogEditController} from './action/factory-action-edit.controller';
 import {FactoryCommandController} from './command/factory-command.controller';
 import {FactoryCommand} from './command/factory-command.directive';
 import {FactoryCommandDialogEditController} from './command/factory-command-edit.controller';
@@ -53,16 +50,12 @@ export class CreateFactoryConfig {
     register.controller('FactoryActionBoxController', FactoryActionBoxController);
     register.directive('cdvyFactoryActionBox', FactoryActionBox);
 
-    register.controller('FactoryActionController', FactoryActionController);
-    register.directive('cdvyFactoryAction', FactoryAction);
-
     register.controller('FactoryCommandController', FactoryCommandController);
     register.directive('cdvyFactoryCommand', FactoryCommand);
 
     register.controller('CreateFactoryGitController', CreateFactoryGitController);
     register.directive('cdvyCreateFactoryGit', CreateFactoryGit);
 
-    register.controller('FactoryActionDialogAddController', FactoryActionDialogAddController);
     register.controller('FactoryActionDialogEditController', FactoryActionDialogEditController);
     register.controller('FactoryCommandDialogEditController', FactoryCommandDialogEditController);
 

@@ -45,7 +45,6 @@ import com.codenvy.im.response.NodeInfo;
 import com.codenvy.im.response.UpdateArtifactInfo;
 import com.codenvy.im.saas.SaasAuthServiceProxy;
 import com.codenvy.im.saas.SaasRepositoryServiceProxy;
-import com.codenvy.im.utils.Commons;
 import com.codenvy.im.utils.HttpTransport;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.FluentIterable;
@@ -62,17 +61,13 @@ import javax.validation.constraints.NotNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.codenvy.im.artifacts.ArtifactFactory.createArtifact;
@@ -494,13 +489,6 @@ public class InstallationManagerFacade {
      */
     public void logoutFromCodenvySaaS(@NotNull String authToken) throws IOException {
         saasAuthServiceProxy.logout(authToken);
-    }
-
-    /**
-     * @see com.codenvy.im.managers.LdapManager#changeAdminPassword(byte[], byte[])
-     */
-    public void changeAdminPassword(byte[] currentPassword, byte[] newPassword) throws IOException {
-        ldapManager.changeAdminPassword(currentPassword, newPassword);
     }
 
     /**

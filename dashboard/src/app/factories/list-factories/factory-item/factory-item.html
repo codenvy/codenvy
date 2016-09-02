@@ -17,53 +17,43 @@
     from Codenvy S.A..
 
 -->
-<che-list-item flex-gt-xs="100" flex="33"
-               ng-mouseover="hover=true" ng-mouseout="hover=false">
+<che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
-       layout-gt-xs="row"
-       layout-align="start center"
-       class="factory-list-row">
-
-    <div layout-align="center center"
-         class="factory-list-static-icon"
+       layout="row"
+       layout-align="start stretch"
+       class="che-list-item-row">
+    <div layout="row"
+         layout-align="start center"
+         class="che-checkbox-area"
          ng-if="factoryItemCtrl.isSelectable === true">
-      <che-list-item-checked class="factory-type-icon"
-                             ng-model="factoryItemCtrl.isSelect"
-                             che-aria-label-checkbox="Factory {{factoryItemCtrl.factory.originFactory.name}}"></che-list-item-checked>
+      <che-list-item-checked ng-model="factoryItemCtrl.isSelect"
+                             che-aria-label-checkbox="Factory {{factoryItemCtrl.factory.originFactory.name}}"
+                             ng-click="factoryItemCtrl.onCheckboxClick()"></che-list-item-checked>
     </div>
-
     <div flex
-         layout="column"
-         layout-align-xs="center center" layout-align-gt-xs="start start"
-         ng-click="factoryItemCtrl.redirectToFactoryDetails()">
-      <div class="factory-name che-hover" ng-if="factoryItemCtrl.factory.originFactory.name">
-        {{factoryItemCtrl.factory.originFactory.name}}
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="25"
+           class="che-list-item-name"
+           ng-click="factoryItemCtrl.redirectToFactoryDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
+        <span tooltip="Created: {{factoryItemCtrl.factory.originFactory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+              class="che-hover">{{factoryItemCtrl.factory.originFactory.name ? factoryItemCtrl.factory.originFactory.name : factoryItemCtrl.factory.idURL}}</span>
       </div>
-      <div class="factory-id-url che-hover" ng-if="factoryItemCtrl.factory.originFactory.name">
-        {{factoryItemCtrl.factory.nameURL}}
+      <div flex-gt-xs="60">
+        <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+        <span class="factory-consumed-value">{{factoryItemCtrl.factory.originFactory.workspace.environments[0].machineConfigs[0].limits.ram}} MB</span>
       </div>
-      <div class="factory-id-url che-hover" ng-if="!factoryItemCtrl.factory.originFactory.name">
-        {{factoryItemCtrl.factory.idURL ? factoryItemCtrl.factory.idURL : factoryItemCtrl.factory.originFactory.id}}
+      <div flex-gt-xs="15">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <a tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemCtrl.factory.originFactory.id}}">
+            <span class="fa fa-chevron-circle-right factory-action"></span>
+          </a>
+        </span>
       </div>
-    </div>
-
-    <div flex flex-gt-xs="15"
-         layout="column"
-         layout-align="center center"
-         class="factory-details">
-      <div tooltip="Created: {{factoryItemCtrl.factory.originFactory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
-           am-time-ago="factoryItemCtrl.factory.originFactory.creator.created"></div>
-    </div>
-
-    <div flex="none"
-         layout="row"
-         layout-align="center center"
-         ng-show="hover">
-      <a ng-href="#/load-factory/{{factoryItemCtrl.factory.originFactory.id}}" target="_self">
-        <che-button-default class="che-hover factory-list-details-arrow"
-                            che-button-icon="fa fa fa-chevron-circle-right"
-                            che-button-title="Open in IDE"></che-button-default>
-      </a>
     </div>
   </div>
 </che-list-item>

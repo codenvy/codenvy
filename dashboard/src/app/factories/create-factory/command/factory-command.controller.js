@@ -56,6 +56,8 @@ export class FactoryCommandController {
     };
 
     this.factoryObject.workspace.commands.push(command);
+
+    this.onChange();
   }
 
   /**
@@ -64,6 +66,8 @@ export class FactoryCommandController {
    */
   removeCommand(index) {
     this.factoryObject.workspace.commands.splice(index, 1);
+
+    this.onChange();
   }
 
   /**
@@ -89,5 +93,7 @@ export class FactoryCommandController {
 
   callbackEditAction(index, newValue) {
     this.factoryObject.workspace.commands[index].commandLine = newValue;
+
+    this.onChange();
   }
 }

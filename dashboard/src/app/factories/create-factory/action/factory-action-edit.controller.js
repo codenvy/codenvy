@@ -28,6 +28,9 @@ export class FactoryActionDialogEditController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
+
+    // this.selectedValue = this.selectedAction.id === 'runCommand' ? this.selectedAction.properties.name : this.selectedAction.properties.file;
+    console.log('>>>  this.selectedValue: ', this.selectedValue);
   }
 
   /**
@@ -35,7 +38,7 @@ export class FactoryActionDialogEditController {
    */
   edit() {
     this.$mdDialog.hide();
-    this.callbackController.callbackEditAction(this.selectedValue);
+    this.callbackController.callbackEditAction(this.index, this.selectedValue);
   }
 
 

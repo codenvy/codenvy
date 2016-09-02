@@ -24,39 +24,19 @@ export class FactoryDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $routeParams, $location, codenvyAPI, cheNotification) {
+  constructor($route, codenvyAPI, cheNotification) {
     'ngInject';
 
     let factoryId = $route.current.params.id;
 
     this.factory = codenvyAPI.getFactory().getFactoryById(factoryId);
 
-    let promise = codenvyAPI.getFactory().fetchFactory(factoryId);
-
-    promise.then((factory) => {
+    codenvyAPI.getFactory().fetchFactory(factoryId).then((factory) => {
       this.factory = factory;
     }, (error) => {
       cheNotification.showError(error.data.message ? error.data.message : 'Get factory failed.');
       console.log('error', error);
     });
-
-    //search the selected tab
-    let tabName = $routeParams.tabName;
-    if (!tabName) {
-      $location.path('/factory/' + factoryId);
-    } else {
-      switch (tabName) {
-        case 'info':
-          this.selectedTabIndex = 0;
-          break;
-        case 'configure':
-          this.selectedTabIndex = 1;
-          break;
-        default:
-          $location.path('/factory/' + factoryId + '/info');
-          break;
-      }
-    }
   }
 }
 

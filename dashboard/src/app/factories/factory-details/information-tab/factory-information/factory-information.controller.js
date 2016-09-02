@@ -24,20 +24,91 @@ export class FactoryInformationCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, codenvyAPI, cheNotification, $log) {
+  constructor($scope, cheAPI, codenvyAPI, cheNotification, $location, $mdDialog, $log, $timeout, lodash, $filter, $q) {
+    this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
+    this.$location = $location;
+    this.$mdDialog = $mdDialog;
     this.$log = $log;
+    this.$timeout = $timeout;
+    this.lodash = lodash;
+    this.$filter = $filter;
+
+    this.timeoutPromise = null;
+    $scope.$on('$destroy', () => {
+      if (this.timeoutPromise) {
+        $timeout.cancel(this.timeoutPromise);
+      }
+    });
 
     $scope.$watch(() => {
       return this.factory ? this.factory.originFactory : null;
     }, (newOriginFactory) => {
+      if (!newOriginFactory) {
+        return;
+      }
+
       this.copyOriginFactory = newOriginFactory ? angular.copy(newOriginFactory) : null;
+
+      if (this.copyOriginFactory.links) {
+        delete this.copyOriginFactory.links;
+      }
+
+      let factoryContent = this.$filter('json')(this.copyOriginFactory);
+      if (factoryContent !== this.factoryContent) {
+        if (!this.factoryContent) {
+          this.editorLoadedPromise.then((instance) => {
+            this.$timeout(() => {
+              instance.refresh();
+            }, 500);
+          })
+        }
+        this.factoryContent = factoryContent;
+      }
     });
+
+    this.factoryInformationForm;
+    this.stackRecipeMode = 'current-recipe';
+
+    let editorLoadedDefer = $q.defer();
+    this.editorLoadedPromise = editorLoadedDefer.promise;
+    this.editorOptions = {
+      onLoad: ((instance) => {
+        editorLoadedDefer.resolve(instance);
+      })
+    };
+  }
+
+  isFactoryChanged() {
+    if (!this.copyOriginFactory) {
+      return false;
+    }
+
+    let testFactory = angular.copy(this.factory.originFactory);
+    if (testFactory.links) {
+      delete testFactory.links;
+    }
+
+    return angular.equals(this.copyOriginFactory, testFactory) !== true;
+  }
+
+  updateFactory() {
+
+    this.factoryContent = this.$filter('json')(this.copyOriginFactory);
+
+    if (this.factoryInformationForm.$invalid || !this.isFactoryChanged()){
+      return;
+    }
+
+    this.$timeout.cancel(this.timeoutPromise);
+    this.timeoutPromise = this.$timeout(() => {
+      this.doUpdateFactory(this.copyOriginFactory);
+    }, 500);
   }
 
   //Udpate factory content.
-  updateFactory(factory) {
+  doUpdateFactory(factory) {
     let promise = this.codenvyAPI.getFactory().setFactory(factory);
 
     promise.then(() => {
@@ -45,7 +116,173 @@ export class FactoryInformationCtrl {
       this.cheNotification.showInfo('Factory information successfully updated.');
     }, (error) => {
       this.cheNotification.showError(error.data.message ? error.data.message : 'Update factory failed.');
+      this.$log.log(error);
+    });
+  }
+
+  factoryEditorOnFocus() {
+    if (this.timeoutPromise) {
+      this.$timeout.cancel(this.timeoutPromise);
+      this.doUpdateFactory(this.copyOriginFactory);
+    }
+  }
+
+  factoryEditorReset() {
+    this.factoryContent = this.$filter('json')(this.copyOriginFactory, 2);
+  }
+
+  updateFactoryContent() {
+    let promise = this.codenvyAPI.getFactory().setFactoryContent(this.factory.originFactory.id, this.factoryContent);
+
+    promise.then((factory) => {
+      this.factory = factory;
+      this.cheNotification.showInfo('Factory information successfully updated.');
+    }, (error) => {
+      this.factoryContent = this.$filter('json')(this.copyOriginFactory, 2);
+      this.cheNotification.showError(error.data.message ? error.data.message : 'Update factory failed.');
       this.$log.error(error);
     });
   }
+
+  //Perform factory deletion.
+  deleteFactory(event) {
+    let confirm = this.$mdDialog.confirm()
+      .title('Would you like to delete the factory ' + (this.factory.originFactory.name ? '"' + this.factory.originFactory.name + '"' : this.factory.originFactory.id + '?'))
+      .content('Please confirm for the factory removal.')
+      .ariaLabel('Remove factory')
+      .ok('Delete it!')
+      .cancel('Cancel')
+      .clickOutsideToClose(true)
+      .targetEvent(event);
+    this.$mdDialog.show(confirm).then(() => {
+      // remove it !
+      let promise = this.codenvyAPI.getFactory().deleteFactoryById(this.factory.originFactory.id);
+      promise.then(() => {
+        this.$location.path('/factories');
+      }, (error) => {
+        this.cheNotification.showError(error.data.message ? error.data.message : 'Delete failed.');
+        this.$log.log(error);
+      });
+    });
+  }
+
+  /**
+   * Callback when changing stack tab
+   */
+  setStackTab() {
+  }
+
+
+  /**
+   * Callback when stack has been set
+   * @param stack  the selected stack
+   */
+  cheStackLibrarySelecter(stack) {
+    this.stack = stack
+  }
+  /**
+   * Callback when user ask to validate a stack
+   * We need then to create (if required) recipe and update JSON factory configuration
+   */
+
+  validateStack() {
+    //check predefined recipe location
+    if (this.stack) {
+      // needs to get recipe URL from stack
+      let promise = this.computeRecipeForStack(this.stack);
+      promise.then((recipe) => {
+        this.createRecipe(recipe);
+      }, (error) => {
+        this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
+      });
+    } else if (this.recipeUrl) {
+      this.updateMachineRecipeLocation(this.recipeUrl);
+    } else if (this.recipeScript) {
+      // create recipe from script
+      let promise = this.submitRecipe('generated-script', this.recipeScript);
+      promise.then((recipe) => {
+        this.createRecipe(recipe);
+      }, (error) => {
+        this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
+      });
+    }
+  }
+
+  /**
+   * Get recipe link from newly created recipe
+   * @param recipe the recipe result
+   */
+  createRecipe(recipe) {
+    let findLink = this.lodash.find(recipe.links, (link) => {
+      return link.rel === 'get recipe script';
+    });
+    if (findLink) {
+      this.updateMachineRecipeLocation(findLink.href);
+    }
+  }
+
+  /**
+   * User has selected a stack. needs to find or add recipe for that stack
+   */
+  computeRecipeForStack(stack) {
+    // look at recipe
+    let recipeSource = stack.source;
+
+    let promise;
+
+    // what is type of source ?
+    if ('image' === recipeSource.type) {
+      // needs to add recipe for that script
+      promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
+    } else if ('recipe' === recipeSource.type) {
+      promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
+    } else {
+      throw 'Not implemented';
+    }
+
+    return promise;
+  }
+
+  /**
+   * Create a new recipe based on a given name and a given script
+   * @param recipeName the name of the recipe
+   * @param recipeScript the content of the docker script for example
+   * @returns {recipe} promise
+   */
+  submitRecipe(recipeName, recipeScript) {
+    let recipe = {
+      type: 'docker',
+      name: recipeName,
+      permissions: {
+        groups: [
+          {
+            name: 'public',
+            acl: [
+              'read'
+            ]
+          }
+        ],
+        users: {}
+      },
+      script: recipeScript
+    };
+
+    return this.cheAPI.getRecipe().create(recipe);
+  }
+
+  /**
+   * Update the machine recipe URL
+   * @param recipeURL
+   */
+  updateMachineRecipeLocation(recipeURL) {
+    if (!this.copyOriginFactory) {
+      return;
+    }
+    let machineConfig = this.copyOriginFactory.workspace.environments[0].machineConfigs[0];
+    machineConfig.source.type = 'recipe';
+    machineConfig.source.location = recipeURL;
+
+    this.updateFactory();
+  }
+
 }

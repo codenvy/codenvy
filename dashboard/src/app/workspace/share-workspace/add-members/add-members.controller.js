@@ -15,30 +15,35 @@
 'use strict';
 
 /**
- * Defines a directive for displaying factory configuration widget.
+ * This class is handling the controller for the add members popup
  * @author Oleksii Orel
  */
-export class FactoryConfiguration {
+export class AddMemberController {
 
   /**
-   * Default constructor that is using resource
+   * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor() {
-    this.restrict = 'E';
-
-    this.templateUrl = 'app/factories/factory-details/configuration-tab/factory-configuration/factory-configuration.html';
-    this.replace = false;
-
-    this.controller = 'FactoryConfigurationCtrl';
-    this.controllerAs = 'factoryConfigurationCtrl';
-
-    this.bindToController = true;
-
-    // scope values
-    this.scope = {
-      factory: '=cdvyFactory'
-    };
+  constructor($q, $mdDialog) {
+    this.$q = $q;
+    this.$mdDialog = $mdDialog;
   }
 
+  /**
+   * Callback of the cancel button of the dialog.
+   */
+  abort() {
+    this.$mdDialog.hide();
+  }
+
+  /**
+   * Callback of the share button of the dialog.
+   */
+  shareWorkspace() {
+    let permissionPromises = this.callbackController.shareWorkspace();
+
+    this.$q.all(permissionPromises).then(() => {
+      this.$mdDialog.hide();
+    });
+  }
 }

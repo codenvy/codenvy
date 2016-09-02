@@ -1,14 +1,16 @@
-md-content.create-factory
+md-content .create-factory
   overflow auto
   min-height calc(100vh - 152px)
+  background-color $white-color !important
+  padding 0 14px
 
-.create-factory > md-card:first-child .che-panel-content
-  padding-left 0 !important
-  padding-right 0 !important
+  button
+    margin-left 0
+    margin-right 0
+    margin-bottom 16px
 
-.create-factory > md-card:first-child .che-panel-content md-tabs-content-wrapper
-  padding-left 24px
-  padding-right 24px
+  .che-label-container-content .create-factory-input
+    margin -6px 0
 
 md-progress-linear.create-factory-progress
   z-index 1
@@ -20,19 +22,13 @@ md-progress-linear.create-factory-progress
   margin-bottom 20px
   color $red-lipstick-color
 
-.create-factory .disabled-state
-  cursor not-allowed
-  background-color transparent
-
-.create-factory .disabled-state .che-panel-title
-  cursor not-allowed
-
+.create-factory md-tabs-content-wrapper
+  display inline
 
 che-button-primary#create-factory-next-button button
-  margin-top 10px
-  margin-right 24px
-  margin-bottom 100px
+  margin 10px 0 100px
   font-size 1.2em
+  width 100% !important
 
 .create-factory-share-header-widget
   border-top 1px solid $primary-color
@@ -73,6 +69,9 @@ md-card.create-factory-factory-information-card
   font-size 1.1em
   font-family sans-serif
 
+md-tabs.factory-select-source-details
+  margin -15px 0
+
 md-tabs.factory-select-source-details:not(.md-no-tab-content):not(.md-dynamic-height)
   min-height 448px
 
@@ -93,9 +92,3 @@ md-tabs.factory-select-source-details md-tab-content > div:first-child
 .create-factory-share-header-small-button:hover
   color $white-color
   text-decoration none
-
-.create-factory-git-content
-  min-height 80px
-
-.create-factory-git-content cdvy-create-factory-git
-  height 50px

@@ -34,9 +34,6 @@ fetchJsonParameter "file"
 BACKUP_AT_START=${OUTPUT}
 
 # modify data: add account, workspace, project, user, factory
-executeIMCommand "password" "password" "new-password"
-auth "admin" "new-password"
-
 doPost "application/json" "{\"name\":\"account-1\"}" "http://${HOST_URL}/api/account?token=${TOKEN}"
 fetchJsonParameter "id"
 ACCOUNT_ID=${OUTPUT}
@@ -69,7 +66,7 @@ executeSshCommand "sudo LC_TIME=\"uk_US.UTF-8\" date -s \"${TOMORROW_DATE}\"" "a
 
 # analytics data
 DATE=`date +"%Y%m%d"`
-auth "admin" "new-password"
+auth "admin" "password"
 
 executeSshCommand "date" "analytics.${HOST_URL}"
 doPost "" "" "http://${HOST_URL}/analytics/api/service/com.codenvy.analytics.services.PigRunnerFeature/${DATE}/${DATE}?token=${TOKEN}"   # takes about 20 minutes
@@ -122,7 +119,7 @@ validateExpectedString ".*\"value\"\:\"0\".*"
 executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}
 
 # check if modified data was restored correctly
-auth "admin" "new-password"
+auth "admin" "password"
 
 doGet "http://${HOST_URL}/api/account/${ACCOUNT_ID}?token=${TOKEN}"
 validateExpectedString ".*account-1.*"

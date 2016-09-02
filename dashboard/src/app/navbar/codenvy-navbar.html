@@ -41,7 +41,6 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.dashboard}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -52,7 +51,6 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.workspaces}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
@@ -63,7 +61,6 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item" ng-if="codenvyNavbarCtrl.isFactoryServiceAvailable">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.factories}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.factories}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-factory"></md-icon>
@@ -89,7 +86,6 @@
             <md-list-item flex class="navbar-subsection-item"
                           ng-if="codenvyNavbarCtrl.userServices.hasInstallationManagerService">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.administration}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.administration}}"
                          layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -101,7 +97,6 @@
             <md-list-item flex class="navbar-subsection-item"
                           ng-if="codenvyNavbarCtrl.userServices.hasAdminUserService">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.usermanagement}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.usermanagement}}"
                          layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -135,7 +130,6 @@
           <md-list layout="column" flex>
             <md-list-item ng-show="codenvyNavbarCtrl.isAdminPluginServiceAvailable" flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
-                         che-on-long-touch="codenvyNavbarCtrl.openLinkInNewTab('{{codenvyNavbarCtrl.menuItemUrl.plugins}}')"
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.plugins}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">Plug-Ins</div>
               </md-button>

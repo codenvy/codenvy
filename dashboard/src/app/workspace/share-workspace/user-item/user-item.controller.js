@@ -25,16 +25,28 @@ export class UserItemController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(codenvyPermissions) {
+  constructor(codenvyPermissions, $mdDialog) {
     this.codenvyPermissions = codenvyPermissions;
+    this.$mdDialog = $mdDialog;
   }
 
   /**
-   * Call user permissions removal.
+   * Call user permissions removal. Show the dialog
+   * @param  event - the $event
    */
-  removeUser() {
-    //Callback is set in scope definition:
-    this.callback.removePermissions(this.user);
+  removeUser(event) {
+    let confirm = this.$mdDialog.confirm()
+      .title('Would you like to remove member  ' + this.user.email + ' ?')
+      .content('Please confirm for the member removal.')
+      .ariaLabel('Remove member')
+      .ok('Remove')
+      .cancel('Cancel')
+      .clickOutsideToClose(true)
+      .targetEvent(event);
+    this.$mdDialog.show(confirm).then(() => {
+      //Callback is set in scope definition:
+      this.callback.removePermissions(this.user);
+    });
   }
 
   /**

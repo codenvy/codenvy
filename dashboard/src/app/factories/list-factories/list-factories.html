@@ -17,42 +17,67 @@
     from Codenvy S.A..
 
 -->
-<che-toolbar che-title="All Factories"
-             che-dropdown-menu="listFactoriesCtrl.menuOptions"
-             che-search-placeholder="Search for factories"
-             che-search-model="listFactoriesCtrl.factoriesFilter.originFactory.name"
-             che-add-button-name="Create Factory"
-             che-add-button-href="#/factories/create-factory"></che-toolbar>
+<che-toolbar che-title="All factories" border-none></che-toolbar>
+<che-description che-link-title="Learn more." che-link="http://codenvy.readme.io/docs/factories">
+  Factories enable workspace automation and are packaged as a consumer-friendly URL. Create new Factories to onboard your team, or integrate with your toolchain.
+</che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class="factories-list-factories">
-
-  <div class="create-factory-share-header-widget" ng-if="!listFactoriesCtrl.isLoading" flex layout-align="center center" layout="column">
-    <div layout="row" layout-align="start center">
-      <div class="create-factory-share-header-widget-icon"><i class="chefont cheico-rocket-chefont icon">&nbsp;</i></div>
-      <div layout="row" layout-fill layout-align="center center">
-        <div class="create-factory-share-header-widget-title">A factory is a template that generates workspaces packaged as a consumer-friendly URL. You can configure factories to customize the contents of a workspace, trigger post-loading actions, create default commands, and generate guided tours.  Factories can be badged with Markdown buttons or iframed to embed workspaces in other products.</div>
-      </div>
-    </div>
-  </div>
-
   <md-progress-linear md-mode="indeterminate" class="factories-list-factories-progress"
                       ng-if="listFactoriesCtrl.isLoading"></md-progress-linear>
   <md-content flex class="md-maincontent-theme-theme" ng-show="!listFactoriesCtrl.isLoading"
               che-list-on-scroll-bottom="listFactoriesCtrl.loadNextPage()">
-    <div ng-if="listFactoriesCtrl.factories.length === 0" layout="row" layout-align="center center">
-      <che-empty-state che-value="There are no factories yet."
-                        che-icon-class="chefont cheico-rocket-chefont icon"></che-empty-state>
-    </div>
-    <div ng-if="listFactoriesCtrl.factories.length > 0">
-      <div class="factories-list-notification">
-      <span
-        ng-show="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0 && listFactoriesCtrl.factories.length > 0"
-        class="factories-list-empty">No factories found</span>
+    <che-list-header che-input-placeholder="Search"
+                     che-search-model="listFactoriesCtrl.factoriesFilter.originFactory.name"
+                     che-hide-search="listFactoriesCtrl.factories.length === 0"
+                     che-add-button-title="Create Factory"
+                     che-add-button-href="#/factories/create-factory"
+                     che-delete-button-title="Delete"
+                     che-on-delete="listFactoriesCtrl.deleteSelectedFactories()"
+                     che-hide-delete="listFactoriesCtrl.isNoSelected"
+                     che-hide-header="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Factory list"
+                         ng-checked="listFactoriesCtrl.isBulkChecked"
+                         ng-click="listFactoriesCtrl.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="25"
+                                  che-sort-value='listFactoriesCtrl.factoriesOrderBy'
+                                  che-sort-item='[originFactory.name, idURL]'
+                                  che-column-title='Factory'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="60"
+                                  che-sort-value='listFactoriesCtrl.factoriesOrderBy'
+                                  che-sort-item='originFactory.workspace.environments[0].machineConfigs[0].limits.ram'
+                                  che-column-title='RAM'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="15"
+                                  che-column-title='Actions'></che-list-header-column>
+        </div>
       </div>
-      <che-list ng-show="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length > 0">
-        <cdvy-factory-item
-          ng-repeat="factory in listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter | orderBy:listFactoriesCtrl.factoriesOrderBy"
-          cdvy-factory="factory" cdvy-is-selectable="true" ng-model="listFactoriesCtrl.factoriesSelectedStatus[factory.originFactory.id]"/>
-      </che-list>
+    </che-list-header>
+    <che-list ng-show="(listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length > 0">
+      <cdvy-factory-item
+              ng-repeat="factory in listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter | orderBy:listFactoriesCtrl.factoriesOrderBy"
+              cdvy-factory="factory"
+              cdvy-is-selectable="true"
+              ng-model="listFactoriesCtrl.factoriesSelectedStatus[factory.originFactory.id]"
+              cdvy-on-checkbox-click="listFactoriesCtrl.updateSelectedStatus()"/>
+    </che-list>
+    <div class="che-list-empty">
+        <span ng-show="listFactoriesCtrl.factories.length > 0 && (listFactoriesCtrl.factories | filter:listFactoriesCtrl.factoriesFilter).length === 0">
+          No factories found
+        </span>
+      <span ng-show="listFactoriesCtrl.factories.length === 0">There are no factories yet</span>
     </div>
   </md-content>
 </md-content>

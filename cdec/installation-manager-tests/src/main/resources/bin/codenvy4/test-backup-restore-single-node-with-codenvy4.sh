@@ -38,8 +38,7 @@ fetchJsonParameter "file"
 BACKUP_AT_START=${OUTPUT}
 
 # modify data: add account, workspace, project, user
-executeIMCommand "password" "password" "new-password"
-authWithoutRealmAndServerDns "admin" "new-password"
+authWithoutRealmAndServerDns "admin" "password"
 
 # create user "cdec.im.test@gmail.com"
 doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
@@ -118,7 +117,7 @@ validateExpectedString ".*Factory.*not.found.*"
 executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}
 
 # check if modified data was restored correctly
-authWithoutRealmAndServerDns "admin" "new-password"
+authWithoutRealmAndServerDns "admin" "password"
 
 doGet "http://${HOST_URL}/api/user/${USER_ID}?token=${TOKEN}"
 validateExpectedString ".*cdec.im.test@gmail.com.*"
