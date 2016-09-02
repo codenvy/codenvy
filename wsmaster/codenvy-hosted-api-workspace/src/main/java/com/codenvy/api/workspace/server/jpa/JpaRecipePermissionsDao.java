@@ -123,7 +123,7 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
                 for (RecipePermissionsImpl permissions : dao.getByInstance(event.getRecipe().getId())) {
                     dao.remove(permissions.getUserId(), permissions.getInstanceId());
                 }
-            } catch (Exception x) {
+            } catch (ServerException |NotFoundException x) {
                 LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getRecipe().getId()), x);
             }
         }

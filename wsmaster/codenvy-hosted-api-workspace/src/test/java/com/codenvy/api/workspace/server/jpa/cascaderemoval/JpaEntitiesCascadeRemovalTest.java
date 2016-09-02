@@ -95,6 +95,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
+
 /**
  * Tests top-level entities cascade removals.
  *
@@ -121,6 +123,7 @@ public class JpaEntitiesCascadeRemovalTest {
     private UserImpl user;
 
     private UserImpl user2;
+    private UserImpl user3;
 
 
     /** Profile depends on user. */
@@ -159,6 +162,7 @@ public class JpaEntitiesCascadeRemovalTest {
     /** Stack depend on user via permissions */
     private StackImpl stack1;
     private StackImpl stack2;
+    private StackImpl stack3;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -238,6 +242,14 @@ public class JpaEntitiesCascadeRemovalTest {
         // Permissions are removed
         assertTrue(recipePermissionsDao.getByUser(user2.getId()).isEmpty());
         assertTrue(stackPermissionsDao.getByUser(user2.getId()).isEmpty());
+        // Non-removed user permissions and stack are present
+        assertNotNull(notFoundToNull(() -> stackDao.getById(stack3.getId())));
+        assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
+
+        //cleanup
+        stackDao.remove(stack3.getId());
+        userDao.remove(user3.getId());
+
     }
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
@@ -272,8 +284,9 @@ public class JpaEntitiesCascadeRemovalTest {
 
     private void createTestData() throws ConflictException, ServerException {
         userDao.create(user = createUser("bobby"));
-        // test permissions user
+        // test permissions users
         userDao.create(user2 = createUser("worker"));
+        userDao.create(user3 = createUser("stacker"));
 
         profileDao.create(profile = createProfile(user.getId()));
 
@@ -300,14 +313,19 @@ public class JpaEntitiesCascadeRemovalTest {
 
         stackDao.create(stack1 = createStack("stack1", "st1"));
         stackDao.create(stack2 = createStack("stack2", "st2"));
+        stackDao.create(stack3 = createStack("stack3", "st3"));
 
         workerDao.store(createWorker(user2.getId(), workspace3.getId()));
 
-        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack1.getId(), Arrays.asList("read", "write")));
-        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack2.getId(), Arrays.asList("read", "write", "execute")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack1.getId(), Arrays.asList(SET_PERMISSIONS,"read", "write")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack2.getId(), Arrays.asList(SET_PERMISSIONS,"read", "execute")));
+        // To test removal only permissions if more users with setPermissions are present
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack3.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user3.getId(), stack3.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write", "execute")));
 
-        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), Arrays.asList("read", "write")));
-        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe2.getId(), Arrays.asList("read", "write", "execute")));
+
+        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write")));
+        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe2.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write", "execute")));
 
 
     }
@@ -320,6 +338,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
         stackPermissionsDao.remove(user2.getId(), stack1.getId());
         stackPermissionsDao.remove(user2.getId(), stack2.getId());
+        stackPermissionsDao.remove(user2.getId(), stack3.getId());
+        stackPermissionsDao.remove(user3.getId(), stack3.getId());
 
         recipePermissionsDao.remove(user2.getId(), recipe1.getId());
         recipePermissionsDao.remove(user2.getId(), recipe2.getId());
@@ -329,6 +349,7 @@ public class JpaEntitiesCascadeRemovalTest {
 
         stackDao.remove(stack1.getId());
         stackDao.remove(stack2.getId());
+        stackDao.remove(stack3.getId());
 
         workerDao.removeWorker(workspace3.getId(),user2.getId());
 
@@ -341,12 +362,21 @@ public class JpaEntitiesCascadeRemovalTest {
 
         workspaceDao.remove(workspace1.getId());
         workspaceDao.remove(workspace2.getId());
+        workspaceDao.remove(workspace3.getId());
 
+        preferenceDao.remove(user3.getId());
+        preferenceDao.remove(user2.getId());
         preferenceDao.remove(user.getId());
 
+        profileDao.remove(user3.getId());
+        profileDao.remove(user2.getId());
         profileDao.remove(user.getId());
 
+        userDao.remove(user3.getId());
+        userDao.remove(user2.getId());
         userDao.remove(user.getId());
+
+
     }
 
     private static <T> T notFoundToNull(Callable<T> action) throws Exception {

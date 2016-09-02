@@ -123,7 +123,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
                 for (StackPermissionsImpl permissions : dao.getByInstance(event.getStack().getId())) {
                     dao.remove(permissions.getUserId(), permissions.getInstanceId());
                 }
-            } catch (Exception x) {
+            } catch (ServerException | NotFoundException x) {
                 LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getStack().getId()), x);
             }
         }
