@@ -84,7 +84,8 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
                                             @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                             @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
                                             @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
-                                            MachineTokenRegistry tokenRegistry)
+                                            MachineTokenRegistry tokenRegistry,
+                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
             throws IOException {
         super(docker,
               dockerConnectorConfiguration,
@@ -104,7 +105,8 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
               devMachineEnvVariables,
               allMachinesEnvVariables,
               snapshotUseRegistry,
-              memorySwapMultiplier);
+              memorySwapMultiplier,
+              additionalNetworks);
 
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;

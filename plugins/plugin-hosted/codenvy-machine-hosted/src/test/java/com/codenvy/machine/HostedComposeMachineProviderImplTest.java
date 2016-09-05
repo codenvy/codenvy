@@ -43,11 +43,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_KEY;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -121,20 +120,21 @@ public class HostedComposeMachineProviderImplTest {
                                                         dockerMachineFactory,
                                                         dockerInstanceStopDetector,
                                                         containerNameGenerator,
-                                                        Collections.emptySet(),
-                                                        Collections.emptySet(),
-                                                        Collections.emptySet(),
-                                                        Collections.emptySet(),
+                                                        emptySet(),
+                                                        emptySet(),
+                                                        emptySet(),
+                                                        emptySet(),
                                                         null,
                                                         workspaceFolderPathProvider,
                                                         PROJECT_FOLDER_PATH,
                                                         false,
                                                         false,
-                                                        Collections.emptySet(),
-                                                        Collections.emptySet(),
+                                                        emptySet(),
+                                                        emptySet(),
                                                         SNAPSHOT_USE_REGISTRY,
                                                         MEMORY_SWAP_MULTIPLIER,
-                                                        machineTokenRegistry);
+                                                        machineTokenRegistry,
+                                                        emptySet());
 
         createInstanceFromRecipe(true);
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
