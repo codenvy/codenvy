@@ -15,10 +15,11 @@
 package com.codenvy.organization.api;
 
 import com.codenvy.organization.api.event.OrganizationCreatedEvent;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
-import com.codenvy.organization.shared.model.Organization;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.google.common.collect.Sets;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -27,7 +28,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
@@ -41,14 +44,17 @@ public class OrganizationManager {
     private final OrganizationDao organizationDao;
     private final MemberDao       memberDao;
     private final EventService    eventService;
+    private final Set<String>     reservedNames;
 
     @Inject
     public OrganizationManager(OrganizationDao organizationDao,
                                MemberDao memberDao,
-                               EventService eventService) {
+                               EventService eventService,
+                               @Named("che.account.reserved_names") String[] reservedNames) {
         this.organizationDao = organizationDao;
         this.memberDao = memberDao;
         this.eventService = eventService;
+        this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
     /**
@@ -61,11 +67,16 @@ public class OrganizationManager {
      *         when {@code organization} is null
      * @throws ConflictException
      *         when organization with such id/name already exists
+     * @throws ConflictException
+     *         when specified organization name is reserved
      * @throws ServerException
      *         when any other error occurs during organization creation
      */
     public OrganizationImpl create(Organization newOrganization) throws ConflictException, ServerException {
         requireNonNull(newOrganization, "Required non-null organization");
+        if (reservedNames.contains(newOrganization.getName().toLowerCase())) {
+            throw new ConflictException(String.format("Organization name '%s' is reserved", newOrganization.getName()));
+        }
         final OrganizationImpl organization = new OrganizationImpl(NameGenerator.generate("organization", 16),
                                                                    newOrganization.getName(),
                                                                    newOrganization.getParent());
@@ -86,7 +97,7 @@ public class OrganizationManager {
      * @throws NotFoundException
      *         when organization with given id doesn't exist
      * @throws ConflictException
-     *         when name updated with a value which is not unique
+     *         when name updated with a value which is reserved or is not unique
      * @throws ServerException
      *         when any other error occurs organization updating
      */
@@ -95,6 +106,9 @@ public class OrganizationManager {
                                                                                       ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         requireNonNull(update, "Required non-null organization");
+        if (reservedNames.contains(update.getName().toLowerCase())) {
+            throw new ConflictException(String.format("Organization name '%s' is reserved", update.getName()));
+        }
         final OrganizationImpl organization = organizationDao.getById(organizationId);
         organization.setName(update.getName());
         organizationDao.update(organization);

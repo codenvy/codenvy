@@ -19,8 +19,10 @@ import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Organization;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -47,6 +49,7 @@ import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -75,6 +78,9 @@ public class OrganizationServiceTest {
 
     @Mock
     private OrganizationLinksInjector linksInjector;
+
+    @Mock
+    private OrganizationValidator validator;
 
     @InjectMocks
     private OrganizationService service;
@@ -118,6 +124,25 @@ public class OrganizationServiceTest {
     }
 
     @Test
+    public void shouldThrowBadRequestWhenCreatingNonValidOrganization() throws Exception {
+        doThrow(new BadRequestException("non valid organization")).when(validator).checkOrganization(any());
+
+        final OrganizationDto toCreate = createOrganization();
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(toCreate)
+                                         .when()
+                                         .expect().statusCode(400)
+                                         .post(SECURE_PATH + "/organization");
+
+        final ServiceError error = unwrapDto(response, ServiceError.class);
+        assertEquals(error.getMessage(), "non valid organization");
+        verify(validator).checkOrganization(toCreate);
+    }
+
+    @Test
     public void shouldUpdateOrganization() throws Exception {
         when(orgManager.update(anyString(), any()))
                 .thenAnswer(invocationOnMock -> new OrganizationImpl((Organization)invocationOnMock.getArguments()[1]));
@@ -148,6 +173,26 @@ public class OrganizationServiceTest {
                .expect()
                .statusCode(400)
                .post(SECURE_PATH + "/organization/organization123");
+    }
+
+    @Test
+    public void shouldThrowBadRequestWhenUpdatingNonValidOrganization() throws Exception {
+        doThrow(new BadRequestException("non valid organization")).when(validator).checkOrganization(any());
+
+        final OrganizationDto toUpdate = createOrganization();
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(toUpdate)
+                                         .when()
+                                         .expect()
+                                         .statusCode(400)
+                                         .post(SECURE_PATH + "/organization/organization123");
+
+        final ServiceError error = unwrapDto(response, ServiceError.class);
+        assertEquals(error.getMessage(), "non valid organization");
+        verify(validator).checkOrganization(toUpdate);
     }
 
     @Test

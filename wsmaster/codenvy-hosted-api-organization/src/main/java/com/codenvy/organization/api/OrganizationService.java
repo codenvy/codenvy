@@ -56,11 +56,15 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class OrganizationService extends Service {
     private final OrganizationManager       organizationManager;
     private final OrganizationLinksInjector linksInjector;
+    private final OrganizationValidator     organizationValidator;
 
     @Inject
-    public OrganizationService(OrganizationManager organizationManager, OrganizationLinksInjector linksInjector) {
+    public OrganizationService(OrganizationManager organizationManager,
+                               OrganizationLinksInjector linksInjector,
+                               OrganizationValidator organizationValidator) {
         this.organizationManager = organizationManager;
         this.linksInjector = linksInjector;
+        this.organizationValidator = organizationValidator;
     }
 
     @POST
@@ -76,6 +80,7 @@ public class OrganizationService extends Service {
     public Response create(@ApiParam(value = "Organization to create", required = true)
                            OrganizationDto organization) throws BadRequestException, ConflictException, ServerException {
         requiredNotNull(organization, "Organization");
+        organizationValidator.checkOrganization(organization);
         return Response.status(201)
                        .entity(linksInjector.injectLinks(toDto(organizationManager.create(organization)), getServiceContext()))
                        .build();
@@ -102,6 +107,7 @@ public class OrganizationService extends Service {
                                                                        NotFoundException,
                                                                        ServerException {
         requiredNotNull(organization, "Organization");
+        organizationValidator.checkOrganization(organization);
         return linksInjector.injectLinks(toDto(organizationManager.update(organizationId, organization)),
                                          getServiceContext());
     }
@@ -156,7 +162,7 @@ public class OrganizationService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The child organizations successfully fetched"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<OrganizationDto> getByParent(@ApiParam("Parent organization id")
-                                                 @PathParam("parent") String parent) throws ServerException {
+                                             @PathParam("parent") String parent) throws ServerException {
         return organizationManager.getByParent(parent)
                                   .stream()
                                   .map(child -> linksInjector.injectLinks(toDto(child), getServiceContext()))

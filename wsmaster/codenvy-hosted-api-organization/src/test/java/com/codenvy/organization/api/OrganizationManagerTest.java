@@ -15,17 +15,20 @@
 package com.codenvy.organization.api;
 
 import com.codenvy.organization.api.event.OrganizationCreatedEvent;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
-import com.codenvy.organization.shared.model.Organization;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
 
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -58,8 +61,15 @@ public class OrganizationManagerTest {
     @Mock
     EventService    eventService;
 
-    @InjectMocks
     OrganizationManager manager;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        manager = new OrganizationManager(organizationDao,
+                                          memberDao,
+                                          eventService,
+                                          new String[] {"reserved"});
+    }
 
     @Test
     public void shouldCreateOrganization() throws Exception {
@@ -90,11 +100,17 @@ public class OrganizationManagerTest {
         assertNotEquals(id, "identifier");
     }
 
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionOnCreationIfOrganizationNameIsReserved() throws Exception {
+        final OrganizationImpl organization = new OrganizationImpl("identifier", "reserved", "parentId");
+
+        manager.create(organization);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenCreatingNullableOrganization() throws Exception {
         manager.create(null);
     }
-
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenUpdatingOrganizationWithNullEntity() throws Exception {
@@ -115,6 +131,11 @@ public class OrganizationManagerTest {
         assertEquals(updated.getName(), update.getName());
         assertEquals(updated.getParent(), existing.getParent());
         assertEquals(updated.getId(), existing.getId());
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionOnUpdatingIfOrganizationNameIsReserved() throws Exception {
+        manager.update("id", new OrganizationImpl("id", "reserved", "parentId"));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
