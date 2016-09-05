@@ -161,7 +161,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     }
 
     @Singleton
-    public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveWorkersBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
