@@ -39,18 +39,16 @@ import static java.lang.String.format;
  *
  * @author Max Shaposhnik
  */
-public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extends PermissionsDao<? extends AbstractPermissions>>
+        implements EventSubscriber<BeforeUserRemovedEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
 
     @Inject
     private EventService eventService;
 
-    PermissionsDao<? extends AbstractPermissions> storage;
-
-    protected RemovePermissionsOnLastUserRemovedEventSubscriber(PermissionsDao<? extends AbstractPermissions> storage) {
-        this.storage = storage;
-    }
+    @Inject
+    T storage;
 
     @PostConstruct
     public void subscribe() {

@@ -30,13 +30,12 @@ import javax.inject.Singleton;
  * @author Max Shaposhnik
  */
 @Singleton
-public class RemoveRecipeOnLastUserRemovedEventSubscriber extends RemovePermissionsOnLastUserRemovedEventSubscriber {
+public class RemoveRecipeOnLastUserRemovedEventSubscriber extends RemovePermissionsOnLastUserRemovedEventSubscriber<JpaRecipePermissionsDao> {
 
     private JpaRecipeDao recipeDao;
 
     @Inject
-    public RemoveRecipeOnLastUserRemovedEventSubscriber(JpaRecipeDao recipeDao, JpaRecipePermissionsDao recipePermissionsDao) {
-        super(recipePermissionsDao);
+    public RemoveRecipeOnLastUserRemovedEventSubscriber(JpaRecipeDao recipeDao) {
         this.recipeDao = recipeDao;
     }
 
