@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.workspace.server.jpa.listener;
 
-import com.codenvy.api.workspace.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.workspace.server.jpa.JpaStackPermissionsDao;
 
 import org.eclipse.che.api.core.ServerException;
@@ -33,12 +32,8 @@ import javax.inject.Singleton;
 @Singleton
 public class RemoveStackOnLastUserRemovedEventSubscriber extends RemovePermissionsOnLastUserRemovedEventSubscriber<JpaStackPermissionsDao> {
 
-    private JpaStackDao stackDao;
-
     @Inject
-    public RemoveStackOnLastUserRemovedEventSubscriber(JpaStackDao stackDao) {
-        this.stackDao = stackDao;
-    }
+    private JpaStackDao stackDao;
 
     @Override
     public void remove(String instanceId) throws ServerException {

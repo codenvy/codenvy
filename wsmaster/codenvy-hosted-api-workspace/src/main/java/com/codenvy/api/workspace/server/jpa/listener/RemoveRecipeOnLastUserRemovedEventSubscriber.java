@@ -32,12 +32,8 @@ import javax.inject.Singleton;
 @Singleton
 public class RemoveRecipeOnLastUserRemovedEventSubscriber extends RemovePermissionsOnLastUserRemovedEventSubscriber<JpaRecipePermissionsDao> {
 
-    private JpaRecipeDao recipeDao;
-
     @Inject
-    public RemoveRecipeOnLastUserRemovedEventSubscriber(JpaRecipeDao recipeDao) {
-        this.recipeDao = recipeDao;
-    }
+    private JpaRecipeDao recipeDao;
 
     @Override
     public void remove(String instanceId) throws ServerException {
