@@ -51,7 +51,8 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
 
     private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
 
-    private final Set<String> supportedDomains = Stream.of(StackDomain.DOMAIN_ID, RecipeDomain.DOMAIN_ID).collect(Collectors.toSet());
+    private final Set<String> supportedDomains = Stream.of(StackDomain.DOMAIN_ID, RecipeDomain.DOMAIN_ID)
+                                                       .collect(Collectors.toSet());
 
     private JpaStackDao stackDao;
 
@@ -69,8 +70,8 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
         this.stackDao = stackDao;
         this.recipeDao = recipeDao;
         this.eventService = eventService;
-        this.supportedStorages = storages.stream().filter(storage1 -> supportedDomains.contains(storage1.getDomain().getId()))
-                                                                                      .collect(Collectors.toList());
+        this.supportedStorages = storages.stream().filter(storage -> supportedDomains.contains(storage.getDomain().getId()))
+                                                                                     .collect(Collectors.toList());
     }
 
     @PostConstruct
