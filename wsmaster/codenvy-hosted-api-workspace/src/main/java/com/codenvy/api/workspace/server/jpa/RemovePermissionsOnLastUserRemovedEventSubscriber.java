@@ -32,13 +32,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Listens for {@link UserImpl} removal events, and checks if the removing user is the last who have "setPermissions"
@@ -51,7 +50,7 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
     private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
 
     private final Set<String> supportedDomains = Stream.of(StackDomain.DOMAIN_ID, RecipeDomain.DOMAIN_ID)
-                                                       .collect(Collectors.toSet());
+                                                       .collect(toSet());
 
     private JpaStackDao stackDao;
 
@@ -59,7 +58,7 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
 
     private EventService eventService;
 
-    private List<PermissionsDao<? extends AbstractPermissions>> supportedStorages;
+    private Set<PermissionsDao<? extends AbstractPermissions>> supportedStorages;
 
     @Inject
     public RemovePermissionsOnLastUserRemovedEventSubscriber(Set<PermissionsDao<? extends AbstractPermissions>> storages,
@@ -69,8 +68,9 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
         this.stackDao = stackDao;
         this.recipeDao = recipeDao;
         this.eventService = eventService;
-        this.supportedStorages = storages.stream().filter(storage -> supportedDomains.contains(storage.getDomain().getId()))
-                                                                                     .collect(Collectors.toList());
+        this.supportedStorages = storages.stream()
+                                         .filter(storage -> supportedDomains.contains(storage.getDomain().getId()))
+                                         .collect(toSet());
     }
 
     @PostConstruct
