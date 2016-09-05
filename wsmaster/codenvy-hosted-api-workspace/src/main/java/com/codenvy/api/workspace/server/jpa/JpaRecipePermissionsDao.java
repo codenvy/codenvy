@@ -109,7 +109,7 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
         @Inject
         private EventService eventService;
         @Inject
-        JpaRecipePermissionsDao dao;
+        private JpaRecipePermissionsDao dao;
 
         @PostConstruct
         public void subscribe() {

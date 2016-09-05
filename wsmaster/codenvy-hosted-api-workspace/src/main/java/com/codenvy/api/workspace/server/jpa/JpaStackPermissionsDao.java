@@ -108,7 +108,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
         @Inject
         private EventService eventService;
         @Inject
-        JpaStackPermissionsDao dao;
+        private JpaStackPermissionsDao dao;
 
         @PostConstruct
         public void subscribe() {
@@ -127,7 +127,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
                     dao.remove(permissions.getUserId(), permissions.getInstanceId());
                 }
             } catch (ServerException | NotFoundException x) {
-                LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getStack().getId()), x);
+                LOG.error(format("Couldn't remove permissions before stack '%s' is removed", event.getStack().getId()), x);
             }
         }
     }
