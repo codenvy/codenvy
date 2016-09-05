@@ -18,6 +18,9 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.WorkspaceDomain;
+import com.codenvy.api.workspace.server.jpa.listener.RemovePermissionsOnLastUserRemovedEventSubscriber;
+import com.codenvy.api.workspace.server.jpa.listener.RemoveRecipeOnLastUserRemovedEventSubscriber;
+import com.codenvy.api.workspace.server.jpa.listener.RemoveStackOnLastUserRemovedEventSubscriber;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.recipe.RecipeDomain;
 import com.codenvy.api.workspace.server.recipe.RecipePermissionsImpl;
@@ -39,7 +42,8 @@ public class PermissionsJpaModule extends AbstractModule {
         bind(WorkerDao.class).to(JpaWorkerDao.class);
         bind(JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaWorkerDao.RemoveWorkersBeforeUserRemovedEventSubscriber.class).asEagerSingleton();
-        bind(RemovePermissionsOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
+        bind(RemoveStackOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
+        bind(RemoveRecipeOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class).asEagerSingleton();
         bind(JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class).asEagerSingleton();
 
