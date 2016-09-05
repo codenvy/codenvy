@@ -32,7 +32,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static java.lang.String.format;
@@ -47,17 +51,27 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
 
     private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
 
-    @Inject
-    Set<PermissionsDao<? extends AbstractPermissions>> storages;
+    private final Set<String> supportedDomains = Stream.of(StackDomain.DOMAIN_ID, RecipeDomain.DOMAIN_ID).collect(Collectors.toSet());
 
-    @Inject
-    JpaStackDao stackDao;
+    private JpaStackDao stackDao;
 
-    @Inject
-    JpaRecipeDao recipeDao;
+    private JpaRecipeDao recipeDao;
 
-    @Inject
     private EventService eventService;
+
+    private List<PermissionsDao<? extends AbstractPermissions>> supportedStorages;
+
+    @Inject
+    public RemovePermissionsOnLastUserRemovedEventSubscriber(Set<PermissionsDao<? extends AbstractPermissions>> storages,
+                                                             JpaStackDao stackDao,
+                                                             JpaRecipeDao recipeDao,
+                                                             EventService eventService) {
+        this.stackDao = stackDao;
+        this.recipeDao = recipeDao;
+        this.eventService = eventService;
+        this.supportedStorages = storages.stream().filter(storage1 -> supportedDomains.contains(storage1.getDomain().getId()))
+                                                                                      .collect(Collectors.toList());
+    }
 
     @PostConstruct
     public void subscribe() {
@@ -69,10 +83,11 @@ public class RemovePermissionsOnLastUserRemovedEventSubscriber implements EventS
         eventService.unsubscribe(this);
     }
 
+
     @Override
     public void onEvent(BeforeUserRemovedEvent event) {
         try {
-            for (PermissionsDao<? extends AbstractPermissions> storage : storages) {
+            for (PermissionsDao<? extends AbstractPermissions> storage : supportedStorages) {
                 for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
                     // This method can  potentially be source of race conditions,
                     // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
