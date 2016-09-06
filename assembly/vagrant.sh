@@ -228,8 +228,8 @@ if [ ${MULTI_SERVER} == true ]; then
   cp -f onpremises-ide-packaging-tomcat-api/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-api.zip
   cp -f onpremises-ide-packaging-tomcat-site/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-site.zip
   cp -f ../analytics/analytics-tomcat-pkg/target/*.zip ../../deployment/puppet/modules/multi_server/files/analytics-tomcat-pkg.zip
-  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-ext-server.zip
-  cp -f onpremises-ide-packaging-zip-terminal/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-zip-terminal.zip
+  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.tar.gz ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-ext-server.tar.gz
+  cp -f onpremises-ide-packaging-zip-terminal/target/*.tar.gz ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-zip-terminal.tar.gz
 
   # Open folder for multi server env
   cd ../../deployment/puppet/vagrant-multi-vm-env
@@ -237,11 +237,11 @@ if [ ${MULTI_SERVER} == true ]; then
 elif [ ${SCALABLE_AIO} == true ]; then
   # Copy all-in-one tomcat zip to puppet folder for subsequent update
   cp -f onpremises-ide-packaging-tomcat-codenvy-allinone/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-codenvy-allinone.zip
-  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-ext-server.zip
-  cp -f onpremises-ide-packaging-zip-terminal/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-zip-terminal.zip
+  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.tar.gz ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-ext-server.tar.gz
+  cp -f onpremises-ide-packaging-zip-terminal/target/*.tar.gz ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-zip-terminal.tar.gz
   cp -f onpremises-ide-packaging-tomcat-im/target/*.zip ../../deployment/puppet/modules/codenvy_im/files/onpremises-ide-packaging-tomcat-im.zip
-  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-ext-server.zip
-  cp -f onpremises-ide-packaging-zip-terminal/target/*.zip ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-zip-terminal.zip
+  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.tar.gz ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-tomcat-ext-server.tar.gz
+  cp -f onpremises-ide-packaging-zip-terminal/target/*.tar.gz ../../deployment/puppet/modules/multi_server/files/onpremises-ide-packaging-zip-terminal.tar.gz
 
   # Open folder for AIO env
   cd ../../deployment/puppet/vagrant-scalable-aio
@@ -249,8 +249,8 @@ elif [ ${SCALABLE_AIO} == true ]; then
 else
   # Copy all-in-one tomcat zip to puppet folder for subsequent update
   cp -f onpremises-ide-packaging-tomcat-codenvy-allinone/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-codenvy-allinone.zip
-  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-ext-server.zip
-  cp -f onpremises-ide-packaging-zip-terminal/target/*.zip ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-zip-terminal.zip
+  cp -f onpremises-ide-packaging-tomcat-ext-server/target/*.tar.gz ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-tomcat-ext-server.tar.gz
+  cp -f onpremises-ide-packaging-zip-terminal/target/*.tar.gz ../../deployment/puppet/modules/all_in_one/files/onpremises-ide-packaging-zip-terminal.tar.gz
   cp -f onpremises-ide-packaging-tomcat-im/target/*.zip ../../deployment/puppet/modules/codenvy_im/files/onpremises-ide-packaging-tomcat-im.zip
 
   # Open folder for AIO env

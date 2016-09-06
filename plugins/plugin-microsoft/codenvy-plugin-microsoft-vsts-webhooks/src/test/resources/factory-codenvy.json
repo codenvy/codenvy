@@ -12,7 +12,7 @@
         "machines": {
           "dev-machine": {
             "agents":[
-              "ws-agent"
+              "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
             ]
           }
         }

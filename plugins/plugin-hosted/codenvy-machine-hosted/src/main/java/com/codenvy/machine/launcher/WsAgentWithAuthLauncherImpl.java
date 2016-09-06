@@ -16,13 +16,14 @@ package com.codenvy.machine.launcher;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
+import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,6 +38,7 @@ import java.io.IOException;
  * until ws-agent sends appropriate event about start.
  *
  * @author Anton Korneta
+ * @author Anatolii Bazko
  */
 @Singleton
 public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
@@ -47,7 +49,7 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
     @Inject
     public WsAgentWithAuthLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
                                        HttpJsonRequestFactory httpJsonRequestFactory,
-                                       @Named(WS_AGENT_PROCESS_START_COMMAND) String wsAgentStartCommandLine,
+                                       @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
                                        @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                        @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
                                        @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
@@ -55,7 +57,7 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
                                        @Named("api.endpoint") String apiEndpoint) {
         super(machineProcessManagerProvider,
               httpJsonRequestFactory,
-              wsAgentStartCommandLine,
+              wsAgentRunCommand,
               wsAgentMaxStartTimeMs,
               wsAgentPingDelayMs,
               wsAgentPingConnectionTimeoutMs,
@@ -65,7 +67,8 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
     }
 
     // modifies the ping request if it is possible to get the machine token.
-    protected HttpJsonRequest createPingRequest(Machine devMachine) throws ServerException {
+    @Override
+    protected HttpJsonRequest createPingRequest(Instance devMachine) throws ServerException {
         final HttpJsonRequest pingRequest = super.createPingRequest(devMachine);
         final String tokenServiceUrl = UriBuilder.fromUri(apiEndpoint)
                                                  .replacePath("api/machine/token/" + devMachine.getWorkspaceId())

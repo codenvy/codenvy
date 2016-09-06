@@ -459,7 +459,7 @@ export class ShareWorkspaceController {
     let defaultEnvironment = environments[defaultEnvName];
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
-      return machine.agents.indexOf('ws-agent') >= 0;
+      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
     });
 
     //TODO check after environment model changes completed

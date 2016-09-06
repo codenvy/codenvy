@@ -474,7 +474,7 @@ public class WorkspaceDaoImplTest {
         properties.put("prop4", "value4");
         servers.put("ref2", new ServerConf2Impl("port2", "proto2", properties));
         machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(asList("ws-agent", "someAgent"),
+        machines.put("machine1", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
                                                          servers,
                                                          new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
         servers = new HashMap<>();

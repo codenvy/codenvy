@@ -61,7 +61,7 @@ public final class TestObjects {
             throws Exception {
 
         Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-        machines.put("dev-machine", new ExtendedMachineImpl(singletonList("ws-agent"),
+        machines.put("dev-machine", new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                             emptyMap(),
                                                             new HashMap<>(singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam))))));
         HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
@@ -110,7 +110,7 @@ public final class TestObjects {
                                                                .entrySet()
                                                                .stream()
                                                                .filter(entry -> entry.getValue() .getAgents() != null &&
-                                                                                entry.getValue().getAgents().contains("ws-agent"))
+                                                                                entry.getValue().getAgents().contains("org.eclipse.che.ws-agent"))
                                                                .findAny()
                                                                .get();
         final WorkspaceRuntimeImpl runtime =
