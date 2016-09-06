@@ -33,7 +33,7 @@
         <module>wsagent</module>
         <module>plugins</module>
         <module>dashboard</module>
-        <!--module>site</module-->
+        <module>site</module>
         <module>platform-api-client-java</module>
         <module>cli</module>
         <module>cdec</module>
