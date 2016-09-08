@@ -14,6 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
+import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.OrganizationService;
 import com.codenvy.organization.shared.dto.OrganizationDto;
@@ -57,6 +58,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -75,6 +77,8 @@ public class OrganizationPermissionsFilterTest {
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER = new EnvironmentFilter();
 
+    private static final String USER_ID = "user123";
+
     @Mock
     private OrganizationService service;
 
@@ -90,6 +94,8 @@ public class OrganizationPermissionsFilterTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        when(subject.getUserId()).thenReturn(USER_ID);
+
         when(manager.getById(anyString())).thenReturn(new OrganizationImpl("organization123", "test", null));
     }
 
@@ -101,7 +107,7 @@ public class OrganizationPermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/organization/organization123");
 
-        verify(service).getById(eq("organization123"));
+        verify(service).getById("organization123");
         verifyNoMoreInteractions(subject);
     }
 
@@ -113,20 +119,70 @@ public class OrganizationPermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/organization/find?name=test");
 
-        verify(service).find(eq("test"));
+        verify(service).find("test");
         verifyNoMoreInteractions(subject);
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnGettingOrganizations() throws Exception {
+    public void shouldNotCheckPermissionsOnOrganizationsFetchingIfUserIdIsNotSpecified() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .contentType("application/json")
+               .expect()
+               .statusCode(204)
                .when()
                .get(SECURE_PATH + "/organization");
 
-        verify(service).getOrganizations(anyInt(), anyInt());
-        verifyNoMoreInteractions(subject);
+        verify(service).getOrganizations(eq(null), anyInt(), anyInt());
+        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+    }
+
+    @Test
+    public void shouldNotCheckPermissionsOnOrganizationsFetchingIfUserSpecifiesHisOwnId() throws Exception {
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .contentType("application/json")
+               .expect()
+               .statusCode(204)
+               .when()
+               .get(SECURE_PATH + "/organization?user=" + USER_ID);
+
+        verify(service).getOrganizations(eq(USER_ID), anyInt(), anyInt());
+        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+    }
+
+    @Test
+    public void shouldCheckPermissionsOnOrganizationsFetchingIfUserSpecifiesForeignId() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(true);
+
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .contentType("application/json")
+               .expect()
+               .statusCode(204)
+               .when()
+               .get(SECURE_PATH + "/organization?user=user321");
+
+        verify(service).getOrganizations(eq("user321"), anyInt(), anyInt());
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+    }
+
+    @Test
+    public void shouldThrowForbiddenExceptionOnOrganizationsFetchingIfUserSpecifiesForeignIdAndDoesNotHaveRequiredPermission()
+            throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(false);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .expect()
+                                         .statusCode(403)
+                                         .when()
+                                         .get(SECURE_PATH + "/organization?user=user321");
+
+        assertEquals(unwrapError(response), "The user is able to specify only own id");
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verifyZeroInteractions(service);
     }
 
     @Test
@@ -141,7 +197,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).update(eq("organization123"), any());
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("organization123"), eq(UPDATE));
+        verify(subject).hasPermission(DOMAIN_ID, "organization123", UPDATE);
         verifyNoMoreInteractions(subject);
     }
 
@@ -158,7 +214,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).update(eq("organization123"), any());
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent123"), eq(MANAGE_SUBORGANIZATIONS));
+        verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
         verifyNoMoreInteractions(subject);
     }
 
@@ -176,8 +232,8 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).update(eq("organization123"), any());
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent123"), eq(MANAGE_SUBORGANIZATIONS));
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("organization123"), eq(UPDATE));
+        verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
+        verify(subject).hasPermission(DOMAIN_ID, "organization123", UPDATE);
     }
 
     @Test
@@ -192,7 +248,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).remove(eq("organization123"));
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("organization123"), eq(DELETE));
+        verify(subject).hasPermission(DOMAIN_ID, "organization123", DELETE);
         verifyNoMoreInteractions(subject);
     }
 
@@ -209,7 +265,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).remove(eq("organization123"));
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent123"), eq(MANAGE_SUBORGANIZATIONS));
+        verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
         verifyNoMoreInteractions(subject);
     }
 
@@ -227,22 +283,9 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).remove(eq("organization123"));
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent123"), eq(MANAGE_SUBORGANIZATIONS));
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("organization123"), eq(DELETE));
+        verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
+        verify(subject).hasPermission(DOMAIN_ID, "organization123", DELETE);
         verifyNoMoreInteractions(subject);
-    }
-
-    @Test
-    public void shouldNotCheckPermissionsOnOrganizationsGetting() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .get(SECURE_PATH + "/organization");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).getOrganizations(anyInt(), anyInt());
-        verifyZeroInteractions(subject);
     }
 
     @Test
@@ -274,7 +317,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(service).create(any());
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent-org"), eq(MANAGE_SUBORGANIZATIONS));
+        verify(subject).hasPermission(DOMAIN_ID, "parent-org", MANAGE_SUBORGANIZATIONS);
     }
 
     @Test
@@ -291,7 +334,7 @@ public class OrganizationPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 403);
         verifyZeroInteractions(service);
-        verify(subject).hasPermission(eq(DOMAIN_ID), eq("parent-org"), eq(MANAGE_SUBORGANIZATIONS));
+        verify(subject).hasPermission(DOMAIN_ID, "parent-org", MANAGE_SUBORGANIZATIONS);
     }
 
     @Test(expectedExceptions = ForbiddenException.class,

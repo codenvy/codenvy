@@ -65,7 +65,7 @@ import static org.testng.Assert.assertEquals;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class OrganizationServiceTest {
 
-    private static final String USER_ID = "user123";
+    private static final String CURRENT_USER_ID = "user123";
 
     @SuppressWarnings("unused") //is declared for deploying by everrest-assured
     private ApiExceptionMapper mapper;
@@ -272,14 +272,14 @@ public class OrganizationServiceTest {
     }
 
     @Test
-    public void shouldGetOrganizationsByUser() throws Exception {
+    public void shouldGetOrganizationsByCurrentUserIfParameterIsNotSpecified() throws Exception {
         final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
                                                   .withId("organization123")
                                                   .withName("MyOrganization")
                                                   .withParent("parentOrg123");
 
         doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
-                .when(orgManager).getByParent(anyString(), anyInt(), anyInt());
+                .when(orgManager).getByMember(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -292,7 +292,32 @@ public class OrganizationServiceTest {
         final List<OrganizationDto> organizationDtos = unwrapDtoList(response, OrganizationDto.class);
         assertEquals(organizationDtos.size(), 1);
         assertEquals(organizationDtos.get(0), toFetch);
-        verify(orgManager).getByMember(USER_ID, 1, 0);
+        verify(orgManager).getByMember(CURRENT_USER_ID, 1, 0);
+        verify(linksInjector).injectLinks(any(), any());
+    }
+
+    @Test
+    public void shouldGetOrganizationsBySpecifiedUser() throws Exception {
+        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
+                                                  .withId("organization123")
+                                                  .withName("MyOrganization")
+                                                  .withParent("parentOrg123");
+
+        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+                .when(orgManager).getByMember(anyString(), anyInt(), anyInt());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .expect()
+                                         .statusCode(200)
+                                         .get(SECURE_PATH + "/organization?user=user789&skipCount=0&maxItems=1");
+
+        final List<OrganizationDto> organizationDtos = unwrapDtoList(response, OrganizationDto.class);
+        assertEquals(organizationDtos.size(), 1);
+        assertEquals(organizationDtos.get(0), toFetch);
+        verify(orgManager).getByMember("user789", 1, 0);
         verify(linksInjector).injectLinks(any(), any());
     }
 
@@ -316,7 +341,7 @@ public class OrganizationServiceTest {
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("userName", USER_ID, "token", false));
+            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("userName", CURRENT_USER_ID, "token", false));
         }
     }
 }

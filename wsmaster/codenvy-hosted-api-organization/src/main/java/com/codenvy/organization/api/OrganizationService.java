@@ -176,20 +176,24 @@ public class OrganizationService extends Service {
 
     @GET
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get memberships of current user",
+    @ApiOperation(value = "Get user's organizations",
+                  notes = "When user parameter is missed then will be fetched current user's organizations",
                   response = OrganizationDto.class,
                   responseContainer = "list")
     @ApiResponses({@ApiResponse(code = 200, message = "The organizations successfully fetched"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Response getOrganizations(@ApiParam(value = "Max items") @QueryParam("maxItems") @DefaultValue("30") int maxItems,
+    public Response getOrganizations(@ApiParam(value = "User id") @QueryParam("user") String userId,
+                                     @ApiParam(value = "Max items") @QueryParam("maxItems") @DefaultValue("30") int maxItems,
                                      @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
             throws ServerException, BadRequestException {
 
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
-        final String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
-        final Page<? extends Organization> organizationsPage = organizationManager.getByMember(currentUserId, maxItems, skipCount);
+        if (userId == null) {
+            userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+        }
+        final Page<? extends Organization> organizationsPage = organizationManager.getByMember(userId, maxItems, skipCount);
         return Response.ok()
                        .entity(organizationsPage.getItems(organization -> linksInjector.injectLinks(asDto(organization),
                                                                                                     getServiceContext())))

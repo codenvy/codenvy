@@ -14,6 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
+import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.OrganizationService;
 import com.codenvy.organization.shared.dto.OrganizationDto;
@@ -82,8 +83,17 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 //anybody can create root organization
                 return;
 
-            //methods accessible to every user
             case "getOrganizations":
+                final String userId = (String)arguments[0];
+                if (userId != null
+                    && !userId.equals(currentSubject.getUserId())
+                    && !currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                    throw new ForbiddenException("The user is able to specify only own id");
+                }
+                //user specified his user id or has required permission
+                return;
+
+            //methods accessible to every user
             case "getById":
             case "find":
                 return;
