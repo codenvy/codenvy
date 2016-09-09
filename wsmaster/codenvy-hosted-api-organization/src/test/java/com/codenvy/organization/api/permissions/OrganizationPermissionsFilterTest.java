@@ -49,6 +49,7 @@ import static com.codenvy.organization.api.permissions.OrganizationDomain.DELETE
 import static com.codenvy.organization.api.permissions.OrganizationDomain.DOMAIN_ID;
 import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE_SUBORGANIZATIONS;
 import static com.codenvy.organization.api.permissions.OrganizationDomain.UPDATE;
+import static com.codenvy.organization.api.permissions.OrganizationPermissionsFilter.MANAGE_ORGANIZATIONS_ACTION;
 import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -134,7 +135,7 @@ public class OrganizationPermissionsFilterTest {
                .get(SECURE_PATH + "/organization");
 
         verify(service).getOrganizations(eq(null), anyInt(), anyInt());
-        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
     }
 
     @Test
@@ -148,12 +149,12 @@ public class OrganizationPermissionsFilterTest {
                .get(SECURE_PATH + "/organization?user=" + USER_ID);
 
         verify(service).getOrganizations(eq(USER_ID), anyInt(), anyInt());
-        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject, never()).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
     }
 
     @Test
     public void shouldCheckPermissionsOnOrganizationsFetchingIfUserSpecifiesForeignId() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(true);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(true);
 
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -164,13 +165,13 @@ public class OrganizationPermissionsFilterTest {
                .get(SECURE_PATH + "/organization?user=user321");
 
         verify(service).getOrganizations(eq("user321"), anyInt(), anyInt());
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
     }
 
     @Test
     public void shouldThrowForbiddenExceptionOnOrganizationsFetchingIfUserSpecifiesForeignIdAndDoesNotHaveRequiredPermission()
             throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(false);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -180,13 +181,14 @@ public class OrganizationPermissionsFilterTest {
                                          .when()
                                          .get(SECURE_PATH + "/organization?user=user321");
 
-        assertEquals(unwrapError(response), "The user is able to specify only own id");
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        assertEquals(unwrapError(response), "The user is able to specify only his own id");
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyZeroInteractions(service);
     }
 
     @Test
     public void shouldCheckPermissionsOnOrganizationUpdating() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
         when(subject.hasPermission(DOMAIN_ID, "organization123", UPDATE)).thenReturn(true);
 
         final Response response = given().auth()
@@ -198,6 +200,7 @@ public class OrganizationPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(service).update(eq("organization123"), any());
         verify(subject).hasPermission(DOMAIN_ID, "organization123", UPDATE);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyNoMoreInteractions(subject);
     }
 
@@ -215,6 +218,7 @@ public class OrganizationPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(service).update(eq("organization123"), any());
         verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyNoMoreInteractions(subject);
     }
 
@@ -239,6 +243,7 @@ public class OrganizationPermissionsFilterTest {
     @Test
     public void shouldCheckPermissionsOnOrganizationRemoving() throws Exception {
         when(subject.hasPermission(DOMAIN_ID, "organization123", DELETE)).thenReturn(true);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -249,6 +254,23 @@ public class OrganizationPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(service).remove(eq("organization123"));
         verify(subject).hasPermission(DOMAIN_ID, "organization123", DELETE);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
+        verifyNoMoreInteractions(subject);
+    }
+
+    @Test
+    public void shouldNotCheckPermissionsOnOrganizationLevelWhenUserHasManageOrganizationsAction() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(true);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .delete(SECURE_PATH + "/organization/organization123");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(service).remove(eq("organization123"));
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyNoMoreInteractions(subject);
     }
 
@@ -256,6 +278,7 @@ public class OrganizationPermissionsFilterTest {
     public void shouldCheckPermissionsOnParentOrgLevelOnChildOrganizationRemoving() throws Exception {
         when(manager.getById(anyString())).thenReturn(new OrganizationImpl("organization123", "test", "parent123"));
         when(subject.hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS)).thenReturn(true);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -266,12 +289,14 @@ public class OrganizationPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(service).remove(eq("organization123"));
         verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyNoMoreInteractions(subject);
     }
 
     @Test
     public void shouldCheckPermissionsOnChildOrganizationRemovingWhenUserDoesNotHavePermissionsOnParentOrgLevel() throws Exception {
         when(manager.getById(anyString())).thenReturn(new OrganizationImpl("organization123", "test", "parent123"));
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
         when(subject.hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS)).thenReturn(false);
         when(subject.hasPermission(DOMAIN_ID, "organization123", DELETE)).thenReturn(true);
 
@@ -285,6 +310,7 @@ public class OrganizationPermissionsFilterTest {
         verify(service).remove(eq("organization123"));
         verify(subject).hasPermission(DOMAIN_ID, "parent123", MANAGE_SUBORGANIZATIONS);
         verify(subject).hasPermission(DOMAIN_ID, "organization123", DELETE);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
         verifyNoMoreInteractions(subject);
     }
 

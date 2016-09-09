@@ -19,7 +19,6 @@ import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.OrganizationService;
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -46,6 +45,8 @@ import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE
 @Filter
 @Path("/organization{path:(/.*)?}")
 public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
+    public static final String MANAGE_ORGANIZATIONS_ACTION = "manageOrganizations";
+
     @Inject
     private OrganizationManager manager;
 
@@ -87,8 +88,8 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 final String userId = (String)arguments[0];
                 if (userId != null
                     && !userId.equals(currentSubject.getUserId())
-                    && !currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
-                    throw new ForbiddenException("The user is able to specify only own id");
+                    && !currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)) {
+                    throw new ForbiddenException("The user is able to specify only his own id");
                 }
                 //user specified his user id or has required permission
                 return;
@@ -102,8 +103,13 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        final Organization organization = manager.getById(organizationId);
+        if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)) {
+            //user is admin and he should be able to do anything with any organizations
+            return;
+        }
 
+        //user is not admin and it is need to check permissions on organization instance level
+        final Organization organization = manager.getById(organizationId);
         final String parentOrganizationId = organization.getParent();
         //check permissions on parent organization level when updating or removing child organization
         if (parentOrganizationId != null && (OrganizationDomain.UPDATE.equals(action) || OrganizationDomain.DELETE.equals(action))) {

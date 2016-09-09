@@ -15,6 +15,7 @@
 package com.codenvy.organization.api;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.organization.api.permissions.OrganizationCreatorPermissionsProvider;
@@ -29,6 +30,7 @@ import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
 /**
  * @author Sergii Leschenko
@@ -52,5 +54,10 @@ public class OrganizationModule extends AbstractModule {
         Multibinder<PermissionsDao<? extends AbstractPermissions>> storages =
                 Multibinder.newSetBinder(binder(), new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {});
         storages.addBinding().to(JpaMemberDao.class);
+
+        final Multibinder<String> binder = Multibinder.newSetBinder(binder(),
+                                                                    String.class,
+                                                                    Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
+        binder.addBinding().toInstance(OrganizationPermissionsFilter.MANAGE_ORGANIZATIONS_ACTION);
     }
 }
