@@ -37,9 +37,10 @@ function migrateFactories() {
 
 function adaptConfig(config) {
     var environments = config.environments;
-
-    for (var env in environments) {
-        environments[env] = updateAgents(environments[env]);
+    if (environments) {
+        for (var env in environments) {
+            environments[env] = updateAgents(environments[env]);
+        }
     }
 
     return config;
