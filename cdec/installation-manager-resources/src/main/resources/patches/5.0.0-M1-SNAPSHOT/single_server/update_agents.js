@@ -47,13 +47,19 @@ function adaptConfig(config) {
 
 function updateAgents(env) {
     for (var machine in env.machines) {
-        if (env.machines[machine].agents == "ws-agent") {
-            env.machines[machine].agents = [ "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh" ];
-        }
+       var agents = env.machines[machine].agents;
+       if (agents) {
+            var wsAgent = env.machines[machine].agents.indexOf("ws-agent");
+            if (wsAgent != -1) {
+                env.machines[machine].agents[wsAgent] = "org.eclipse.che.ws-agent";
+                env.machines[machine].agents.push("org.eclipse.che.terminal", "org.eclipse.che.ssh");
+           }
+       }
     }
 
     return env;
 }
+
 
 migrateWorkspaces();
 migrateStacks();
