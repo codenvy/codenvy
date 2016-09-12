@@ -53,7 +53,8 @@ import java.util.List;
                                     "AND (recipe.userId IS NULL OR recipe.userId = :userId) ")
         }
 )
-@Table(indexes = @Index(columnList = "userId, recipeId", unique = true))
+@Table(indexes = {@Index(columnList = "userId, recipeId", unique = true),
+                  @Index(columnList = "recipeId")})
 public class RecipePermissionsImpl extends AbstractPermissions {
 
     @Column

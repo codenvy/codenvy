@@ -14,8 +14,8 @@
  */
 package com.codenvy.api.workspace.server.model.impl;
 
-import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.api.workspace.server.model.Worker;
 
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -48,11 +48,12 @@ import java.util.List;
                 @NamedQuery(name = "Worker.getByUserAndWorkspaceId",
                             query = "SELECT worker " +
                                     "FROM Worker worker " +
-                                    "WHERE worker.workspaceId = :workspaceId " +
-                                    "AND worker.userId = :userId")
+                                    "WHERE worker.userId = :userId " +
+                                    "AND worker.workspaceId = :workspaceId ")
         }
 )
-@Table(indexes = @Index(columnList = "userId, workspaceId", unique = true))
+@Table(indexes = {@Index(columnList = "userId, workspaceId", unique = true),
+                  @Index(columnList = "workspaceId")})
 public class WorkerImpl extends AbstractPermissions implements Worker {
 
     private String workspaceId;

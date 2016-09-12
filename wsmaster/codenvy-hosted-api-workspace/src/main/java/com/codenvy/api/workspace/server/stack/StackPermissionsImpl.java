@@ -53,7 +53,8 @@ import java.util.List;
                                     "AND (stack.userId IS NULL OR stack.userId = :userId) ")
         }
 )
-@Table(indexes = @Index(columnList = "userId, stackId", unique = true))
+@Table(indexes = {@Index(columnList = "userId, stackId", unique = true),
+                  @Index(columnList = "stackId")})
 public class StackPermissionsImpl extends AbstractPermissions {
 
     @Column
