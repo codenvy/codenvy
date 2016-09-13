@@ -100,6 +100,7 @@ import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
@@ -312,7 +313,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         Multibinder<String> allMachineVolumes = Multibinder.newSetBinder(binder(),
                                                                          String.class,
                                                                          Names.named("machine.docker.machine_volumes"));
-        allMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.local.provider.ExtraVolumeProvider.class);
+        allMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
 
         bind(String.class).annotatedWith(Names.named("machine.docker.machine_env"))
