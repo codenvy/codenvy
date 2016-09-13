@@ -14,11 +14,12 @@
  */
 package com.codenvy.organization.spi.tck;
 
-import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
@@ -29,7 +30,6 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
@@ -204,16 +204,30 @@ public class OrganizationDaoTest {
         final OrganizationImpl parent = organizations[0];
         final OrganizationImpl child1 = new OrganizationImpl("child1", "childTest1", parent.getId());
         final OrganizationImpl child2 = new OrganizationImpl("child2", "childTest2", parent.getId());
-        tckRepository.createAll(asList(child1, child2));
+        final OrganizationImpl child3 = new OrganizationImpl("child3", "childTest3", parent.getId());
+        tckRepository.createAll(asList(child1, child2, child3));
 
-        final List<OrganizationImpl> children = organizationDao.getByParent(parent.getId());
+        final Page<OrganizationImpl> children = organizationDao.getByParent(parent.getId(), 1, 1);
 
-        assertEquals(children.size(), 2);
-        assertTrue(children.containsAll(asList(child1, child2)));
+        assertEquals(children.getTotalItemsCount(), 3);
+        assertEquals(children.getItemsCount(), 1);
+        assertTrue(children.getItems().contains(child1)
+                   ^ children.getItems().contains(child2)
+                   ^ children.getItems().contains(child3));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeOnGettingChildrenByNullableParentId() throws Exception {
-        organizationDao.getByParent(null);
+        organizationDao.getByParent(null, 30, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionOnGettingChildrenWithNegativeMaxItems() throws Exception {
+        organizationDao.getByParent("org123", -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionOnGettingChildrenWithNegativeSkipCount() throws Exception {
+        organizationDao.getByParent("org123", 0, -1);
     }
 }

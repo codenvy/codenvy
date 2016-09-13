@@ -17,8 +17,8 @@ package com.codenvy.organization.spi;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
@@ -103,11 +103,17 @@ public interface MemberDao {
      *
      * @param userId
      *         user id
+     * @param maxItems
+     *         the maximum number of organizations to return
+     * @param skipCount
+     *         the number of organizations to skip
      * @return list of organizations where user is member
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
      * @throws NullPointerException
      *         when {@code userId} is null
      * @throws ServerException
      *         when any other error occurs during organizations fetching
      */
-    List<OrganizationImpl> getOrganizations(String userId) throws ServerException;
+    Page<OrganizationImpl> getOrganizations(String userId, int maxItems, int skipCount) throws ServerException;
 }

@@ -19,6 +19,7 @@ import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -74,15 +75,17 @@ public class MemberDaoTest {
         users[1] = new UserImpl("user2-id", "user2@test.com", "user2-name");
         userRepo.createAll(asList(users));
 
-        orgs = new OrganizationImpl[2];
+        orgs = new OrganizationImpl[3];
         orgs[0] = new OrganizationImpl("org1-id", "org1-name", null);
         orgs[1] = new OrganizationImpl("org2-id", "org2-name", null);
+        orgs[2] = new OrganizationImpl("org3-id", "org3-name", null);
         organizationRepo.createAll(asList(orgs));
 
-        members = new MemberImpl[3];
+        members = new MemberImpl[4];
         members[0] = new MemberImpl(users[0].getId(), orgs[0].getId(), asList("read", "update"));
         members[1] = new MemberImpl(users[1].getId(), orgs[0].getId(), asList("read", "update"));
         members[2] = new MemberImpl(users[1].getId(), orgs[1].getId(), asList("read", "update"));
+        members[3] = new MemberImpl(users[1].getId(), orgs[2].getId(), asList("read", "update"));
 
         memberRepo.createAll(asList(members));
     }
@@ -224,22 +227,34 @@ public class MemberDaoTest {
 
     @Test
     public void shouldGetOrganizationsByUser() throws Exception {
-        final List<OrganizationImpl> fetchedMembers = memberDao.getOrganizations(members[1].getUserId());
+        final Page<OrganizationImpl> fetchedMembers = memberDao.getOrganizations(members[1].getUserId(), 1, 1);
 
-        assertEquals(fetchedMembers.size(), 2);
-        assertTrue(fetchedMembers.contains(orgs[0]));
-        assertTrue(fetchedMembers.contains(orgs[1]));
+        assertEquals(fetchedMembers.getItemsCount(), 1);
+        assertEquals(fetchedMembers.getTotalItemsCount(), 3);
+        assertTrue(fetchedMembers.getItems().contains(orgs[0])
+                   ^ fetchedMembers.getItems().contains(orgs[1])
+                   ^ fetchedMembers.getItems().contains(orgs[2]));
     }
 
     @Test
     public void shouldReturnEmptyListIfThereAreNotAnyOrganizationsForSpecifiedUser() throws Exception {
-        final List<OrganizationImpl> organizations = memberDao.getOrganizations("user1234567");
+        final Page<OrganizationImpl> organizations = memberDao.getOrganizations("user1234567", 30, 0);
 
         assertTrue(organizations.isEmpty());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeOnGettingOrganizationByNullUserId() throws Exception {
-        memberDao.getOrganizations(null);
+        memberDao.getOrganizations(null, 30, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionOnGettingOrganizationWithNegativeMaxItems() throws Exception {
+        memberDao.getOrganizations("user123", -1, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionOnGettingOrganizationWithNegativeSkipCount() throws Exception {
+        memberDao.getOrganizations("user123", 0, -1);
     }
 }

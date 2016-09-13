@@ -51,7 +51,11 @@ import java.util.List;
                 @NamedQuery(name = "Member.getOrganizations",
                             query = "SELECT org " +
                                     "FROM Member m, m.organization org " +
-                                    "WHERE m.userId = :userId")
+                                    "WHERE m.userId = :userId"),
+                @NamedQuery(name = "Member.getOrganizationsCount",
+                            query = "SELECT COUNT(m) " +
+                                    "FROM Member m " +
+                                    "WHERE m.userId = :userId ")
         }
 )
 @Table(indexes = {@Index(columnList = "userId, organizationId", unique = true),

@@ -53,6 +53,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -124,7 +125,7 @@ public class OrganizationPermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/organization");
 
-        verify(service).getOrganizations();
+        verify(service).getOrganizations(anyInt(), anyInt());
         verifyNoMoreInteractions(subject);
     }
 
@@ -239,8 +240,8 @@ public class OrganizationPermissionsFilterTest {
                                          .when()
                                          .get(SECURE_PATH + "/organization");
 
-        assertEquals(response.getStatusCode(), 200);
-        verify(service).getOrganizations();
+        assertEquals(response.getStatusCode(), 204);
+        verify(service).getOrganizations(anyInt(), anyInt());
         verifyZeroInteractions(subject);
     }
 

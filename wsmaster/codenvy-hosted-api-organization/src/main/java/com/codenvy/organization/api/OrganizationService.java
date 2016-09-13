@@ -22,10 +22,12 @@ import io.swagger.annotations.ApiResponses;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Organization;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -34,6 +36,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -41,8 +44,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -79,10 +80,9 @@ public class OrganizationService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam(value = "Organization to create", required = true)
                            OrganizationDto organization) throws BadRequestException, ConflictException, ServerException {
-        requiredNotNull(organization, "Organization");
         organizationValidator.checkOrganization(organization);
         return Response.status(201)
-                       .entity(linksInjector.injectLinks(toDto(organizationManager.create(organization)), getServiceContext()))
+                       .entity(linksInjector.injectLinks(asDto(organizationManager.create(organization)), getServiceContext()))
                        .build();
     }
 
@@ -106,9 +106,8 @@ public class OrganizationService extends Service {
                                                                        ConflictException,
                                                                        NotFoundException,
                                                                        ServerException {
-        requiredNotNull(organization, "Organization");
         organizationValidator.checkOrganization(organization);
-        return linksInjector.injectLinks(toDto(organizationManager.update(organizationId, organization)),
+        return linksInjector.injectLinks(asDto(organizationManager.update(organizationId, organization)),
                                          getServiceContext());
     }
 
@@ -133,7 +132,7 @@ public class OrganizationService extends Service {
     public OrganizationDto getById(@ApiParam("Organization id")
                                    @PathParam("organizationId") String organizationId) throws NotFoundException,
                                                                                               ServerException {
-        return linksInjector.injectLinks(toDto(organizationManager.getById(organizationId)), getServiceContext());
+        return linksInjector.injectLinks(asDto(organizationManager.getById(organizationId)), getServiceContext());
     }
 
     @GET
@@ -149,8 +148,8 @@ public class OrganizationService extends Service {
                                 @QueryParam("name") String organizationName) throws NotFoundException,
                                                                                     ServerException,
                                                                                     BadRequestException {
-        requiredNotNull(organizationName, "Missed organization's name");
-        return linksInjector.injectLinks(toDto(organizationManager.getByName(organizationName)), getServiceContext());
+        checkArgument(organizationName != null, "Missed organization's name");
+        return linksInjector.injectLinks(asDto(organizationManager.getByName(organizationName)), getServiceContext());
     }
 
     @GET
@@ -161,12 +160,19 @@ public class OrganizationService extends Service {
                   responseContainer = "list")
     @ApiResponses({@ApiResponse(code = 200, message = "The child organizations successfully fetched"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public List<OrganizationDto> getByParent(@ApiParam("Parent organization id")
-                                             @PathParam("parent") String parent) throws ServerException {
-        return organizationManager.getByParent(parent)
-                                  .stream()
-                                  .map(child -> linksInjector.injectLinks(toDto(child), getServiceContext()))
-                                  .collect(Collectors.toList());
+    public Response getByParent(@ApiParam("Parent organization id") @PathParam("parent") String parent,
+                                @ApiParam(value = "Max items") @QueryParam("maxItems") @DefaultValue("30") int maxItems,
+                                @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
+            throws ServerException, BadRequestException {
+
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+        final Page<OrganizationImpl> organizationsPage = organizationManager.getByParent(parent, maxItems, skipCount);
+        return Response.ok()
+                       .entity(organizationsPage
+                                       .getItems(organization -> linksInjector.injectLinks(asDto(organization), getServiceContext())))
+                       .header("Link", createLinkHeader(organizationsPage))
+                       .build();
     }
 
     @GET
@@ -175,15 +181,24 @@ public class OrganizationService extends Service {
                   response = OrganizationDto.class,
                   responseContainer = "list")
     @ApiResponses({@ApiResponse(code = 200, message = "The organizations successfully fetched"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public List<OrganizationDto> getOrganizations() throws ServerException {
-        return organizationManager.getByMember(EnvironmentContext.getCurrent().getSubject().getUserId())
-                                  .stream()
-                                  .map(child -> linksInjector.injectLinks(toDto(child), getServiceContext()))
-                                  .collect(Collectors.toList());
+    public Response getOrganizations(@ApiParam(value = "Max items") @QueryParam("maxItems") @DefaultValue("30") int maxItems,
+                                     @ApiParam(value = "Skip count") @QueryParam("skipCount") @DefaultValue("0") int skipCount)
+            throws ServerException, BadRequestException {
+
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+        final String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
+        final Page<OrganizationImpl> organizationsPage = organizationManager.getByMember(currentUserId, maxItems, skipCount);
+        return Response.ok()
+                       .entity(organizationsPage
+                                       .getItems(organization -> linksInjector.injectLinks(asDto(organization), getServiceContext())))
+                       .header("Link", createLinkHeader(organizationsPage))
+                       .build();
     }
 
-    private OrganizationDto toDto(Organization organization) {
+    private OrganizationDto asDto(Organization organization) {
         return DtoFactory.newDto(OrganizationDto.class)
                          .withId(organization.getId())
                          .withName(organization.getName())
@@ -191,18 +206,18 @@ public class OrganizationService extends Service {
     }
 
     /**
-     * Checks object reference is not {@code null}
+     * Ensures the truth of an expression involving one or more parameters to the calling method.
      *
-     * @param object
-     *         object reference to check
-     * @param subject
-     *         used as subject of exception message "{subject} required"
+     * @param expression
+     *         a boolean expression
+     * @param errorMessage
+     *         the exception message to use if the check fails
      * @throws BadRequestException
-     *         when object reference is {@code null}
+     *         if {@code expression} is false
      */
-    private void requiredNotNull(Object object, String subject) throws BadRequestException {
-        if (object == null) {
-            throw new BadRequestException(subject + " required");
+    private void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+        if (!expression) {
+            throw new BadRequestException(errorMessage);
         }
     }
 }

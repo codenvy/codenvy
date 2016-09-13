@@ -14,12 +14,13 @@
  */
 package com.codenvy.organization.spi.jpa;
 
-import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 
@@ -30,6 +31,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -116,13 +118,22 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Override
     @Transactional
-    public List<OrganizationImpl> getByParent(String parent) throws ServerException {
+    public Page<OrganizationImpl> getByParent(String parent, int maxItems, int skipCount) throws ServerException {
         requireNonNull(parent, "Required non-null parent");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         try {
             final EntityManager manager = managerProvider.get();
-            return manager.createNamedQuery("Organizations.getByParent", OrganizationImpl.class)
-                          .setParameter("parent", parent)
-                          .getResultList();
+            final List<OrganizationImpl> result = manager.createNamedQuery("Organization.getByParent", OrganizationImpl.class)
+                                                         .setParameter("parent", parent)
+                                                         .setMaxResults(maxItems)
+                                                         .setFirstResult(skipCount)
+                                                         .getResultList();
+            final Long suborganizationsCount = manager.createNamedQuery("Organization.getSuborganizationsCount", Long.class)
+                                                      .setParameter("parent", parent)
+                                                      .getSingleResult();
+
+            return new Page<>(result, skipCount, maxItems, suborganizationsCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }

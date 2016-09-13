@@ -14,12 +14,13 @@
  */
 package com.codenvy.organization.api;
 
-import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Organization;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -37,16 +38,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -113,17 +115,6 @@ public class OrganizationServiceTest {
     }
 
     @Test
-    public void shouldThrowBadRequestWhenCreatingOrganizationWithoutEntity() throws Exception {
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .contentType("application/json")
-               .when()
-               .expect()
-               .statusCode(400)
-               .post(SECURE_PATH + "/organization");
-    }
-
-    @Test
     public void shouldThrowBadRequestWhenCreatingNonValidOrganization() throws Exception {
         doThrow(new BadRequestException("non valid organization")).when(validator).checkOrganization(any());
 
@@ -162,17 +153,6 @@ public class OrganizationServiceTest {
         assertEquals(createdOrganization, toUpdate);
         verify(linksInjector).injectLinks(any(), any());
         verify(orgManager).update(eq("organization123"), eq(toUpdate));
-    }
-
-    @Test
-    public void shouldThrowBadRequestWhenUpdatingOrganizationWithoutEntity() throws Exception {
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .contentType("application/json")
-               .when()
-               .expect()
-               .statusCode(400)
-               .post(SECURE_PATH + "/organization/organization123");
     }
 
     @Test
@@ -272,7 +252,8 @@ public class OrganizationServiceTest {
                                                   .withName("MyOrganization")
                                                   .withParent("parentOrg123");
 
-        when(orgManager.getByParent(anyString())).thenReturn(Collections.singletonList(new OrganizationImpl(toFetch)));
+        when(orgManager.getByParent(anyString(), anyInt(), anyInt()))
+                .thenReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -280,12 +261,12 @@ public class OrganizationServiceTest {
                                          .when()
                                          .expect()
                                          .statusCode(200)
-                                         .get(SECURE_PATH + "/organization/parentOrg123/organizations");
+                                         .get(SECURE_PATH + "/organization/parentOrg123/organizations?skipCount=0&maxItems=1");
 
         final List<OrganizationDto> organizationDtos = unwrapDtoList(response, OrganizationDto.class);
         assertEquals(organizationDtos.size(), 1);
         assertEquals(organizationDtos.get(0), toFetch);
-        verify(orgManager).getByParent(eq("parentOrg123"));
+        verify(orgManager).getByParent("parentOrg123", 1, 0);
         verify(linksInjector).injectLinks(any(), any());
     }
 
@@ -296,7 +277,8 @@ public class OrganizationServiceTest {
                                                   .withName("MyOrganization")
                                                   .withParent("parentOrg123");
 
-        when(orgManager.getByMember(anyString())).thenReturn(Collections.singletonList(new OrganizationImpl(toFetch)));
+        when(orgManager.getByMember(anyString(), anyInt(), anyInt()))
+                .thenReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -304,12 +286,12 @@ public class OrganizationServiceTest {
                                          .when()
                                          .expect()
                                          .statusCode(200)
-                                         .get(SECURE_PATH + "/organization");
+                                         .get(SECURE_PATH + "/organization?skipCount=0&maxItems=1");
 
         final List<OrganizationDto> organizationDtos = unwrapDtoList(response, OrganizationDto.class);
         assertEquals(organizationDtos.size(), 1);
         assertEquals(organizationDtos.get(0), toFetch);
-        verify(orgManager).getByMember(eq(USER_ID));
+        verify(orgManager).getByMember(USER_ID, 1, 0);
         verify(linksInjector).injectLinks(any(), any());
     }
 

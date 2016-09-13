@@ -46,12 +46,17 @@ import java.util.Objects;
                             query = "SELECT o " +
                                     "FROM Organization o " +
                                     "WHERE o.account.name = :name"),
-                @NamedQuery(name = "Organizations.getByParent",
+                @NamedQuery(name = "Organization.getByParent",
                             query = "SELECT o " +
                                     "FROM Organization o " +
-                                    "WHERE o.parent = :parent")
+                                    "WHERE o.parent = :parent "),
+                @NamedQuery(name = "Organization.getSuborganizationsCount",
+                            query = "SELECT COUNT(o) " +
+                                    "FROM Organization o " +
+                                    "WHERE o.parent = :parent "),
         }
 )
+
 @Table(indexes = {@Index(columnList = "parent")})
 public class OrganizationImpl implements Organization {
     public static final String ORGANIZATIONAL_ACCOUNT = "organizational";

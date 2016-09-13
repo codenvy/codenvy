@@ -18,9 +18,8 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-
-import java.util.List;
 
 /**
  * Defines data access object for {@link OrganizationImpl}
@@ -105,11 +104,17 @@ public interface OrganizationDao {
      *
      * @param parent
      *         id of parent organizations
+     * @param maxItems
+     *         the maximum number of organizations to return
+     * @param skipCount
+     *         the number of organizations to skip
      * @return list of children organizations
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
      * @throws NullPointerException
      *         when {@code parent} is null
      * @throws ServerException
      *         when any other error occurs during organizations fetching
      */
-    List<OrganizationImpl> getByParent(String parent) throws ServerException;
+    Page<OrganizationImpl> getByParent(String parent, int maxItems, int skipCount) throws ServerException;
 }

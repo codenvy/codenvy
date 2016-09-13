@@ -23,25 +23,23 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -133,13 +131,22 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
     @Override
     @Transactional
-    public List<OrganizationImpl> getOrganizations(String userId) throws ServerException {
+    public Page<OrganizationImpl> getOrganizations(String userId, int maxItems, int skipCount) throws ServerException {
         requireNonNull(userId, "Required non-null user id");
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         try {
             final EntityManager manager = managerProvider.get();
-            return manager.createNamedQuery("Member.getOrganizations", OrganizationImpl.class)
-                          .setParameter("userId", userId)
-                          .getResultList();
+            final List<OrganizationImpl> result = manager.createNamedQuery("Member.getOrganizations", OrganizationImpl.class)
+                                                         .setParameter("userId", userId)
+                                                         .setMaxResults(maxItems)
+                                                         .setFirstResult(skipCount)
+                                                         .getResultList();
+            final Long organizationsCount = manager.createNamedQuery("Member.getOrganizationsCount", Long.class)
+                                                   .setParameter("userId", userId)
+                                                   .getSingleResult();
+
+            return new Page<>(result, skipCount, maxItems, organizationsCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
