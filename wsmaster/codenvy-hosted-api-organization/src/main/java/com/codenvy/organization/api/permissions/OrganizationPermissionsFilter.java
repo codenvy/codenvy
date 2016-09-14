@@ -17,6 +17,7 @@ package com.codenvy.organization.api.permissions;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.OrganizationService;
 import com.codenvy.organization.shared.dto.OrganizationDto;
+import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.ApiException;
@@ -91,7 +92,7 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
 
-        final OrganizationImpl organization = manager.getById(organizationId);
+        final Organization organization = manager.getById(organizationId);
 
         final String parentOrganizationId = organization.getParent();
         //check permissions on parent organization level when updating or removing child organization

@@ -35,6 +35,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -118,18 +119,19 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldUpdateOrganizationAndIgnoreIdAndParentFields() throws Exception {
-        final OrganizationImpl existing = createOrganization();
-        when(organizationDao.getById("organizationId")).thenReturn(existing);
+        final OrganizationImpl existing = mock(OrganizationImpl.class);
+        when(organizationDao.getById(any())).thenReturn(existing);
         final OrganizationImpl update = new OrganizationImpl(existing);
         update.setId("newId");
+        update.setName("newName");
         update.setParent("newParent");
 
-        final OrganizationImpl updated = manager.update("organizationId", update);
+        final Organization updated = manager.update("organizationId", update);
 
-        verify(organizationDao).update(eq(updated));
-        assertEquals(updated.getName(), update.getName());
-        assertEquals(updated.getParent(), existing.getParent());
-        assertEquals(updated.getId(), existing.getId());
+        verify(organizationDao).getById("organizationId");
+        verify(existing).setName("newName");
+        verify(organizationDao).update(existing);
+        assertEquals(updated, existing);
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -164,7 +166,7 @@ public class OrganizationManagerTest {
         final OrganizationImpl toFetch = createOrganization();
         when(organizationDao.getByName(eq("org123"))).thenReturn(toFetch);
 
-        final OrganizationImpl fetched = manager.getByName("org123");
+        final Organization fetched = manager.getByName("org123");
 
         assertEquals(fetched, toFetch);
         verify(organizationDao).getByName("org123");
@@ -180,7 +182,7 @@ public class OrganizationManagerTest {
         final OrganizationImpl toFetch = createOrganization();
         when(organizationDao.getById(eq("org123"))).thenReturn(toFetch);
 
-        final OrganizationImpl fetched = manager.getById("org123");
+        final Organization fetched = manager.getById("org123");
 
         assertEquals(fetched, toFetch);
         verify(organizationDao).getById("org123");
@@ -207,7 +209,7 @@ public class OrganizationManagerTest {
         when(organizationDao.getByParent(eq("org123"), anyInt(), anyInt()))
                 .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
-        final Page<OrganizationImpl> organizations = manager.getByParent("org123", 30, 0);
+        final Page<? extends Organization> organizations = manager.getByParent("org123", 30, 0);
 
         assertEquals(organizations.getItemsCount(), 1);
         assertEquals(organizations.getItems().get(0), toFetch);
@@ -235,7 +237,7 @@ public class OrganizationManagerTest {
         when(memberDao.getOrganizations(eq("org123"), anyInt(), anyInt()))
                 .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
-        final Page<OrganizationImpl> organizations = manager.getByMember("org123", 30, 0);
+        final Page<? extends Organization> organizations = manager.getByMember("org123", 30, 0);
 
         assertEquals(organizations.getItemsCount(), 1);
         assertEquals(organizations.getItems().get(0), toFetch);

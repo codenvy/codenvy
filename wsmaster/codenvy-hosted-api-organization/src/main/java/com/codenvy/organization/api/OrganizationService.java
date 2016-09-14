@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiResponses;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -167,10 +166,10 @@ public class OrganizationService extends Service {
 
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
-        final Page<OrganizationImpl> organizationsPage = organizationManager.getByParent(parent, maxItems, skipCount);
+        final Page<? extends Organization> organizationsPage = organizationManager.getByParent(parent, maxItems, skipCount);
         return Response.ok()
-                       .entity(organizationsPage
-                                       .getItems(organization -> linksInjector.injectLinks(asDto(organization), getServiceContext())))
+                       .entity(organizationsPage.getItems(organization -> linksInjector.injectLinks(asDto(organization),
+                                                                                                    getServiceContext())))
                        .header("Link", createLinkHeader(organizationsPage))
                        .build();
     }
@@ -190,10 +189,10 @@ public class OrganizationService extends Service {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         final String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
-        final Page<OrganizationImpl> organizationsPage = organizationManager.getByMember(currentUserId, maxItems, skipCount);
+        final Page<? extends Organization> organizationsPage = organizationManager.getByMember(currentUserId, maxItems, skipCount);
         return Response.ok()
-                       .entity(organizationsPage
-                                       .getItems(organization -> linksInjector.injectLinks(asDto(organization), getServiceContext())))
+                       .entity(organizationsPage.getItems(organization -> linksInjector.injectLinks(asDto(organization),
+                                                                                                    getServiceContext())))
                        .header("Link", createLinkHeader(organizationsPage))
                        .build();
     }

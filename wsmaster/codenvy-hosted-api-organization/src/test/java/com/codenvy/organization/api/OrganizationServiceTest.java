@@ -51,6 +51,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -252,8 +253,8 @@ public class OrganizationServiceTest {
                                                   .withName("MyOrganization")
                                                   .withParent("parentOrg123");
 
-        when(orgManager.getByParent(anyString(), anyInt(), anyInt()))
-                .thenReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1));
+        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+                .when(orgManager).getByParent(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -277,8 +278,8 @@ public class OrganizationServiceTest {
                                                   .withName("MyOrganization")
                                                   .withParent("parentOrg123");
 
-        when(orgManager.getByMember(anyString(), anyInt(), anyInt()))
-                .thenReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1));
+        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+                .when(orgManager).getByParent(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
