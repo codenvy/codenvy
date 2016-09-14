@@ -58,6 +58,7 @@ import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.environment.server.MachineInstanceProvider;
 import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
@@ -371,8 +372,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
         bind(com.codenvy.api.factory.server.filters.FactoryPermissionsFilter.class);
 
-        bind(org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider.class)
-                .to(com.codenvy.machine.HostedComposeMachineProviderImpl.class);
+        bind(MachineInstanceProvider.class)
+                .to(com.codenvy.machine.HostedMachineProviderImpl.class);
 
         final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
         adaptersMultibinder.addBinding().to(FactoryMessageBodyAdapter.class);

@@ -17,7 +17,7 @@ package com.codenvy.machine;
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
 
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -30,7 +30,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
-import org.eclipse.che.plugin.docker.machine.ComposeMachineProviderImpl;
+import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
@@ -57,7 +57,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 @Listeners(MockitoTestNGListener.class)
-public class HostedComposeMachineProviderImplTest {
+public class HostedMachineProviderImplTest {
 
     @Mock
     private DockerConnector                               dockerConnector;
@@ -84,12 +84,11 @@ public class HostedComposeMachineProviderImplTest {
     @Mock
     private MachineTokenRegistry                          machineTokenRegistry;
 
-    private ComposeMachineProviderImpl provider;
+    private MachineProviderImpl provider;
 
     private static final String  PROJECT_FOLDER_PATH    = "/projects";
     private static final String  CONTAINER_ID           = "containerId";
     private static final String  WORKSPACE_ID           = "wsId";
-    private static final String  MACHINE_ID             = "machineId";
     private static final String  MACHINE_NAME           = "machineName";
     private static final String  USER_TOKEN             = "userToken";
     private static final String  USER_NAME              = "user";
@@ -114,27 +113,26 @@ public class HostedComposeMachineProviderImplTest {
 
     @Test
     public void shouldAddMaintenanceConstraintWhenBuildImage() throws Exception {
-        provider = new HostedComposeMachineProviderImpl(dockerConnector,
-                                                        dockerConnectorConfiguration,
-                                                        credentialsReader,
-                                                        dockerMachineFactory,
-                                                        dockerInstanceStopDetector,
-                                                        containerNameGenerator,
-                                                        emptySet(),
-                                                        emptySet(),
-                                                        emptySet(),
-                                                        emptySet(),
-                                                        null,
-                                                        workspaceFolderPathProvider,
-                                                        PROJECT_FOLDER_PATH,
-                                                        false,
-                                                        false,
-                                                        emptySet(),
-                                                        emptySet(),
-                                                        SNAPSHOT_USE_REGISTRY,
-                                                        MEMORY_SWAP_MULTIPLIER,
-                                                        machineTokenRegistry,
-                                                        emptySet());
+        provider = new HostedMachineProviderImpl(dockerConnector,
+                                                 dockerConnectorConfiguration,
+                                                 credentialsReader,
+                                                 dockerMachineFactory,
+                                                 dockerInstanceStopDetector,
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 null,
+                                                 workspaceFolderPathProvider,
+                                                 PROJECT_FOLDER_PATH,
+                                                 false,
+                                                 false,
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 SNAPSHOT_USE_REGISTRY,
+                                                 MEMORY_SWAP_MULTIPLIER,
+                                                 machineTokenRegistry,
+                                                 emptySet());
 
         createInstanceFromRecipe(true);
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
@@ -143,8 +141,8 @@ public class HostedComposeMachineProviderImplTest {
         assertEquals(argumentCaptor.getValue().getBuildArgs().get(MAINTENANCE_CONSTRAINT_KEY), MAINTENANCE_CONSTRAINT_VALUE);
     }
 
-    public ComposeServiceImpl createService() {
-        ComposeServiceImpl service = new ComposeServiceImpl();
+    public CheServiceImpl createService() {
+        CheServiceImpl service = new CheServiceImpl();
         service.setImage("image");
         service.setCommand(asList("some", "command"));
         service.setContainerName("cont_name");
@@ -165,7 +163,6 @@ public class HostedComposeMachineProviderImplTest {
         provider.startService(USER_NAME,
                               WORKSPACE_ID,
                               "env",
-                              MACHINE_ID,
                               MACHINE_NAME,
                               isDev,
                               "net",

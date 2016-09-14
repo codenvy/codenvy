@@ -14,15 +14,15 @@
  */
 package com.codenvy.api.workspace;
 
-import org.eclipse.che.account.spi.AccountImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.compose.ComposeEnvironmentImpl;
+import org.eclipse.che.api.environment.server.compose.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
@@ -64,7 +64,8 @@ public final class TestObjects {
         Map<String, ExtendedMachineImpl> machines = new HashMap<>();
         machines.put("dev-machine", new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                             emptyMap(),
-                                                            new HashMap<>(singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam))))));
+                                                            singletonMap("memoryLimitBytes",
+                                                                         Long.toString(Size.parseSize(devMachineRam)))));
         HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
         services.put("dev-machine", createService());
         for (int i = 0; i < machineRams.length; i++) {
@@ -73,7 +74,8 @@ public final class TestObjects {
             if (machineRams[i] != null) {
                 machines.put("machine" + i, new ExtendedMachineImpl(null,
                                                                     null,
-                                                                    new HashMap<>(singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i]))))));
+                                                                    singletonMap("memoryLimitBytes",
+                                                                                 Long.toString(Size.parseSize(machineRams[i])))));
             }
         }
         ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
@@ -155,9 +157,9 @@ public final class TestObjects {
                           .setStatus(MachineStatus.RUNNING)
                           .setWorkspaceId(workspaceId)
                           .setEnvName(envName)
-                          .setRuntime(new MachineRuntimeInfoImpl(new HashMap<>(),
-                                                                 new HashMap<>(),
-                                                                 new HashMap<>()))
+                          .setRuntime(new MachineRuntimeInfoImpl(emptyMap(),
+                                                                 emptyMap(),
+                                                                 emptyMap()))
                           .build();
     }
 

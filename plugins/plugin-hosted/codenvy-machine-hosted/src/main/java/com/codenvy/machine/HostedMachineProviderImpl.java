@@ -20,9 +20,8 @@ import com.google.common.base.MoreObjects;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -30,10 +29,9 @@ import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
-import org.eclipse.che.plugin.docker.machine.ComposeMachineProviderImpl;
-import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
+import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
@@ -48,7 +46,7 @@ import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONS
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
 
 /**
- * Specific implementation of {@link ComposeMachineProviderImpl} needed for hosted environment.
+ * Specific implementation of {@link MachineProviderImpl} needed for hosted environment.
  *
  * <p/> This implementation:
  * <br/>- provides compose services with environment context that contains the specific machine token instead of user token
@@ -59,40 +57,38 @@ import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONS
  * @author Roman Iuvshyn
  * @author Alexander Garagatyi
  */
-public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl {
+public class HostedMachineProviderImpl extends MachineProviderImpl {
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final MachineTokenRegistry                          tokenRegistry;
 
     @Inject
-    public HostedComposeMachineProviderImpl(DockerConnector docker,
-                                            DockerConnectorConfiguration dockerConnectorConfiguration,
-                                            UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                                            DockerMachineFactory dockerMachineFactory,
-                                            DockerInstanceStopDetector dockerInstanceStopDetector,
-                                            DockerContainerNameGenerator containerNameGenerator,
-                                            @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
-                                            @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
-                                            @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
-                                            @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                                            @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
-                                            WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                                            @Named("che.machine.projects.internal.storage") String projectFolderPath,
-                                            @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
-                                            @Named("machine.docker.privilege_mode") boolean privilegeMode,
-                                            @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                                            @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                                            @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
-                                            @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
-                                            MachineTokenRegistry tokenRegistry,
-                                            @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
+    public HostedMachineProviderImpl(DockerConnector docker,
+                                     DockerConnectorConfiguration dockerConnectorConfiguration,
+                                     UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
+                                     DockerMachineFactory dockerMachineFactory,
+                                     DockerInstanceStopDetector dockerInstanceStopDetector,
+                                     @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
+                                     @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
+                                     @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
+                                     @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
+                                     @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
+                                     WorkspaceFolderPathProvider workspaceFolderPathProvider,
+                                     @Named("che.machine.projects.internal.storage") String projectFolderPath,
+                                     @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
+                                     @Named("machine.docker.privilege_mode") boolean privilegeMode,
+                                     @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
+                                     @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
+                                     @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
+                                     @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
+                                     MachineTokenRegistry tokenRegistry,
+                                     @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
             throws IOException {
         super(docker,
               dockerConnectorConfiguration,
               dockerCredentials,
               dockerMachineFactory,
               dockerInstanceStopDetector,
-              containerNameGenerator,
               devMachineServers,
               allMachinesServers,
               devMachineSystemVolumes,
@@ -130,11 +126,9 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
      * {@inheritDoc}
      */
     @Override
-    protected void pullImage(ComposeServiceImpl service,
+    protected void pullImage(CheServiceImpl service,
                              String machineImageName,
-                             ProgressMonitor progressMonitor) throws NotFoundException,
-                                                                     MachineException,
-                                                                     SourceNotFoundException {
+                             ProgressMonitor progressMonitor) throws MachineException {
 
         File workDir = null;
         try {
@@ -170,7 +164,7 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
      * {@inheritDoc}
      */
     @Override
-    protected void buildImage(ComposeServiceImpl service,
+    protected void buildImage(CheServiceImpl service,
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor) throws MachineException {
@@ -178,19 +172,18 @@ public class HostedComposeMachineProviderImpl extends ComposeMachineProviderImpl
         try {
             BuildImageParams buildImageParams;
             if (service.getBuild() != null &&
-                service.getBuild().getContext() == null &&
-                service.getBuild().getDockerfile() != null) {
+                service.getBuild().getDockerfileContent() != null) {
 
                 workDir = Files.createTempDirectory(null).toFile();
                 final File dockerfileFile = new File(workDir, "Dockerfile");
                 try (FileWriter output = new FileWriter(dockerfileFile)) {
-                    output.append(service.getBuild().getDockerfile());
+                    output.append(service.getBuild().getDockerfileContent());
                 }
 
                 buildImageParams = BuildImageParams.create(dockerfileFile);
             } else {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
-                                                   .withDockerfile(service.getBuild().getDockerfile());
+                                                   .withDockerfile(service.getBuild().getDockerfilePath());
             }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)

@@ -28,7 +28,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -286,7 +286,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in environment in megabytes.
      */
     private long sumRam(Environment environment) throws ServerException {
-        ComposeEnvironmentImpl composeEnv = environmentParser.parse(environment);
+        CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
 
         long sumBytes = composeEnv.getServices()
                                   .values()
