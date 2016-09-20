@@ -14,14 +14,17 @@
  */
 package com.codenvy.ldap.auth;
 
-import com.codenvy.ldap.LdapConfiguration;
+import com.google.common.base.Strings;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.auth.PooledSearchEntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
+import javax.validation.constraints.NotNull;
 
 /**
  * Created by sj on 09.09.16.
@@ -31,11 +34,14 @@ public class EntryResolverProvider implements Provider<EntryResolver> {
     private final PooledSearchEntryResolver entryResolver;
 
     @Inject
-    public EntryResolverProvider(PooledConnectionFactory connFactory, LdapConfiguration configuration) {
+    public EntryResolverProvider(PooledConnectionFactory connFactory,
+                                 @NotNull @Named("ldap.base_dn") String baseDn,
+                                 @Nullable @Named("ldap.auth.user.filter") String userFilter,
+                                 @Nullable @Named("ldap.auth.subtree_search") String subtreeSearch) {
         this.entryResolver = new PooledSearchEntryResolver();
-        this.entryResolver.setBaseDn(configuration.getBaseDn());
-        this.entryResolver.setUserFilter(configuration.getUserFilter());
-        this.entryResolver.setSubtreeSearch(configuration.isSubtreeSearch());
+        this.entryResolver.setBaseDn(baseDn);
+        this.entryResolver.setUserFilter(userFilter);
+        this.entryResolver.setSubtreeSearch(Strings.isNullOrEmpty(subtreeSearch) ? false : Boolean.valueOf(subtreeSearch));
         this.entryResolver.setConnectionFactory(connFactory);
 
     }

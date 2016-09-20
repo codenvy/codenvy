@@ -24,16 +24,11 @@ import com.codenvy.ldap.sync.LdapSynchronizer;
 import com.codenvy.ldap.sync.LdapSynchronizerService;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
-import com.google.inject.util.Providers;
 
 import org.ldaptive.ConnectionFactory;
 import org.ldaptive.auth.Authenticator;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Binder for Ldap modules.
@@ -50,7 +45,6 @@ public class LdapModule extends AbstractModule {
         handlerBinder.addBinding().to(LdapAuthenticationHandler.class);
 
         bind(Authenticator.class).toProvider(AuthenticatorProvider.class);
-        bind(LdapConfiguration.class);
         bind(ConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
         bind(PooledConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
 
@@ -59,5 +53,11 @@ public class LdapModule extends AbstractModule {
         bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
         bind(LdapSynchronizer.class).asEagerSingleton();
         bind(LdapSynchronizerService.class);
+
+        install(new DefaultPropertiesModule());
+
+
     }
+
+
 }

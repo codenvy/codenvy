@@ -14,6 +14,11 @@
  */
 package com.codenvy.ldap;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.multibindings.OptionalBinder;
+import com.google.inject.name.Names;
+
 import org.apache.directory.server.constants.ServerDNConstants;
 import org.apache.directory.server.core.CoreSession;
 import org.apache.directory.server.core.DefaultDirectoryService;
@@ -341,6 +346,28 @@ public class MyLdapServer {
         partition.setSuffix(partitionDn);
         service.addPartition(partition);
         return partition;
+    }
+
+    public static class MyLdapModule extends AbstractModule {
+
+
+        private final MyLdapServer server;
+
+        public MyLdapModule(MyLdapServer server) {
+            this.server = server;
+        }
+
+
+        @Override
+        protected void configure() {
+            bindConstant().annotatedWith(Names.named("ldap.url")).to(server.getUrl());
+            bindConstant().annotatedWith(Names.named("ldap.base_dn")).to(server.getBaseDn());
+
+            OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("ldap.connection.bind.dn")))
+                          .setBinding().toInstance(server.getAdminDn());
+            OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("ldap.connection.bind.password")))
+                          .setBinding().toInstance(server.getAdminPassword());
+        }
     }
 
     public static class Builder {

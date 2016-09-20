@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.ldap;
+package com.codenvy.ldap.auth;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
