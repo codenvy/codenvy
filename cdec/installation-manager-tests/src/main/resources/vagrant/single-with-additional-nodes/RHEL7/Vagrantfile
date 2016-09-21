@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
     ###################
     config.vm.define :node2 do |node2_instance_config|
     hostname = 'node2'
-    domain = 'test.codenvy.onprem'
+    domain = 'codenvy.onprem'
     node2_instance_config.vm.host_name = hostname + '.' + domain
     node2_instance_config.vm.network :private_network, ip: "192.168.56.20"
     node2_instance_config.vm.provider :virtualbox do |vbox|
@@ -84,7 +84,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision :hosts do |config|
     config.add_host '192.168.56.15', ['node1.codenvy.onprem']
-    config.add_host '192.168.56.20', ['node2.test.codenvy.onprem']
+    config.add_host '192.168.56.20', ['node2.codenvy.onprem']
     config.add_host '192.168.56.110', ['codenvy.onprem']
     end
 
