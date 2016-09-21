@@ -78,15 +78,21 @@ import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceUnitTransactionType;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
@@ -101,16 +107,39 @@ import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTI
  */
 public class JpaIntegrationTckModule extends TckModule {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JpaIntegrationTckModule.class);
+
     @Override
     protected void configure() {
-        Map properties = new HashMap();
-        properties.put(TRANSACTION_TYPE,
-                       PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(TRANSACTION_TYPE, PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
 
+        final String dbUrl = System.getProperty("jdbc.url");
+        final String dbUser = System.getProperty("jdbc.user");
+        final String dbPassword = System.getProperty("jdbc.password");
+
+        // Tries to establish connection 10 times with 1 second delay
+        boolean isAvailable = false;
+        for (int i = 0; i < 10 && !isAvailable; i++) {
+            try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+                isAvailable = true;
+            } catch (SQLException x) {
+                LOG.warn("An attempt to connect to the database failed with an error: {}", x.getLocalizedMessage());
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException x) {
+                throw new RuntimeException(x.getLocalizedMessage(), x);
+            }
+        }
+        if (!isAvailable) {
+            throw new IllegalStateException("Couldn't initialize connection with a database");
+        }
+
+        properties.put(JDBC_URL, dbUrl);
+        properties.put(JDBC_USER, dbUser);
+        properties.put(JDBC_PASSWORD, dbPassword);
         properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
-        properties.put(JDBC_URL, System.getProperty("jdbc.url"));
-        properties.put(JDBC_USER, System.getProperty("jdbc.user"));
-        properties.put(JDBC_PASSWORD, System.getProperty("jdbc.password"));
 
         JpaPersistModule main = new JpaPersistModule("main");
         main.properties(properties);

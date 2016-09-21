@@ -185,7 +185,8 @@
                                             <port>jdbc.port:5432</port>
                                         </ports>
                                         <wait>
-                                            <log>PostgreSQL init process complete</log>
+                                            <log>database system is ready to accept connections</log>
+                                            <time>20000</time>
                                         </wait>
                                         <restartPolicy>
                                             <name>always</name>
