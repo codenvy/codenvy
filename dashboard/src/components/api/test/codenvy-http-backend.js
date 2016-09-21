@@ -28,11 +28,16 @@ export class CodenvyHttpBackend {
   constructor($httpBackend, codenvyAPIBuilder) {
     this.httpBackend = $httpBackend;
 
-    this.defaultUser = {};
     this.defaultBranding = {};
+
+    this.defaultUser = {};
     this.userIdMap = new Map();
     this.userEmailMap = new Map();
 
+    this.factoriesMap = new Map();
+
+    this.pageMaxItem = 5;
+    this.pageSkipCount = 0;
 
     // change password
     this.httpBackend.when('POST', '/api/user/password').respond(() => {
@@ -55,19 +60,75 @@ export class CodenvyHttpBackend {
 
 
   /**
+   * Setup Backend for factories
+   */
+  factoriesBackendSetup() {
+    let allFactories = [];
+    let pageFactories = [];
+
+    let factoriesKeys = this.factoriesMap.keys();
+    for (let key of factoriesKeys) {
+      let factory = this.factoriesMap.get(key);
+      this.httpBackend.when('GET', '/api/factory/' + factory.id).respond(factory);
+      this.httpBackend.when('DELETE', '/api/factory/' + factory.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allFactories.push(factory);
+    }
+
+    if (this.defaultUser) {
+      this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
+
+      if (allFactories.length >  this.pageSkipCount) {
+        if(allFactories.length > this.pageSkipCount + this.pageMaxItem) {
+          pageFactories = allFactories.slice(this.pageSkipCount, this.pageSkipCount + this.pageMaxItem);
+        } else {
+          pageFactories = allFactories.slice(this.pageSkipCount);
+        }
+      }
+      this.httpBackend.when('GET', '/api/factory/find?creator.userId=' + this.defaultUser.id + '&maxItems=' + this.pageMaxItem + '&skipCount=' + this.pageSkipCount).respond(pageFactories);
+    }
+  }
+
+  /**
    * Setup all users
    */
   usersBackendSetup() {
-    // add the remote call for user API
     this.httpBackend.when('GET', '/api/user').respond(this.defaultUser);
-    var userIdKeys = this.userIdMap.keys();
+
+    let userIdKeys = this.userIdMap.keys();
     for (let key of userIdKeys) {
       this.httpBackend.when('GET', '/api/user/' + key).respond(this.userIdMap.get(key));
     }
-    var userEmailKeys = this.userEmailMap.keys();
+
+    let userEmailKeys = this.userEmailMap.keys();
     for (let key of userEmailKeys) {
       this.httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
+  }
+
+  /**
+   * Add the given factory
+   * @param factory
+   */
+  addUserFactory(factory) {
+    this.factoriesMap.set(factory.id, factory);
+  }
+
+  /**
+   * Sets max objects on response
+   * @param pageMaxItem
+   */
+  setPageMaxItem(pageMaxItem) {
+    this.pageMaxItem = pageMaxItem;
+  }
+
+  /**
+   * Sets skip count of values
+   * @param pageSkipCount
+   */
+  setPageSkipCount(pageSkipCount) {
+    this.pageSkipCount = pageSkipCount;
   }
 
   /**

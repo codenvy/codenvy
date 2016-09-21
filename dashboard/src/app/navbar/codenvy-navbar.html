@@ -59,6 +59,15 @@
                 </div>
               </md-button>
             </md-list-item>
+            <md-list-item flex class="navbar-subsection-item">
+              <md-button nav-bar-selected flex che-reload-href
+                         ng-href="{{codenvyNavbarCtrl.menuItemUrl.stacks}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
+                  <span>Stacks</span>
+                </div>
+              </md-button>
+            </md-list-item>
             <md-list-item flex class="navbar-subsection-item" ng-if="codenvyNavbarCtrl.isFactoryServiceAvailable">
               <md-button nav-bar-selected flex che-reload-href
                          ng-href="{{codenvyNavbarCtrl.menuItemUrl.factories}}" layout-align="left">

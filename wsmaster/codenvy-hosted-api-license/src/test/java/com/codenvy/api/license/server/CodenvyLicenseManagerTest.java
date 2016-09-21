@@ -20,10 +20,8 @@ import com.codenvy.api.license.LicenseNotFoundException;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.codenvy.swarm.client.model.DockerNode;
 
-import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.mockito.Mock;
@@ -40,6 +38,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 
+import static com.codenvy.api.license.CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS;
+import static com.codenvy.api.license.CodenvyLicense.MAX_NUMBER_OF_FREE_USERS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -78,8 +78,6 @@ public class CodenvyLicenseManagerTest {
     @Mock
     private UserManager           userManager;
     @Mock
-    private Page<UserImpl>        page;
-    @Mock
     private List<DockerNode>      dockerNodes;
 
     private File testDirectory;
@@ -97,7 +95,7 @@ public class CodenvyLicenseManagerTest {
         Files.createDirectories(testDirectory.toPath());
         Mockito.when(codenvyLicense.getLicenseText()).thenReturn(TEXT);
 
-        setAmountOfUsers(USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
         codenvyLicenseManager =
@@ -160,8 +158,8 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyFreeUsageLegal() throws IOException, ServerException {
-        setAmountOfUsers(CodenvyLicense.MAX_NUMBER_OF_FREE_USERS);
-        setSizeOfAdditionalNodes(CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
+        setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
         doThrow(LicenseNotFoundException.class).when(codenvyLicenseManager).load();
 
@@ -178,8 +176,8 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyFreeUsageNotLegal() throws IOException, ServerException {
-        setAmountOfUsers(CodenvyLicense.MAX_NUMBER_OF_FREE_USERS + 1);
-        setSizeOfAdditionalNodes(CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS + 1);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS + 1);
+        setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
         doThrow(LicenseNotFoundException.class).when(codenvyLicenseManager).load();
 
@@ -222,7 +220,7 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyNodesFreeUsageLegal() throws IOException, ServerException {
-        setSizeOfAdditionalNodes(CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS);
+        setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
         doThrow(LicenseNotFoundException.class).when(codenvyLicenseManager).load();
 
@@ -231,17 +229,11 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyNodesFreeUsageNotLegal() throws IOException, ServerException {
-        setSizeOfAdditionalNodes(CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS + 1);
+        setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
         doThrow(LicenseNotFoundException.class).when(codenvyLicenseManager).load();
 
         assertFalse(codenvyLicenseManager.isCodenvyNodesUsageLegal(null));
-    }
-
-    private void setAmountOfUsers(long amountOfUsers) throws ServerException {
-        when(userManager.getAll(30, 0)).thenReturn(
-                page);   //TODO Replace it with UserManager#getTotalCount when codenvy->jpa-integration branch will be merged to master
-        when(page.getTotalItemsCount()).thenReturn(amountOfUsers);
     }
 
     private void setSizeOfAdditionalNodes(int size) throws IOException {

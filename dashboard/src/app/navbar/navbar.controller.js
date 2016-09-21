@@ -38,7 +38,7 @@ export class CodenvyNavBarCtrl {
     this.logoutAPI = this.$resource('/api/auth/logout', {});
 
     this.userServices = this.codenvyPermissions.getUserServices();
-    if(!this.codenvyPermissions.getSystemPermissions()) {
+    if (!this.codenvyPermissions.getSystemPermissions()) {
       this.codenvyPermissions.fetchSystemPermissions();
     }
 
@@ -70,6 +70,7 @@ export class CodenvyNavBarCtrl {
       login: '/site/login',
       dashboard: '#/',
       workspaces: '#/workspaces',
+      stacks: '#/stacks',
       factories: '#/factories',
       administration: '#/onprem/administration',
       usermanagement: '#/admin/usermanagement',
@@ -135,7 +136,8 @@ export class CodenvyNavBarCtrl {
   }
 
   getFactoriesNumber() {
-    return this.codenvyAPI.codenvyFactory.getFactories().length;
+    let pagesInfo = this.codenvyAPI.codenvyFactory.getPagesInfo();
+    return pagesInfo && pagesInfo.count ? pagesInfo.count : this.codenvyAPI.codenvyFactory.factoriesById.size;
   }
 
   openLinkInNewTab(url) {

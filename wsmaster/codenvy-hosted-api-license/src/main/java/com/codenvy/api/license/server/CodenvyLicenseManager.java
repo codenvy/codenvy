@@ -130,8 +130,7 @@ public class CodenvyLicenseManager {
      * Return true if only Codenvy usage meets the constrains of license properties or free usage properties.
      **/
     public boolean isCodenvyUsageLegal() throws ServerException, IOException {
-        long actualUsers = userManager.getAll(30, 0)
-                                      .getTotalItemsCount();   // TODO replace it with UserManager#getTotalCount when codenvy->jpa-integration branch will be merged to master
+        long actualUsers = userManager.getTotalCount();
         int actualServers = dockerConnector.getAvailableNodes().size();
 
         try {

@@ -16,6 +16,7 @@
 
 
 import {CodenvyUserBuilder} from './codenvy-user-builder.js';
+import {CodenvyFactoryBuilder} from './codenvy-factory-builder.js';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -37,5 +38,13 @@ export class CodenvyAPIBuilder {
    */
   getUserBuilder() {
     return new CodenvyUserBuilder();
+  }
+
+  /***
+   * The Codenvy Factory builder
+   * @returns {CodenvyFactoryBuilder}
+   */
+  getFactoryBuilder() {
+    return new CodenvyFactoryBuilder();
   }
 }

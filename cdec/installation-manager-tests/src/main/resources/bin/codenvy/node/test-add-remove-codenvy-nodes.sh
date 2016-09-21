@@ -19,7 +19,7 @@
 # load lib.sh from path stored in parameter 1
 . $1
 
-if [[ -n "$1" ]] && [[ "$1" == "rhel" ]]; then
+if [[ -n "$2" ]] && [[ "$2" == "rhel" ]]; then
     RHEL_OS=true
     printAndLog "TEST CASE: Add and remove Codenvy All-In-One nodes in RHEL OS"
     vagrantUp ${SINGLE_RHEL_WITH_ADDITIONAL_NODES_VAGRANT_FILE}

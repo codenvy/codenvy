@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -68,7 +68,7 @@ public class TemporaryWorkspaceInformer {
     }
 
     public void process() {
-        WorkspaceDto workspace = appContext.getWorkspace();
+        Workspace workspace = appContext.getWorkspace();
         if (workspace == null || !workspace.isTemporary()) {
             return;
         }

@@ -14,6 +14,8 @@
  */
 package com.codenvy.im.utils;
 
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -82,7 +85,7 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_JSON}
      */
     public String doOption(String path, String accessToken) throws IOException {
-        return request(path, "OPTIONS", null, MediaType.APPLICATION_JSON, accessToken);
+        return request(path, "OPTIONS", null, MediaType.APPLICATION_JSON, accessToken, false);
     }
 
     /**
@@ -98,7 +101,7 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#TEXT_PLAIN}
      */
     public String doGetTextPlain(String path) throws IOException {
-        return request(path, "GET", null, MediaType.TEXT_PLAIN, null);
+        return request(path, "GET", null, MediaType.TEXT_PLAIN, null, false);
     }
 
     /**
@@ -106,7 +109,15 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_JSON}
      */
     public String doGet(String path, String accessToken) throws IOException {
-        return request(path, "GET", null, MediaType.APPLICATION_JSON, accessToken);
+        return request(path, "GET", null, MediaType.APPLICATION_JSON, accessToken, false);
+    }
+
+    /**
+     * Performs GET request without proxy.
+     * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_JSON}
+     */
+    public String doGetWithoutProxy(String path) throws IOException {
+        return request(path, "GET", null, MediaType.APPLICATION_JSON, null, true);
     }
 
     /**
@@ -114,7 +125,7 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_JSON}
      */
     public void doDelete(String path, String accessToken) throws IOException {
-        request(path, "DELETE", null, null, accessToken);
+        request(path, "DELETE", null, null, accessToken, false);
     }
 
     /**
@@ -122,7 +133,7 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_JSON}
      */
     public String doPost(String path, Object body, String accessToken) throws IOException {
-        return request(path, "POST", body, MediaType.APPLICATION_JSON, accessToken);
+        return request(path, "POST", body, MediaType.APPLICATION_JSON, accessToken, false);
     }
 
     /**
@@ -133,7 +144,7 @@ public class HttpTransport {
      *         if request failed
      */
     public String doPost(String path, Object body) throws IOException {
-        return request(path, "POST", body, MediaType.APPLICATION_JSON, null);
+        return request(path, "POST", body, MediaType.APPLICATION_JSON, null, false);
     }
 
     /**
@@ -141,15 +152,25 @@ public class HttpTransport {
      * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_OCTET_STREAM}
      */
     public Path download(String path, Path destinationDir) throws IOException {
-        if (!Files.exists(destinationDir)) {
-            Files.createDirectories(destinationDir);
-        }
-
-        return download(path, "GET", MediaType.APPLICATION_OCTET_STREAM, destinationDir);
+        return download(path, "GET", null, MediaType.APPLICATION_OCTET_STREAM, destinationDir, false);
     }
 
-    HttpURLConnection openConnection(String path, @Nullable String accessToken) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection)new URL(path).openConnection();
+    /**
+     * Performs GET request without proxy and store response into file.
+     * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_OCTET_STREAM}
+     */
+    public Path downloadWithoutProxy(String path, String accessToken, Path destinationDir) throws IOException {
+        return download(path, "GET", accessToken, MediaType.APPLICATION_OCTET_STREAM, destinationDir, true);
+    }
+
+    @VisibleForTesting
+    HttpURLConnection openConnection(String path, @Nullable String accessToken, boolean noProxy) throws IOException {
+        HttpURLConnection connection;
+        if (noProxy) {
+            connection = getConnectionWithoutProxy(path);
+        } else {
+            connection = getConnectionWithProxy(path);
+        }
 
         if (accessToken != null) {
             String accessTokenCookie = String.format("session-access-key=%s;", accessToken);
@@ -159,15 +180,26 @@ public class HttpTransport {
         return connection;
     }
 
+    @VisibleForTesting
+    HttpURLConnection getConnectionWithoutProxy(String path) throws IOException {
+        return (HttpURLConnection)new URL(path).openConnection(Proxy.NO_PROXY);
+    }
+
+    @VisibleForTesting
+    HttpURLConnection getConnectionWithProxy(String path) throws IOException {
+        return (HttpURLConnection)new URL(path).openConnection();
+    }
+
     private String request(String path,
                            String method,
                            @Nullable Object body,
                            @Nullable String expectedContentType,
-                           @Nullable String accessToken) throws IOException {
+                           @Nullable String accessToken,
+                           boolean noProxy) throws IOException {
         HttpURLConnection conn = null;
 
         try {
-            conn = openConnection(path, accessToken);
+            conn = openConnection(path, accessToken, noProxy);
             request(method, body, expectedContentType, conn);
             return readAndCloseQuietly(conn.getInputStream());
         } catch (SocketTimeoutException e) { // catch exception and throw a new one with proper message
@@ -180,11 +212,20 @@ public class HttpTransport {
         }
     }
 
-    private Path download(String path, String method, String expectedContentType, Path destinationDir) throws IOException {
-        final HttpURLConnection conn = openConnection(path, null);
+    private Path download(String path,
+                          String method,
+                          String accessToken,
+                          String expectedContentType,
+                          Path destinationDir,
+                          boolean noProxy) throws IOException {
+        if (!Files.exists(destinationDir)) {
+            Files.createDirectories(destinationDir);
+        }
+
+        final HttpURLConnection conn = openConnection(path, accessToken, noProxy);
 
         try {
-            request(method, null, expectedContentType, conn);
+            request(method, accessToken, expectedContentType, conn);
 
             String headerField = conn.getHeaderField("Content-Disposition");
             if (headerField == null) {

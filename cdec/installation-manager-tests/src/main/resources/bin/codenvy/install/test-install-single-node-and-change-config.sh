@@ -54,15 +54,5 @@ validateExpectedString ".*\"artifact\".\:.\"codenvy\".*\"status\".\:.\"SUCCESS\"
 
 validateInstalledCodenvyVersion ${LATEST_CODENVY_VERSION}
 
-# login to Codenvy on-prem by using IM CLI login command
-executeIMCommand "--valid-exit-code=1" "login" "admin" "wrong"
-validateExpectedString ".*Login.failed.on.'http://${HOST_URL}'.*"
-
-executeIMCommand "login" "admin" "password"
-validateExpectedString ".*Login.success.on.'http://${HOST_URL}'.*"
-
-executeIMCommand "login" "--remote=http://${HOST_URL}" "admin" "password"
-validateExpectedString ".*Login.success.on.'http://${HOST_URL}'.*"
-
 printAndLog "RESULT: PASSED"
 vagrantDestroy

@@ -55,7 +55,6 @@ export class ShareWorkspaceController {
     //Temp solution with defined actions, better to provide list of available for user to choose:
     this.actions = ['read', 'use', 'run', 'configure'];
     this.workspaceDomain = 'workspace';
-    this.recipeDomain = 'recipe';
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
@@ -142,13 +141,9 @@ export class ShareWorkspaceController {
 
   shareWorkspace() {
     let permissionPromises = [];
-    this.recipeId = this.getRecipeId();
 
     this.existingUsers.forEach((user) => {
       permissionPromises.push(this.storeWorkspacePermissions(user));
-      if (this.recipeId) {
-        permissionPromises.push(this.storeRecipePermissions(user));
-      }
     });
 
     this.$q.all(permissionPromises).then(() => {
@@ -351,22 +346,6 @@ export class ShareWorkspaceController {
   }
 
   /**
-   * Strores user permissions for current workspace's recipe.
-   *
-   * @param user user data
-   * @returns {*} promise with store permissions request
-   */
-  storeRecipePermissions(user) {
-    let permission = {};
-    permission.user = user.id;
-    permission.domain = this.recipeDomain;
-    permission.instance = this.recipeId;
-    permission.actions = ['read'];
-
-    return this.codenvyPermissions.storePermissions(permission);
-  }
-
-  /**
    * Removes user permissions for current workspace
    *
    * @param user user
@@ -444,35 +423,4 @@ export class ShareWorkspaceController {
     return (this.codenvyUser.getUserByAlias(email) !== undefined);
   }
 
-  /**
-   * Detects recipe id from it's location.
-   *
-   * (Format of the url : http://{host}/api/recipe/{recipe id}/script).
-   *
-   * @returns {*|string}
-   */
-  getRecipeId() {
-    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
-    let environments = workspace.config.environments;
-    let defaultEnvName = workspace.config.defaultEnv;
-
-    let defaultEnvironment = environments[defaultEnvName];
-
-    let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
-      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
-    });
-
-    //TODO check after environment model changes completed
-    let recipeLocation = devMachine.source.location;
-    if (!recipeLocation || recipeLocation.length === 0) {
-      return null;
-    }
-
-    let recipePath = '/recipe/';
-    let start = recipeLocation.indexOf(recipePath);
-    let end = recipeLocation.indexOf('/script', start);
-
-    let recipeId = (start > 0 && end > 0) ? recipeLocation.substring(start + recipePath.length, end) : null;
-    return recipeId;
-  }
 }

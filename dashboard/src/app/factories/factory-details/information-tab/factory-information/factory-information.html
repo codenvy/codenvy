@@ -47,13 +47,13 @@
 
   <!-- URL -->
   <che-label-container che-label-name="URL">
-    <che-text-info ng-show="factoryInformationCtrl.factory.nameURL"
-                   che-text="factoryInformationCtrl.factory.nameURL ? factoryInformationCtrl.factory.nameURL : 'No value'"
-                   che-href="factoryInformationCtrl.factory.nameURL"
+    <che-text-info ng-show="factoryInformationCtrl.getFactoryNamedUrl()"
+                   che-text="factoryInformationCtrl.getFactoryNamedUrl()"
+                   che-href="factoryInformationCtrl.getFactoryNamedUrl()"
                    che-copy-clipboard="true"
                    class="factory-information-panel-item"></che-text-info>
-    <che-text-info che-text="factoryInformationCtrl.factory.idURL ? factoryInformationCtrl.factory.idURL : 'No value'"
-                   che-href="factoryInformationCtrl.factory.idURL"
+    <che-text-info che-text="factoryInformationCtrl.getFactoryIdUrl()"
+                   che-href="factoryInformationCtrl.getFactoryIdUrl()"
                    che-copy-clipboard="true"
                    class="factory-information-panel-item"></che-text-info>
   </che-label-container>
@@ -61,7 +61,7 @@
   <!-- Creation Date -->
   <che-label-container che-label-name="Creation Date">
     <che-text-info
-      che-text="factoryInformationCtrl.factory.originFactory.creator.created | amDateFormat:'Do MMMM YYYY'">
+            che-text="factoryInformationCtrl.factory.creator.created | amDateFormat:'Do MMMM YYYY'">
     </che-text-info>
   </che-label-container>
 
@@ -118,15 +118,27 @@
         </div>
       </ng-form>
     </che-label-container>
-    <!--Workspace RAM--Temporary not available //TODO add when implemented>
-   <!-- <che-label-container che-label-name="RAM">
+    <!--Workspace RAM-->
+    <che-label-container che-label-name="RAM">
       <ng-form name="factoryInformationForm">
-        <che-workspace-ram-allocation-slider
-          ng-model="factoryInformationCtrl.copyOriginFactory.workspace.environments[0].machines[0].limits.ram"
-          che-on-change="factoryInformationCtrl.updateFactory()"></che-workspace-ram-allocation-slider>
+        <div data-ng-repeat="(environmentKey, environmentValue) in factoryInformationCtrl.copyOriginFactory.workspace.environments">
+          <span ng-if="factoryInformationCtrl.getObjectKeys(factoryInformationCtrl.copyOriginFactory.workspace.environments).length > 1"
+                class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
+
+          <div>
+            <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
+              <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
+                <span ng-if="factoryInformationCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+                <che-workspace-ram-allocation-slider
+                        ng-model="machineValue.attributes.memoryLimitBytes"
+                        che-on-change="factoryInformationCtrl.updateFactory()"></che-workspace-ram-allocation-slider>
+              </div>
+            </div>
+          </div>
+        </div>
       </ng-form>
     </che-label-container>
-  </che-label-container>-->
+  </che-label-container>
 
   <!-- Configure commands -->
   <che-label-container che-label-name="Configure Commands"

@@ -32,50 +32,24 @@ export class NagMessageCtrl {
     this.nagMessageService = nagMessageService;
 
     this.userServices = codenvyPermissions.getUserServices();
-    this.licenseLegality = imsLicenseApi.getLicenseLegality();
     this.numberOfFreeUsers = imsLicenseApi.getNumberOfFreeUsers();
 
-    this.checkLicenseStatus();
-  }
+    let licenseLegality = imsLicenseApi.getLicenseLegality();
 
-  /**
-   * Check the installation manager status
-   */
-  checkLicenseStatus() {
-    if (this.userServices.hasInstallationManagerService) {
-      this.updateLicense();
-      return;
-    }
-    //returns an unregister function
-    var unregister = this.$scope.$watch(()=> {
-      return this.userServices.hasInstallationManagerService;
-    }, (isAvailable)=> {
-      if (!isAvailable) {
-        return;
-      }
-      this.updateLicense();
-      unregister();
+    this.imsLicenseApi.fetchLicenseLegality().finally(() => {
+      this.checkLegality(licenseLegality);
     });
-  }
 
-  /**
-   * Update license's properties if installation manager is available
-   */
-  updateLicense() {
-    this.checkLegality(this.licenseLegality);
-
-    this.imsLicenseApi.fetchLicenseLegality();
-
-    //returns an unregister function
     this.$scope.$watch(()=> {
-      return this.imsLicenseApi.getLicenseLegality();
-    }, (newLicenseLegality)=> {
-      this.checkLegality(newLicenseLegality);
+      return licenseLegality.value;
+    }, ()=> {
+      this.checkLegality(licenseLegality);
     });
   }
 
   /**
    * Check the license legality
+   * @param licenseLegality
    */
   checkLegality(licenseLegality) {
     if (licenseLegality && licenseLegality.value === 'false') {

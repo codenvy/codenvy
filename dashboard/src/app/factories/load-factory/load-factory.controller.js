@@ -68,7 +68,7 @@ export class LoadFactoryCtrl {
     var promise;
     if (this.routeParams.id) {
       this.factory = this.codenvyAPI.getFactory().getFactoryById(this.routeParams.id);
-      promise = this.codenvyAPI.getFactory().fetchFactory(this.routeParams.id);
+      promise = this.codenvyAPI.getFactory().fetchFactoryById(this.routeParams.id);
     } else if (this.routeParams) {
       promise = this.codenvyAPI.getFactory().fetchParameterFactory(this.routeParams);
     } else {
@@ -77,7 +77,7 @@ export class LoadFactoryCtrl {
     }
     if (promise) {
       promise.then((factory) => {
-        this.factory = factory.originFactory;
+        this.factory = factory;
 
         //Check factory contains workspace config:
         if (!this.factory.workspace) {
@@ -405,7 +405,7 @@ export class LoadFactoryCtrl {
 
     // needs to update configuration of the project
     let updatePromise = promise.then(() => {
-        projectService.updateProject(project.name, project).$promise;
+      projectService.updateProject(project.name, project).$promise;
     }, (error) => {
       this.handleError(error);
     });

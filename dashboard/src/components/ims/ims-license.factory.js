@@ -57,7 +57,8 @@ export class ImsLicenseApi {
     // default number of free users
     this.numberOfFreeUsers = 5;
 
-    this.licenseLegality = {};
+    // default license legality
+    this.licenseLegality = {value: true};
   }
 
   /**
@@ -204,11 +205,9 @@ export class ImsLicenseApi {
     let promise = this.remoteLicenseAPI.getLegality().$promise;
 
     // check if was OK or not
-    promise.then((licenseLegality) => {
-        this.licenseLegality = licenseLegality;
+    return promise.then((licenseLegality) => {
+      this.licenseLegality.value = licenseLegality.value === true;
     });
-
-    return promise;
   }
 
   /**

@@ -14,18 +14,19 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
+import com.codenvy.plugin.pullrequest.client.dto.HostUser;
+import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.client.dto.Repository;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.dto.HostUser;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
-import com.codenvy.plugin.pullrequest.client.dto.Repository;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -34,7 +35,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -48,9 +48,8 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
 
-import javax.validation.constraints.NotNull;
 import javax.inject.Inject;
-
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static com.google.gwt.regexp.shared.RegExp.compile;
@@ -350,7 +349,7 @@ public class BitbucketHostingService implements VcsHostingService {
 
     @Override
     public Promise<HostUser> authenticate(final CurrentUser user) {
-        final WorkspaceDto workspace = this.appContext.getWorkspace();
+        final Workspace workspace = this.appContext.getWorkspace();
         if (workspace == null) {
             return Promises.reject(JsPromiseError.create("Error accessing current workspace"));
         }

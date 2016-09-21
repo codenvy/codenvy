@@ -295,7 +295,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         try {
             String legalityNodeUrl = configManager.getApiEndpoint() + LEGALITY_NODE_LICENSE_SERVICE +
                                      "?" + NODE_NUMBER_PARAM + "=" + nodeNumber;
-            String value = (String)asMap(transport.doGet(legalityNodeUrl)).get("value");
+            String value = (String)asMap(transport.doGetWithoutProxy(legalityNodeUrl)).get("value");
             if (!Boolean.valueOf(value)) {
                 throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
             }

@@ -15,7 +15,9 @@
 package com.codenvy.plugin.urlfactory;
 
 import com.google.common.base.Strings;
+import com.google.common.io.CharStreams;
 
+import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
@@ -26,6 +28,12 @@ import org.eclipse.che.dto.server.DtoFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -61,6 +69,9 @@ public class URLFactoryBuilder {
     @Inject
     private URLFetcher URLFetcher;
 
+    @Inject
+    private FactoryMessageBodyAdapter factoryAdapter;
+
     /**
      * Build a default factory using the provided json file or create default one
      *
@@ -74,6 +85,14 @@ public class URLFactoryBuilder {
         if (createFactoryParams != null && createFactoryParams.codenvyJsonFileLocation() != null) {
             String factoryJsonContent = URLFetcher.fetch(createFactoryParams.codenvyJsonFileLocation());
             if (!Strings.isNullOrEmpty(factoryJsonContent)) {
+                // Adapt an old factory format to a new one if necessary
+                try {
+                    final ByteArrayInputStream contentStream = new ByteArrayInputStream(factoryJsonContent.getBytes(UTF_8));
+                    final InputStream newStream = factoryAdapter.adapt(contentStream);
+                    factoryJsonContent = CharStreams.toString(new InputStreamReader(newStream, UTF_8));
+                } catch (IOException x) {
+                    throw new IllegalStateException(x.getLocalizedMessage(), x);
+                }
                 return DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class);
             }
         }

@@ -15,17 +15,17 @@
 package com.codenvy.im.utils;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.annotations.OPTIONS;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.everrest.assured.EverrestJetty;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -47,11 +47,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -63,15 +63,23 @@ import static org.testng.Assert.assertTrue;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class TestHttpTransport {
 
+    private static final String TEXT = "to be or not to be";
+
     private TestService   testService;
     private HttpTransport httpTransport;
     private HttpTransport spyHttpTransport;
+
+    @Mock
+    private HttpURLConnection httpURLConnection;
 
     @BeforeMethod
     public void setUp() throws Exception {
         testService = new TestService();
         httpTransport = new HttpTransport();
         spyHttpTransport = spy(new HttpTransport());
+
+        doReturn(httpURLConnection).when(spyHttpTransport).getConnectionWithProxy(TEXT);
+        doReturn(httpURLConnection).when(spyHttpTransport).getConnectionWithoutProxy(TEXT);
     }
 
     @Test
@@ -189,7 +197,7 @@ public class TestHttpTransport {
         HttpURLConnection mockConnection = mock(HttpURLConnection.class);
         doReturn(200).when(mockConnection).getResponseCode();
 
-        doReturn(mockConnection).when(spyHttpTransport).openConnection(httpPath, null);
+        doReturn(mockConnection).when(spyHttpTransport).openConnection(httpPath, null, false);
 
         spyHttpTransport.doGet(httpPath);
         verification.run();
@@ -206,9 +214,25 @@ public class TestHttpTransport {
         doReturn(new URL(httpsPath)).when(mockConnection).getURL();
         doReturn(200).when(mockConnection).getResponseCode();
 
-        doReturn(mockConnection).when(spyHttpTransport).openConnection(httpsPath, null);
+        doReturn(mockConnection).when(spyHttpTransport).openConnection(httpsPath, null, false);
 
         spyHttpTransport.doGet(httpsPath);
+    }
+
+    @Test
+    public void shouldReturnConnectionWithProxy() throws IOException {
+        spyHttpTransport.openConnection(TEXT, TEXT, false);
+
+        verify(spyHttpTransport).getConnectionWithProxy(TEXT);
+        verify(httpURLConnection).addRequestProperty(anyString(), anyString());
+    }
+
+    @Test
+    public void shouldReturnConnectionWithoutProxy() throws IOException {
+        spyHttpTransport.openConnection(TEXT, TEXT, true);
+
+        verify(spyHttpTransport).getConnectionWithoutProxy(TEXT);
+        verify(httpURLConnection).addRequestProperty(anyString(), anyString());
     }
 
     @AfterMethod

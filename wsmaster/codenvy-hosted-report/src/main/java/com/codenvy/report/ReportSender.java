@@ -100,7 +100,7 @@ public class ReportSender {
         StringBuilder msg = new StringBuilder();
         msg.append(String.format("External IP address: %s\n", externalIP.getValue()));
         msg.append(String.format("Hostname: %s\n", new URL(apiEndpoint).getHost()));
-        msg.append(String.format("Number of users: %s\n", userManager.getAll(30, 0).getTotalItemsCount()));
+        msg.append(String.format("Number of users: %s\n", userManager.getTotalCount()));
 
         mailClient.sendMail(parameters.getSender(), parameters.getReceiver(), null, parameters.getTitle(), MediaType.TEXT_PLAIN,
                             msg.toString());

@@ -43,4 +43,6 @@ fi
 
 validateExpectedString ".*\"artifact\".\:.\"codenvy\".*\"version\".\:.\"${LATEST_CODENVY_VERSION}\".*\"label\".\:.\"${EXPECTED_LABEL}\".*"
 
+printAndLog "RESULT: PASSED"
+
 vagrantDestroy

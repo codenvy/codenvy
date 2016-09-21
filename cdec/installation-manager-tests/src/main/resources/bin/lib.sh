@@ -449,7 +449,7 @@ doSleep() {
 
 addCodenvyLicenseConfiguration() {
     local LICENSE_TEMPLATE_FILE='/etc/puppet/modules/all_in_one/templates/license.properties.erb'
-    executeSshCommand "sudo sed -i 's/\license-manager.public_key.*/\license-manager.public_key=$CODENVY_LICENSE_PUBLIC_KEY/g' $LICENSE_TEMPLATE_FILE"
+    executeSshCommand "sudo sed -i 's/license-manager.public_key.*/license-manager.public_key=$CODENVY_LICENSE_PUBLIC_KEY/g' $LICENSE_TEMPLATE_FILE"
     executeSshCommand "sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay"
 }
 

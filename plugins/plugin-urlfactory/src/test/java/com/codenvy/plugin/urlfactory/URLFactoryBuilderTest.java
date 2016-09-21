@@ -14,6 +14,7 @@
  */
 package com.codenvy.plugin.urlfactory;
 
+import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
@@ -33,6 +34,7 @@ import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -56,6 +58,9 @@ public class URLFactoryBuilderTest {
      */
     @Mock
     private URLFetcher URLFetcher;
+
+    @Mock
+    private FactoryMessageBodyAdapter factoryAdapter;
 
     /**
      * Tested instance.
@@ -151,6 +156,8 @@ public class URLFactoryBuilderTest {
      */
     @Test
     public void checkWithCustomFactoryJsonFile() throws Exception {
+
+        when(factoryAdapter.adapt(any())).thenAnswer(inv -> inv.getArguments()[0]);
 
         WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class);
         FactoryDto templateFactory = newDto(FactoryDto.class).withV("4.0").withName("florent").withWorkspace(workspaceConfigDto);

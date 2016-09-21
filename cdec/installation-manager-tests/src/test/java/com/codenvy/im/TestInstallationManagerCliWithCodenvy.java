@@ -70,8 +70,8 @@ public class TestInstallationManagerCliWithCodenvy extends BaseIntegrationTest {
     }
 
     @Test
-    public void testLoginToCodenvySaaSThroughIMServer() throws Exception {
-        doTest("codenvy/test-login-to-saas-through-ims.sh");
+    public void testLogin() throws Exception {
+        doTest("codenvy/test-login.sh");
     }
 
     @Test

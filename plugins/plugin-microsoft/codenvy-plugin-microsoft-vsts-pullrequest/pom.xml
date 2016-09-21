@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-microsoft-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.0.0-M2-SNAPSHOT</version>
+        <version>5.0.0-M3-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-microsoft-vsts-pullrequest</artifactId>
     <name>Codenvy Plugin :: Microsoft :: VSTS Pull request</name>
@@ -55,11 +55,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-user-shared</artifactId>
+            <artifactId>che-core-api-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
+            <artifactId>che-core-api-user-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

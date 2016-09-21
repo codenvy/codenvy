@@ -185,6 +185,7 @@ export class CodenvyUser {
     if (lastPageLink) {
       let pageParam = this._getPageParamByLink(lastPageLink);
       this.pageInfo.countOfPages = pageParam.skipCount / pageParam.maxItems + 1;
+      this.pageInfo.count = pageParam.skipCount;
       let lastPageData = {link: lastPageLink};
       if (this.pageInfo.currentPageNumber === this.pageInfo.countOfPages) {
         lastPageData.users = data.users;

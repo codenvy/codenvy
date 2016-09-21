@@ -45,6 +45,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -97,6 +98,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
 
         initConfigs();
         initLicenseValidationRequest();
+        when(transport.doGetWithoutProxy(anyString())).thenReturn(VALIDATION_NODE_JSON);
 
         k = 0;
     }
@@ -412,20 +414,20 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
     public void licenseShouldBeValid() throws IOException, ApiException {
         spyHelperCodenvy4.validateLicense();
 
-        verify(transport).doGet(anyString());
+        verify(transport).doGetWithoutProxy(anyString());
         verify(mockConfigManager).getApiEndpoint();
     }
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Your Codenvy subscription only allows a single server.")
     public void licenseShouldBeInValid() throws IOException, ApiException {
-        when(transport.doGet(anyString())).thenReturn("{\"value\" : \"false\"}");
+        when(transport.doGetWithoutProxy(anyString())).thenReturn("{\"value\" : \"false\"}");
 
         spyHelperCodenvy4.validateLicense();
     }
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Codenvy License can't be validated.")
     public void processVerifyLicenseShouldBeFailed() throws IOException, ApiException {
-        doThrow(IOException.class).when(transport).doGet(anyString());
+        doThrow(IOException.class).when(transport).doGetWithoutProxy(anyString());
 
         spyHelperCodenvy4.validateLicense();
     }

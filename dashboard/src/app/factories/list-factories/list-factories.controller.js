@@ -31,12 +31,11 @@ export class ListFactoriesCtrl {
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
 
-    this.hasNextPage = true;
     this.maxItems = 15;
     this.skipCount = 0;
 
     this.factoriesOrderBy = '';
-    this.factoriesFilter = {originFactory: {name: ''}};
+    this.factoriesFilter = {name: ''};
     this.factoriesSelectedStatus = {};
     this.isNoSelected = true;
     this.isAllSelected = false;
@@ -44,20 +43,20 @@ export class ListFactoriesCtrl {
 
     this.factoriesSelectedStatus = {};
     this.isLoading = true;
-    this.factories = codenvyAPI.getFactory().getFactories();
+    this.factories = codenvyAPI.getFactory().getPageFactories();
 
-    // fetch factories when initializing
+    this.isLoading = true;
     let promise = codenvyAPI.getFactory().fetchFactories(this.maxItems, this.skipCount);
-
     promise.then(() => {
-        this.isLoading = false;
-      },
-      (error) => {
-        this.isLoading = false;
-        if (error.status !== 304) {
-          cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
-        }
-      });
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+      if (error.status !== 304) {
+        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve the list of factories.');
+      }
+    });
+
+    this.pagesInfo = codenvyAPI.getFactory().getPagesInfo();
 
     $rootScope.showIDE = false;
   }
@@ -67,7 +66,7 @@ export class ListFactoriesCtrl {
    */
   selectAllFactories() {
     this.factories.forEach((factory) => {
-      this.factoriesSelectedStatus[factory.originFactory.id] = true;
+      this.factoriesSelectedStatus[factory.id] = true;
     });
   }
 
@@ -76,7 +75,7 @@ export class ListFactoriesCtrl {
    */
   deselectAllFactories() {
     this.factories.forEach((factory) => {
-      this.factoriesSelectedStatus[factory.originFactory.id] = false;
+      this.factoriesSelectedStatus[factory.id] = false;
     });
   }
 
@@ -102,7 +101,7 @@ export class ListFactoriesCtrl {
     this.isAllSelected = true;
 
     this.factories.forEach((factory) => {
-      if (this.factoriesSelectedStatus[factory.originFactory.id]) {
+      if (this.factoriesSelectedStatus[factory.id]) {
         this.isNoSelected = false;
       } else {
         this.isAllSelected = false;
@@ -118,28 +117,6 @@ export class ListFactoriesCtrl {
       this.isBulkChecked = true;
     }
   }
-
-  /**
-   * Load more factories, coll this function on list scroll down
-   */
-  loadNextPage() {
-    this.skipCount = this.factories.length;
-    this.isLoading = true;
-
-    let promise = this.codenvyAPI.getFactory().fetchFactories(this.maxItems, this.skipCount);
-
-    promise.then(() => {
-        this.factories = this.codenvyAPI.getFactory().getFactories();
-        this.isLoading = false;
-      },
-      (error) => {
-        this.isLoading = false;
-        if (error.status !== 304) {
-          this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
-        }
-      });
-  }
-
 
   /**
    * Delete all selected factories
@@ -208,6 +185,65 @@ export class ListFactoriesCtrl {
   }
 
   /**
+   * Ask for loading the users page in asynchronous way
+   * @param pageKey - the key of page
+   */
+  fetchFactoriesPage(pageKey) {
+    this.isLoading = true;
+    let promise = this.codenvyAPI.getFactory().fetchFactoryPage(pageKey);
+
+    promise.then(() => {
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+      if (error.status !== 304) {
+        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Update information failed.');
+      }
+    });
+  }
+
+  /**
+   * Returns true if the next page is exist.
+   * @returns {boolean}
+   */
+  hasNextPage() {
+    if (this.pagesInfo.countOfPages) {
+      return this.pagesInfo.currentPageNumber < this.pagesInfo.countOfPages;
+    }
+    return this.factories.length === this.maxItems;
+  }
+
+  /**
+   * Returns true if the last page is exist.
+   * @returns {boolean}
+   */
+  hasLastPage() {
+    if (this.pagesInfo.countOfPages) {
+      return this.pagesInfo.currentPageNumber < this.pagesInfo.countOfPages;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the previous page is exist.
+   * @returns {boolean}
+   */
+  hasPreviousPage() {
+    return this.pagesInfo.currentPageNumber > 1;
+  }
+
+  /**
+   * Returns true if we have more then one page.
+   * @returns {boolean}
+   */
+  isPagination() {
+    if (this.pagesInfo.countOfPages) {
+      return this.pagesInfo.countOfPages > 1;
+    }
+    return this.factories.length === this.maxItems || this.pagesInfo.currentPageNumber > 1;
+  }
+
+  /**
    * Show confirmation popup before delete
    * @param numberToDelete
    * @returns {*}
@@ -229,4 +265,3 @@ export class ListFactoriesCtrl {
     return this.$mdDialog.show(confirm);
   }
 }
-

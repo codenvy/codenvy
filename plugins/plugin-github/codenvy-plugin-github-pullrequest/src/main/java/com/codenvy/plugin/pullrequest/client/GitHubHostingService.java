@@ -14,6 +14,7 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
+import com.codenvy.plugin.pullrequest.client.dto.HostUser;
 import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
 import com.codenvy.plugin.pullrequest.client.dto.Repository;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
@@ -24,18 +25,17 @@ import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.dto.HostUser;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -472,7 +472,7 @@ public class GitHubHostingService implements VcsHostingService {
 
     @Override
     public Promise<HostUser> authenticate(final CurrentUser user) {
-        final WorkspaceDto workspace = this.appContext.getWorkspace();
+        final Workspace workspace = this.appContext.getWorkspace();
         if (workspace == null) {
             return Promises.reject(JsPromiseError.create("Error accessing current workspace"));
         }

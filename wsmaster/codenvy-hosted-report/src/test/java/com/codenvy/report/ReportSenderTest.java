@@ -20,12 +20,10 @@ import com.codenvy.mail.MailSenderClient;
 import com.codenvy.report.shared.dto.Ip;
 
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
@@ -77,8 +75,6 @@ public class ReportSenderTest {
     @Mock
     private UserManager            userManager;
     @Mock
-    private Page<UserImpl>         mockPage;
-    @Mock
     private CodenvyLicenseManager  mockLicenseManager;
 
     @BeforeMethod
@@ -102,8 +98,7 @@ public class ReportSenderTest {
         doReturn(REPORT_PARAMETERS).when(mockHttpJsonResponse).as(ReportParameters.class,
                                                                   ReportParameters.class.getGenericSuperclass());
 
-        when(userManager.getAll(30, 0)).thenReturn(mockPage);
-        when(mockPage.getTotalItemsCount()).thenReturn(USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
     }
 
     @Test

@@ -26,6 +26,8 @@
         <class>org.eclipse.che.api.user.server.model.impl.ProfileImpl</class>
         <class>org.eclipse.che.api.user.server.jpa.PreferenceEntity</class>
 
+        <class>com.codenvy.organization.spi.impl.OrganizationImpl</class>
+        <class>com.codenvy.organization.spi.impl.MemberImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl</class>
