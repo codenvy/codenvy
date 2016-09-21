@@ -171,9 +171,9 @@
                         </goals>
                         <configuration>
                             <includes>
-                               <include>**/spi/tck/*.*</include>
-                               <include>**/jpa/*.*</include>
-                           </includes>
+                                <include>**/spi/tck/*.*</include>
+                                <include>**/jpa/*.*</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
