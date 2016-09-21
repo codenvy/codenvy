@@ -16,6 +16,7 @@ package com.codenvy.ldap.sync;
 
 import com.codenvy.ldap.sync.LdapSynchronizer.SyncResult;
 
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.Pair;
@@ -24,18 +25,22 @@ import org.ldaptive.ConnectionFactory;
 import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -148,6 +153,28 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getRefreshed(), 2);
         verify(userDao, times(2)).update(anyObject());
         verify(profileDao, times(2)).update(anyObject());
+    }
+
+    @Test(dataProvider = "identifiersSet")
+    public void shouldNormalizeUserIdentifier(String raw, String normalized) throws Exception {
+        when(entrySelector.select(anyObject())).thenReturn(singletonList(createUserEntry(raw)));
+
+        synchronizer.syncAll();
+
+        final ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
+        verify(userDao).create(captor.capture());
+        assertEquals(captor.getValue().getId(), normalized);
+    }
+
+    @DataProvider
+    public static Object[][] identifiersSet() {
+        return new String[][] {
+                {"{0000-1111-2222-3333-4444}", "0000-1111-2222-3333-4444"},
+                {"(abc1234456789)01.01.2000", "abc123445678901012000"},
+                {"abcd#efgh", "abcdefgh"},
+                {"dot.separated.identifier", "dotseparatedidentifier"},
+                {"A_Valid_Identifier-1234567890", "A_Valid_Identifier-1234567890"}
+        };
     }
 
     private static LdapEntry createUserEntry(String id) {

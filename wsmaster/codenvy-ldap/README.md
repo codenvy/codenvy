@@ -107,7 +107,7 @@ if set to <= 0 then <i>1000</i> is used by default.
 a page, the default value is 30000ms, the value of this property MUST be
 set in milliseconds.
 
-#### Groups confiugration
+#### Groups configuration
 
 - __ldap.sync.group.additional_dn__(optional) - if set will be used
 in addition to <i>ldap.base_dn</i> for searching groups.
@@ -124,7 +124,7 @@ The example: _(&(objectClass=groupOfNames)(cn=CodenvyMembers))_
 
 - __ldap.sync.group.attr.members__ (optional) - the name of the attribute
 which identifies group members distinguished names. The synchronizer considers
-that this attribute i multi-value attribute and values are user DNs.
+that this attribute is multi-value attribute and values are user DNs.
 This attribute is ignored if <i>ldap.sync.group.filter</i> is not set.
 The example: _member_
 
@@ -134,6 +134,8 @@ The example: _member_
 
 - __ldap.sync.user.attr.id__ - LDAP attribute name which defines unique mandatory
 user identifier, the value of this attribute will be used as Codenvy User/Profile identifier.
+All the characters which are not in `a-zA-Z0-9-_` will be removed from user identifier during synchronization, for instance
+if the ide of the user is _{0-1-2-3-4-5}_ he will be synchronized as a user with id _0-1-2-3-4-5_.
 Common values for this property : _cn_, _uid_, _objectGUID_.
 
 - __ldap.sync.user.attr.name__ - LDAP attribute name which defines unique

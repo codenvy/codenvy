@@ -30,6 +30,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.Connection;
 import org.ldaptive.ConnectionFactory;
+import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
@@ -74,11 +76,13 @@ import static java.lang.String.format;
 @Singleton
 public class LdapSynchronizer {
 
-    private static final Logger LOG                                   = LoggerFactory.getLogger(LdapSynchronizer.class);
-    private static final int    EACH_ENTRIES_COUNT_CHECK_INTERRUPTION = 200;
+    private static final Logger  LOG                                   = LoggerFactory.getLogger(LdapSynchronizer.class);
+    private static final Pattern NOT_VALID_ID_CHARS_PATTERN            = Pattern.compile("[^a-zA-Z0-9-_]");
+    private static final int     EACH_ENTRIES_COUNT_CHECK_INTERRUPTION = 200;
 
     private final long                             syncPeriodMs;
     private final long                             initDelayMs;
+    private final String                           userIdAttr;
     private final Function<LdapEntry, ProfileImpl> profileMapper;
     private final Function<LdapEntry, UserImpl>    userMapper;
     private final LdapEntrySelector                selector;
@@ -149,6 +153,7 @@ public class LdapSynchronizer {
         this.syncPeriodMs = syncPeriodMs;
         this.initDelayMs = initDelayMs;
         this.selector = selector;
+        this.userIdAttr = userIdAttr;
         this.userMapper = new UserMapper(userIdAttr, userNameAttr, userEmailAttr);
         this.profileMapper = new ProfileMapper(userIdAttr, profileAttributes);
         this.isSyncing = new AtomicBoolean(false);
@@ -192,6 +197,13 @@ public class LdapSynchronizer {
             long iteration = 0;
             for (LdapEntry entry : selector.select(connection)) {
                 iteration++;
+
+                // normalize the identifier
+                final LdapAttribute idAttr = entry.getAttribute(userIdAttr);
+                final String id = idAttr.getStringValue();
+                idAttr.clear();
+                idAttr.addStringValue(NOT_VALID_ID_CHARS_PATTERN.matcher(id).replaceAll(""));
+
                 final UserImpl user = userMapper.apply(entry);
                 final ProfileImpl profile = profileMapper.apply(entry);
                 try {
