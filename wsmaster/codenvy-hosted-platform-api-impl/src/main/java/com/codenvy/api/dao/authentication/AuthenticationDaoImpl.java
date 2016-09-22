@@ -89,7 +89,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
             throw new AuthenticationException("Provided username and password is not valid");
         }
         try {
-            userDao.getByName(userId);
+            userDao.getById(userId);
         } catch (NotFoundException e) {
             LOG.warn("User {} is not found in the system. But {} successfully complete authentication",
                      credentials.getUsername(),

@@ -17,6 +17,7 @@ package com.codenvy.ldap.auth;
 import com.google.common.base.Strings;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.ldaptive.ad.handler.ObjectGuidHandler;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.auth.PooledSearchEntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
@@ -43,6 +44,7 @@ public class EntryResolverProvider implements Provider<EntryResolver> {
         this.entryResolver.setUserFilter(userFilter);
         this.entryResolver.setSubtreeSearch(Strings.isNullOrEmpty(subtreeSearch) ? false : Boolean.valueOf(subtreeSearch));
         this.entryResolver.setConnectionFactory(connFactory);
+        this.entryResolver.setSearchEntryHandlers(new ObjectGuidHandler());
 
     }
 

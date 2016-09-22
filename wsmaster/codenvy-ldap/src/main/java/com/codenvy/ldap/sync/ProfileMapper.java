@@ -49,7 +49,7 @@ public class ProfileMapper implements Function<LdapEntry, ProfileImpl> {
     @Override
     public ProfileImpl apply(LdapEntry entry) {
         final ProfileImpl profile = new ProfileImpl();
-        profile.setUserId(entry.getAttribute(idAttr).getStringValue());
+        profile.setUserId(UserMapper.NOT_VALID_ID_CHARS_PATTERN.matcher(entry.getAttribute(idAttr).getStringValue()).replaceAll(""));
         for (Map.Entry<String, String> attrMapping : appToLdapAttrNames.entrySet()) {
             final LdapAttribute ldapAttr = entry.getAttribute(attrMapping.getValue());
             if (ldapAttr != null) {
