@@ -75,7 +75,7 @@
                                     <arg value="test" />
                                 </exec>
                                 <!-- Disable development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
+                                <replace file="${basedir}/src/app/index.module.ts">
                                     <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
                                     <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
                                 </replace>
@@ -89,7 +89,7 @@
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
                                 </replace>
                                 <!-- Enable back development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
+                                <replace file="${basedir}/src/app/index.module.ts">
                                     <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
                                     <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
                                 </replace>
