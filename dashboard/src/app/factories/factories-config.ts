@@ -22,7 +22,7 @@ import {ListFactoriesCtrl} from './list-factories/list-factories.controller';
 import {FactoryItemCtrl} from './list-factories/factory-item/factory-item.controller';
 import {CodenvyFactoryItem} from './list-factories/factory-item/factory-item.directive';
 import {LoadFactoryCtrl} from './load-factory/load-factory.controller';
-import {LoadFactoryService} from './load-factory/load-factory.service.js';
+import {LoadFactoryService} from './load-factory/load-factory.service';
 
 export class FactoryConfig {
 

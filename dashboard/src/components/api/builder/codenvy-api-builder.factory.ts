@@ -15,8 +15,8 @@
 'use strict';
 
 
-import {CodenvyUserBuilder} from './codenvy-user-builder.js';
-import {CodenvyFactoryBuilder} from './codenvy-factory-builder.js';
+import {CodenvyUserBuilder} from './codenvy-user-builder';
+import {CodenvyFactoryBuilder} from './codenvy-factory-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
