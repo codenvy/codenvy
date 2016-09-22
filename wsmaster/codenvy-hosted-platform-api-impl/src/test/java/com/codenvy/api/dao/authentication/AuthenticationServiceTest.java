@@ -104,7 +104,7 @@ public class AuthenticationServiceTest {
     public void shouldAuthenticateWithCorrectParams() throws Exception {
         //given
 
-
+        when(handler.authenticate(eq(USER.getName()), eq("secret"))).thenReturn(USER.getId());
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             Response.ResponseBuilder builder = (Response.ResponseBuilder)args[0];
@@ -216,6 +216,7 @@ public class AuthenticationServiceTest {
     @Test
     public void shouldLogoutFirstIfUserAlreadyLoggedIn() throws Exception {
         //given
+        when(handler.authenticate(eq(USER.getName()), eq("secret"))).thenReturn(USER.getId());
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {

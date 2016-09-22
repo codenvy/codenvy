@@ -30,7 +30,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.Connection;
 import org.ldaptive.ConnectionFactory;
-import org.ldaptive.LdapAttribute;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.slf4j.Logger;
@@ -42,7 +41,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -50,7 +48,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
@@ -77,7 +74,7 @@ import static java.lang.String.format;
 public class LdapSynchronizer {
 
     private static final Logger  LOG                                   = LoggerFactory.getLogger(LdapSynchronizer.class);
-    private static final Pattern NOT_VALID_ID_CHARS_PATTERN            = Pattern.compile("[^a-zA-Z0-9-_]");
+
     private static final int     EACH_ENTRIES_COUNT_CHECK_INTERRUPTION = 200;
 
     private final long                             syncPeriodMs;
@@ -118,14 +115,6 @@ public class LdapSynchronizer {
      *         ldap attribute indicating user identifier, it must be unique, otherwise
      *         synchronization will fail on user which has the same identifier.
      *         e.g. 'uid'
-     * @param userNameAttr
-     *         ldap attribute indicating user name, it must be unique, otherwise
-     *         synchronization will fail on user which has the same name.
-     *         e.g. 'cn'
-     * @param userEmailAttr
-     *         ldap attribute indicating user email, it must be unique, otherwise
-     *         synchronization will fail on user which has the same email
-     *         e.g. 'mail'
      * @param profileAttributes
      *         an optional list of pairs indicating application to ldap attributes mapping.
      *         e.g. <i>lastName=sn,firstName=givenName,phone=telephoneNumber</i>
@@ -137,11 +126,10 @@ public class LdapSynchronizer {
                             UserDao userDao,
                             ProfileDao profileDao,
                             EntityListenerInjectionManagerInitializer jpaInitializer,
+                            UserMapper userMapper,
                             @Named("ldap.sync.period_ms") long syncPeriodMs,
                             @Named("ldap.sync.initial_delay_ms") long initDelayMs,
                             @Named("ldap.sync.user.attr.id") String userIdAttr,
-                            @Named("ldap.sync.user.attr.name") String userNameAttr,
-                            @Named("ldap.sync.user.attr.email") String userEmailAttr,
                             @Named("ldap.sync.profile.attrs") @Nullable Pair<String, String>[] profileAttributes) {
         if (initDelayMs < 0) {
             throw new IllegalArgumentException("'ldap.sync.initial_delay_ms' must be >= 0, the actual value is " + initDelayMs);
@@ -154,7 +142,7 @@ public class LdapSynchronizer {
         this.initDelayMs = initDelayMs;
         this.selector = selector;
         this.userIdAttr = userIdAttr;
-        this.userMapper = new UserMapper(userIdAttr, userNameAttr, userEmailAttr);
+        this.userMapper = userMapper;
         this.profileMapper = new ProfileMapper(userIdAttr, profileAttributes);
         this.isSyncing = new AtomicBoolean(false);
         this.scheduler = Executors.newScheduledThreadPool(1,
@@ -197,12 +185,6 @@ public class LdapSynchronizer {
             long iteration = 0;
             for (LdapEntry entry : selector.select(connection)) {
                 iteration++;
-
-                // normalize the identifier
-                final LdapAttribute idAttr = entry.getAttribute(userIdAttr);
-                final String id = idAttr.getStringValue();
-                idAttr.clear();
-                idAttr.addStringValue(NOT_VALID_ID_CHARS_PATTERN.matcher(id).replaceAll(""));
 
                 final UserImpl user = userMapper.apply(entry);
                 final ProfileImpl profile = profileMapper.apply(entry);

@@ -25,9 +25,11 @@ public interface AuthenticationHandler {
     /**
      *  Check user password.
      *
-     * @throws AuthenticationException
+     * @throws AuthenticationException - in case if login name and password are not matched.
+     * @return User id  of authenticated user.
+     *
      */
-    void authenticate(final String login, final String password) throws AuthenticationException;
+    String authenticate(final String login, final String password) throws AuthenticationException;
 
     /** @return - type of authentication handler */
     String getType();

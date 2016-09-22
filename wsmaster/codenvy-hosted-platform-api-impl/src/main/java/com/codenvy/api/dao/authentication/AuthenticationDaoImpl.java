@@ -14,13 +14,14 @@
  */
 package com.codenvy.api.dao.authentication;
 
+import com.google.common.base.Strings;
+
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -80,10 +81,15 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
 
         AuthenticationHandler handler = handlerProvider.getDefaultHandler();
 
-        handler.authenticate(credentials.getUsername(), credentials.getPassword());
-        User user = null;
+        String userId = handler.authenticate(credentials.getUsername(), credentials.getPassword());
+        if (Strings.isNullOrEmpty(userId)) {
+            LOG.error("Handler {} returned invalid userid during authentication of {}",
+                      handler.getType(),
+                      credentials.getUsername());
+            throw new AuthenticationException("Provided username and password is not valid");
+        }
         try {
-            user = userDao.getByName(credentials.getUsername());
+            userDao.getByName(userId);
         } catch (NotFoundException e) {
             LOG.warn("User {} is not found in the system. But {} successfully complete authentication",
                      credentials.getUsername(),
@@ -97,16 +103,16 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
             throw new AuthenticationException("Provided username and password is not valid");
         }
         // DO NOT REMOVE! This log will be used in statistic analyzing
-        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), user.getId());
+        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), userId);
         Response.ResponseBuilder builder = Response.ok();
         if (tokenAccessCookie != null) {
             AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
             if (accessTicket != null) {
-                if (!user.getId().equals(accessTicket.getUserId())) {
+                if (!userId.equals(accessTicket.getUserId())) {
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     LOG.info("EVENT#user-changed-name# OLD-USER#{}# NEW-USER#{}#",
                              accessTicket.getUserId(),
-                             user.getId());
+                             userId);
                     LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getUserId());
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     ticketManager.removeTicket(accessTicket.getAccessToken());
@@ -121,7 +127,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
         }
         // If we obtained principal  - authentication is done.
         String token = uniqueTokenGenerator.generate();
-        ticketManager.putAccessTicket(new AccessTicket(token, user.getId(), handler.getType()));
+        ticketManager.putAccessTicket(new AccessTicket(token, userId, handler.getType()));
         if (cookieBuilder != null) {
             cookieBuilder.setCookies(builder, token, secure);
         }

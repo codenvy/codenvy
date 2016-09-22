@@ -35,14 +35,14 @@ public class OrgServiceAuthenticationHandler implements AuthenticationHandler {
     @Inject
     UserDao userDao;
 
-    public void authenticate(final String login, final String password)
+    public String authenticate(final String login, final String password)
             throws AuthenticationException {
         if (login == null || login.isEmpty() || password == null || password.isEmpty()) {
             throw new AuthenticationException(401, "Authentication failed. Please check username and password.");
         }
 
         try {
-            userDao.getByAliasAndPassword(login, password);
+           return userDao.getByAliasAndPassword(login, password).getId();
         } catch (ApiException e) {
             LOG.debug(e.getLocalizedMessage(), e);
             throw new AuthenticationException(401, "Authentication failed. Please check username and password.");
