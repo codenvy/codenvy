@@ -36,6 +36,12 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
         this.mailAttr = emailAttr;
     }
 
+    public String[] getLdapEntryAttributeNames() {
+        return new String[]{idAttr, nameAttr, mailAttr};
+    }
+
+    ;
+
     @Override
     public UserImpl apply(LdapEntry entry) {
         return new UserImpl(NOT_VALID_ID_CHARS_PATTERN.matcher(entry.getAttribute(idAttr).getStringValue()).replaceAll(""),

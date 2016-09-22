@@ -61,6 +61,7 @@ public class LdapAuthenticationHandler implements AuthenticationHandler {
             LOG.debug("Attempting LDAP authentication for: {}", login);
             final AuthenticationRequest request = new AuthenticationRequest(login,
                                                                             new Credential(password));
+            request.setReturnAttributes(userMapper.getLdapEntryAttributeNames());
             response = this.ldapAuthenticator.authenticate(request);
         } catch (final LdapException e) {
             throw new AuthenticationException(401, "Unexpected LDAP error");

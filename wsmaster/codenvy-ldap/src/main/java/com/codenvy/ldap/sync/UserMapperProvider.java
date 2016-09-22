@@ -14,6 +14,7 @@
  */
 package com.codenvy.ldap.sync;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import javax.inject.Named;
@@ -42,7 +43,9 @@ public class UserMapperProvider implements Provider<UserMapper> {
      * @param userEmailAttr
      *         ldap attribute indicating user email, it must be unique, otherwise
      *         synchronization will fail on user which has the same email
-     *         e.g. 'mail'   */
+     *         e.g. 'mail'
+     */
+    @Inject
     public UserMapperProvider(@Named("ldap.sync.user.attr.id") String userIdAttr,
                               @Named("ldap.sync.user.attr.name") String userNameAttr,
                               @Named("ldap.sync.user.attr.email") String userEmailAttr) {

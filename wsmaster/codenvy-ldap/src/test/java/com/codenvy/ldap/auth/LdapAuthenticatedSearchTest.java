@@ -18,6 +18,8 @@ import com.codenvy.api.dao.authentication.AuthenticationHandler;
 import com.codenvy.ldap.DefaultPropertiesModule;
 import com.codenvy.ldap.LdapConnectionFactoryProvider;
 import com.codenvy.ldap.MyLdapServer;
+import com.codenvy.ldap.sync.UserMapper;
+import com.codenvy.ldap.sync.UserMapperProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -33,6 +35,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.auth.Authenticator;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,6 +60,9 @@ public class LdapAuthenticatedSearchTest {
             Multibinder<AuthenticationHandler> handlerBinder =
                     Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
             handlerBinder.addBinding().to(LdapAuthenticationHandler.class);
+            bind(UserMapper.class).toProvider(new UserMapperProvider("uid",
+                                                                     "cn",
+                                                                     "mail"));
 
             bind(Authenticator.class).toProvider(AuthenticatorProvider.class);
             bind(PooledConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
@@ -107,8 +113,9 @@ public class LdapAuthenticatedSearchTest {
 
     @Test
     public void testAuthenticatedSearch() throws LdapInvalidAttributeValueException, AuthenticationException {
-        for (Pair<String, String> pair : users) {
-            handler.authenticate(pair.first, pair.second);
+        for (int i = 0; i < 2; i++) {
+            Pair<String, String> pair = users.get(i);
+            Assert.assertEquals(handler.authenticate(pair.first, pair.second), "id"+i);
         }
     }
 

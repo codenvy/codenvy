@@ -18,6 +18,8 @@ import com.codenvy.api.dao.authentication.AuthenticationHandler;
 import com.codenvy.ldap.DefaultPropertiesModule;
 import com.codenvy.ldap.LdapConnectionFactoryProvider;
 import com.codenvy.ldap.MyLdapServer;
+import com.codenvy.ldap.sync.UserMapper;
+import com.codenvy.ldap.sync.UserMapperProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -33,6 +35,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.auth.Authenticator;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -62,6 +65,9 @@ public class LdapDirectBindTest {
 
             bind(Authenticator.class).toProvider(AuthenticatorProvider.class);
             bind(PooledConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
+            bind(UserMapper.class).toProvider(new UserMapperProvider("uid",
+                                                                     "cn",
+                                                                     "mail"));
 
             bind(EntryResolver.class).toProvider(EntryResolverProvider.class);
             bindConstant().annotatedWith(Names.named("ldap.auth.authentication_type")).to(AuthenticationType.DIRECT.toString());
@@ -113,7 +119,7 @@ public class LdapDirectBindTest {
     @Test
     public void testAuthenticatedSearch() throws LdapInvalidAttributeValueException, AuthenticationException {
         for (Pair<String, String> pair : users) {
-            handler.authenticate(pair.first, pair.second);
+            Assert.assertEquals(handler.authenticate(pair.first, pair.second), pair.first);
         }
     }
 

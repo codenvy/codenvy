@@ -190,6 +190,7 @@ public class LdapSynchronizationFlowTest {
             install(new UserJpaModule());
             install(new DefaultPropertiesModule());
             bind(ConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
+            bind(UserMapper.class).toProvider(UserMapperProvider.class);
             install(new MyLdapServer.MyLdapModule(server));
 
 

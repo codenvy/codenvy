@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -87,11 +86,12 @@ public class LdapSynchronizerTest {
                                             userDao,
                                             profileDao,
                                             null,
+                                            new UserMapperProvider("uid",
+                                                                   "cn",
+                                                                   "mail").get(),
                                             0,
                                             0,
                                             "uid",
-                                            "cn",
-                                            "mail",
                                             new Pair[] {Pair.of("firstName", "givenName")});
 
         // mocking existing ids
