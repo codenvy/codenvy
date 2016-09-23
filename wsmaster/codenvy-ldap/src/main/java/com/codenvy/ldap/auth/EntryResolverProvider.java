@@ -25,11 +25,14 @@ import org.ldaptive.pool.PooledConnectionFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
 /**
- * Created by sj on 09.09.16.
+ * Provider of EntryResolver
+ * @author Sergii Kabashniuk
  */
+@Singleton
 public class EntryResolverProvider implements Provider<EntryResolver> {
 
     private final PooledSearchEntryResolver entryResolver;

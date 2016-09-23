@@ -28,7 +28,7 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
     private final String idAttr;
     private final String nameAttr;
     private final String mailAttr;
-    public  static final Pattern NOT_VALID_ID_CHARS_PATTERN = Pattern.compile("[^a-zA-Z0-9-_]");
+    public static final Pattern NOT_VALID_ID_CHARS_PATTERN = Pattern.compile("[^a-zA-Z0-9-_]");
 
     public UserMapper(String idAttr, String nameAttr, String emailAttr) {
         this.idAttr = idAttr;
@@ -39,9 +39,7 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
     public String[] getLdapEntryAttributeNames() {
         return new String[]{idAttr, nameAttr, mailAttr};
     }
-
-    ;
-
+    
     @Override
     public UserImpl apply(LdapEntry entry) {
         return new UserImpl(NOT_VALID_ID_CHARS_PATTERN.matcher(entry.getAttribute(idAttr).getStringValue()).replaceAll(""),
