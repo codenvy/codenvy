@@ -14,10 +14,7 @@
  */
 package com.codenvy.ldap.sync;
 
-import com.codenvy.ldap.DefaultPropertiesModule;
 import com.codenvy.ldap.MyLdapServer;
-import com.codenvy.ldap.TestConnectionModule;
-import com.google.inject.Injector;
 
 import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.Connection;
@@ -47,13 +44,10 @@ public class LookupSelectorTest {
     @BeforeClass
     public void setUpServer() throws Exception {
         (server = MyLdapServer.newDefaultServer()).start();
-        final Injector injector = com.google.inject.Guice
-                .createInjector(new TestConnectionModule(),
-                                new MyLdapServer.MyLdapModule(server),
-                                new DefaultPropertiesModule());
 
 
-        connFactory = injector.getInstance(ConnectionFactory.class);
+
+        connFactory = server.getConnectionFactory();
 
 
         // first 100 users have additional attributes

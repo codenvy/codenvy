@@ -14,8 +14,6 @@
  */
 package com.codenvy.ldap.sync;
 
-import com.codenvy.ldap.DefaultPropertiesModule;
-import com.codenvy.ldap.LdapConnectionFactoryProvider;
 import com.codenvy.ldap.MyLdapServer;
 import com.codenvy.ldap.sync.LdapSynchronizer.SyncResult;
 import com.google.inject.AbstractModule;
@@ -186,16 +184,14 @@ public class LdapSynchronizationFlowTest {
             bind(EventService.class).in(Singleton.class);
             bind(JpaInitializer.class).asEagerSingleton();
             bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+            bind(UserMapper.class).asEagerSingleton();
+
             install(new JpaPersistModule("test"));
             install(new UserJpaModule());
-            install(new DefaultPropertiesModule());
-            bind(ConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
-            bind(UserMapper.class).toProvider(UserMapperProvider.class);
-            install(new MyLdapServer.MyLdapModule(server));
-
 
             // configure synchronizer
             bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
+            bind(ConnectionFactory.class).toInstance(server.getConnectionFactory());
             bindConstant().annotatedWith(Names.named("ldap.sync.initial_delay_ms")).to(0L);
             bindConstant().annotatedWith(Names.named("ldap.sync.period_ms")).to(-1L);
             bindConstant().annotatedWith(Names.named("ldap.sync.user.attr.email")).to("mail");
@@ -203,6 +199,7 @@ public class LdapSynchronizationFlowTest {
             bindConstant().annotatedWith(Names.named("ldap.sync.user.attr.name")).to("cn");
             bindConstant().annotatedWith(Names.named("ldap.sync.page.size")).to(10);
             bindConstant().annotatedWith(Names.named("ldap.sync.page.read_timeout_ms")).to(30_000L);
+            bindConstant().annotatedWith(Names.named("ldap.base_dn")).to(server.getBaseDn());
             bindConstant().annotatedWith(Names.named("ldap.sync.user.filter")).to("(objectClass=inetOrgPerson)");
             bind(String.class).annotatedWith(Names.named("ldap.sync.group.additional_dn")).toProvider(Providers.of(null));
             bind(String.class).annotatedWith(Names.named("ldap.sync.group.filter")).toProvider(Providers.of(null));

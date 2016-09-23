@@ -14,18 +14,8 @@
  */
 package com.codenvy.ldap.auth;
 
-import com.codenvy.api.dao.authentication.AuthenticationHandler;
-import com.codenvy.ldap.DefaultPropertiesModule;
-import com.codenvy.ldap.LdapConnectionFactoryProvider;
 import com.codenvy.ldap.MyLdapServer;
 import com.codenvy.ldap.sync.UserMapper;
-import com.codenvy.ldap.sync.UserMapperProvider;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.multibindings.OptionalBinder;
-import com.google.inject.name.Names;
 
 import org.apache.directory.shared.ldap.entry.ServerEntry;
 import org.apache.directory.shared.ldap.exception.LdapInvalidAttributeValueException;
@@ -46,40 +36,15 @@ import java.util.List;
 
 public class LdapDirectBindTest {
 
-    private static final String BASE_DN = "dc=codenvy,dc=com";
+    private static final String BASE_DN            = "dc=codenvy,dc=com";
+    private static final String USER_FILTER        = "cn={user}";
+    private static final String SUBTREE_SEARCH     = "false";
+    private static final String ALLOW_MULTIPLE_DNS = "false";
 
     private MyLdapServer               server;
     private LdapAuthenticationHandler  handler;
     private List<ServerEntry>          createdEntries;
     private List<Pair<String, String>> users;
-
-
-    public static class LdapInitModule extends AbstractModule {
-
-
-        @Override
-        protected void configure() {
-            Multibinder<AuthenticationHandler> handlerBinder =
-                    Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
-            handlerBinder.addBinding().to(LdapAuthenticationHandler.class);
-
-            bind(Authenticator.class).toProvider(AuthenticatorProvider.class);
-            bind(PooledConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
-            bind(UserMapper.class).toProvider(new UserMapperProvider("uid",
-                                                                     "cn",
-                                                                     "mail"));
-
-            bind(EntryResolver.class).toProvider(EntryResolverProvider.class);
-            bindConstant().annotatedWith(Names.named("ldap.auth.authentication_type")).to(AuthenticationType.DIRECT.toString());
-
-            OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("ldap.auth.user.filter")))
-                          .setBinding().toInstance("cn={user}");
-            OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("ldap.auth.dn_format")))
-                          .setBinding().toInstance("uid=%s," + BASE_DN);
-
-        }
-    }
-
 
     @BeforeClass
     public void startServer() throws Exception {
@@ -90,11 +55,24 @@ public class LdapDirectBindTest {
                              .setMaxSizeLimit(1000)
                              .build();
         server.start();
-        final Injector injector = com.google.inject.Guice
-                .createInjector(new LdapInitModule(),
-                                new MyLdapServer.MyLdapModule(server),
-                                new DefaultPropertiesModule());
-        handler = injector.getInstance(LdapAuthenticationHandler.class);
+
+        UserMapper userMapper = new UserMapper("uid", "cn", "mail");
+        PooledConnectionFactory connectionFactory = server.getConnectionFactory();
+        EntryResolver entryResolverProvider =
+                new EntryResolverProvider(connectionFactory,
+                                          server.getBaseDn(),
+                                          USER_FILTER,
+                                          SUBTREE_SEARCH).get();
+        Authenticator authenticator =
+                new AuthenticatorProvider(connectionFactory,
+                                          entryResolverProvider,
+                                          server.getBaseDn(),
+                                          AuthenticationType.DIRECT.toString(),
+                                          "uid=%s," + BASE_DN,
+                                          null,
+                                          USER_FILTER,
+                                          ALLOW_MULTIPLE_DNS, SUBTREE_SEARCH).get();
+        handler = new LdapAuthenticationHandler(authenticator, userMapper);
 
         // create a set of users
         users = new ArrayList<>();

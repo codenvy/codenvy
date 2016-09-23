@@ -14,18 +14,8 @@
  */
 package com.codenvy.ldap.auth;
 
-import com.codenvy.api.dao.authentication.AuthenticationHandler;
-import com.codenvy.ldap.DefaultPropertiesModule;
-import com.codenvy.ldap.LdapConnectionFactoryProvider;
 import com.codenvy.ldap.MyLdapServer;
 import com.codenvy.ldap.sync.UserMapper;
-import com.codenvy.ldap.sync.UserMapperProvider;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.multibindings.OptionalBinder;
-import com.google.inject.name.Names;
 
 import org.apache.directory.shared.ldap.entry.ServerEntry;
 import org.apache.directory.shared.ldap.exception.LdapInvalidAttributeValueException;
@@ -35,7 +25,6 @@ import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.auth.Authenticator;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.pool.PooledConnectionFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,38 +32,22 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.testng.Assert.assertEquals;
+
 
 @Test
 public class LdapAuthenticatedSearchTest {
 
-    private static final String BASE_DN = "dc=codenvy,dc=com";
+    private static final String BASE_DN            = "dc=codenvy,dc=com";
+    private static final String USER_FILTER        = "cn={user}";
+    private static final String SUBTREE_SEARCH     = "false";
+    private static final String ALLOW_MULTIPLE_DNS = "false";
     private MyLdapServer              server;
     private LdapAuthenticationHandler handler;
 
     private List<ServerEntry>          createdEntries;
     private List<Pair<String, String>> users;
 
-    public static class LdapInitModule extends AbstractModule {
-        @Override
-        protected void configure() {
-            Multibinder<AuthenticationHandler> handlerBinder =
-                    Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
-            handlerBinder.addBinding().to(LdapAuthenticationHandler.class);
-            bind(UserMapper.class).toProvider(new UserMapperProvider("uid",
-                                                                     "cn",
-                                                                     "mail"));
-
-            bind(Authenticator.class).toProvider(AuthenticatorProvider.class);
-            bind(PooledConnectionFactory.class).toProvider(LdapConnectionFactoryProvider.class);
-
-            bind(EntryResolver.class).toProvider(EntryResolverProvider.class);
-            bindConstant().annotatedWith(Names.named("ldap.auth.authentication_type")).to(AuthenticationType.AUTHENTICATED.toString());
-
-            OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("ldap.auth.user.filter")))
-                          .setBinding().toInstance("cn={user}");
-
-        }
-    }
 
     @BeforeMethod
     public void startServer() throws Exception {
@@ -85,11 +58,26 @@ public class LdapAuthenticatedSearchTest {
                              .setMaxSizeLimit(1000)
                              .build();
         server.start();
-        final Injector injector = com.google.inject.Guice
-                .createInjector(new LdapInitModule(),
-                                new MyLdapServer.MyLdapModule(server),
-                                new DefaultPropertiesModule());
-        handler = injector.getInstance(LdapAuthenticationHandler.class);
+
+
+        UserMapper userMapper = new UserMapper("uid", "cn", "mail");
+        PooledConnectionFactory connectionFactory = server.getConnectionFactory();
+        EntryResolver entryResolverProvider =
+                new EntryResolverProvider(connectionFactory,
+                                          server.getBaseDn(),
+                                          USER_FILTER,
+                                          SUBTREE_SEARCH).get();
+        Authenticator authenticator =
+                new AuthenticatorProvider(connectionFactory,
+                                          entryResolverProvider,
+                                          server.getBaseDn(),
+                                          AuthenticationType.AUTHENTICATED.toString(),
+                                          null, null,
+                                          USER_FILTER,
+                                          ALLOW_MULTIPLE_DNS, SUBTREE_SEARCH).get();
+        handler = new LdapAuthenticationHandler(authenticator, userMapper);
+
+
         // create a set of users
         SSHAPasswordEncryptor passwordEncryptor = new SSHAPasswordEncryptor();
         users = new ArrayList<>();
@@ -115,7 +103,7 @@ public class LdapAuthenticatedSearchTest {
     public void testAuthenticatedSearch() throws LdapInvalidAttributeValueException, AuthenticationException {
         for (int i = 0; i < 2; i++) {
             Pair<String, String> pair = users.get(i);
-            Assert.assertEquals(handler.authenticate(pair.first, pair.second), "id"+i);
+            assertEquals(handler.authenticate(pair.first, pair.second), "id" + i);
         }
     }
 
