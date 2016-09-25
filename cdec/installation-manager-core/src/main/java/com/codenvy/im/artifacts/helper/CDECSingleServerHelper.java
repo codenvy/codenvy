@@ -56,6 +56,7 @@ import static com.codenvy.im.managers.BackupConfig.Component.FS;
 import static com.codenvy.im.managers.BackupConfig.Component.LDAP;
 import static com.codenvy.im.managers.BackupConfig.Component.LDAP_ADMIN;
 import static com.codenvy.im.managers.BackupConfig.Component.MONGO;
+import static com.codenvy.im.managers.BackupConfig.Component.PGSQL;
 import static com.codenvy.im.managers.BackupConfig.getComponentTempPath;
 import static com.codenvy.im.utils.Version.valueOf;
 import static java.lang.String.format;
@@ -188,7 +189,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
                 return createStartServiceCommand("puppetmaster");
 
             case 6:
-                return new MacroCommand(ImmutableList.<Command>of(
+                return new MacroCommand(ImmutableList.of(
                     createCommand("sleep 30"),
                     createStartServiceCommand("puppet")),
                                         "Launch puppet agent");
@@ -323,37 +324,45 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         commands.add(createCommand(format("mkdir -p %s", tempDir)));
 
         // stop services
-        commands.add(createStopServiceCommand("puppet"));
         commands.add(createStopServiceCommand("crond"));
+        commands.add(createStopServiceCommand("puppet"));
         commands.add(createRepeatCommand(createStopServiceCommand("codenvy")));
-        commands.add(createStopServiceCommand("slapd"));
-
-        // dump LDAP user db into {backup_directory}/ldap/ldap.ldif file
-        Path ldapUserBackupPath = getComponentTempPath(tempDir, LDAP);
-        commands.add(createCommand(format("mkdir -p %s", ldapUserBackupPath.getParent())));
-        commands.add(createCommand(format("sudo slapcat > %s", ldapUserBackupPath)));
-
 
         Version codenvyVersion = valueOf(codenvyConfig.getValue(Config.VERSION));
-        if (codenvyVersion.is3Major()) {
-            // dump LDAP_ADMIN db into {backup_directory}/ldap_admin/ldap.ldif file
-            Path ldapAdminBackupPath = getComponentTempPath(tempDir, LDAP_ADMIN);
-            commands.add(createCommand(format("mkdir -p %s", ldapAdminBackupPath.getParent())));
-            commands.add(createCommand(format("sudo slapcat -b '%s' > %s",
-                                              codenvyConfig.getValue(Config.ADMIN_LDAP_DN),
-                                              ldapAdminBackupPath)));
+        if (codenvyVersion.greaterThan(Version.valueOf("5.0.0-M2"))) {
+            // dump PostgreSQL data into {backup_directory}/pgsql/dump.tar file
+            Path pgSqlCodenvyBackupPath = getComponentTempPath(tempDir, PGSQL);
+            commands.add(createCommand(format("mkdir -p %s", pgSqlCodenvyBackupPath.getParent())));
+            commands.add(createCommand(format("sudo chmod o+w %s", pgSqlCodenvyBackupPath.getParent())));   // grant write access for postgres account
+            commands.add(createCommand(format("sudo su - postgres -c \"pg_dump -Ft -d %s -f %s\"",
+                                              codenvyConfig.getValue(Config.PGSQL_DATABASE_NAME),
+                                              pgSqlCodenvyBackupPath)));
+        } else {
+            commands.add(createStopServiceCommand("slapd"));
+
+            // dump LDAP user db into {backup_directory}/ldap/ldap.ldif file
+            Path ldapUserBackupPath = getComponentTempPath(tempDir, LDAP);
+            commands.add(createCommand(format("mkdir -p %s", ldapUserBackupPath.getParent())));
+            commands.add(createCommand(format("sudo slapcat > %s", ldapUserBackupPath)));
+            if (codenvyVersion.is3Major()) {
+                // dump LDAP_ADMIN db into {backup_directory}/ldap_admin/ldap.ldif file
+                Path ldapAdminBackupPath = getComponentTempPath(tempDir, LDAP_ADMIN);
+                commands.add(createCommand(format("mkdir -p %s", ldapAdminBackupPath.getParent())));
+                commands.add(createCommand(format("sudo slapcat -b '%s' > %s",
+                                                  codenvyConfig.getValue(Config.ADMIN_LDAP_DN),
+                                                  ldapAdminBackupPath)));
+            }
+
+            // dump MONGO data into {backup_directory}/mongo dir
+            Path mongoBackupPath = getComponentTempPath(tempDir, MONGO);
+            commands.add(createCommand(format("mkdir -p %s", mongoBackupPath)));
+            commands.add(createCommand(format("/usr/bin/mongodump -u%s -p%s -o %s --authenticationDatabase admin --quiet",
+                                              codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
+                                              codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD),
+                                              mongoBackupPath)));
+            Path adminDatabaseBackup = mongoBackupPath.resolve("admin");
+            commands.add(createCommand(format("rm -rf %s", adminDatabaseBackup)));  // remove useless 'admin' database
         }
-
-        // dump MONGO data into {backup_directory}/mongo dir
-        Path mongoBackupPath = getComponentTempPath(tempDir, MONGO);
-        commands.add(createCommand(format("mkdir -p %s", mongoBackupPath)));
-        commands.add(createCommand(format("/usr/bin/mongodump -u%s -p%s -o %s --authenticationDatabase admin --quiet",
-                                          codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
-                                          codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD),
-                                          mongoBackupPath)));
-
-        Path adminDatabaseBackup = mongoBackupPath.resolve("admin");
-        commands.add(createCommand(format("rm -rf %s", adminDatabaseBackup)));  // remove useless 'admin' database
 
         // pack dumps into backup file
         commands.add(createPackCommand(tempDir, backupFile, ".", false));
@@ -362,8 +371,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         commands.add(createPackCommand(Paths.get("/home/codenvy/codenvy-data"), backupFile, "fs/.", true));
 
         // start services
-        commands.add(createStartServiceCommand("slapd"));
-        commands.add(createStartServiceCommand("codenvy"));
         commands.add(createStartServiceCommand("puppet"));
 
         // wait until API server starts
@@ -407,44 +414,55 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         commands.add(createStopServiceCommand("puppet"));
         commands.add(createStopServiceCommand("crond"));
         commands.add(createStopServiceCommand("codenvy"));
-        commands.add(createStopServiceCommand("slapd"));
-
-        // restore LDAP user db from {temp_backup_directory}/ldap/ladp.ldif file
-        Path ldapUserBackupPath = getComponentTempPath(tempDir, LDAP);
-        if (exists(ldapUserBackupPath)) {
-            commands.add(createCommand("sudo rm -rf /var/lib/ldap"));
-            commands.add(createCommand("sudo mkdir -p /var/lib/ldap"));
-            commands.add(createCommand(format("sudo slapadd -q <%s", ldapUserBackupPath)));
-            commands.add(createCommand("sudo chown -R ldap:ldap /var/lib/ldap"));
-        }
 
         Version codenvyVersion = valueOf(codenvyConfig.getValue(Config.VERSION));
-        if (codenvyVersion.is3Major()) {
-            // restore LDAP_ADMIN db from {temp_backup_directory}/ldap_admin/ladp.ldif file
-            Path ldapAdminBackupPath = getComponentTempPath(tempDir, LDAP_ADMIN);
-            if (exists(ldapAdminBackupPath)) {
-                commands.add(createCommand("sudo rm -rf /var/lib/ldapcorp"));
-                commands.add(createCommand("sudo mkdir -p /var/lib/ldapcorp"));
-                commands.add(createCommand(format("sudo slapadd -q -b '%s' <%s",
-                                                  codenvyConfig.getValue(Config.ADMIN_LDAP_DN),
-                                                  ldapAdminBackupPath)));
-                commands.add(createCommand("sudo chown -R ldap:ldap /var/lib/ldapcorp"));
-            }
-        }
+        if (codenvyVersion.greaterThan(Version.valueOf("5.0.0-M2"))) {
+            // restore PostgreSQL data from {backup_directory}/pgsql/dump.tar file
+            Path pgSqlCodenvyBackupPath = getComponentTempPath(tempDir, PGSQL);
+            commands.add(createCommand(format("sudo su - postgres -c \"createdb %s &>/dev/null; exit 0\"",
+                                              codenvyConfig.getValue(Config.PGSQL_DATABASE_NAME))));
+            commands.add(createCommand(format("sudo su - postgres -c \"pg_restore -c -d %s %s\"",
+                                              codenvyConfig.getValue(Config.PGSQL_DATABASE_NAME),
+                                              pgSqlCodenvyBackupPath)));
+        } else {
+            commands.add(createStopServiceCommand("slapd"));
 
-        // restore mongo from {temp_backup_directory}/mongo folder
-        Path mongoBackupPath = getComponentTempPath(tempDir, MONGO);
-        if (exists(mongoBackupPath)) {
-            // remove all databases expect 'admin' one
-            commands.add(createCommand(format("/usr/bin/mongo -u %s -p %s --authenticationDatabase admin --quiet --eval " +
-                                              "'db.getMongo().getDBNames().forEach(function(d){if (d!=\"admin\") db.getSiblingDB(d).dropDatabase()})'",
-                                              codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
-                                              codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD))));
-            commands.add(createCommand(format("/usr/bin/mongorestore -u%s -p%s %s --authenticationDatabase admin --drop --quiet",
-                                              // suppress stdout to avoid hanging up SecureSSH
-                                              codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
-                                              codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD),
-                                              mongoBackupPath)));
+            // restore LDAP user db from {temp_backup_directory}/ldap/ladp.ldif file
+            Path ldapUserBackupPath = getComponentTempPath(tempDir, LDAP);
+            if (exists(ldapUserBackupPath)) {
+                commands.add(createCommand("sudo rm -rf /var/lib/ldap"));
+                commands.add(createCommand("sudo mkdir -p /var/lib/ldap"));
+                commands.add(createCommand(format("sudo slapadd -q <%s", ldapUserBackupPath)));
+                commands.add(createCommand("sudo chown -R ldap:ldap /var/lib/ldap"));
+            }
+
+            if (codenvyVersion.is3Major()) {
+                // restore LDAP_ADMIN db from {temp_backup_directory}/ldap_admin/ladp.ldif file
+                Path ldapAdminBackupPath = getComponentTempPath(tempDir, LDAP_ADMIN);
+                if (exists(ldapAdminBackupPath)) {
+                    commands.add(createCommand("sudo rm -rf /var/lib/ldapcorp"));
+                    commands.add(createCommand("sudo mkdir -p /var/lib/ldapcorp"));
+                    commands.add(createCommand(format("sudo slapadd -q -b '%s' <%s",
+                                                      codenvyConfig.getValue(Config.ADMIN_LDAP_DN),
+                                                      ldapAdminBackupPath)));
+                    commands.add(createCommand("sudo chown -R ldap:ldap /var/lib/ldapcorp"));
+                }
+            }
+
+            // restore mongo from {temp_backup_directory}/mongo folder
+            Path mongoBackupPath = getComponentTempPath(tempDir, MONGO);
+            if (exists(mongoBackupPath)) {
+                // remove all databases expect 'admin' one
+                commands.add(createCommand(format("/usr/bin/mongo -u %s -p %s --authenticationDatabase admin --quiet --eval " +
+                                                  "'db.getMongo().getDBNames().forEach(function(d){if (d!=\"admin\") db.getSiblingDB(d).dropDatabase()})'",
+                                                  codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
+                                                  codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD))));
+                commands.add(createCommand(format("/usr/bin/mongorestore -u%s -p%s %s --authenticationDatabase admin --drop --quiet",
+                                                  // suppress stdout to avoid hanging up SecureSSH
+                                                  codenvyConfig.getValue(Config.MONGO_ADMIN_USERNAME),
+                                                  codenvyConfig.getValue(Config.MONGO_ADMIN_PASSWORD),
+                                                  mongoBackupPath)));
+            }
         }
 
         // restore filesystem data from {backup_file}/fs folder
@@ -456,8 +474,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         }
 
         // start services
-        commands.add(createStartServiceCommand("slapd"));
-        commands.add(createStartServiceCommand("codenvy"));
         commands.add(createStartServiceCommand("puppet"));
 
         // wait until API server restarts

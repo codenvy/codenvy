@@ -52,12 +52,12 @@ USER_ID=${OUTPUT}
 authWithoutRealmAndServerDns "cdec" "pwd123ABC"
 
 # create workspace
-doPost "application/json" "{\"defaultEnv\":\"default\",\"commands\":[{\"commandLine\":\"mvn clean install -f $\{current.project.path}\",\"name\":\"build\",\"type\":\"mvn\",\"attributes\":{}}],\"projects\":[],\"environments\":[{\"machineConfigs\":[{\"dev\":true,\"servers\":[],\"envVariables\":{},\"source\":{\"type\":\"dockerfile\",\"content\":\"FROM codenvy/ubuntu_jdk8\"},\"limits\":{\"ram\":1024},\"name\":\"default\",\"type\":\"docker\",\"links\":[]}],\"name\":\"default\"}],\"name\":\"${WORKSPACE_NAME}\",\"links\":[],\"description\":null}" "http://${HOST_URL}/api/workspace/?token=${TOKEN}"
+doPost "application/json" "{\"defaultEnv\":\"default\",\"commands\":[{\"commandLine\":\"mvn clean install -f $\{current.project.path}\",\"name\":\"build\",\"type\":\"mvn\",\"attributes\":{}}],\"projects\":[],\"name\":\"${WORKSPACE_NAME}\",\"environments\":{\"default\":{\"recipe\":{\"location\":\"codenvy/ubuntu_jdk8\",\"type\":\"dockerimage\"},\"machines\":{\"dev-machine\":{\"servers\":{},\"agents\":[\"org.eclipse.che.terminal\",\"org.eclipse.che.ws-agent\",\"org.eclipse.che.ssh\"],\"attributes\":{\"memoryLimitBytes\":1610612736},\"source\":{\"type\":\"dockerfile\",\"content\":\"FROM codenvy/ubuntu_jdk8\"}}}}},\"links\":[],\"description\":null}" "http://${HOST_URL}/api/workspace/?token=${TOKEN}"
 fetchJsonParameter "id"
 WORKSPACE_ID=${OUTPUT}
 
 # run workspace
-doPost "application/json" "{}" "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}/runtime?token=${TOKEN}"
+doPost "application/json" "{}" "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}/runtime?environment=default&token=${TOKEN}"
 
 # verify is workspace running
 doSleep "6m"  "Wait until workspace starts to avoid 'java.lang.NullPointerException' error on verifying workspace state"
@@ -105,17 +105,17 @@ executeIMCommand "restore" ${BACKUP_AT_START}
 authWithoutRealmAndServerDns "admin" "password"
 
 doGet "http://${HOST_URL}/api/user/${USER_ID}?token=${TOKEN}"
-validateExpectedString ".*User.*not.found.*"
+validateExpectedString ".*User.with.id.'${USER_ID}'.doesn't.exist.*"
 
 doGet "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}?token=${TOKEN}"
-validateExpectedString ".*The.user.does.not.have.permission.to.read.workspace.with.id.'${WORKSPACE_ID}'.*"
+validateExpectedString ".*Workspace.with.id.'${WORKSPACE_ID}'.doesn't.exist.*"
 
 # verify that there is no project on file system
 executeSshCommand "sudo ls /home/codenvy/codenvy-data/fs"
 validateExpectedString ""
 
 doGet "http://${HOST_URL}/api/factory/${FACTORY_ID}?token=${TOKEN}"
-validateExpectedString ".*Factory.*not.found.*"
+validateExpectedString ".*Factory.with.id.'${FACTORY_ID}'.doesn't.exist.*"
 
 # restore state after modifications
 executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}

@@ -28,13 +28,13 @@ public class TestVersion {
 
     public static final String INVALID_VER = "invalid_version";
 
-    @Test(dataProvider = "testValidVersion")
+    @Test(dataProvider = "dataTestValidVersion")
     public void testValidVersion(String version) throws Exception {
         assertTrue(Version.isValidVersion(version), "Version is invalid: " + version);
     }
 
-    @DataProvider(name = "testValidVersion")
-    public static Object[][] testValidVersion() {
+    @DataProvider
+    public static Object[][] dataTestValidVersion() {
         return new Object[][] {{"0.0.1"},
                                {"1.0.1"},
                                {"10.3.0"},
@@ -59,13 +59,13 @@ public class TestVersion {
                                {"1.0.1.2-M1-RC1-SNAPSHOT"}};
     }
 
-    @Test(dataProvider = "testInvalidVersion")
+    @Test(dataProvider = "dataTestInvalidVersion")
     public void testInvalidVersion(String version) throws Exception {
         assertFalse(Version.isValidVersion(version), "Version is valid: " + version);
     }
 
-    @DataProvider(name = "testInvalidVersion")
-    public static Object[][] testInvalidVersion() {
+    @DataProvider
+    public static Object[][] dataTestInvalidVersion() {
         return new Object[][] {{"1"},
                                {"00.1.1"},
                                {"1.1"},
@@ -88,7 +88,7 @@ public class TestVersion {
                                {"1.0.1-SNAPSHOT-RC"}};
     }
 
-    @Test(dataProvider = "testParseValidVersion")
+    @Test(dataProvider = "dataTestParseValidVersion")
     public void testParseValidVersion(String str,
                                       int major,
                                       int minor,
@@ -103,8 +103,8 @@ public class TestVersion {
     }
 
 
-    @DataProvider(name = "testParseValidVersion")
-    public Object[][] testParseValidVersion() {
+    @DataProvider
+    public Object[][] dataTestParseValidVersion() {
         return new Object[][] {
                 {"1.0.1-RC1", 1, 0, 1, 0, 0, 0, 1, false, false},
                 {"1.0.1.0", 1, 0, 1, 0, 0, 0, 0, false, false},
@@ -127,13 +127,13 @@ public class TestVersion {
         Version.valueOf("01.1.1");
     }
 
-    @Test(dataProvider = "testToString")
+    @Test(dataProvider = "dataTestToString")
     public void testToString(String str) throws Exception {
         assertEquals(Version.valueOf(str).toString(), str);
     }
 
-    @DataProvider(name = "testToString")
-    public Object[][] testToString() {
+    @DataProvider
+    public Object[][] dataTestToString() {
         return new Object[][] {
                 {"10.150.200"},
                 {"10.150.200.1"},
@@ -148,69 +148,70 @@ public class TestVersion {
     }
 
 
-    @Test(dataProvider = "testCompareTo")
-    public void testCompareTo(String version1, String version2, int expected) throws Exception {
-        assertEquals(Version.valueOf(version1).compareTo(Version.valueOf(version2)), expected, version1 + " vs " + version2);
+    @Test(dataProvider = "dataTestCompareTo")
+    public void testCompareTo(String version1, String version2, int expectedCompareTo, boolean expectedGreaterThan) throws Exception {
+        assertEquals(Version.valueOf(version1).compareTo(Version.valueOf(version2)), expectedCompareTo, version1 + " compareTo " + version2);
+        assertEquals(Version.valueOf(version1).greaterThan(Version.valueOf(version2)), expectedGreaterThan, version1 + " greaterThan " + version2);
     }
 
-    @DataProvider(name = "testCompareTo")
-    public Object[][] testCompareTo() {
+    @DataProvider
+    public Object[][] dataTestCompareTo() {
         return new Object[][] {
-                {"1.0.1", "1.0.1", 0},
-                {"1.0.1", "1.0.1.0", 0},
-                {"1.0.2-M20", "1.0.2-M20", 0},
-                {"1.0.2-M20-SNAPSHOT", "1.0.2-M20-SNAPSHOT", 0},
-                {"1.0.2.4-M20-SNAPSHOT", "1.0.2.4-M20-SNAPSHOT", 0},
-                {"1.0.2.4-RC1-SNAPSHOT", "1.0.2.4-RC1-SNAPSHOT", 0},
-                {"1.0.2.4-GA-SNAPSHOT", "1.0.2.4-GA-SNAPSHOT", 0},
-                {"1.0.2-SNAPSHOT", "1.0.2-SNAPSHOT", 0},
+                {"1.0.1", "1.0.1", 0, false},
+                {"1.0.1", "1.0.1.0", 0, false},
+                {"1.0.2-M20", "1.0.2-M20", 0, false},
+                {"1.0.2-M20-SNAPSHOT", "1.0.2-M20-SNAPSHOT", 0, false},
+                {"1.0.2.4-M20-SNAPSHOT", "1.0.2.4-M20-SNAPSHOT", 0, false},
+                {"1.0.2.4-RC1-SNAPSHOT", "1.0.2.4-RC1-SNAPSHOT", 0, false},
+                {"1.0.2.4-GA-SNAPSHOT", "1.0.2.4-GA-SNAPSHOT", 0, false},
+                {"1.0.2-SNAPSHOT", "1.0.2-SNAPSHOT", 0, false},
 
-                {"4.0.1", "0.4.0", 1},
-                {"2.0.1", "1.0.1", 1},
-                {"1.1.1", "1.0.1", 1},
-                {"1.0.1.1", "1.0.1", 1},
-                {"1.0.1.1", "1.0.1.0", 1},
-                {"1.0.2", "1.0.1", 1},
-                {"1.0.2", "1.0.1-RC1", 1},
-                {"1.0.2", "1.0.1-M20", 1},
-                {"1.0.2", "1.0.2-SNAPSHOT", 1},
-                {"1.0.2", "1.0.2-GA", 1},
-                {"1.0.2-SNAPSHOT", "1.0.2-GA-SNAPSHOT", 1},
-                {"1.0.2", "1.0.2-GA-SNAPSHOT", 1},
-                {"1.0.2-GA", "1.0.2-GA-SNAPSHOT", 1},
-                {"1.0.2-GA", "1.0.2-RC1", 1},
-                {"1.0.2-GA-SNAPSHOT", "1.0.2-RC1", 1},
-                {"1.0.2-GA", "1.0.2-RC1-SNAPSHOT", 1},
-                {"1.0.2-GA-SNAPSHOT", "1.0.2-RC1-SNAPSHOT", 1},
-                {"1.0.2-M20", "1.0.2-M19", 1},
-                {"1.0.2-M20", "1.0.2-M20-SNAPSHOT", 1},
-                {"1.0.2-M20", "1.0.2-M20-RC1", 1},
-                {"1.0.2-beta-2", "1.0.2-beta-1", 1},
-                {"1.0.2-RC2-SNAPSHOT", "1.0.2-RC1-SNAPSHOT", 1},
-                {"1.0.2-RC1", "1.0.2-RC1-SNAPSHOT", 1},
+                {"4.0.1", "0.4.0", 1, true},
+                {"2.0.1", "1.0.1", 1, true},
+                {"1.1.1", "1.0.1", 1, true},
+                {"1.0.1.1", "1.0.1", 1, true},
+                {"1.0.1.1", "1.0.1.0", 1, true},
+                {"1.0.2", "1.0.1", 1, true},
+                {"1.0.2", "1.0.1-RC1", 1, true},
+                {"1.0.2", "1.0.1-M20", 1, true},
+                {"1.0.2", "1.0.2-SNAPSHOT", 1, true},
+                {"1.0.2", "1.0.2-GA", 1, true},
+                {"1.0.2-SNAPSHOT", "1.0.2-GA-SNAPSHOT", 1, true},
+                {"1.0.2", "1.0.2-GA-SNAPSHOT", 1, true},
+                {"1.0.2-GA", "1.0.2-GA-SNAPSHOT", 1, true},
+                {"1.0.2-GA", "1.0.2-RC1", 1, true},
+                {"1.0.2-GA-SNAPSHOT", "1.0.2-RC1", 1, true},
+                {"1.0.2-GA", "1.0.2-RC1-SNAPSHOT", 1, true},
+                {"1.0.2-GA-SNAPSHOT", "1.0.2-RC1-SNAPSHOT", 1, true},
+                {"1.0.2-M20", "1.0.2-M19", 1, true},
+                {"1.0.2-M20", "1.0.2-M20-SNAPSHOT", 1, true},
+                {"1.0.2-M20", "1.0.2-M20-RC1", 1, true},
+                {"1.0.2-beta-2", "1.0.2-beta-1", 1, true},
+                {"1.0.2-RC2-SNAPSHOT", "1.0.2-RC1-SNAPSHOT", 1, true},
+                {"1.0.2-RC1", "1.0.2-RC1-SNAPSHOT", 1, true},
 
-                {"1.0.1", "2.0.1", -1},
-                {"1.0.1", "1.1.1", -1},
-                {"1.1.1.0", "1.1.1.1", -1},
-                {"1.0.1", "1.0.2", -1},
-                {"1.0.1-GA", "1.0.2-GA", -1},
-                {"1.0.1-GA-SNAPSHOT", "1.0.1-GA", -1},
-                {"1.0.1-RC2-SNAPSHOT", "1.0.1-GA-SNAPSHOT", -1},
-                {"1.0.1-RC2", "1.0.1-GA", -1},
-                {"1.0.1-SNAPSHOT", "1.0.1", -1},
-                {"1.0.2-M20", "1.0.2", -1},
-                {"1.0.2-beta-1", "1.0.2-RC1", -1}};
+                {"1.0.1", "2.0.1", -1, false},
+                {"1.0.1", "1.1.1", -1, false},
+                {"1.1.1.0", "1.1.1.1", -1, false},
+                {"1.0.1", "1.0.2", -1, false},
+                {"1.0.1-GA", "1.0.2-GA", -1, false},
+                {"1.0.1-GA-SNAPSHOT", "1.0.1-GA", -1, false},
+                {"1.0.1-RC2-SNAPSHOT", "1.0.1-GA-SNAPSHOT", -1, false},
+                {"1.0.1-RC2", "1.0.1-GA", -1, false},
+                {"1.0.1-SNAPSHOT", "1.0.1", -1, false},
+                {"1.0.2-M20", "1.0.2", -1, false},
+                {"1.0.2-beta-1", "1.0.2-RC1", -1, false}};
     }
 
-    @Test(dataProvider = "dataForTestIsSuitedFor")
-    public void dataForTestIsSuitedFor(String version, String pattern, boolean expected) throws Exception {
+    @Test(dataProvider = "dataTestIsSuitedFor")
+    public void testIsSuitedFor(String version, String pattern, boolean expected) throws Exception {
         boolean actual = Version.valueOf(version).isSuitedFor(pattern);
 
         assertEquals(actual, expected, pattern);
     }
 
     @DataProvider
-    public static Object[][] dataForTestIsSuitedFor() {
+    public static Object[][] dataTestIsSuitedFor() {
         return new Object[][] {
                 {"1.0.1", "1\\.0\\.1", true},
                 {"1.0.1", "1\\.0\\.(.*)", true},
@@ -230,7 +231,7 @@ public class TestVersion {
         };
     }
 
-    @Test()
+    @Test(dataProvider = "dataTestCertainIsMajor")
     public void testIsCertainMajor(boolean expectedIs3Major,
                                    boolean expectedIs4Major,
                                    boolean expectedIs4Compatible,
@@ -244,16 +245,13 @@ public class TestVersion {
     }
 
     @DataProvider
-    public static Object[][] dataForTestIsMajor() {
-        return new Object[][] {
-            {false, false, false, false, null},
-            {false, false, false, false, INVALID_VER},
+    public static Object[][] dataTestCertainIsMajor() {
+        return new Object[][]{
             {false, false, false, false, "2.0.0-RC1-SNAPSHOT"},
-            {true,  false, false, false, "3.0.4"},
-            {false, true,  true,  false, "4.5.0-SNAPSHOT"},
-            {false, false, true,  true,  "5.0.0-M1"},
-            {false, false, false, false, "6.3.1-GA-SNAPSHOT"},
+            {true, false, false, false, "3.0.4"},
+            {false, true, true, false, "4.5.0-SNAPSHOT"},
+            {false, false, true, true, "5.0.0-M1"},
+            {false, false, false, false, "6.3.1-GA-SNAPSHOT"}
         };
     }
-
 }

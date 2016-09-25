@@ -255,6 +255,14 @@ public class Version implements Comparable<Version> {
         }
     }
 
+    /**
+     * @param version
+     * @return true if only current version is greater than parameter 'version'
+     */
+    public boolean greaterThan(Version version) {
+        return compareTo(version) > 0;
+    }
+
     static public class ReverseOrderComparator implements Comparator<Version> {
         @Override
         public int compare(Version v1, Version v2) {

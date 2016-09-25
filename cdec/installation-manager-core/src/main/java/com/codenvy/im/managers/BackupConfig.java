@@ -47,7 +47,8 @@ public class BackupConfig {
         MONGO_ANALYTICS,
         FS,
         ANALYTICS_DATA,
-        ANALYTICS_LOGS;
+        ANALYTICS_LOGS,
+        PGSQL("dump.tar");
 
         private String filename;
 
@@ -69,7 +70,7 @@ public class BackupConfig {
     }
 
     protected static String BACKUP_NAME_TIME_FORMAT = "dd-MMM-yyyy_HH-mm-ss";
-    public static    Path   BASE_TMP_DIRECTORY      = Paths.get(System.getProperty("java.io.tmpdir")).resolve("codenvy");
+    public static    Path   BASE_TMP_DIRECTORY      = Paths.get("/tmp").resolve("codenvy");
 
     @ApiModelProperty(required = true, allowableValues = CDECArtifact.NAME)
     private String artifactName;
