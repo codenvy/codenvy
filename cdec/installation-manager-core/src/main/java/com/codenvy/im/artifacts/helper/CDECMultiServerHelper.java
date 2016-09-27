@@ -301,6 +301,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
     public Command getUpdateCommand(Version versionToUpdate, Path pathToBinaries, InstallOptions installOptions) throws IOException {
         final Config config = new Config(installOptions.getConfigProperties());
         final int step = installOptions.getStep();
+        final Config oldConfig = configManager.loadInstalledCodenvyConfig();
 
         switch (step) {
             case 0:
@@ -360,7 +361,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
 
                 return createPatchCommand(Paths.get(getTmpCodenvyDir(), "patches"),
                                           CommandLibrary.PatchType.BEFORE_UPDATE,
-                                          installOptions);
+                                          installOptions, oldConfig);
 
             case 3:
                 // don't remove /etc/puppet/manifests directory in time of updating it
@@ -377,7 +378,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
             case 5:
                 return createPatchCommand(Paths.get(getPuppetDir(), "patches"),
                                           CommandLibrary.PatchType.AFTER_UPDATE,
-                                          installOptions);
+                                          installOptions, oldConfig);
 
             default:
                 throw new IllegalArgumentException(format("Step number %d is out of update range", step));

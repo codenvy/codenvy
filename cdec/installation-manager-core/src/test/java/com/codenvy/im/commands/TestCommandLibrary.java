@@ -16,6 +16,7 @@ package com.codenvy.im.commands;
 
 import com.codenvy.im.BaseTest;
 import com.codenvy.im.agent.AgentException;
+import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.InstallOptions;
 import com.codenvy.im.managers.InstallType;
 import com.codenvy.im.managers.NodeConfig;
@@ -293,9 +294,10 @@ public class TestCommandLibrary extends BaseTest {
         writeStringToFile(patchDir.resolve(InstallType.MULTI_SERVER.toString().toLowerCase()).resolve("patch_before_update.sh").toFile(),
                           "echo -n \"$test_property1\"");
 
-        Command command = CommandLibrary.createPatchCommand(patchDir, CommandLibrary.PatchType.BEFORE_UPDATE, installOptions);
-        assertEquals(command.toString(), "[{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$test_property1|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                                         + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$test_property2|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+        Command command = CommandLibrary.createPatchCommand(patchDir, CommandLibrary.PatchType.BEFORE_UPDATE, installOptions, new Config(ImmutableMap.of("old_test_property1", "old_property1")));
+        assertEquals(command.toString(), "[{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${OLD_old_test_property1}|old_property1|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                                         + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${test_property1}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                                         + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${test_property2}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                                          + "{'command'='bash target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}]");
     }
 

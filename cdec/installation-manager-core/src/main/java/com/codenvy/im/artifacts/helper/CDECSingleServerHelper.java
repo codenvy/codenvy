@@ -18,6 +18,7 @@ import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.commands.Command;
 import com.codenvy.im.commands.CommandLibrary;
 import com.codenvy.im.commands.MacroCommand;
+import com.codenvy.im.commands.SimpleCommand;
 import com.codenvy.im.commands.WaitOnAliveArtifactCommand;
 import com.codenvy.im.commands.WaitOnAliveArtifactOfCorrectVersionCommand;
 import com.codenvy.im.commands.decorators.PuppetErrorInterrupter;
@@ -217,6 +218,8 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
     public Command getUpdateCommand(Version versionToUpdate, Path pathToBinaries, InstallOptions installOptions) throws IOException {
         final Config config = new Config(installOptions.getConfigProperties());
         final int step = installOptions.getStep();
+        Iterator<Path> propertiesFiles = configManager.getCodenvyPropertiesFiles(getTmpCodenvyDir(), InstallType.SINGLE_SERVER);
+        final Config oldConfig = configManager.loadInstalledCodenvyConfig();
 
         switch (step) {
             case 0:
@@ -231,7 +234,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
             case 1:
                 List<Command> commands = new ArrayList<>();
 
-                Iterator<Path> propertiesFiles = configManager.getCodenvyPropertiesFiles(getTmpCodenvyDir(), InstallType.SINGLE_SERVER);
                 while (propertiesFiles.hasNext()) {
                     Path propertiesFileOfCodenvyBinary = propertiesFiles.next();
 
@@ -267,7 +269,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
 
                 return createPatchCommand(Paths.get(getTmpCodenvyDir(), "patches"),
                                           CommandLibrary.PatchType.BEFORE_UPDATE,
-                                          installOptions);
+                                          installOptions, oldConfig);
 
             case 3:
                 // don't remove /etc/puppet/manifests directory in time of updating it
@@ -284,7 +286,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
             case 5:
                 return createPatchCommand(Paths.get(getPuppetDir(), "patches"),
                                           CommandLibrary.PatchType.AFTER_UPDATE,
-                                          installOptions);
+                                          installOptions, oldConfig);
 
             default:
                 throw new IllegalArgumentException(format("Step number %d is out of update range", step));

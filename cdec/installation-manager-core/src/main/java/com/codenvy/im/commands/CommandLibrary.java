@@ -92,7 +92,7 @@ public class CommandLibrary {
      */
     private static String getReplaceCommand(String file, String replacingToken, String replacement, boolean withSudo) {
 
-        String command = format("sudo cat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|%1$s|%2$2s|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %3$s",
+        String command = format("sudo cat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|%1$s|%2$s|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %3$s",
                                replacingToken,
                                replacement.replace("\\$", "\\\\$").replace("\n", "\\n").replace("|", "\\|").replace("&", "\\&"),
                                file);
@@ -204,19 +204,31 @@ public class CommandLibrary {
                       System.nanoTime());
     }
 
-    public static Command createPatchCommand(Path patchDir, PatchType patchType, InstallOptions installOptions) throws IOException {
+    public static Command createPatchCommand(Path patchDir, PatchType patchType, InstallOptions installOptions, Config oldConfig) throws IOException {
         List<Command> commands = new ArrayList<>();
 
         Path relativePatchFilePath = getRelativePatchFilePath(patchType, installOptions.getInstallType());
         Path patchFile = patchDir.resolve(relativePatchFilePath);
         if (exists(patchFile)) {
-            Config config = new Config(installOptions.getConfigProperties());
+            // substitute old properties
+            for (Map.Entry<String, String> e : oldConfig.getProperties().entrySet()) {
+                String property = e.getKey();
+                String value = oldConfig.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
 
+                commands.add(createReplaceCommand(patchFile.toString(),
+                                                  format("${OLD_%s}", property),
+                                                  value));
+            }
+
+            // substitute new properties
+            Config config = new Config(installOptions.getConfigProperties());
             for (Map.Entry<String, String> e : config.getProperties().entrySet()) {
                 String property = e.getKey();
                 String value = config.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
 
-                commands.add(createReplaceCommand(patchFile.toString(), "$" + property, value));
+                commands.add(createReplaceCommand(patchFile.toString(),
+                                                  format("${%s}", property),
+                                                  value));
             }
             commands.add(createCommand(format("bash %s", patchFile)));
         }
