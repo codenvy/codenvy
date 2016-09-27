@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace;
 
+import com.codenvy.service.systemram.SystemRamInfoProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Striped;
@@ -44,9 +45,11 @@ import javax.inject.Singleton;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 
 import static java.lang.String.format;
+import static java.lang.Thread.currentThread;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 /**
@@ -54,6 +57,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
  * Doesn't contain any logic related to start/stop or any kind of operations different from limits checks.
  *
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 @Singleton
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
@@ -63,18 +67,24 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     private static final Striped<Lock> START_LOCKS                = Striped.lazyWeakLock(100);
     private static final long          BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
-    private final UserManager       userManager;
-    private final EnvironmentParser environmentParser;
+    private final UserManager           userManager;
+    private final EnvironmentParser     environmentParser;
+    private final SystemRamInfoProvider systemRamInfoProvider;
 
     private final int  workspacesPerUser;
     private final long maxRamPerEnvMB;
     private final long ramPerUserMB;
     private final long defaultMachineMemorySizeBytes;
 
+    @VisibleForTesting
+    Semaphore startSemaphore;
+
     @Inject
     public LimitsCheckingWorkspaceManager(@Named("limits.user.workspaces.count") int workspacesPerUser,
                                           @Named("limits.user.workspaces.ram") String ramPerUser,
                                           @Named("limits.workspace.env.ram") String maxRamPerEnv,
+                                          @Named("limits.workspace.start.throughput") int maxSameTimeStartWSRequests,
+                                          SystemRamInfoProvider systemRamInfoProvider,
                                           WorkspaceDao workspaceDao,
                                           WorkspaceRuntimes runtimes,
                                           EventService eventService,
@@ -86,12 +96,16 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
                                           @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB) {
         super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
+        this.systemRamInfoProvider = systemRamInfoProvider;
         this.userManager = userManager;
         this.workspacesPerUser = workspacesPerUser;
         this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
         this.ramPerUserMB = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
         this.environmentParser = environmentParser;
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
+        if (maxSameTimeStartWSRequests > 0) {
+            this.startSemaphore = new Semaphore(maxSameTimeStartWSRequests);
+        }
     }
 
     @Override
@@ -128,10 +142,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                 "Unable to start workspace %s, because its namespace owner is " +
                 "unavailable and it is impossible to check resources consumption.",
                 workspaceId));
-        return checkRamAndPropagateStart(workspace.getConfig(),
-                                         envName,
-                                         workspace.getNamespace(),
-                                         () -> super.startWorkspace(workspaceId, envName, restore));
+        return checkRamAndPropagateLimitedThroughputStart(workspace.getConfig(),
+                                                          envName,
+                                                          workspace.getNamespace(),
+                                                          () -> super.startWorkspace(workspaceId, envName, restore));
     }
 
     @Override
@@ -141,10 +155,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                     NotFoundException,
                                                                     ConflictException {
         checkMaxEnvironmentRam(config);
-        return checkRamAndPropagateStart(config,
-                                         config.getDefaultEnv(),
-                                         namespace,
-                                         () -> super.startWorkspace(config, namespace, isTemporary));
+        return checkRamAndPropagateLimitedThroughputStart(config,
+                                                          config.getDefaultEnv(),
+                                                          namespace,
+                                                          () -> super.startWorkspace(config, namespace, isTemporary));
     }
 
     @Override
@@ -166,6 +180,39 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     }
 
     /**
+     * One of the checks in {@link #checkRamAndPropagateStart(WorkspaceConfig, String, String, WorkspaceCallback)}
+     * is needed to deny starting workspace, if system RAM limit exceeded.
+     * This check may be slow because it is based on request to swarm for memory amount allocated on all nodes, but it
+     * can't be performed more than specified times at the same time, and the semaphore is used to control that.
+     * The semaphore is a trade off between speed and risk to exceed system RAM limit.
+     * In the worst case specified number of permits to start workspace can happen at the same time after the actually
+     * system limit allows to start only one workspace, all permits will be allowed to start workspace.
+     * If more than specified number of permits to start workspace happens, they will wait in a queue.
+     * limits.workspace.start.throughput property configures how many permits can be handled at the same time.
+     */
+    @VisibleForTesting
+    <T extends WorkspaceImpl> T checkRamAndPropagateLimitedThroughputStart(WorkspaceConfig config,
+                                                                           String envName,
+                                                                           String namespace,
+                                                                           WorkspaceCallback<T> callback) throws ServerException,
+                                                                                                                 NotFoundException,
+                                                                                                                 ConflictException {
+        if (startSemaphore == null) {
+            return checkRamAndPropagateStart(config, envName, namespace, callback);
+        } else {
+            try {
+                startSemaphore.acquire();
+                return checkRamAndPropagateStart(config, envName, namespace, callback);
+            } catch (InterruptedException e) {
+                currentThread().interrupt();
+                throw new ServerException(e.getMessage(), e);
+            } finally {
+                startSemaphore.release();
+            }
+        }
+    }
+
+    /**
      * Checks that starting workspace won't exceed user's RAM limit.
      * Throws {@link BadRequestException} in the case of RAM constraint violation, otherwise
      * performs {@code callback.call()} and returns its result.
@@ -177,6 +224,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                           WorkspaceCallback<T> callback) throws ServerException,
                                                                                                 NotFoundException,
                                                                                                 ConflictException {
+        if (systemRamInfoProvider.getSystemRamInfo().isSystemRamLimitExceeded()) {
+            throw new LimitExceededException("Low RAM. Your workspace cannot be started until the system has more RAM available.");
+        }
         if (ramPerUserMB < 0) {
             return callback.call();
         }
