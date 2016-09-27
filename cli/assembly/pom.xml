@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-cli</artifactId>
         <groupId>com.codenvy.cli</groupId>
-        <version>5.0.0-M4-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>cli-assembly</artifactId>
     <name>Codenvy CLI :: Assembly</name>

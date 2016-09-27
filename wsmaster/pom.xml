@@ -20,11 +20,11 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M4-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises.wsmaster</groupId>
     <artifactId>codenvy-master-parent</artifactId>
-    <version>5.0.0-M4-SNAPSHOT</version>
+    <version>5.0.0-M5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Master Parent</name>
     <modules>

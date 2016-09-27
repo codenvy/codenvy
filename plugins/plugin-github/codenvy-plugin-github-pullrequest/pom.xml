@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-github-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.0.0-M4-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-github-pullrequest</artifactId>
     <name>Codenvy Plugin :: Github :: Pull request</name>

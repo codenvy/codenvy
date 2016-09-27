@@ -87,7 +87,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           WorkspaceDao workspaceDao,
                                           WorkspaceRuntimes runtimes,
                                           EventService eventService,
-                                          UserManager userManager,
                                           SnapshotDao snapshotDao,
                                           AccountManager accountManager,
                                           EnvironmentParser environmentParser,
