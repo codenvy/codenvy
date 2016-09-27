@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -228,10 +229,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         if (ramPerUserMB < 0) {
             return callback.call();
         }
-        Environment env = config.getEnvironments().get(envName);
-        if (env == null) {
-            env = config.getEnvironments().get(config.getDefaultEnv());
-        }
+        final Environment env = config.getEnvironments().get(firstNonNull(envName, config.getDefaultEnv()));
         // It is important to lock in this place because:
         // if ram per user limit is 2GB and user currently using 1GB, then if he sends 2 separate requests to start a new
         // 1 GB workspace , it may start both of them, because currently allocated ram check is not atomic one
