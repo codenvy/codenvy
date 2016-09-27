@@ -17,11 +17,14 @@ package com.codenvy.api.workspace.server.filters;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.environment.server.MachineService;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -57,9 +60,11 @@ import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -83,6 +88,12 @@ public class WorkspacePermissionsFilterTest {
     @Mock
     WorkspaceManager workspaceManager;
 
+    @Mock
+    AccountManager accountManager;
+
+    @Mock
+    AccountImpl account;
+
     @InjectMocks
     @Spy
     WorkspacePermissionsFilter permissionsFilter;
@@ -101,16 +112,20 @@ public class WorkspacePermissionsFilterTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any());
+        doThrow(new ForbiddenException("")).when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
 
         when(subject.getUserName()).thenReturn(USERNAME);
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
         when(workspace.getNamespace()).thenReturn("namespace");
         when(workspace.getId()).thenReturn("workspace123");
+
+        when(accountManager.getByName(any())).thenReturn(account);
     }
 
     @Test
     public void shouldCheckNamespaceAccessOnWorkspaceCreation() throws Exception {
+        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
@@ -119,12 +134,14 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(workspaceService).create(any(), any(), any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"));
+        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckNamespaceAccessOnFetchingWorkspacesByNamespace() throws Exception {
+        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
@@ -133,12 +150,14 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(workspaceService).getByNamespace(any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"));
+        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
     }
 
     @Test
     public void shouldCheckNamespaceAccessOnStaringWorkspaceFromConfig() throws Exception {
+        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
@@ -146,9 +165,8 @@ public class WorkspacePermissionsFilterTest {
                                          .post(SECURE_PATH + "/workspace/runtime?namespace=userok");
 
         assertEquals(response.getStatusCode(), 204);
-
         verify(workspaceService).startFromConfig(any(), any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"));
+        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
     }
 
@@ -548,6 +566,7 @@ public class WorkspacePermissionsFilterTest {
                                                                                                String method,
                                                                                                String action) throws Exception {
         when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
+        doThrow(new ForbiddenException("")).when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
 
         Response response = request(given().auth()
                                            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -567,6 +586,7 @@ public class WorkspacePermissionsFilterTest {
     public void shouldNotCheckWorkspacePermissionsWhenWorkspaceBelongToHisPersonalAccount(String path,
                                                                                           String method,
                                                                                           String action) throws Exception {
+        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
         when(workspace.getNamespace()).thenReturn(USERNAME);
 
         Response response = request(given().auth()
@@ -588,14 +608,16 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
-    public void shouldNotThrowExceptionWhenNamespaceEqualsToUserNameIsNullOnNamespaceAccessChecking() throws Exception {
+    public void shouldNotThrowExceptionWhenNamespaceEqualsToPersonalAccountNameOfUserOnNamespaceAccessChecking() throws Exception {
+        when(account.getName()).thenReturn(USERNAME);
+        when(account.getType()).thenReturn(UserImpl.PERSONAL_ACCOUNT);
         doCallRealMethod().when(permissionsFilter).checkNamespaceAccess(any(), any());
 
         permissionsFilter.checkNamespaceAccess(subject, USERNAME);
     }
 
     @Test(expectedExceptions = ForbiddenException.class)
-    public void shouldThrowForbiddenExceptionWhenNamespaceIsNotNullAndDoesNotEqualToUserNameIsNullOnNamespaceAccessChecking() throws Exception {
+    public void shouldThrowForbiddenExceptionWhenNamespaceIsNotNullAndDoesNotEqualToUserNameOnNamespaceAccessChecking() throws Exception {
         doCallRealMethod().when(permissionsFilter).checkNamespaceAccess(any(), any());
 
         permissionsFilter.checkNamespaceAccess(subject, "namespace");

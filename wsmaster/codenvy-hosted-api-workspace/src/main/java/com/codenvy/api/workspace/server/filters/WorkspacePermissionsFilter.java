@@ -14,14 +14,19 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
+import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
@@ -37,6 +42,9 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.READ;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.RUN;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
+import static com.codenvy.organization.api.permissions.OrganizationDomain.CREATE_WORKSPACES;
+import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE_WORKSPACES;
+import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_ACCOUNT;
 
 /**
  * Restricts access to methods of {@link WorkspaceService} by users' permissions
@@ -50,10 +58,12 @@ import static com.codenvy.api.workspace.server.WorkspaceDomain.USE;
 @Path("/workspace{path:(/.*)?}")
 public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     private final WorkspaceManager workspaceManager;
+    private final AccountManager   accountManager;
 
     @Inject
-    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager) {
+    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager, AccountManager accountManager) {
         this.workspaceManager = workspaceManager;
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -71,17 +81,17 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 return;
 
             case "getByNamespace": {
-                checkNamespaceAccess(currentSubject, ((String)arguments[1]));
+                checkManageNamespaceAccess(currentSubject, ((String)arguments[1]));
                 return;
             }
 
             case "create": {
-                checkNamespaceAccess(currentSubject, ((String)arguments[3]));
+                checkNamespaceAccess(currentSubject, ((String)arguments[3]), MANAGE_WORKSPACES, CREATE_WORKSPACES);
                 return;
             }
 
             case "startFromConfig": {
-                checkNamespaceAccess(currentSubject, ((String)arguments[2]));
+                checkManageNamespaceAccess(currentSubject, ((String)arguments[2]));
                 return;
             }
 
@@ -143,27 +153,50 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         }
 
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-        final String namespace = workspace.getNamespace();
-
-        if (currentSubject.getUserName().equals(namespace)) {
-            // user is authorized to perform any operation if workspace belongs to his personal account
-            return;
-        }
-
-        if (!currentSubject.hasPermission(DOMAIN_ID, workspace.getId(), action)) {
-            throw new ForbiddenException(
-                    "The user does not have permission to " + action + " workspace with id '" + workspace.getId() + "'");
+        try {
+            checkManageNamespaceAccess(currentSubject, workspace.getNamespace());
+            // user is authorized to perform any operation if workspace belongs to account where he has the corresponding permissions
+        } catch (ForbiddenException e) {
+            //check permissions on workspace level
+            if (!currentSubject.hasPermission(DOMAIN_ID, workspace.getId(), action)) {
+                throw new ForbiddenException(
+                        "The user does not have permission to " + action + " workspace with id '" + workspace.getId() + "'");
+            }
         }
     }
 
+    private void checkManageNamespaceAccess(Subject currentSubject, @Nullable String namespace) throws ServerException,
+                                                                                               NotFoundException,
+                                                                                               ForbiddenException {
+        checkNamespaceAccess(currentSubject, namespace, MANAGE_WORKSPACES);
+    }
+
     @VisibleForTesting
-    void checkNamespaceAccess(Subject currentSubject, String namespace) throws ForbiddenException {
+    void checkNamespaceAccess(Subject currentSubject, @Nullable String namespace, String... actions) throws ForbiddenException,
+                                                                                                            NotFoundException,
+                                                                                                            ServerException {
         if (namespace == null) {
             //namespace will be defined as username by default
             return;
         }
 
-        if (!currentSubject.getUserName().equals(namespace)) {
+        final Account account = accountManager.getByName(namespace);
+
+        if (UserImpl.PERSONAL_ACCOUNT.equals(account.getType())) {
+            if (!account.getName().equals(currentSubject.getUserName())) {
+                throw new ForbiddenException("User is not authorized to use given namespace");
+            }
+        } else if (ORGANIZATIONAL_ACCOUNT.equals(account.getType())) {
+            boolean authorized = false;
+            for (String action : actions) {
+                if (authorized = currentSubject.hasPermission(OrganizationDomain.DOMAIN_ID, account.getId(), action)) {
+                    break;
+                }
+            }
+            if (!authorized) {
+                throw new ForbiddenException("User is not authorized to use given namespace");
+            }
+        } else {
             throw new ForbiddenException("User is not authorized to use given namespace");
         }
     }

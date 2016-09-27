@@ -96,6 +96,8 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                "/preferences/*",
                "/license",
                "/license/*",
+               "/organization",
+               "/organization/*",
                "/system/ram/*")
                 .through(com.codenvy.auth.sso.client.LoginFilter.class);
 

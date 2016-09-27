@@ -27,7 +27,6 @@ import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -100,7 +99,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -118,7 +116,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               "2gb",
                                                                                               "1gb",
                                                                                               0,
-                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
@@ -153,7 +150,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -176,7 +172,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               "1gb",
                                                                                               0,
                                                                                               systemRamInfoProvider,
-                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
@@ -228,7 +223,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -251,7 +245,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               "1gb",
                                                                                               0,
                                                                                               systemRamInfoProvider,
-                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
@@ -284,7 +277,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -300,7 +292,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               "3gb",
                                                                                               "-1", // <- workspaces env ram limit
                                                                                               0,
-                                                                                              null,
                                                                                               null,
                                                                                               null,
                                                                                               null,
@@ -331,7 +322,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -353,7 +343,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -363,11 +352,11 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     @Test
     public void shouldCheckRamLimitOfCreatorUserInsteadOfCurrent() throws Exception {
-        final UserManager userManager = mock(UserManager.class);
+        final AccountManager accountManager = mock(AccountManager.class);
         final WorkspaceImpl ws = createRuntime("1gb", "1gb");
         final UserImpl user = new UserImpl("id", "email", ws.getNamespace());
         user.setName(ws.getNamespace());
-        doReturn(user).when(userManager).getByName(eq(ws.getNamespace()));
+        doReturn(user.getAccount()).when(accountManager).getByName(eq(ws.getNamespace()));
 
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
                                                                                               "2gb", // <- workspaces ram limit
@@ -377,9 +366,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              userManager,
                                                                                               snapshotDao,
-                                                                                              null,
+                                                                                              accountManager,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -400,9 +388,9 @@ public class LimitsCheckingWorkspaceManagerTest {
           expectedExceptionsMessageRegExp = "Unable to start workspace .*, because its namespace owner is " +
                                             "unavailable and it is impossible to check resources consumption.")
     public void shouldPreventStartIfCreatorNotExistsAnymore() throws Exception {
-        final UserManager userManager = mock(UserManager.class);
+        final AccountManager accountManager = mock(AccountManager.class);
         final WorkspaceImpl ws = createRuntime("1gb", "1gb");
-        doThrow(new NotFoundException("Nope")).when(userManager).getByName(eq(ws.getNamespace()));
+        doThrow(new NotFoundException("Nope")).when(accountManager).getByName(eq(ws.getNamespace()));
 
 
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
@@ -413,9 +401,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              userManager,
                                                                                               snapshotDao,
-                                                                                              null,
+                                                                                              accountManager,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -438,7 +425,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               null,
                                                                                               null,
                                                                                               null,
-                                                                                              null,
                                                                                               environmentParser,
                                                                                               false,
                                                                                               false,
@@ -454,7 +440,6 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                         "1gb", // <- workspaces ram limit
                                                                                         0,
                                                                                         systemRamInfoProvider,
-                                                                                        null,
                                                                                         null,
                                                                                         null,
                                                                                         null,
