@@ -289,7 +289,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                         ),
                         new UriStartFromRequestFilter("/api/license/legality")
                 )
-                                            );
+        );
 
 
         bindConstant().annotatedWith(Names.named("notification.server.propagate_events")).to("vfs,workspace");
