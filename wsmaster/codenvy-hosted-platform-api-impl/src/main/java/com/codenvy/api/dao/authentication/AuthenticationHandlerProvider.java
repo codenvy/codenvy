@@ -34,7 +34,7 @@ public class AuthenticationHandlerProvider {
     private final AuthenticationHandler              defaultHandler;
 
     @Inject
-    public AuthenticationHandlerProvider(Set<AuthenticationHandler> handlers, @Named("auth.handler.default") String defaultHandler) {
+    public AuthenticationHandlerProvider(Set<AuthenticationHandler> handlers, @Named("sys.auth.handler.default") String defaultHandler) {
         this.handlers = new HashMap<>(handlers.size());
         for (AuthenticationHandler handler : handlers) {
             this.handlers.put(handler.getType(), handler);

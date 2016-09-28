@@ -32,8 +32,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserValidator;
 import org.eclipse.che.commons.lang.Deserializer;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,21 +129,16 @@ public class BearerTokenAuthenticationService {
         try {
             final String username = userNameValidator.normalizeUserName(payload.get("username"));
             User user = userCreator.createUser(payload.get("email"), username, payload.get("firstName"), payload.get("lastName"));
-            final Subject subject = new SubjectImpl(user.getName(),
-                                                    user.getId(),
-                                                    null,
-                                                    true);
-
             Response.ResponseBuilder builder = Response.ok();
             if (tokenAccessCookie != null) {
                 AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
                 if (accessTicket != null) {
-                    if (!subject.equals(accessTicket.getPrincipal())) {
+                    if (!user.getId().equals(accessTicket.getUserId())) {
                         // DO NOT REMOVE! This log will be used in statistic analyzing
                         LOG.info("EVENT#user-changed-name# OLD-USER#{}# NEW-USER#{}#",
-                                 accessTicket.getPrincipal().getUserName(),
-                                 subject.getUserName());
-                        LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getUserName());
+                                 accessTicket.getUserId(),
+                                 user.getId());
+                        LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getUserId());
                         // DO NOT REMOVE! This log will be used in statistic analyzing
                         ticketManager.removeTicket(accessTicket.getAccessToken());
                     }
@@ -163,7 +156,7 @@ public class BearerTokenAuthenticationService {
 
             // If we obtained principal  - authentication is done.
             String token = uniqueTokenGenerator.generate();
-            ticketManager.putAccessTicket(new AccessTicket(token, subject, "bearer"));
+            ticketManager.putAccessTicket(new AccessTicket(token, user.getId(), "bearer"));
 
             cookieBuilder.setCookies(builder, token, isSecure);
             builder.entity(Collections.singletonMap("token", token));

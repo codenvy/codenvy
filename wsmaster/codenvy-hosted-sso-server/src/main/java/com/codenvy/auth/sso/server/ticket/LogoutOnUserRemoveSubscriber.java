@@ -19,27 +19,24 @@ import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.event.user.RemoveUserEvent;
 
 import org.eclipse.che.api.core.notification.EventService;
-
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * Initiate logout on all sso clients in case of user removal.
  * @author Alexander Garagatyi
  */
 @Singleton
 public class LogoutOnUserRemoveSubscriber {
-    private static final Logger LOG = LoggerFactory.getLogger(LogoutOnUserRemoveSubscriber.class);
 
     @Inject
-    private EventService eventService;
+    EventService eventService;
 
     @Inject
-    private TicketManager ticketManager;
+    TicketManager ticketManager;
 
     @PostConstruct
     public void start() {
@@ -48,8 +45,9 @@ public class LogoutOnUserRemoveSubscriber {
             public void onEvent(RemoveUserEvent event) {
                 if (null != event && null != event.getUserId()) {
                     String id = event.getUserId();
+
                     for (AccessTicket accessTicket : ticketManager.getAccessTickets()) {
-                        if (id.equals(accessTicket.getPrincipal().getUserId())) {
+                        if (id.equals(accessTicket.getUserId())) {
                             ticketManager.removeTicket(accessTicket.getAccessToken());
                         }
                     }

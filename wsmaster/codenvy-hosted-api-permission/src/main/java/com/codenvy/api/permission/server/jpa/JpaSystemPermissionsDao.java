@@ -71,6 +71,12 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
     }
 
     @Override
+    public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
+        requireNonNull(userId, "User identifier required");
+        doRemove(userId, instanceId);
+    }
+
+    @Override
     @Transactional
     public List<SystemPermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");

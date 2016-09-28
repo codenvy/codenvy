@@ -45,7 +45,7 @@ public class SecureRandomTokenGenerator implements TokenGenerator {
             chars[i++] = (char)c;
         }
     }
-
+    @Override
     public String generate() {
         final char[] tokenChars = new char[255];
         for (int i = 0; i < tokenChars.length; i++) {

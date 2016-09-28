@@ -140,7 +140,6 @@ public class HttpSsoServerClientTest {
         return DtoFactory.newDto(SubjectDto.class)
                          .withId("user123")
                          .withName("userok")
-                         .withToken("token123")
-                         .withTemporary(false);
+                         .withToken("token123");
     }
 }

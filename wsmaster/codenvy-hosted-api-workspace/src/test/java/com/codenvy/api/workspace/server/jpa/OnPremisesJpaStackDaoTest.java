@@ -15,7 +15,6 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
-import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.permission.server.PermissionsModule;
 import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
@@ -176,7 +175,7 @@ public class OnPremisesJpaStackDaoTest {
             bind(new TypeLiteral<TckRepository<WorkerImpl>>() {}).toInstance(new JpaTckRepository<>(WorkerImpl.class));
             bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
 
-            Map properties = new HashMap();
+            Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
                 properties.put(TRANSACTION_TYPE,
                                PersistenceUnitTransactionType.RESOURCE_LOCAL.name());

@@ -14,12 +14,16 @@
  */
 package com.codenvy.api.dao.authentication;
 
+import com.google.common.base.Strings;
+
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,8 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
     @Nullable
     @Inject
     protected CookieBuilder                 cookieBuilder;
+    @Inject
+    protected UserDao                       userDao;
 
     /**
      * Get token to be able to call secure api methods.
@@ -72,35 +78,42 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
 
         boolean secure = uriInfo.getRequestUri().getScheme().equals("https");
 
-        String realm = credentials.getRealm();
 
-        AuthenticationHandler handler;
-        if (realm == null) {
-            handler = handlerProvider.getDefaultHandler();
-        } else {
-            handler = handlerProvider.getHandler(realm);
-            if (handler == null) {
-                throw new AuthenticationException("Unknown realm: " + realm);
-            }
+        AuthenticationHandler handler = handlerProvider.getDefaultHandler();
+
+        String userId = handler.authenticate(credentials.getUsername(), credentials.getPassword());
+        if (Strings.isNullOrEmpty(userId)) {
+            LOG.error("Handler {} returned invalid userid during authentication of {}",
+                      handler.getType(),
+                      credentials.getUsername());
+            throw new AuthenticationException("Provided username and password is not valid");
         }
-
-        Subject principal = handler.authenticate(credentials.getUsername(), credentials.getPassword());
-        if (principal == null) {
-            throw new AuthenticationException("Provided user and password is not valid");
+        try {
+            userDao.getById(userId);
+        } catch (NotFoundException e) {
+            LOG.warn("User {} is not found in the system. But {} successfully complete authentication",
+                     credentials.getUsername(),
+                     handler.getType());
+            throw new AuthenticationException("Provided username and password is not valid");
+        } catch (ServerException e) {
+            LOG.warn("Fail to get user after authentication .User {} provider {} reason {} ",
+                     credentials.getUsername(),
+                     handler.getType(),
+                     e.getLocalizedMessage());
+            throw new AuthenticationException("Provided username and password is not valid");
         }
-
         // DO NOT REMOVE! This log will be used in statistic analyzing
-        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), principal.getUserName());
+        LOG.info("EVENT#user-sso-logged-in# USING#{}# USER#{}# ", handler.getType(), userId);
         Response.ResponseBuilder builder = Response.ok();
         if (tokenAccessCookie != null) {
             AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
             if (accessTicket != null) {
-                if (!principal.equals(accessTicket.getPrincipal())) {
+                if (!userId.equals(accessTicket.getUserId())) {
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     LOG.info("EVENT#user-changed-name# OLD-USER#{}# NEW-USER#{}#",
-                             accessTicket.getPrincipal().getUserName(),
-                             principal.getUserName());
-                    LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getPrincipal().getUserName());
+                             accessTicket.getUserId(),
+                             userId);
+                    LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getUserId());
                     // DO NOT REMOVE! This log will be used in statistic analyzing
                     ticketManager.removeTicket(accessTicket.getAccessToken());
                 }
@@ -114,7 +127,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
         }
         // If we obtained principal  - authentication is done.
         String token = uniqueTokenGenerator.generate();
-        ticketManager.putAccessTicket(new AccessTicket(token, principal, handler.getType()));
+        ticketManager.putAccessTicket(new AccessTicket(token, userId, handler.getType()));
         if (cookieBuilder != null) {
             cookieBuilder.setCookies(builder, token, secure);
         }
@@ -142,9 +155,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
             response = Response.ok();
             AccessTicket accessTicket = ticketManager.removeTicket(accessToken);
             if (accessTicket != null) {
-                Subject subjectPrincipal = accessTicket.getPrincipal();
-                // DO NOT REMOVE! This log will be used in statistic analyzing
-                LOG.info("EVENT#user-sso-logged-out# USER#{}#", subjectPrincipal.getUserName());
+                LOG.info("EVENT#user-sso-logged-out# USER#{}#", accessTicket.getUserId());
             } else {
                 LOG.warn("AccessTicket not found. Nothing to do.");
             }
@@ -157,33 +168,4 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
         }
         return response.build();
     }
-
-//    public static class Credentials {
-//        private String username;
-//        private String password;
-//
-//        public Credentials() {
-//        }
-//
-//        public Credentials(String username, String password) {
-//            this.username = username;
-//            this.password = password;
-//        }
-//
-//        public String getUsername() {
-//            return username;
-//        }
-//
-//        public void setUsername(String username) {
-//            this.username = username;
-//        }
-//
-//        public String getPassword() {
-//            return password;
-//        }
-//
-//        public void setPassword(String password) {
-//            this.password = password;
-//        }
-//    }
 }

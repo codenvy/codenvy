@@ -21,8 +21,11 @@ import com.codenvy.auth.sso.shared.dto.SubjectDto;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.auth.AuthenticationExceptionMapper;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
@@ -44,7 +47,7 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class SsoServiceTest {
-    AuthenticationExceptionMapper exceptionMapper;
+    AuthenticationExceptionMapper exceptionMapper = new AuthenticationExceptionMapper();
     @Mock
     TicketManager              ticketManager;
     @Mock
@@ -53,6 +56,9 @@ public class SsoServiceTest {
     CookieBuilder              cookieBuilder;
     @InjectMocks
     SsoService                 ssoService;
+    @Mock
+    UserManager                userManager;
+    User user = new UserImpl("id-1", "emai@host.com", "name");
 
 
     @Test
@@ -78,14 +84,15 @@ public class SsoServiceTest {
     }
 
     @Test
-    public void shouldValidUserIfTokenIsValid() {
+    public void shouldValidUserIfTokenIsValid() throws NotFoundException, ServerException {
         //given
-        Subject principal = new SubjectImpl("someuser", "132", "t1", false);
-        AccessTicket ticket = new AccessTicket("t1", principal, "default");
-        SubjectDto user = DtoFactory.newDto(SubjectDto.class)
-                                    .withName(principal.getUserName())
-                                    .withId(principal.getUserId()).withToken(principal.getToken())
-                                    .withTemporary(false);
+        when(userManager.getById(eq(user.getId()))).thenReturn(user);
+        AccessTicket ticket = new AccessTicket("t1", user.getId(), "default");
+        SubjectDto subjectDto = DtoFactory.newDto(SubjectDto.class)
+                                          .withName(user.getName())
+                                          .withId(user.getId())
+                                          .withToken(ticket.getAccessToken());
+
         when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
 
         //when
@@ -97,7 +104,7 @@ public class SsoServiceTest {
                 .when()
                 .get("internal/sso/server/{token}");
         //then
-        assertEquals(unwrapDto(response, SubjectDto.class), user);
+        assertEquals(unwrapDto(response, SubjectDto.class), subjectDto);
         assertTrue(ticket.getRegisteredClients().contains("http://dev.box.com/api"));
     }
 
@@ -119,7 +126,7 @@ public class SsoServiceTest {
     @Test
     public void shouldUnregisterClientByTokenAndUrl() {
         //given
-        AccessTicket ticket = new AccessTicket("t1", new SubjectImpl("someuser", "132", "t1", false), "default");
+        AccessTicket ticket = new AccessTicket("t1", "id-34", "default");
         ticket.registerClientUrl("http://dev.box.com/api");
         when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
         //when

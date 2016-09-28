@@ -15,7 +15,6 @@
 package com.codenvy.auth.sso.server.ticket;
 
 
-
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.TicketManager;
 
@@ -53,9 +52,10 @@ public class AccessTicketInvalidator extends TimerTask {
 
     @Override
     public void run() {
+
         for (AccessTicket accessTicket : ticketManager.getAccessTickets()) {
             if (System.currentTimeMillis() > accessTicket.getCreationTime() + ticketLifeTimeSeconds * 1000) {
-                LOG.info("Initiate user {} sso logout by timeout", accessTicket.getPrincipal().getUserName());
+                LOG.info("Initiate user {} sso logout by timeout", accessTicket.getUserId());
                 ticketManager.removeTicket(accessTicket.getAccessToken());
             }
         }

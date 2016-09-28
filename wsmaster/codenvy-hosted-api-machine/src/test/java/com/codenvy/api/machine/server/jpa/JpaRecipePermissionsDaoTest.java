@@ -37,7 +37,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.AssertTrue;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -212,7 +211,7 @@ public class JpaRecipePermissionsDaoTest {
             bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
             bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
 
-            Map properties = new HashMap();
+            Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
                 properties.put(TRANSACTION_TYPE,
                                PersistenceUnitTransactionType.RESOURCE_LOCAL.name());

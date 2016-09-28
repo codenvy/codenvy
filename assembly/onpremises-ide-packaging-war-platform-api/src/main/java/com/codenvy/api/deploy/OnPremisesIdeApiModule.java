@@ -34,6 +34,8 @@ import com.codenvy.auth.sso.client.filter.RequestMethodFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
+import com.codenvy.ldap.LdapModule;
+import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.organization.api.OrganizationModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolver;
@@ -249,7 +251,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                 .to(com.codenvy.auth.sso.client.NoUserInteractionTokenHandler.class);
 
         bindConstant().annotatedWith(Names.named("auth.jaas.realm")).to("default_realm");
-        bindConstant().annotatedWith(Names.named("auth.handler.default")).to("org");
         bindConstant().annotatedWith(Names.named("auth.sso.access_cookie_path")).to("/api/internal/sso/server");
         bindConstant().annotatedWith(Names.named("auth.sso.access_ticket_lifetime_seconds")).to(259200);
         bindConstant().annotatedWith(Names.named("auth.sso.bearer_ticket_lifetime_seconds")).to(3600);
@@ -396,6 +397,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
+
+        //ldap
+        if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
+            install(new LdapModule());
+        }
 
         // install report sender
         install(new ReportModule());
