@@ -15,6 +15,7 @@
 package com.codenvy.machine;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -56,25 +57,28 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
         final int colonIndex = serverAddress.indexOf(':');
         final String serverHost = serverAddress.substring(0, colonIndex);
         final String serverPort = serverAddress.substring(colonIndex + 1);
-        String serverPath = server.getPath();
-        if (serverPath == null) {
-            serverPath = "";
-        } else if (serverPath.startsWith("/")) {
+        String serverPath = "";
+        if (server.getProperties() != null && server.getProperties().getPath() != null) {
+            serverPath = server.getProperties().getPath();
+        }
+        if (serverPath.startsWith("/")) {
             serverPath = serverPath.substring(1);
         }
 
         try {
-            final URI serverUri = new URI(format(serverUrlTemplate,
+            URI serverUri = new URI(format(serverUrlTemplate,
                                                  server.getRef(),
                                                  serverHost,
                                                  serverPort,
                                                  serverPath));
+            String newServerAddress = serverUri.getHost() +
+                                      (serverUri.getPort() == -1 ? "" : ":" + serverUri.getPort());
 
             return new ServerImpl(server.getRef(),
                                   serverUri.getScheme(),
-                                  serverUri.getHost() + (serverUri.getPort() == -1 ? "" : ":" + serverUri.getPort()),
-                                  serverUri.getPath(),
-                                  serverUri.toString());
+                                  newServerAddress,
+                                  serverUri.toString(),
+                                  new ServerPropertiesImpl(serverUri.getPath(), newServerAddress, serverUri.toString()));
         } catch (URISyntaxException e) {
             LOG.error(format("Server uri created from template taken from configuration is invalid. Template:%s. Origin server:%s",
                              serverUrlTemplate,
