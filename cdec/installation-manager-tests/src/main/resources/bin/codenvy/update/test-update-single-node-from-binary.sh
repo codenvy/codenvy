@@ -27,6 +27,9 @@ validateInstalledCodenvyVersion ${PREV_CODENVY_VERSION}
 executeSshCommand "cat codenvy/codenvy.properties | grep 'install_monitoring_tools=false'"
 authWithoutRealmAndServerDns "admin" "password"
 
+executeSshCommand "sudo sed -i 's/${HOST_URL}/${NEW_HOST_URL}/g' /etc/hosts"
+executeIMCommand "config" "--hostname" "${NEW_HOST_URL}"
+
 executeIMCommand "download" "codenvy" "${LATEST_CODENVY_VERSION}"
 
 BINARIES="/home/vagrant/codenvy/updates/codenvy/${LATEST_CODENVY_VERSION}/codenvy-${LATEST_CODENVY_VERSION}.zip"

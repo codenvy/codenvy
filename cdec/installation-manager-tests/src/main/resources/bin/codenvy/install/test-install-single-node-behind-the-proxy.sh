@@ -81,8 +81,8 @@ validateExpectedString ".*NO_PROXY=\"$NO_PROXY\".*"
 ## check creation of workspace
 authWithoutRealmAndServerDns "admin" "password"
 
-# create user "cdec.im.test@gmail.com"
-doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
+# create user "cdec.im.test1@gmail.com"
+doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test1@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
 fetchJsonParameter "id"
 USER_ID=${OUTPUT}
 

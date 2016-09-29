@@ -391,13 +391,14 @@ public class TestCDECArtifact extends BaseTest {
                             TMP_CODENVY));
 
         List<Command> commands = ((MacroCommand) spyCdecArtifact.getUpdateCommand(versionToUpdate, pathToBinaries, options.setStep(1))).getCommands();
-        assertEquals(commands.size(), 8);
+        assertEquals(commands.size(), 10);
         k = 0;
 
         assertTrue(commands.get(k).toString().matches(format("\\{'command'='sudo cp %1$s/manifests/nodes/single_server/base_config.pp %1$s/manifests/nodes/single_server/base_config.pp.back ; sudo cp %1$s/manifests/nodes/single_server/base_config.pp %1$s/manifests/nodes/single_server/base_config.pp.back.\\d+ ; ', 'agent'='LocalAgent'\\}", ETC_PUPPET)),
                                                       "Actual command: " + commands.get(k++).toString());
 
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/base_config.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|YOUR_DNS_NAME|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/base_config.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
+        assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/base_config.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|codenvy.onprem|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/base_config.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/base_config.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$host_url *= *\"[^\"]*\"|$host_url = \"host_url\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/base_config.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/base_config.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$some property *= *\"[^\"]*\"|$some property = \"some value\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/base_config.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
 
@@ -405,6 +406,7 @@ public class TestCDECArtifact extends BaseTest {
                    "Actual command: " + commands.get(k++).toString());
 
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/single_server.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|YOUR_DNS_NAME|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
+        assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/single_server.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|codenvy.onprem|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/single_server.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$host_url *= *\"[^\"]*\"|$host_url = \"host_url\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
         assertEquals(commands.get(k++).toString(), format("{'command'='sudo cat %1$s/manifests/nodes/single_server/single_server.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$some property *= *\"[^\"]*\"|$some property = \"some value\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", TMP_CODENVY));
 

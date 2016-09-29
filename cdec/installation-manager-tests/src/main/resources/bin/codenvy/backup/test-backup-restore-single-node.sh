@@ -44,8 +44,8 @@ BACKUP_AT_START=${OUTPUT}
 # modify data: add account, workspace, project, user
 authWithoutRealmAndServerDns "admin" "password"
 
-# create user "cdec.im.test@gmail.com"
-doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
+# create user "cdec.im.test1@gmail.com"
+doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test1@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
 fetchJsonParameter "id"
 USER_ID=${OUTPUT}
 
@@ -124,9 +124,9 @@ executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}
 authWithoutRealmAndServerDns "admin" "password"
 
 doGet "http://${HOST_URL}/api/user/${USER_ID}?token=${TOKEN}"
-validateExpectedString ".*cdec.im.test@gmail.com.*"
+validateExpectedString ".*cdec.im.test1@gmail.com.*"
 
-authWithoutRealmAndServerDns "cdec.im.test@gmail.com" "pwd123ABC"
+authWithoutRealmAndServerDns "cdec.im.test1@gmail.com" "pwd123ABC"
 
 doGet "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}?token=${TOKEN}"
 validateExpectedString ".*${PROJECT_NAME}.*${WORKSPACE_NAME}.*"

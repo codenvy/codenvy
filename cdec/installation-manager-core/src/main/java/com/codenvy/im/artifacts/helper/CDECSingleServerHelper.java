@@ -153,6 +153,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
                     Path file = propertiesFiles.next();
 
                     commands.add(createReplaceCommand(file, "YOUR_DNS_NAME", config.getHostUrl()));
+                    commands.add(createReplaceCommand(file, "codenvy.onprem", config.getHostUrl()));
                     for (Map.Entry<String, String> e : config.getProperties().entrySet()) {
                         String property = e.getKey();
                         String value = e.getValue();
@@ -245,6 +246,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
 
                     // set host url in the "machine instance" section of puppet manifest
                     commands.add(createReplaceCommand(propertiesFileOfCodenvyBinary, "YOUR_DNS_NAME", config.getHostUrl()));
+                    commands.add(createReplaceCommand(propertiesFileOfCodenvyBinary, "codenvy.onprem", config.getHostUrl()));
 
                     // replace propertiesFileOfCodenvyBinary on actual codenvy properties
                     for (Map.Entry<String, String> e : config.getProperties().entrySet()) {
