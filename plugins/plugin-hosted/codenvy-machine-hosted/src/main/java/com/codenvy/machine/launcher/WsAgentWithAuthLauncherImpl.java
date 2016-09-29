@@ -16,6 +16,7 @@ package com.codenvy.machine.launcher;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
+import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
@@ -49,18 +50,17 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
     @Inject
     public WsAgentWithAuthLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
                                        HttpJsonRequestFactory httpJsonRequestFactory,
+                                       WsAgentPingRequestFactory wsAgentPingRequestFactory,
                                        @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
                                        @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                        @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
-                                       @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
                                        @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage,
                                        @Named("api.endpoint") String apiEndpoint) {
         super(machineProcessManagerProvider,
-              httpJsonRequestFactory,
+              wsAgentPingRequestFactory,
               wsAgentRunCommand,
               wsAgentMaxStartTimeMs,
               wsAgentPingDelayMs,
-              wsAgentPingConnectionTimeoutMs,
               pingTimedOutErrorMessage);
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;

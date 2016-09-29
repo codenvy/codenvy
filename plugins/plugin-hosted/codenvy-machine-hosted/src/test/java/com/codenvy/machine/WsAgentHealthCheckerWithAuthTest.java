@@ -16,6 +16,7 @@ package com.codenvy.machine;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
+import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.Server;
@@ -55,22 +56,23 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class WsAgentHealthCheckerWithAuthTest {
-    private final static int    WS_AGENT_PING_CONNECTION_TIMEOUT_MS = 20;
-    private final static String WS_AGENT_SERVER_URL                 = "ws_agent";
-    private final static String API_ENDPOINT                        = "api_endpoint";
+    private final static String WS_AGENT_SERVER_URL = "ws_agent";
+    private final static String API_ENDPOINT        = "api_endpoint";
 
     @Mock
-    private HttpJsonRequestFactory httpJsonRequestFactory;
+    private HttpJsonRequestFactory    httpJsonRequestFactory;
     @Mock
-    private Machine                devMachine;
+    private WsAgentPingRequestFactory wsAgentPingRequestFactory;
     @Mock
-    private MachineRuntimeInfo     machineRuntimeInfo;
+    private Machine                   devMachine;
     @Mock
-    private Server                 server;
+    private MachineRuntimeInfo        machineRuntimeInfo;
     @Mock
-    private HttpJsonRequest        httpJsonRequest;
+    private Server                    server;
     @Mock
-    private HttpJsonResponse       httpJsonResponse;
+    private HttpJsonRequest           httpJsonRequest;
+    @Mock
+    private HttpJsonResponse          httpJsonResponse;
 
     private Map<String, Server> servers = new HashMap<>(1);
 
@@ -84,9 +86,10 @@ public class WsAgentHealthCheckerWithAuthTest {
         when(server.getRef()).thenReturn(WSAGENT_REFERENCE);
         when(server.getUrl()).thenReturn(WS_AGENT_SERVER_URL);
 
-        checker = new WsAgentHealthCheckerWithAuth(httpJsonRequestFactory, WS_AGENT_PING_CONNECTION_TIMEOUT_MS, API_ENDPOINT);
+        checker = new WsAgentHealthCheckerWithAuth(wsAgentPingRequestFactory, httpJsonRequestFactory, API_ENDPOINT);
 
         when(httpJsonRequestFactory.fromUrl(anyString())).thenReturn(httpJsonRequest);
+        when(wsAgentPingRequestFactory.createRequest(devMachine)).thenReturn(httpJsonRequest);
         when(httpJsonRequest.setMethod(any())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.setTimeout(anyInt())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
@@ -125,11 +128,7 @@ public class WsAgentHealthCheckerWithAuthTest {
 
         final WsAgentHealthStateDto result = checker.check(devMachine);
 
-        verify(httpJsonRequestFactory).fromUrl(WS_AGENT_SERVER_URL + '/');
-        verify(httpJsonRequest, times(2)).setMethod(javax.ws.rs.HttpMethod.GET);
-        verify(httpJsonRequest).setTimeout(WS_AGENT_PING_CONNECTION_TIMEOUT_MS);
         verify(httpJsonRequest, times(2)).request();
-
         assertEquals(200, result.getCode());
     }
 
@@ -139,11 +138,7 @@ public class WsAgentHealthCheckerWithAuthTest {
 
         final WsAgentHealthStateDto result = checker.check(devMachine);
 
-        verify(httpJsonRequestFactory).fromUrl(WS_AGENT_SERVER_URL + '/');
-        verify(httpJsonRequest, times(2)).setMethod(javax.ws.rs.HttpMethod.GET);
-        verify(httpJsonRequest).setTimeout(WS_AGENT_PING_CONNECTION_TIMEOUT_MS);
         verify(httpJsonRequest, times(2)).request();
-
         assertEquals(SERVICE_UNAVAILABLE.getStatusCode(), result.getCode());
     }
 }

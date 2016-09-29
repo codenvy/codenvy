@@ -17,10 +17,10 @@ package com.codenvy.machine;
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
 import org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl;
+import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 
@@ -41,22 +41,22 @@ import java.io.IOException;
 public class WsAgentHealthCheckerWithAuth extends WsAgentHealthCheckerImpl {
 
     private final HttpJsonRequestFactory httpJsonRequestFactory;
-    private final String apiEndpoint;
+    private final String                 apiEndpoint;
 
 
     @Inject
-    public WsAgentHealthCheckerWithAuth(HttpJsonRequestFactory httpJsonRequestFactory,
-                                        @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
+    public WsAgentHealthCheckerWithAuth(WsAgentPingRequestFactory pingRequestFactory,
+                                        HttpJsonRequestFactory httpJsonRequestFactory,
                                         @Named("api.endpoint") String apiEndpoint) {
-        super(httpJsonRequestFactory, wsAgentPingConnectionTimeoutMs);
-        this.httpJsonRequestFactory = httpJsonRequestFactory;
+        super(pingRequestFactory);
         this.apiEndpoint = apiEndpoint;
+        this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
 
 
     // modifies the ping request if it is possible to get the machine token.
-    protected HttpJsonRequest createPingRequest(Machine devMachine, Server wsAgent) throws ServerException {
-        final HttpJsonRequest pingRequest = super.createPingRequest(devMachine, wsAgent);
+    protected HttpJsonRequest createPingRequest(Machine devMachine) throws ServerException {
+        final HttpJsonRequest pingRequest = super.createPingRequest(devMachine);
         final String tokenServiceUrl = UriBuilder.fromUri(apiEndpoint)
                                                  .replacePath("api/machine/token/" + devMachine.getWorkspaceId())
                                                  .build()
