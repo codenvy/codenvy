@@ -21,13 +21,11 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.shared.dto.ResourceDto;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -44,7 +42,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Sergii Leschenko
  */
-@Api(value = "/resource", description = "Resources REST API")
+@Api(value = "/resource", description = "Resource REST API")
 @Path("/resource")
 public class ResourceService extends Service {
     private final ResourceManager resourceManager;
@@ -58,7 +56,8 @@ public class ResourceService extends Service {
     @Path("/{accountId}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get list of resources which are available for given account",
-                  response = OrganizationDto.class)
+                  response = ResourceDto.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The total resources are successfully fetched"),
                    @ApiResponse(code = 404, message = "Account with specified id was not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
@@ -66,7 +65,7 @@ public class ResourceService extends Service {
                                                @PathParam("accountId") String accountId) throws NotFoundException, ServerException {
         return resourceManager.getTotalResources(accountId)
                               .stream()
-                              .map(this::toDto)
+                              .map(DtoConverter::asDto)
                               .collect(Collectors.toList());
     }
 
@@ -74,7 +73,8 @@ public class ResourceService extends Service {
     @Path("/{accountId}/available")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get list of resources which are available for usage by given account",
-                  response = OrganizationDto.class)
+                  response = ResourceDto.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The available resources are successfully fetched"),
                    @ApiResponse(code = 404, message = "Account with specified id was not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
@@ -82,7 +82,7 @@ public class ResourceService extends Service {
                                                    String accountId) throws NotFoundException, ServerException {
         return resourceManager.getAvailableResources(accountId)
                               .stream()
-                              .map(this::toDto)
+                              .map(DtoConverter::asDto)
                               .collect(Collectors.toList());
     }
 
@@ -90,7 +90,8 @@ public class ResourceService extends Service {
     @Path("/{accountId}/used")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get list of resources which are used by given account",
-                  response = OrganizationDto.class)
+                  response = ResourceDto.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The used resources are successfully fetched"),
                    @ApiResponse(code = 404, message = "Account with specified id was not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
@@ -98,14 +99,7 @@ public class ResourceService extends Service {
                                               String accountId) throws NotFoundException, ServerException {
         return resourceManager.getUsedResources(accountId)
                               .stream()
-                              .map(this::toDto)
+                              .map(DtoConverter::asDto)
                               .collect(Collectors.toList());
-    }
-
-    private ResourceDto toDto(Resource resource) {
-        return DtoFactory.newDto(ResourceDto.class)
-                         .withAmount(resource.getAmount())
-                         .withType(resource.getType())
-                         .withUnit(resource.getUnit());
     }
 }

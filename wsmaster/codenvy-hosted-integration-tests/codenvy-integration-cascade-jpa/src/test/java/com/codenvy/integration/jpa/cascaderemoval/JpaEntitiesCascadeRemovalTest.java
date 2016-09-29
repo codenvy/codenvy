@@ -26,6 +26,10 @@ import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackDomain;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
+import com.codenvy.resource.api.ResourceModule;
+import com.codenvy.resource.spi.FreeResourcesLimitDao;
+import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
+import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -58,6 +62,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -79,6 +84,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
+import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.*;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createFactory;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createPreferences;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
@@ -117,6 +123,7 @@ public class JpaEntitiesCascadeRemovalTest {
     private WorkerDao               workerDao;
     private JpaRecipePermissionsDao recipePermissionsDao;
     private JpaStackPermissionsDao  stackPermissionsDao;
+    private FreeResourcesLimitDao   freeResourcesLimitDao;
 
     /** User is a root of dependency tree. */
     private UserImpl user;
@@ -163,6 +170,9 @@ public class JpaEntitiesCascadeRemovalTest {
     private StackImpl stack2;
     private StackImpl stack3;
 
+    /** Free resources limit depends on user via personal account */
+    private FreeResourcesLimitImpl freeResourcesLimit;
+
     @BeforeMethod
     public void setUp() throws Exception {
         injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
@@ -181,6 +191,9 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new FactoryJpaModule());
                 install(new OnPremisesJpaWorkspaceModule());
                 install(new OnPremisesJpaMachineModule());
+
+                bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
+                bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber.class).asEagerSingleton();
             }
         });
 
@@ -195,6 +208,7 @@ public class JpaEntitiesCascadeRemovalTest {
         stackDao = injector.getInstance(StackDao.class);
         recipeDao = injector.getInstance(RecipeDao.class);
         workerDao = injector.getInstance(WorkerDao.class);
+        freeResourcesLimitDao = injector.getInstance(FreeResourcesLimitDao.class);
 
         TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>> lit =
                 new TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>>() {
@@ -245,6 +259,8 @@ public class JpaEntitiesCascadeRemovalTest {
         // Non-removed user permissions and stack are present
         assertNotNull(notFoundToNull(() -> stackDao.getById(stack3.getId())));
         assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
+        // free resources limit is removed
+        assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
 
         //cleanup
         stackDao.remove(stack3.getId());
@@ -272,6 +288,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertNotNull(notFoundToNull(() -> recipeDao.getById(recipe2.getId())));
         assertNotNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));
         assertNotNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
+        assertNotNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
         wipeTestData();
     }
 
@@ -327,10 +344,12 @@ public class JpaEntitiesCascadeRemovalTest {
         recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write")));
         recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe2.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write", "execute")));
 
-
+        freeResourcesLimitDao.store(freeResourcesLimit = createFreeResourcesLimit(user.getId()));
     }
 
     private void wipeTestData() throws ConflictException, ServerException, NotFoundException {
+        freeResourcesLimitDao.remove(freeResourcesLimit.getAccountId());
+
         snapshotDao.removeSnapshot(snapshot1.getId());
         snapshotDao.removeSnapshot(snapshot2.getId());
         snapshotDao.removeSnapshot(snapshot3.getId());

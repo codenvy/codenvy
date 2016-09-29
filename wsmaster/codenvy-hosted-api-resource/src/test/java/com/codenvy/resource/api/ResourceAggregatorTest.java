@@ -16,7 +16,7 @@ package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -53,13 +53,13 @@ public class ResourceAggregatorTest {
     private static final String B_RESOURCE_TYPE = "resourceB";
     private static final String C_RESOURCE_TYPE = "resourceC";
     @Mock
-    ResourceType<AResource> aResourceType;
+    ResourceType aResourceType;
 
     @Mock
-    ResourceType<BResource> bResourceType;
+    ResourceType bResourceType;
 
     @Mock
-    ResourceType<BResource> cResourceType;
+    ResourceType cResourceType;
 
     private ResourceAggregator resourceAggregator;
 
@@ -74,13 +74,13 @@ public class ResourceAggregatorTest {
 
     @Test
     public void shouldTestResourcesAggregationByTypes() throws Exception {
-        final AResource aResource = new AResource();
-        final BResource bResource = new BResource();
-        final BResource anotherBResource = new BResource();
-        final BResource aggregatedBResources = new BResource();
+        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
+        final ResourceImpl aggregatedBResources = new ResourceImpl(B_RESOURCE_TYPE, 444, "unit");
         when(bResourceType.aggregate(any(), any())).thenReturn(aggregatedBResources);
 
-        final Map<String, AbstractResource> aggregatedResources =
+        final Map<String, ResourceImpl> aggregatedResources =
                 resourceAggregator.aggregateByType(asList(aResource, bResource, anotherBResource));
 
         verify(bResourceType).aggregate(eq(bResource), eq(anotherBResource));
@@ -97,11 +97,11 @@ public class ResourceAggregatorTest {
 
     @Test
     public void shouldTestResourcesDeduction() throws Exception {
-        final AResource aResource = new AResource();
-        final BResource bResource = new BResource();
-        final CResource cResource = new CResource();
-        final BResource anotherBResource = new BResource();
-        final BResource aggregatedBResources = new BResource();
+        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl cResource = new ResourceImpl(C_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
+        final ResourceImpl aggregatedBResources = new ResourceImpl(A_RESOURCE_TYPE, 444, "unit");
         when(bResourceType.deduct(any(), any())).thenReturn(aggregatedBResources);
 
         final List<? extends Resource> deductedResources = resourceAggregator.deduct(asList(aResource, bResource),
@@ -118,8 +118,8 @@ public class ResourceAggregatorTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "No enough resources")
     public void shouldThrowConflictExceptionWhenTotalResourcesDoNotHaveEnoughtAmoutToDeduct() throws Exception {
-        final AResource aResource = new AResource();
-        final AResource anotherAResource = new AResource();
+        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl anotherAResource = new ResourceImpl(A_RESOURCE_TYPE, 321, "unit");
         when(aResourceType.deduct(any(), any())).thenThrow(new ConflictException("No enough resources"));
 
         resourceAggregator.deduct(singletonList(aResource), singletonList(anotherAResource));
@@ -127,7 +127,7 @@ public class ResourceAggregatorTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionWhenTryingToAggregateNotSupportedResource() throws Exception {
-        final AbstractResource dResource = mock(AbstractResource.class);
+        final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 
         resourceAggregator.aggregateByType(singletonList(dResource));
@@ -135,8 +135,8 @@ public class ResourceAggregatorTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionWhenTryingToAggregateNotSupportedResources() throws Exception {
-        final AbstractResource dResource = mock(AbstractResource.class);
-        final AbstractResource anotherDResource = mock(AbstractResource.class);
+        final ResourceImpl dResource = mock(ResourceImpl.class);
+        final ResourceImpl anotherDResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
         when(anotherDResource.getType()).thenReturn("resourceD");
 
@@ -145,7 +145,7 @@ public class ResourceAggregatorTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionWhenTotalResourcesListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
-        final AbstractResource dResource = mock(AbstractResource.class);
+        final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 
         resourceAggregator.deduct(emptyList(), singletonList(dResource));
@@ -153,45 +153,9 @@ public class ResourceAggregatorTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionWhenResourcesToDeductListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
-        final AbstractResource dResource = mock(AbstractResource.class);
+        final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 
         resourceAggregator.deduct(singletonList(dResource), emptyList());
-    }
-
-    private static class AResource extends AbstractResource {
-        @Override
-        public String getType() {
-            return A_RESOURCE_TYPE;
-        }
-
-        @Override
-        public String getUnit() {
-            return null;
-        }
-    }
-
-    private static class BResource extends AbstractResource {
-        @Override
-        public String getType() {
-            return B_RESOURCE_TYPE;
-        }
-
-        @Override
-        public String getUnit() {
-            return null;
-        }
-    }
-
-    private static class CResource extends AbstractResource {
-        @Override
-        public String getType() {
-            return C_RESOURCE_TYPE;
-        }
-
-        @Override
-        public String getUnit() {
-            return null;
-        }
     }
 }

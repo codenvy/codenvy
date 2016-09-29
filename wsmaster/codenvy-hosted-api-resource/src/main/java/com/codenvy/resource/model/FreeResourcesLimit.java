@@ -12,25 +12,23 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.model;
 
-import com.codenvy.resource.spi.impl.AbstractResource;
+import java.util.List;
 
 /**
+ * Represents limit of resources which are available for free usage by some account.
+ *
  * @author Sergii Leschenko
  */
-public class TestResource extends AbstractResource {
-    public TestResource(long amount) {
-        super(amount);
-    }
+public interface FreeResourcesLimit {
+    /**
+     * Returns id of account that can use free resources.
+     */
+    String getAccountId();
 
-    @Override
-    public String getType() {
-        return "test";
-    }
-
-    @Override
-    public String getUnit() {
-        return "mb";
-    }
+    /**
+     * Returns resources which are available for free usage.
+     */
+    List<? extends Resource> getResources();
 }

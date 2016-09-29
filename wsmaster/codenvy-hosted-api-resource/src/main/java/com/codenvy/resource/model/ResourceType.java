@@ -14,43 +14,56 @@
  */
 package com.codenvy.resource.model;
 
+import com.codenvy.resource.spi.impl.ResourceImpl;
+
 import org.eclipse.che.api.core.ConflictException;
 
+import java.util.Set;
+
 /**
- * Represents some kind of resources which can be used by account
+ * Represents some kind of resources which can be used by account.
  *
  * @author Sergii Leschenko
  */
-public interface ResourceType<T extends Resource> {
+public interface ResourceType {
     /**
-     * Returns id of resource type
+     * Returns id of resource type.
      */
     String getId();
 
     /**
-     * Returns description of resource type
+     * Returns description of resource type.
      */
     String getDescription();
 
     /**
-     * Defines function for aggregating two resources of this type
+     * Returns supported units.
+     */
+    Set<String> getSupportedUnits();
+
+    /**
+     * Defines function for aggregating two resources of this type.
      *
      * @param resourceA
      *         resources A
      * @param resourceB
      *         resource B
+     * @throws IllegalArgumentException
+     *         if one of resources has unsupported type or unit
      */
-    T aggregate(T resourceA, T resourceB);
+    ResourceImpl aggregate(ResourceImpl resourceA, ResourceImpl resourceB);
 
     /**
-     * Defines function for subtraction two resources of this type
+     * Defines function for subtraction two resources of this type.
      *
      * @param total
      *         total resource
      * @param deduction
      *         resource that should be deducted from {@code total}
+     * @throws IllegalArgumentException
+     *         if one of resources has unsupported type or unit
      * @throws ConflictException
      *         when {@code total}'s amount is less than {@code deduction}'s amount
      */
-    T deduct(T total, T deduction) throws ConflictException;
+    ResourceImpl deduct(ResourceImpl total, ResourceImpl deduction) throws ConflictException;
 }

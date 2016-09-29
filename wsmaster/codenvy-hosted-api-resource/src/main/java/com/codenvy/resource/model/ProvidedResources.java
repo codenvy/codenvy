@@ -19,42 +19,41 @@ import org.eclipse.che.commons.annotation.Nullable;
 import java.util.List;
 
 /**
- * Resources that are provided for using by account by some resource providing mechanism
+ * Resources that are provided for using by account by some resource providing mechanism.
  *
  * @author Sergii Leschenko
  */
 public interface ProvidedResources {
 
     /**
-     * Returns id of resource provider
+     * Returns id of resource provider.
      */
     String getProviderId();
 
     /**
-     * Returns id of granted resource entity
-     *
-     * Can be null when provider provides static single entry
+     * Returns id of granted resource entity.
+     * Can be null when provider provides static single entry.
      */
     @Nullable
     String getId();
 
     /**
-     * Returns owner of license
+     * Returns owner of license.
      */
     String getOwner();
 
     /**
-     * Returns time when license became active
+     * Returns time when license became active.
      */
     Long getStartTime();
 
     /**
-     * Returns time when license will be/became inactive
+     * Returns time when license will be/became inactive.
      */
     Long getEndTime();
 
     /**
-     * Returns list of resources which can be used by owner
+     * Returns list of resources which can be used by owner.
      */
     List<? extends Resource> getResources();
 }

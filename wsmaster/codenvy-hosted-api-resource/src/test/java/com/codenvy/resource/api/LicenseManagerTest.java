@@ -14,9 +14,9 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.api.provider.ResourcesProvider;
 import com.codenvy.resource.spi.impl.LicenseImpl;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -64,14 +64,14 @@ public class LicenseManagerTest {
 
     @Test
     public void shouldReturnLicenseForGivenAccount() throws Exception {
-        final TestResource testResource = new TestResource(1000);
-        final TestResource reducedResource = new TestResource(2000);
+        final ResourceImpl testResource = new ResourceImpl("RAM", 1000, "mb");
+        final ResourceImpl reducedResource = new ResourceImpl("timeout", 2000, "m");
         final ProvidedResourcesImpl providedResource = new ProvidedResourcesImpl("test",
-                                                                               null,
-                                                                               "account123",
-                                                                               123L,
-                                                                               321L,
-                                                                               singletonList(testResource));
+                                                                                 null,
+                                                                                 "account123",
+                                                                                 123L,
+                                                                                 321L,
+                                                                                 singletonList(testResource));
 
         when(resourcesProvider.getResources(eq("account123"))).thenReturn(singletonList(providedResource));
         when(resourceAggregator.aggregateByType(any())).thenReturn(ImmutableMap.of(reducedResource.getType(), reducedResource));

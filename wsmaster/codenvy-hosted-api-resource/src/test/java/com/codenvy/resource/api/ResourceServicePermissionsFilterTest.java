@@ -15,6 +15,8 @@
 package com.codenvy.resource.api;
 
 import com.codenvy.organization.api.permissions.OrganizationDomain;
+import com.codenvy.resource.api.free.FreeResourcesLimitService;
+import com.codenvy.resource.api.free.FreeResourcesLimitServicePermissionsFilter;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -34,6 +36,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_ACCOUNT;
 import static com.jayway.restassured.RestAssured.given;
 import static org.eclipse.che.api.user.server.model.impl.UserImpl.PERSONAL_ACCOUNT;
@@ -45,7 +53,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -71,6 +81,9 @@ public class ResourceServicePermissionsFilterTest {
     private ResourceService service;
 
     @Mock
+    private FreeResourcesLimitService freeResourcesLimitService;
+
+    @Mock
     private static Subject subject;
 
 
@@ -83,6 +96,34 @@ public class ResourceServicePermissionsFilterTest {
         when(accountManager.getById(any())).thenReturn(account);
 
         doReturn(true).when(filter).canSeeResources(any(), anyString());
+    }
+
+    @Test
+    public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
+        //given
+        final List<String> collect = Stream.of(ResourceService.class.getDeclaredMethods())
+                                           .filter(method -> Modifier.isPublic(method.getModifiers()))
+                                           .map(Method::getName)
+                                           .collect(Collectors.toList());
+
+        //then
+        assertEquals(collect.size(), 3);
+        assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_TOTAL_RESOURCES_METHOD));
+        assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_AVAILABLE_RESOURCES_METHOD));
+        assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_USED_RESOURCES_METHOD));
+    }
+
+    @Test
+    public void shouldNotProceedFreeResourcesPath() throws Exception {
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .expect()
+               .statusCode(204)
+               .when()
+               .get(SECURE_PATH + "/resource/free/account123");
+
+        verifyZeroInteractions(filter);
+        verify(freeResourcesLimitService).getFreeResourcesLimit(anyString());
     }
 
     @Test

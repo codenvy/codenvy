@@ -25,11 +25,11 @@ import java.util.List;
 public class LicenseImpl implements License {
     private final String                      accountId;
     private final List<ProvidedResourcesImpl> resourcesDetails;
-    private final List<AbstractResource>      totalResources;
+    private final List<ResourceImpl>          totalResources;
 
     public LicenseImpl(String owner,
                        List<ProvidedResourcesImpl> resourcesDetails,
-                       List<AbstractResource> totalResources) {
+                       List<ResourceImpl> totalResources) {
         this.accountId = owner;
         this.resourcesDetails = resourcesDetails;
         this.totalResources = totalResources;
@@ -46,7 +46,7 @@ public class LicenseImpl implements License {
     }
 
     @Override
-    public List<AbstractResource> getTotalResources() {
+    public List<ResourceImpl> getTotalResources() {
         return totalResources;
     }
 

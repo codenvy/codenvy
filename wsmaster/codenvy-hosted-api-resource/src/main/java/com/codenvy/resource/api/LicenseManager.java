@@ -14,8 +14,7 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.api.provider.ResourcesProvider;
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.codenvy.resource.spi.impl.LicenseImpl;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 
@@ -23,6 +22,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author Sergii Leschenko
  */
+@Singleton
 public class LicenseManager {
     private final Set<ResourcesProvider> resourcesProviders;
     private final ResourceAggregator     resourceAggregator;
@@ -45,7 +46,7 @@ public class LicenseManager {
     }
 
     /**
-     * Returns license which given account can use
+     * Returns license which given account can use.
      *
      * @param accountId
      *         account id
@@ -61,7 +62,7 @@ public class LicenseManager {
             resources.addAll(resourcesProvider.getResources(accountId));
         }
 
-        final List<AbstractResource> allResources = resources.stream()
+        final List<ResourceImpl> allResources = resources.stream()
                                                              .flatMap(providedResources -> providedResources.getResources().stream())
                                                              .collect(Collectors.toList());
 

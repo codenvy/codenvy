@@ -20,9 +20,8 @@
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.eclipse.che.account.spi.AccountImpl</class>
-        <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
-        <class>com.codenvy.organization.spi.impl.OrganizationImpl</class>
-        <class>com.codenvy.organization.spi.impl.MemberImpl</class>
+        <class>com.codenvy.resource.spi.impl.ResourceImpl</class>
+        <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>

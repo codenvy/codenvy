@@ -15,7 +15,7 @@
 package com.codenvy.resource.api;
 
 import com.codenvy.resource.shared.dto.ResourceDto;
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -58,7 +58,7 @@ public class ResourceServiceTest {
     private ApiExceptionMapper exceptionMapper;
 
     @Mock
-    AbstractResource resource;
+    ResourceImpl resource;
 
     @Mock
     private ResourceManager resourceManager;

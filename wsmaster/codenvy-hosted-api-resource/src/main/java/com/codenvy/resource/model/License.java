@@ -24,17 +24,17 @@ import java.util.List;
  */
 public interface License {
     /**
-     * Returns id of account that is owner of this license
+     * Returns id of account that is owner of this license.
      */
     String getAccountId();
 
     /**
-     * Returns detailed list of resources which can be used by owner
+     * Returns detailed list of resources which can be used by owner.
      */
     List<? extends ProvidedResources> getResourcesDetails();
 
     /**
-     * Returns list of resources which can be used by owner
+     * Returns list of resources which can be used by owner.
      */
     List<? extends Resource> getTotalResources();
 }

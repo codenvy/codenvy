@@ -15,6 +15,7 @@
 package com.codenvy.resource.api.ram;
 
 import com.codenvy.resource.api.ResourceManager;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -44,10 +45,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -104,7 +105,9 @@ public class WorkspaceRamConsumerTest {
 
         verify(workspaceManager).getWorkspace(eq("workspace123"));
         verify(accountManager).getByName(eq("testAccount"));
-        verify(resourceManager).reserveResources(eq("account123"), eq(Collections.singletonList(new RamResource(1000))), any());
+        verify(resourceManager).reserveResources(eq("account123"), eq(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                     1000,
+                                                                                                     RamResourceType.UNIT))), any());
     }
 
     @Test
@@ -119,7 +122,9 @@ public class WorkspaceRamConsumerTest {
 
         verify(workspaceManager).getWorkspace(eq("workspace123"));
         verify(accountManager).getByName(eq("testAccount"));
-        verify(resourceManager).reserveResources(eq("account123"), eq(Collections.singletonList(new RamResource(1000))), any());
+        verify(resourceManager).reserveResources(eq("account123"), eq(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                     1000,
+                                                                                                     RamResourceType.UNIT))), any());
     }
 
     @Test
@@ -134,7 +139,9 @@ public class WorkspaceRamConsumerTest {
 
         verify(workspaceManager).getWorkspace(eq("workspace123"));
         verify(accountManager).getByName(eq("testAccount"));
-        verify(resourceManager).reserveResources(eq("account123"), eq(Collections.singletonList(new RamResource(DEFAULT_SIZE_MB + 300))), any());
+        verify(resourceManager).reserveResources(eq("account123"), eq(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                     DEFAULT_SIZE_MB + 300,
+                                                                                                     RamResourceType.UNIT))), any());
     }
 
     @Test
@@ -147,7 +154,9 @@ public class WorkspaceRamConsumerTest {
         ramConsumer.invoke(invocation);
 
         verify(accountManager).getByName(eq("testAccount"));
-        verify(resourceManager).reserveResources(eq("account123"), eq(Collections.singletonList(new RamResource(DEFAULT_SIZE_MB + 700))), any());
+        verify(resourceManager).reserveResources(eq("account123"), eq(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                     DEFAULT_SIZE_MB + 700,
+                                                                                                     RamResourceType.UNIT))), any());
     }
 
     @Test
@@ -160,7 +169,9 @@ public class WorkspaceRamConsumerTest {
         ramConsumer.invoke(invocation);
 
         verify(accountManager).getByName(eq("testAccount"));
-        verify(resourceManager).reserveResources(eq("account123"), eq(Collections.singletonList(new RamResource(1000))), any());
+        verify(resourceManager).reserveResources(eq("account123"), eq(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                     1000,
+                                                                                                     RamResourceType.UNIT))), any());
     }
 
     @Test(dataProvider = "interceptedMethods")

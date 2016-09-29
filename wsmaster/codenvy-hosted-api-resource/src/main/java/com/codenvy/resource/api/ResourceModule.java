@@ -14,16 +14,20 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.api.provider.FreeResourcesProvider;
-import com.codenvy.resource.api.provider.ResourcesProvider;
+import com.codenvy.resource.api.free.FreeResourcesLimitService;
+import com.codenvy.resource.api.free.FreeResourcesLimitServicePermissionsFilter;
+import com.codenvy.resource.api.free.FreeResourcesProvider;
 import com.codenvy.resource.api.ram.RamResourceType;
 import com.codenvy.resource.api.ram.RamResourceUsageTracker;
 import com.codenvy.resource.api.ram.WorkspaceRamConsumer;
 import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.spi.FreeResourcesLimitDao;
+import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
@@ -35,6 +39,12 @@ public class ResourceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ResourceService.class);
+        bind(ResourceServicePermissionsFilter.class);
+
+        bind(FreeResourcesLimitService.class);
+        bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
+        bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber.class).asEagerSingleton();
+        bind(FreeResourcesLimitServicePermissionsFilter.class);
 
         Multibinder<ResourcesProvider> resourceProviderBinder = Multibinder.newSetBinder(binder(), ResourcesProvider.class);
         resourceProviderBinder.addBinding().to(FreeResourcesProvider.class);

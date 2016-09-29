@@ -15,24 +15,24 @@
 package com.codenvy.resource.model;
 
 /**
- * Represents some number of resources that can be used by account
+ * Represents some number of resources that can be used by account.
  *
  * @author gazarenkov
  * @author Sergii Leschenko
  */
 public interface Resource {
     /**
-     * Returns type of resources, e.g. RAM
+     * Returns type of resources, e.g. RAM.
      */
     String getType();
 
     /**
-     * Returns amount of resources
+     * Returns amount of resources.
      */
     long getAmount();
 
     /**
-     * Returns unit of resources
+     * Returns unit of resources.
      */
     String getUnit();
 }

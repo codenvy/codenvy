@@ -399,6 +399,12 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-resource</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-subscription</artifactId>
                 <version>${project.version}</version>
             </dependency>
