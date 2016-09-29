@@ -69,4 +69,5 @@ updateMigrationConfig admin_ldap_user_name "${OLD_admin_ldap_user_name}"
 updateMigrationConfig admin_ldap_password "${OLD_admin_ldap_password}"
 updateMigrationConfig admin_ldap_mail "${OLD_admin_ldap_mail}"
 
-#${CODENVY_IM_BASE}/jre/bin/java -jar ${CURRENT_DIR}/jpa-migration-tool.jar migrate -config-file $MIGRATION_CONF &>> $LOG_FILE
+# https://github.com/codenvy/deployment/tree/master/automation/jpa-migration-tool
+${CODENVY_IM_BASE}/jre/bin/java -jar ${CURRENT_DIR}/jpa-migration-tool.jar migrate -config-file $MIGRATION_CONF &>> $LOG_FILE
