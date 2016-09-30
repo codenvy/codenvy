@@ -225,6 +225,4 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
             }
         }
     }
-
-
 }

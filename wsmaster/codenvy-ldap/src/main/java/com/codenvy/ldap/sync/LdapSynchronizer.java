@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Periodically synchronizes ldap users with a provided database.
