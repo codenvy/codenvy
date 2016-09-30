@@ -57,7 +57,7 @@
         <com.nimbusds.version>3.0</com.nimbusds.version>
         <commons-configuration.version>1.10</commons-configuration.version>
         <de.flapdoodle.embed-mongo.version>1.50.0</de.flapdoodle.embed-mongo.version>
-        <jdbc.postgresql-driver.version>9.3-1102-jdbc41</jdbc.postgresql-driver.version>
+        <jdbc.postgresql-driver.version>9.4.1211</jdbc.postgresql-driver.version>
         <jline.version>2.12</jline.version>
         <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <maven.releases.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-releases/</maven.releases.repo.url>
