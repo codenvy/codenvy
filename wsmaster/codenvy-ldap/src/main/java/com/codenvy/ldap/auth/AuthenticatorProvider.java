@@ -14,9 +14,11 @@
  */
 package com.codenvy.ldap.auth;
 
-import com.google.common.base.Strings;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.inject.ConfigurationException;
 import org.ldaptive.auth.Authenticator;
 import org.ldaptive.auth.EntryResolver;
 import org.ldaptive.auth.FormatDnResolver;
@@ -32,6 +34,13 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+
 /**
  * Create Authenticator based on container configuration.
  */
@@ -39,6 +48,13 @@ import javax.validation.constraints.NotNull;
 public class AuthenticatorProvider implements Provider<Authenticator> {
 
     private final Authenticator authenticator;
+    private static final String AUTH_TYPE_PROPERTY_NAME               = "ldap.auth.authentication_type";
+    private static final String DN_FORMAT_PROPERTY_NAME               = "ldap.auth.dn_format";
+    private static final String USER_FILTER_PROPERTY_NAME             = "ldap.auth.user.filter";
+    private static final String BASE_DN_PROPERTY_NAME                 = "ldap.base_dn";
+    private static final String ALLOW_MULTIPLE_DNS_PROPERTY_NAME      = "ldap.auth.allow_multiple_dns";
+    private static final String USER_PASSWORD_ATTRIBUTE_PROPERTY_NAME = "ldap.auth.user_password_attribute";
+    private static final String SUBTREE_SEARCH_PROPERTY_NAME          = "ldap.auth.subtree_search";
 
     private       String             baseDn;
     /**
@@ -90,20 +106,21 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     @Inject
     public AuthenticatorProvider(PooledConnectionFactory connFactory,
                                  EntryResolver entryResolver,
-                                 @NotNull @Named("ldap.base_dn") String baseDn,
-                                 @NotNull @Named("ldap.auth.authentication_type") String type,
-                                 @Nullable @Named("ldap.auth.dn_format") String dnFormat,
-                                 @Nullable @Named("ldap.auth.user_password_attribute") String userPasswordAttribute,
-                                 @Nullable @Named("ldap.auth.user.filter") String userFilter,
-                                 @Nullable @Named("ldap.auth.allow_multiple_dns") String allowMultipleDns,
-                                 @Nullable @Named("ldap.auth.subtree_search") String subtreeSearch) {
+                                 @NotNull @Named(BASE_DN_PROPERTY_NAME) String baseDn,
+                                 @NotNull @Named(AUTH_TYPE_PROPERTY_NAME) String type,
+                                 @Nullable @Named(DN_FORMAT_PROPERTY_NAME) String dnFormat,
+                                 @Nullable @Named(USER_PASSWORD_ATTRIBUTE_PROPERTY_NAME) String userPasswordAttribute,
+                                 @Nullable @Named(USER_FILTER_PROPERTY_NAME) String userFilter,
+                                 @Nullable @Named(ALLOW_MULTIPLE_DNS_PROPERTY_NAME) String allowMultipleDns,
+                                 @Nullable @Named(SUBTREE_SEARCH_PROPERTY_NAME) String subtreeSearch) {
         this.baseDn = baseDn;
+        checkRequiredPropertySet(AUTH_TYPE_PROPERTY_NAME, type);
         this.type = AuthenticationType.valueOf(type);
         this.dnFormat = dnFormat;
         this.userPasswordAttribute = userPasswordAttribute;
         this.userFilter = userFilter;
-        this.allowMultipleDns = Strings.isNullOrEmpty(allowMultipleDns) ? false : Boolean.valueOf(allowMultipleDns);
-        this.subtreeSearch = Strings.isNullOrEmpty(subtreeSearch) ? false : Boolean.valueOf(subtreeSearch);
+        this.allowMultipleDns = isNullOrEmpty(allowMultipleDns) ? false : Boolean.valueOf(allowMultipleDns);
+        this.subtreeSearch = isNullOrEmpty(subtreeSearch) ? false : Boolean.valueOf(subtreeSearch);
         this.authenticator = getAuthenticator(connFactory, entryResolver);
     }
 
@@ -129,6 +146,9 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     }
 
     private Authenticator getSaslAuthenticator(PooledConnectionFactory connFactory) {
+        checkRequiredPropertySet(USER_FILTER_PROPERTY_NAME, userFilter,
+                                 Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
+                                 Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
         final PooledSearchDnResolver resolver = new PooledSearchDnResolver();
         resolver.setBaseDn(baseDn);
         resolver.setSubtreeSearch(subtreeSearch);
@@ -140,6 +160,9 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
 
     private Authenticator getAuthenticatedOrAnonSearchAuthenticator(PooledConnectionFactory connFactory,
                                                                     EntryResolver entryResolver) {
+        checkRequiredPropertySet(USER_FILTER_PROPERTY_NAME, userFilter,
+                                 Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
+                                 Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
         final PooledSearchDnResolver resolver = new PooledSearchDnResolver();
         resolver.setBaseDn(baseDn);
         resolver.setSubtreeSearch(subtreeSearch);
@@ -148,7 +171,7 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
         resolver.setUserFilter(userFilter);
 
         final Authenticator auth;
-        if (Strings.isNullOrEmpty(userPasswordAttribute)) {
+        if (isNullOrEmpty(userPasswordAttribute)) {
             auth = new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
         } else {
             auth = new Authenticator(resolver, getPooledCompareAuthenticationHandler(connFactory));
@@ -159,12 +182,14 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     }
 
     private Authenticator getDirectBindAuthenticator(PooledConnectionFactory connFactory) {
+        checkRequiredPropertySet(DN_FORMAT_PROPERTY_NAME, dnFormat);
         final FormatDnResolver resolver = new FormatDnResolver(dnFormat);
         return new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
     }
 
     private Authenticator getActiveDirectoryAuthenticator(PooledConnectionFactory connFactory,
                                                           EntryResolver entryResolver) {
+        checkRequiredPropertySet(DN_FORMAT_PROPERTY_NAME, dnFormat);
         final FormatDnResolver resolver = new FormatDnResolver(dnFormat);
         final Authenticator authn = new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
         authn.setEntryResolver(entryResolver);
@@ -180,7 +205,26 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     private PooledCompareAuthenticationHandler getPooledCompareAuthenticationHandler(PooledConnectionFactory connFactory) {
         final PooledCompareAuthenticationHandler handler = new PooledCompareAuthenticationHandler(
                 connFactory);
+        checkRequiredPropertySet(USER_PASSWORD_ATTRIBUTE_PROPERTY_NAME, userPasswordAttribute);
         handler.setPasswordAttribute(userPasswordAttribute);
         return handler;
     }
+
+    @SafeVarargs
+    @VisibleForTesting
+    final void checkRequiredPropertySet(String name, String value, Pair<String, String>... nameValuePairs) {
+        final List<Pair<String, String>> allPairs = new ArrayList<>();
+        allPairs.add(Pair.of(name, value));
+        if (nameValuePairs != null) {
+            allPairs.addAll(Arrays.asList(nameValuePairs));
+        }
+        for (Pair<String, String> nameValuePair : allPairs) {
+            if (isNullOrEmpty(nameValuePair.second)) {
+                throw new ConfigurationException(
+                        format("Selected authentication type requires the property %s value to be not null or empty.", nameValuePair.first));
+            }
+        }
+    }
+
+
 }
