@@ -18,21 +18,17 @@ import com.codenvy.im.agent.AgentException;
 import com.codenvy.im.commands.decorators.PuppetErrorInterrupter;
 import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.InstallOptions;
-import com.codenvy.im.managers.InstallType;
 import com.codenvy.im.managers.NodeConfig;
 import com.google.common.collect.ImmutableList;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.codenvy.im.commands.SimpleCommand.createCommand;
 import static java.lang.String.format;
-import static java.nio.file.Files.exists;
 
 /** @author Dmytro Nochevnov */
 public class CommandLibrary {
@@ -48,6 +44,11 @@ public class CommandLibrary {
     /** @return Command to ping host by dns */
     public static Command createCheckAccessToHostCommand(String dns) {
         return createCommand(format("ping -c 1 '%s' &> /dev/null", dns));
+    }
+
+    /** @return Command to patch CDEC before or after install **/
+    public static Command createPatchCDECCommand(Path patches, PatchType beforeUpdate, InstallOptions installOptions, Config oldCDECConfig, Map<String, String> patchScriptProperties) {
+        return new PatchCDECCommand(patches, beforeUpdate, installOptions, oldCDECConfig, patchScriptProperties);
     }
 
     public enum PatchType {
@@ -202,47 +203,6 @@ public class CommandLibrary {
                       "sudo cp %1$s %1$s.back.%2$s ; ",
                       file,
                       System.nanoTime());
-    }
-
-    public static Command createPatchCommand(Path patchDir, PatchType patchType, InstallOptions installOptions, Config oldConfig) throws IOException {
-        List<Command> commands = new ArrayList<>();
-
-        Path relativePatchFilePath = getRelativePatchFilePath(patchType, installOptions.getInstallType());
-        Path patchFile = patchDir.resolve(relativePatchFilePath);
-        if (exists(patchFile)) {
-            // substitute old properties
-            for (Map.Entry<String, String> e : oldConfig.getProperties().entrySet()) {
-                String property = e.getKey();
-                String value = oldConfig.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
-
-                commands.add(createReplaceCommand(patchFile.toString(),
-                                                  format("${OLD_%s}", property),
-                                                  value));
-            }
-
-            // substitute new properties
-            Config config = new Config(installOptions.getConfigProperties());
-            for (Map.Entry<String, String> e : config.getProperties().entrySet()) {
-                String property = e.getKey();
-                String value = config.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
-
-                commands.add(createReplaceCommand(patchFile.toString(),
-                                                  format("${%s}", property),
-                                                  value));
-            }
-            commands.add(createCommand(format("bash %s", patchFile)));
-        }
-
-        return new MacroCommand(commands, "Patch resources");
-    }
-
-    /**
-     * Return relative path to patch file, for example:  "single_server/patch_before_update.sh"
-     */
-    private static Path getRelativePatchFilePath(PatchType patchType, InstallType installType) {
-        String pathFilename = format("patch_%s.sh", patchType.toString().toLowerCase());
-        return Paths.get(installType.toString().toLowerCase())
-                    .resolve(pathFilename);
     }
 
     public static Command createRepeatCommand(Command command) {

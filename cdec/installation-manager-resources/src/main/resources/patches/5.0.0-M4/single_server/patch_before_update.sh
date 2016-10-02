@@ -6,30 +6,30 @@ dollar_symbol='$'
 
 CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 LOG_FILE="$CODENVY_IM_BASE/migration.log"
-rm -f $LOG_FILE
+rm -f "$LOG_FILE"
 
 # merge docker registry properties
-echo "Merge docker AWS registry properties into the ${dollar_symbol}docker_registry_aws_ecr_credentials" >> $LOG_FILE
+echo "Merge docker AWS registry properties into the ${dollar_symbol}docker_registry_aws_ecr_credentials" >> "$LOG_FILE"
 if [ "${OLD_docker_registry_aws_id}" != "" ] && [ "${OLD_docker_registry_aws_region}" != "" ] && [ "${OLD_docker_registry_aws_access_key_id}" != "" ] && [ "${OLD_docker_registry_aws_secret_access_key}" != "" ]; then
-    sudo sed -i "s/^  ${dollar_symbol}docker_registry_aws_ecr_credentials.*=.*/  ${dollar_symbol}docker_registry_aws_ecr_credentials = \"registry1.id=${OLD_docker_registry_aws_id}\nregistry1.region=${OLD_docker_registry_aws_region}\nregistry1.access_key_id=${OLD_docker_registry_aws_access_key_id}\nregistry1.secret_access_key=${OLD_docker_registry_aws_secret_access_key}\"/" "${PATH_TO_MANIFEST}" &>> $LOG_FILE
+    sudo sed -i "s/^  ${dollar_symbol}docker_registry_aws_ecr_credentials.*=.*/  ${dollar_symbol}docker_registry_aws_ecr_credentials = \"registry1.id=${OLD_docker_registry_aws_id}\nregistry1.region=${OLD_docker_registry_aws_region}\nregistry1.access_key_id=${OLD_docker_registry_aws_access_key_id}\nregistry1.secret_access_key=${OLD_docker_registry_aws_secret_access_key}\"/" "${PATH_TO_MANIFEST}" &>> "$LOG_FILE"
 fi
 
 # migrate admin credentials
-echo >> $LOG_FILE
-echo "Migrate admin credentials..." >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "Migrate admin credentials..." >> "$LOG_FILE"
 
-sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_name.*=.*/  ${dollar_symbol}codenvy_admin_name = \"${OLD_admin_ldap_user_name}\"/" "${PATH_TO_MANIFEST}" &>> $LOG_FILE
-sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_initial_password.*=.*/  ${dollar_symbol}codenvy_admin_initial_password = \"${OLD_admin_ldap_password}\"/" "${PATH_TO_MANIFEST}" &>> $LOG_FILE
-sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_email.*=.*/  ${dollar_symbol}codenvy_admin_email = \"${OLD_admin_ldap_mail}\"/" "${PATH_TO_MANIFEST}" &>> $LOG_FILE
+sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_name.*=.*/  ${dollar_symbol}codenvy_admin_name = \"${OLD_admin_ldap_user_name}\"/" "${PATH_TO_MANIFEST}" &>> "$LOG_FILE"
+sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_initial_password.*=.*/  ${dollar_symbol}codenvy_admin_initial_password = \"${OLD_admin_ldap_password}\"/" "${PATH_TO_MANIFEST}" &>> "$LOG_FILE"
+sudo sed -i "s/^  ${dollar_symbol}codenvy_admin_email.*=.*/  ${dollar_symbol}codenvy_admin_email = \"${OLD_admin_ldap_mail}\"/" "${PATH_TO_MANIFEST}" &>> "$LOG_FILE"
 
 # JPA integration migration
-echo >> $LOG_FILE
-echo "Start JPA integration migration..." >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "Start JPA integration migration..." >> "$LOG_FILE"
 
 MIGRATION_CONF="${CURRENT_DIR}/configuration.properties"
 
 updateMigrationConfig() {
-    sed -i "s/${dollar_symbol}{$1}/$2/g" "$MIGRATION_CONF" &>> $LOG_FILE
+    sed -i "s/${dollar_symbol}{$1}/$2/g" "$MIGRATION_CONF" &>> "$LOG_FILE"
 }
 
 updateMigrationConfig ldap_connect_pool "${OLD_ldap_connect_pool}"
@@ -70,4 +70,11 @@ updateMigrationConfig admin_ldap_password "${OLD_admin_ldap_password}"
 updateMigrationConfig admin_ldap_mail "${OLD_admin_ldap_mail}"
 
 # https://github.com/codenvy/deployment/tree/master/automation/jpa-migration-tool
-${CODENVY_IM_BASE}/jre/bin/java -jar ${CURRENT_DIR}/jpa-migration-tool.jar migrate -config-file $MIGRATION_CONF &>> $LOG_FILE
+${CODENVY_IM_BASE}/jre/bin/java -jar ${CURRENT_DIR}/jpa-migration-tool.jar migrate -config-file $MIGRATION_CONF &>> "$LOG_FILE"
+
+# create update info file
+echo >> "$LOG_FILE"
+echo "Create update info file" >> "$LOG_FILE"
+echo "All users' passwords have been reset. This is a one-time event to increase security with an internal database consolidation." > "${PATH_TO_UPDATE_INFO}"
+echo "Admin user name: '${OLD_admin_ldap_user_name}'" >> "${PATH_TO_UPDATE_INFO}"
+echo "Admin password:  '${OLD_admin_ldap_password}'" >> "${PATH_TO_UPDATE_INFO}"

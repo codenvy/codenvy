@@ -18,6 +18,7 @@ import com.codenvy.im.artifacts.Artifact;
 import com.codenvy.im.artifacts.ArtifactFactory;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.InstallManagerArtifact;
+import com.codenvy.im.commands.PatchCDECCommand;
 import com.codenvy.im.event.Event;
 import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.InstallOptions;
@@ -27,6 +28,7 @@ import com.codenvy.im.response.InstallArtifactStepInfo;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.io.FileUtils;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -35,6 +37,7 @@ import org.testng.annotations.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -50,6 +53,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -58,6 +62,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -65,10 +70,12 @@ import static org.testng.Assert.assertTrue;
  *         Alexander Reshetnyak
  */
 public class TestInstallCommand extends AbstractTestCommand {
-    public static final String TEST_ARTIFACT = CDECArtifact.NAME;
-    public static final String TEST_VERSION = "1.0.1";
-    public static final String ERROR_MESSAGE = "error";
-    public static final List<String> INSTALL_INFO = ImmutableList.of("step 1", "step 2", "step 3");
+    public static final String       TEST_ARTIFACT            = CDECArtifact.NAME;
+    public static final String       TEST_VERSION             = "1.0.1";
+    public static final String       ERROR_MESSAGE            = "error";
+    public static final List<String> INSTALL_INFO             = ImmutableList.of("step 1", "step 2", "step 3");
+    public static final Path         PATH_TO_TEST_UPDATE_INFO = Paths.get(TestInstallCommand.class.getClassLoader().getResource(".").getPath())
+                                                                     .resolve(PatchCDECCommand.UPDATE_INFO);
     private InstallCommand spyCommand;
 
     private ByteArrayOutputStream outputStream;
@@ -103,6 +110,11 @@ public class TestInstallCommand extends AbstractTestCommand {
     public void restoreSystemStreams() {
         System.setOut(originOut);
         System.setErr(originErr);
+    }
+
+    @AfterMethod
+    public void removeUpdateInfo() {
+        FileUtils.deleteQuietly(PATH_TO_TEST_UPDATE_INFO.toFile());
     }
 
     @Test
@@ -213,6 +225,11 @@ public class TestInstallCommand extends AbstractTestCommand {
             return true;
         }).when(spyConsole).askUser(anyString());
 
+        // test displaying update info
+        FileUtils.write(PATH_TO_TEST_UPDATE_INFO.toFile(), "update info");
+        doReturn(PATH_TO_TEST_UPDATE_INFO).when(spyCommand).getPathToUpdateInfoFile();
+        doNothing().when(spyCommand).removeUpdateInfoFile();
+
         CommandInvoker commandInvoker = new CommandInvoker(spyCommand, mockCommandSession);
         commandInvoker.argument("artifact", TEST_ARTIFACT);
         commandInvoker.argument("version", "1.0.2");
@@ -227,9 +244,13 @@ public class TestInstallCommand extends AbstractTestCommand {
                              "    \"status\" : \"SUCCESS\"\n" +
                              "  } ],\n" +
                              "  \"status\" : \"OK\"\n" +
-                             "}\n");
+                             "}\n" +
+                             "update info\n");
 
         verify(mockFacade, never()).logSaasAnalyticsEvent(any(Event.class));
+
+        verify(spyCommand).removeUpdateInfoFile();
+        assertTrue(Files.exists(PATH_TO_TEST_UPDATE_INFO));
     }
 
     @Test
@@ -704,5 +725,21 @@ public class TestInstallCommand extends AbstractTestCommand {
         assertEquals(values.get(0).getType(), Event.Type.IM_ARTIFACT_INSTALL_FINISHED_SUCCESSFULLY);
         assertTrue(values.get(0).getParameters().toString().matches(format("\\{ARTIFACT=%s, VERSION=%s, TIME=\\d*}", TEST_ARTIFACT, TEST_VERSION)),
                    "Actual parameters: " + values.get(0).getParameters().toString());
+    }
+
+    @Test
+    public void shouldReturnPathToUpdateInfoFile() {
+        assertEquals(spyCommand.getPathToUpdateInfoFile().toString(),
+                     format("/home/%s/codenvy/update.info", SYSTEM_USER_NAME));
+    }
+
+    @Test
+    public void shouldRemoveUpdateInfoFile() throws IOException {
+        FileUtils.write(PATH_TO_TEST_UPDATE_INFO.toFile(), "update info");
+        doReturn(PATH_TO_TEST_UPDATE_INFO).when(spyCommand).getPathToUpdateInfoFile();
+
+        spyCommand.removeUpdateInfoFile();
+
+        assertFalse(Files.exists(PATH_TO_TEST_UPDATE_INFO));
     }
 }

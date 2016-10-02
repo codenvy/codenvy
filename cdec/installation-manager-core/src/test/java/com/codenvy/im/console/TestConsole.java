@@ -410,6 +410,15 @@ public class TestConsole {
         assertEquals(Console.getInstance(), console);
     }
 
+    @Test
+    public void testPrintWarning() throws IOException {
+        String testMessage = "warning";
+
+        Console spyConsole = createNonInteractiveConsole();
+        spyConsole.printWarning(testMessage, true);
+        assertEquals(getOutputContent(), "\u001B[93m" + testMessage + "\n\u001B[m");
+    }
+
     private Console createInteractiveConsole() throws IOException {
         setUp();
         Console spyConsole = spy(Console.create(true));

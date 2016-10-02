@@ -418,8 +418,9 @@ public class TestCDECArtifact extends BaseTest {
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${OLD_version}|3.3.0|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${host_url}|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${some property}|some value|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='sudo cat %1$s/patches/single_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_UPDATE_INFO}|/home/%2$s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_MANIFEST}|%1$s/manifests/nodes/single_server/base_config.pp|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='bash %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}]", TMP_CODENVY));
+                            + "{'command'='bash %1$s/patches/single_server/patch_before_update.sh', 'agent'='LocalAgent'}]", TMP_CODENVY, SYSTEM_USER_NAME));
 
         options.setConfigProperties(new HashMap<String, String>() {{
             put("some property", "some value");
@@ -437,7 +438,8 @@ public class TestCDECArtifact extends BaseTest {
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${OLD_version}|3.3.0|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${host_url}|host_url|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/single_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${some property}|some value|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='bash %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}]", ETC_PUPPET));
+                            + "{'command'='sudo cat %1$s/patches/single_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_UPDATE_INFO}|/home/%2$s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='bash %1$s/patches/single_server/patch_after_update.sh', 'agent'='LocalAgent'}]", ETC_PUPPET, SYSTEM_USER_NAME));
     }
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Codenvy On-Prem can be updated on CentOS 7 only")
@@ -503,10 +505,10 @@ public class TestCDECArtifact extends BaseTest {
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${puppet_master_host_name}|master.example.com|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${host_url}|hostname|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${api_host_name}|api.example.com|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_MANIFEST}|%1$s/manifests/nodes/single_server/base_config.pp|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${analytics_host_name}|analytics.example.com|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${version}|3.3.0|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='bash %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}]", TMP_CODENVY));
+                            + "{'command'='sudo cat %1$s/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_UPDATE_INFO}|/home/%2$s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='bash %1$s/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}]", TMP_CODENVY, SYSTEM_USER_NAME));
 
         options.setConfigProperties(getTestMultiNodeProperties());
         assertEquals(spyCdecArtifact.getUpdateCommand(versionToUpdate, pathToBinaries, options.setStep(3)).toString(),
@@ -528,7 +530,8 @@ public class TestCDECArtifact extends BaseTest {
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${api_host_name}|api.example.com|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${analytics_host_name}|analytics.example.com|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='sudo cat %1$s/patches/multi_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${version}|3.3.0|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='bash %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}]", ETC_PUPPET));
+                            + "{'command'='sudo cat %1$s/patches/multi_server/patch_after_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_UPDATE_INFO}|/home/%2$s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='bash %1$s/patches/multi_server/patch_after_update.sh', 'agent'='LocalAgent'}]", ETC_PUPPET, SYSTEM_USER_NAME));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Step number .* is out of update range")
