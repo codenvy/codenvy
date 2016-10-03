@@ -34,10 +34,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
@@ -114,7 +110,7 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
                                  @Nullable @Named(ALLOW_MULTIPLE_DNS_PROPERTY_NAME) String allowMultipleDns,
                                  @Nullable @Named(SUBTREE_SEARCH_PROPERTY_NAME) String subtreeSearch) {
         this.baseDn = baseDn;
-        checkRequiredPropertySet(AUTH_TYPE_PROPERTY_NAME, type);
+        checkRequiredProperty(AUTH_TYPE_PROPERTY_NAME, type);
         this.type = AuthenticationType.valueOf(type);
         this.dnFormat = dnFormat;
         this.userPasswordAttribute = userPasswordAttribute;
@@ -146,9 +142,9 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     }
 
     private Authenticator getSaslAuthenticator(PooledConnectionFactory connFactory) {
-        checkRequiredPropertySet(USER_FILTER_PROPERTY_NAME, userFilter,
-                                 Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
-                                 Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
+        checkRequiredProperty(Pair.of(USER_FILTER_PROPERTY_NAME, userFilter),
+                              Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
+                              Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
         final PooledSearchDnResolver resolver = new PooledSearchDnResolver();
         resolver.setBaseDn(baseDn);
         resolver.setSubtreeSearch(subtreeSearch);
@@ -160,9 +156,9 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
 
     private Authenticator getAuthenticatedOrAnonSearchAuthenticator(PooledConnectionFactory connFactory,
                                                                     EntryResolver entryResolver) {
-        checkRequiredPropertySet(USER_FILTER_PROPERTY_NAME, userFilter,
-                                 Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
-                                 Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
+        checkRequiredProperty(Pair.of(USER_FILTER_PROPERTY_NAME, userFilter),
+                              Pair.of(BASE_DN_PROPERTY_NAME, baseDn),
+                              Pair.of(USER_FILTER_PROPERTY_NAME, userFilter));
         final PooledSearchDnResolver resolver = new PooledSearchDnResolver();
         resolver.setBaseDn(baseDn);
         resolver.setSubtreeSearch(subtreeSearch);
@@ -182,14 +178,14 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     }
 
     private Authenticator getDirectBindAuthenticator(PooledConnectionFactory connFactory) {
-        checkRequiredPropertySet(DN_FORMAT_PROPERTY_NAME, dnFormat);
+        checkRequiredProperty(DN_FORMAT_PROPERTY_NAME, dnFormat);
         final FormatDnResolver resolver = new FormatDnResolver(dnFormat);
         return new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
     }
 
     private Authenticator getActiveDirectoryAuthenticator(PooledConnectionFactory connFactory,
                                                           EntryResolver entryResolver) {
-        checkRequiredPropertySet(DN_FORMAT_PROPERTY_NAME, dnFormat);
+        checkRequiredProperty(DN_FORMAT_PROPERTY_NAME, dnFormat);
         final FormatDnResolver resolver = new FormatDnResolver(dnFormat);
         final Authenticator authn = new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
         authn.setEntryResolver(entryResolver);
@@ -205,20 +201,21 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
     private PooledCompareAuthenticationHandler getPooledCompareAuthenticationHandler(PooledConnectionFactory connFactory) {
         final PooledCompareAuthenticationHandler handler = new PooledCompareAuthenticationHandler(
                 connFactory);
-        checkRequiredPropertySet(USER_PASSWORD_ATTRIBUTE_PROPERTY_NAME, userPasswordAttribute);
+        checkRequiredProperty(USER_PASSWORD_ATTRIBUTE_PROPERTY_NAME, userPasswordAttribute);
         handler.setPasswordAttribute(userPasswordAttribute);
         return handler;
     }
 
+
+
+    final void checkRequiredProperty(String name, String value) {
+        checkRequiredProperty(Pair.of(name, value));
+    }
+
     @SafeVarargs
     @VisibleForTesting
-    final void checkRequiredPropertySet(String name, String value, Pair<String, String>... nameValuePairs) {
-        final List<Pair<String, String>> allPairs = new ArrayList<>();
-        allPairs.add(Pair.of(name, value));
-        if (nameValuePairs != null) {
-            allPairs.addAll(Arrays.asList(nameValuePairs));
-        }
-        for (Pair<String, String> nameValuePair : allPairs) {
+    final void checkRequiredProperty(Pair<String, String>... nameValuePairs) {
+        for (Pair<String, String> nameValuePair : nameValuePairs) {
             if (isNullOrEmpty(nameValuePair.second)) {
                 throw new ConfigurationException(
                         format("Selected authentication type requires the property %s value to be not null or empty.", nameValuePair.first));
