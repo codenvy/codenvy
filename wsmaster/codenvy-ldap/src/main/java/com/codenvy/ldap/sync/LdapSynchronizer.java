@@ -70,6 +70,7 @@ import static java.lang.String.format;
  * <p>It is thread-safe.
  *
  * @author Yevhenii Voevodin
+ * @author Max Shaposhnik
  */
 @Singleton
 public class LdapSynchronizer {

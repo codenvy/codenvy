@@ -24,6 +24,7 @@ import java.util.function.Function;
  * Maps {@link LdapEntry} to {@link UserImpl}.
  *
  * @author Yevhenii Voevodin
+ * @author Max Shapososhnik
  */
 public class UserMapper implements Function<LdapEntry, UserImpl> {
 
