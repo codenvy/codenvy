@@ -16,7 +16,7 @@
     <parent>
         <artifactId>cli-shell</artifactId>
         <groupId>com.codenvy.cli</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>cli-shell-main</artifactId>
     <packaging>bundle</packaging>

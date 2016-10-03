@@ -24,7 +24,7 @@
                      che-input-placeholder="Search"
                      che-search-model="shareWorkspaceController.userFilter.name"
                      che-hide-search="shareWorkspaceController.users.length === 0"
-                     che-add-button-title="Add Member"
+                     che-add-button-title="Add Developer"
                      che-on-add="shareWorkspaceController.showAddMembersDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="shareWorkspaceController.deleteSelectedWorkspaceMembers()"
@@ -68,9 +68,9 @@
 
     <div class="che-list-empty">
         <span ng-show="shareWorkspaceController.users.length > 0 && (shareWorkspaceController.users | filter:shareWorkspaceController.userFilter).length === 0">
-          No members found
+          No members found.
         </span>
-      <span ng-show="shareWorkspaceController.users.length === 0">There are no members yet</span>
+      <span ng-show="shareWorkspaceController.users.length === 0">There are no members.</span>
     </div>
   </div>
 </md-content>

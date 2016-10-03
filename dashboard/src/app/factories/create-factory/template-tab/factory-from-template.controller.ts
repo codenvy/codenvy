@@ -31,11 +31,14 @@ export class FactoryFromTemplateCtrl {
 
     this.isImporting = false;
     this.factoryContent = null;
+
+    this.editorOptions = {
+      mode: 'application/json'
+    };
   }
 
   //Gets factory template.
   getFactoryTemplate(templateName) {
-
     let factoryContent = this.codenvyAPI.getFactoryTemplate().getFactoryTemplate(templateName);
 
     if (factoryContent) {

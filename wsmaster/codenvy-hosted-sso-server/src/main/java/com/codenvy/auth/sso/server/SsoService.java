@@ -18,14 +18,13 @@ import com.codahale.metrics.annotation.Metered;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
-import com.codenvy.api.dao.authentication.TokenGenerator;
-import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.auth.sso.shared.dto.SubjectDto;
 
 import org.eclipse.che.api.auth.AuthenticationException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,23 +63,20 @@ import static java.net.URLEncoder.encode;
 public class SsoService {
     private static final Logger LOG = LoggerFactory.getLogger(SsoService.class);
 
-    private final TicketManager          ticketManager;
-    private final UserCreator            userCreator;
-    private final TokenGenerator         uniqueTokenGenerator;
-    private final CookieBuilder          cookieBuilder;
-    private final String                 loginPage;
+    private final TicketManager ticketManager;
+    private final CookieBuilder cookieBuilder;
+    private final String        loginPage;
+    private final UserManager   userManager;
 
     @Inject
     public SsoService(TicketManager ticketManager,
-                      UserCreator userCreator,
-                      TokenGenerator uniqueTokenGenerator,
                       CookieBuilder cookieBuilder,
-                      @Named("auth.sso.login_page_url") String loginPage) {
+                      @Named("auth.sso.login_page_url") String loginPage,
+                      UserManager userManager) {
         this.ticketManager = ticketManager;
-        this.userCreator = userCreator;
-        this.uniqueTokenGenerator = uniqueTokenGenerator;
         this.cookieBuilder = cookieBuilder;
         this.loginPage = loginPage;
+        this.userManager = userManager;
     }
 
     /**
@@ -93,7 +89,8 @@ public class SsoService {
     @Path("{token}")
     @GET
     public SubjectDto getCurrentPrincipal(@PathParam("token") String token,
-                                          @QueryParam("clienturl") String clientUrl) throws AuthenticationException {
+                                          @QueryParam("clienturl") String clientUrl)
+            throws AuthenticationException, NotFoundException, ServerException {
 
         LOG.debug("Request user  with token {}", token);
 
@@ -106,11 +103,10 @@ public class SsoService {
             throw new AuthenticationException("Access token not found or expired.");
         } else {
             accessTicket.registerClientUrl(clientUrl);
-
+            User user = userManager.getById(accessTicket.getUserId());
             return DtoFactory.newDto(SubjectDto.class)
-                             .withName(accessTicket.getPrincipal().getUserName())
-                             .withId(accessTicket.getPrincipal().getUserId())
-                             .withTemporary(false) //TODO Fix when temporary users will be supported in 4.x
+                             .withName(user.getName())
+                             .withId(user.getId())
                              .withToken(accessTicket.getAccessToken());
         }
     }
@@ -139,22 +135,19 @@ public class SsoService {
      *         - url for redirection after successful authentication.
      * @param tokenAccessCookie
      *         - cookie with authentication token
-     * @param allowAnonymous
-     *         - should service provide anonymous access if user is not authenticated.
      */
     @Metered(name = "auth.sso.service_refresh_token")
     @Path("refresh")
     @GET
-    public Response authenticate(@QueryParam("redirect_url") String redirectUrl,
-                                 @CookieParam("token-access-key") Cookie tokenAccessCookie,
-                                 @QueryParam("allowAnonymous") String allowAnonymous,
-                                 @Context UriInfo uriInfo) throws UnsupportedEncodingException {
+    public Response refresh(@QueryParam("redirect_url") String redirectUrl,
+                            @CookieParam("token-access-key") Cookie tokenAccessCookie,
+                            @Context UriInfo uriInfo) throws UnsupportedEncodingException {
         Response.ResponseBuilder builder;
         boolean isSecure = uriInfo.getRequestUri().getScheme().equals("https");
         try {
             if (tokenAccessCookie != null) {
                 AccessTicket accessTicket = ticketManager.getAccessTicket(tokenAccessCookie.getValue());
-                if (accessTicket != null && !(!Boolean.valueOf(allowAnonymous) && accessTicket.getPrincipal().isTemporary())) {
+                if (accessTicket != null) {
 
                     UriBuilder destination = UriBuilder.fromUri(redirectUrl);
                     destination.replaceQueryParam("cookiePresent", true);
@@ -165,27 +158,7 @@ public class SsoService {
                     return builder.build();
                 }
             }
-
-            if (Boolean.valueOf(allowAnonymous)) {
-                // create new temp user
-                final User user = userCreator.createTemporary();
-                LOG.info("Temporary user {} {} has been created for client {}", user.getName(), user.getId(), redirectUrl);
-                final Subject anonymousSubject = new SubjectImpl(user.getName(),
-                                                                 user.getId(),
-                                                                 null,
-                                                                 true);
-
-                final AccessTicket ticket = new AccessTicket(uniqueTokenGenerator.generate(), anonymousSubject, "anonymous");
-                ticketManager.putAccessTicket(ticket);
-
-                UriBuilder destination = UriBuilder.fromUri(redirectUrl);
-                destination.replaceQueryParam("cookiePresent", true);
-                builder = Response.temporaryRedirect(destination.build());
-
-                ((SsoCookieBuilder)cookieBuilder).setCookies(builder, ticket.getAccessToken(), isSecure, true);
-            } else {
-                builder = Response.temporaryRedirect(new URI(loginPage + "?redirect_url=" + encode(redirectUrl, "UTF-8")));
-            }
+            builder = Response.temporaryRedirect(new URI(loginPage + "?redirect_url=" + encode(redirectUrl, "UTF-8")));
         } catch (IOException | URISyntaxException e) {
             LOG.error(e.getLocalizedMessage(), e);
             builder = Response.serverError();

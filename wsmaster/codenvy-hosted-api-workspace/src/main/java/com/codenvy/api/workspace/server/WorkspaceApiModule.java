@@ -19,6 +19,7 @@ import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFi
 import com.codenvy.api.workspace.server.filters.SetPublicPermissionsFilter;
 import com.codenvy.api.workspace.server.filters.StackPermissionsFilter;
 import com.codenvy.api.workspace.server.filters.WorkspacePermissionsFilter;
+import com.codenvy.api.workspace.server.stack.StackCreatorPermissionsProvider;
 import com.google.inject.AbstractModule;
 
 /**
@@ -34,5 +35,6 @@ public class WorkspaceApiModule extends AbstractModule {
         bind(RecipeScriptDownloadPermissionFilter.class);
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
+        bind(StackCreatorPermissionsProvider.class).asEagerSingleton();
     }
 }

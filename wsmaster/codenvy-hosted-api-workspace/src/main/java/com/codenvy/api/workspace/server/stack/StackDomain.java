@@ -23,6 +23,7 @@ import java.util.List;
  * Domain for storing stacks' permissions
  *
  * @author Sergii Leschenko
+ * @author Yevhenii Voevodin
  */
 public class StackDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {
     public static final String DOMAIN_ID = "stack";
@@ -32,11 +33,13 @@ public class StackDomain extends AbstractPermissionsDomain<StackPermissionsImpl>
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
 
+    private static final List<String> ACTIONS = ImmutableList.of(READ, SEARCH, UPDATE, DELETE);
+
+    /** Returns all the available actions for {@link StackDomain}. */
+    public static List<String> getActions() { return ACTIONS; }
+
     public StackDomain() {
-        super(DOMAIN_ID, ImmutableList.of(READ,
-                                          SEARCH,
-                                          UPDATE,
-                                          DELETE));
+        super(DOMAIN_ID, ACTIONS);
     }
 
     @Override

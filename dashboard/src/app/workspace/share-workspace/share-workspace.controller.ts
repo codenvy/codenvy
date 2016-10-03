@@ -115,7 +115,7 @@ export class ShareWorkspaceController {
     this.users = [];
 
     permissions.forEach((permission) => {
-      let userId = permission.user;
+      let userId = permission.userId;
       let user = this.codenvyUser.getUserFromId(userId);
       if (user) {
         this.formUserItem(user, permission);
@@ -253,7 +253,7 @@ export class ShareWorkspaceController {
       checkedUsers.forEach((user) => {
         currentUserEmail = user.email;
         this.usersSelectedStatus[user.id] = false;
-        let promise = this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instance, user.id);
+        let promise = this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instanceId, user.id);
         promise.then(() => {
           queueLength--;
         }, (error) => {
@@ -337,9 +337,9 @@ export class ShareWorkspaceController {
    */
   storeWorkspacePermissions(user) {
     let permission = {};
-    permission.user = user.id;
-    permission.domain = this.workspaceDomain;
-    permission.instance = this.workspace.id;
+    permission.userId = user.id;
+    permission.domainId = this.workspaceDomain;
+    permission.instanceId = this.workspace.id;
     permission.actions = this.actions;
 
     return this.codenvyPermissions.storePermissions(permission);
@@ -352,7 +352,7 @@ export class ShareWorkspaceController {
    */
   removePermissions(user) {
     this.isLoading = true;
-    this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instance, user.id).then(() => {
+    this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instanceId, user.id).then(() => {
       this.refreshWorkspacePermissions();
     }, (error) => {
       this.isLoading = false;

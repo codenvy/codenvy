@@ -16,8 +16,6 @@ package com.codenvy.auth.sso.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
 /**
  * @author Sergii Leschenko
  */
@@ -40,10 +38,4 @@ public interface SubjectDto {
     void setToken(String token);
 
     SubjectDto withToken(String token);
-
-    boolean isTemporary();
-
-    void setTemporary(boolean isTemporary);
-
-    SubjectDto withTemporary(boolean isTemporary);
 }

@@ -25,7 +25,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DefaultUser implements User {
     private final String id;
-    private final String password;
     private final String email;
 
     /**
@@ -33,32 +32,23 @@ public class DefaultUser implements User {
      *
      * @param id
      *         the user id.
-     * @param password
-     *         the user password.
      * @param email
      *         the user email.
      * @throws NullPointerException
      *         if id, password or email parameter is {@code null}.
      */
     @JsonCreator
-    public DefaultUser(@JsonProperty("id") String id, @JsonProperty("password") String password, @JsonProperty("email") String email) {
+    public DefaultUser(@JsonProperty("id") String id, @JsonProperty("email") String email) {
         checkNotNull(id);
-        checkNotNull(password);
         checkNotNull(email);
 
         this.id = id;
         this.email = email;
-        this.password = password;
     }
 
     @Override
     public String id() {
         return id;
-    }
-
-    @Override
-    public String password() {
-        return password;
     }
 
     @Override

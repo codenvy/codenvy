@@ -1911,9 +1911,16 @@ updateLoader() {
 
 printPostInstallInfo_codenvy() {
     local systemAdminName=$(readProperty "admin_ldap_user_name")
+    if [ -z "$systemAdminName" ]; then
+        systemAdminName=$(readProperty "codenvy_admin_name")  # property name starting from version 5.0.0-M3
+    fi
+
 
     if [[ "${VERSION}" =~ ^([4-5]).* ]]; then
         local systemAdminPassword=$(readProperty "admin_ldap_password")
+        if [ -z "$systemAdminPassword" ]; then
+            systemAdminPassword=$(readProperty "codenvy_admin_initial_password")  # property name starting from version 5.0.0-M3
+        fi
     else
         local systemAdminPassword=$(readProperty "system_ldap_password")
     fi

@@ -15,9 +15,6 @@
 package com.codenvy.api.dao.authentication;
 
 
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.commons.subject.Subject;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -31,28 +28,28 @@ import java.util.Set;
  */
 public final class AccessTicket {
     private final Set<String> registeredClients;
-    private final Subject     principal;
+    private final String      userId;
     private final String      authHandlerType;
     /** Time of ticket creation in milliseconds. */
     private       long        creationTime;
     /** Value of access cookie associated with this access key. */
     private       String      accessToken;
 
-    public AccessTicket(String accessToken, Subject principal, String authHandlerType) {
-        this(accessToken, principal, authHandlerType, System.currentTimeMillis());
+    public AccessTicket(String accessToken, String userId, String authHandlerType) {
+        this(accessToken, userId, authHandlerType, System.currentTimeMillis());
     }
 
 
-    public AccessTicket(String accessToken, Subject principal, String authHandlerType, long creationTime) {
+    public AccessTicket(String accessToken, String userId, String authHandlerType, long creationTime) {
 
         if (accessToken == null) {
             throw new IllegalArgumentException("Invalid access token: " + accessToken);
         }
-        if (principal == null) {
-            throw new IllegalArgumentException("Invalid principal: " + principal);
+        if (userId == null) {
+            throw new IllegalArgumentException("Invalid userId: " + userId);
         }
         if (authHandlerType == null) {
-            throw new IllegalArgumentException("Invalid authHandlerType: " + principal);
+            throw new IllegalArgumentException("Invalid authHandlerType: " + authHandlerType);
         }
         if (creationTime < 0) {
             throw new IllegalArgumentException("Invalid creation time : " + creationTime);
@@ -60,7 +57,7 @@ public final class AccessTicket {
         this.accessToken = accessToken;
         this.authHandlerType = authHandlerType;
 
-        this.principal = principal;
+        this.userId = userId;
         this.creationTime = creationTime;
         this.registeredClients = new HashSet<>();
     }
@@ -69,38 +66,8 @@ public final class AccessTicket {
         return accessToken;
     }
 
-    public Subject getPrincipal() {
-        return new Subject() {
-            @Override
-            public String getUserName() {
-                return principal.getUserName();
-            }
-
-            @Override
-            public boolean hasPermission(String domain, String instance, String action) {
-                return principal.hasPermission(domain, instance, action);
-            }
-
-            @Override
-            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
-                principal.checkPermission(domain, instance, action);
-            }
-
-            @Override
-            public String getToken() {
-                return accessToken;
-            }
-
-            @Override
-            public String getUserId() {
-                return principal.getUserId();
-            }
-
-            @Override
-            public boolean isTemporary() {
-                return principal.isTemporary();
-            }
-        };
+    public String getUserId() {
+        return userId;
     }
 
     /**
@@ -151,7 +118,7 @@ public final class AccessTicket {
         if (creationTime != that.creationTime) return false;
         if (accessToken != null ? !accessToken.equals(that.accessToken) : that.accessToken != null) return false;
         if (authHandlerType != null ? !authHandlerType.equals(that.authHandlerType) : that.authHandlerType != null) return false;
-        if (principal != null ? !principal.equals(that.principal) : that.principal != null) return false;
+        if (userId != null ? !userId.equals(that.userId) : that.userId != null) return false;
         if (registeredClients != null ? !registeredClients.equals(that.registeredClients) : that.registeredClients != null) return false;
 
         return true;
@@ -160,7 +127,7 @@ public final class AccessTicket {
     @Override
     public int hashCode() {
         int result = registeredClients != null ? registeredClients.hashCode() : 0;
-        result = 31 * result + (principal != null ? principal.hashCode() : 0);
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
         result = 31 * result + (authHandlerType != null ? authHandlerType.hashCode() : 0);
         result = 31 * result + (int)(creationTime ^ (creationTime >>> 32));
         result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
@@ -171,7 +138,7 @@ public final class AccessTicket {
     public String toString() {
         final StringBuilder sb = new StringBuilder("AccessTicket{");
         sb.append("registeredClients=").append(registeredClients);
-        sb.append(", principal=").append(principal);
+        sb.append(", userId='").append(userId).append('\'');
         sb.append(", authHandlerType='").append(authHandlerType).append('\'');
         sb.append(", creationTime=").append(creationTime);
         sb.append(", accessToken='").append(accessToken).append('\'');

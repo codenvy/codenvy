@@ -54,12 +54,8 @@
 })(window,document,'script','dataLayer','GTM-M69DMB');</script>
 <!-- End Google Tag Manager -->
 <div ng-hide="hideLoader" class="main-page-loader">
-  <div layout="column" class="main-page-loader-content">
-    <div class="spinner">
-      <div class="rect1"></div>
-      <div class="rect2"></div>
-      <div class="rect3"></div>
-    </div>
+  <div class="ide-page-loader-content">
+    <img ng-src="{{branding.loaderURL}}">
   </div>
   <div class="main-page-loader-logo logo-color-white" ng-include="branding.logoURL"></div>
 </div>
@@ -72,6 +68,7 @@
 </md-sidenav>
 <div class="onprem-theme main-page ide-show" layout="column" flex>
   <div role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
+  <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
   <che-footer id="codenvyfooter" che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Codenvy" ng-show="waitingLoaded && !showIDE"></che-footer>
 </div>
 <!-- Addons are not automatically injected -->

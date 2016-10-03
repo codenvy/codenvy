@@ -14,25 +14,32 @@
  */
 package com.codenvy.api.user.server;
 
+import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.SystemDomain;
-import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 /**
@@ -41,7 +48,7 @@ import static java.util.Collections.emptyList;
  * @author Anton Korneta
  */
 @Singleton
-public class AdminUserCreator {
+public class AdminUserCreator implements EventSubscriber<BeforeUserPersistedEvent> {
     private static final Logger LOG = LoggerFactory.getLogger(AdminUserCreator.class);
 
     @Inject
@@ -51,10 +58,13 @@ public class AdminUserCreator {
     PermissionsManager permissionsManager;
 
     @Inject
+    EventService  eventService;
+
+    @Inject
     @SuppressWarnings("unused")
     // this work around needed for Guice to help initialize components in right sequence,
     // because instance of JpaInitializer should be created before components that dependent on dao (such as UserManager)
-    private JpaInitializer jpaInitializer;
+    private EntityListenerInjectionManagerInitializer jpaInitializer;
 
     @Inject
     @Named("codenvy.admin.name")
@@ -68,26 +78,53 @@ public class AdminUserCreator {
     @Named("codenvy.admin.email")
     private String email;
 
+    @Inject
+    @Named("sys.auth.handler.default")
+    private String authHandler;
+
     @PostConstruct
     public void create() throws ServerException {
-        User adminUser;
+        boolean shouldCreateAdmin = true;
+        if (LdapAuthenticationHandler.TYPE.equals(authHandler)) {
+            eventService.subscribe(this);
+            shouldCreateAdmin = false;
+        }
         try {
-            adminUser = userManager.getById(name);
+            User adminUser = userManager.getByName(name);
+            grantSystemPermissions(adminUser.getId());
         } catch (NotFoundException ex) {
-            try {
-                adminUser =  userManager.create(new UserImpl(name, email, name, password, emptyList()), false);
-                LOG.info("Admin user '" + name + "' successfully created");
-            } catch (ConflictException cfEx) {
-                LOG.warn("Admin user creation failed", cfEx.getLocalizedMessage());
-                return;
+            if (shouldCreateAdmin) {
+                try {
+                    User adminUser = userManager.create(new UserImpl(name, email, name, password, emptyList()), false);
+                    grantSystemPermissions(adminUser.getId());
+                    LOG.info("Admin user '" + name + "' successfully created");
+                } catch (ConflictException cfEx) {
+                    LOG.warn("Admin user creation failed", cfEx.getLocalizedMessage());
+                }
             }
         }
+    }
+
+    @PreDestroy
+    public void unsubscribe() {
+        eventService.unsubscribe(this);
+    }
+
+    @Override
+    public void onEvent(BeforeUserPersistedEvent event) {
+        if (event.getUser().getName().equals(name)) {
+            grantSystemPermissions(event.getUser().getId());
+        }
+    }
+
+    private void grantSystemPermissions(String userId) {
         // Add all possible system permissions
         try {
-            permissionsManager.storePermission(
-                    new SystemPermissionsImpl(adminUser.getId(), permissionsManager.getDomain(SystemDomain.DOMAIN_ID).getAllowedActions()));
-        } catch (NotFoundException | ConflictException e) {
-            LOG.warn("Admin user permissions creation failed", e.getLocalizedMessage());
+            AbstractPermissionsDomain<? extends AbstractPermissions> systemDomain = permissionsManager.getDomain(SystemDomain.DOMAIN_ID);
+            permissionsManager.storePermission(systemDomain.newInstance(userId, null, systemDomain.getAllowedActions()));
+        } catch (ServerException | NotFoundException | ConflictException e) {
+            LOG.warn(format("System permissions creation failed for user %s", userId), e.getLocalizedMessage());
         }
+
     }
 }

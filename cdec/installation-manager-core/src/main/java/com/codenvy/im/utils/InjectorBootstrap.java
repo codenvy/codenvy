@@ -54,6 +54,8 @@ public class InjectorBootstrap {
     // ${...}
     private static final Pattern envPattern = Pattern.compile("\\$\\{([^\\}]*)\\}");
 
+    public static final String INSTALLATION_MANAGER_BASE_DIR = "installation-manager.base_dir";
+
     static {
         boundProperties = new HashMap<>();
         INJECTOR = createInjector();

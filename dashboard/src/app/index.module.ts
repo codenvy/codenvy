@@ -152,7 +152,7 @@ initModule.factory('AuthInterceptor', ($window, $cookies, $q, $location, $log) =
   };
 });
 
-initModule.constant('codenvyDashboardConfig', {
+initModule.constant('userDashboardConfig', {
   developmentMode: DEV
 });
 

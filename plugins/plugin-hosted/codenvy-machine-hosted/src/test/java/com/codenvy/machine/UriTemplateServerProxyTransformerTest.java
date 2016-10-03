@@ -15,6 +15,7 @@
 package com.codenvy.machine;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -31,13 +32,18 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 "some/path",
-                                                 "http://my-server.com:32589/some/path");
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
         ServerImpl expectedServer = new ServerImpl(originServer.getRef(),
                                                    "http",
                                                    originServer.getAddress(),
-                                                   '/' + originServer.getPath(),
-                                                   "http://my-server.com:32589/some/path");
+                                                   "http://my-server.com:32589/some/path",
+                                                   new ServerPropertiesImpl(
+                                                           '/' + originServer.getProperties().getPath(),
+                                                           originServer.getAddress(),
+                                                           "http://my-server.com:32589/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 
@@ -50,8 +56,10 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 "/some/path",
-                                                 "http://my-server.com:32589/some/path");
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("/some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 
@@ -64,8 +72,10 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 "/some/path",
-                                                 "http://my-server.com:32589/some/path");
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("/some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 
@@ -78,8 +88,10 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 "/some/path",
-                                                 "http://my-server.com:32589/some/path");
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("/some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 
@@ -92,13 +104,17 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 "/some/path",
-                                                 "http://my-server.com:32589/some/path");
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("/some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
         ServerImpl expectedServer = new ServerImpl("myRef",
                                                    "https",
                                                    "32589-my-server.com.transform-host:444",
-                                                   "/myRef/some/path",
-                                                   "https://32589-my-server.com.transform-host:444/myRef/some/path");
+                                                   "https://32589-my-server.com.transform-host:444/myRef/some/path",
+                                                   new ServerPropertiesImpl("/myRef/some/path",
+                                                                            "32589-my-server.com.transform-host:444",
+                                                                            "https://32589-my-server.com.transform-host:444/myRef/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 
@@ -111,13 +127,17 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
-                                                 null,
-                                                 "http://my-server.com:32589/");
+                                                 "http://my-server.com:32589/",
+                                                 new ServerPropertiesImpl(null,
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/"));
         ServerImpl expectedServer = new ServerImpl("myRef",
                                                    "https",
                                                    "32589-my-server.com.transform-host:444",
-                                                   "/",
-                                                   "https://32589-my-server.com.transform-host:444/");
+                                                   "https://32589-my-server.com.transform-host:444/",
+                                                   new ServerPropertiesImpl("/",
+                                                                            "32589-my-server.com.transform-host:444",
+                                                                            "https://32589-my-server.com.transform-host:444/"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 

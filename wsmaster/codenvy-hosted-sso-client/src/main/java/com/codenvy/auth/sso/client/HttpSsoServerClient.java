@@ -62,7 +62,7 @@ public class HttpSsoServerClient implements ServerClient {
 
             final SubjectDto subjectDto = currentPrincipalRequest.request()
                                                                  .asDto(SubjectDto.class);
-            return new SubjectImpl(subjectDto.getName(), subjectDto.getId(), subjectDto.getToken(), subjectDto.isTemporary());
+            return new SubjectImpl(subjectDto.getName(), subjectDto.getId(), subjectDto.getToken(), false);
         } catch (ApiException | IOException e) {
             LOG.warn(e.getLocalizedMessage());
         }

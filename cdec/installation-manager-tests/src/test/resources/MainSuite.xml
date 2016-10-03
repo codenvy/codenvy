@@ -43,11 +43,11 @@
         </classes>
     </test>
 
-    <test name="im-cli-with-codenvy3">
+    <!--test name="im-cli-with-codenvy3">
         <classes>
             <class name="com.codenvy.im.TestInstallationManagerCliWithCodenvy3"/>
         </classes>
-    </test>
+    </test-->
 
     <test name="im-cli-with-codenvy">
         <classes>

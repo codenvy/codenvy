@@ -14,14 +14,12 @@
  */
 package com.codenvy.im.console;
 
-import jline.console.ConsoleReader;
-
 import com.codenvy.im.response.BasicResponse;
 import com.codenvy.im.response.Response;
 import com.codenvy.im.response.ResponseCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Singleton;
-
+import jline.console.ConsoleReader;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.fusesource.jansi.Ansi;
@@ -42,10 +40,12 @@ public class Console {
     public static final  Ansi   ERASE_LINE_ABOVE   = ansi().a(ansi().cursorUp(1).eraseLine(Ansi.Erase.ALL));
     public static final  Ansi   ERASE_CURRENT_LINE = ansi().eraseLine(Ansi.Erase.ALL);
     public static final  String CODENVY_PREFIX     = "[CODENVY] ";
+    public static final  String LIGHT_BLUE         = '\u001b' + "[94m";
+    public static final  String LIGHT_YELLOW       = '\u001b' + "[93m";
+
     private static final Logger LOG                = Logger.getLogger(Console.class.getName());
 
     private static final AtomicReference<Console> consoleInstance = new AtomicReference<>();
-
     private final boolean       interactive;
     protected     ConsoleReader consoleReader;
     private final LoadingBar    loaderBar;
@@ -241,7 +241,6 @@ public class Console {
     }
 
     private void print(Object o) {
-
         System.out.print(o);
         System.out.flush();
     }
@@ -255,13 +254,16 @@ public class Console {
     }
 
     private void printCodenvyPrompt() {
-        final String lightBlue = '\u001b' + "[94m";
-        print(ansi().a(lightBlue + CODENVY_PREFIX).reset()); // light blue
+        print(ansi().a(LIGHT_BLUE + CODENVY_PREFIX).reset()); // light blue
     }
 
     private String doReadLine(@Nullable Character mask) throws IOException {
         rowCounter++;
         return consoleReader.readLine(mask);
+    }
+
+    public void printWarning(String message, boolean suppressCodenvyPrompt) {
+        print(ansi().a(LIGHT_YELLOW + message).newline().reset(), suppressCodenvyPrompt);
     }
 
     protected class LoadingBar {

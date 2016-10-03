@@ -36,9 +36,17 @@ import com.codenvy.auth.sso.client.filter.RequestMethodFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
+import com.codenvy.ldap.LdapModule;
+import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.organization.api.OrganizationModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolver;
 import com.codenvy.report.ReportModule;
+import com.codenvy.resource.api.ResourceModule;
+import com.codenvy.service.systemram.DockerBasedSystemRamInfoProvider;
+import com.codenvy.service.systemram.SystemRamInfoProvider;
+import com.codenvy.service.systemram.SystemRamService;
+import com.codenvy.service.systemram.SystemRamLimitMessageSender;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -185,6 +193,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new OnPremisesJpaMachineModule());
         install(new FactoryJpaModule());
         bind(AccountDao.class).to(JpaAccountDao.class);
+        install(new OrganizationModule());
+        install(new ResourceModule());
         bind(FactoryDao.class).to(JpaFactoryDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
         bind(RecipeDao.class).to(JpaRecipeDao.class);
@@ -209,6 +219,12 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(com.codenvy.service.http.WorkspaceInfoCache.class);
 
         bind(com.codenvy.service.password.PasswordService.class);
+
+        bind(SystemRamLimitMessageSender.class);
+
+        bind(SystemRamService.class);
+
+        bind(SystemRamInfoProvider.class).to(DockerBasedSystemRamInfoProvider.class);
 
         bind(AuditService.class);
         bind(AuditServicePermissionsFilter.class);
@@ -389,6 +405,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
+
+        //ldap
+        if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
+            install(new LdapModule());
+        }
 
         // install report sender
         install(new ReportModule());

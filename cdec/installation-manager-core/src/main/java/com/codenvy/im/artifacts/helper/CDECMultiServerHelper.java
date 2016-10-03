@@ -18,6 +18,7 @@ import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.commands.Command;
 import com.codenvy.im.commands.CommandLibrary;
 import com.codenvy.im.commands.MacroCommand;
+import com.codenvy.im.commands.PatchCDECCommand;
 import com.codenvy.im.commands.WaitOnAliveArtifactCommand;
 import com.codenvy.im.commands.WaitOnAliveArtifactOfCorrectVersionCommand;
 import com.codenvy.im.commands.decorators.PuppetErrorInterrupter;
@@ -37,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ import static com.codenvy.im.commands.CommandLibrary.createFileBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createFileRestoreOrBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPackCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPatchCommand;
+import static com.codenvy.im.commands.CommandLibrary.createPatchCDECCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createRepeatCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
@@ -301,6 +303,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
     public Command getUpdateCommand(Version versionToUpdate, Path pathToBinaries, InstallOptions installOptions) throws IOException {
         final Config config = new Config(installOptions.getConfigProperties());
         final int step = installOptions.getStep();
+        final Config oldConfig = configManager.loadInstalledCodenvyConfig();
 
         switch (step) {
             case 0:
@@ -349,18 +352,21 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
                 return new MacroCommand(commands, "Configure Codenvy");
 
             case 2:
+                Map<String, String> patchProperties = new HashMap<>();
                 if (versionToUpdate.is4Compatible()) {
-                    propertiesFiles = configManager.getCodenvyPropertiesFiles(getTmpCodenvyDir(), InstallType.SINGLE_SERVER);
+                    propertiesFiles = configManager.getCodenvyPropertiesFiles(getTmpCodenvyDir(), InstallType.MULTI_SERVER);
 
                     if (propertiesFiles.hasNext()) {
                         Path file = propertiesFiles.next();
-                        installOptions.getConfigProperties().put(ConfigManager.PATH_TO_MANIFEST_PATCH_VARIABLE, file.toString());
+                        patchProperties.put(PatchCDECCommand.PATH_TO_MANIFEST_PATCH_SCRIPT_VARIABLE, file.toString());
                     }
                 }
 
-                return createPatchCommand(Paths.get(getTmpCodenvyDir(), "patches"),
-                                          CommandLibrary.PatchType.BEFORE_UPDATE,
-                                          installOptions);
+                return createPatchCDECCommand(Paths.get(getTmpCodenvyDir(), "patches"),
+                                              CommandLibrary.PatchType.BEFORE_UPDATE,
+                                              installOptions,
+                                              oldConfig,
+                                              patchProperties);
 
             case 3:
                 // don't remove /etc/puppet/manifests directory in time of updating it
@@ -375,9 +381,11 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
                 return new PuppetErrorInterrupter(new WaitOnAliveArtifactOfCorrectVersionCommand(original, versionToUpdate), configManager);
 
             case 5:
-                return createPatchCommand(Paths.get(getPuppetDir(), "patches"),
-                                          CommandLibrary.PatchType.AFTER_UPDATE,
-                                          installOptions);
+                return createPatchCDECCommand(Paths.get(getPuppetDir(), "patches"),
+                                              CommandLibrary.PatchType.AFTER_UPDATE,
+                                              installOptions,
+                                              oldConfig,
+                                              new HashMap<>());
 
             default:
                 throw new IllegalArgumentException(format("Step number %d is out of update range", step));

@@ -66,9 +66,6 @@ public class ConfigManager {
     public static final Pattern PUPPET_PROP_TEMPLATE  = Pattern.compile(" *\\$([^\\s]+) *= *\"([^\"]*)\"");
     public static final Pattern CODENVY_PROP_TEMPLATE = Pattern.compile("^([^\\s=#]+)=(.*)");
 
-    public static final String PATH_TO_MANIFEST_PATCH_VARIABLE = "PATH_TO_MANIFEST";
-
-
     private static final String    SECURE_VALUE_MASK    = "*****";
     private static final Pattern[] PRIVATE_KEY_PATTERNS = new Pattern[]{Pattern.compile("password$"),
                                                                         Pattern.compile("_pass$"),

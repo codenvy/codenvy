@@ -30,7 +30,6 @@ public class UserClientIT extends AbstractIT {
 
         Assert.assertNotNull(currentUser);
         Assert.assertNotNull(currentUser.id());
-        Assert.assertNotNull(currentUser.password());
         Assert.assertNotNull(currentUser.email());
     }
 }

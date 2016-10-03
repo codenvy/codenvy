@@ -15,7 +15,6 @@
 package com.codenvy.auth.sso.server.ticket;
 
 
-
 import com.codahale.metrics.annotation.Gauge;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.TicketManager;
@@ -50,7 +49,7 @@ public class InMemoryTicketManager implements TicketManager {
     /** @see TicketManager#putAccessTicket(com.codenvy.api.dao.authentication.AccessTicket) */
     @Override
     public void putAccessTicket(AccessTicket accessTicket) {
-        if (accessTicket.getPrincipal() == null || accessTicket.getPrincipal().getUserName() == null) {
+        if (accessTicket.getUserId() == null) {
             throw new IllegalArgumentException("Access ticket has no principal or username in principal");
         }
         readWriteLock.writeLock().lock();

@@ -43,10 +43,9 @@ export class FactoryFromFile {
   }
 
   link($scope, element) {
-    // search the input fields
-    let inputElements = element.find('input');
-
-    $scope.clickUpload = function () {
+    $scope.clickUpload = () => {
+      // search the input fields
+      let inputElements = element.find('input');
       inputElements.eq(0).click();
     };
   }

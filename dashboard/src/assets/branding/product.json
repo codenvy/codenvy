@@ -4,6 +4,7 @@
   "logoFile": "codenvy-logo.svg",
   "logoTextFile": "codenvy-logo-text.svg",
   "favicon": "favicon.ico",
+  "loader": "loader.svg",
   "ideResources": "/ide-resources/_app/",
   "helpPath": "https://codenvy.com/support/",
   "helpTitle": "Help",

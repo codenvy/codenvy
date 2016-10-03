@@ -23,11 +23,6 @@ public interface User {
     String id();
 
     /**
-     * @return password of this user.
-     */
-    String password();
-
-    /**
      * @return e-mail of this user.
      */
     String email();

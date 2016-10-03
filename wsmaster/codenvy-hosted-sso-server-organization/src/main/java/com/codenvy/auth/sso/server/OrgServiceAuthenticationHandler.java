@@ -14,27 +14,18 @@
  */
 package com.codenvy.auth.sso.server;
 
-import org.eclipse.che.api.auth.AuthenticationException;
-import org.eclipse.che.api.core.ApiException;
 import com.codenvy.api.dao.authentication.AuthenticationHandler;
 
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.auth.AuthenticationException;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.Collections;
 
 /**
- * Authentication using username and password based on
- * Java Authentication and Authorization Service.
- * <p/>
- * As usual you have to configure LoginModule to handle
- * LoginContext login() logout() calls.
+ * Authentication using username and password based on UserDao
  *
  * @author Sergii Kabashniuk
  */
@@ -44,15 +35,14 @@ public class OrgServiceAuthenticationHandler implements AuthenticationHandler {
     @Inject
     UserDao userDao;
 
-    public Subject authenticate(final String login, final String password)
+    public String authenticate(final String login, final String password)
             throws AuthenticationException {
         if (login == null || login.isEmpty() || password == null || password.isEmpty()) {
             throw new AuthenticationException(401, "Authentication failed. Please check username and password.");
         }
 
         try {
-            final UserImpl user = userDao.getByAliasAndPassword(login, password);
-            return new SubjectImpl(user.getName(), user.getId(), null, false);
+           return userDao.getByAliasAndPassword(login, password).getId();
         } catch (ApiException e) {
             LOG.debug(e.getLocalizedMessage(), e);
             throw new AuthenticationException(401, "Authentication failed. Please check username and password.");

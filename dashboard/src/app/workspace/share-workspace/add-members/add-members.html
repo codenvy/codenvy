@@ -25,7 +25,7 @@
               md-separator-keys="addMemberController.callbackController.separators"
               md-transform-chip="addMemberController.callbackController.handleUserAdding($chip)"
               md-on-remove="addMemberController.callbackController.onRemoveEmail($chip)"
-              secondary-placeholder="Enter user emails">
+              secondary-placeholder="Enter comma-separated email list of developers to invite">
       <md-chip-template>
         <div>{{$chip}}
             <span class="material-design icon-ic_done_24px user-exists-checked"
@@ -39,7 +39,6 @@
       <b>{{addMemberController.callbackController.getNotExistingEmails()}}</b> not found. Workspaces can be shared with registered users
       only.
     </div>
-    </che-input>
   </div>
   <che-button-primary
           ng-disabled="addMemberController.callbackController.existingUsers.size === 0 || addMemberController.callbackController.isLoading"

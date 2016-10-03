@@ -31,7 +31,7 @@ VALUE_TO_TEST=root@localhost
 VALUE_TO_UPDATE=user@localhost
 
 executeIMCommand "config"
-validateExpectedString ".*admin_ldap_password=*****.*installation_manager_update_server_endpoint=$UPDATE_SERVICE.*version=$LATEST_CODENVY_VERSION.*$PROPERTY_TO_TEST=$VALUE_TO_TEST.*"
+validateExpectedString ".*codenvy_admin_initial_password=*****.*installation_manager_update_server_endpoint=$UPDATE_SERVICE.*version=$LATEST_CODENVY_VERSION.*$PROPERTY_TO_TEST=$VALUE_TO_TEST.*"
 
 executeIMCommand "config $PROPERTY_TO_TEST"
 validateExpectedString ".*$PROPERTY_TO_TEST=$VALUE_TO_TEST.*"

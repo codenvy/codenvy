@@ -20,11 +20,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-assembly-parent</artifactId>
-    <version>5.0.0-M3-SNAPSHOT</version>
+    <version>5.0.0-M5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
@@ -46,8 +46,8 @@
     </scm>
     <properties>
         <aws.java.sdk.version>1.11.22</aws.java.sdk.version>
-        <che.lib.version>5.0.0-M3-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-M3-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M5-SNAPSHOT</che.lib.version>
+        <che.version>5.0.0-M5-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>
@@ -57,8 +57,7 @@
         <com.nimbusds.version>3.0</com.nimbusds.version>
         <commons-configuration.version>1.10</commons-configuration.version>
         <de.flapdoodle.embed-mongo.version>1.50.0</de.flapdoodle.embed-mongo.version>
-        <jdbc.h2-driver.version>1.2.140</jdbc.h2-driver.version>
-        <jdbc.postgresql-driver.version>9.3-1102-jdbc41</jdbc.postgresql-driver.version>
+        <jdbc.postgresql-driver.version>9.4.1211</jdbc.postgresql-driver.version>
         <jline.version>2.12</jline.version>
         <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <maven.releases.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-releases/</maven.releases.repo.url>
@@ -67,6 +66,7 @@
         <org.apache.karaf.version>3.0.2</org.apache.karaf.version>
         <org.apache.sshd.version>0.9.0</org.apache.sshd.version>
         <org.flyway.version>3.1</org.flyway.version>
+        <org.ldaptive.version>1.2.0</org.ldaptive.version>
         <org.mongodb.version>3.2.1</org.mongodb.version>
         <org.osgi.version>5.0.0</org.osgi.version>
         <org.scala.lang.version>2.10.4</org.scala.lang.version>
@@ -104,13 +104,6 @@
                 <groupId>com.codahale.metrics</groupId>
                 <artifactId>metrics-servlets</artifactId>
                 <version>${com.codahale.metrics.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy</groupId>
-                <artifactId>site</artifactId>
-                <version>${project.version}</version>
-                <type>zip</type>
-                <classifier>${site.classifier}</classifier>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.cli</groupId>
@@ -321,6 +314,13 @@
                 <type>zip</type>
             </dependency>
             <dependency>
+                <groupId>com.codenvy.onpremises</groupId>
+                <artifactId>site</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+                <classifier>${site.classifier}</classifier>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.onpremises.wsagent</groupId>
                 <artifactId>codenvy-hosted-machine-authentication-agent</artifactId>
                 <version>${project.version}</version>
@@ -373,6 +373,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-organization</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-permission</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -390,6 +395,11 @@
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-permission-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-resource</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -511,7 +521,17 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-system-ram</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-workspace-activity</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-ldap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -717,11 +737,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${jdbc.h2-driver.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.license4j</groupId>
                 <artifactId>license4j-runtime-library</artifactId>
                 <version>${com.license4j.version}</version>
@@ -858,6 +873,11 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
                 <version>${org.flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ldaptive</groupId>
+                <artifactId>ldaptive</artifactId>
+                <version>${org.ldaptive.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>

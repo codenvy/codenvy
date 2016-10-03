@@ -20,7 +20,7 @@
     <parent>
         <artifactId>onpremises-ide-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>onpremises-ide-packaging-war-factory</artifactId>
     <packaging>war</packaging>
@@ -150,7 +150,7 @@
                             <stripVersion>true</stripVersion>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.codenvy</groupId>
+                                    <groupId>com.codenvy.onpremises</groupId>
                                     <artifactId>site</artifactId>
                                     <version>${codenvy.site.version}</version>
                                     <classifier>${site.classifier}</classifier>

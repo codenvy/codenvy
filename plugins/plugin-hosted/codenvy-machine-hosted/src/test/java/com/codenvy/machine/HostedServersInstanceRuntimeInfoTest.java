@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
@@ -65,13 +66,17 @@ public class HostedServersInstanceRuntimeInfoTest {
         originServers.put("8080/tcp", new ServerImpl("ref1",
                                                      "http",
                                                      DEFAULT_HOST + ":32000",
-                                                     "/some/path",
-                                                     "http://" + DEFAULT_HOST + ":32000/some/path"));
+                                                     "http://" + DEFAULT_HOST + ":32000/some/path",
+                                                     new ServerPropertiesImpl("/some/path",
+                                                                              DEFAULT_HOST + ":32000",
+                                                                              "http://" + DEFAULT_HOST + ":32000/some/path")));
         originServers.put("1000/tcp", new ServerImpl("ref2",
                                                      "wss",
                                                      DEFAULT_HOST + ":32001",
-                                                     "/some/path",
-                                                     "wss://" + DEFAULT_HOST + ":32001/some/path"));
+                                                     "wss://" + DEFAULT_HOST + ":32001/some/path",
+                                                     new ServerPropertiesImpl("/some/path",
+                                                                              DEFAULT_HOST + ":32001",
+                                                                              "wss://" + DEFAULT_HOST + ":32001/some/path")));
         makeParentOfHostedRuntimeInfoReturnServers(originServers, singletonMap("otherreference",
                                                                                new UriTemplateServerProxyTransformer("http://host:9090/path") {}));
 
@@ -86,20 +91,26 @@ public class HostedServersInstanceRuntimeInfoTest {
         originServers.put("8080/tcp", new ServerImpl("ref1",
                                                      "http",
                                                      DEFAULT_HOST + ":32000",
-                                                     "/some/path",
-                                                     "http://" + DEFAULT_HOST + ":32000/some/path"));
+                                                     "http://" + DEFAULT_HOST + ":32000/some/path",
+                                                     new ServerPropertiesImpl("/some/path",
+                                                                              DEFAULT_HOST + ":32000",
+                                                                              "http://" + DEFAULT_HOST + ":32000/some/path")));
         originServers.put("1000/tcp", new ServerImpl("ref2",
                                                      "wss",
                                                      DEFAULT_HOST + ":30001",
-                                                     "/some/path",
-                                                     "wss://" + DEFAULT_HOST + ":32001/some/path"));
+                                                     "wss://" + DEFAULT_HOST + ":32001/some/path",
+                                                     new ServerPropertiesImpl("/some/path",
+                                                                              DEFAULT_HOST + ":30001",
+                                                                              "wss://" + DEFAULT_HOST + ":32001/some/path")));
         HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("8080/tcp", originServers.get("8080/tcp"));
         expectedServers.put("1000/tcp", new ServerImpl("ref2",
                                                        "http",
                                                        "host:9090",
-                                                       "/path",
-                                                       "http://host:9090/path"));
+                                                       "http://host:9090/path",
+                                                       new ServerPropertiesImpl("/path",
+                                                                                "host:9090",
+                                                                                "http://host:9090/path")));
 
         makeParentOfHostedRuntimeInfoReturnServers(expectedServers, singletonMap("ref2",
                                                                                  new UriTemplateServerProxyTransformer("http://host:9090/path") {}));
@@ -118,13 +129,14 @@ public class HostedServersInstanceRuntimeInfoTest {
             serverConfigs.add(new ServerConfImpl(server.getRef(),
                                                  serverEntry.getKey(),
                                                  server.getProtocol(),
-                                                 server.getPath()));
+                                                 server.getProperties().getPath()));
 
             exposedPorts.put(serverEntry.getKey(),
                              singletonList(new PortBinding().withHostPort(server.getAddress().split(":")[1])));
         }
 
         runtimeInfo = spy(new HostedServersInstanceRuntimeInfo(containerInfo,
+                                                               null,
                                                                DEFAULT_HOST,
                                                                machineConfig,
                                                                emptySet(),

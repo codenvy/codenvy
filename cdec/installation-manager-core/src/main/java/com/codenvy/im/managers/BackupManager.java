@@ -38,7 +38,7 @@ import static java.lang.String.format;
 @Singleton
 public class BackupManager {
 
-    private String        defaultBackupDir;
+    private String defaultBackupDir;
 
     @Inject
     public BackupManager(@Named("installation-manager.backup_dir") String defaultBackupDir) throws IOException {

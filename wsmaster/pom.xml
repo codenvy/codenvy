@@ -20,16 +20,15 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M5-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises.wsmaster</groupId>
     <artifactId>codenvy-master-parent</artifactId>
-    <version>5.0.0-M3-SNAPSHOT</version>
+    <version>5.0.0-M5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Master Parent</name>
     <modules>
         <module>codenvy-hosted-api-jdbc-vendor-postgresql</module>
-        <module>codenvy-hosted-api-admin</module>
         <module>codenvy-hosted-mail-client</module>
         <module>codenvy-hosted-mail-server</module>
         <module>codenvy-hosted-platform-api-impl</module>
@@ -53,10 +52,15 @@
         <module>codenvy-hosted-api-factory</module>
         <module>codenvy-hosted-api-permission-shared</module>
         <module>codenvy-hosted-integration-tests</module>
+        <module>codenvy-ldap</module>
         <module>codenvy-hosted-api-license</module>
         <module>codenvy-hosted-license-shared</module>
         <module>codenvy-hosted-report-shared</module>
         <module>codenvy-hosted-report</module>
+        <module>codenvy-hosted-api-admin</module>
+        <module>codenvy-hosted-api-organization</module>
+        <module>codenvy-hosted-system-ram</module>
+        <module>codenvy-hosted-api-resource</module>
         <module>codenvy-hosted-api-audit</module>
     </modules>
 </project>
