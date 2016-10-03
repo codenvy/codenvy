@@ -85,6 +85,7 @@ the pool. The example: _10_
 - __ldap.connection.bind.dn__ - Since connections are initialized by performing a bind operation, this property indicates DN to make this bind with. The example: _userX_
 - __ldap.connection.bind.password__ - Credential for the initial connection bind. The example: _password_
    On Active Directory, a special mode called FastBind can be activated by setting both  `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*".  In this mode, no group evaluation is done, so it can be only used to verify a client's credentials. 
+   See http://msdn.microsoft.com/en-us/library/cc223503(v=prot.20).aspx
    
 
 #### SSL configuration
