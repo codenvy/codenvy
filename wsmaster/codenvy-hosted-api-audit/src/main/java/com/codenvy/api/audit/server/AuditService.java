@@ -52,8 +52,11 @@ public class AuditService extends Service {
         java.nio.file.Path report = auditManager.generateAuditReport();
 
         StreamingOutput stream = outputStream -> {
-            copy(report, outputStream);
-            auditManager.deleteReportDirectory(report);
+            try {
+                copy(report, outputStream);
+            } finally {
+                auditManager.deleteReportDirectory(report);
+            }
         };
 
         return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
