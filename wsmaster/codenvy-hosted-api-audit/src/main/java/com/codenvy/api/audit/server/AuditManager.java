@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -130,9 +131,9 @@ public class AuditManager {
                 List<WorkspaceImpl> workspaces;
                 try {
                     workspaces = workspaceManager.getWorkspaces(user.getId());
-                    List<String> workspaceIds = workspaces.stream()
-                                                          .map(WorkspaceImpl::getId)
-                                                          .collect(Collectors.toList());
+                    Set<String> workspaceIds = workspaces.stream()
+                                                         .map(WorkspaceImpl::getId)
+                                                         .collect(Collectors.toSet());
                     //add workspaces witch are belong to user, but user doesn't have permissions for them.
                     workspaceManager.getByNamespace(user.getName())
                                     .stream()
