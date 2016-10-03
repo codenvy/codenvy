@@ -26,6 +26,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -183,7 +184,7 @@ public class TestHttpTransport {
     }
 
     @Test(dataProvider = "testConsideringAuthenticatedProxyData")
-    public void testConsideringAuthenticatedHttpProxy(String username, String password, Runnable verification) throws IOException {
+    public void testConsideringAuthenticatedHttpProxy(String username, String password) throws IOException {
         String httpPath = "http://localhost";
 
         if (username != null) {
@@ -195,12 +196,25 @@ public class TestHttpTransport {
         }
 
         HttpURLConnection mockConnection = mock(HttpURLConnection.class);
+        doReturn(new URL(httpPath)).when(mockConnection).getURL();
         doReturn(200).when(mockConnection).getResponseCode();
 
         doReturn(mockConnection).when(spyHttpTransport).openConnection(httpPath, null, false);
 
         spyHttpTransport.doGet(httpPath);
-        verification.run();
+    }
+
+    @DataProvider
+    public Object[][] testConsideringAuthenticatedProxyData() {
+        return new Object[][]{
+            {null, null},
+            {"", null},
+            {null, ""},
+            {null, "pass"},
+            {"test", null},
+            {"test", ""},
+            {"test", "pass"}
+        };
     }
 
     @Test

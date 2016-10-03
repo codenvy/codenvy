@@ -91,7 +91,7 @@ public abstract class BaseTestPuppetErrorInterrupter {
     public void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
 
-        deleteIfExists(BASE_TMP_DIRECTORY);
+        FileUtils.deleteDirectory(BASE_TMP_DIRECTORY.toFile());
 
         createDirectory(BASE_TMP_DIRECTORY);
         createDirectory(REPORT_TMP_DIRECTORY);
