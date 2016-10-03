@@ -17,10 +17,8 @@ package com.codenvy.ldap.sync;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.ldaptive.LdapEntry;
 
-import javax.inject.Inject;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
 
 /**
  * Maps {@link LdapEntry} to {@link UserImpl}.
@@ -41,19 +39,8 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
 
     @Override
     public UserImpl apply(LdapEntry entry) {
-        validateRequiredAttrsExists(entry);
-        return new UserImpl(entry.getAttribute(idAttr).getStringValue(),
-                            entry.getAttribute(mailAttr).getStringValue(),
-                            entry.getAttribute(nameAttr).getStringValue());
-    }
-
-    private void validateRequiredAttrsExists(LdapEntry entry) {
-        try {
-            requireNonNull(entry.getAttribute(idAttr), "Cannot identify required ID attribute in LDAP entry. Please, check configuration parameter correctness.");
-            requireNonNull(entry.getAttribute(nameAttr), "Cannot identify required Name attribute in LDAP entry. Please, check configuration parameter correctness.");
-            requireNonNull(entry.getAttribute(mailAttr), "Cannot identify required Email attribute in LDAP entry. Please, check configuration parameter correctness.");
-        } catch (NullPointerException e) {
-            throw new SyncException(e.getMessage(), e);
-        }
+        return new UserImpl(entry.getAttribute(idAttr) != null ? entry.getAttribute(idAttr).getStringValue() : null,
+                            entry.getAttribute(mailAttr)!= null ? entry.getAttribute(mailAttr).getStringValue() : null,
+                            entry.getAttribute(nameAttr) != null ? entry.getAttribute(nameAttr).getStringValue() : null);
     }
 }
