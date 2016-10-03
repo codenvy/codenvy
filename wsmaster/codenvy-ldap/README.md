@@ -82,9 +82,10 @@ the pool. The example: _10_
 - __ldap.connection.pool.prune_ms__ - Period in milliseconds between connection pool prunes (e.g. idle connections are removed).
 - __ldap.connection.pool.fail_fast__ - Indicates whether exception should be thrown during pool initialization when pool does not contain at least one connection and it's minimum size is greater than zero
 - __ldap.connection.pool.block_wait_ms__ - Period in milliseconds during which an pool which is reached the maximum size will block new requests. BlockingTimeoutException will be thrown when time is exceeded. Default is _infinite_.
-- __ldap.connection.bind.dn__ - Since connections are initialized by performing a bind operation, indicated DN to make this bind with. The example: _userX_
+- __ldap.connection.bind.dn__ - Since connections are initialized by performing a bind operation, this property indicates DN to make this bind with. The example: _userX_
 - __ldap.connection.bind.password__ - Credential for the initial connection bind. The example: _password_
-   A special mode called FastBind can be activated by setting both  _ldap.connection.bind.dn_ and _ldap.connection.bind.password_ to a value of "*".  In this mode, no group evaluation is done, so it can be only used to verify a client's credentials 
+   On Active Directory, a special mode called FastBind can be activated by setting both  `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*".  In this mode, no group evaluation is done, so it can be only used to verify a client's credentials. 
+   
 
 #### SSL configuration
    SSL can be configured in two ways - using trust certificate or using secure keystore. 
