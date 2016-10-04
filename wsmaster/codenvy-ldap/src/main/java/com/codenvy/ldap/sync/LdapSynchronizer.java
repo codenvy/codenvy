@@ -202,7 +202,7 @@ public class LdapSynchronizer {
                 iteration++;
                 idNormalizer.normalize(entry);
                 final UserImpl user = userMapper.apply(entry);
-                if (!validateRequiredFields(user)) {
+                if (!isValid(user)) {
                     continue;
                 }
                 final ProfileImpl profile = profileMapper.apply(entry);
@@ -314,7 +314,7 @@ public class LdapSynchronizer {
         }
     }
 
-    private boolean validateRequiredFields(UserImpl user) {
+    private boolean isValid(UserImpl user) {
         if (user.getId() == null) {
             LOG.warn(format("Cannot find out user's id. Please, check configuration `%s` parameter correctness.", USER_ID_ATTRIBUTE_NAME));
             return false;
