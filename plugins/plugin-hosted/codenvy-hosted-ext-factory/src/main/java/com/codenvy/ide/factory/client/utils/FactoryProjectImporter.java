@@ -28,6 +28,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -42,6 +43,8 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -66,8 +69,10 @@ import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
 import static org.eclipse.che.api.core.ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -82,6 +87,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     private static final String CHANNEL = "git:checkout:";
 
     private final MessageBusProvider          messageBusProvider;
+    private final SubversionCredentialsDialog subversionCredentialsDialog;
     private final FactoryLocalizationConstant locale;
     private final NotificationManager         notificationManager;
     private final String                      restContext;
@@ -95,6 +101,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     @Inject
     public FactoryProjectImporter(AppContext appContext,
                                   NotificationManager notificationManager,
+                                  SubversionCredentialsDialog subversionCredentialsDialog,
                                   FactoryLocalizationConstant locale,
                                   ImportProjectNotificationSubscriberFactory subscriberFactory,
                                   @RestContext String restContext,
@@ -104,6 +111,7 @@ public class FactoryProjectImporter extends AbstractImporter {
                                   DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         super(appContext, subscriberFactory);
         this.notificationManager = notificationManager;
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.locale = locale;
         this.restContext = restContext;
         this.dialogFactory = dialogFactory;
@@ -280,6 +288,9 @@ public class FactoryProjectImporter extends AbstractImporter {
                                          }
 
                                          break;
+                                     case UNAUTHORIZED_SVN_OPERATION:
+                                         subscriber.onFailure(err.getMessage());
+                                         return recallImportWithCredentials(pathToProject, sourceStorage);
                                      case UNABLE_GET_PRIVATE_SSH_KEY:
                                          subscriber.onFailure(locale.acceptSshNotFoundText());
                                          break;
@@ -328,6 +339,32 @@ public class FactoryProjectImporter extends AbstractImporter {
             @Override
             public void apply(PromiseError caught) throws OperationException {
                 callback.onFailure(new Exception(caught.getMessage()));
+            }
+        });
+    }
+
+    private Promise<Project> recallImportWithCredentials(final Path path, final SourceStorage sourceStorage) {
+        return createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Project>() {
+            @Override
+            public void makeCall(final AsyncCallback<Project> callback) {
+                subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                    @Override
+                    public void apply(Credentials credentials) throws OperationException {
+                        sourceStorage.getParameters().put("username", credentials.getUsername());
+                        sourceStorage.getParameters().put("password", credentials.getPassword());
+                        doImport(path, sourceStorage).then(new Operation<Project>() {
+                            @Override
+                            public void apply(Project project) throws OperationException {
+                                callback.onSuccess(project);
+                            }
+                        }).catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError error) throws OperationException {
+                                callback.onFailure(error.getCause());
+                            }
+                        });
+                    }
+                });
             }
         });
     }
