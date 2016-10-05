@@ -83,7 +83,7 @@ public class AuditManager {
     }
 
     /**
-     * Generates audit report.
+     * Generates audit report file in plain/text format.
      *
      * @return path of audit report file
      * @throws ServerException
