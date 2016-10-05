@@ -258,7 +258,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                 .to(com.codenvy.auth.sso.client.NoUserInteractionTokenHandler.class);
 
         bindConstant().annotatedWith(Names.named("auth.jaas.realm")).to("default_realm");
-        bindConstant().annotatedWith(Names.named("auth.handler.default")).to("org");
         bindConstant().annotatedWith(Names.named("auth.sso.access_cookie_path")).to("/api/internal/sso/server");
         bindConstant().annotatedWith(Names.named("auth.sso.access_ticket_lifetime_seconds")).to(259200);
         bindConstant().annotatedWith(Names.named("auth.sso.bearer_ticket_lifetime_seconds")).to(3600);
