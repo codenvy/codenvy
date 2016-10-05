@@ -58,7 +58,7 @@ createFileBackup() {
 
 createFileBackup "${PATH_TO_MANIFEST}"
 
-if [[ '$machine_ws_agent_run_command' =~ .*sleep.5.&&.mkdir.-p.~/che.&&.rm.-rf.~/che/*.&&.unzip.-q./mnt/che/ws-agent.zip.-d.~/che/ws-agent.&&.~/che/ws-agent/bin/catalina.sh.run ]]; then
+if [[ '${machine_ws_agent_run_command}' =~ .*sleep.5.&&.mkdir.-p.~/che.&&.rm.-rf.~/che/*.&&.unzip.-q./mnt/che/ws-agent.zip.-d.~/che/ws-agent.&&.~/che/ws-agent/bin/catalina.sh.run ]]; then
     echo >> $LOG_FILE
     echo "Update codenvy property: machine_ws_agent_run_command = '${machine_ws_agent_run_command}'" >> $LOG_FILE
     sudo sed -i 's|sleep 5 && mkdir -p ~/che && rm -rf ~/che/[*] && unzip -q /mnt/che/ws-agent.zip -d ~/che/ws-agent && ~/che/ws-agent/bin/catalina.sh run|~/che/ws-agent/bin/catalina.sh run|g' "${PATH_TO_MANIFEST}" &>> $LOG_FILE
