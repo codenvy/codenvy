@@ -28,7 +28,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -72,7 +71,6 @@ import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
-import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -290,7 +288,7 @@ public class FactoryProjectImporter extends AbstractImporter {
                                          break;
                                      case UNAUTHORIZED_SVN_OPERATION:
                                          subscriber.onFailure(err.getMessage());
-                                         return recallImportWithCredentials(pathToProject, sourceStorage);
+                                         return recallSubversionImportWithCredentials(pathToProject, sourceStorage);
                                      case UNABLE_GET_PRIVATE_SSH_KEY:
                                          subscriber.onFailure(locale.acceptSshNotFoundText());
                                          break;
@@ -343,29 +341,21 @@ public class FactoryProjectImporter extends AbstractImporter {
         });
     }
 
-    private Promise<Project> recallImportWithCredentials(final Path path, final SourceStorage sourceStorage) {
-        return createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Project>() {
-            @Override
-            public void makeCall(final AsyncCallback<Project> callback) {
-                subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                    @Override
-                    public void apply(Credentials credentials) throws OperationException {
-                        sourceStorage.getParameters().put("username", credentials.getUsername());
-                        sourceStorage.getParameters().put("password", credentials.getPassword());
-                        doImport(path, sourceStorage).then(new Operation<Project>() {
-                            @Override
-                            public void apply(Project project) throws OperationException {
-                                callback.onSuccess(project);
-                            }
-                        }).catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError error) throws OperationException {
-                                callback.onFailure(error.getCause());
-                            }
-                        });
-                    }
-                });
-            }
-        });
+    private Promise<Project> recallSubversionImportWithCredentials(final Path path, final SourceStorage sourceStorage) {
+        return subversionCredentialsDialog.askCredentials()
+                                          .thenPromise(new Function<Credentials, Promise<Project>>() {
+                                              @Override
+                                              public Promise<Project> apply(Credentials credentials) throws FunctionException {
+                                                  sourceStorage.getParameters().put("username", credentials.getUsername());
+                                                  sourceStorage.getParameters().put("password", credentials.getPassword());
+                                                  return doImport(path, sourceStorage);
+                                              }
+                                          })
+                                          .catchError(new Operation<PromiseError>() {
+                                              @Override
+                                              public void apply(PromiseError error) throws OperationException {
+                                                  callback.onFailure(error.getCause());
+                                              }
+                                          });
     }
 }
