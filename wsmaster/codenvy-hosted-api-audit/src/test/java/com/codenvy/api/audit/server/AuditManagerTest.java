@@ -27,7 +27,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.everrest.assured.EverrestJetty;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -56,7 +55,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Igor Vinokur
  */
-@Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
+@Listeners(value = MockitoTestNGListener.class)
 public class AuditManagerTest {
 
     private static final String FULL_AUDIT_REPORT                    =
