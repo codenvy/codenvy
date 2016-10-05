@@ -165,7 +165,7 @@ public class WorkspaceInfoCache {
     public static class HttpWorkspaceCacheLoader extends WorkspaceCacheLoader {
 
         @Inject
-        @Named("api.endpoint")
+        @Named("che.api")
         URI apiEndpoint;
 
         @Inject

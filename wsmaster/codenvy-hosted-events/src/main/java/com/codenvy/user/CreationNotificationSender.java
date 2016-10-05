@@ -58,7 +58,7 @@ public class CreationNotificationSender {
 
     @VisibleForTesting
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     String apiEndpoint;
 
     @VisibleForTesting

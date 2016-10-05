@@ -44,7 +44,7 @@ public class FactoryConnection {
     private final String                 baseUrl;
 
     @Inject
-    public FactoryConnection(HttpJsonRequestFactory httpJsonRequestFactory, @Named("api.endpoint") String baseUrl) {
+    public FactoryConnection(HttpJsonRequestFactory httpJsonRequestFactory, @Named("che.api") String baseUrl) {
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.baseUrl = baseUrl;
     }

@@ -51,7 +51,7 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 public class FactoryRetrieverFilter implements Filter {
 
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     protected String apiEndPoint;
 
     @Inject

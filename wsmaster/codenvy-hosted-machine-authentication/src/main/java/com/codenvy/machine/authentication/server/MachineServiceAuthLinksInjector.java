@@ -53,7 +53,7 @@ public class MachineServiceAuthLinksInjector extends MachineServiceLinksInjector
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public MachineServiceAuthLinksInjector(@Named("api.endpoint") String apiEndpoint,
+    public MachineServiceAuthLinksInjector(@Named("che.api") String apiEndpoint,
                                            HttpJsonRequestFactory httpJsonRequestFactory) {
         this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
         this.httpJsonRequestFactory = httpJsonRequestFactory;

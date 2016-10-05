@@ -60,7 +60,7 @@ public class ReportSender {
 
     @Inject
     public ReportSender(@Named("report-sender.update_server_endpoint") String updateServerEndpoint,
-                        @Named("api.endpoint") String apiEndpoint,
+                        @Named("che.api") String apiEndpoint,
                         MailSenderClient mailClient,
                         HttpJsonRequestFactory httpJsonRequestFactory,
                         CodenvyLicenseManager licenseManager,

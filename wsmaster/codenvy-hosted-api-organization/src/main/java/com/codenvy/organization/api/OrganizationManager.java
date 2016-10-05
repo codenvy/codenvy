@@ -48,7 +48,7 @@ public class OrganizationManager {
     @Inject
     public OrganizationManager(OrganizationDao organizationDao,
                                MemberDao memberDao,
-                               @Named("che.account.reserved_names") String[] reservedNames) {
+                               @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.organizationDao = organizationDao;
         this.memberDao = memberDao;
         this.reservedNames = Sets.newHashSet(reservedNames);

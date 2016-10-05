@@ -44,8 +44,8 @@ public class OrgServiceUserValidator implements UserCreationValidator {
     @Inject
     public OrgServiceUserValidator(UserManager userDao,
                                    UserValidator userValidator,
-                                   @Named("user.self.creation.allowed") boolean userSelfCreationAllowed,
-                                   @Named("che.account.reserved_names") String[] reservedNames) {
+                                   @Named("che.auth.user_self_creation") boolean userSelfCreationAllowed,
+                                   @Named("che.auth.reserved_user_names") String[] reservedNames) {
         this.userDao = userDao;
         this.userValidator = userValidator;
         this.userSelfCreationAllowed = userSelfCreationAllowed;

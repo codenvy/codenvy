@@ -50,7 +50,7 @@ public class MachineTokenService {
     @Inject
     public MachineTokenService(MachineTokenRegistry machineTokenRegistry,
                                HttpJsonRequestFactory requestFactory,
-                               @Named("api.endpoint") String apiEndpoint) {
+                               @Named("che.api") String apiEndpoint) {
         this.registry = machineTokenRegistry;
         this.requestFactory = requestFactory;
         this.apiEndpoint = apiEndpoint;

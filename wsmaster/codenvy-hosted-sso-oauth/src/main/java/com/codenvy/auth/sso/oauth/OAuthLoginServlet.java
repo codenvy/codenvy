@@ -68,7 +68,7 @@ public class OAuthLoginServlet extends HttpServlet {
     @Inject
     private String                           noAccountFoundErrorPage;
     @Inject
-    @Named("user.self.creation.allowed")
+    @Named("che.auth.user_self_creation")
     private boolean                          userSelfCreationAllowed;
 
     @Override

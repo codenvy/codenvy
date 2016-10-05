@@ -44,7 +44,7 @@ public class HttpPermissionCheckerImpl implements PermissionChecker {
     private final LoadingCache<Key, Set<String>> permissionsCache;
 
     @Inject
-    public HttpPermissionCheckerImpl(@Named("api.endpoint") String apiEndpoint,
+    public HttpPermissionCheckerImpl(@Named("che.api") String apiEndpoint,
                                      HttpJsonRequestFactory requestFactory) {
         //TODO mb make configurable size of cache and expiration time
         this.permissionsCache = CacheBuilder.newBuilder()

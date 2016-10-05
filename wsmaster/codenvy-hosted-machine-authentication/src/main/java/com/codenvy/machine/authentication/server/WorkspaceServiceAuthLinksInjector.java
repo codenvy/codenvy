@@ -63,7 +63,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceServiceAuthLinksInjector(@Named("api.endpoint") String apiEndpoint,
+    public WorkspaceServiceAuthLinksInjector(@Named("che.api") String apiEndpoint,
                                              HttpJsonRequestFactory httpJsonRequestFactory,
                                              MachineServiceLinksInjector machineLinksInjector) {
         super(machineLinksInjector);

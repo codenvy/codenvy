@@ -106,7 +106,7 @@ public class Config {
 
     public static final String SYSTEM_HTTP_PROXY  = "http_proxy";
     public static final String SYSTEM_HTTPS_PROXY = "https_proxy";
-    public static final String SYSTEM_NO_PROXY    = "no_proxy";
+    public static final String SYSTEM_NO_PROXY    = "che.workspace.no_proxy";
 
     public static final String HTTP_PROXY_FOR_CODENVY  = "http_proxy_for_codenvy";
     public static final String HTTPS_PROXY_FOR_CODENVY = "https_proxy_for_codenvy";

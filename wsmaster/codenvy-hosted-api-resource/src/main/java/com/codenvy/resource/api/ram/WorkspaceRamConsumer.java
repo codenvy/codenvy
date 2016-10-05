@@ -62,7 +62,7 @@ public class WorkspaceRamConsumer implements MethodInterceptor {
     EnvironmentParser environmentParser;
 
     @Inject
-    @Named("machine.default_mem_size_mb")
+    @Named("che.workspace.default_memory_mb")
     @VisibleForTesting
     int defaultMachineMemorySizeMB;
 

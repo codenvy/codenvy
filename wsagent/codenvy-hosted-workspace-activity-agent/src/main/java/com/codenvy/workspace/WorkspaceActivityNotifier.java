@@ -46,7 +46,7 @@ public class WorkspaceActivityNotifier {
 
     @Inject
     public WorkspaceActivityNotifier(HttpJsonRequestFactory httpJsonRequestFactory,
-                                     @Named("api.endpoint") String apiEndpoint,
+                                     @Named("che.api") String apiEndpoint,
                                      @Named("env.CHE_WORKSPACE_ID") String wsId,
                                      @Named("workspace.activity.notify_time_threshold_ms") long threshold,
                                      @Named("user.token") String token) {

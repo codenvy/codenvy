@@ -42,7 +42,7 @@ public class HttpSsoServerClient implements ServerClient {
     protected final HttpJsonRequestFactory requestFactory;
 
     @Inject
-    public HttpSsoServerClient(@Named("api.endpoint") String apiEndpoint,
+    public HttpSsoServerClient(@Named("che.api") String apiEndpoint,
                                HttpJsonRequestFactory requestFactory) {
         this.apiEndpoint = apiEndpoint;
         this.requestFactory = requestFactory;

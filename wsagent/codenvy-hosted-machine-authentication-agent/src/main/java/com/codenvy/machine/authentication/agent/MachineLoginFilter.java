@@ -53,7 +53,7 @@ public class MachineLoginFilter implements Filter {
     private final RequestTokenExtractor  tokenExtractor;
 
     @Inject
-    public MachineLoginFilter(@Named("api.endpoint") String apiEndpoint,
+    public MachineLoginFilter(@Named("che.api") String apiEndpoint,
                               HttpJsonRequestFactory requestFactory,
                               RequestTokenExtractor tokenExtractor) {
         this.tokenServiceEndpoint = apiEndpoint + "/machine/token";

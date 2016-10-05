@@ -78,8 +78,8 @@ public class MachineTokenInterceptorTest {
                 bind(MachineProcessManager.class).toInstance(mock(MachineProcessManager.class));
                 bind(UserManager.class).toInstance(mock(UserManager.class));
                 bind(AccountDao.class).toInstance(mock(AccountDao.class));
-                bindConstant().annotatedWith(Names.named("workspace.runtime.auto_restore")).to(false);
-                bindConstant().annotatedWith(Names.named("workspace.runtime.auto_snapshot")).to(false);
+                bindConstant().annotatedWith(Names.named("che.workspace.auto_restore")).to(false);
+                bindConstant().annotatedWith(Names.named("che.workspace.auto_snapshot")).to(false);
                 bind(WorkspaceManager.class);
                 bind(SnapshotDao.class).toInstance(mock(SnapshotDao.class));
 

@@ -62,8 +62,8 @@ public class OnPremisesStackLoader {
     private final JpaStackPermissionsDao permissionsDao;
 
     @Inject
-    public OnPremisesStackLoader(@Named("che.stacks.default") String stacksPath,
-                                 @Named("che.stacks.images.storage") String stackIconFolder,
+    public OnPremisesStackLoader(@Named("che.stacks.storage") String stacksPath,
+                                 @Named("che.stacks.images") String stackIconFolder,
                                  JpaStackPermissionsDao permissionsDao,
                                  StackDao stackDao) {
 

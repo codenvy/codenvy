@@ -258,7 +258,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("auth.sso.bearer_ticket_lifetime_seconds")).to(3600);
         bindConstant().annotatedWith(Names.named("auth.sso.create_workspace_page_url")).to("/site/auth/create");
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
-        bindConstant().annotatedWith(Names.named("auth.oauth.access_denied_error_page")).to("/site/login");
+        bindConstant().annotatedWith(Names.named("che.auth.access_denied_error_page")).to("/site/login");
         bindConstant().annotatedWith(Names.named("error.page.workspace_not_found_redirect_url")).to("/site/error/error-tenant-name");
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url"))
                       .to("/site/error/error-cookies-disabled");
@@ -349,8 +349,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bind(com.codenvy.machine.backup.WorkspaceFsBackupScheduler.class).asEagerSingleton();
 
-        bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint"))
-                          .to(Key.get(String.class, Names.named("api.endpoint")));
+        bind(String.class).annotatedWith(Names.named("che.workspace.che_server_endpoint"))
+                          .to(Key.get(String.class, Names.named("che.api")));
 
 //        install(new com.codenvy.router.MachineRouterModule());
 

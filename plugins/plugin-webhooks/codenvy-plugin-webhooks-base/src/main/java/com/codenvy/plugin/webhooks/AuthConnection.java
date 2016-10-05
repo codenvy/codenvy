@@ -45,7 +45,7 @@ public class AuthConnection {
     private final String                 baseUrl;
 
     @Inject
-    public AuthConnection(HttpJsonRequestFactory httpJsonRequestFactory, @Named("api.endpoint") String baseUrl) {
+    public AuthConnection(HttpJsonRequestFactory httpJsonRequestFactory, @Named("che.api") String baseUrl) {
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.baseUrl = baseUrl;
     }

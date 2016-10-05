@@ -47,7 +47,7 @@ public class MachineSsoServerClient extends HttpSsoServerClient {
     private final UserManager          userManager;
 
     @Inject
-    public MachineSsoServerClient(@Named("api.endpoint") String apiEndpoint,
+    public MachineSsoServerClient(@Named("che.api") String apiEndpoint,
                                   HttpJsonRequestFactory requestFactory,
                                   MachineTokenRegistry tokenRegistry,
                                   UserManager userManager) {

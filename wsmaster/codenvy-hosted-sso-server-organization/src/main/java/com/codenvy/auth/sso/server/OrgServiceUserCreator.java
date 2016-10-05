@@ -21,7 +21,6 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.PreferenceManager;
@@ -55,7 +54,7 @@ public class OrgServiceUserCreator implements UserCreator {
     public OrgServiceUserCreator(UserManager userManager,
                                  ProfileManager profileManager,
                                  PreferenceManager preferenceManager,
-                                 @Named("user.self.creation.allowed") boolean userSelfCreationAllowed) {
+                                 @Named("che.auth.user_self_creation") boolean userSelfCreationAllowed) {
         this.userManager = userManager;
         this.profileManager = profileManager;
         this.preferenceManager = preferenceManager;

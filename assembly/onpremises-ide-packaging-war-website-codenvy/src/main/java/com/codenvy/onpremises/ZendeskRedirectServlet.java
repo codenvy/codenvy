@@ -57,7 +57,7 @@ import java.util.UUID;
 @Singleton
 public class ZendeskRedirectServlet extends HttpServlet {
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     private String apiEndpoint;
     @Inject
     @Named("zendesk.shared.key")
