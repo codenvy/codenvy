@@ -17,6 +17,7 @@ package com.codenvy.organization.spi.jpa;
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 
 import javax.inject.Inject;
@@ -36,6 +37,10 @@ public class OrganizationEntityListener {
 
     @PreRemove
     public void preRemove(OrganizationImpl organization) {
-        eventService.publish(new BeforeOrganizationRemovedEvent(organization));
+        final BeforeOrganizationRemovedEvent event = new BeforeOrganizationRemovedEvent(organization);
+        eventService.publish(event);
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 }

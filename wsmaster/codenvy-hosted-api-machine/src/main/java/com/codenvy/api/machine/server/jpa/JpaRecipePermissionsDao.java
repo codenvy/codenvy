@@ -21,11 +21,9 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -46,8 +44,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePermissionsImpl> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaRecipePermissionsDao.class);
 
     @Inject
     public JpaRecipePermissionsDao(AbstractPermissionsDomain<RecipePermissionsImpl> domain) throws IOException {
@@ -117,7 +113,8 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
 
 
     @Singleton
-    public static class RemovePermissionsBeforeRecipeRemovedEventSubscriber implements EventSubscriber<BeforeRecipeRemovedEvent> {
+    public static class RemovePermissionsBeforeRecipeRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeRecipeRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -125,22 +122,18 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeRecipeRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeRecipeRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeRecipeRemovedEvent event) {
-            try {
-                for (RecipePermissionsImpl permissions : dao.getByInstance(event.getRecipe().getId())) {
-                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
-                }
-            } catch (ServerException |NotFoundException x) {
-                LOG.error(format("Couldn't remove permissions before recipe '%s' is removed", event.getRecipe().getId()), x);
+        public void onRemovalEvent(BeforeRecipeRemovedEvent event) throws Exception {
+            for (RecipePermissionsImpl permissions : dao.getByInstance(event.getRecipe().getId())) {
+                dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }
         }
     }
