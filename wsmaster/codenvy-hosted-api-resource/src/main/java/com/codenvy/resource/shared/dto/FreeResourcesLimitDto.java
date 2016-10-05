@@ -12,33 +12,30 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.ram;
+package com.codenvy.resource.shared.dto;
 
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.model.FreeResourcesLimit;
 
-import javax.persistence.Entity;
+import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 /**
- * Ram resources indicates how many RAM can be used by active workspaces of one account at the same time
- *
  * @author Sergii Leschenko
  */
-@Entity(name = "RamResource")
-public class RamResource extends AbstractResource {
-    public RamResource() {
-    }
+@DTO
+public interface FreeResourcesLimitDto extends FreeResourcesLimit {
+    @Override
+    String getAccountId();
 
-    public RamResource(long amount) {
-        super(amount);
-    }
+    void setAccountId(String accountId);
+
+    FreeResourcesLimitDto withAccountId(String accountId);
 
     @Override
-    public String getType() {
-        return RamResourceType.ID;
-    }
+    List<ResourceDto> getResources();
 
-    @Override
-    public String getUnit() {
-        return RamResourceType.UNIT;
-    }
+    void setResources(List<ResourceDto> resources);
+
+    FreeResourcesLimitDto withResources(List<ResourceDto> resources);
 }

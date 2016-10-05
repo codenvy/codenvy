@@ -14,19 +14,19 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 /**
- * Tracks usage of resources of specified type
+ * Tracks usage of resources of specified type.
  *
  * @author Sergii Leschenko
  */
-public interface ResourceUsageTracker<T extends AbstractResource> {
+public interface ResourceUsageTracker {
     /**
-     * Returns amount of used resource by given account at this moment
+     * Returns amount of used resource by given account at this moment.
      *
      * @param accountId
      *         account id to fetch used resource
@@ -36,5 +36,5 @@ public interface ResourceUsageTracker<T extends AbstractResource> {
      * @throws ServerException
      *         when some exception occurs on used resources fetching
      */
-    T getUsedResource(String accountId) throws NotFoundException, ServerException;
+    ResourceImpl getUsedResource(String accountId) throws NotFoundException, ServerException;
 }

@@ -15,7 +15,8 @@
 package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Striped;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -63,7 +64,7 @@ public class ResourceManager {
     /**
      * Reserve resources for usage.
      *
-     * Note: should be invoked while consuming operation starts
+     * <p>Note: should be invoked while consuming operation starts
      *
      * @param accountId
      *         account id which will use resources
@@ -82,7 +83,7 @@ public class ResourceManager {
      *         when some exception occurred while operation performing
      */
     public <T, X extends Throwable> T reserveResources(String accountId,
-                                                       List<AbstractResource> resources,
+                                                       List<ResourceImpl> resources,
                                                        ResourceUsageOperation<T, X> operation) throws X,
                                                                                                       NotFoundException,
                                                                                                       ServerException,
@@ -90,7 +91,7 @@ public class ResourceManager {
         final Lock lock = RESOURCES_LOCKS.get(accountId);
         lock.lock();
         try {
-            List<? extends Resource> availableResources = getAvailableResources(accountId);
+            List<ResourceImpl> availableResources = doGetAvailableResources(accountId);
             //check resources availability
             resourceAggregator.deduct(availableResources, resources);
             return operation.use();
@@ -100,7 +101,7 @@ public class ResourceManager {
     }
 
     /**
-     * Returns list of resources which are available for given account
+     * Returns list of resources which are available for given account.
      *
      * @param accountId
      *         id of account
@@ -111,11 +112,11 @@ public class ResourceManager {
      *         when some exception occurred while resources fetching
      */
     public List<? extends Resource> getTotalResources(String accountId) throws NotFoundException, ServerException {
-        return licenseManager.getByAccount(accountId).getTotalResources();
+        return doGetTotalResources(accountId);
     }
 
     /**
-     * Returns list of resources which are available for usage by given account
+     * Returns list of resources which are available for usage by given account.
      *
      * @param accountId
      *         id of account
@@ -126,18 +127,11 @@ public class ResourceManager {
      *         when some exception occurred while resources fetching
      */
     public List<? extends Resource> getAvailableResources(String accountId) throws NotFoundException, ServerException {
-        try {
-            return resourceAggregator.deduct(getTotalResources(accountId),
-                                             getUsedResources(accountId));
-        } catch (ConflictException e) {
-            // should not happen
-            LOG.error("Number of used resources more than total resources", e);
-            throw new ServerException(e.getMessage(), e);
-        }
+        return doGetAvailableResources(accountId);
     }
 
     /**
-     * Returns list of resources which are used by given account
+     * Returns list of resources which are used by given account.
      *
      * @param accountId
      *         id of account
@@ -148,7 +142,30 @@ public class ResourceManager {
      *         when some exception occurred while resources fetching
      */
     public List<? extends Resource> getUsedResources(String accountId) throws NotFoundException, ServerException {
-        List<AbstractResource> usedResources = new ArrayList<>();
+        return doGetUsedResources(accountId);
+    }
+
+    @VisibleForTesting
+    List<ResourceImpl> doGetAvailableResources(String accountId) throws NotFoundException, ServerException {
+        try {
+            return resourceAggregator.deduct(doGetTotalResources(accountId),
+                                             doGetUsedResources(accountId));
+        } catch (ConflictException e) {
+            // should not happen
+            LOG.error("Number of used resources more than total resources", e);
+            throw new ServerException(e.getMessage(), e);
+        }
+    }
+
+    @VisibleForTesting
+    List<ResourceImpl> doGetTotalResources(String accountId) throws NotFoundException, ServerException {
+        return licenseManager.getByAccount(accountId).getTotalResources();
+    }
+
+    @VisibleForTesting
+    List<ResourceImpl> doGetUsedResources(String accountId)
+            throws NotFoundException, ServerException {
+        List<ResourceImpl> usedResources = new ArrayList<>();
         for (ResourceUsageTracker usageTracker : usageTrackers) {
             usedResources.add(usageTracker.getUsedResource(accountId));
         }

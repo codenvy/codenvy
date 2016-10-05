@@ -14,8 +14,8 @@
  */
 package com.codenvy.api.tck;
 
-import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.jpa.JpaRecipePermissionsDao;
+import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.spi.tck.RecipePermissionsDaoTest;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.SystemDomain;
@@ -30,6 +30,9 @@ import com.codenvy.api.workspace.server.spi.jpa.JpaWorkerDao;
 import com.codenvy.api.workspace.server.spi.tck.StackPermissionsDaoTest;
 import com.codenvy.api.workspace.server.spi.tck.WorkerDaoTest;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
+import com.codenvy.resource.spi.FreeResourcesLimitDao;
+import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
+import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
@@ -182,6 +185,8 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {}).to(WorkerDaoTest.TestDomain.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemPermissionsDaoTest.TestDomain.class);
 
+        //api-resource
+        bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {}).toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
         //dao
         //api-account
@@ -201,6 +206,9 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(SnapshotDao.class).to(JpaSnapshotDao.class);
         //api-ssh
         bind(SshDao.class).to(JpaSshDao.class);
+
+        //api-resource
+        bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
 
         // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
         bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);

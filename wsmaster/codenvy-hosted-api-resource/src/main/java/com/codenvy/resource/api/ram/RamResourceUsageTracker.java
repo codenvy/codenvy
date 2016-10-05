@@ -15,6 +15,7 @@
 package com.codenvy.resource.api.ram;
 
 import com.codenvy.resource.api.ResourceUsageTracker;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -30,12 +31,12 @@ import java.util.List;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 /**
- * Tracks usage of RAM resource
+ * Tracks usage of {@link RamResourceType} resource.
  *
  * @author Sergii Leschenko
  */
 @Singleton
-public class RamResourceUsageTracker implements ResourceUsageTracker<RamResource> {
+public class RamResourceUsageTracker implements ResourceUsageTracker {
     private final WorkspaceManager workspaceManager;
     private final AccountManager   accountManager;
 
@@ -46,7 +47,7 @@ public class RamResourceUsageTracker implements ResourceUsageTracker<RamResource
     }
 
     @Override
-    public RamResource getUsedResource(String accountId) throws NotFoundException, ServerException {
+    public ResourceImpl getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
         final List<WorkspaceImpl> accountWorkspaces = workspaceManager.getByNamespace(account.getName());
         final long currentlyUsedRamMB = accountWorkspaces.stream()
@@ -57,6 +58,6 @@ public class RamResourceUsageTracker implements ResourceUsageTracker<RamResource
                                                                                      .getLimits()
                                                                                      .getRam())
                                                          .sum();
-        return new RamResource(currentlyUsedRamMB);
+        return new ResourceImpl(RamResourceType.ID, currentlyUsedRamMB, RamResourceType.UNIT);
     }
 }

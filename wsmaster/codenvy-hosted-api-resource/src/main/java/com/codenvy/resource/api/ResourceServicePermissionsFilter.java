@@ -39,7 +39,7 @@ import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_
 import static org.eclipse.che.api.user.server.model.impl.UserImpl.PERSONAL_ACCOUNT;
 
 /**
- * Restricts access to methods of {@link ResourceService} by users' permissions
+ * Restricts access to methods of {@link ResourceService} by users' permissions.
  *
  * <p>Filter contains rules for protecting of all methods of {@link ResourceService}.<br>
  * In case when requested method is unknown filter throws {@link ForbiddenException}
@@ -47,8 +47,12 @@ import static org.eclipse.che.api.user.server.model.impl.UserImpl.PERSONAL_ACCOU
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/resource{path:(/.*)?}")
+@Path("/resource{path:(?!/free)(/.*)?}")
 public class ResourceServicePermissionsFilter extends CheMethodInvokerFilter {
+    static final String GET_TOTAL_RESOURCES_METHOD     = "getTotalResources";
+    static final String GET_AVAILABLE_RESOURCES_METHOD = "getAvailableResources";
+    static final String GET_USED_RESOURCES_METHOD      = "getUsedResources";
+
     @Inject
     private AccountManager accountManager;
 
@@ -56,9 +60,9 @@ public class ResourceServicePermissionsFilter extends CheMethodInvokerFilter {
     protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException {
         String accountId;
         switch (genericMethodResource.getMethod().getName()) {
-            case "getTotalResources":
-            case "getAvailableResources":
-            case "getUsedResources":
+            case GET_TOTAL_RESOURCES_METHOD:
+            case GET_AVAILABLE_RESOURCES_METHOD:
+            case GET_USED_RESOURCES_METHOD:
                 accountId = ((String)arguments[0]);
                 break;
 

@@ -244,10 +244,14 @@
                                         <workingDirectory>${project.build.directory}/${item}/go</workingDirectory>
                                         <arguments>
                                             <argument>build</argument>
+                                            <argument>-a</argument>
+                                            <argument>-installsuffix</argument>
+                                            <argument>cgo</argument>
                                             <argument>-o</argument>
                                             <argument>che-websocket-terminal</argument>
                                         </arguments>
                                         <environmentVariables>
+                                            <CGO_ENABLED>0</CGO_ENABLED>
                                             <GOOS>${terminal.target.os}</GOOS>
                                             <GOARCH>${terminal.target.architecture}</GOARCH>
                                             <GOARM>${terminal.target.arm.version}</GOARM>

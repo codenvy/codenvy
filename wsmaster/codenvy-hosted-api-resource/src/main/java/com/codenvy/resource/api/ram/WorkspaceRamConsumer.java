@@ -15,6 +15,7 @@
 package com.codenvy.resource.api.ram;
 
 import com.codenvy.resource.api.ResourceManager;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -27,13 +28,13 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.lang.Size;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Collections.singletonList;
@@ -41,10 +42,11 @@ import static java.util.Collections.singletonList;
 /**
  * Intercepts {@link WorkspaceManager#startWorkspace(String, String, Boolean)}
  * and {@link WorkspaceManager#startWorkspace(WorkspaceConfig, String, boolean)}
- * and reserves RAM resource while workspace is starting
+ * and reserves RAM resource while workspace is starting.
  *
  * @author Sergii Leschenko
  */
+@Singleton
 public class WorkspaceRamConsumer implements MethodInterceptor {
     private static final long BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
@@ -88,7 +90,7 @@ public class WorkspaceRamConsumer implements MethodInterceptor {
         }
 
         final Environment environment = config.getEnvironments().get(firstNonNull(envName, config.getDefaultEnv()));
-        final RamResource ramToUse = new RamResource(sumRam(environment));
+        final ResourceImpl ramToUse = new ResourceImpl(RamResourceType.ID, sumRam(environment), RamResourceType.UNIT);
         final Account account = accountManager.getByName(namespace);
         return resourceManager.reserveResources(account.getId(), singletonList(ramToUse), invocation::proceed);
     }

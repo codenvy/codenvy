@@ -16,6 +16,7 @@ package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.LicenseImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.mockito.Mock;
@@ -48,6 +49,9 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(MockitoTestNGListener.class)
 public class ResourceManagerTest {
+    private static final String TEST_RESOURCE_TYPE = "test";
+    private static final String TEST_RESOURCE_UNIT = "unit";
+
     @Mock
     private ResourceAggregator   resourceAggregator;
     @Mock
@@ -68,7 +72,7 @@ public class ResourceManagerTest {
 
     @Test
     public void shouldReturnTotalResourcesForAccount() throws Exception {
-        TestResource testResource = new TestResource(1000);
+        ResourceImpl testResource = new ResourceImpl(TEST_RESOURCE_TYPE, 1000, TEST_RESOURCE_UNIT);
         when(license.getTotalResources()).thenReturn(singletonList(testResource));
         when(licenseManager.getByAccount(eq("account123"))).thenReturn(license);
 
@@ -81,7 +85,7 @@ public class ResourceManagerTest {
 
     @Test
     public void shouldReturnUsedResourcesForAccount() throws Exception {
-        TestResource usedResource = new TestResource(1000);
+        ResourceImpl usedResource = new ResourceImpl(TEST_RESOURCE_TYPE, 1000, TEST_RESOURCE_UNIT);
         when(resourceUsageTracker.getUsedResource(eq("account123"))).thenReturn(usedResource);
 
         final List<? extends Resource> usedResources = resourceManager.getUsedResources("account123");
@@ -93,43 +97,44 @@ public class ResourceManagerTest {
 
     @Test
     public void shouldReturnAvailableResourcesForAccount() throws Exception {
-        TestResource totalResources = new TestResource(2000);
-        doReturn(singletonList(totalResources)).when(resourceManager).getTotalResources(anyString());
+        ResourceImpl totalResources = new ResourceImpl(TEST_RESOURCE_TYPE, 2000, TEST_RESOURCE_UNIT);
+        doReturn(singletonList(totalResources)).when(resourceManager).doGetTotalResources(anyString());
 
-        TestResource usedResource = new TestResource(500);
-        doReturn(singletonList(usedResource)).when(resourceManager).getUsedResources(anyString());
+        ResourceImpl usedResource = new ResourceImpl(TEST_RESOURCE_TYPE, 500, TEST_RESOURCE_UNIT);
+        doReturn(singletonList(usedResource)).when(resourceManager).doGetUsedResources(anyString());
 
-        final TestResource availableResource = new TestResource(1500);
+        final ResourceImpl availableResource = new ResourceImpl(TEST_RESOURCE_TYPE, 1500, TEST_RESOURCE_UNIT);
         doReturn(singletonList(availableResource)).when(resourceAggregator).deduct(any(), any());
 
         final List<? extends Resource> availableResources = resourceManager.getAvailableResources("account123");
 
         verify(resourceAggregator).deduct(eq(singletonList(totalResources)), eq(singletonList(usedResource)));
         verify(resourceManager).getAvailableResources(eq("account123"));
-        verify(resourceManager).getUsedResources(eq("account123"));
+        verify(resourceManager).doGetUsedResources(eq("account123"));
         assertEquals(availableResources.size(), 1);
         assertEquals(availableResources.get(0), availableResource);
     }
 
     @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "No enough resources")
     public void shouldThrowConflictExceptionWhenAccountDoesNotHaveEnoughResourcesToReserve() throws Exception {
-        doReturn(singletonList(emptyList())).when(resourceManager).getAvailableResources(anyString());
+        doReturn(singletonList(emptyList())).when(resourceManager).doGetAvailableResources(anyString());
         when(resourceAggregator.deduct(any(), any())).thenThrow(new ConflictException("No enough resources"));
 
         resourceManager.reserveResources("account123",
-                                          Collections.singletonList(new TestResource(100)),
-                                          () -> null);
+                                         Collections.singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 100, TEST_RESOURCE_UNIT)),
+                                         () -> null);
     }
 
     @Test
     public void shouldReturnValueOfOperationOnResourcesReserve() throws Exception {
         final Object value = new Object();
-        doReturn(singletonList(emptyList())).when(resourceManager).getAvailableResources(anyString());
+        doReturn(singletonList(emptyList())).when(resourceManager).doGetAvailableResources(anyString());
         doReturn(new ArrayList<>()).when(resourceAggregator).deduct(any(), any());
 
         final Object result = resourceManager.reserveResources("account123",
-                                                                Collections.singletonList(new TestResource(100)),
-                                                                () -> value);
+                                                               Collections.singletonList(
+                                                                       new ResourceImpl(TEST_RESOURCE_TYPE, 100, TEST_RESOURCE_UNIT)),
+                                                               () -> value);
 
         assertTrue(value == result);
     }
@@ -137,13 +142,13 @@ public class ResourceManagerTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "error")
     public void shouldRethrowExceptionWhenSomeExceptionOccursWhenReservingResources() throws Exception {
-        doReturn(singletonList(emptyList())).when(resourceManager).getAvailableResources(anyString());
+        doReturn(singletonList(emptyList())).when(resourceManager).doGetAvailableResources(anyString());
         doReturn(new ArrayList<>()).when(resourceAggregator).deduct(any(), any());
 
         resourceManager.reserveResources("account123",
-                                          Collections.singletonList(new TestResource(100)),
-                                          () -> {
-                                              throw new ConflictException("error");
-                                          });
+                                         Collections.singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 100, TEST_RESOURCE_UNIT)),
+                                         () -> {
+                                             throw new ConflictException("error");
+                                         });
     }
 }

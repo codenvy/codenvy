@@ -1912,14 +1912,14 @@ updateLoader() {
 printPostInstallInfo_codenvy() {
     local systemAdminName=$(readProperty "admin_ldap_user_name")
     if [ -z "$systemAdminName" ]; then
-        systemAdminName=$(readProperty "codenvy_admin_name")  # property name starting from version 5.0.0-M3
+        systemAdminName=$(readProperty "codenvy_admin_name")  # property name starting from version 5.0.0-M4
     fi
 
 
     if [[ "${VERSION}" =~ ^([4-5]).* ]]; then
         local systemAdminPassword=$(readProperty "admin_ldap_password")
         if [ -z "$systemAdminPassword" ]; then
-            systemAdminPassword=$(readProperty "codenvy_admin_initial_password")  # property name starting from version 5.0.0-M3
+            systemAdminPassword=$(readProperty "codenvy_admin_initial_password")  # property name starting from version 5.0.0-M4
         fi
     else
         local systemAdminPassword=$(readProperty "system_ldap_password")
@@ -2139,11 +2139,19 @@ pauseInternetAccessChecker
 pauseFooterUpdater
 
 if [[ "${ARTIFACT}" == "codenvy" ]] && [[ "${VERSION}" =~ ^([4-5]).* ]]; then
-    adminName=$(readProperty 'admin_ldap_user_name')
-    adminPassword=$(readProperty 'admin_ldap_password')
+    systemAdminName=$(readProperty "admin_ldap_user_name")
+    if [ -z "$systemAdminName" ]; then
+        systemAdminName=$(readProperty "codenvy_admin_name")  # property name starting from version 5.0.0-M4
+    fi
+
+    systemAdminPassword=$(readProperty "admin_ldap_password")
+    if [ -z "$systemAdminPassword" ]; then
+        systemAdminPassword=$(readProperty "codenvy_admin_initial_password")  # property name starting from version 5.0.0-M4
+    fi
+
     toolVersion=$(if [[ "${VERSION}" =~ .*SNAPSHOT$ ]]; then echo "nightly"; else echo ${VERSION}; fi)
 
-    postFlightCheckOfCodenvy "$adminName" "$adminPassword" "$toolVersion"
+    postFlightCheckOfCodenvy "$systemAdminName" "$systemAdminPassword" "$toolVersion"
     println
 fi
 

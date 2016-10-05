@@ -18,30 +18,46 @@ import com.codenvy.resource.model.Resource;
 import com.google.common.base.Objects;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 
 /**
  * @author Sergii Leschenko
  */
 @Entity(name = "Resource")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class AbstractResource implements Resource {
+public class ResourceImpl implements Resource {
     @Id
     @GeneratedValue
     private Long id;
 
-    @Basic
+    @Column(nullable = false)
+    private String type;
+
+    @Basic(optional = false)
     private long amount;
 
-    public AbstractResource() {
+    @Column(nullable = false)
+    private String unit;
+
+    public ResourceImpl() {}
+
+    public ResourceImpl(String type, long amount, String unit) {
+        this.amount = amount;
+        this.type = type;
+        this.unit = unit;
     }
 
-    public AbstractResource(long amount) {
-        this.amount = amount;
+    public ResourceImpl(Resource resource) {
+        this(resource.getType(),
+             resource.getAmount(),
+             resource.getUnit());
+    }
+
+    @Override
+    public String getType() {
+        return type;
     }
 
     @Override
@@ -50,10 +66,15 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
+    public String getUnit() {
+        return unit;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractResource)) return false;
-        AbstractResource resource = (AbstractResource)o;
+        if (!(o instanceof ResourceImpl)) return false;
+        ResourceImpl resource = (ResourceImpl)o;
         return Objects.equal(amount, resource.amount) &&
                Objects.equal(getType(), resource.getType()) &&
                Objects.equal(getUnit(), resource.getUnit());
@@ -67,9 +88,9 @@ public abstract class AbstractResource implements Resource {
     @Override
     public String toString() {
         return "ResourceImpl{" +
-               "type='" + getType() + '\'' +
+               "type='" + type + '\'' +
                ", amount=" + amount +
-               ", unit=" + getUnit() +
+               ", unit=" + unit +
                '}';
     }
 }

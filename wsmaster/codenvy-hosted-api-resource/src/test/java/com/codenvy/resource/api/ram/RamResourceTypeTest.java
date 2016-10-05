@@ -14,8 +14,11 @@
  */
 package com.codenvy.resource.api.ram;
 
+import com.codenvy.resource.spi.impl.ResourceImpl;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -35,20 +38,68 @@ public class RamResourceTypeTest {
 
     @Test
     public void shouldFindSumRamAmountOnResourcesAggregation() throws Exception {
-        final RamResource aggregate = resourceType.aggregate(new RamResource(1000), new RamResource(500));
+        final ResourceImpl aggregate = resourceType.aggregate(new ResourceImpl(RamResourceType.ID,
+                                                                               1000,
+                                                                               RamResourceType.UNIT),
+                                                              new ResourceImpl(RamResourceType.ID,
+                                                                               500,
+                                                                               RamResourceType.UNIT));
 
+        assertEquals(aggregate.getType(), RamResourceType.ID);
         assertEquals(aggregate.getAmount(), 1500);
+        assertEquals(aggregate.getUnit(), RamResourceType.UNIT);
     }
 
     @Test
     public void shouldFindDifferenceRamAmountOnResourcesDeduction() throws Exception {
-        final RamResource aggregate = resourceType.deduct(new RamResource(1000), new RamResource(500));
+        final ResourceImpl deducted = resourceType.deduct(new ResourceImpl(RamResourceType.ID,
+                                                                           1000,
+                                                                           RamResourceType.UNIT),
+                                                          new ResourceImpl(RamResourceType.ID,
+                                                                           500,
+                                                                           RamResourceType.UNIT));
 
-        assertEquals(aggregate.getAmount(), 500);
+        assertEquals(deducted.getType(), RamResourceType.ID);
+        assertEquals(deducted.getAmount(), 500);
+        assertEquals(deducted.getUnit(), RamResourceType.UNIT);
     }
 
-    @Test(expectedExceptions = ConflictException.class)
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Workspace needs 1000mb RAM to start - your account has 500mb RAM available.")
     public void shouldThrowConflictExceptionWhenDeductionAmountMoreThanTotalAmountOnResourcesDeduction() throws Exception {
-        resourceType.deduct(new RamResource(500), new RamResource(1000));
+        resourceType.deduct(new ResourceImpl(RamResourceType.ID,
+                                             500,
+                                             RamResourceType.UNIT),
+                            new ResourceImpl(RamResourceType.ID,
+                                             1000,
+                                             RamResourceType.UNIT));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          dataProvider = "resources")
+    public void shouldThrowIllegalArgumentExceptionWhenOneOfResourcesHasUnsupportedTypeOrUnitOnResourcesAggregation(ResourceImpl resourceA,
+                                                                                                                    ResourceImpl resourceB) {
+        resourceType.aggregate(resourceA, resourceB);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          dataProvider = "resources")
+    public void shouldThrowIllegalArgumentExceptionWhenOneOfResourcesHasUnsupportedTypeOrUnitOnResourcesDeduction(ResourceImpl resourceA,
+                                                                                                                  ResourceImpl resourceB) {
+        resourceType.aggregate(resourceA, resourceB);
+    }
+
+    @DataProvider(name = "resources")
+    public Object[][] getWorkspaceStatus() {
+        return new Object[][] {
+                {new ResourceImpl("unsupported", 1000, RamResourceType.UNIT),
+                 new ResourceImpl(RamResourceType.ID, 1000, RamResourceType.UNIT)},
+                {new ResourceImpl(RamResourceType.ID, 1000, RamResourceType.UNIT),
+                 new ResourceImpl("unsupported", 1000, RamResourceType.UNIT)},
+                {new ResourceImpl(RamResourceType.ID, 1000, "unsupported"),
+                 new ResourceImpl(RamResourceType.ID, 1000, RamResourceType.UNIT)},
+                {new ResourceImpl(RamResourceType.ID, 1000, RamResourceType.UNIT),
+                 new ResourceImpl(RamResourceType.ID, 1000, "unsupported")}
+        };
     }
 }

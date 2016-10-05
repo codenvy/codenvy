@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.provider;
+package com.codenvy.resource.api;
 
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 
@@ -28,7 +28,7 @@ import java.util.List;
  */
 public interface ResourcesProvider {
     /**
-     * Returns list of provided resources for given account
+     * Returns list of provided resources for given account.
      *
      * @param accountId
      *         account id

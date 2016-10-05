@@ -16,7 +16,7 @@ package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
-import com.codenvy.resource.spi.impl.AbstractResource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Helps aggregate resources by theirs type
+ * Helps aggregate resources by theirs type.
  *
  * @author Sergii Leschenko
  */
@@ -47,7 +47,7 @@ public class ResourceAggregator {
     }
 
     /**
-     * Aggregates resources of the same type
+     * Aggregates resources of the same type.
      *
      * @param resources
      *         resources list which can contain more that one instance for some type
@@ -55,12 +55,12 @@ public class ResourceAggregator {
      * @throws NotFoundException
      *         when resources list contains resource with not supported type
      */
-    public Map<String, AbstractResource> aggregateByType(List<AbstractResource> resources) throws NotFoundException {
+    public Map<String, ResourceImpl> aggregateByType(List<ResourceImpl> resources) throws NotFoundException {
         checkSupporting(resources);
 
-        Map<String, AbstractResource> type2Resource = new HashMap<>();
-        for (AbstractResource resource : resources) {
-            final AbstractResource resource1 = type2Resource.get(resource.getType());
+        Map<String, ResourceImpl> type2Resource = new HashMap<>();
+        for (ResourceImpl resource : resources) {
+            final ResourceImpl resource1 = type2Resource.get(resource.getType());
             if (resource1 != null) {
                 type2Resource.put(resource.getType(), aggregate(resource1, resource));
             } else {
@@ -71,7 +71,7 @@ public class ResourceAggregator {
     }
 
     /**
-     * Returns list which is result of deduction {@code resourceToDeduct} from {@code totalResources}
+     * Returns list which is result of deduction {@code resourceToDeduct} from {@code totalResources}.
      *
      * @param totalResources
      *         the total resources
@@ -82,17 +82,17 @@ public class ResourceAggregator {
      * @throws NotFoundException
      *         when {@code totalResources} or {@code deduction} contain resource with not supported type
      */
-    public List<? extends Resource> deduct(List<? extends Resource> totalResources,
-                                           List<? extends Resource> resourcesToDeduct) throws NotFoundException,
-                                                                                              ConflictException {
+    public List<ResourceImpl> deduct(List<ResourceImpl> totalResources,
+                                     List<ResourceImpl> resourcesToDeduct) throws NotFoundException,
+                                                                                  ConflictException {
         checkSupporting(totalResources);
         checkSupporting(resourcesToDeduct);
 
-        final Map<String, Resource> result = totalResources.stream()
-                                                           .collect(Collectors.toMap(Resource::getType,
-                                                                                     Function.identity()));
-        for (Resource toDeduct : resourcesToDeduct) {
-            final Resource resource1 = result.get(toDeduct.getType());
+        final Map<String, ResourceImpl> result = totalResources.stream()
+                                                               .collect(Collectors.toMap(Resource::getType,
+                                                                                         Function.identity()));
+        for (ResourceImpl toDeduct : resourcesToDeduct) {
+            final ResourceImpl resource1 = result.get(toDeduct.getType());
             if (resource1 != null) {
                 result.put(toDeduct.getType(), deduct(resource1, toDeduct));
             }
@@ -101,14 +101,14 @@ public class ResourceAggregator {
     }
 
     /**
-     * Check supporting of all given resources
+     * Check supporting of all given resources.
      *
      * @param resources
      *         resources to check types
      * @throws NotFoundException
      *         when {@code resources} list contains resource with not supported type
      */
-    private void checkSupporting(List<? extends Resource> resources) throws NotFoundException {
+    private void checkSupporting(List<ResourceImpl> resources) throws NotFoundException {
         final Set<String> resourcesTypes = resources.stream()
                                                     .map(Resource::getType)
                                                     .collect(Collectors.toSet());
@@ -120,59 +120,52 @@ public class ResourceAggregator {
     }
 
     /**
-     * Aggregates two resources which have the same type
+     * Aggregates two resources which have the same type.
      *
      * @param resourceA
      *         resources A
      * @param resourceB
      *         resource B
-     * @param <T>
-     *         type of resources
      * @return one resources with type {@code T} that is result of aggregating {@code resourceA} and {@code resourceB}
      * @throws NotFoundException
      *         when {@code T} is not supported type
      */
-    private <T extends AbstractResource> T aggregate(T resourceA, T resourceB) throws NotFoundException {
+    private ResourceImpl aggregate(ResourceImpl resourceA, ResourceImpl resourceB) throws NotFoundException {
         final String typeId = resourceA.getType();
-        final ResourceType<T> resourceType = getResourceType(typeId);
+        final ResourceType resourceType = getResourceType(typeId);
         return resourceType.aggregate(resourceA, resourceB);
     }
 
     /**
-     * Deducts two resources which have the same type
+     * Deducts two resources which have the same type.
      *
      * @param totalResource
      *         total resource
      * @param deduction
      *         resources which should be deducted from {@code totalResource}
-     * @param <T>
-     *         type of resources
      * @return one resources with type {@code T} that is result of subtraction {@code totalResource} and {@code deduction}
      * @throws ConflictException
      *         when {@code totalResource}'s amount is less than {@code deduction}'s amount
      * @throws NotFoundException
      *         when {@code T} is not supported type
      */
-    private <T extends Resource> T deduct(T totalResource, T deduction) throws NotFoundException, ConflictException {
+    private ResourceImpl deduct(ResourceImpl totalResource, ResourceImpl deduction) throws NotFoundException, ConflictException {
         final String typeId = totalResource.getType();
-        final ResourceType<T> resourceType = getResourceType(typeId);
+        final ResourceType resourceType = getResourceType(typeId);
         return resourceType.deduct(totalResource, deduction);
     }
 
     /**
-     * Returns resources type by given id
+     * Returns resources type by given id.
      *
      * @param typeId
      *         id of resources type
-     * @param <T>
-     *         type of resources
      * @return resources type by given id
      * @throws NotFoundException
      *         when type by given id is not supported type
      */
-    @SuppressWarnings("unchecked")
-    private <T extends Resource> ResourceType<T> getResourceType(String typeId) throws NotFoundException {
-        final ResourceType<T> resourceType = (ResourceType<T>)resourcesTypes.get(typeId);
+    private ResourceType getResourceType(String typeId) throws NotFoundException {
+        final ResourceType resourceType = resourcesTypes.get(typeId);
         if (resourceType == null) {
             throw new NotFoundException(String.format("'%s' resource type is not supported", typeId));
         }

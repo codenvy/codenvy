@@ -15,33 +15,41 @@
 package com.codenvy.resource.spi.impl;
 
 import com.codenvy.resource.model.ProvidedResources;
+import com.codenvy.resource.model.Resource;
 import com.google.common.base.Objects;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Sergii Leschenko
  */
 public class ProvidedResourcesImpl implements ProvidedResources {
-    private final String                 provider;
-    private final String                 id;
-    private final String                 owner;
-    private final Long                   startTime;
-    private final Long                   endTime;
-    private final List<AbstractResource> resources;
+    private String             provider;
+    private String             id;
+    private String             owner;
+    private Long               startTime;
+    private Long               endTime;
+    private List<ResourceImpl> resources;
 
     public ProvidedResourcesImpl(String provider,
                                  String id,
                                  String owner,
                                  Long startTime,
                                  Long endTime,
-                                 List<AbstractResource> resources) {
+                                 Collection<? extends Resource> resources) {
         this.provider = provider;
         this.id = id;
         this.owner = owner;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.resources = resources;
+        if (resources != null) {
+            this.resources = resources.stream()
+                                      .map(ResourceImpl::new)
+                                      .collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -70,7 +78,10 @@ public class ProvidedResourcesImpl implements ProvidedResources {
     }
 
     @Override
-    public List<AbstractResource> getResources() {
+    public List<ResourceImpl> getResources() {
+        if (resources == null) {
+            resources = new ArrayList<>();
+        }
         return resources;
     }
 
@@ -84,12 +95,12 @@ public class ProvidedResourcesImpl implements ProvidedResources {
                Objects.equal(owner, that.owner) &&
                Objects.equal(startTime, that.startTime) &&
                Objects.equal(endTime, that.endTime) &&
-               Objects.equal(resources, that.resources);
+               Objects.equal(getResources(), that.getResources());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(provider, id, owner, startTime, endTime, resources);
+        return Objects.hashCode(provider, id, owner, startTime, endTime, getResources());
     }
 
     @Override
@@ -100,7 +111,7 @@ public class ProvidedResourcesImpl implements ProvidedResources {
                ", owner='" + owner + '\'' +
                ", startTime=" + startTime +
                ", endTime=" + endTime +
-               ", resources=" + resources +
+               ", resources=" + getResources() +
                '}';
     }
 }

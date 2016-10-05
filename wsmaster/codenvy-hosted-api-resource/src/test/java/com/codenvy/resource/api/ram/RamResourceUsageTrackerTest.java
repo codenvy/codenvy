@@ -14,6 +14,8 @@
  */
 package com.codenvy.resource.api.ram;
 
+import com.codenvy.resource.spi.impl.ResourceImpl;
+
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
@@ -74,7 +76,7 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.RUNNING, 1000, 500, 500)));
 
-        RamResource usedRam = ramUsageTracker.getUsedResource("account123");
+        ResourceImpl usedRam = ramUsageTracker.getUsedResource("account123");
 
         assertEquals(usedRam.getAmount(), 2000L);
         verify(accountManager).getById(eq("account123"));
@@ -89,9 +91,11 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
-        RamResource usedRam = ramUsageTracker.getUsedResource("account123");
+        ResourceImpl usedRam = ramUsageTracker.getUsedResource("account123");
 
+        assertEquals(usedRam.getType(), RamResourceType.ID);
         assertEquals(usedRam.getAmount(), 0L);
+        assertEquals(usedRam.getUnit(), RamResourceType.UNIT);
         verify(accountManager).getById(eq("account123"));
         verify(workspaceManager).getByNamespace(eq("testAccount"));
     }
