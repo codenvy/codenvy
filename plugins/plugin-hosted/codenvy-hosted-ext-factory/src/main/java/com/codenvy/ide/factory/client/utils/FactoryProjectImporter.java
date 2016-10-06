@@ -42,6 +42,8 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -66,6 +68,7 @@ import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
 import static org.eclipse.che.api.core.ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -82,6 +85,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     private static final String CHANNEL = "git:checkout:";
 
     private final MessageBusProvider          messageBusProvider;
+    private final SubversionCredentialsDialog subversionCredentialsDialog;
     private final FactoryLocalizationConstant locale;
     private final NotificationManager         notificationManager;
     private final String                      restContext;
@@ -95,6 +99,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     @Inject
     public FactoryProjectImporter(AppContext appContext,
                                   NotificationManager notificationManager,
+                                  SubversionCredentialsDialog subversionCredentialsDialog,
                                   FactoryLocalizationConstant locale,
                                   ImportProjectNotificationSubscriberFactory subscriberFactory,
                                   @RestContext String restContext,
@@ -104,6 +109,7 @@ public class FactoryProjectImporter extends AbstractImporter {
                                   DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         super(appContext, subscriberFactory);
         this.notificationManager = notificationManager;
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.locale = locale;
         this.restContext = restContext;
         this.dialogFactory = dialogFactory;
@@ -280,6 +286,9 @@ public class FactoryProjectImporter extends AbstractImporter {
                                          }
 
                                          break;
+                                     case UNAUTHORIZED_SVN_OPERATION:
+                                         subscriber.onFailure(err.getMessage());
+                                         return recallSubversionImportWithCredentials(pathToProject, sourceStorage);
                                      case UNABLE_GET_PRIVATE_SSH_KEY:
                                          subscriber.onFailure(locale.acceptSshNotFoundText());
                                          break;
@@ -330,5 +339,23 @@ public class FactoryProjectImporter extends AbstractImporter {
                 callback.onFailure(new Exception(caught.getMessage()));
             }
         });
+    }
+
+    private Promise<Project> recallSubversionImportWithCredentials(final Path path, final SourceStorage sourceStorage) {
+        return subversionCredentialsDialog.askCredentials()
+                                          .thenPromise(new Function<Credentials, Promise<Project>>() {
+                                              @Override
+                                              public Promise<Project> apply(Credentials credentials) throws FunctionException {
+                                                  sourceStorage.getParameters().put("username", credentials.getUsername());
+                                                  sourceStorage.getParameters().put("password", credentials.getPassword());
+                                                  return doImport(path, sourceStorage);
+                                              }
+                                          })
+                                          .catchError(new Operation<PromiseError>() {
+                                              @Override
+                                              public void apply(PromiseError error) throws OperationException {
+                                                  callback.onFailure(error.getCause());
+                                              }
+                                          });
     }
 }

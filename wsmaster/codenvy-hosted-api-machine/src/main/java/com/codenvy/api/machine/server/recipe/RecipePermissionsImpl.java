@@ -39,23 +39,23 @@ import java.util.List;
 @NamedQueries(
         {
                 @NamedQuery(name = "RecipePermissions.getByRecipeId",
-                            query = "SELECT recipe " +
-                                    "FROM RecipePermissions recipe " +
-                                    "WHERE recipe.recipeId = :recipeId "),
+                            query = "SELECT recipePermission " +
+                                    "FROM RecipePermissions recipePermission " +
+                                    "WHERE recipePermission.recipeId = :recipeId "),
                 @NamedQuery(name = "RecipePermissions.getByUserId",
-                            query = "SELECT recipe " +
-                                    "FROM RecipePermissions recipe " +
-                                    "WHERE recipe.userId IS NULL OR recipe.userId = :userId "),
+                            query = "SELECT recipePermission " +
+                                    "FROM RecipePermissions recipePermission " +
+                                    "WHERE recipePermission.userId = :userId "),
                 @NamedQuery(name = "RecipePermissions.getByUserAndRecipeId",
-                            query = "SELECT recipe " +
-                                    "FROM RecipePermissions recipe " +
-                                    "WHERE recipe.recipeId = :recipeId " +
-                                    "AND recipe.userId = :userId"),
+                            query = "SELECT recipePermission " +
+                                    "FROM RecipePermissions recipePermission " +
+                                    "WHERE recipePermission.recipeId = :recipeId " +
+                                    "AND recipePermission.userId = :userId"),
                 @NamedQuery(name = "RecipePermissions.getByRecipeIdPublic",
-                            query = "SELECT recipe " +
-                                    "FROM RecipePermissions recipe " +
-                                    "WHERE recipe.recipeId = :recipeId " +
-                                    "AND recipe.userId IS NULL ")
+                            query = "SELECT recipePermission " +
+                                    "FROM RecipePermissions recipePermission " +
+                                    "WHERE recipePermission.recipeId = :recipeId " +
+                                    "AND recipePermission.userId IS NULL ")
         }
 )
 @Table(indexes = {@Index(columnList = "userId, recipeId", unique = true),
