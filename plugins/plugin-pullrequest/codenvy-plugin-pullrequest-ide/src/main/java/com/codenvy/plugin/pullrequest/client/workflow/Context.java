@@ -91,6 +91,7 @@ public class Context {
     /** The name of the origin remote. */
     private String         originRemoteName;
     private WorkflowStatus status;
+    private WorkflowStatus previousStatus;
     private Configuration  configuration;
     public  ViewState      viewState;
     private VcsService     vcsService;
@@ -274,7 +275,13 @@ public class Context {
         return status;
     }
 
+    @Nullable
+    public WorkflowStatus getPreviousStatus() {
+        return previousStatus;
+    }
+
     public void setStatus(@Nullable WorkflowStatus status) {
+        this.previousStatus = this.status;
         this.status = status;
     }
 
