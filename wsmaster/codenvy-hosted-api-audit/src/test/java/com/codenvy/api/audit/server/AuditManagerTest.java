@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Tests for {@link AuditService}.
+ * Tests for {@link AuditManager}.
  *
  * @author Igor Vinokur
  */

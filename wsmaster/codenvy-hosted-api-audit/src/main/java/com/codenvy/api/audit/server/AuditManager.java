@@ -83,9 +83,10 @@ public class AuditManager {
     }
 
     /**
-     * Generates audit report file in plain/text format.
+     * Generates file with audit report in plain/text format.
+     * The audit report contains information about license, users and their workspaces.
      *
-     * @return path of audit report file
+     * @return path of the audit report file
      * @throws ServerException
      *         if an error occurs
      * @throws ConflictException

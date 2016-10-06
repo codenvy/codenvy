@@ -67,10 +67,10 @@ public class AuditServicePermissionsFilterTest {
     AuditService service;
 
     @Test
-    public void shouldCheckPermissionsByUsersFetching() throws Exception {
+    public void shouldCheckPermissionsOnAuditRequest() throws Exception {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/octet-stream")
+                                         .accept("text/plain")
                                          .when()
                                          .get(SECURE_PATH + "/audit");
 

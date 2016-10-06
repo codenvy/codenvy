@@ -37,7 +37,8 @@ import java.util.Optional;
 import static com.google.common.io.Files.append;
 
 /**
- * Audit report printer.
+ * Class for printing audit report from given data to given file.
+ * The audit report consist of header and list of users with their workspaces.
  *
  * @author Igor Vinokur
  */
@@ -53,14 +54,14 @@ class AuditReportPrinter {
      * Number of users licensed: <value>
      * Date when license expires: <date>
      * <p>
-     * If license is not defined it prints error message instead license rows.
+     * If license is not defined, it prints error message instead of license rows.
      *
      * @param auditReport
      *         file of audit report
      * @param allUsersNumber
      *         all users number
      * @param license
-     *         {@link CodenvyLicense} object
+     *         {@link CodenvyLicense} object that contains license information
      * @throws ServerException
      *         if an error occurs
      */
@@ -76,7 +77,7 @@ class AuditReportPrinter {
     }
 
     /**
-     * Print users info and his related workspaces info in format:
+     * Prints users info and his related workspaces info in format:
      * <p>
      * <user e-mail> is owner of <own workspaces number> workspace(s) and has permissions in <workspaces number> workspace(s)
      * └ <workspace name>, is owner: <true or false>, permissions: <list of permissions for current user>
@@ -85,7 +86,7 @@ class AuditReportPrinter {
      * .
      * └ <workspace name>, is owner: <true or false>, permissions: <list of permissions for current user>
      * <p>
-     * If the list of user workspaces is not defined it prints error message.
+     * If the list of user workspaces is not defined, it prints error message.
      *
      * @param auditReport
      *         file of audit report

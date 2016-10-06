@@ -47,7 +47,7 @@ public class AuditService extends Service {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response downloadReport() throws ServerException, ConflictException, IOException {
         java.nio.file.Path report = auditManager.generateAuditReport();
 
@@ -59,7 +59,7 @@ public class AuditService extends Service {
             }
         };
 
-        return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
+        return Response.ok(stream, MediaType.TEXT_PLAIN)
                        .header("Content-Length", String.valueOf(Files.size(report)))
                        .header("Content-Disposition", "attachment; filename=" + report.getFileName().toString())
                        .build();
