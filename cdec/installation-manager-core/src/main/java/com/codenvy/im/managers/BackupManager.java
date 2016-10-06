@@ -21,6 +21,7 @@ import com.codenvy.im.utils.TarUtils;
 import com.codenvy.im.utils.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.commons.io.FileUtils;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -59,6 +60,10 @@ public class BackupManager {
         Artifact artifact = getArtifact(backupConfig.getArtifactName());
         Files.createDirectories(Paths.get(backupConfig.getBackupDirectory()));
 
+        Path tempDir = backupConfig.obtainArtifactTempDirectory();
+        FileUtils.deleteQuietly(tempDir.toFile());
+        FileUtils.forceMkdir(tempDir.toFile());
+
         try {
             Path backupFile = backupConfig.generateBackupFilePath();
             backupConfig.setBackupFile(backupFile.toString());
@@ -68,7 +73,7 @@ public class BackupManager {
                 throw new IllegalStateException("Artifact version is unavailable");
             }
             backupConfig.setArtifactVersion(artifactVersion.get().toString());
-            backupConfig.storeConfigIntoBackup();
+            backupConfig.createConfigFileInTmpDir();
 
             Command backupCommand = artifact.getBackupCommand(backupConfig);
             backupCommand.execute();
@@ -78,6 +83,8 @@ public class BackupManager {
 
             Files.deleteIfExists(backupFile);
             backupConfig.setBackupFile(compressedBackupFile.toString());
+
+            FileUtils.deleteQuietly(tempDir.toFile());
         } catch(Exception e) {
             throw new BackupException(e.getMessage(), e);
         }
@@ -106,14 +113,18 @@ public class BackupManager {
 
             String backupFileName = removeGzipExtension(compressedBackupFile).getFileName().toString();
             Path backupFile = tempDir.resolve(backupFileName);
+            TarUtils.unpackAllFiles(backupFile, tempDir);
+
             backupConfig.setBackupFile(backupFile.toString());
             backupConfig.setBackupDirectory(tempDir.toString());
 
-            BackupConfig storedBackupConfig = backupConfig.extractConfigFromBackup();
+            BackupConfig storedBackupConfig = backupConfig.loadConfigFromTempDir();
             checkBackup(artifact, storedBackupConfig);
 
             Command restoreCommand = artifact.getRestoreCommand(backupConfig);
             restoreCommand.execute();
+
+            FileUtils.deleteQuietly(tempDir.toFile());
         } catch(IllegalArgumentException | IllegalStateException | BackupException e) {
             throw e;
         } catch(Exception e) {

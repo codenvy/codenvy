@@ -15,7 +15,6 @@
 package com.codenvy.im.managers;
 
 import com.codenvy.im.artifacts.CDECArtifact;
-import com.codenvy.im.utils.TarUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterMethod;
@@ -206,23 +205,17 @@ public class TestBackupConfig {
     }
 
     @Test
-    public void testStoreConfigIntoBackup() throws IOException {
-        Files.createDirectories(TEST_BASE_TMP_DIRECTORY);
-        Path testBackupFile = TEST_BASE_TMP_DIRECTORY.resolve("test_backup.tar");
+    public void shouldCreateConfigFile() throws IOException {
         BackupConfig testConfig = new BackupConfig().setArtifactName("codenvy")
-                                                    .setArtifactVersion("1.0.0")
-                                                    .setBackupFile(testBackupFile.toString());
+                                                    .setArtifactVersion("1.0.0");
+        Path tmpDir = testConfig.obtainArtifactTempDirectory();
+        Files.createDirectories(tmpDir);
 
-        testConfig.storeConfigIntoBackup();
-        assertTrue(Files.exists(Paths.get(testConfig.getBackupFile())));
+        testConfig.createConfigFileInTmpDir();
+        Path configFile = tmpDir.resolve(BackupConfig.BACKUP_CONFIG_FILE);
+        assertTrue(Files.exists(configFile));
 
-        Path tempDir = TEST_BASE_TMP_DIRECTORY;
-        Files.createDirectories(tempDir);
-
-        TarUtils.unpackFile(testBackupFile, tempDir, Paths.get(BackupConfig.BACKUP_CONFIG_FILE));
-        Path storedConfigFile = tempDir.resolve(BackupConfig.BACKUP_CONFIG_FILE);
-
-        String storedTestConfigContent = FileUtils.readFileToString(storedConfigFile.toFile());
+        String storedTestConfigContent = FileUtils.readFileToString(configFile.toFile());
         assertEquals(storedTestConfigContent, "{\n"
                                               + "  \"artifactName\" : \"codenvy\",\n"
                                               + "  \"artifactVersion\" : \"1.0.0\"\n"
@@ -236,7 +229,7 @@ public class TestBackupConfig {
                                                     .setArtifactVersion("1.0.0")
                                                     .setBackupFile(testingBackup);
 
-        BackupConfig testConfig = backupConfig.extractConfigFromBackup();
+        BackupConfig testConfig = backupConfig.loadConfigFromTempDir();
         assertEquals(testConfig.toString(), "{" +
                                             "'artifactName':'codenvy', " +
                                             "'artifactVersion':'1.0.0', " +
@@ -254,7 +247,7 @@ public class TestBackupConfig {
                                                       .setArtifactVersion("1.0.0")
                                                       .setBackupFile(testingBackup);
 
-        backupConfig.extractConfigFromBackup();
+        backupConfig.loadConfigFromTempDir();
     }
 
     @Test(expectedExceptions = BackupException.class,
@@ -265,6 +258,6 @@ public class TestBackupConfig {
                                                       .setArtifactVersion("1.0.0")
                                                       .setBackupFile(testingBackup);
 
-        backupConfig.extractConfigFromBackup();
+        backupConfig.loadConfigFromTempDir();
     }
 }
