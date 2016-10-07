@@ -38,12 +38,14 @@ import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
@@ -69,20 +71,27 @@ public class OnPremisesJpaRecipeDaoTest {
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        permissionses = new RecipePermissionsImpl[] {new RecipePermissionsImpl("user1", "recipe1", Arrays.asList("read", "use", "search")),
-                                                     new RecipePermissionsImpl("user1", "recipe2", Arrays.asList("read", "search")),
-                                                     new RecipePermissionsImpl("user1",     "recipe3", Arrays.asList("read", "search")),
-                                                     new RecipePermissionsImpl("user1", "recipe4", Arrays.asList("read", "run")),
-                                                     new RecipePermissionsImpl("user2", "recipe1", Arrays.asList("read", "use"))};
+        permissionses = new RecipePermissionsImpl[] {
+                new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "search")),
+                new RecipePermissionsImpl("user1", "recipe2", asList("read", "search")),
+                new RecipePermissionsImpl("user1", "recipe3", asList("read", "search")),
+                new RecipePermissionsImpl("user1", "recipe4", asList("read", "run")),
+                new RecipePermissionsImpl("user2", "recipe1", asList("read", "use")),
+                new RecipePermissionsImpl("*", "recipe_debian", singletonList("search")),
+                new RecipePermissionsImpl("*", "recipe_ubuntu", singletonList("search"))
+        };
 
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
 
         recipes = new RecipeImpl[] {
-                new RecipeImpl("recipe1", "rc1", null, null, null, Arrays.asList("tag1", "tag2"), null),
+                new RecipeImpl("recipe1", "rc1", null, null, null, asList("tag1", "tag2"), null),
                 new RecipeImpl("recipe2", "rc2", null, "testType", null, null, null),
-                new RecipeImpl("recipe3", "rc3", null, null, null, Arrays.asList("tag1", "tag2"), null),
-                new RecipeImpl("recipe4", "rc4", null, null, null, null, null)};
+                new RecipeImpl("recipe3", "rc3", null, null, null, asList("tag1", "tag2"), null),
+                new RecipeImpl("recipe4", "rc4", null, null, null, null, null),
+                new RecipeImpl("recipe_debian", "DEBIAN_JDK8", "test", "test", null, asList("debian", "tag1"), null),
+                new RecipeImpl("recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
+        };
 
         Injector injector =
                 Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule(),
@@ -132,7 +141,6 @@ public class OnPremisesJpaRecipeDaoTest {
         manager.getEntityManagerFactory().close();
     }
 
-
     @Test
     public void shouldFindRecipeByPermissionsAndType() throws Exception {
         List<RecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
@@ -144,15 +152,26 @@ public class OnPremisesJpaRecipeDaoTest {
 
     @Test
     public void shouldFindRecipeByPermissionsAndTags() throws Exception {
-        List<RecipeImpl> results = dao.search(users[0].getId(), Collections.singletonList("tag2"), null, 0, 0);
+        List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("tag2"), null, 0, 0);
         assertEquals(results.size(), 2);
         assertTrue(results.contains(recipes[0]));
         assertTrue(results.contains(recipes[2]));
     }
 
     @Test
+    public void shouldFindRecipeByUserIdAndPublicPermissions() throws Exception {
+        final Set<RecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
+        assertEquals(results.size(), 5);
+        assertTrue(results.contains(recipes[0]));
+        assertTrue(results.contains(recipes[1]));
+        assertTrue(results.contains(recipes[2]));
+        assertTrue(results.contains(recipes[4]));
+        assertTrue(results.contains(recipes[5]));
+    }
+
+    @Test
     public void shouldNotFindRecipeNonexistentTags() throws Exception {
-        List<RecipeImpl> results = dao.search(users[0].getId(), Collections.singletonList("unexisted_tag2"), null, 0, 0);
+        List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("unexisted_tag2"), null, 0, 0);
         assertTrue(results.isEmpty());
     }
 

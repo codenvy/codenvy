@@ -15,6 +15,7 @@
 package com.codenvy.api.workspace.server;
 
 import com.codenvy.api.machine.server.filters.RecipePermissionsFilter;
+import com.codenvy.api.machine.server.recipe.RecipeCreatorPermissionsProvider;
 import com.codenvy.api.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
 import com.codenvy.api.workspace.server.filters.SetPublicPermissionsFilter;
 import com.codenvy.api.workspace.server.filters.StackPermissionsFilter;
@@ -36,5 +37,6 @@ public class WorkspaceApiModule extends AbstractModule {
 
         bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
         bind(StackCreatorPermissionsProvider.class).asEagerSingleton();
+        bind(RecipeCreatorPermissionsProvider.class).asEagerSingleton();
     }
 }

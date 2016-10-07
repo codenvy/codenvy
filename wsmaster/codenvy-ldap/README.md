@@ -51,6 +51,7 @@ User authentication is implemented in the following way:
 - __ldap.auth.subtree_search__ - Indicates whether subtree search will be used. When set to true, allows to search authenticating DN out of the `base_dn` tree.
 - __ldap.auth.allow_multiple_dns__ - Indicates whether DN resolution should fail if multiple DNs are found. When false, exception will be thrown if multiple DNs is found during search. When true, the first entry will be used for authentication attempt.
 - __ldap.auth.user.filter__ - Defines the LDAP search filter (https://docs.oracle.com/cd/E19693-01/819-0997/gdxpo/index.html) parameters applied during search for the user.
+    It is required to  contain an `{user}` variable and, unlike similar property from synchronization, cannot contain wildcard ('*') values (because it is supposed to search for single entity).
 
      Typical examples: 
      *  OpenLDAP: _cn={user}_ 
@@ -90,20 +91,27 @@ the pool. The example: _10_
 
 #### SSL configuration
    SSL can be configured in two ways - using trust certificate or using secure keystore. 
+   Certificates from trusted CA does not need any additional actions like manual import. It's enough to just turn SSL on. For the self-signed certificates, it is required to import it into java keystore or use separately.  
+   See https://docs.oracle.com/javase/tutorial/security/toolsign/rstep2.html for keystore import instructions.
 - __ldap.connection.use_ssl__ - Indicates whether the secured protocol will be used for connections.
+- __ldap.connection.use_start_tls__ - Indicates whether TLS (Transport Layer Security) should be established on connections.
 - __ldap.connection.ssl.trust_certificates__ - Path to the certificates file. Example: `file:///etc/ssl/mycertificate.cer`
 - __ldap.connection.ssl.keystore.name__  - Defines name of the keystore to use. Example: `file:///usr/local/jdk/jre/lib/security/mycerts`
 - __ldap.connection.ssl.keystore.password__ - Defines keystore password.
 - __ldap.connection.ssl.keystore.type__ - Defines keystore type.
 
 #### SASL configuration
-   Indicates capacity of authenticating  of clients via the Simple Authentication and Security Layer (SASL)
+   The Simple Authentication and Security Layer (SASL) is a method for adding authentication support to connection-based protocols. To use this specification, a protocol includes a command
+   for identifying and authenticating a user to a server and for optionally negotiating a security layer for subsequent protocol interactions. 
+
+   As an example, if the client and server both uses TLS, and have trusted certificates, they may use the SASL/EXTERNAL, and for client requests the server derive its identity from credentials provided at a lower (TLS) level.
 - __ldap.connection.sasl.mechanism__ - Defines SASL mechanism. Supported values are `DIGEST_MD5`, `CRAM_MD5`, `GSSAPI` and `EXTERNAL`.
+    See https://msdn.microsoft.com/en-us/library/cc223371.aspx for AD,  or http://www.openldap.org/doc/admin24/sasl.html for OpenLdap mechanisms explanation.
 - __ldap.connection.sasl.realm__ - SASL realm value. Example: `example.com`
 - __ldap.connection.sasl.authorization_id__ - Defines the SASL authorization id.
-- __ldap.connection.sasl.security_strength__ - Specifies the client's preferred privacy protection strength (ciphers and key lengths used for encryption). Possible values are `low`, `medium`, and `high`.
-- __ldap.connection.sasl.mutual_auth__ - SASL mutual authentication on supported mechanisms. Indicates whether the LDAP server's identity should be verified.
-- __ldap.connection.sasl.quality_of_protection__ - Defines integrity and privacy protection of the communication channel after successful authentication. Possible values are `auth` (default),`auth-inf` and `auth-conf`. 
+- __ldap.connection.sasl.security_strength__ - Specifies the client's preferred privacy protection strength (ciphers and key lengths used for encryption). The value of this property is a comma-separated list of strength values, the order of which specifies the preference order. The three possible strength values are "low", "medium", and "high". If you do not specify this property, then it defaults to "high,medium,low".
+- __ldap.connection.sasl.mutual_auth__ - SASL mutual authentication on supported mechanisms. For some applications, it is equally important that the LDAP server's identity be verified. The process by which both parties participating in the exchange authenticate each other is referred to as mutual authentication. Defaults to false.
+- __ldap.connection.sasl.quality_of_protection__ - Defines integrity and privacy protection of the communication channel.It is negotiated between during the authentication phase of the SASL exchange. Possible values are `auth` (default),`auth-inf` and `auth-conf`. 
 
 
 LDAP Synchronizer
