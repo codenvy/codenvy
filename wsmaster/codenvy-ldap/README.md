@@ -92,7 +92,7 @@ the pool. The example: _10_
 #### SSL configuration
    SSL can be configured in two ways - using trust certificate or using secure keystore. 
    Certificates from trusted CA does not need any additional actions like manual import. It's enough to just turn SSL on. For the self-signed certificates, it is required to import it into java keystore or use separately.  
-   See https://docs.oracle.com/javase/tutorial/security/toolsign/rstep2.html for keystore import instaructions.
+   See https://docs.oracle.com/javase/tutorial/security/toolsign/rstep2.html for keystore import instructions.
 - __ldap.connection.use_ssl__ - Indicates whether the secured protocol will be used for connections.
 - __ldap.connection.use_start_tls__ - Indicates whether TLS (Transport Layer Security) should be established on connections.
 - __ldap.connection.ssl.trust_certificates__ - Path to the certificates file. Example: `file:///etc/ssl/mycertificate.cer`
