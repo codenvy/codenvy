@@ -92,6 +92,7 @@ the pool. The example: _10_
 #### SSL configuration
    SSL can be configured in two ways - using trust certificate or using secure keystore. 
    Certificates from trusted CA does not need any additional actions like manual import. It's enough to just turn SSL on. For the self-signed certificates, it is required to import it into java keystore or use separately.  
+   See https://docs.oracle.com/javase/tutorial/security/toolsign/rstep2.html for keystore import instaructions.
 - __ldap.connection.use_ssl__ - Indicates whether the secured protocol will be used for connections.
 - __ldap.connection.use_start_tls__ - Indicates whether TLS (Transport Layer Security) should be established on connections.
 - __ldap.connection.ssl.trust_certificates__ - Path to the certificates file. Example: `file:///etc/ssl/mycertificate.cer`
@@ -109,7 +110,7 @@ the pool. The example: _10_
 - __ldap.connection.sasl.realm__ - SASL realm value. Example: `example.com`
 - __ldap.connection.sasl.authorization_id__ - Defines the SASL authorization id.
 - __ldap.connection.sasl.security_strength__ - Specifies the client's preferred privacy protection strength (ciphers and key lengths used for encryption). The value of this property is a comma-separated list of strength values, the order of which specifies the preference order. The three possible strength values are "low", "medium", and "high". If you do not specify this property, then it defaults to "high,medium,low".
-- __ldap.connection.sasl.mutual_auth__ - SASL mutual authentication on supported mechanisms. For some applications, it is equally important that the LDAP server's identity be verified. The process by which both parties participating in the exchange authenticate each other is referred to as mutual authentication.
+- __ldap.connection.sasl.mutual_auth__ - SASL mutual authentication on supported mechanisms. For some applications, it is equally important that the LDAP server's identity be verified. The process by which both parties participating in the exchange authenticate each other is referred to as mutual authentication. Defaults to false.
 - __ldap.connection.sasl.quality_of_protection__ - Defines integrity and privacy protection of the communication channel.It is negotiated between during the authentication phase of the SASL exchange. Possible values are `auth` (default),`auth-inf` and `auth-conf`. 
 
 
