@@ -16,6 +16,7 @@ package com.codenvy.im.managers;
 
 import com.codenvy.im.artifacts.CDECArtifact;
 
+import com.codenvy.im.utils.TarUtils;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -225,9 +226,12 @@ public class TestBackupConfig {
     @Test
     public void testExtractConfigFromBackup() throws IOException {
         String testingBackup = getClass().getClassLoader().getResource("backups/empty_backup.tar").getPath();
+
         BackupConfig backupConfig = new BackupConfig().setArtifactName("codenvy")
                                                     .setArtifactVersion("1.0.0")
                                                     .setBackupFile(testingBackup);
+
+        TarUtils.unpackAllFiles(Paths.get(testingBackup), backupConfig.obtainArtifactTempDirectory());
 
         BackupConfig testConfig = backupConfig.loadConfigFromTempDir();
         assertEquals(testConfig.toString(), "{" +
@@ -239,24 +243,27 @@ public class TestBackupConfig {
     }
 
     @Test(expectedExceptions = BackupException.class,
-            expectedExceptionsMessageRegExp = "There was a problem with config of backup which should be placed in file 'backup_without_config" +
-                                              ".tar/backup.config.json'")
+          expectedExceptionsMessageRegExp = "There was a problem with config of backup which should be placed in file 'backup_without_config.tar/backup.config.json'. "
+                                              + "Error: File 'target/tmp_backup/codenvy/codenvy/backup.config.json' does not exist")
     public void testExtractAbsenceConfigFromBackupError() throws IOException {
         String testingBackup = getClass().getClassLoader().getResource("backups/backup_without_config.tar").getPath();
         BackupConfig backupConfig = new BackupConfig().setArtifactName("codenvy")
                                                       .setArtifactVersion("1.0.0")
                                                       .setBackupFile(testingBackup);
+        TarUtils.unpackAllFiles(Paths.get(testingBackup), backupConfig.obtainArtifactTempDirectory());
 
         backupConfig.loadConfigFromTempDir();
     }
 
     @Test(expectedExceptions = BackupException.class,
-            expectedExceptionsMessageRegExp = "There was a problem with config of backup which should be placed in file 'backup_empty_config.tar/backup.config.json'")
+          expectedExceptionsMessageRegExp = "There was a problem with config of backup which should be placed in file 'backup_empty_config.tar/backup.config.json'. "
+                                            + "Error: com.fasterxml.jackson.databind.JsonMappingException: No content to map due to end-of-input(?s).*")
     public void testExtractEmptyConfigFromBackupError() throws IOException {
         String testingBackup = getClass().getClassLoader().getResource("backups/backup_empty_config.tar").getPath();
         BackupConfig backupConfig = new BackupConfig().setArtifactName("codenvy")
                                                       .setArtifactVersion("1.0.0")
                                                       .setBackupFile(testingBackup);
+        TarUtils.unpackAllFiles(Paths.get(testingBackup), backupConfig.obtainArtifactTempDirectory());
 
         backupConfig.loadConfigFromTempDir();
     }

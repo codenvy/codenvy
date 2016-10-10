@@ -282,7 +282,7 @@ public class CommandLibrary {
                       needSudo ? "sudo" : "",
                       fromDir,
                       packFile,
-                      pathWithinThePack,
+                      pathWithinThePack != null ? pathWithinThePack : "",
                       useCompression ? "-z" : "");
     }
 
@@ -312,7 +312,7 @@ public class CommandLibrary {
                       useCompression ? "-z" : "",
                       packFile,
                       toDir,
-                      pathWithinThePack);
+                      pathWithinThePack != null ? pathWithinThePack : "");
     }
 
     public static Command createCopyFromRemoteToLocalCommand(Path fromPath, Path toPath, NodeConfig remote) {
