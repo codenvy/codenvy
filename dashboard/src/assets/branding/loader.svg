@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="130px" height="60px" viewBox="0 0 130 60" enable-background="new 0 0 130 60" fill="#fff">
+<g>
+	<path class="outer-fill" d="M6.03,40.01c0-7.236-6.03-7.732-6.03-7.732v-6.101c0,0,6.03-0.496,6.03-7.874v-5.959
+		C6.03,1.135,14.117,0,17.522,0c0.993,0,1.632,0.071,1.632,0.071V5.32c0,0-0.426,0-0.993,0c-1.774,0-6.101,0.638-6.101,7.449v7.307
+		c0,7.023-5.746,9.009-5.746,9.009v0.142c0,0,5.746,1.702,5.746,9.009v8.158c0,6.81,4.327,7.449,6.101,7.449
+		c0.567,0,0.993,0,0.993,0v5.249c0,0-0.638,0.142-1.632,0.142c-3.405,0-11.492-1.135-11.492-12.414V40.01z"/>
+	<path class="outer-fill" d="M110.406,53.843c1.773,0,6.101-0.638,6.101-7.449v-8.158c0-7.307,5.746-9.009,5.746-9.009v-0.142
+		c0,0-5.746-1.986-5.746-9.009v-7.307c0-6.81-4.328-7.449-6.101-7.449c-0.638,0-0.993,0-0.993,0V0.071c0,0,0.638-0.071,1.632-0.071
+		c3.405,0,11.492,1.135,11.492,12.343v5.959c0,7.378,6.03,7.874,6.03,7.874v6.101c0,0-6.03,0.497-6.03,7.732v6.81
+		c0,11.279-8.087,12.414-11.492,12.414c-0.993,0-1.632-0.142-1.632-0.142v-5.249C109.413,53.843,109.767,53.843,110.406,53.843z"/>
+	<path class="outer-fill" d="M82.305,51.767h-33.96c-9.816,0-17.802-7.986-17.802-17.802c0-9.281,7.139-16.926,16.214-17.732
+		c2.351-5.814,7.999-9.707,14.437-9.707c5.72,0,10.885,3.084,13.614,7.995c4.124,0.647,7.789,2.909,10.225,6.321
+		c3.32,0.586,6.361,2.235,8.685,4.733c2.689,2.891,4.17,6.658,4.17,10.608C97.889,44.776,90.898,51.767,82.305,51.767z
+		 M48.345,22.091c-6.548,0-11.874,5.327-11.874,11.874S41.797,45.84,48.345,45.84h33.96c5.325,0,9.656-4.332,9.656-9.656
+		c0-5.01-3.909-9.237-8.898-9.623l-1.556-0.12l-0.781-1.351c-1.671-2.89-4.653-4.693-7.977-4.823l-1.899-0.075l-0.724-1.757
+		c-1.498-3.633-5.003-5.98-8.93-5.98c-4.477,0-8.336,3.036-9.384,7.383l-0.569,2.36l-2.426-0.093
+		C48.659,22.097,48.503,22.091,48.345,22.091z"/>
+</g>
+</svg>

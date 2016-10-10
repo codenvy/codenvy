@@ -26,26 +26,36 @@ import com.codenvy.im.response.InstallResponse;
 import com.codenvy.im.response.ResponseCode;
 import com.codenvy.im.utils.Version;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonParseException;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.codenvy.im.artifacts.ArtifactFactory.createArtifact;
+import static com.codenvy.im.commands.PatchCDECCommand.UPDATE_INFO;
 import static com.codenvy.im.event.EventFactory.createImArtifactInstallStartedWithTime;
 import static com.codenvy.im.event.EventFactory.createImArtifactInstallSuccessWithTime;
 import static com.codenvy.im.event.EventFactory.createImArtifactInstallUnsuccessWithTime;
 import static com.codenvy.im.utils.Commons.toJson;
 import static com.codenvy.im.utils.InjectorBootstrap.INJECTOR;
+import static com.codenvy.im.utils.InjectorBootstrap.INSTALLATION_MANAGER_BASE_DIR;
+import static com.codenvy.im.utils.InjectorBootstrap.getProperty;
 import static java.lang.Math.max;
+import static java.lang.String.format;
 
 /**
  * @author Alexander Reshetnyak
@@ -53,6 +63,8 @@ import static java.lang.Math.max;
  */
 @Command(scope = "codenvy", name = "install", description = "Install, update artifact or print the list of already installed ones")
 public class InstallCommand extends AbstractIMCommand {
+
+    private static final Logger LOG = Logger.getLogger(InstallCommand.class.getName());
 
     private final ConfigManager configManager;
     private       InstallType   installType;
@@ -62,9 +74,9 @@ public class InstallCommand extends AbstractIMCommand {
 
     @Argument(index = 1, name = "version", description = "The specific version of the artifact to install", required = false, multiValued = false)
     private String versionNumber;
-    
-    @Option(name = "--list", aliases = "-l", description = "To show installed list of artifacts", required = false)		
-    private boolean list;		
+
+    @Option(name = "--list", aliases = "-l", description = "To show installed list of artifacts", required = false)
+    private boolean list;
 
     @Option(name = "--multi", aliases = "-m", description = "To install artifact on multiply nodes (by default on single node)", required = false)
     private boolean multi;
@@ -137,7 +149,7 @@ public class InstallCommand extends AbstractIMCommand {
         }
     }
 
-    protected Void doExecuteInstall() throws IOException, JsonParseException, InterruptedException {
+    private Void doExecuteInstall() throws IOException, JsonParseException, InterruptedException {
         if (binaries != null) {
             if (versionNumber == null) {
                 throw new IllegalStateException("Parameter 'version' is missed");
@@ -159,7 +171,6 @@ public class InstallCommand extends AbstractIMCommand {
 
         final InstallOptions installOptions = new InstallOptions();
         final boolean isInstall = isInstall(artifact);
-
 
         final int firstStep = getFirstInstallStep();
 
@@ -190,6 +201,7 @@ public class InstallCommand extends AbstractIMCommand {
             }
         } else {
             infos = getFacade().getUpdateInfo(artifact, installType);
+            removeUpdateInfoFile();
         }
 
         final int finalStep = infos.size() - 1;
@@ -262,6 +274,11 @@ public class InstallCommand extends AbstractIMCommand {
 
             getConsole().println(toJson(installResponse));
 
+            final String updateInfo = getUpdateInfo();
+            if (!isInstall && updateInfo != null) {
+                getConsole().printWarning(updateInfo, isInteractive());
+            }
+
             if (isInteractive() && artifactName.equals(InstallManagerArtifact.NAME)) {
                 getConsole().pressAnyKey("'Installation Manager CLI' is being updated! Press any key to exit...\n");
                 getConsole().exit(0);
@@ -270,29 +287,58 @@ public class InstallCommand extends AbstractIMCommand {
 
         return null;
     }
-    
-    protected Void doExecuteListInstalledArtifacts() throws IOException, JsonParseException {		
-        Collection<InstallArtifactInfo> installedVersions = getFacade().getInstalledVersions();
-        InstallResponse installResponse = new InstallResponse();		
-        installResponse.setArtifacts(installedVersions);		
-        installResponse.setStatus(ResponseCode.OK);		
-        getConsole().printResponseExitInError(installResponse);
-        return null;		
+
+    @VisibleForTesting
+    void removeUpdateInfoFile() {
+        Path infoPath = getPathToUpdateInfoFile();
+        FileUtils.deleteQuietly(infoPath.toFile());
     }
 
-    protected void setInstallProperties(InstallOptions options, boolean isInstall) throws IOException {
-        Map<String, String> properties = getConfigManager().prepareInstallProperties(configFilePath,
-                                                                                binaries == null ? null : Paths.get(binaries),
-                                                                                installType,
-                                                                                createArtifact(artifactName),
-                                                                                Version.valueOf(versionNumber),
-                                                                                isInstall);
-        options.setConfigProperties(properties);
+    @VisibleForTesting
+    Path getPathToUpdateInfoFile() {
+        return Paths.get(getProperty(INSTALLATION_MANAGER_BASE_DIR),
+                         UPDATE_INFO);
     }
 
-    protected boolean isInstall(Artifact artifact) throws IOException {
+    @Nullable
+    private String getUpdateInfo() {
+        String info = null;
+        Path infoPath = getPathToUpdateInfoFile();
+        if (Files.exists(infoPath)) {
+            try {
+                info = FileUtils.readFileToString(infoPath.toFile());
+            } catch (IOException e) {
+                LOG.log(Level.WARNING, format("Can't read update info from the file '%s'. Error: %s.", infoPath.toFile(), e.getMessage()));
+                return null;
+            }
+        }
+
+        return info;
+    }
+
+    @VisibleForTesting
+    boolean isInstall(Artifact artifact) throws IOException {
         return (installStep != null && forceInstall)
                || !artifact.getInstalledVersion().isPresent();
+    }
+
+    private Void doExecuteListInstalledArtifacts() throws IOException, JsonParseException {
+        Collection<InstallArtifactInfo> installedVersions = getFacade().getInstalledVersions();
+        InstallResponse installResponse = new InstallResponse();
+        installResponse.setArtifacts(installedVersions);
+        installResponse.setStatus(ResponseCode.OK);
+        getConsole().printResponseExitInError(installResponse);
+        return null;
+    }
+
+    private void setInstallProperties(InstallOptions options, boolean isInstall) throws IOException {
+        Map<String, String> properties = getConfigManager().prepareInstallProperties(configFilePath,
+                                                                                     binaries == null ? null : Paths.get(binaries),
+                                                                                     installType,
+                                                                                     createArtifact(artifactName),
+                                                                                     Version.valueOf(versionNumber),
+                                                                                     isInstall);
+        options.setConfigProperties(properties);
     }
 
     private int getFirstInstallStep() {

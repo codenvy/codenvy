@@ -32,11 +32,13 @@ public class RecipeDomain extends AbstractPermissionsDomain<RecipePermissionsImp
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
 
+    private static final List<String> ACTIONS = ImmutableList.of(READ, SEARCH, UPDATE, DELETE);
+
+    /** Returns all the available actions for {@link RecipeDomain}. */
+    public static List<String> getActions() { return ACTIONS; }
+
     public RecipeDomain() {
-        super(DOMAIN_ID, ImmutableList.of(READ,
-                                          SEARCH,
-                                          UPDATE,
-                                          DELETE));
+        super(DOMAIN_ID, ACTIONS);
     }
 
     @Override

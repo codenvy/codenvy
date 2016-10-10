@@ -44,6 +44,7 @@ public class ProfileMapper implements Function<LdapEntry, ProfileImpl> {
             this.appToLdapAttrNames = ImmutableMap.of();
         } else {
             this.appToLdapAttrNames = ImmutableMap.copyOf(Arrays.stream(attributes)
+                                                                .filter(p -> !p.first.isEmpty() && p.second != null)
                                                                 .collect(toMap(p -> p.first, p -> p.second.toLowerCase())));
         }
     }

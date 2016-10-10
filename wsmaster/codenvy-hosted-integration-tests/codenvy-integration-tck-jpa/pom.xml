@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-integration-tests</artifactId>
         <groupId>com.codenvy.integration.tests</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-integration-tck-jpa</artifactId>
     <packaging>jar</packaging>
@@ -49,6 +49,15 @@
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-permission</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-resource</artifactId>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
@@ -186,6 +195,7 @@
                                     <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
                                     <includeArtifactIds>codenvy-hosted-api-machine,
                                         codenvy-hosted-api-workspace,
+                                        codenvy-hosted-api-resource,
                                         codenvy-hosted-api-permission,
                                         che-core-api-account,
                                         che-core-api-factory,

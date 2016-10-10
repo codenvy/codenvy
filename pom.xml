@@ -20,11 +20,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-assembly-parent</artifactId>
-    <version>5.0.0-M5-SNAPSHOT</version>
+    <version>5.0.0-M6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
@@ -46,8 +46,8 @@
     </scm>
     <properties>
         <aws.java.sdk.version>1.11.22</aws.java.sdk.version>
-        <che.lib.version>5.0.0-M5-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-M5-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M6-SNAPSHOT</che.lib.version>
+        <che.version>5.0.0-M6-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>
@@ -57,7 +57,7 @@
         <com.nimbusds.version>3.0</com.nimbusds.version>
         <commons-configuration.version>1.10</commons-configuration.version>
         <de.flapdoodle.embed-mongo.version>1.50.0</de.flapdoodle.embed-mongo.version>
-        <jdbc.postgresql-driver.version>9.3-1102-jdbc41</jdbc.postgresql-driver.version>
+        <jdbc.postgresql-driver.version>9.4.1211</jdbc.postgresql-driver.version>
         <jline.version>2.12</jline.version>
         <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <maven.releases.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-releases/</maven.releases.repo.url>
@@ -391,6 +391,17 @@
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-permission-shared</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-resource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-resource</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>

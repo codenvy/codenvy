@@ -43,34 +43,34 @@ public class TestInstallationManagerCliWithCodenvy3 extends BaseIntegrationTest 
         doTest("codenvy3/install/test-install-single-node-and-change-config-with-codenvy3.sh");
     }
 
-    @Test
-    public void testUpdateSingleNodeFromBinary() throws Exception {
-        doTest("codenvy3/update/test-update-single-node-from-binary-with-codenvy3.sh");
-    }
-
-    @Test
-    public void testUpdateMultiNodesFromBinary() throws Exception {
-        doTest("codenvy3/update/test-update-multi-nodes-from-binary-with-codenvy3.sh");
-    }
+//    @Test
+//    public void testUpdateSingleNodeFromBinary() throws Exception {
+//        doTest("codenvy3/update/test-update-single-node-from-binary-with-codenvy3.sh");
+//    }
+//
+//    @Test
+//    public void testUpdateMultiNodesFromBinary() throws Exception {
+//        doTest("codenvy3/update/test-update-multi-nodes-from-binary-with-codenvy3.sh");
+//    }
 
     @Test
     public void testAddRemoveCodenvyNodes() throws Exception {
         doTest("codenvy3/node/test-add-remove-codenvy-nodes-with-codenvy3.sh");
     }
 
-    @Test
-    public void testBackupRestoreSingleNode() throws Exception {
-        doTest("codenvy3/backup/test-backup-restore-single-node-with-codenvy3.sh");
-    }
+//    @Test
+//    public void testBackupRestoreSingleNode() throws Exception {
+//        doTest("codenvy3/backup/test-backup-restore-single-node-with-codenvy3.sh");
+//    }
 
     @Test(priority = 9)
     public void testMigrationData() throws Exception {
         doTest("codenvy3/update/test-migration-data-with-codenvy3.sh");
     }
-
-    @Test(priority = 10)
-    public void testBackupRestoreMultiNodes() throws Exception {
-        doTest("codenvy3/update/test-backup-restore-multi-nodes-with-codenvy3.sh");
-    }
+//
+//    @Test(priority = 10)
+//    public void testBackupRestoreMultiNodes() throws Exception {
+//        doTest("codenvy3/update/test-backup-restore-multi-nodes-with-codenvy3.sh");
+//    }
 
 }

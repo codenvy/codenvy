@@ -42,6 +42,7 @@ public abstract class AbstractTestCommand {
     public final static String CODENVY_ONPREM_AUTH_TOKEN    = "authToken";
     public static final String CODENVY_ONPREM_USER_PASSWORD = "testUserPassword";
     public static final String CODENVY_ONPREM_USER          = "test@codenvy.onprem";
+    public static final String SYSTEM_USER_NAME             = System.getProperty("user.name");
 
     public CommandInvoker commandInvoker;
     public Console        spyConsole;

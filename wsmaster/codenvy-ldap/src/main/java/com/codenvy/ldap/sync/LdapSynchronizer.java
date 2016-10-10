@@ -70,12 +70,17 @@ import static java.lang.String.format;
  * <p>It is thread-safe.
  *
  * @author Yevhenii Voevodin
+ * @author Max Shaposhnik
  */
 @Singleton
 public class LdapSynchronizer {
 
     private static final Logger LOG                                   = LoggerFactory.getLogger(LdapSynchronizer.class);
     private static final int    EACH_ENTRIES_COUNT_CHECK_INTERRUPTION = 200;
+
+    private static final String USER_ID_ATTRIBUTE_NAME    = "ldap.sync.user.attr.id";
+    private static final String USER_NAME_ATTRIBUTE_NAME  = "ldap.sync.user.attr.name";
+    private static final String USER_EMAIL_ATTRIBUTE_NAME = "ldap.sync.user.attr.email";
 
     private final long                             syncPeriodMs;
     private final long                             initDelayMs;
@@ -137,9 +142,9 @@ public class LdapSynchronizer {
                             EntityListenerInjectionManagerInitializer jpaInitializer,
                             @Named("ldap.sync.period_ms") long syncPeriodMs,
                             @Named("ldap.sync.initial_delay_ms") long initDelayMs,
-                            @Named("ldap.sync.user.attr.id") String userIdAttr,
-                            @Named("ldap.sync.user.attr.name") String userNameAttr,
-                            @Named("ldap.sync.user.attr.email") String userEmailAttr,
+                            @Named(USER_ID_ATTRIBUTE_NAME) String userIdAttr,
+                            @Named(USER_NAME_ATTRIBUTE_NAME) String userNameAttr,
+                            @Named(USER_EMAIL_ATTRIBUTE_NAME) String userEmailAttr,
                             @Named("ldap.sync.profile.attrs") @Nullable Pair<String, String>[] profileAttributes) {
         if (initDelayMs < 0) {
             throw new IllegalArgumentException("'ldap.sync.initial_delay_ms' must be >= 0, the actual value is " + initDelayMs);
@@ -197,6 +202,9 @@ public class LdapSynchronizer {
                 iteration++;
                 idNormalizer.normalize(entry);
                 final UserImpl user = userMapper.apply(entry);
+                if (!isValid(user)) {
+                    continue;
+                }
                 final ProfileImpl profile = profileMapper.apply(entry);
                 try {
                     if (existingIds.remove(user.getId())) {
@@ -305,6 +313,25 @@ public class LdapSynchronizer {
             Thread.currentThread().interrupt();
         }
     }
+
+    private boolean isValid(UserImpl user) {
+        if (user.getId() == null) {
+            LOG.warn(format("Cannot find out user's id. Please, check configuration `%s` parameter correctness.", USER_ID_ATTRIBUTE_NAME));
+            return false;
+        }
+        if (user.getName() == null) {
+            LOG.warn(format("Cannot find out user's name. Please, check configuration `%s` parameter correctness.",
+                            USER_NAME_ATTRIBUTE_NAME));
+            return false;
+        }
+        if (user.getEmail() == null) {
+            LOG.warn(format("Cannot find out user's email. Please, check configuration `%s` parameter correctness.",
+                            USER_NAME_ATTRIBUTE_NAME));
+            return false;
+        }
+        return true;
+    }
+
 
     public static class SyncResult {
         private long created;

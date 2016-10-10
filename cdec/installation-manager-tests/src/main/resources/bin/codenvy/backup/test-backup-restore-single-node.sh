@@ -44,8 +44,8 @@ BACKUP_AT_START=${OUTPUT}
 # modify data: add account, workspace, project, user
 authWithoutRealmAndServerDns "admin" "password"
 
-# create user "cdec.im.test@gmail.com"
-doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
+# create user "cdec.im.test1@gmail.com"
+doPost "application/json" "{\"name\":\"cdec\",\"email\":\"cdec.im.test1@gmail.com\",\"password\":\"pwd123ABC\"}" "http://${HOST_URL}/api/user" "${TOKEN}"
 fetchJsonParameter "id"
 USER_ID=${OUTPUT}
 
@@ -70,7 +70,7 @@ NETWORK_PORTS=${OUTPUT}
 
 EXT_HOST_PORT_REGEX="4401/tcp=\[PortBinding\{hostIp='127.0.0.1', hostPort='([0-9]*)'\}\]"
 EXT_HOST_PORT=$([[ "$NETWORK_PORTS" =~ $EXT_HOST_PORT_REGEX ]] && echo ${BASH_REMATCH[1]})
-URL_OF_PROJECT_API="http://${HOST_URL}:81/${EXT_HOST_PORT}_${HOST_URL}/wsagent/ext/project"
+URL_OF_PROJECT_API="http://${HOST_URL}/${EXT_HOST_PORT}_${HOST_URL}/wsagent/ext/project"
 
 # obtain machine token
 doGet "http://${HOST_URL}/api/machine/token/${WORKSPACE_ID}?token=${TOKEN}"
@@ -124,9 +124,9 @@ executeIMCommand "restore" ${BACKUP_WITH_MODIFICATIONS}
 authWithoutRealmAndServerDns "admin" "password"
 
 doGet "http://${HOST_URL}/api/user/${USER_ID}?token=${TOKEN}"
-validateExpectedString ".*cdec.im.test@gmail.com.*"
+validateExpectedString ".*cdec.im.test1@gmail.com.*"
 
-authWithoutRealmAndServerDns "cdec.im.test@gmail.com" "pwd123ABC"
+authWithoutRealmAndServerDns "cdec.im.test1@gmail.com" "pwd123ABC"
 
 doGet "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}?token=${TOKEN}"
 validateExpectedString ".*${PROJECT_NAME}.*${WORKSPACE_NAME}.*"

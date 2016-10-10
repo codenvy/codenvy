@@ -20,11 +20,11 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises.wsmaster</groupId>
     <artifactId>codenvy-master-parent</artifactId>
-    <version>5.0.0-M5-SNAPSHOT</version>
+    <version>5.0.0-M6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Master Parent</name>
     <modules>
@@ -60,5 +60,6 @@
         <module>codenvy-hosted-api-admin</module>
         <module>codenvy-hosted-api-organization</module>
         <module>codenvy-hosted-system-ram</module>
+        <module>codenvy-hosted-api-resource</module>
     </modules>
 </project>

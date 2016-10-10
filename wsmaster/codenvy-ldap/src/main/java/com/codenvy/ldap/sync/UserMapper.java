@@ -17,13 +17,14 @@ package com.codenvy.ldap.sync;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.ldaptive.LdapEntry;
 
-import javax.inject.Inject;
 import java.util.function.Function;
+
 
 /**
  * Maps {@link LdapEntry} to {@link UserImpl}.
  *
  * @author Yevhenii Voevodin
+ * @author Max Shapososhnik
  */
 public class UserMapper implements Function<LdapEntry, UserImpl> {
 
@@ -31,7 +32,6 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
     private final String nameAttr;
     private final String mailAttr;
 
-    @Inject
     public UserMapper(String userIdAttr, String userNameAttr, String userEmailAttr) {
         this.idAttr = userIdAttr;
         this.nameAttr = userNameAttr;
@@ -40,8 +40,8 @@ public class UserMapper implements Function<LdapEntry, UserImpl> {
 
     @Override
     public UserImpl apply(LdapEntry entry) {
-        return new UserImpl(entry.getAttribute(idAttr).getStringValue(),
-                            entry.getAttribute(mailAttr).getStringValue(),
-                            entry.getAttribute(nameAttr).getStringValue());
+        return new UserImpl(entry.getAttribute(idAttr) != null ? entry.getAttribute(idAttr).getStringValue() : null,
+                            entry.getAttribute(mailAttr)!= null ? entry.getAttribute(mailAttr).getStringValue() : null,
+                            entry.getAttribute(nameAttr) != null ? entry.getAttribute(nameAttr).getStringValue() : null);
     }
 }

@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -70,7 +71,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
 
-    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder) {
+    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
         final WorkspaceRuntimeDto runtime = workspace.getRuntime();
         // add links for running workspace
         if (workspace.getStatus() == RUNNING && runtime != null) {
@@ -91,6 +92,9 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                 LOG.warn("Failed to get machine token", ex);
             }
             final String machineToken = firstNonNull(token, "");
+
+            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
+
             final MachineDto devMachine = runtime.getDevMachine();
             if (devMachine != null) {
                 final Collection<ServerDto> servers = devMachine.getRuntime()

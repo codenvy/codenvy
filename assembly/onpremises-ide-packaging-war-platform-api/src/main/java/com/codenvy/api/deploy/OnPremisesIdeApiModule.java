@@ -41,6 +41,7 @@ import com.codenvy.organization.api.OrganizationModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolver;
 import com.codenvy.report.ReportModule;
+import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.service.systemram.DockerBasedSystemRamInfoProvider;
 import com.codenvy.service.systemram.SystemRamInfoProvider;
 import com.codenvy.service.systemram.SystemRamService;
@@ -193,6 +194,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new FactoryJpaModule());
         bind(AccountDao.class).to(JpaAccountDao.class);
         install(new OrganizationModule());
+        install(new ResourceModule());
         bind(FactoryDao.class).to(JpaFactoryDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
         bind(RecipeDao.class).to(JpaRecipeDao.class);

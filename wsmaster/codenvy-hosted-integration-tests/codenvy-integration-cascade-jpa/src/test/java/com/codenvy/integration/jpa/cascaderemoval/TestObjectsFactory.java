@@ -15,6 +15,8 @@
 package com.codenvy.integration.jpa.cascaderemoval;
 
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
+import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.account.shared.model.Account;
@@ -137,6 +139,12 @@ public final class TestObjectsFactory {
 
     public static WorkerImpl createWorker(String userId, String workspaceId) {
         return new WorkerImpl(workspaceId, userId, Arrays.asList("read", "write", "run"));
+    }
+
+    public static FreeResourcesLimitImpl createFreeResourcesLimit(String accountId) {
+        return new FreeResourcesLimitImpl(accountId,
+                                          Arrays.asList(new ResourceImpl("test1", 123, "mb"),
+                                                        new ResourceImpl("test2", 234, "h")));
     }
 
     private TestObjectsFactory() {}
