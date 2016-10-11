@@ -32,8 +32,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
+import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
+import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
+import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -61,9 +69,7 @@ public class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscribe
 
         manager = injector.getInstance(EntityManager.class);
         jpaOrganizationDao = injector.getInstance(JpaOrganizationDao.class);
-        suborganizationsRemover =
-                injector.getInstance(RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber.class);
-        suborganizationsRemover.subscribe();
+        suborganizationsRemover = injector.getInstance(RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -74,20 +80,30 @@ public class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscribe
             manager.flush();
         }
         manager.getTransaction().commit();
+        suborganizationsRemover.subscribe();
     }
 
     @AfterMethod
     public void cleanup() {
+        suborganizationsRemover.unsubscribe();
+
         manager.getTransaction().begin();
-        manager.createQuery("SELECT org FROM Organization org", OrganizationImpl.class)
-               .getResultList()
-               .forEach(manager::remove);
+        final Map<String, OrganizationImpl> managedOrganizations = manager.createQuery("SELECT org FROM Organization org",
+                                                                                       OrganizationImpl.class)
+                                                                          .getResultList().stream()
+                                                                          .collect(toMap(OrganizationImpl::getId,
+                                                                                         Function.identity()));
+        for (int i = organizations.length - 1; i > -1; i--) {
+            final OrganizationImpl managedOrganization = managedOrganizations.get(organizations[i].getId());
+            if (managedOrganization != null) {
+                manager.remove(managedOrganization);
+            }
+        }
         manager.getTransaction().commit();
     }
 
     @AfterClass
     public void shutdown() throws Exception {
-        suborganizationsRemover.unsubscribe();
         manager.getEntityManagerFactory().close();
     }
 
@@ -120,7 +136,16 @@ public class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscribe
     private static class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            install(new JpaPersistModule("main"));
+            Map<String, String> properties = new HashMap<>();
+            if (System.getProperty("jdbc.driver") != null) {
+                properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
+                properties.put(JDBC_URL, System.getProperty("jdbc.url"));
+                properties.put(JDBC_USER, System.getProperty("jdbc.user"));
+                properties.put(JDBC_PASSWORD, System.getProperty("jdbc.password"));
+            }
+            JpaPersistModule main = new JpaPersistModule("main");
+            main.properties(properties);
+            install(main);
             bind(JpaInitializer.class).asEagerSingleton();
             bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
         }

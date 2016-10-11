@@ -110,6 +110,7 @@ import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.crea
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -279,7 +280,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertTrue(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
         //Check workers and parent entity is removed
         assertTrue(workspaceDao.getByNamespace(user2.getId()).isEmpty());
-        assertTrue(workerDao.getWorkers(workspace3.getId()).isEmpty());
+        assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
         // Check stack and recipes are removed
         assertNull(notFoundToNull(() -> recipeDao.getById(recipe1.getId())));
         assertNull(notFoundToNull(() -> recipeDao.getById(recipe2.getId())));
@@ -293,13 +294,13 @@ public class JpaEntitiesCascadeRemovalTest {
         assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
         // Check existence of organizations
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
-        assertTrue(memberDao.getMembers(organization.getId()).isEmpty());
+        assertEquals(memberDao.getMembers(organization.getId(), 1, 0).getTotalItemsCount(), 0);
 
         assertNull(notFoundToNull(() -> organizationDao.getById(childOrganization.getId())));
-        assertTrue(memberDao.getMembers(childOrganization.getId()).isEmpty());
+        assertEquals(memberDao.getMembers(childOrganization.getId(), 1, 0).getTotalItemsCount(), 0);
 
         assertNotNull(notFoundToNull(() -> organizationDao.getById(organization2.getId())));
-        assertFalse(memberDao.getMembers(organization2.getId()).isEmpty());
+        assertEquals(memberDao.getMembers(organization2.getId(), 1, 0).getTotalItemsCount(), 1);
 
         // free resources limit is removed
         assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
@@ -396,11 +397,8 @@ public class JpaEntitiesCascadeRemovalTest {
                                                            stack3.getId(),
                                                            asList(SET_PERMISSIONS, "read", "write", "execute")));
 
-        recipePermissionsDao
-                .store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), asList(SET_PERMISSIONS, "read", "write")));
-        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(),
-                                                             recipe2.getId(),
-                                                             asList(SET_PERMISSIONS, "read", "write", "execute")));
+        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), asList(SET_PERMISSIONS, "read", "write")));
+        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe2.getId(), asList(SET_PERMISSIONS, "read", "execute")));
 
         organizationDao.create(organization = new OrganizationImpl("org123", "testOrg", null));
         organizationDao.create(childOrganization = new OrganizationImpl("suborg123", "childTestOrg", organization.getId()));

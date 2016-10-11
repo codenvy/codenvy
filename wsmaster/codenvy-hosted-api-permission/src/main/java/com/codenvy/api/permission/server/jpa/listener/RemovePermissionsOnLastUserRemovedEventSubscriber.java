@@ -17,6 +17,9 @@ package com.codenvy.api.permission.server.jpa.listener;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
@@ -26,6 +29,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import java.util.List;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 
@@ -62,15 +66,40 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
             // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
             // deleted when it's not required anymore.
             // As a result, a solitary objects may be present in the DB.
-            if (storage.getByInstance(permissions.getInstanceId())
-                       .stream()
-                       .noneMatch(permissions1 -> permissions1.getActions().contains(SET_PERMISSIONS) &&
-                                                  !permissions1.getUserId().equals(event.getUser().getId()))) {
+            if (userHasLastSetPermissions(permissions.getUserId(),
+                                          permissions.getInstanceId())) {
                 remove(permissions.getInstanceId());
             } else {
                 storage.remove(event.getUser().getId(), permissions.getInstanceId());
             }
         }
+    }
+
+    private boolean userHasLastSetPermissions(String userId,
+                                              String instanceId) throws ServerException, ConflictException {
+        try {
+            Page<? extends AbstractPermissions> page = storage.getByInstance(instanceId, 30, 0);
+            boolean hasSetPermission;
+            while (!(hasSetPermission = hasForeignSetPermission(page.getItems(), userId))
+                   && page.hasNextPage()) {
+
+                final Page.PageRef nextPageRef = page.getNextPageRef();
+                page = storage.getByInstance(instanceId, nextPageRef.getPageSize(), (int)nextPageRef.getItemsBefore());
+            }
+            return !hasSetPermission;
+        } catch (NotFoundException e) {
+            return true;
+        }
+    }
+
+    private boolean hasForeignSetPermission(List<? extends AbstractPermissions> permissions, String userId) {
+        for (AbstractPermissions permission : permissions) {
+            if (!permission.getUserId().equals(userId)
+                && permission.getActions().contains(SET_PERMISSIONS)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public abstract void remove(String instanceId) throws ServerException;

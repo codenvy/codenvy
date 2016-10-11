@@ -18,6 +18,7 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
@@ -70,13 +71,17 @@ public interface PermissionsDao<T extends AbstractPermissions> {
     /**
      * @param instanceId
      *         instance id
+     * @param maxItems
+     *         the maximum number of permissions to return
+     * @param skipCount
+     *         the number of permissions to skip
      * @return set of permissions
      * @throws NotFoundException
      *         when given instance was not found
      * @throws ServerException
      *         when any other error occurs during permissions fetching
      */
-    List<T> getByInstance(String instanceId) throws ServerException, NotFoundException;
+    Page<T> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException, NotFoundException;
 
     /**
      * @param userId

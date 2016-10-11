@@ -14,12 +14,14 @@
  */
 package com.codenvy.api.machine.server.spi.tck;
 
+import com.codenvy.api.machine.server.recipe.RecipeDomain;
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
@@ -60,17 +62,18 @@ public class RecipePermissionsDaoTest {
 
     @BeforeMethod
     public void setUp() throws TckRepositoryException {
-        permissions = new RecipePermissionsImpl[] {new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "run")),
-                                                   new RecipePermissionsImpl("user2", "recipe1", asList("read", "use")),
-                                                   new RecipePermissionsImpl("user1", "recipe2", asList("read", "run")),
-                                                   new RecipePermissionsImpl("user2", "recipe2",
+        permissions = new RecipePermissionsImpl[] {new RecipePermissionsImpl("user", "recipe1", asList("read", "use", "run")),
+                                                   new RecipePermissionsImpl("user2", "recipe1", asList("read", "use", "run")),
+                                                   new RecipePermissionsImpl("user3", "recipe1", asList("read", "use")),
+                                                   new RecipePermissionsImpl("user2", "recipe2", asList("read", "run")),
+                                                   new RecipePermissionsImpl("user3", "recipe2",
                                                                              asList("read", "use", "run", "configure"))
         };
 
 
         final UserImpl[] users = new UserImpl[] {new UserImpl("user", "user@com.com", "usr"),
-                                                 new UserImpl("user1", "user1@com.com", "usr1"),
-                                                 new UserImpl("user2", "user2@com.com", "usr2")};
+                                                 new UserImpl("user2", "user2@com.com", "usr2"),
+                                                 new UserImpl("user3", "user3@com.com", "usr3")};
         userRepository.createAll(asList(users));
 
         recipeRepository.createAll(
@@ -86,9 +89,7 @@ public class RecipePermissionsDaoTest {
         permissionsRepository.removeAll();
         recipeRepository.removeAll();
         userRepository.removeAll();
-
     }
-
 
     /* RecipePermissionsDao.store() tests */
     @Test
@@ -108,11 +109,11 @@ public class RecipePermissionsDaoTest {
 
     @Test
     public void shouldReplacePermissionsOnStoringWhenItHasAlreadyExisted() throws Exception {
-
         RecipePermissionsImpl oldPermissions = permissions[0];
 
-        RecipePermissionsImpl newPermissions =
-                new RecipePermissionsImpl(oldPermissions.getUserId(), oldPermissions.getInstanceId(), singletonList("read"));
+        RecipePermissionsImpl newPermissions = new RecipePermissionsImpl(oldPermissions.getUserId(),
+                                                                         oldPermissions.getInstanceId(),
+                                                                         singletonList("read"));
         dao.store(newPermissions);
 
         final Permissions result = dao.get(oldPermissions.getUserId(), oldPermissions.getInstanceId());
@@ -122,7 +123,11 @@ public class RecipePermissionsDaoTest {
 
     @Test
     public void shouldReturnsSupportedDomainsIds() {
-        assertEquals(dao.getDomain(), new TestDomain());
+        //given
+        AbstractPermissionsDomain<RecipePermissionsImpl> recipeDomain = new TestDomain();
+
+        //then
+        assertEquals(dao.getDomain(), recipeDomain);
     }
 
     /* RecipePermissionsDao.remove() tests */
@@ -155,29 +160,29 @@ public class RecipePermissionsDaoTest {
     @Test
     public void shouldGetPermissionsByInstance() throws Exception {
 
-        final List<RecipePermissionsImpl> result = dao.getByInstance(permissions[2].getInstanceId());
+        final Page<RecipePermissionsImpl> permissionsPage = dao.getByInstance(permissions[2].getInstanceId(), 1, 1);
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(permissions[2]) && result.contains(permissions[3]));
+        assertEquals(1, permissionsPage.getItemsCount());
+        assertEquals(3, permissionsPage.getTotalItemsCount());
+        final List<RecipePermissionsImpl> fetchedPermissions = permissionsPage.getItems();
+        assertTrue(fetchedPermissions.contains(permissions[0])
+                   ^ fetchedPermissions.contains(permissions[1])
+                   ^ fetchedPermissions.contains(permissions[2]));
     }
-
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowExceptionWhenGetByInstanceInstanceIdArgumentIsNull() throws Exception {
-        dao.getByInstance(null);
+        dao.getByInstance(null, 30, 0);
     }
-
 
     /* RecipePermissionsDao.get() tests */
     @Test
     public void shouldBeAbleToGetPermissions() throws Exception {
-
         final RecipePermissionsImpl result1 = dao.get(permissions[0].getUserId(), permissions[0].getInstanceId());
         final RecipePermissionsImpl result2 = dao.get(permissions[2].getUserId(), permissions[2].getInstanceId());
 
         assertEquals(result1, permissions[0]);
         assertEquals(result2, permissions[2]);
-
     }
 
     @Test(expectedExceptions = NotFoundException.class,

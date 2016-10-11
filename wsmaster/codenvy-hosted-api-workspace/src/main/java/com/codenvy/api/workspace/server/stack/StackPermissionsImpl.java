@@ -42,6 +42,10 @@ import java.util.List;
                             query = "SELECT stack " +
                                     "FROM StackPermissions stack " +
                                     "WHERE stack.stackId = :stackId "),
+                @NamedQuery(name = "StackPermissions.getCountByStackId",
+                            query = "SELECT COUNT(stack) " +
+                                    "FROM StackPermissions stack " +
+                                    "WHERE stack.stackId = :stackId "),
                 @NamedQuery(name = "StackPermissions.getByUserId",
                             query = "SELECT stack " +
                                     "FROM StackPermissions stack " +

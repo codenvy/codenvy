@@ -18,9 +18,11 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
@@ -32,9 +34,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -66,8 +70,8 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     }
 
     @Override
-    public List<WorkerImpl> getWorkers(String workspaceId) throws ServerException {
-        return getByInstance(workspaceId);
+    public Page<WorkerImpl> getWorkers(String workspaceId, int maxItems, long skipCount) throws ServerException {
+        return getByInstance(workspaceId, maxItems, skipCount);
     }
 
     @Override
@@ -90,13 +94,21 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
     @Override
     @Transactional
-    public List<WorkerImpl> getByInstance(String instanceId) throws ServerException {
+    public Page<WorkerImpl> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(instanceId, "Workspace identifier required");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
+
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("Worker.getByWorkspaceId", WorkerImpl.class)
-                                  .setParameter("workspaceId", instanceId)
-                                  .getResultList();
+            final EntityManager entityManager = managerProvider.get();
+            final List<WorkerImpl> workers = entityManager.createNamedQuery("Worker.getByWorkspaceId", WorkerImpl.class)
+                                                          .setParameter("workspaceId", instanceId)
+                                                          .setMaxResults(maxItems)
+                                                          .setFirstResult((int)skipCount)
+                                                          .getResultList();
+            final Long workersCount = entityManager.createNamedQuery("Worker.getCountByWorkspaceId", Long.class)
+                                                   .setParameter("workspaceId", instanceId)
+                                                   .getSingleResult();
+            return new Page<>(workers, skipCount, maxItems, workersCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -129,10 +141,11 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
     }
 
-
     @Singleton
     public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber
             extends CascadeRemovalEventSubscriber<BeforeWorkspaceRemovedEvent> {
+        private static final int PAGE_SIZE = 100;
+
         @Inject
         private EventService eventService;
         @Inject
@@ -150,12 +163,21 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
         @Override
         public void onRemovalEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
-            for (WorkerImpl worker : workerDao.getWorkers(event.getWorkspace().getId())) {
-                workerDao.removeWorker(worker.getWorkspaceId(), worker.getUserId());
-            }
+            removeWorkers(event.getWorkspace().getId(), PAGE_SIZE);
+        }
+
+        @VisibleForTesting
+        void removeWorkers(String workspaceId, int pageSize) throws ServerException {
+            Page<WorkerImpl> workersPage;
+            do {
+                // skip count always equals to 0 because elements will be shifted after removing previous items
+                workersPage = workerDao.getWorkers(workspaceId, pageSize, 0);
+                for (WorkerImpl worker : workersPage.getItems()) {
+                    workerDao.removeWorker(worker.getInstanceId(), worker.getUserId());
+                }
+            } while (workersPage.hasNextPage());
         }
     }
-
 
     @Singleton
     public static class RemoveWorkersBeforeUserRemovedEventSubscriber

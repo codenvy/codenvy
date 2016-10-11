@@ -19,6 +19,7 @@ import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
@@ -29,9 +30,11 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -55,12 +58,19 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
 
     @Override
     @Transactional
-    public List<SystemPermissionsImpl> getByInstance(String instanceId) throws ServerException {
+    public Page<SystemPermissionsImpl> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException {
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         // instanceId is ignored because system domain doesn't require it
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("SystemPermissions.getAll", SystemPermissionsImpl.class)
-                                  .getResultList();
+            final EntityManager entityManager = managerProvider.get();
+            final List<SystemPermissionsImpl> permissions = entityManager.createNamedQuery("SystemPermissions.getAll",
+                                                                                           SystemPermissionsImpl.class)
+                                                                         .setMaxResults(maxItems)
+                                                                         .setFirstResult((int)skipCount)
+                                                                         .getResultList();
+            final Long totalCount = entityManager.createNamedQuery("SystemPermissions.getTotalCount", Long.class)
+                                                 .getSingleResult();
+            return new Page<>(permissions, skipCount, maxItems, totalCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }

@@ -51,7 +51,6 @@
             <artifactId>codenvy-hosted-api-workspace</artifactId>
             <classifier>tests</classifier>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -122,7 +121,7 @@
                                 <configuration>
                                     <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
                                     <includeArtifactIds>codenvy-hosted-api-machine,
-                                        codenvy-hosted-api-workspace,</includeArtifactIds>
+                                        codenvy-hosted-api-workspace</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                 </configuration>
                             </execution>

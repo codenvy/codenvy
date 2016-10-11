@@ -18,6 +18,7 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
@@ -26,16 +27,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 /**
- * @author Max Shaposhnik (mshaposhnik@codenvy.com) on 8/23/16.
+ * @author Max Shaposhnik
  */
 @org.testng.annotations.Guice(moduleFactory = TckModuleFactory.class)
 @Test(suiteName = "SystemPermissionsDaoTck")
@@ -44,31 +43,31 @@ public class SystemPermissionsDaoTest {
     @Inject
     private JpaSystemPermissionsDao dao;
 
-    UserImpl[] users;
+    private UserImpl[] users;
 
-    SystemPermissionsImpl[] systemPermissionses;
+    private SystemPermissionsImpl[] systemPermissions;
 
     @Inject
-    private TckRepository<UserImpl>   userRepository;
+    private TckRepository<UserImpl>              userRepository;
     @Inject
     private TckRepository<SystemPermissionsImpl> systemRepository;
 
     @BeforeMethod
     public void setupEntities() throws Exception {
-        systemPermissionses = new SystemPermissionsImpl[]{new SystemPermissionsImpl("user1", Arrays.asList("read", "use", "run")),
-                                                          new SystemPermissionsImpl("user2", Arrays.asList("read", "use")),
+        systemPermissions = new SystemPermissionsImpl[] {new SystemPermissionsImpl("user1", asList("read", "use", "run")),
+                                                         new SystemPermissionsImpl("user2", asList("read", "use")),
+                                                         new SystemPermissionsImpl("user3", asList("read", "use"))
         };
 
-        users = new UserImpl[]{new UserImpl("user1", "user1@com.com", "usr1"),
-                               new UserImpl("user2", "user2@com.com", "usr2")};
+        users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
+                                new UserImpl("user2", "user2@com.com", "usr2"),
+                                new UserImpl("user3", "user3@com.com", "usr3")};
 
 
-        userRepository.createAll(Arrays.asList(users));
+        userRepository.createAll(asList(users));
 
-        systemRepository.createAll(Arrays.asList(systemPermissionses));
+        systemRepository.createAll(asList(systemPermissions));
     }
-
-
 
     @AfterMethod
     public void cleanup() throws Exception {
@@ -76,13 +75,16 @@ public class SystemPermissionsDaoTest {
         userRepository.removeAll();
     }
 
-
     @Test
     public void shouldReturnAllPermissionsWhenGetByInstance() throws Exception {
-        final Set<SystemPermissionsImpl> result = new HashSet<>(dao.getByInstance(null));
+        final Page<SystemPermissionsImpl> permissionsPage = dao.getByInstance(null, 1, 1);
+        final List<SystemPermissionsImpl> permissions = permissionsPage.getItems();
 
-        assertTrue(result.contains(systemPermissionses[0]));
-        assertTrue(result.contains(systemPermissionses[1]));
+        assertEquals(permissionsPage.getTotalItemsCount(), 3);
+        assertEquals(permissionsPage.getItemsCount(), 1);
+        assertTrue(permissions.contains(systemPermissions[0])
+                   ^ permissions.contains(systemPermissions[1])
+                   ^ permissions.contains(systemPermissions[2]));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -92,18 +94,16 @@ public class SystemPermissionsDaoTest {
 
     @Test
     public void shouldBeAbleToGetPermissions() throws Exception {
+        final SystemPermissionsImpl result1 = dao.get(systemPermissions[0].getUserId(), systemPermissions[0].getInstanceId());
+        final SystemPermissionsImpl result2 = dao.get(systemPermissions[1].getUserId(), systemPermissions[1].getInstanceId());
 
-        final SystemPermissionsImpl result1 = dao.get(systemPermissionses[0].getUserId(), systemPermissionses[0].getInstanceId());
-        final SystemPermissionsImpl result2 = dao.get(systemPermissionses[1].getUserId(), systemPermissionses[1].getInstanceId());
-
-        assertEquals(result1, systemPermissionses[0]);
-        assertEquals(result2, systemPermissionses[1]);
+        assertEquals(result1, systemPermissions[0]);
+        assertEquals(result2, systemPermissions[1]);
     }
-
 
     public static class TestDomain extends AbstractPermissionsDomain<SystemPermissionsImpl> {
         public TestDomain() {
-            super("system", Arrays.asList("read", "write", "use"));
+            super("system", asList("read", "write", "use"));
         }
 
         @Override
@@ -111,5 +111,4 @@ public class SystemPermissionsDaoTest {
             return null;
         }
     }
-
 }

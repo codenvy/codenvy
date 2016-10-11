@@ -44,6 +44,10 @@ import java.util.List;
                             query = "SELECT m " +
                                     "FROM Member m " +
                                     "WHERE m.organizationId = :organizationId"),
+                @NamedQuery(name = "Member.getCountByOrganizationId",
+                            query = "SELECT COUNT(m) " +
+                                    "FROM Member m " +
+                                    "WHERE m.organizationId = :organizationId"),
                 @NamedQuery(name = "Member.getByUser",
                             query = "SELECT m " +
                                     "FROM Member m " +

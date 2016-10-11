@@ -15,27 +15,19 @@
 package com.codenvy.api.workspace.server.jpa;
 
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
-import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
-import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.jpa.OnPremisesJpaStackDao;
 import com.codenvy.api.workspace.server.spi.jpa.OnPremisesJpaWorkspaceDao;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -63,23 +55,20 @@ import static org.testng.Assert.assertTrue;
  */
 public class OnPremisesJpaStackDaoTest {
 
-    private EntityManager manager;
-
+    private EntityManager         manager;
     private OnPremisesJpaStackDao dao;
 
-    StackPermissionsImpl[] permissionses;
-
-    UserImpl[] users;
-
-    StackImpl[] stacks;
+    private StackPermissionsImpl[] permissions;
+    private UserImpl[]             users;
+    private StackImpl[]            stacks;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        permissionses = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "search")),
-                                                    new StackPermissionsImpl("user1", "stack2", Arrays.asList("read", "search")),
-                                                    new StackPermissionsImpl("*",     "stack3", Arrays.asList("read", "search")),
-                                                    new StackPermissionsImpl("user1", "stack4", Arrays.asList("read", "run")),
-                                                    new StackPermissionsImpl("user2", "stack1", Arrays.asList("read", "use"))};
+        permissions = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "search")),
+                                                  new StackPermissionsImpl("user1", "stack2", Arrays.asList("read", "search")),
+                                                  new StackPermissionsImpl("*", "stack3", Arrays.asList("read", "search")),
+                                                  new StackPermissionsImpl("user1", "stack4", Arrays.asList("read", "run")),
+                                                  new StackPermissionsImpl("user2", "stack1", Arrays.asList("read", "use"))};
 
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
@@ -91,8 +80,7 @@ public class OnPremisesJpaStackDaoTest {
                 new StackImpl("stack4", "st4", null, null, null, null, null, null, null, null)};
 
         Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule(),
-                                     new SystemPermissionsJpaModule());
+                Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(OnPremisesJpaStackDao.class);
     }
@@ -108,7 +96,7 @@ public class OnPremisesJpaStackDaoTest {
             manager.persist(recipe);
         }
 
-        for (StackPermissionsImpl recipePermissions : permissionses) {
+        for (StackPermissionsImpl recipePermissions : permissions) {
             manager.persist(recipePermissions);
         }
         manager.getTransaction().commit();
@@ -166,14 +154,7 @@ public class OnPremisesJpaStackDaoTest {
 
         @Override
         protected void configure() {
-
             bind(JpaWorkspaceDao.class).to(OnPremisesJpaWorkspaceDao.class);
-
-            bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {
-            }).toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
-            bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-            bind(new TypeLiteral<TckRepository<WorkerImpl>>() {}).toInstance(new JpaTckRepository<>(WorkerImpl.class));
-            bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
 
             Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {

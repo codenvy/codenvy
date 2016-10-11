@@ -17,9 +17,11 @@ package com.codenvy.api.workspace.server.spi.jpa;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,9 +32,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -64,13 +68,23 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
 
     @Override
     @Transactional
-    public List<StackPermissionsImpl> getByInstance(String instanceId) throws ServerException {
+    public Page<StackPermissionsImpl> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(instanceId, "Stack identifier required");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
+
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("StackPermissions.getByStackId", StackPermissionsImpl.class)
-                                  .setParameter("stackId", instanceId)
-                                  .getResultList();
+            final EntityManager entityManager = managerProvider.get();
+            final List<StackPermissionsImpl> stacks = entityManager.createNamedQuery("StackPermissions.getByStackId",
+                                                                                     StackPermissionsImpl.class)
+                                                                   .setFirstResult((int)skipCount)
+                                                                   .setMaxResults(maxItems)
+                                                                   .setParameter("stackId", instanceId)
+                                                                   .getResultList();
+            final Long permissionsCount = entityManager.createNamedQuery("StackPermissions.getCountByStackId", Long.class)
+                                                       .setParameter("stackId", instanceId)
+                                                       .getSingleResult();
+
+            return new Page<>(stacks, skipCount, maxItems, permissionsCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -113,8 +127,9 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     @Singleton
     public static class RemovePermissionsBeforeStackRemovedEventSubscriber
             extends CascadeRemovalEventSubscriber<BeforeStackRemovedEvent> {
+        private static final int PAGE_SIZE = 100;
         @Inject
-        private EventService eventService;
+        private EventService           eventService;
         @Inject
         private JpaStackPermissionsDao dao;
 
@@ -130,9 +145,20 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
 
         @Override
         public void onRemovalEvent(BeforeStackRemovedEvent event) throws Exception {
-            for (StackPermissionsImpl permissions : dao.getByInstance(event.getStack().getId())) {
-                dao.remove(permissions.getUserId(), permissions.getInstanceId());
-            }
+            removeStackPermissions(event.getStack().getId(), PAGE_SIZE);
+        }
+
+        @VisibleForTesting
+        void removeStackPermissions(String stackId, int pageSize) throws ServerException, NotFoundException {
+            Page<StackPermissionsImpl> stacksPage;
+            do {
+                // skip count always equals to 0 because elements will be shifted after removing previous items
+                stacksPage = dao.getByInstance(stackId, pageSize, 0);
+                for (StackPermissionsImpl stackPermissions : stacksPage.getItems()) {
+                    dao.remove(stackPermissions.getUserId(), stackPermissions.getInstanceId());
+                }
+            } while (stacksPage.hasNextPage());
+
         }
     }
 }

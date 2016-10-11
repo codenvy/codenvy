@@ -17,6 +17,7 @@ package com.codenvy.api.workspace.server.spi;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public interface WorkerDao {
      * @throws ServerException
      *         when any other error occurs during worker fetching
      */
-    WorkerImpl getWorker(String workspaceId, String userId) throws  ServerException, NotFoundException;
+    WorkerImpl getWorker(String workspaceId, String userId) throws ServerException, NotFoundException;
 
     /**
      * Removes worker
@@ -78,13 +79,17 @@ public interface WorkerDao {
      *
      * @param workspaceId
      *         workspace identifier
+     * @param maxItems
+     *         the maximum number of workers to return
+     * @param skipCount
+     *         the number of workers to skip
      * @return list of workers instance
      * @throws NullPointerException
      *         when {@code workspace} is null
      * @throws ServerException
      *         when any other error occurs during worker fetching
      */
-    List<WorkerImpl> getWorkers(String workspaceId) throws ServerException;
+    Page<WorkerImpl> getWorkers(String workspaceId, int maxItems, long skipCount) throws ServerException;
 
     /**
      * Gets workers by user

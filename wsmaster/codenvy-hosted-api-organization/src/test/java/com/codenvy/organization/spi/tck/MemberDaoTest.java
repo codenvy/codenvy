@@ -70,9 +70,10 @@ public class MemberDaoTest {
 
     @BeforeMethod
     private void setUp() throws TckRepositoryException {
-        users = new UserImpl[2];
+        users = new UserImpl[3];
         users[0] = new UserImpl("user1-id", "user1@test.com", "user1-name");
         users[1] = new UserImpl("user2-id", "user2@test.com", "user2-name");
+        users[2] = new UserImpl("user3-id", "user3@test.com", "user3-name");
         userRepo.createAll(asList(users));
 
         orgs = new OrganizationImpl[3];
@@ -81,11 +82,12 @@ public class MemberDaoTest {
         orgs[2] = new OrganizationImpl("org3-id", "org3-name", null);
         organizationRepo.createAll(asList(orgs));
 
-        members = new MemberImpl[4];
+        members = new MemberImpl[5];
         members[0] = new MemberImpl(users[0].getId(), orgs[0].getId(), asList("read", "update"));
         members[1] = new MemberImpl(users[1].getId(), orgs[0].getId(), asList("read", "update"));
-        members[2] = new MemberImpl(users[1].getId(), orgs[1].getId(), asList("read", "update"));
-        members[3] = new MemberImpl(users[1].getId(), orgs[2].getId(), asList("read", "update"));
+        members[2] = new MemberImpl(users[2].getId(), orgs[0].getId(), asList("read", "update"));
+        members[3] = new MemberImpl(users[1].getId(), orgs[1].getId(), asList("read", "update"));
+        members[4] = new MemberImpl(users[1].getId(), orgs[2].getId(), asList("read", "update"));
 
         memberRepo.createAll(asList(members));
     }
@@ -186,23 +188,27 @@ public class MemberDaoTest {
 
     @Test
     public void shouldGetMembersByOrganization() throws Exception {
-        final List<MemberImpl> fetchedMembers = memberDao.getMembers(members[0].getOrganizationId());
+        final Page<MemberImpl> membersPage = memberDao.getMembers(members[0].getOrganizationId(), 1, 1);
+        final List<MemberImpl> fetchedMembers = membersPage.getItems();
 
-        assertEquals(fetchedMembers.size(), 2);
-        assertTrue(fetchedMembers.contains(members[0]));
-        assertTrue(fetchedMembers.contains(members[1]));
+        assertEquals(membersPage.getTotalItemsCount(), 3);
+        assertEquals(membersPage.getItemsCount(), 1);
+        assertTrue(fetchedMembers.contains(members[0])
+                   ^ fetchedMembers.contains(members[1])
+                   ^ fetchedMembers.contains(members[2]));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeOnGettingMembersByNullOrganization() throws Exception {
-        memberDao.getMembers(null);
+        memberDao.getMembers(null, 1, 0);
     }
 
     @Test
     public void shouldReturnEmptyListIfThereAreNotAnyMembersForSpecifiedOrganization() throws Exception {
-        final List<MemberImpl> fetchedMembers = memberDao.getMembers("organization1234567");
+        final Page<MemberImpl> fetchedMembers = memberDao.getMembers("organization1234567", 30, 0);
 
         assertTrue(fetchedMembers.isEmpty());
+        assertEquals(fetchedMembers.getTotalItemsCount(), 0);
     }
 
     @Test
@@ -220,7 +226,7 @@ public class MemberDaoTest {
 
     @Test
     public void shouldReturnEmptyListIfThereAreNotAnyMembershipsForSpecifiedUser() throws Exception {
-        final List<MemberImpl> fetchedMembers = memberDao.getMembers("user1234567");
+        final List<MemberImpl> fetchedMembers = memberDao.getMemberships("user1234567");
 
         assertTrue(fetchedMembers.isEmpty());
     }

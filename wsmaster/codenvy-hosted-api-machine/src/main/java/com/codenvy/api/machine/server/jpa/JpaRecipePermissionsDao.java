@@ -20,6 +20,7 @@ import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,10 +31,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -65,13 +68,22 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
 
     @Override
     @Transactional
-    public List<RecipePermissionsImpl> getByInstance(String instanceId) throws ServerException {
+    public Page<RecipePermissionsImpl> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(instanceId, "Recipe identifier required");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("RecipePermissions.getByRecipeId", RecipePermissionsImpl.class)
-                                  .setParameter("recipeId", instanceId)
-                                  .getResultList();
+            final EntityManager entityManager = managerProvider.get();
+            final List<RecipePermissionsImpl> recipePermissionsList = entityManager.createNamedQuery("RecipePermissions.getByRecipeId",
+                                                                                                     RecipePermissionsImpl.class)
+                                                                                   .setParameter("recipeId", instanceId)
+                                                                                   .setMaxResults(maxItems)
+                                                                                   .setFirstResult((int)skipCount)
+                                                                                   .getResultList();
+            final Long permissionsCount = entityManager.createNamedQuery("RecipePermissions.getCountByRecipeId", Long.class)
+                                                       .setParameter("recipeId", instanceId)
+                                                       .getSingleResult();
+
+            return new Page<>(recipePermissionsList, skipCount, maxItems, permissionsCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -111,12 +123,13 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
         }
     }
 
-
     @Singleton
     public static class RemovePermissionsBeforeRecipeRemovedEventSubscriber
             extends CascadeRemovalEventSubscriber<BeforeRecipeRemovedEvent> {
+        private static final int PAGE_SIZE = 100;
+
         @Inject
-        private EventService eventService;
+        private EventService            eventService;
         @Inject
         private JpaRecipePermissionsDao dao;
 
@@ -132,9 +145,18 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
 
         @Override
         public void onRemovalEvent(BeforeRecipeRemovedEvent event) throws Exception {
-            for (RecipePermissionsImpl permissions : dao.getByInstance(event.getRecipe().getId())) {
-                dao.remove(permissions.getUserId(), permissions.getInstanceId());
-            }
+            removeRecipePermissions(event.getRecipe().getId(), PAGE_SIZE);
+        }
+
+        public void removeRecipePermissions(String recipeId, int pageSize) throws ServerException, NotFoundException {
+            Page<RecipePermissionsImpl> recipePermissionsPage;
+            do {
+                // skip count always equals to 0 because elements will be shifted after removing previous items
+                recipePermissionsPage = dao.getByInstance(recipeId, pageSize, 0);
+                for (RecipePermissionsImpl permissions : recipePermissionsPage.getItems()) {
+                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
+                }
+            } while (recipePermissionsPage.hasNextPage());
         }
     }
 }

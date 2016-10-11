@@ -79,12 +79,16 @@ public interface MemberDao {
      *
      * @param organizationId
      *         organization id
+     * @param maxItems
+     *         the maximum number of members to return
+     * @param skipCount
+     *         the number of members to skip
      * @throws NullPointerException
      *         when {@code organizationId} is null
      * @throws ServerException
      *         when any other error occurs during members fetching
      */
-    List<MemberImpl> getMembers(String organizationId) throws ServerException;
+    Page<MemberImpl> getMembers(String organizationId, int maxItems, long skipCount) throws ServerException;
 
     /**
      * Returns all memberships of given user

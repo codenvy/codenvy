@@ -16,20 +16,15 @@ package com.codenvy.api.machine.server.jpa;
 
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -37,62 +32,46 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
  * @author Max Shaposhnik
  */
 public class JpaRecipePermissionsDaoTest {
-
-    private EntityManager manager;
-
+    private EntityManager           manager;
     private JpaRecipePermissionsDao dao;
 
-
-    private JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber removePermissionsBeforeRecipeRemovedEventSubscriber;
-
-
-    RecipePermissionsImpl[] permissionses;
-
-    UserImpl[] users;
-
-    RecipeImpl[] recipes;
+    private RecipePermissionsImpl[] permissions;
+    private UserImpl[]              users;
+    private RecipeImpl[]            recipes;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        permissionses = new RecipePermissionsImpl[] {new RecipePermissionsImpl("user1", "recipe1", Arrays.asList("read", "use", "run")),
-                                                     new RecipePermissionsImpl("user2", "recipe1", Arrays.asList("read", "use")),
-                                                     new RecipePermissionsImpl("user1", "recipe2", Arrays.asList("read", "run")),
-                                                     new RecipePermissionsImpl("user2", "recipe2",
-                                                                               Arrays.asList("read", "use", "run", "configure"))};
+        permissions = new RecipePermissionsImpl[] {new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "run")),
+                                                   new RecipePermissionsImpl("user2", "recipe1", asList("read", "use")),
+                                                   new RecipePermissionsImpl("user1", "recipe2", asList("read", "run")),
+                                                   new RecipePermissionsImpl("user2", "recipe2",
+                                                                             asList("read", "use", "run", "configure"))};
 
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
 
-        recipes = new RecipeImpl[] {
-                new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
-                new RecipeImpl("recipe2", "rc2", null, null, null, null, null)};
+        recipes = new RecipeImpl[] {new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
+                                    new RecipeImpl("recipe2", "rc2", null, null, null, null, null)};
 
-        Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule(),
-                                     new SystemPermissionsJpaModule());
+        Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(JpaRecipePermissionsDao.class);
-        removePermissionsBeforeRecipeRemovedEventSubscriber = injector.getInstance(
-                JpaRecipePermissionsDao.RemovePermissionsBeforeRecipeRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -106,7 +85,7 @@ public class JpaRecipePermissionsDaoTest {
             manager.persist(recipe);
         }
 
-        for (RecipePermissionsImpl recipePermissions : permissionses) {
+        for (RecipePermissionsImpl recipePermissions : permissions) {
             manager.persist(recipePermissions);
         }
         manager.getTransaction().commit();
@@ -137,13 +116,6 @@ public class JpaRecipePermissionsDaoTest {
     }
 
     @Test
-    public void shouldRemoveWorkersWhenWorkspaceIsRemoved() throws Exception {
-        BeforeRecipeRemovedEvent event = new BeforeRecipeRemovedEvent(recipes[0]);
-        removePermissionsBeforeRecipeRemovedEventSubscriber.onEvent(event);
-        assertTrue(dao.getByInstance("recipe1").isEmpty());
-    }
-
-    @Test
     public void shouldGetRecipePermissionByInstanceIdAndWildcard() throws Exception {
         manager.getTransaction().begin();
         manager.persist(new RecipePermissionsImpl(null, "recipe1", asList("read", "use", "run")));
@@ -153,7 +125,6 @@ public class JpaRecipePermissionsDaoTest {
         assertEquals(result.getInstanceId(), "recipe1");
         assertEquals(result.getUserId(), null);
     }
-
 
     @Test
     public void shouldGetRecipePermissionByInstanceIdAndUserIdIfPublicPermissionExistsWithSameInstanceId() throws Exception {
@@ -168,12 +139,17 @@ public class JpaRecipePermissionsDaoTest {
 
     @Test
     public void shouldStoreRecipePublicPermission() throws Exception {
+        //given
         final RecipePermissionsImpl publicPermission = new RecipePermissionsImpl("*",
                                                                                  "recipe1",
                                                                                  asList("read", "use", "run"));
+
+        //when
         dao.store(publicPermission);
 
-        assertTrue(dao.getByInstance(publicPermission.getInstanceId())
+        //then
+        assertTrue(dao.getByInstance(publicPermission.getInstanceId(), 3, 0)
+                      .getItems()
                       .contains(publicPermission));
     }
 
@@ -185,9 +161,10 @@ public class JpaRecipePermissionsDaoTest {
         dao.store(publicPermission);
         dao.store(publicPermission);
 
-        List<RecipePermissionsImpl> byInstance = dao.getByInstance(publicPermission.getInstanceId());
-        assertTrue(byInstance.contains(publicPermission));
-        assertTrue(byInstance.stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
+        final List<RecipePermissionsImpl> storedPermissions = dao.getByInstance(publicPermission.getInstanceId(), 30, 0)
+                                                                 .getItems();
+        assertTrue(storedPermissions.contains(publicPermission));
+        assertTrue(storedPermissions.stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
     }
 
     @Test
@@ -198,24 +175,16 @@ public class JpaRecipePermissionsDaoTest {
         dao.store(publicPermission);
         dao.remove(publicPermission.getUserId(), publicPermission.getInstanceId());
 
-        List<RecipePermissionsImpl> byInstance = dao.getByInstance(publicPermission.getInstanceId());
-        assertTrue(byInstance.stream().filter(p -> "*".equals(p.getUserId())).count() == 0);
+        final List<RecipePermissionsImpl> storePermissions = dao.getByInstance(publicPermission.getInstanceId(), 30, 0)
+                                                                .getItems();
+        assertTrue(storePermissions.stream().filter(p -> "*".equals(p.getUserId())).count() == 0);
     }
 
-
     private class TestModule extends AbstractModule {
-
         @Override
         protected void configure() {
-            bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
-            bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-            bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
-
             Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
-                properties.put(TRANSACTION_TYPE,
-                               PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
-
                 properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
                 properties.put(JDBC_URL, System.getProperty("jdbc.url"));
                 properties.put(JDBC_USER, System.getProperty("jdbc.user"));

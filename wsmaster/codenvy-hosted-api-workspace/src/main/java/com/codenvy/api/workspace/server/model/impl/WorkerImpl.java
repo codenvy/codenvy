@@ -41,6 +41,10 @@ import java.util.List;
                             query = "SELECT worker " +
                                     "FROM Worker worker " +
                                     "WHERE worker.workspaceId = :workspaceId "),
+                @NamedQuery(name = "Worker.getCountByWorkspaceId",
+                            query = "SELECT COUNT(worker) " +
+                                    "FROM Worker worker " +
+                                    "WHERE worker.workspaceId = :workspaceId "),
                 @NamedQuery(name = "Worker.getByUserId",
                             query = "SELECT worker " +
                                     "FROM Worker worker " +

@@ -15,12 +15,9 @@
 package com.codenvy.api.machine.server.jpa;
 
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
-import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
@@ -28,8 +25,6 @@ import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -37,7 +32,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,7 +44,6 @@ import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIV
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -58,20 +51,16 @@ import static org.testng.Assert.assertTrue;
  * @author Max Shaposhnik
  */
 public class OnPremisesJpaRecipeDaoTest {
-
-    private EntityManager manager;
-
+    private EntityManager          manager;
     private OnPremisesJpaRecipeDao dao;
 
-    RecipePermissionsImpl[] permissionses;
-
-    UserImpl[] users;
-
-    RecipeImpl[] recipes;
+    private RecipePermissionsImpl[] permissions;
+    private UserImpl[]              users;
+    private RecipeImpl[]            recipes;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        permissionses = new RecipePermissionsImpl[] {
+        permissions = new RecipePermissionsImpl[] {
                 new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "search")),
                 new RecipePermissionsImpl("user1", "recipe2", asList("read", "search")),
                 new RecipePermissionsImpl("user1", "recipe3", asList("read", "search")),
@@ -93,9 +82,8 @@ public class OnPremisesJpaRecipeDaoTest {
                 new RecipeImpl("recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
         };
 
-        Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule(),
-                                     new SystemPermissionsJpaModule());
+        Injector injector = Guice.createInjector(new TestModule(),
+                                                 new OnPremisesJpaMachineModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(OnPremisesJpaRecipeDao.class);
     }
@@ -111,7 +99,7 @@ public class OnPremisesJpaRecipeDaoTest {
             manager.persist(recipe);
         }
 
-        for (RecipePermissionsImpl recipePermissions : permissionses) {
+        for (RecipePermissionsImpl recipePermissions : permissions) {
             manager.persist(recipePermissions);
         }
         manager.getTransaction().commit();
@@ -179,18 +167,10 @@ public class OnPremisesJpaRecipeDaoTest {
 
         @Override
         protected void configure() {
-
             bind(JpaRecipeDao.class).to(OnPremisesJpaRecipeDao.class);
 
-            bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {
-            }).toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
-            bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-            bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
             Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
-                properties.put(TRANSACTION_TYPE,
-                               PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
-
                 properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
                 properties.put(JDBC_URL, System.getProperty("jdbc.url"));
                 properties.put(JDBC_USER, System.getProperty("jdbc.user"));

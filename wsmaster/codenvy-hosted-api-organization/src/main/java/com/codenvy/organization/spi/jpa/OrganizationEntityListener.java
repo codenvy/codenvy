@@ -29,7 +29,6 @@ import javax.persistence.PreRemove;
  *
  * @author Sergii Leschenko
  */
-@Singleton
 public class OrganizationEntityListener {
 
     @Inject

@@ -20,6 +20,7 @@ import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -37,6 +38,7 @@ import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -58,8 +60,8 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
     }
 
     @Override
-    public List<MemberImpl> getByInstance(String instanceId) throws ServerException {
-        return getMembers(instanceId);
+    public Page<MemberImpl> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException {
+        return getMembers(instanceId, maxItems, skipCount);
     }
 
     @Override
@@ -98,13 +100,20 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
     @Override
     @Transactional
-    public List<MemberImpl> getMembers(String organizationId) throws ServerException {
+    public Page<MemberImpl> getMembers(String organizationId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {
             final EntityManager manager = managerProvider.get();
-            return manager.createNamedQuery("Member.getByOrganization", MemberImpl.class)
-                          .setParameter("organizationId", organizationId)
-                          .getResultList();
+            final List<MemberImpl> members = manager.createNamedQuery("Member.getByOrganization", MemberImpl.class)
+                                                    .setParameter("organizationId", organizationId)
+                                                    .setMaxResults(maxItems)
+                                                    .setFirstResult((int)skipCount)
+                                                    .getResultList();
+            final Long membersCount = manager.createNamedQuery("Member.getCountByOrganizationId", Long.class)
+                                             .setParameter("organizationId", organizationId)
+                                             .getSingleResult();
+            return new Page<>(members, skipCount, maxItems, membersCount);
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -160,6 +169,8 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
     @Singleton
     public static class RemoveMembersBeforeOrganizationRemovedEventSubscriber
             extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
+        private static final int PAGE_SIZE = 100;
+
         @Inject
         private EventService eventService;
         @Inject
@@ -177,9 +188,19 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
         @Override
         public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
-            for (MemberImpl member : memberDao.getMembers(event.getOrganization().getId())) {
-                memberDao.remove(member.getUserId(), member.getOrganizationId());
-            }
+            removeMembers(event.getOrganization().getId(), PAGE_SIZE);
+        }
+
+        @VisibleForTesting
+        void removeMembers(String organizationId, int pageSize) throws ServerException {
+            Page<MemberImpl> membersPage;
+            do {
+                // skip count always equals to 0 because elements will be shifted after removing previous items
+                membersPage = memberDao.getMembers(organizationId, pageSize, 0);
+                for (MemberImpl member : membersPage.getItems()) {
+                    memberDao.remove(member.getUserId(), member.getOrganizationId());
+                }
+            } while (membersPage.hasNextPage());
         }
     }
 }

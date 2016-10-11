@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
@@ -114,6 +115,8 @@ public class PermissionsManager {
     }
 
     /**
+     * Returns user's permissions for specified instance
+     *
      * @param userId
      *         user id
      * @param domainId
@@ -135,10 +138,16 @@ public class PermissionsManager {
     }
 
     /**
+     * Returns users' permissions for specified instance
+     *
      * @param domainId
      *         domain id
      * @param instanceId
      *         instance id
+     * @param maxItems
+     *         the maximum number of permissions to return
+     * @param skipCount
+     *         the number of permissions to skip
      * @return set of permissions
      * @throws NotFoundException
      *         when given domainId is unsupported
@@ -146,10 +155,10 @@ public class PermissionsManager {
      *         when any other error occurs during permissions fetching
      */
     @SuppressWarnings("unchecked")
-    public List<AbstractPermissions> getByInstance(String domainId, String instanceId) throws ServerException,
-                                                                                              NotFoundException,
-                                                                                              ConflictException {
-        return (List<AbstractPermissions>)getPermissionsDao(domainId).getByInstance(instanceId);
+    public Page<AbstractPermissions> getByInstance(String domainId, String instanceId, int maxItems, int skipCount) throws ServerException,
+                                                                                                                           NotFoundException,
+                                                                                                                           ConflictException {
+        return (Page<AbstractPermissions>)getPermissionsDao(domainId).getByInstance(instanceId, maxItems, skipCount);
     }
 
     /**
@@ -177,6 +186,8 @@ public class PermissionsManager {
     }
 
     /**
+     * Checks existence of user's permission for specified instance
+     *
      * @param userId
      *         user id
      * @param domainId
@@ -215,7 +226,6 @@ public class PermissionsManager {
         return getPermissionsDao(domain).getDomain();
     }
 
-
     private PermissionsDao<? extends AbstractPermissions> getPermissionsDao(String domain) throws NotFoundException {
         final PermissionsDao<? extends AbstractPermissions> permissionsStorage = domainToDao.get(domain);
         if (permissionsStorage == null) {
@@ -226,15 +236,31 @@ public class PermissionsManager {
 
     private boolean userHasLastSetPermissions(PermissionsDao<? extends AbstractPermissions> permissionsStorage,
                                               String userId,
-                                              String instanceId) throws ServerException, ConflictException {
-        try {
-            return permissionsStorage.exists(userId, instanceId, SET_PERMISSIONS)
-                   && !permissionsStorage.getByInstance(instanceId)
-                                         .stream()
-                                         .anyMatch(permission -> !permission.getUserId().equals(userId)
-                                                                 && permission.getActions().contains(SET_PERMISSIONS));
-        } catch (NotFoundException e) {
-            return true;
+                                              String instanceId) throws ServerException,
+                                                                        ConflictException,
+                                                                        NotFoundException {
+        if (!permissionsStorage.exists(userId, instanceId, SET_PERMISSIONS)) {
+            return false;
         }
+
+        Page<? extends AbstractPermissions> page = permissionsStorage.getByInstance(instanceId, 0, 30);
+        boolean hasForeignSetPermission;
+        while (!(hasForeignSetPermission = hasForeignSetPermission(page.getItems(), userId))
+               && page.hasNextPage()) {
+
+            final Page.PageRef nextPageRef = page.getNextPageRef();
+            page = permissionsStorage.getByInstance(instanceId, nextPageRef.getPageSize(), (int)nextPageRef.getItemsBefore());
+        }
+        return !hasForeignSetPermission;
+    }
+
+    private boolean hasForeignSetPermission(List<? extends AbstractPermissions> permissions, String userId) {
+        for (AbstractPermissions permission : permissions) {
+            if (!permission.getUserId().equals(userId)
+                && permission.getActions().contains(SET_PERMISSIONS)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

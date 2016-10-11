@@ -14,25 +14,20 @@
  */
 package com.codenvy.api.workspace.server.spi.jpa;
 
-
-import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.codenvy.api.workspace.server.jpa.OnPremisesJpaWorkspaceModule;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
+import com.codenvy.api.workspace.server.spi.jpa.JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -40,73 +35,58 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
 /**
- * JPA-specific (non-TCK compliant) tests of {@link JpaWorkerDao}
+ * Tests for {@link RemoveWorkersBeforeWorkspaceRemovedEventSubscriber}
  *
- * @author Max Shaposhnik
+ * @author Sergii Leschenko
  */
-public class JpaWorkerDaoTest {
+public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
+    private EntityManager   manager;
+    private JpaWorkerDao    workerDao;
+    private JpaWorkspaceDao workspaceDao;
 
-    private EntityManager manager;
+    private RemoveWorkersBeforeWorkspaceRemovedEventSubscriber subscriber;
 
-    private JpaWorkerDao workerDao;
-
-    private JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber removeWorkersBeforeWorkspaceRemovedEventSubscriber;
-
-    WorkerImpl[] workers;
-
-    UserImpl[] users;
-
-    WorkspaceImpl[] workspaces;
+    private WorkspaceImpl workspace;
+    private WorkerImpl[]  workers;
+    private UserImpl[]    users;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        workers = new WorkerImpl[] {new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
-                                    new WorkerImpl("ws1", "user2", Arrays.asList("read", "use")),
-                                    new WorkerImpl("ws2", "user1", Arrays.asList("read", "run")),
-                                    new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure"))};
-
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
 
-        workspaces = new WorkspaceImpl[] {
-                new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null)),
-                new WorkspaceImpl("ws2", users[1].getAccount(), new WorkspaceConfigImpl("", "", "cfg2", null, null, null))};
+        workspace = new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null));
 
-        Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule(), new PermissionsModule(), new SystemPermissionsJpaModule());
+        workers = new WorkerImpl[] {new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
+                                    new WorkerImpl("ws1", "user2", Arrays.asList("read", "use"))};
+
+        Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule());
+
         manager = injector.getInstance(EntityManager.class);
         workerDao = injector.getInstance(JpaWorkerDao.class);
-        removeWorkersBeforeWorkspaceRemovedEventSubscriber = injector.getInstance(
-                JpaWorkerDao.RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
+        workspaceDao = injector.getInstance(JpaWorkspaceDao.class);
+        subscriber = injector.getInstance(RemoveWorkersBeforeWorkspaceRemovedEventSubscriber.class);
+        subscriber.subscribe();
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         manager.getTransaction().begin();
-        for (UserImpl user : users) {
-            manager.persist(user);
-        }
-
-        for (WorkspaceImpl ws : workspaces) {
-            manager.persist(ws);
-        }
-
-        for (WorkerImpl worker : workers) {
-            manager.persist(worker);
-        }
+        manager.persist(workspace);
+        Stream.of(users).forEach(manager::persist);
+        Stream.of(workers).forEach(manager::persist);
         manager.getTransaction().commit();
         manager.clear();
     }
@@ -131,30 +111,30 @@ public class JpaWorkerDaoTest {
 
     @AfterClass
     public void shutdown() throws Exception {
+        subscriber.unsubscribe();
         manager.getEntityManagerFactory().close();
     }
 
     @Test
-    public void shouldRemoveWorkersWhenWorkspaceIsRemoved() throws Exception {
-        BeforeWorkspaceRemovedEvent event = new BeforeWorkspaceRemovedEvent(workspaces[0]);
-        removeWorkersBeforeWorkspaceRemovedEventSubscriber.onEvent(event);
-        assertTrue(workerDao.getWorkers("ws1").isEmpty());
+    public void shouldRemoveAllWorkersWhenWorkspaceIsRemoved() throws Exception {
+        workspaceDao.remove(workspace.getId());
+
+        assertEquals(workerDao.getWorkers(workspace.getId(), 1, 0).getTotalItemsCount(), 0);
+    }
+
+    @Test
+    public void shouldRemoveAllWorkersWhenPageSizeEqualsToOne() throws Exception {
+        subscriber.removeWorkers(workspace.getId(), 1);
+
+        assertEquals(workerDao.getWorkers(workspace.getId(), 1, 0).getTotalItemsCount(), 0);
     }
 
     private class TestModule extends AbstractModule {
 
         @Override
         protected void configure() {
-            bind(new TypeLiteral<TckRepository<WorkerImpl>>() {}).toInstance(new JpaTckRepository<>(WorkerImpl.class));
-            bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-
-            bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
-
-            Map properties = new HashMap();
+            Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
-                properties.put(TRANSACTION_TYPE,
-                               PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
-
                 properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
                 properties.put(JDBC_URL, System.getProperty("jdbc.url"));
                 properties.put(JDBC_USER, System.getProperty("jdbc.user"));

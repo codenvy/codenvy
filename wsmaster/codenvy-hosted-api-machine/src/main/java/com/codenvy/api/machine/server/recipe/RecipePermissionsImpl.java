@@ -42,6 +42,10 @@ import java.util.List;
                             query = "SELECT recipePermission " +
                                     "FROM RecipePermissions recipePermission " +
                                     "WHERE recipePermission.recipeId = :recipeId "),
+                @NamedQuery(name = "RecipePermissions.getCountByRecipeId",
+                            query = "SELECT COUNT(recipePermission) " +
+                                    "FROM RecipePermissions recipePermission " +
+                                    "WHERE recipePermission.recipeId = :recipeId "),
                 @NamedQuery(name = "RecipePermissions.getByUserId",
                             query = "SELECT recipePermission " +
                                     "FROM RecipePermissions recipePermission " +

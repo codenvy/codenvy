@@ -20,14 +20,16 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.api.permission.shared.model.Permissions;
-import com.codenvy.api.permission.shared.model.PermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.shared.dto.DomainDto;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
+import com.codenvy.api.permission.shared.model.Permissions;
+import com.codenvy.api.permission.shared.model.PermissionsDomain;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Required;
@@ -37,12 +39,14 @@ import org.eclipse.che.dto.server.DtoFactory;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,19 +137,29 @@ public class PermissionsService extends Service {
                   response = PermissionsDto.class,
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The permissions successfully fetched"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
                    @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during permissions fetching")})
-    public List<PermissionsDto> getUsersPermissions(@ApiParam(value = "Domain id to retrieve users' permissions")
-                                                    @PathParam("domain") String domain,
-                                                    @ApiParam(value = "Instance id to retrieve users' permissions")
-                                                    @QueryParam("instance") String instance) throws ServerException,
-                                                                                                    NotFoundException,
-                                                                                                    ConflictException {
-        return permissionsManager.getByInstance(domain, instance)
-                                .stream()
-                                .map(this::toDto)
-                                .collect(Collectors.toList());
+    public Response getUsersPermissions(@ApiParam(value = "Domain id to retrieve users' permissions")
+                                        @PathParam("domain") String domain,
+                                        @ApiParam(value = "Instance id to retrieve users' permissions")
+                                        @QueryParam("instance") String instance,
+                                        @ApiParam(value = "Max items")
+                                        @QueryParam("maxItems") @DefaultValue("30") int maxItems,
+                                        @ApiParam(value = "Skip count")
+                                        @QueryParam("skipCount") @DefaultValue("0") int skipCount) throws ServerException,
+                                                                                                          NotFoundException,
+                                                                                                          ConflictException,
+                                                                                                          BadRequestException {
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+
+        final Page<AbstractPermissions> permissionsPage = permissionsManager.getByInstance(domain, instance, maxItems, skipCount);
+        return Response.ok()
+                       .entity(permissionsPage.getItems(this::toDto))
+                       .header("Link", createLinkHeader(permissionsPage))
+                       .build();
     }
 
     @DELETE

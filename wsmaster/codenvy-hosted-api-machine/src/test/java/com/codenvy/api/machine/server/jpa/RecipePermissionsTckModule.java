@@ -33,7 +33,6 @@ import org.eclipse.che.commons.test.tck.repository.TckRepository;
 
 /**
  * @author Max Shaposhnik
- *
  */
 public class RecipePermissionsTckModule extends TckModule {
     @Override

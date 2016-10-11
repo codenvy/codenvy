@@ -32,7 +32,6 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
@@ -243,6 +242,7 @@ public class OrganizationDaoTest {
     public void shouldThrowNpeOnGettingChildrenByNullableParentId() throws Exception {
         organizationDao.getByParent(null, 30, 0);
     }
+
 
     private static <T> T notFoundToNull(Callable<T> action) throws Exception {
         try {

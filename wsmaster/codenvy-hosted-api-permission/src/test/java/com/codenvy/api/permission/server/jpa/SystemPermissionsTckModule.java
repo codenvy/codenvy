@@ -38,7 +38,6 @@ public class SystemPermissionsTckModule extends TckModule {
 
     @Override
     protected void configure() {
-
         //Creates empty multibinder to avoid error during container starting
         Multibinder.newSetBinder(binder(),
                                  String.class,

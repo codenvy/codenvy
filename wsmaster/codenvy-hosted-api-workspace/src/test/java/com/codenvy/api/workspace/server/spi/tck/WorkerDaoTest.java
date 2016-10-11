@@ -19,6 +19,7 @@ import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -70,7 +71,8 @@ public class WorkerDaoTest {
         workers = new WorkerImpl[] {new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
                                     new WorkerImpl("ws1", "user2", Arrays.asList("read", "use")),
                                     new WorkerImpl("ws2", "user1", Arrays.asList("read", "run")),
-                                    new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure"))};
+                                    new WorkerImpl("ws2", "user2", Arrays.asList("read", "use", "run", "configure")),
+                                    new WorkerImpl("ws2", "user0", Arrays.asList("read", "use", "run", "configure"))};
 
         final UserImpl[] users = new UserImpl[] {new UserImpl("user0", "user0@com.com", "usr0"),
                                                  new UserImpl("user1", "user1@com.com", "usr1"),
@@ -138,12 +140,17 @@ public class WorkerDaoTest {
     /* WorkerDao.getWorkers() tests */
     @Test
     public void shouldGetWorkersByWorkspaceId() throws Exception {
-        List<WorkerImpl> actual = workerDao.getWorkers("ws1");
-        List<WorkerImpl> expected = Arrays.asList(workers).subList(0, 2);
-        assertEquals(actual.size(), expected.size());
-        assertTrue(new HashSet<>(actual).equals(new HashSet<>(expected)));
+        Page<WorkerImpl> workersPage = workerDao.getWorkers("ws2", 1, 1);
+
+        final List<WorkerImpl> fetchedWorkers = workersPage.getItems();
+        assertEquals(workersPage.getTotalItemsCount(), 3);
+        assertEquals(workersPage.getItemsCount(), 1);
+        assertTrue(fetchedWorkers.contains(workers[2])
+                   ^ fetchedWorkers.contains(workers[3])
+                   ^ fetchedWorkers.contains(workers[4]));
     }
 
+    @Test
     public void shouldGetWorkersByUserId() throws Exception {
         List<WorkerImpl> actual = workerDao.getWorkersByUser("user1");
         List<WorkerImpl> expected = Arrays.asList(workers[0], workers[2]);
@@ -153,7 +160,7 @@ public class WorkerDaoTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowExceptionWhenGetWorkersByWorkspaceArgumentIsNull() throws Exception {
-        workerDao.getWorkers(null);
+        workerDao.getWorkers(null, 1, 0);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -163,7 +170,7 @@ public class WorkerDaoTest {
 
     @Test
     public void shouldReturnEmptyListIfWorkersWithSuchWorkspaceIdDoesNotFound() throws Exception {
-        assertEquals(0, workerDao.getWorkers("unexisted_ws").size());
+        assertEquals(0, workerDao.getWorkers("unexisted_ws", 1, 0).getItemsCount());
     }
 
     @Test

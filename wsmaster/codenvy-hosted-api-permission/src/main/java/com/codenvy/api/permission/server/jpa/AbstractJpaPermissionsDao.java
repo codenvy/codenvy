@@ -21,6 +21,7 @@ import com.codenvy.api.permission.shared.model.Permissions;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
@@ -89,7 +90,7 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
     public abstract List<T> getByUser(String userId) throws ServerException;
 
     @Override
-    public abstract List<T> getByInstance(String instanceId) throws ServerException;
+    public abstract Page<T> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException;
 
     @Transactional
     protected void doCreate(T permissions) throws ServerException {

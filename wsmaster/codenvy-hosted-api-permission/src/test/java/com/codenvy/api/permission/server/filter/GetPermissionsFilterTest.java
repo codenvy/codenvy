@@ -42,6 +42,8 @@ import static java.util.Collections.singletonList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -103,8 +105,8 @@ public class GetPermissionsFilterTest {
                                          .when()
                                          .get(SECURE_PATH + "/permissions/test/all?instance=test123");
 
-        assertEquals(response.getStatusCode(), 200);
-        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"));
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
     }
 
     private static String unwrapError(Response response) {

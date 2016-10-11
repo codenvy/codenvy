@@ -20,6 +20,7 @@ import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
@@ -31,9 +32,9 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -48,38 +49,35 @@ public class StackPermissionsDaoTest {
 
     @Inject
     private PermissionsDao<StackPermissionsImpl> dao;
-
     @Inject
-    private TckRepository<StackPermissionsImpl> permissionsRepository;
+    private TckRepository<StackPermissionsImpl>  permissionsRepository;
     @Inject
-    private TckRepository<UserImpl>             userRepository;
+    private TckRepository<UserImpl>              userRepository;
     @Inject
-    private TckRepository<StackImpl>            stackRepository;
+    private TckRepository<StackImpl>             stackRepository;
 
-
-    StackPermissionsImpl[] permissions;
+    private StackPermissionsImpl[] permissions;
 
     @BeforeMethod
     public void setUp() throws TckRepositoryException {
-        permissions = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "run")),
-                                                  new StackPermissionsImpl("user2", "stack1", Arrays.asList("read", "use")),
-                                                  new StackPermissionsImpl("user1", "stack2", Arrays.asList("read", "run")),
+        permissions = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", asList("read", "use", "run")),
+                                                  new StackPermissionsImpl("user2", "stack1", asList("read", "use")),
+                                                  new StackPermissionsImpl("user1", "stack2", asList("read", "run")),
                                                   new StackPermissionsImpl("user2", "stack2",
-                                                                           Arrays.asList("read", "use", "run", "configure"))
-        };
+                                                                           asList("read", "use", "run", "configure")),
+                                                  new StackPermissionsImpl("user", "stack2",
+                                                                           asList("read", "use", "run", "configure"))};
 
 
         final UserImpl[] users = new UserImpl[] {new UserImpl("user", "user@com.com", "usr"),
                                                  new UserImpl("user1", "user1@com.com", "usr1"),
                                                  new UserImpl("user2", "user2@com.com", "usr2")};
-        userRepository.createAll(Arrays.asList(users));
+        userRepository.createAll(asList(users));
 
-        stackRepository.createAll(
-                Arrays.asList(new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
-                              new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)
-                ));
+        stackRepository.createAll(asList(new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
+                                         new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)));
 
-        permissionsRepository.createAll(Arrays.asList(permissions));
+        permissionsRepository.createAll(asList(permissions));
     }
 
     @AfterMethod
@@ -87,14 +85,12 @@ public class StackPermissionsDaoTest {
         permissionsRepository.removeAll();
         stackRepository.removeAll();
         userRepository.removeAll();
-
     }
-
 
     /* StackPermissionsDao.store() tests */
     @Test
     public void shouldStorePermissions() throws Exception {
-        final StackPermissionsImpl permissions = new StackPermissionsImpl("user", "stack1", Arrays.asList("read", "use"));
+        final StackPermissionsImpl permissions = new StackPermissionsImpl("user", "stack1", asList("read", "use"));
 
         dao.store(permissions);
 
@@ -109,11 +105,10 @@ public class StackPermissionsDaoTest {
 
     @Test
     public void shouldReplacePermissionsOnStoringWhenItHasAlreadyExisted() throws Exception {
-
         StackPermissionsImpl oldPermissions = permissions[0];
 
-        StackPermissionsImpl newPermissions =
-                new StackPermissionsImpl(oldPermissions.getUserId(), oldPermissions.getInstanceId(), singletonList("read"));
+        StackPermissionsImpl newPermissions = new StackPermissionsImpl(oldPermissions.getUserId(), oldPermissions.getInstanceId(),
+                                                                       singletonList("read"));
         dao.store(newPermissions);
 
         final Permissions result = dao.get(oldPermissions.getUserId(), oldPermissions.getInstanceId());
@@ -155,19 +150,20 @@ public class StackPermissionsDaoTest {
     /* StackPermissionsDao.getByInstance() tests */
     @Test
     public void shouldGetPermissionsByInstance() throws Exception {
+        final Page<StackPermissionsImpl> permissionsPage = dao.getByInstance(permissions[2].getInstanceId(), 1, 1);
+        final List<StackPermissionsImpl> fetchedPermissions = permissionsPage.getItems();
 
-        final List<StackPermissionsImpl> result = dao.getByInstance(permissions[2].getInstanceId());
-
-        assertEquals(2, result.size());
-        assertTrue(result.contains(permissions[2]) && result.contains(permissions[3]));
+        assertEquals(3, permissionsPage.getTotalItemsCount());
+        assertEquals(1, permissionsPage.getItemsCount());
+        assertTrue(fetchedPermissions.contains(permissions[2])
+                   ^ fetchedPermissions.contains(this.permissions[3])
+                   ^ fetchedPermissions.contains(this.permissions[4]));
     }
-
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowExceptionWhenGetByInstanceInstanceIdArgumentIsNull() throws Exception {
-        dao.getByInstance(null);
+        dao.getByInstance(null, 1, 0);
     }
-
 
     /* StackPermissionsDao.get() tests */
     @Test
@@ -227,7 +223,7 @@ public class StackPermissionsDaoTest {
 
     public static class TestDomain extends AbstractPermissionsDomain<StackPermissionsImpl> {
         public TestDomain() {
-            super("stack", Arrays.asList("read", "write", "use", "delete"));
+            super("stack", asList("read", "write", "use", "delete"));
         }
 
         @Override

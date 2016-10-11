@@ -37,6 +37,9 @@ import java.util.List;
                                     "WHERE permissions.userId = :userId "),
                 @NamedQuery(name = "SystemPermissions.getAll",
                             query = "SELECT permissions " +
+                                    "FROM SystemPermissions permissions "),
+                @NamedQuery(name = "SystemPermissions.getTotalCount",
+                            query = "SELECT COUNT(permissions) " +
                                     "FROM SystemPermissions permissions ")
         }
 )

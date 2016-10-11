@@ -14,23 +14,19 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
-import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.codenvy.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -38,10 +34,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -49,7 +42,6 @@ import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIV
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.TRANSACTION_TYPE;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -60,23 +52,19 @@ public class JpaStackPermissionsDaoTest {
 
     private JpaStackPermissionsDao dao;
 
-
     private JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber removePermissionsBeforeStackRemovedEventSubscriber;
 
-
-    StackPermissionsImpl[] permissionses;
-
-    UserImpl[] users;
-
-    StackImpl[] stacks;
+    private StackPermissionsImpl[] permissions;
+    private UserImpl[]             users;
+    private StackImpl[]            stacks;
 
     @BeforeClass
     public void setupEntities() throws Exception {
-        permissionses = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "run")),
-                                                    new StackPermissionsImpl("user2", "stack1", Arrays.asList("read", "use")),
-                                                    new StackPermissionsImpl("user1", "stack2", Arrays.asList("read", "run")),
-                                                    new StackPermissionsImpl("user2", "stack2",
-                                                                             Arrays.asList("read", "use", "run", "configure"))};
+        permissions = new StackPermissionsImpl[] {new StackPermissionsImpl("user1", "stack1", asList("read", "use", "run")),
+                                                  new StackPermissionsImpl("user2", "stack1", asList("read", "use")),
+                                                  new StackPermissionsImpl("user1", "stack2", asList("read", "run")),
+                                                  new StackPermissionsImpl("user2", "stack2",
+                                                                           asList("read", "use", "run", "configure"))};
 
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
@@ -85,13 +73,11 @@ public class JpaStackPermissionsDaoTest {
                 new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
                 new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)};
 
-        Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule(), new PermissionsModule(),
-                                     new SystemPermissionsJpaModule());
+        Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(JpaStackPermissionsDao.class);
-        removePermissionsBeforeStackRemovedEventSubscriber = injector.getInstance(
-                JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
+        removePermissionsBeforeStackRemovedEventSubscriber =
+                injector.getInstance(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -105,7 +91,7 @@ public class JpaStackPermissionsDaoTest {
             manager.persist(stack);
         }
 
-        for (StackPermissionsImpl stackPermissions : permissionses) {
+        for (StackPermissionsImpl stackPermissions : permissions) {
             manager.persist(stackPermissions);
         }
         manager.getTransaction().commit();
@@ -136,10 +122,10 @@ public class JpaStackPermissionsDaoTest {
     }
 
     @Test
-    public void shouldRemoveWorkersWhenWorkspaceIsRemoved() throws Exception {
+    public void shouldStackPermissionsWhenStackIsRemoved() throws Exception {
         BeforeStackRemovedEvent event = new BeforeStackRemovedEvent(stacks[0]);
         removePermissionsBeforeStackRemovedEventSubscriber.onEvent(event);
-        assertTrue(dao.getByInstance("stack1").isEmpty());
+        assertTrue(dao.getByInstance("stack1", 30, 0).isEmpty());
     }
 
     @Test
@@ -149,7 +135,8 @@ public class JpaStackPermissionsDaoTest {
                                                                                asList("read", "use", "run"));
         dao.store(publicPermission);
 
-        assertTrue(dao.getByInstance(publicPermission.getInstanceId())
+        assertTrue(dao.getByInstance(publicPermission.getInstanceId(), 30, 0)
+                      .getItems()
                       .contains(publicPermission));
     }
 
@@ -161,9 +148,9 @@ public class JpaStackPermissionsDaoTest {
         dao.store(publicPermission);
         dao.store(publicPermission);
 
-        final List<StackPermissionsImpl> permissions = dao.getByInstance(publicPermission.getInstanceId());
-        assertTrue(permissions.contains(publicPermission));
-        assertTrue(permissions.stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
+        final Page<StackPermissionsImpl> permissions = dao.getByInstance(publicPermission.getInstanceId(), 30, 0);
+        assertTrue(permissions.getItems().contains(publicPermission));
+        assertTrue(permissions.getItems().stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
     }
 
     @Test
@@ -174,23 +161,15 @@ public class JpaStackPermissionsDaoTest {
         dao.store(publicPermission);
         dao.remove(publicPermission.getUserId(), publicPermission.getInstanceId());
 
-        List<StackPermissionsImpl> byInstance = dao.getByInstance(publicPermission.getInstanceId());
-        assertTrue(byInstance.stream().filter(p -> "*".equals(p.getUserId())).count() == 0);
+        Page<StackPermissionsImpl> byInstance = dao.getByInstance(publicPermission.getInstanceId(), 30, 0);
+        assertTrue(byInstance.getItems().stream().filter(p -> "*".equals(p.getUserId())).count() == 0);
     }
 
     private class TestModule extends AbstractModule {
-
         @Override
         protected void configure() {
-            bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {}).toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
-            bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
-            bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new JpaTckRepository<>(StackImpl.class));
-
             Map<String, String> properties = new HashMap<>();
             if (System.getProperty("jdbc.driver") != null) {
-                properties.put(TRANSACTION_TYPE,
-                               PersistenceUnitTransactionType.RESOURCE_LOCAL.name());
-
                 properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
                 properties.put(JDBC_URL, System.getProperty("jdbc.url"));
                 properties.put(JDBC_USER, System.getProperty("jdbc.user"));
