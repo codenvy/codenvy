@@ -371,7 +371,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         }
 
         // pack dumps into backup file
-        commands.add(createPackCommand(tempDir, backupFile, "*", false));
+        commands.add(createPackCommand(tempDir, backupFile, ".", false));
 
         // pack filesystem data into the {backup_file}/fs folder
         commands.add(createPackCommand(Paths.get("/home/codenvy/codenvy-data"), backupFile, "fs", true));
