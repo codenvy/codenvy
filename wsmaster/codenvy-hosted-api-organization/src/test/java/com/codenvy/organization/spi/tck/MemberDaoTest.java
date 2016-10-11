@@ -142,7 +142,7 @@ public class MemberDaoTest {
 
         memberDao.remove(member.getOrganizationId(), member.getUserId());
 
-        memberDao.getMember(member.getOrganizationId(), member.getUserId());
+        memberDao.getMember(member.getUserId(), member.getOrganizationId());
     }
 
     @Test(expectedExceptions = NullPointerException.class)

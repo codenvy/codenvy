@@ -46,16 +46,16 @@ public interface MemberDao {
     /**
      * Removes member with given organization and user
      *
-     * @param organizationId
-     *         id of organization
      * @param userId
      *         id of user
+     * @param organizationId
+     *         id of organization
      * @throws NullPointerException
      *         when {@code organizationId} or {@code userId} is null
      * @throws ServerException
      *         when any other error occurs during member removing
      */
-    void remove(String organizationId, String userId) throws ServerException;
+    void remove(String userId, String organizationId) throws ServerException;
 
     /**
      * Returns member for specified organization and user

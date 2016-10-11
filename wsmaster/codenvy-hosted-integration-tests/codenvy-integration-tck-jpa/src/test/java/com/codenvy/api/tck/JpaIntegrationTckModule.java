@@ -19,6 +19,7 @@ import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.spi.tck.RecipePermissionsDaoTest;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
@@ -30,6 +31,13 @@ import com.codenvy.api.workspace.server.spi.jpa.JpaWorkerDao;
 import com.codenvy.api.workspace.server.spi.tck.StackPermissionsDaoTest;
 import com.codenvy.api.workspace.server.spi.tck.WorkerDaoTest;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
+import com.codenvy.organization.api.permissions.OrganizationDomain;
+import com.codenvy.organization.spi.MemberDao;
+import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.impl.MemberImpl;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.codenvy.organization.spi.jpa.JpaMemberDao;
+import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
@@ -185,6 +193,10 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {}).to(WorkerDaoTest.TestDomain.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemPermissionsDaoTest.TestDomain.class);
 
+        //api-organization
+        bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).toInstance(new JpaTckRepository<>(OrganizationImpl.class));
+        bind(new TypeLiteral<TckRepository<MemberImpl>>() {}).toInstance(new JpaTckRepository<>(MemberImpl.class));
+
         //api-resource
         bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {}).toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
@@ -206,6 +218,11 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(SnapshotDao.class).to(JpaSnapshotDao.class);
         //api-ssh
         bind(SshDao.class).to(JpaSshDao.class);
+        //api-organization
+        bind(OrganizationDao.class).to(JpaOrganizationDao.class);
+        bind(MemberDao.class).to(JpaMemberDao.class);
+        bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
+        bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
         //api-resource
         bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);

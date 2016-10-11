@@ -74,7 +74,7 @@ public class RemoveMembersBeforeOrganizationRemovedEventSubscriberTest {
         subscriber.onEvent(new BeforeOrganizationRemovedEvent(organization));
 
         verify(memberDao).getMembers(eq("org123"));
-        verify(memberDao).remove(eq("org123"), eq("user123"));
-        verify(memberDao).remove(eq("org123"), eq("user321"));
+        verify(memberDao).remove(eq("user123"), eq("org123"));
+        verify(memberDao).remove(eq("user321"), eq("org123"));
     }
 }
