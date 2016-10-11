@@ -34,6 +34,7 @@ import com.codenvy.auth.sso.client.filter.RequestMethodFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
+import com.codenvy.machine.WsAgentHealthCheckerWithAuth;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.organization.api.OrganizationModule;
@@ -56,6 +57,7 @@ import com.palominolabs.metrics.guice.InstrumentationModule;
 
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
+import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationService;
@@ -239,6 +241,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(ServerClient.class).to(com.codenvy.auth.sso.client.MachineSsoServerClient.class);
         bind(com.codenvy.auth.sso.client.MachineSessionInvalidator.class);
 
+        bind(WsAgentHealthChecker.class).to(WsAgentHealthCheckerWithAuth.class);
+
         //SSO
         Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
                 Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
@@ -291,8 +295,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                 new RequestMethodFilter("GET")
                         ),
                         new UriStartFromRequestFilter("/api/license/legality")
-                )
-        );
+                ));
 
 
         bindConstant().annotatedWith(Names.named("notification.server.propagate_events")).to("vfs,workspace");

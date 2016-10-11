@@ -21,11 +21,9 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -45,8 +43,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermissionsImpl> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaStackPermissionsDao.class);
 
     @Inject
     public JpaStackPermissionsDao(AbstractPermissionsDomain<StackPermissionsImpl> domain) {
@@ -115,7 +111,8 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     }
 
     @Singleton
-    public static class RemovePermissionsBeforeStackRemovedEventSubscriber implements EventSubscriber<BeforeStackRemovedEvent> {
+    public static class RemovePermissionsBeforeStackRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeStackRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -123,22 +120,18 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeStackRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeStackRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeStackRemovedEvent event) {
-            try {
-                for (StackPermissionsImpl permissions : dao.getByInstance(event.getStack().getId())) {
-                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
-                }
-            } catch (ServerException | NotFoundException x) {
-                LOG.error(format("Couldn't remove permissions before stack '%s' is removed", event.getStack().getId()), x);
+        public void onRemovalEvent(BeforeStackRemovedEvent event) throws Exception {
+            for (StackPermissionsImpl permissions : dao.getByInstance(event.getStack().getId())) {
+                dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }
         }
     }

@@ -18,19 +18,16 @@ import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
-import static java.lang.String.format;
 
 /**
  * Listens for {@link UserImpl} removal events, and checks if the removing user is the last who have "setPermissions"
@@ -39,9 +36,7 @@ import static java.lang.String.format;
  * @author Max Shaposhnik
  */
 public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extends PermissionsDao<? extends AbstractPermissions>>
-        implements EventSubscriber<BeforeUserRemovedEvent> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RemovePermissionsOnLastUserRemovedEventSubscriber.class);
+        extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
 
     @Inject
     private EventService eventService;
@@ -51,35 +46,30 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
 
     @PostConstruct
     public void subscribe() {
-        eventService.subscribe(this);
+        eventService.subscribe(this, BeforeUserRemovedEvent.class);
     }
 
     @PreDestroy
     public void unsubscribe() {
-        eventService.unsubscribe(this);
+        eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
     }
 
-
     @Override
-    public void onEvent(BeforeUserRemovedEvent event) {
-        try {
-            for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
-                // This method can  potentially be source of race conditions,
-                // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
-                // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
-                // deleted when it's not required anymore.
-                // As a result, a solitary objects may be present in the DB.
-                if (storage.getByInstance(permissions.getInstanceId())
-                           .stream()
-                           .noneMatch(permissions1 -> permissions1.getActions().contains(SET_PERMISSIONS) &&
-                                                      !permissions1.getUserId().equals(event.getUser().getId()))) {
-                    remove(permissions.getInstanceId());
-                } else {
-                    storage.remove(event.getUser().getId(), permissions.getInstanceId());
-                }
+    public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+        for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
+            // This method can  potentially be source of race conditions,
+            // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
+            // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
+            // deleted when it's not required anymore.
+            // As a result, a solitary objects may be present in the DB.
+            if (storage.getByInstance(permissions.getInstanceId())
+                       .stream()
+                       .noneMatch(permissions1 -> permissions1.getActions().contains(SET_PERMISSIONS) &&
+                                                  !permissions1.getUserId().equals(event.getUser().getId()))) {
+                remove(permissions.getInstanceId());
+            } else {
+                storage.remove(event.getUser().getId(), permissions.getInstanceId());
             }
-        } catch (Exception x) {
-            LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
         }
     }
 

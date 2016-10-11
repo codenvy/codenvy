@@ -25,10 +25,8 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,7 +37,6 @@ import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -49,7 +46,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implements MemberDao {
-    private static final Logger LOG = LoggerFactory.getLogger(JpaMemberDao.class);
 
     @Inject
     public JpaMemberDao(AbstractPermissionsDomain<MemberImpl> supportedDomain) throws IOException {
@@ -162,7 +158,8 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
     }
 
     @Singleton
-    public static class RemoveMembersBeforeOrganizationRemovedEventSubscriber implements EventSubscriber<BeforeOrganizationRemovedEvent> {
+    public static class RemoveMembersBeforeOrganizationRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -170,22 +167,18 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeOrganizationRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeOrganizationRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeOrganizationRemovedEvent event) {
-            try {
-                for (MemberImpl member : memberDao.getMembers(event.getOrganization().getId())) {
-                    memberDao.remove(member.getOrganizationId(), member.getUserId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove members before organization '%s' is removed", event.getOrganization().getId()), x);
+        public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+            for (MemberImpl member : memberDao.getMembers(event.getOrganization().getId())) {
+                memberDao.remove(member.getOrganizationId(), member.getUserId());
             }
         }
     }

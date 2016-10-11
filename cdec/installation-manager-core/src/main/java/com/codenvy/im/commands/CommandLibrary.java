@@ -274,29 +274,16 @@ public class CommandLibrary {
     }
 
     private static String getPackCommand(Path fromDir, Path packFile, String pathWithinThePack, boolean needSudo, boolean useCompression) {
-        String compressionOption = useCompression ? "-z" : "";
-
-        if (needSudo) {
-            return format("if sudo test -f %2$s; then " +
-                          "   sudo tar -C %1$s %4$s -rf %2$s %3$s;" +
-                          "else " +
-                          "   sudo tar -C %1$s %4$s -cf %2$s %3$s;" +
-                          "fi;",
-                          fromDir,
-                          packFile,
-                          pathWithinThePack,
-                          compressionOption);
-        } else {
-            return format("if test -f %2$s; then " +
-                          "   tar -C %1$s %4$s -rf %2$s %3$s;" +
-                          "else " +
-                          "   tar -C %1$s %4$s -cf %2$s %3$s;" +
-                          "fi;",
-                          fromDir,
-                          packFile,
-                          pathWithinThePack,
-                          compressionOption);
-        }
+        return format("if %1$s test -f %3$s; then " +
+                      "  %1$s tar -H posix -C %2$s %5$s -rf %3$s %4$s; " +
+                      "else " +
+                      "  %1$s tar -H posix -C %2$s %5$s -cf %3$s %4$s; " +
+                      "fi; ",
+                      needSudo ? "sudo" : "",
+                      fromDir,
+                      packFile,
+                      pathWithinThePack != null ? pathWithinThePack : "",
+                      useCompression ? "-z" : "");
     }
 
     public static Command createUnpackCommand(Path packFile, Path toDir, String pathWithinThePack, boolean needSudo) {
@@ -319,28 +306,13 @@ public class CommandLibrary {
         return createCommand(getUnpackCommand(packFile, toDir, pathWithinThePack, true, false), node);
     }
 
-    private static String getUnpackCommand(Path packFile, Path toDir, @Nullable String pathWithinThePack, boolean needSudo, boolean useCompression) {
-        String command;
-        String compressionOptions = useCompression ? "-z" : "";
-
-        if (pathWithinThePack == null) {
-            command = format("tar %s -xf %s -C %s",
-                             compressionOptions,
-                             packFile,
-                             toDir);
-        } else {
-            command = format("tar %s -xf %s -C %s %s",
-                             compressionOptions,
-                             packFile,
-                             toDir,
-                             pathWithinThePack);
-        }
-
-        if (needSudo) {
-            command = "sudo " + command;
-        }
-
-        return command;
+    private static String getUnpackCommand(Path packFile, Path toDir, String pathWithinThePack, boolean needSudo, boolean useCompression) {
+        return format("%s tar %s -xf %s -C %s %s",
+                      needSudo ? "sudo" : "",
+                      useCompression ? "-z" : "",
+                      packFile,
+                      toDir,
+                      pathWithinThePack != null ? pathWithinThePack : "");
     }
 
     public static Command createCopyFromRemoteToLocalCommand(Path fromPath, Path toPath, NodeConfig remote) {

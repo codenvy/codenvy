@@ -20,11 +20,9 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -44,8 +42,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPermissionsImpl> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractJpaPermissionsDao.class);
 
     @Inject
     public JpaSystemPermissionsDao(@Named(SystemDomain.SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) {
@@ -100,7 +96,8 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
     }
 
     @Singleton
-    public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -108,22 +105,18 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
-                    dao.remove(permissions.getUserId(), permissions.getInstanceId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove permissions before user '%s' is removed", event.getUser().getId()), x);
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
+                dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }
         }
     }

@@ -12,63 +12,50 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.machine.launcher;
+package com.codenvy.machine;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
+import org.eclipse.che.api.agent.server.WsAgentHealthCheckerImpl;
 import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.environment.server.MachineProcessManager;
-import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 
 /**
- * Starts the ws-agent and pings it using custom machine request,
- * until ws-agent sends appropriate event about start.
+ * Mechanism for checking workspace agent's state by using the machine token.
  *
- * @author Anton Korneta
- * @author Anatolii Bazko
+ * @author Vitalii Parfonov
+ * @author Valeriy Svydenko
  */
 @Singleton
-public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
+public class WsAgentHealthCheckerWithAuth extends WsAgentHealthCheckerImpl {
 
     private final HttpJsonRequestFactory httpJsonRequestFactory;
     private final String                 apiEndpoint;
 
+
     @Inject
-    public WsAgentWithAuthLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
-                                       HttpJsonRequestFactory httpJsonRequestFactory,
-                                       WsAgentPingRequestFactory wsAgentPingRequestFactory,
-                                       @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
-                                       @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
-                                       @Named("che.workspace.agent.dev.ping_delay_ms") long wsAgentPingDelayMs,
-                                       @Named("che.workspace.agent.dev.ping_timeout_error_ms") String pingTimedOutErrorMessage,
-                                       @Named("che.api") String apiEndpoint) {
-        super(machineProcessManagerProvider,
-              wsAgentPingRequestFactory,
-              wsAgentRunCommand,
-              wsAgentMaxStartTimeMs,
-              wsAgentPingDelayMs,
-              pingTimedOutErrorMessage);
+    public WsAgentHealthCheckerWithAuth(WsAgentPingRequestFactory pingRequestFactory,
+                                        HttpJsonRequestFactory httpJsonRequestFactory,
+                                        @Named("api.endpoint") String apiEndpoint) {
+        super(pingRequestFactory);
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
 
+
     // modifies the ping request if it is possible to get the machine token.
-    @Override
-    protected HttpJsonRequest createPingRequest(Instance devMachine) throws ServerException {
+    protected HttpJsonRequest createPingRequest(Machine devMachine) throws ServerException {
         final HttpJsonRequest pingRequest = super.createPingRequest(devMachine);
         final String tokenServiceUrl = UriBuilder.fromUri(apiEndpoint)
                                                  .replacePath("api/machine/token/" + devMachine.getWorkspaceId())
@@ -79,7 +66,8 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
             machineToken = httpJsonRequestFactory.fromUrl(tokenServiceUrl)
                                                  .setMethod(HttpMethod.GET)
                                                  .request()
-                                                 .asDto(MachineTokenDto.class).getMachineToken();
+                                                 .asDto(MachineTokenDto.class)
+                                                 .getMachineToken();
         } catch (ApiException | IOException ex) {
             LOG.warn("Failed to get machine token", ex);
         }
