@@ -75,6 +75,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-user</artifactId>
         </dependency>
         <dependency>
@@ -82,12 +86,12 @@
             <artifactId>che-core-commons-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-core</artifactId>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
@@ -117,11 +121,6 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-jdbc</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

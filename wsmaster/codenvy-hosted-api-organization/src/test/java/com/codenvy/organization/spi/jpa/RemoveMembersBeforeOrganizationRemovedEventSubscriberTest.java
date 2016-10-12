@@ -53,14 +53,14 @@ public class RemoveMembersBeforeOrganizationRemovedEventSubscriberTest {
     public void shouldSubscribeItself() {
         subscriber.subscribe();
 
-        verify(eventService).subscribe(eq(subscriber));
+        verify(eventService).subscribe(eq(subscriber), eq(BeforeOrganizationRemovedEvent.class));
     }
 
     @Test
     public void shouldUnsubscribeItself() {
         subscriber.unsubscribe();
 
-        verify(eventService).unsubscribe(eq(subscriber));
+        verify(eventService).unsubscribe(eq(subscriber), eq(BeforeOrganizationRemovedEvent.class));
     }
 
     @Test

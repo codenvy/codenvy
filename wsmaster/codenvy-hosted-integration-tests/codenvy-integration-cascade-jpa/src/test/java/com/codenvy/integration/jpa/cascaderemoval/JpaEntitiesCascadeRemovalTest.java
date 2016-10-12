@@ -14,10 +14,10 @@
  */
 package com.codenvy.integration.jpa.cascaderemoval;
 
+import com.codenvy.api.machine.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
 import com.codenvy.api.machine.server.recipe.RecipeDomain;
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
-import com.codenvy.api.machine.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.workspace.server.jpa.OnPremisesJpaWorkspaceModule;
@@ -26,7 +26,6 @@ import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import com.codenvy.api.workspace.server.stack.StackDomain;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
-import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
@@ -36,15 +35,19 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
@@ -56,13 +59,15 @@ import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -70,6 +75,7 @@ import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -78,14 +84,13 @@ import org.testng.annotations.Test;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
-import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.*;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createFactory;
+import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createFreeResourcesLimit;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createPreferences;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createRecipe;
@@ -95,7 +100,9 @@ import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.crea
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createWorker;
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -185,6 +192,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new InitModule(PostConstruct.class));
                 install(new JpaPersistModule("main"));
                 install(new UserJpaModule());
+                install(new AccountModule());
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
                 install(new MachineJpaModule());
@@ -194,6 +202,13 @@ public class JpaEntitiesCascadeRemovalTest {
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber.class).asEagerSingleton();
+                bind(WorkspaceManager.class);
+                final WorkspaceRuntimes wR = Mockito.mock(WorkspaceRuntimes.class);
+                when(wR.hasRuntime(Mockito.anyString())).thenReturn(false);
+                bind(WorkspaceRuntimes.class).toInstance(wR);
+                bind(AccountManager.class);
+                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_snapshot")).toInstance(false);
+                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_restore")).toInstance(false);
             }
         });
 
@@ -269,9 +284,11 @@ public class JpaEntitiesCascadeRemovalTest {
     }
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
-    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(Class<EventSubscriber> eventSubscriber) throws Exception {
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
+            Class<CascadeRemovalEventSubscriber<CascadeRemovalEvent>> subscriberClass,
+            Class<CascadeRemovalEvent> eventClass) throws Exception {
         createTestData();
-        eventService.unsubscribe(injector.getInstance(eventSubscriber));
+        eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 
         // Remove the user, all entries must be rolled back after fail
         try {
@@ -294,8 +311,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
     @DataProvider(name = "beforeRemoveRollbackActions")
     public Object[][] beforeRemoveActions() {
-        return new Class[][]{
-                {RemoveStackOnLastUserRemovedEventSubscriber.class}
+        return new Class[][] {
+                {RemoveStackOnLastUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
         };
     }
 
@@ -334,15 +351,23 @@ public class JpaEntitiesCascadeRemovalTest {
 
         workerDao.store(createWorker(user2.getId(), workspace3.getId()));
 
-        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack1.getId(), Arrays.asList(SET_PERMISSIONS,"read", "write")));
-        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack2.getId(), Arrays.asList(SET_PERMISSIONS,"read", "execute")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack1.getId(), asList(SET_PERMISSIONS, "read", "write")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(),
+                                                           stack2.getId(),
+                                                           asList(SET_PERMISSIONS, "read", "execute")));
         // To test removal only permissions if more users with setPermissions are present
-        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(), stack3.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write")));
-        stackPermissionsDao.store(new StackPermissionsImpl(user3.getId(), stack3.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write", "execute")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user2.getId(),
+                                                           stack3.getId(),
+                                                           asList(SET_PERMISSIONS, "read", "write")));
+        stackPermissionsDao.store(new StackPermissionsImpl(user3.getId(),
+                                                           stack3.getId(),
+                                                           asList(SET_PERMISSIONS, "read", "write", "execute")));
 
-
-        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write")));
-        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(), recipe2.getId(), Arrays.asList(SET_PERMISSIONS, "read", "write", "execute")));
+        recipePermissionsDao
+                .store(new RecipePermissionsImpl(user2.getId(), recipe1.getId(), asList(SET_PERMISSIONS, "read", "write")));
+        recipePermissionsDao.store(new RecipePermissionsImpl(user2.getId(),
+                                                             recipe2.getId(),
+                                                             asList(SET_PERMISSIONS, "read", "write", "execute")));
 
         freeResourcesLimitDao.store(freeResourcesLimit = createFreeResourcesLimit(user.getId()));
     }
@@ -370,7 +395,7 @@ public class JpaEntitiesCascadeRemovalTest {
         stackDao.remove(stack2.getId());
         stackDao.remove(stack3.getId());
 
-        workerDao.removeWorker(workspace3.getId(),user2.getId());
+        workerDao.removeWorker(workspace3.getId(), user2.getId());
 
 
         factoryDao.remove(factory1.getId());

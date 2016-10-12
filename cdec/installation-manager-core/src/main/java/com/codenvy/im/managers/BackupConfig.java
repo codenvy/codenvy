@@ -14,13 +14,11 @@
  */
 package com.codenvy.im.managers;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.utils.Commons;
-import com.codenvy.im.utils.TarUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
+import com.google.common.annotations.VisibleForTesting;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.commons.json.JsonParseException;
 
@@ -38,7 +36,8 @@ import static java.lang.String.format;
 /** @author Dmytro Nochevnov */
 public class BackupConfig {
 
-    protected static final String BACKUP_CONFIG_FILE = "backup.config.json";
+    @VisibleForTesting
+    static final String BACKUP_CONFIG_FILE = "backup.config.json";
 
     public enum Component {
         LDAP("ldap.ldif"),        // ldap user db
@@ -228,32 +227,20 @@ public class BackupConfig {
     }
 
     /**
-     * Store backup config in this.backupFile
+     * Create artifact info file
      */
-    public void storeConfigIntoBackup() throws IOException {
+    public void createConfigFileInTmpDir() throws IOException {
         String configJson = toJson();
-
-        Path tempDir = BASE_TMP_DIRECTORY;
-        Files.createDirectories(tempDir);
-
-        Path configFile = tempDir.resolve(BACKUP_CONFIG_FILE);
+        Path configFile = obtainArtifactTempDirectory().resolve(BACKUP_CONFIG_FILE);
         FileUtils.writeStringToFile(configFile.toFile(), configJson);
-
-        TarUtils.packFile(configFile, Paths.get(backupFile));
-
-        // cleanup
-        Files.deleteIfExists(configFile);
     }
 
     /**
      * @return config of backup, stored in this.backupFile
      */
     @NotNull
-    public BackupConfig extractConfigFromBackup() throws IOException {
-        Path tempDir = BASE_TMP_DIRECTORY;
-        Files.createDirectories(tempDir);
-
-        TarUtils.unpackFile(Paths.get(backupFile), tempDir, Paths.get(BACKUP_CONFIG_FILE));
+    public BackupConfig loadConfigFromTempDir() throws IOException {
+        Path tempDir = obtainArtifactTempDirectory();
         Path storedConfigFile = tempDir.resolve(BACKUP_CONFIG_FILE);
 
         BackupConfig storedConfig;
@@ -264,9 +251,10 @@ public class BackupConfig {
                 throw new IOException();
             }
         } catch (JsonParseException | IOException e) {
-            throw new BackupException(format("There was a problem with config of backup which should be placed in file '%s/%s'",
+            throw new BackupException(format("There was a problem with config of backup which should be placed in file '%s/%s'. Error: %s",
                                              Paths.get(backupFile).getFileName(),
-                                             BACKUP_CONFIG_FILE));
+                                             BACKUP_CONFIG_FILE,
+                                             e.getMessage()));
         }
 
         // cleanup

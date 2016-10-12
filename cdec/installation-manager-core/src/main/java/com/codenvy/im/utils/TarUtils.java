@@ -137,6 +137,7 @@ public class TarUtils {
         }
 
         try (TarArchiveOutputStream out = new TarArchiveOutputStream(os)) {
+            out.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
             out.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
             TarArchiveEntry tarEntry = new TarArchiveEntry(fileToPack.toFile(),
                                                            fileToPack.getFileName().toString());

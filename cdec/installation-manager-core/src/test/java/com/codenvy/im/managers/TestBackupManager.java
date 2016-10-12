@@ -151,8 +151,7 @@ public class TestBackupManager {
         Path tempBackupFile = expectedBackupDirectory.resolve(backupFile.getFileName().toString());
         expectedBackupConfig.setBackupFile(tempBackupFile.toString());
 
-        doReturn(mockCommand).when(mockCdecArtifact).getRestoreCommand(expectedBackupConfig
-                                                                      );
+        doReturn(mockCommand).when(mockCdecArtifact).getRestoreCommand(expectedBackupConfig);
 
         spyManager.restore(initialBackupConfig);
     }
@@ -204,7 +203,7 @@ public class TestBackupManager {
                                                              .setBackupFile(compressedBackupFile.toString()));
 
         doReturn(spyBackupConfig).when(spyBackupConfig).clone();
-        doThrow(new BackupException("error")).when(spyBackupConfig).extractConfigFromBackup();
+        doThrow(new BackupException("error")).when(spyBackupConfig).loadConfigFromTempDir();
 
         spyManager.restore(spyBackupConfig);
     }
@@ -218,7 +217,7 @@ public class TestBackupManager {
                                                              .setBackupFile(compressedBackupFile.toString()));
 
         doReturn(spyBackupConfig).when(spyBackupConfig).clone();
-        doReturn(spyBackupConfig).when(spyBackupConfig).extractConfigFromBackup();
+        doReturn(spyBackupConfig).when(spyBackupConfig).loadConfigFromTempDir();
         doThrow(new IllegalArgumentException("error")).when(spyManager).checkBackup(mockCdecArtifact, spyBackupConfig);
 
         spyManager.restore(spyBackupConfig);
@@ -233,7 +232,7 @@ public class TestBackupManager {
                                                              .setBackupFile(compressedBackupFile.toString()));
 
         doReturn(spyBackupConfig).when(spyBackupConfig).clone();
-        doReturn(spyBackupConfig).when(spyBackupConfig).extractConfigFromBackup();
+        doReturn(spyBackupConfig).when(spyBackupConfig).loadConfigFromTempDir();
         doThrow(new IllegalStateException("error")).when(spyManager).checkBackup(mockCdecArtifact, spyBackupConfig);
 
         spyManager.restore(spyBackupConfig);

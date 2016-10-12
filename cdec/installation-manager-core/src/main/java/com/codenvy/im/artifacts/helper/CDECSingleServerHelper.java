@@ -329,10 +329,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         Path tempDir = backupConfig.obtainArtifactTempDirectory();
         Path backupFile = Paths.get(backupConfig.getBackupFile());
 
-        // re-create local temp dir
-        commands.add(createCommand(format("rm -rf %s", tempDir)));
-        commands.add(createCommand(format("mkdir -p %s", tempDir)));
-
         // stop services
         commands.add(createStopServiceCommand("crond"));
         commands.add(createStopServiceCommand("puppet"));
@@ -378,16 +374,13 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         commands.add(createPackCommand(tempDir, backupFile, ".", false));
 
         // pack filesystem data into the {backup_file}/fs folder
-        commands.add(createPackCommand(Paths.get("/home/codenvy/codenvy-data"), backupFile, "fs/.", true));
+        commands.add(createPackCommand(Paths.get("/home/codenvy/codenvy-data"), backupFile, "fs", true));
 
         // start services
         commands.add(createStartServiceCommand("puppet"));
 
         // wait until API server starts
         commands.add(new WaitOnAliveArtifactCommand(original));
-
-        // remove temp dir
-        commands.add(createCommand(format("rm -rf %s", tempDir)));
 
         return new MacroCommand(commands, "Backup data commands");
     }
@@ -415,10 +408,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
         List<Command> commands = new ArrayList<>();
         Config codenvyConfig = configManager.loadInstalledCodenvyConfig();
         Path tempDir = backupConfig.obtainArtifactTempDirectory();
-        Path backupFile = Paths.get(backupConfig.getBackupFile());
-
-        // unpack backupFile into the tempDir
-        TarUtils.unpackAllFiles(backupFile, tempDir);
 
         // stop services
         commands.add(createStopServiceCommand("puppet"));
@@ -488,9 +477,6 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
 
         // wait until API server restarts
         commands.add(new WaitOnAliveArtifactCommand(original));
-
-        // remove temp dir
-        commands.add(createCommand(format("rm -rf %s", tempDir)));
 
         return new MacroCommand(commands, "Restore data commands");
     }

@@ -22,13 +22,11 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -47,8 +45,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implements WorkerDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaWorkerDao.class);
 
     @Inject
     public JpaWorkerDao(AbstractPermissionsDomain<WorkerImpl> supportedDomain) {
@@ -135,7 +131,8 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
 
     @Singleton
-    public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber implements EventSubscriber<BeforeWorkspaceRemovedEvent> {
+    public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeWorkspaceRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -143,7 +140,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @PreDestroy
@@ -152,20 +149,17 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
 
         @Override
-        public void onEvent(BeforeWorkspaceRemovedEvent event) {
-            try {
-                for (WorkerImpl worker : workerDao.getWorkers(event.getWorkspace().getId())) {
-                    workerDao.removeWorker(worker.getWorkspaceId(), worker.getUserId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove workers before workspace '%s' is removed", event.getWorkspace().getId()), x);
+        public void onRemovalEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+            for (WorkerImpl worker : workerDao.getWorkers(event.getWorkspace().getId())) {
+                workerDao.removeWorker(worker.getWorkspaceId(), worker.getUserId());
             }
         }
     }
 
 
     @Singleton
-    public static class RemoveWorkersBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveWorkersBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -173,22 +167,18 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (WorkerImpl worker : dao.getWorkersByUser(event.getUser().getId())) {
-                    dao.removeWorker(worker.getInstanceId(), worker.getUserId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove worker before user '%s' is removed", event.getUser().getId()), x);
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            for (WorkerImpl worker : dao.getWorkersByUser(event.getUser().getId())) {
+                dao.removeWorker(worker.getInstanceId(), worker.getUserId());
             }
         }
     }
