@@ -188,6 +188,7 @@ public class JpaEntitiesCascadeRemovalTest {
 
     /** Organization depends on user via permissions */
     private OrganizationImpl organization;
+    private OrganizationImpl childOrganization;
     private OrganizationImpl organization2;
 
     /** Free resources limit depends on user via personal account */
@@ -292,6 +293,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
         // Check existence of organizations
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
+        assertNull(notFoundToNull(() -> organizationDao.getById(childOrganization.getId())));
         assertNotNull(notFoundToNull(() -> organizationDao.getById(organization2.getId())));
 
         // free resources limit is removed
@@ -329,6 +331,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertNotNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
         assertNotNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
         assertNotNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
+        assertNotNull(notFoundToNull(() -> organizationDao.getById(childOrganization.getId())));
         assertNotNull(notFoundToNull(() -> organizationDao.getById(organization2.getId())));
         wipeTestData();
     }
@@ -395,6 +398,7 @@ public class JpaEntitiesCascadeRemovalTest {
                                                              asList(SET_PERMISSIONS, "read", "write", "execute")));
 
         organizationDao.create(organization = new OrganizationImpl("org123", "testOrg", null));
+        organizationDao.create(childOrganization = new OrganizationImpl("suborg123", "childTestOrg", organization.getId()));
         organizationDao.create(organization2 = new OrganizationImpl("org321", "anotherOrg", null));
 
         memberDao.store(new MemberImpl(user.getId(), organization.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
@@ -414,6 +418,7 @@ public class JpaEntitiesCascadeRemovalTest {
         memberDao.remove(organization2.getId(), user2.getId());
         memberDao.remove(organization2.getId(), user3.getId());
 
+        organizationDao.remove(childOrganization.getId());
         organizationDao.remove(organization.getId());
         organizationDao.remove(organization2.getId());
 
