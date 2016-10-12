@@ -34,12 +34,15 @@
 
 # --skip-post-flight-check
 
+# --advertise-network-interface=<NETWORK_INTERFACE_WHICH_IS_USED_BY_THE_DOCKER_FOR_ADVERTISING>
+
 trap cleanUp EXIT
 
 unset HOST_NAME
 unset HTTP_PROXY_FOR_INSTALLATION
 unset HTTPS_PROXY_FOR_INSTALLATION
 unset NO_PROXY_FOR_INSTALLATION
+unset ADVERTISE_NETWORK_INTERFACE
 
 JDK_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz
 JRE_URL=http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jre-8u45-linux-x64.tar.gz
@@ -209,6 +212,9 @@ setRunOptions() {
 
         elif [[ "$var" == "--skip-post-flight-check" ]]; then
             SKIP_POST_FLIGHT_CHECK=true
+
+        elif [[ "$var" =~ --advertise-network-interface=.* ]]; then
+            ADVERTISE_NETWORK_INTERFACE=$(echo "$var" | sed -e "s/--advertise-network-interface=//g")
 
         else
             UNRECOGNIZED_PARAMETERS[$((i++))]="$var"
@@ -1030,7 +1036,7 @@ doCheckAvailablePorts_multi() {
             if [[ "${HOST}" == "${PUPPET_MASTER_HOST_NAME}" ]]; then
                 validatePortLocal "${PROTOCOL}" "${PORT_ONLY}"
             else
-                validatePortRemote "${PROTOCOL}" "${PORT_ONLY}" ${HOST}
+                validatePortRemote "${PROTOCOL}" "${PORT_ONLY}" "${HOST}"
             fi
         done
     done
@@ -1062,42 +1068,44 @@ printPreInstallInfo_single() {
     fi
 
     if [ -n "${HOST_NAME}" ]; then
-        insertProperty "host_url" ${HOST_NAME}
+        insertProperty "host_url" "${HOST_NAME}"
     fi
 
     if [ -n "${HTTP_PROXY_FOR_DOCKER_DAEMON}" ]; then
-        insertProperty "http_proxy_for_docker_daemon" ${HTTP_PROXY_FOR_DOCKER_DAEMON}
+        insertProperty "http_proxy_for_docker_daemon" "${HTTP_PROXY_FOR_DOCKER_DAEMON}"
     fi
     if [ -n "${HTTPS_PROXY_FOR_DOCKER_DAEMON}" ]; then
-        insertProperty "https_proxy_for_docker_daemon" ${HTTPS_PROXY_FOR_DOCKER_DAEMON}
+        insertProperty "https_proxy_for_docker_daemon" "${HTTPS_PROXY_FOR_DOCKER_DAEMON}"
     fi
     if [ -n "${NO_PROXY_FOR_DOCKER_DAEMON}" ]; then
-        insertProperty "no_proxy_for_docker_daemon" ${NO_PROXY_FOR_DOCKER_DAEMON}
+        insertProperty "no_proxy_for_docker_daemon" "${NO_PROXY_FOR_DOCKER_DAEMON}"
     fi
 
     if [ -n "${DOCKER_REGISTRY_MIRROR}" ]; then
-        insertProperty "docker_registry_mirror" ${DOCKER_REGISTRY_MIRROR}
+        insertProperty "docker_registry_mirror" "${DOCKER_REGISTRY_MIRROR}"
     fi
 
     if [ -n "${HTTP_PROXY_FOR_CODENVY}" ]; then
-        insertProperty "http_proxy_for_codenvy" ${HTTP_PROXY_FOR_CODENVY}
+        insertProperty "http_proxy_for_codenvy" "${HTTP_PROXY_FOR_CODENVY}"
     fi
     if [ -n "${HTTPS_PROXY_FOR_CODENVY}" ]; then
-        insertProperty "https_proxy_for_codenvy" ${HTTPS_PROXY_FOR_CODENVY}
+        insertProperty "https_proxy_for_codenvy" "${HTTPS_PROXY_FOR_CODENVY}"
     fi
     if [ -n "${NO_PROXY_FOR_CODENVY}" ]; then
-        insertProperty "no_proxy_for_codenvy" ${NO_PROXY_FOR_CODENVY}
+        insertProperty "no_proxy_for_codenvy" "${NO_PROXY_FOR_CODENVY}"
     fi
 
     if [ -n "${HTTP_PROXY_FOR_CODENVY_WORKSPACES}" ]; then
-        insertProperty "http_proxy_for_codenvy_workspaces" ${HTTP_PROXY_FOR_CODENVY_WORKSPACES}
+        insertProperty "http_proxy_for_codenvy_workspaces" "${HTTP_PROXY_FOR_CODENVY_WORKSPACES}"
     fi
     if [ -n "${HTTPS_PROXY_FOR_CODENVY_WORKSPACES}" ]; then
-        insertProperty "https_proxy_for_codenvy_workspaces" ${HTTPS_PROXY_FOR_CODENVY_WORKSPACES}
+        insertProperty "https_proxy_for_codenvy_workspaces" "${HTTPS_PROXY_FOR_CODENVY_WORKSPACES}"
     fi
     if [ -n "${NO_PROXY_FOR_CODENVY_WORKSPACES}" ]; then
-        insertProperty "no_proxy_for_codenvy_workspaces" ${NO_PROXY_FOR_CODENVY_WORKSPACES}
+        insertProperty "no_proxy_for_codenvy_workspaces" "${NO_PROXY_FOR_CODENVY_WORKSPACES}"
     fi
+
+    checkNetworkInterface
 
     if [[ "${ARTIFACT}" == "codenvy" ]]; then
         doCheckAvailablePorts_single
@@ -1393,6 +1401,32 @@ doCheckRedhatSubscription() {
         println $(printError "Next required repositories aren't enabled: ${disabledRequiredRepoToDisplay::-2}")
         println $(printWarning "NOTE: You could use command 'sudo subscription-manager repos --enable=<repo-name>' to enable them.")
         exit 1
+    fi
+}
+
+# Checks if network interface defined in --advertise-network-interface variable or in the "docker_cluster_advertise" codenvy property is present in system.
+# If not, ask user to type correct interface name in console.
+checkNetworkInterface() {
+    if [[ "${ARTIFACT}" == "codenvy" ]] && [[ "${VERSION}" =~ ^(5).* ]]; then
+        if [[ -z "${ADVERTISE_NETWORK_INTERFACE}" ]]; then
+            ADVERTISE_NETWORK_INTERFACE=$(readProperty "docker_cluster_advertise")
+        fi
+
+        # check if ADVERTISE_NETWORK_INTERFACE network interface is present in system
+        if ! ls /sys/class/net | grep "${ADVERTISE_NETWORK_INTERFACE}" &> /dev/null; then
+            println $(printWarning "Codenvy needs to advertise itself on a network interface. By default we use '${ADVERTISE_NETWORK_INTERFACE}' but can't find that interface on this machine.")
+            print $(printWarning "Please enable '${ADVERTISE_NETWORK_INTERFACE}' or enter the name of an available interface: ")
+
+            local newValueOfDockerClusterAdvertise=$(askProperty)
+
+            println
+        fi
+
+        if [ -n "${newAdvertiseNetworkInterface}" ]; then
+            insertProperty "docker_cluster_advertise" "${newAdvertiseNetworkInterface}"
+        else
+            insertProperty "docker_cluster_advertise" "${ADVERTISE_NETWORK_INTERFACE}"
+        fi
     fi
 }
 

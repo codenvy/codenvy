@@ -21,6 +21,7 @@
 
 if [[ -n "$2" ]] && [[ "$2" == "rhel" ]]; then
     RHEL_OS=true
+    INSTALL_OPTIONS="--advertise-network-interface=enp0s3"
     printAndLog "TEST CASE: Add and remove Codenvy All-In-One nodes in RHEL OS"
     vagrantUp ${SINGLE_RHEL_WITH_ADDITIONAL_NODES_VAGRANT_FILE}
 else
@@ -29,7 +30,7 @@ else
 fi
 
 # install Codenvy on-prem
-installCodenvy ${LATEST_CODENVY_VERSION}
+installCodenvy ${LATEST_CODENVY_VERSION} ${INSTALL_OPTIONS}
 validateInstalledCodenvyVersion ${LATEST_CODENVY_VERSION}
 
 # throw error if no --codenvy-ip is used

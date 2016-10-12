@@ -21,6 +21,7 @@
 
 if [[ -n "$2" ]] && [[ "$2" == "rhel" ]]; then
     RHEL_OS=true
+    INSTALL_OPTIONS="--advertise-network-interface=enp0s3"
     printAndLog "TEST CASE: Backup and restore single-node Codenvy On Premise in RHEL OS"
     vagrantUp ${SINGLE_NODE_RHEL_VAGRANT_FILE}
 else
@@ -32,7 +33,7 @@ WORKSPACE_NAME="workspace-1"
 PROJECT_NAME="project-1"
 
 # install Codenvy on-prem
-installCodenvy ${LATEST_CODENVY_VERSION}
+installCodenvy ${LATEST_CODENVY_VERSION} ${INSTALL_OPTIONS}
 validateInstalledCodenvyVersion ${LATEST_CODENVY_VERSION}
 authWithoutRealmAndServerDns "admin" "password"
 
