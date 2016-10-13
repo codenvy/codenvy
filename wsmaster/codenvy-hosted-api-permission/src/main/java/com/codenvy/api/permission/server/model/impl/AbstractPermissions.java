@@ -21,6 +21,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -54,7 +55,7 @@ public abstract class AbstractPermissions implements Permissions {
     @JoinColumn(name = "userId", insertable = false, updatable = false)
     private UserImpl user;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "actions")
     @CollectionTable(indexes = @Index(columnList = "actions"))
     protected List<String> actions;

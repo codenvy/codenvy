@@ -45,6 +45,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                "/invite/*",
                "/factory",
                "/workspace",
+               "/audit",
                "/user",
                "/git/*",
                "/svn/*",

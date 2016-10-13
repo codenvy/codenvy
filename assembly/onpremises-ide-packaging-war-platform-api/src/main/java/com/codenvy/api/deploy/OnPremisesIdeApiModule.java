@@ -15,6 +15,8 @@
 package com.codenvy.api.deploy;
 
 import com.codenvy.api.AdminApiModule;
+import com.codenvy.api.audit.server.AuditService;
+import com.codenvy.api.audit.server.AuditServicePermissionsFilter;
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
@@ -225,6 +227,9 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(SystemRamService.class);
 
         bind(SystemRamInfoProvider.class).to(DockerBasedSystemRamInfoProvider.class);
+
+        bind(AuditService.class);
+        bind(AuditServicePermissionsFilter.class);
 
         //authentication
 

@@ -54,33 +54,34 @@ ACCOUNT_NAME=${OUTPUT}
 
 ACCOUNT_PASSWORD="pwd123ABC"
 
-# add user with [account/owner] role
-doPost "application/json" "{\"name\":\"${UUID_OWNER}@codenvy.com\",\"password\":\"${ACCOUNT_PASSWORD}\"}" "${SAAS_SERVER}/api/user/create?token=${TOKEN}"
-fetchJsonParameter "id"
-USER_OWNER_ID=${OUTPUT}
-doPost "application/json" "{\"userId\":\"${USER_OWNER_ID}\",\"roles\":[\"account/owner\"]}" "${SAAS_SERVER}/api/account/${ACCOUNT_ID}/members?token=${TOKEN}"
-
-authWithoutRealmAndServerDns "admin" "password"
-
-# need to ensure logout state
-doHttpRequest --method=POST \
-              --url=http://${HOST_URL}/im/logout?token=${TOKEN} \
-              --output-http-code
-validateExpectedString "200"
-
-# test login
-doHttpRequest --method=POST \
-              --content-type="application/json" \
-              --body="{\"username\":\"${UUID_OWNER}@codenvy.com\",\"password\":\"${ACCOUNT_PASSWORD}\"}" \
-              --url="http://${HOST_URL}/im/login?token=${TOKEN}" \
-              --output-http-code
-validateExpectedString "200"
-
-# test logout
-doHttpRequest --method=POST \
-              --url=http://${HOST_URL}/im/logout?token=${TOKEN} \
-              --output-http-code
-validateExpectedString "200"
+#### Nightly Codenvy 3.x SAAS server turned off. So, we commented code of verification of login/logout to the SaaS server
+## add user with [account/owner] role
+#doPost "application/json" "{\"name\":\"${UUID_OWNER}@codenvy.com\",\"password\":\"${ACCOUNT_PASSWORD}\"}" "${SAAS_SERVER}/api/user/create?token=${TOKEN}"
+#fetchJsonParameter "id"
+#USER_OWNER_ID=${OUTPUT}
+#doPost "application/json" "{\"userId\":\"${USER_OWNER_ID}\",\"roles\":[\"account/owner\"]}" "${SAAS_SERVER}/api/account/${ACCOUNT_ID}/members?token=${TOKEN}"
+#
+#authWithoutRealmAndServerDns "admin" "password"
+#
+## need to ensure logout state
+#doHttpRequest --method=POST \
+#              --url=http://${HOST_URL}/im/logout?token=${TOKEN} \
+#              --output-http-code
+#validateExpectedString "200"
+#
+## test login
+#doHttpRequest --method=POST \
+#              --content-type="application/json" \
+#              --body="{\"username\":\"${UUID_OWNER}@codenvy.com\",\"password\":\"${ACCOUNT_PASSWORD}\"}" \
+#              --url="http://${HOST_URL}/im/login?token=${TOKEN}" \
+#              --output-http-code
+#validateExpectedString "200"
+#
+## test logout
+#doHttpRequest --method=POST \
+#              --url=http://${HOST_URL}/im/logout?token=${TOKEN} \
+#              --output-http-code
+#validateExpectedString "200"
 
 printAndLog "RESULT: PASSED"
 

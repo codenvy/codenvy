@@ -23,6 +23,7 @@ import org.ldaptive.SearchOperation;
 import org.ldaptive.SearchRequest;
 import org.ldaptive.SearchResult;
 import org.ldaptive.ad.handler.ObjectGuidHandler;
+import org.ldaptive.ad.handler.RangeEntryHandler;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ public class MembershipSelector implements LdapEntrySelector {
         groupsSearch.setSearchFilter(new SearchFilter(groupsFilter));
         groupsSearch.setSearchScope(SUBTREE);
         groupsSearch.setReturnAttributes(membersAttr);
+        groupsSearch.setSearchEntryHandlers(new RangeEntryHandler());
         try {
             final Response<SearchResult> response = new SearchOperation(connection).execute(groupsSearch);
             if (response.getResultCode() != SUCCESS) {

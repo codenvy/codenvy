@@ -90,8 +90,10 @@ public class ContributionExtension {
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
             @Override
             public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-                workflowExecutor.invalidateContext(lastSelectedProject);
-                contributePart.minimize();
+                if (lastSelectedProject != null) {
+                    workflowExecutor.invalidateContext(lastSelectedProject);
+                    contributePart.minimize();
+                }
             }
         });
 
