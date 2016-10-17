@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -69,8 +70,8 @@ class AuditReportPrinter {
         printRow("Number of all users: " + allUsersNumber + "\n", auditReport);
         if (license != null) {
             printRow("Number of users licensed: " + license.getNumberOfUsers() + "\n", auditReport);
-            printRow("Date when license expires: " + new SimpleDateFormat("dd MMMM yyyy").format(license.getExpirationDate()) + "\n",
-                     auditReport);
+            printRow("Date when license expires: " +
+                     new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH).format(license.getExpirationDate()) + "\n", auditReport);
         } else {
             printError("Failed to retrieve license", auditReport);
         }

@@ -29,7 +29,8 @@ import org.testng.annotations.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,7 +121,7 @@ public class AuditReportPrinterTest {
         //given
         CodenvyLicense license = mock(CodenvyLicense.class);
         when(license.getNumberOfUsers()).thenReturn(15);
-        when(license.getExpirationDate()).thenReturn(new SimpleDateFormat("dd MMMM yyyy").parse("01 January 2016"));
+        when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, Calendar.JANUARY, 1).getTime());
 
         //when
         auditReportPrinter.printHeader(auditReport, 2, license);
