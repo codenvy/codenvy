@@ -149,10 +149,16 @@ public class HttpTransport {
 
     /**
      * Performs GET request and store response into file.
-     * Expected content type {@link javax.ws.rs.core.MediaType#APPLICATION_OCTET_STREAM}
      */
     public Path download(String path, Path destinationDir, String mediaType) throws IOException {
         return download(path, "GET", null, mediaType, destinationDir, false);
+    }
+
+    /**
+     * Performs GET request with access token and store response into file.
+     */
+    public Path download(String path, String accessToken, Path destinationDir, String mediaType) throws IOException {
+        return download(path, "GET", accessToken, mediaType, destinationDir, false);
     }
 
     /**

@@ -124,7 +124,7 @@ public class InstallationManagerFacade {
         if (configManager.getHostUrl().equals(host)) {
             transport.downloadWithoutProxy(host + "/api/audit", authToken, path, MediaType.TEXT_PLAIN);
         } else {
-            transport.download(host + "/api/audit?token=" + authToken, path, MediaType.TEXT_PLAIN);
+            transport.download(host + "/api/audit", authToken, path, MediaType.TEXT_PLAIN);
         }
 
     }
@@ -584,7 +584,7 @@ public class InstallationManagerFacade {
     }
 
     /**
-     * @see com.codenvy.im.saas.SaasRepositoryServiceProxy#logAnalyticsEvent(com.codenvy.im.event.Event, null)
+     * @see com.codenvy.im.saas.SaasRepositoryServiceProxy#logAnalyticsEvent(com.codenvy.im.event.Event, String)
      */
     public void logSaasAnalyticsEvent(Event event) throws IOException {
         logSaasAnalyticsEvent(event, null);

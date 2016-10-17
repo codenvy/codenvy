@@ -47,6 +47,7 @@ import static java.nio.file.Files.createFile;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.endsWith;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -111,7 +112,7 @@ public class TestConfigManager extends BaseTest {
                                              "c=\n" +
                                              "d=3\\n4\n");
         doReturn(properties).when(transport).download(endsWith("codenvy-single-server-properties/3.1.0"), any(Path.class),
-                                                      MediaType.APPLICATION_OCTET_STREAM);
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.SINGLE_SERVER);
         assertEquals(m.size(), 4);
@@ -134,7 +135,7 @@ public class TestConfigManager extends BaseTest {
                                              "billing_resources_refill_cron=0 15 0 * * ?\n" +
                                              "admin_ldap_dn=dc=codenvycorp,dc=com\n");
         doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
-                                                      MediaType.APPLICATION_OCTET_STREAM);
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
         assertEquals(m.size(), 6);
@@ -150,7 +151,7 @@ public class TestConfigManager extends BaseTest {
             expectedExceptionsMessageRegExp = "Can't download installation properties. error")
     public void testLoadDefaultCdecConfigTransportError() throws Exception {
         doThrow(new IOException("error")).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
-                                                                   MediaType.APPLICATION_OCTET_STREAM);
+                                                                   eq(MediaType.APPLICATION_OCTET_STREAM));
 
         spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
     }
@@ -161,7 +162,7 @@ public class TestConfigManager extends BaseTest {
         FileUtils.write(properties.toFile(), "a=1\n" +
                                              "b=2\n");
         doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
-                                                      MediaType.APPLICATION_OCTET_STREAM);
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         doThrow(new IOException("error")).when(spyConfigManager).doLoadCodenvyProperties(any(Path.class));
 
