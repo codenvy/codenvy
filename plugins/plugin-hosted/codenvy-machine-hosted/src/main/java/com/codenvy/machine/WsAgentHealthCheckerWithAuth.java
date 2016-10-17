@@ -47,7 +47,7 @@ public class WsAgentHealthCheckerWithAuth extends WsAgentHealthCheckerImpl {
     @Inject
     public WsAgentHealthCheckerWithAuth(WsAgentPingRequestFactory pingRequestFactory,
                                         HttpJsonRequestFactory httpJsonRequestFactory,
-                                        @Named("api.endpoint") String apiEndpoint) {
+                                        @Named("che.api") String apiEndpoint) {
         super(pingRequestFactory);
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;

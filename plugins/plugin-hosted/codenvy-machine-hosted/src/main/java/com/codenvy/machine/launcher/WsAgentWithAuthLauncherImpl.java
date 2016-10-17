@@ -54,7 +54,7 @@ public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
                                        @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
                                        @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                        @Named("che.workspace.agent.dev.ping_delay_ms") long wsAgentPingDelayMs,
-                                       @Named("che.workspace.agent.dev.ping_timeout_error_ms") String pingTimedOutErrorMessage,
+                                       @Named("che.workspace.agent.dev.ping_timeout_error_msg") String pingTimedOutErrorMessage,
                                        @Named("che.api") String apiEndpoint) {
         super(machineProcessManagerProvider,
               wsAgentPingRequestFactory,

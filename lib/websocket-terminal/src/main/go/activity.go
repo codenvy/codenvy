@@ -10,7 +10,7 @@ import (
 // time in seconds to wait, after last sent activity request, before next requests can be sent
 const threshold int64 = 60
 
-var apiEndpoint = os.Getenv("CHE_API_ENDPOINT")
+var apiEndpoint = os.Getenv("CHE_API")
 
 var workspaceId = os.Getenv("CHE_WORKSPACE_ID")
 
