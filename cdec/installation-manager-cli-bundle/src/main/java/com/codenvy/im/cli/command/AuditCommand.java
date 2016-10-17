@@ -16,7 +16,6 @@ package com.codenvy.im.cli.command;
 
 import com.codenvy.im.cli.preferences.PreferenceNotFoundException;
 import com.codenvy.im.utils.InjectorBootstrap;
-import com.google.common.io.Files;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 
@@ -26,13 +25,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static com.google.common.io.Files.readLines;
 
 /**
  * Installation manager Audit command.
  *
  * @author Igor Vinokur
  */
-@Command(scope = "codenvy", name = "audit", description = "Download Audit report and print it to screen")
+@Command(scope = "codenvy", name = "audit", description = "Download Audit report and print it on the screen")
 public class AuditCommand extends AbstractIMCommand {
     private final File auditDirectory;
 
@@ -56,14 +58,9 @@ public class AuditCommand extends AbstractIMCommand {
             return;
         }
 
-        File lastModifiedFile = reports[0];
-        for (int i = 1; i < reports.length; i++) {
-            if (lastModifiedFile.lastModified() < reports[i].lastModified()) {
-                lastModifiedFile = reports[i];
-            }
-        }
+        File lastModifiedFile = Stream.of(reports).max((f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified())).get();
 
-        List<String> lines = Files.readLines(lastModifiedFile, Charset.defaultCharset());
+        List<String> lines = readLines(lastModifiedFile, Charset.defaultCharset());
         lines.forEach(line -> getConsole().print(line + "\n"));
     }
 }
