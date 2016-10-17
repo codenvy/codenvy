@@ -64,6 +64,7 @@ import java.util.TreeMap;
 
 import static com.codenvy.im.utils.Commons.toJson;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -127,7 +128,7 @@ public class TestInstallationManagerFacade extends BaseTest {
 
         installationManagerFacade.requestAuditReport("token", "host");
 
-        verify(transport).download(eq("host/api/audit?token=token"), any(Path.class), eq(MediaType.TEXT_PLAIN));
+        verify(transport).download(eq("host/api/audit"), eq("token"), any(Path.class), eq(MediaType.TEXT_PLAIN));
     }
 
     @Test
