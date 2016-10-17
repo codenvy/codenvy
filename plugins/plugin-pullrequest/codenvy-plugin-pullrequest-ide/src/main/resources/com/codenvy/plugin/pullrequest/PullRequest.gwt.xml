@@ -26,4 +26,5 @@
     <inherits name="com.codenvy.plugin.pullrequest.projecttype.ContributionProjectType"/>
 
     <source path="client"/>
+    <source path="shared"/>
 </module>

@@ -12,25 +12,24 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.plugin.pullrequest.client.dto;
+package com.codenvy.plugin.pullrequest.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * Contribution configuration, which contains the values chosen by the user.
+ */
 @DTO
-public interface HostUser {
-    String getId();
+public interface Configuration {
+    String getContributionBranchName();
 
-    HostUser withId(String id);
+    Configuration withContributionBranchName(String name);
 
-    String getName();
+    String getContributionComment();
 
-    HostUser withName(String name);
+    Configuration withContributionComment(String comment);
 
-    String getLogin();
+    String getContributionTitle();
 
-    HostUser withLogin(String login);
-
-    String getUrl();
-
-    HostUser withUrl(String url);
+    Configuration withContributionTitle(String title);
 }

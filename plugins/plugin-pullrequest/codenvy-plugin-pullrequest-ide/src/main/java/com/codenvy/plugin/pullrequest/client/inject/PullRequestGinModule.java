@@ -15,14 +15,14 @@
 package com.codenvy.plugin.pullrequest.client.inject;
 
 import com.codenvy.plugin.pullrequest.client.ContributionMixinProvider;
-import com.codenvy.plugin.pullrequest.client.steps.PushBranchStepFactory;
-import com.codenvy.plugin.pullrequest.client.steps.AddForkRemoteStepFactory;
 import com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitView;
 import com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitViewImpl;
 import com.codenvy.plugin.pullrequest.client.parts.contribute.ContributePartPresenter;
 import com.codenvy.plugin.pullrequest.client.parts.contribute.ContributePartView;
 import com.codenvy.plugin.pullrequest.client.parts.contribute.ContributePartViewImpl;
+import com.codenvy.plugin.pullrequest.client.steps.AddForkRemoteStepFactory;
 import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnForkStep;
+import com.codenvy.plugin.pullrequest.client.steps.PushBranchStepFactory;
 import com.codenvy.plugin.pullrequest.client.steps.WaitForkOnRemoteStepFactory;
 import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import com.google.gwt.inject.client.AbstractGinModule;

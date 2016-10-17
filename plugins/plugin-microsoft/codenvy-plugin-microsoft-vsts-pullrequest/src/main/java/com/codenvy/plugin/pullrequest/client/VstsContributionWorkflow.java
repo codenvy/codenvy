@@ -25,10 +25,10 @@ import com.codenvy.plugin.pullrequest.client.steps.GenerateReviewFactoryStep;
 import com.codenvy.plugin.pullrequest.client.steps.InitializeWorkflowContextStep;
 import com.codenvy.plugin.pullrequest.client.steps.IssuePullRequestStep;
 import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
-import com.codenvy.plugin.pullrequest.client.workflow.StepsChain;
 import com.codenvy.plugin.pullrequest.client.steps.UpdatePullRequestStep;
 import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.workflow.ContributionWorkflow;
+import com.codenvy.plugin.pullrequest.client.workflow.StepsChain;
 import com.google.common.base.Supplier;
 
 import javax.inject.Inject;
