@@ -34,6 +34,12 @@ import java.util.List;
  */
 @Command(scope = "codenvy", name = "audit", description = "Download Audit report and print it to screen")
 public class AuditCommand extends AbstractIMCommand {
+    private final File auditDirectory;
+
+    public AuditCommand() {
+        auditDirectory =
+                new File(InjectorBootstrap.INJECTOR.getInstance(Key.get(String.class, Names.named("installation-manager.audit_dir"))));
+    }
 
     @Override
     protected void doExecuteCommand() throws IOException {
@@ -44,10 +50,7 @@ public class AuditCommand extends AbstractIMCommand {
             return;
         }
 
-        File auditDirectory =
-                new File(InjectorBootstrap.INJECTOR.getInstance(Key.get(String.class, Names.named("installation-manager.audit_dir"))));
         File[] reports = auditDirectory.listFiles();
-
         if (reports == null || reports.length == 0) {
             getConsole().printErrorAndExit("Audit directory is empty");
             return;
