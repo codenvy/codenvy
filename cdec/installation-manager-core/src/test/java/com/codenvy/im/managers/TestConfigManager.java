@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.MediaType;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -109,7 +110,8 @@ public class TestConfigManager extends BaseTest {
                                              "b=2\n" +
                                              "c=\n" +
                                              "d=3\\n4\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-single-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-single-server-properties/3.1.0"), any(Path.class),
+                                                      MediaType.APPLICATION_OCTET_STREAM);
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.SINGLE_SERVER);
         assertEquals(m.size(), 4);
@@ -131,7 +133,8 @@ public class TestConfigManager extends BaseTest {
                                              "user_ldap_dn=dc=codenvy-enterprise,dc=com\n" +
                                              "billing_resources_refill_cron=0 15 0 * * ?\n" +
                                              "admin_ldap_dn=dc=codenvycorp,dc=com\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                      MediaType.APPLICATION_OCTET_STREAM);
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
         assertEquals(m.size(), 6);
@@ -146,7 +149,8 @@ public class TestConfigManager extends BaseTest {
     @Test(expectedExceptions = IOException.class,
             expectedExceptionsMessageRegExp = "Can't download installation properties. error")
     public void testLoadDefaultCdecConfigTransportError() throws Exception {
-        doThrow(new IOException("error")).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doThrow(new IOException("error")).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                                   MediaType.APPLICATION_OCTET_STREAM);
 
         spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
     }
@@ -156,7 +160,8 @@ public class TestConfigManager extends BaseTest {
         Path properties = Paths.get("target/test.properties");
         FileUtils.write(properties.toFile(), "a=1\n" +
                                              "b=2\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                      MediaType.APPLICATION_OCTET_STREAM);
 
         doThrow(new IOException("error")).when(spyConfigManager).doLoadCodenvyProperties(any(Path.class));
 

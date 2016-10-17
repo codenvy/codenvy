@@ -75,6 +75,11 @@ public class TestInstallationManagerCliWithCodenvy extends BaseIntegrationTest {
     }
 
     @Test
+    public void testAudit() throws Exception {
+        doTest("codenvy/audit/test-audit.sh");
+    }
+
+    @Test
     public void testSetupAndUpdateCodenvyConfig() throws Exception {
         doTest("codenvy/test-setup-and-update-codenvy-config.sh");
     }

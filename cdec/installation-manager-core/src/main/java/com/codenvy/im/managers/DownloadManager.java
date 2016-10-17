@@ -33,6 +33,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonParseException;
 
 import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
@@ -248,7 +249,7 @@ public class DownloadManager {
             Path artifactDownloadDir = getDownloadDirectory(artifact, version);
             deleteDirectory(artifactDownloadDir.toFile());
 
-            return transport.download(requestUrl, artifactDownloadDir);
+            return transport.download(requestUrl, artifactDownloadDir, MediaType.APPLICATION_OCTET_STREAM);
         } catch (IOException e) {
             throw getProperException(e, artifact);
         }

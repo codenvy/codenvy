@@ -25,3 +25,4 @@ com.codenvy.im.cli.command.BackupCommand
 com.codenvy.im.cli.command.RestoreCommand
 com.codenvy.im.cli.command.VersionCommand
 com.codenvy.im.cli.command.LoginCommand
+com.codenvy.im.cli.command.AuditCommand
