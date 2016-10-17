@@ -231,7 +231,7 @@ public class HttpTransport {
         final HttpURLConnection conn = openConnection(path, accessToken, noProxy);
 
         try {
-            request(method, null, expectedContentType, conn);
+            request(method, accessToken, expectedContentType, conn);
 
             String headerField = conn.getHeaderField("Content-Disposition");
             if (headerField == null) {

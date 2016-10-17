@@ -68,3 +68,6 @@ executeIMCommand "login" "admin" "password"
 executeIMCommand "audit"
 
 validateExpectedString ".*Number.of.all.users:.3.*Number.of.users.licensed:.10.*Date.when.license.expires:.31.December.2050.*admin@codenvy.onprem.is.owner.of.0.workspaces.and.has.permissions.in.0.workspaces.*user1.im.test@email.com.is.owner.of.2.workspaces.and.has.permissions.in.2.workspaces.*${USER_1_WORKSPACE_1_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\].*${USER_1_WORKSPACE_2_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\].*user2.im.test@email.com.is.owner.of.1.workspace.and.has.permissions.in.2.workspaces.*${USER_1_WORKSPACE_2_NAME},.is.owner:.false,.permissions:.\[read,.use,.run,.configure\].*${USER_2_WORKSPACE_1_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\]"
+
+printAndLog "RESULT: PASSED"
+vagrantDestroy
