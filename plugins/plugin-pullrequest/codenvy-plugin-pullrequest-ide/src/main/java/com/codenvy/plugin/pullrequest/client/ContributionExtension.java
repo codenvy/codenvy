@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.Project;
@@ -70,6 +71,7 @@ public class ContributionExtension {
             public void onSelectionChanged(SelectionChangedEvent event) {
                 final Project rootProject = appContext.getRootProject();
                 if (rootProject == null) {
+                    workspaceAgent.getPartStack(PartStackType.TOOLING).removePart(contributePart);
                     return;
                 }
 
@@ -77,6 +79,10 @@ public class ContributionExtension {
                     vcsHostingServiceProvider.getVcsHostingService(rootProject).then(new Operation<VcsHostingService>() {
                         @Override
                         public void apply(VcsHostingService arg) throws OperationException {
+                            final PartStack partStack = workspaceAgent.getPartStack(PartStackType.TOOLING);
+                            if (partStack.getActivePart() == null || !partStack.getActivePart().equals(contributePart)) {
+                                partStack.addPart(contributePart);
+                            }
                             workflowExecutor.init(arg, rootProject);
                         }
                     });
@@ -96,7 +102,5 @@ public class ContributionExtension {
         });
 
         resources.contributeCss().ensureInjected();
-
-        workspaceAgent.getPartStack(PartStackType.TOOLING).addPart(contributePart);
     }
 }
