@@ -16,6 +16,7 @@ package com.codenvy.im.cli.command;
 
 import com.codenvy.im.cli.preferences.PreferenceNotFoundException;
 import com.codenvy.im.utils.InjectorBootstrap;
+import com.google.common.io.LineProcessor;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 
@@ -25,8 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.io.Files.readLines;
 
 /**
@@ -52,15 +55,24 @@ public class AuditCommand extends AbstractIMCommand {
             return;
         }
 
-        File[] reports = auditDirectory.listFiles();
-        if (reports == null || reports.length == 0) {
+        Optional<File> lastModifiedFile = Stream.of(firstNonNull(auditDirectory.listFiles(), new File[0]))
+                                                .max((f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+        if (!lastModifiedFile.isPresent()) {
             getConsole().printErrorAndExit("Audit directory is empty");
             return;
         }
 
-        File lastModifiedFile = Stream.of(reports).max((f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified())).get();
+        readLines(lastModifiedFile.get(), Charset.defaultCharset(), new LineProcessor<List<String>>() {
+            @Override
+            public boolean processLine(String line) throws IOException {
+                getConsole().print(line + "\n");
+                return true;
+            }
 
-        List<String> lines = readLines(lastModifiedFile, Charset.defaultCharset());
-        lines.forEach(line -> getConsole().print(line + "\n"));
+            @Override
+            public List<String> getResult() {
+                return null;
+            }
+        });
     }
 }
