@@ -61,6 +61,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     private static final Striped<Lock> CREATE_LOCKS               = Striped.lazyWeakLock(100);
+    private static final Striped<Lock> START_LOCKS                = Striped.lazyWeakLock(100);
     private static final long          BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
     private final EnvironmentParser     environmentParser;
@@ -218,7 +219,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if started workspaces number limit is 10 and user has 9 started workspaces, then if he sends 2 separate requests
         // to start a workspace, it may start both of them, because started workspaces number check is not atomic one.
-        final Lock lock = CREATE_LOCKS.get(namespace);
+        final Lock lock = START_LOCKS.get(namespace);
         lock.lock();
         try {
             long runningWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
