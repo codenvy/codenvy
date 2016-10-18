@@ -417,5 +417,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         // install report sender
         install(new ReportModule());
+
+        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
+                .to(com.codenvy.workspace.WorkspaceFilesCleanUpScriptExecutor.class);
     }
 }
