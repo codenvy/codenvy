@@ -14,12 +14,12 @@
  */
 package com.codenvy.plugin.pullrequest.client.inject;
 
-import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.workflow.ContributionWorkflow;
 import com.codenvy.plugin.pullrequest.client.MicrosoftHostingService;
 import com.codenvy.plugin.pullrequest.client.VstsContributionWorkflow;
 import com.codenvy.plugin.pullrequest.client.VstsStagesProvider;
+import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
+import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
+import com.codenvy.plugin.pullrequest.client.workflow.ContributionWorkflow;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;

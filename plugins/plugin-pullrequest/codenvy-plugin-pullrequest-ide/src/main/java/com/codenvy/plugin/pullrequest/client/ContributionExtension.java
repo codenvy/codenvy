@@ -34,7 +34,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.plugin.pullrequest.projecttype.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
+import static com.codenvy.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
 
 /**
  * Registers event handlers for adding/removing contribution part.

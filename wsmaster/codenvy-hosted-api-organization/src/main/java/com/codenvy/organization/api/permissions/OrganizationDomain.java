@@ -35,7 +35,8 @@ public class OrganizationDomain extends AbstractPermissionsDomain<MemberImpl> {
     public static final String CREATE_WORKSPACES       = "createWorkspaces";
     public static final String MANAGE_WORKSPACES       = "manageWorkspaces";
 
-    private static final List<String> ACTIONS = ImmutableList.of(UPDATE,
+    private static final List<String> ACTIONS = ImmutableList.of(SET_PERMISSIONS,
+                                                                 UPDATE,
                                                                  DELETE,
                                                                  MANAGE_SUBORGANIZATIONS,
                                                                  MANAGE_RESOURCES,

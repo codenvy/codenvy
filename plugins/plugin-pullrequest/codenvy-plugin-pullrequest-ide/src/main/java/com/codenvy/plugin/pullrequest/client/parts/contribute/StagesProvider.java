@@ -14,9 +14,9 @@
  */
 package com.codenvy.plugin.pullrequest.client.parts.contribute;
 
+import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.workflow.Step;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 
 import java.util.List;
 import java.util.Set;

@@ -62,7 +62,6 @@
     <inherits name='org.eclipse.che.plugin.php.Php'/>
     <inherits name='com.codenvy.plugin.product.info.ProductInfo'/>
     <inherits name='com.codenvy.plugin.pullrequest.PullRequest'/>
-    <inherits name='com.codenvy.plugin.pullrequest.projecttype.ContributionProjectType'/>
     <inherits name='com.codenvy.plugin.pullrequest.BitbucketPullRequest'/>
     <inherits name='com.codenvy.plugin.pullrequest.GithubPullRequest'/>
     <inherits name='com.codenvy.plugin.pullrequest.VstsPullRequest'/>

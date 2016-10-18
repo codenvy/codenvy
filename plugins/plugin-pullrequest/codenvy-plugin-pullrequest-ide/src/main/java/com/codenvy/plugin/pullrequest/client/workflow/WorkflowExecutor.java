@@ -19,7 +19,7 @@ import com.codenvy.plugin.pullrequest.client.events.CurrentContextChangedEvent;
 import com.codenvy.plugin.pullrequest.client.events.StepEvent;
 import com.codenvy.plugin.pullrequest.client.vcs.VcsServiceProvider;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.dto.Configuration;
+import com.codenvy.plugin.pullrequest.shared.dto.Configuration;
 import com.google.common.base.Optional;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;

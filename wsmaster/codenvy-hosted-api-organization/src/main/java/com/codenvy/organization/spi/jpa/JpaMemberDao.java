@@ -68,7 +68,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
     }
 
     @Override
-    public void remove(String organizationId, String userId) throws ServerException {
+    public void remove(String userId, String organizationId) throws ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         requireNonNull(userId, "Required non-null user id");
         try {
@@ -178,7 +178,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         @Override
         public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             for (MemberImpl member : memberDao.getMembers(event.getOrganization().getId())) {
-                memberDao.remove(member.getOrganizationId(), member.getUserId());
+                memberDao.remove(member.getUserId(), member.getOrganizationId());
             }
         }
     }

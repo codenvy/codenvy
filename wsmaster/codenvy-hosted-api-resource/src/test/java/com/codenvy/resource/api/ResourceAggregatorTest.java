@@ -99,13 +99,12 @@ public class ResourceAggregatorTest {
     public void shouldTestResourcesDeduction() throws Exception {
         final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
         final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 123, "unit");
-        final ResourceImpl cResource = new ResourceImpl(C_RESOURCE_TYPE, 123, "unit");
         final ResourceImpl anotherBResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
         final ResourceImpl aggregatedBResources = new ResourceImpl(A_RESOURCE_TYPE, 444, "unit");
         when(bResourceType.deduct(any(), any())).thenReturn(aggregatedBResources);
 
         final List<? extends Resource> deductedResources = resourceAggregator.deduct(asList(aResource, bResource),
-                                                                                    asList(anotherBResource, cResource));
+                                                                                     singletonList(anotherBResource));
 
         verify(bResourceType).deduct(eq(bResource), eq(anotherBResource));
         verify(aResourceType, never()).deduct(any(), any());
@@ -123,6 +122,15 @@ public class ResourceAggregatorTest {
         when(aResourceType.deduct(any(), any())).thenThrow(new ConflictException("No enough resources"));
 
         resourceAggregator.deduct(singletonList(aResource), singletonList(anotherAResource));
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Your account doesn't have resourceB resource to use.")
+    public void shouldThrowConflictExceptionWhenTotalResourcesDoNotContainsRequiredResourcesAtAll() throws Exception {
+        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
+        final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
+
+        resourceAggregator.deduct(singletonList(aResource), singletonList(bResource));
     }
 
     @Test(expectedExceptions = NotFoundException.class)

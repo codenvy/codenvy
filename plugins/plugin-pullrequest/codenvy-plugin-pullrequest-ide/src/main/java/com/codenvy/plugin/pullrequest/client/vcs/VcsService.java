@@ -14,13 +14,13 @@
  */
 package com.codenvy.plugin.pullrequest.client.vcs;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.promises.client.Promise;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;

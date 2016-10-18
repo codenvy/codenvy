@@ -16,14 +16,14 @@ package com.codenvy.plugin.pullrequest.client;
 
 import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
 import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.steps.CreateForkStep;
+import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
 import com.codenvy.plugin.pullrequest.client.steps.IssuePullRequestStep;
 import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnForkStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Step;
+import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
 import com.codenvy.plugin.pullrequest.client.steps.UpdatePullRequestStep;
+import com.codenvy.plugin.pullrequest.client.workflow.Context;
+import com.codenvy.plugin.pullrequest.client.workflow.Step;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -17,8 +17,8 @@ package com.codenvy.plugin.pullrequest.client.workflow;
 import com.codenvy.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
 import com.codenvy.plugin.pullrequest.client.vcs.VcsService;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.dto.Configuration;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.shared.dto.Configuration;
+import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
