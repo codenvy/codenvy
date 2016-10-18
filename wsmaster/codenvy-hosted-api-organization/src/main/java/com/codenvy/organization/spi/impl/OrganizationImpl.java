@@ -78,9 +78,6 @@ public class OrganizationImpl implements Organization {
     @JoinColumn(name = "parent", insertable = false, updatable = false)
     public OrganizationImpl parentObj;
 
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, mappedBy = "parentObj", orphanRemoval = true)
-    List<OrganizationImpl> children;
-
     public OrganizationImpl() {}
 
     public OrganizationImpl(Organization organization) {

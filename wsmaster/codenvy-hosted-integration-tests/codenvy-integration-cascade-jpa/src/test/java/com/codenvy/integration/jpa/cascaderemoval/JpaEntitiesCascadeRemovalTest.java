@@ -293,8 +293,13 @@ public class JpaEntitiesCascadeRemovalTest {
         assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
         // Check existence of organizations
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
+        assertTrue(memberDao.getMembers(organization.getId()).isEmpty());
+
         assertNull(notFoundToNull(() -> organizationDao.getById(childOrganization.getId())));
+        assertTrue(memberDao.getMembers(childOrganization.getId()).isEmpty());
+
         assertNotNull(notFoundToNull(() -> organizationDao.getById(organization2.getId())));
+        assertFalse(memberDao.getMembers(organization2.getId()).isEmpty());
 
         // free resources limit is removed
         assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user.getId())));
@@ -402,6 +407,7 @@ public class JpaEntitiesCascadeRemovalTest {
         organizationDao.create(organization2 = new OrganizationImpl("org321", "anotherOrg", null));
 
         memberDao.store(new MemberImpl(user.getId(), organization.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
+        memberDao.store(new MemberImpl(user.getId(), childOrganization.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
 
         memberDao.store(new MemberImpl(user.getId(), organization2.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
         memberDao.store(new MemberImpl(user2.getId(), organization2.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
@@ -414,6 +420,7 @@ public class JpaEntitiesCascadeRemovalTest {
         freeResourcesLimitDao.remove(freeResourcesLimit.getAccountId());
 
         memberDao.remove(organization.getId(), user.getId());
+        memberDao.remove(childOrganization.getId(), user.getId());
         memberDao.remove(organization2.getId(), user.getId());
         memberDao.remove(organization2.getId(), user2.getId());
         memberDao.remove(organization2.getId(), user3.getId());
