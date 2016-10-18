@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
@@ -60,6 +61,7 @@ import static org.testng.Assert.assertNull;
  *
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi
+ * @author Igor Vinokur
  */
 @Listeners(MockitoTestNGListener.class)
 public class LimitsCheckingWorkspaceManagerTest {
@@ -97,8 +99,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               false,
                                                                                               2000));
         doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
-                .when(manager)
-                .getByNamespace(anyString());
+                                                                                         .when(manager)
+                                                                                         .getByNamespace(anyString());
 
         manager.checkCountAndPropagateCreation("user123", null);
     }
@@ -120,8 +122,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               false,
                                                                                               2000));
         doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
-                .when(manager)
-                .getByNamespace(anyString());
+                                                                                         .when(manager)
+                                                                                         .getByNamespace(anyString());
         final WorkspaceCallback callback = mock(WorkspaceCallback.class);
 
         manager.checkCountAndPropagateCreation("user123", callback);
@@ -477,13 +479,10 @@ public class LimitsCheckingWorkspaceManagerTest {
         verify(manager, timeout(300).times(7)).checkLimitsAndPropagateStart(anyString(), anyObject());
     }
 
-    @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "The maximum workspaces allowed to be started per user is set to '2' " +
-                                            "and you are currently at that limit. This value is set by your admin " +
-                                            "with the 'limits.user.workspaces.run.count' property")
-    public void shouldNotBeAbleToStartWorkspaceIfStartedWorkspacesNumberLimitIsExceeded() throws Exception {
+    @Test
+    public void shouldCallCreateCallBackIfStartedWorkspacesNumberLimitIsNotExceeded() throws Exception {
         final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
-                                                                                              2, // max started workspaces limit
+                                                                                              4, // max started workspaces limit
                                                                                               "1gb",
                                                                                               0,
                                                                                               null,
@@ -496,9 +495,52 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                               false,
                                                                                               false,
                                                                                               2000));
-        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently started 2 workspaces
-                                                                                         .when(manager)
-                                                                                         .getByNamespace(anyString());
+        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
+        WorkspaceImpl startingWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl runningWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl stoppingWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl stoppedWorkspace = mock(WorkspaceImpl.class);
+        when(startingWorkspace.getStatus()).thenReturn(WorkspaceStatus.STARTING);
+        when(runningWorkspace.getStatus()).thenReturn(WorkspaceStatus.RUNNING);
+        when(stoppingWorkspace.getStatus()).thenReturn(WorkspaceStatus.STOPPING);
+        when(stoppedWorkspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
+        doReturn(ImmutableList.of(startingWorkspace, runningWorkspace, stoppingWorkspace, stoppedWorkspace)).when(manager)
+                                                                                                            .getByNamespace(anyString());
+
+        manager.checkStartedWorkspacesNumberAndPropagateStart("user123", callback);
+
+        verify(callback).call();
+    }
+
+    @Test(expectedExceptions = LimitExceededException.class,
+          expectedExceptionsMessageRegExp = "The maximum workspaces allowed to be started per user is set to '3' " +
+                                            "and you are currently at that limit. This value is set by your admin " +
+                                            "with the 'limits.user.workspaces.run.count' property")
+    public void shouldNotBeAbleToStartWorkspaceIfStartedWorkspacesNumberLimitIsExceeded() throws Exception {
+        final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
+                                                                                              3, // max started workspaces limit
+                                                                                              "1gb",
+                                                                                              0,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              null,
+                                                                                              environmentParser,
+                                                                                              false,
+                                                                                              false,
+                                                                                              2000));
+        WorkspaceImpl startingWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl runningWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl stoppingWorkspace = mock(WorkspaceImpl.class);
+        WorkspaceImpl stoppedWorkspace = mock(WorkspaceImpl.class);
+        when(startingWorkspace.getStatus()).thenReturn(WorkspaceStatus.STARTING);
+        when(runningWorkspace.getStatus()).thenReturn(WorkspaceStatus.RUNNING);
+        when(stoppingWorkspace.getStatus()).thenReturn(WorkspaceStatus.STOPPING);
+        when(stoppedWorkspace.getStatus()).thenReturn(WorkspaceStatus.STOPPED);
+        doReturn(ImmutableList.of(startingWorkspace, runningWorkspace, stoppingWorkspace, stoppedWorkspace)).when(manager)
+                                                                                                            .getByNamespace(anyString());
 
         manager.checkStartedWorkspacesNumberAndPropagateStart("user123", null);
     }
@@ -528,29 +570,5 @@ public class LimitsCheckingWorkspaceManagerTest {
 
         verify(callback).call();
         verify(manager, never()).getByNamespace(any());
-    }
-
-    @Test
-    public void shouldCallCreateCallBackIfEverythingIsOkayWithStartedWorkspacesNumberLimit() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = spy(new LimitsCheckingWorkspaceManager(2,
-                                                                                              2, // max started workspaces limit
-                                                                                              "1gb",
-                                                                                              0,
-                                                                                              null,
-                                                                                              null,
-                                                                                              null,
-                                                                                              null,
-                                                                                              null,
-                                                                                              null,
-                                                                                              environmentParser,
-                                                                                              false,
-                                                                                              false,
-                                                                                              2000));
-        doReturn(emptyList()).when(manager).getByNamespace(anyString()); // <- currently started 0 workspaces
-        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-
-        manager.checkStartedWorkspacesNumberAndPropagateStart("user123", callback);
-
-        verify(callback).call();
     }
 }

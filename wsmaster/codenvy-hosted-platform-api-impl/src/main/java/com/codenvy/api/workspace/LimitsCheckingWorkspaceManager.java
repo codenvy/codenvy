@@ -171,14 +171,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * limits.workspace.start.throughput property configures how many permits can be handled at the same time.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkLimitsAndPropagateLimitedThroughputStart(String nameSpace, WorkspaceCallback<T> callback)
+    <T extends WorkspaceImpl> T checkLimitsAndPropagateLimitedThroughputStart(String namespace, WorkspaceCallback<T> callback)
             throws ServerException, NotFoundException, ConflictException {
         if (startSemaphore == null) {
-            return checkLimitsAndPropagateStart(nameSpace, callback);
+            return checkLimitsAndPropagateStart(namespace, callback);
         } else {
             try {
                 startSemaphore.acquire();
-                return checkLimitsAndPropagateStart(nameSpace, callback);
+                return checkLimitsAndPropagateStart(namespace, callback);
             } catch (InterruptedException e) {
                 currentThread().interrupt();
                 throw new ServerException(e.getMessage(), e);
@@ -195,12 +195,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkLimitsAndPropagateStart(String nameSpace, WorkspaceCallback<T> callback)
+    <T extends WorkspaceImpl> T checkLimitsAndPropagateStart(String namespace, WorkspaceCallback<T> callback)
             throws ServerException, NotFoundException, ConflictException {
         if (systemRamInfoProvider.getSystemRamInfo().isSystemRamLimitExceeded()) {
             throw new LimitExceededException("Low RAM. Your workspace cannot be started until the system has more RAM available.");
         }
-        return checkStartedWorkspacesNumberAndPropagateStart(nameSpace, callback);
+        return checkStartedWorkspacesNumberAndPropagateStart(namespace, callback);
     }
 
     /**
@@ -209,7 +209,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkStartedWorkspacesNumberAndPropagateStart(String nameSpace, WorkspaceCallback<T> callback)
+    <T extends WorkspaceImpl> T checkStartedWorkspacesNumberAndPropagateStart(String namespace, WorkspaceCallback<T> callback)
             throws ServerException, NotFoundException, ConflictException {
         if (startedWorkspacesLimit < 0) {
             return callback.call();
@@ -218,10 +218,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         // It is important to lock in this place because:
         // if started workspaces number limit is 10 and user has 9 started workspaces, then if he sends 2 separate requests
         // to start a workspace, it may start both of them, because started workspaces number check is not atomic one.
-        final Lock lock = CREATE_LOCKS.get(nameSpace);
+        final Lock lock = CREATE_LOCKS.get(namespace);
         lock.lock();
         try {
-            long runningWorkspaces = getByNamespace(nameSpace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
+            long runningWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
             if (runningWorkspaces >= startedWorkspacesLimit) {
                 throw new LimitExceededException(format("The maximum workspaces allowed to be started per user is set to '%d' and " +
                                                         "you are currently at that limit. This value is set by your admin with the " +
