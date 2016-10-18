@@ -19,7 +19,7 @@
 # load lib.sh from path stored in parameter 1
 . $1
 
-printAndLog "TEST CASE: Audit"
+printAndLog "TEST CASE: Audit and login commands"
 vagrantUp ${SINGLE_NODE_VAGRANT_FILE}
 
 # install Codenvy on-prem
@@ -63,8 +63,17 @@ doPost "application/json" "{\"userId\":\"${USER_2_ID}\",\"domainId\":\"workspace
 executeIMCommand "--valid-exit-code=1" "audit"
 validateExpectedString ".*Please,.login.into.Codenvy.*"
 
-#execute audit from admin
+# test login command
+executeIMCommand "--valid-exit-code=1" "login" "admin" "wrong"
+validateExpectedString ".*Unable.to.authenticate.for.the.given.credentials.on.URL.'http://${HOST_URL}'..Check.the.username.and.password.*Login.failed.on.'http://${HOST_URL}'.*"
+
 executeIMCommand "login" "admin" "password"
+validateExpectedString ".*Login.success.on.'http://${HOST_URL}'.*"
+
+executeIMCommand "login" "--url=http://${HOST_URL}" "admin" "password"
+validateExpectedString ".*Login.success.on.'http://${HOST_URL}'.*"
+
+# test audit command from admin user
 executeIMCommand "audit"
 
 validateExpectedString ".*Number.of.all.users:.3.*Number.of.users.licensed:.10.*Date.when.license.expires:.31.December.2050.*admin@codenvy.onprem.is.owner.of.0.workspaces.and.has.permissions.in.0.workspaces.*user1.im.test@email.com.is.owner.of.2.workspaces.and.has.permissions.in.2.workspaces.*${USER_1_WORKSPACE_1_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\].*${USER_1_WORKSPACE_2_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\].*user2.im.test@email.com.is.owner.of.1.workspace.and.has.permissions.in.2.workspaces.*${USER_1_WORKSPACE_2_NAME},.is.owner:.false,.permissions:.\[read,.use,.run,.configure\].*${USER_2_WORKSPACE_1_NAME},.is.owner:.true,.permissions:.\[read,.use,.run,.configure,.setPermissions,.delete\]"
