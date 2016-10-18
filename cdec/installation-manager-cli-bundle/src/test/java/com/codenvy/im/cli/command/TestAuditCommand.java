@@ -72,18 +72,17 @@ public class TestAuditCommand extends AbstractTestCommand {
         createDirectory(REPORT_DIRECTORY);
         Path report1 = createFile(REPORT_DIRECTORY.resolve("report1.txt"));
         write(report1, "First_Report".getBytes());
-        Path report2 = createFile(REPORT_DIRECTORY.resolve("report2.txt"));
-        write(report2, "Second_Report".getBytes());
+        Thread.sleep(1000);
         doAnswer(invocation -> {
-            Path report3 = createFile(REPORT_DIRECTORY.resolve("report3.txt"));
-            write(report3, "Third_Report".getBytes());
+            Path report2 = createFile(REPORT_DIRECTORY.resolve("report3.txt"));
+            write(report2, "Second_Report".getBytes());
             return null;
         }).when(mockFacade).requestAuditReport(anyString(), anyString());
         CommandInvoker commandInvoker = new CommandInvoker(spyCommand, mockCommandSession);
 
         String reportContent = commandInvoker.invoke().getOutputStream();
 
-        assertEquals(reportContent, "Third_Report\n");
+        assertEquals(reportContent, "Second_Report\n");
     }
 
     @Test
