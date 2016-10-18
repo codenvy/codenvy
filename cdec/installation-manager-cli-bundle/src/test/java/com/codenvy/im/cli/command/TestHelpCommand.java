@@ -43,6 +43,7 @@ public class TestHelpCommand extends AbstractTestCommand {
 
         assertTrue(output.contains("COMMANDS\n"
                                    + "add-node    Add new Codenvy node such as builder or runner\n"
+                                   + "audit       Download Audit report and print it on the screen\n"
                                    + "backup      Backup all Codenvy data\n"
                                    + "config      Get installation manager configuration\n"
                                    + "download    Download artifacts or print the list of installed ones\n"

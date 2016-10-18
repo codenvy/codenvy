@@ -159,9 +159,8 @@ public class AuditManager {
     }
 
     private Page<UserImpl> getNextPage(Page<UserImpl> currentPage) throws ServerException {
-        final Optional<PageRef> nextPageRefOpt = currentPage.getNextPageRef();
-        if (nextPageRefOpt.isPresent()) {
-            final PageRef nextPageRef = nextPageRefOpt.get();
+        if (currentPage.hasNextPage()) {
+            final PageRef nextPageRef = currentPage.getNextPageRef();
             final long itemsBefore = nextPageRef.getItemsBefore();
             //TODO: fix when https://github.com/eclipse/che/issues/2524 will be resolved
             if (itemsBefore < Integer.MAX_VALUE) {

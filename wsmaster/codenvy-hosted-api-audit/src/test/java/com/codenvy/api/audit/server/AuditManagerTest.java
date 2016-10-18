@@ -159,7 +159,7 @@ public class AuditManagerTest {
         //Page
         Page page = mock(Page.class);
         when(page.getItems()).thenReturn(asList(user1, user2));
-        when(page.getNextPageRef()).thenReturn(Optional.empty());
+        when(page.hasNextPage()).thenReturn(false);
         when(userManager.getAll(1, 0)).thenReturn(page);
         when(userManager.getAll(30, 0)).thenReturn(page);
 

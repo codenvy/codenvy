@@ -43,6 +43,7 @@ public class HelpCommand extends AbstractIMCommand {
         buffer.a(INTENSITY_BOLD).a("COMMANDS").a(INTENSITY_BOLD_OFF).a("\n");
 
         String value = buildAsciiForm().withEntry(withCyan("add-node"), "Add new Codenvy node such as builder or runner")
+                                       .withEntry(withCyan("audit"), "Download Audit report and print it on the screen")
                                        .withEntry(withCyan("backup"), "Backup all Codenvy data")
                                        .withEntry(withCyan("config"), "Get installation manager configuration")
                                        .withEntry(withCyan("download"), "Download artifacts or print the list of installed ones")

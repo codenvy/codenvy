@@ -47,5 +47,8 @@
         <command>
             <action class="com.codenvy.im.cli.command.LoginCommand"/>
         </command>
+        <command>
+            <action class="com.codenvy.im.cli.command.AuditCommand"/>
+        </command>
     </command-bundle>
 </blueprint>
