@@ -72,6 +72,7 @@ public class TestAuditCommand extends AbstractTestCommand {
         createDirectory(REPORT_DIRECTORY);
         Path report1 = createFile(REPORT_DIRECTORY.resolve("report1.txt"));
         write(report1, "First_Report".getBytes());
+        //Sleep is needed here because file.lastModified() returns time rounded to seconds.
         Thread.sleep(1000);
         doAnswer(invocation -> {
             Path report2 = createFile(REPORT_DIRECTORY.resolve("report3.txt"));
