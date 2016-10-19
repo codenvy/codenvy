@@ -16,21 +16,19 @@ package com.codenvy.im.cli.command;
 
 import com.codenvy.im.cli.preferences.PreferenceNotFoundException;
 import com.codenvy.im.utils.InjectorBootstrap;
-import com.google.common.io.LineProcessor;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 
 import org.apache.karaf.shell.commands.Command;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.io.Files.readLines;
+import static java.nio.file.Files.getLastModifiedTime;
+import static java.nio.file.Files.lines;
+import static java.nio.file.Files.list;
 
 /**
  * Installation manager Audit command.
@@ -39,11 +37,11 @@ import static com.google.common.io.Files.readLines;
  */
 @Command(scope = "codenvy", name = "audit", description = "Download Audit report and print it on the screen")
 public class AuditCommand extends AbstractIMCommand {
-    private final File auditDirectory;
+    private final Path auditDirectory;
 
     public AuditCommand() {
         auditDirectory =
-                new File(InjectorBootstrap.INJECTOR.getInstance(Key.get(String.class, Names.named("installation-manager.audit_dir"))));
+                Paths.get(InjectorBootstrap.INJECTOR.getInstance(Key.get(String.class, Names.named("installation-manager.audit_dir"))));
     }
 
     @Override
@@ -55,24 +53,18 @@ public class AuditCommand extends AbstractIMCommand {
             return;
         }
 
-        Optional<File> lastModifiedFile = Stream.of(firstNonNull(auditDirectory.listFiles(), new File[0]))
-                                                .max((f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-        if (!lastModifiedFile.isPresent()) {
-            getConsole().printErrorAndExit("Audit directory is empty");
-            return;
-        }
-
-        readLines(lastModifiedFile.get(), Charset.defaultCharset(), new LineProcessor<List<String>>() {
-            @Override
-            public boolean processLine(String line) throws IOException {
-                getConsole().print(line + "\n");
-                return true;
-            }
-
-            @Override
-            public List<String> getResult() {
-                return null;
+        Optional<Path> lastModifiedFile = list(auditDirectory).max((f1, f2) -> {
+            try {
+                return getLastModifiedTime(f1).compareTo(getLastModifiedTime(f2));
+            } catch (IOException e) {
+                return 0;
             }
         });
+
+        if (lastModifiedFile.isPresent()) {
+            lines(lastModifiedFile.get()).forEach(line -> getConsole().print(line + "\n"));
+        } else {
+            getConsole().printErrorAndExit("Audit directory is empty");
+        }
     }
 }

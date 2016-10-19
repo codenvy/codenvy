@@ -23,10 +23,14 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 
 import static java.nio.file.Files.createDirectory;
 import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.getLastModifiedTime;
+import static java.nio.file.Files.setLastModifiedTime;
 import static java.nio.file.Files.write;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -72,11 +76,14 @@ public class TestAuditCommand extends AbstractTestCommand {
         createDirectory(REPORT_DIRECTORY);
         Path report1 = createFile(REPORT_DIRECTORY.resolve("report1.txt"));
         write(report1, "First_Report".getBytes());
-        //Sleep is needed here because file.lastModified() returns time rounded to seconds.
-        Thread.sleep(1000);
         doAnswer(invocation -> {
-            Path report2 = createFile(REPORT_DIRECTORY.resolve("report3.txt"));
+            Path report2 = createFile(REPORT_DIRECTORY.resolve("report2.txt"));
             write(report2, "Second_Report".getBytes());
+            //Creating of files in this test can be performed during the current second but
+            //getLastModifiedTime() in AuditCommand returns time rounded to seconds and
+            //comparing the modification time of this files will return wrong result.
+            //Adding 5 second to modification time to last created file resolves this problem.
+            setLastModifiedTime(report2, FileTime.from(getLastModifiedTime(report2).toMillis() + 5000, MILLISECONDS));
             return null;
         }).when(mockFacade).requestAuditReport(anyString(), anyString());
         CommandInvoker commandInvoker = new CommandInvoker(spyCommand, mockCommandSession);
@@ -97,6 +104,7 @@ public class TestAuditCommand extends AbstractTestCommand {
 
     @Test
     public void shouldPrintErrorWhenAuditDirectoryIsEmpty() throws Exception {
+        createDirectory(REPORT_DIRECTORY);
         doNothing().when(mockFacade).requestAuditReport(anyString(), anyString());
 
         String errorMessage = commandInvoker.invoke().disableAnsi().getOutputStream();
