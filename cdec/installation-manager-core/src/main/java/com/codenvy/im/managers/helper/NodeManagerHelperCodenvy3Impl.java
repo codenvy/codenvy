@@ -38,7 +38,6 @@ import java.util.Map;
 
 import static com.codenvy.im.commands.CommandLibrary.createFileBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.SimpleCommand.createCommand;
 import static java.lang.String.format;
 
@@ -71,7 +70,7 @@ public class NodeManagerHelperCodenvy3Impl extends NodeManagerHelper {
                 Path file = propertiesFiles.next();
 
                 commands.add(createFileBackupCommand(file));
-                commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
             }
 
             // add node into the autosign list of puppet master
@@ -162,7 +161,7 @@ public class NodeManagerHelperCodenvy3Impl extends NodeManagerHelper {
                 Path file = propertiesFiles.next();
 
                 commands.add(createFileBackupCommand(file));
-                commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
             }
 
             // force applying updated puppet config for puppet agent on API node

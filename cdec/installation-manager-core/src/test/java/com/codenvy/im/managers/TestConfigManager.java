@@ -310,8 +310,8 @@ public class TestConfigManager extends BaseTest {
                 new NodeConfig(NodeConfig.NodeType.RUNNER, "runner23.runner89.com")
                                                  );
 
-        Map<String, String> expected = ImmutableMap.of("builder\\\\d+\\\\.example.com", "builder\\\\d+\\\\.dev.com",
-                                                       "runner\\\\d+\\\\.example.com", "runner\\\\d+\\\\.runner89.com",
+        Map<String, String> expected = ImmutableMap.of("builder\\\\d\\+\\\\.example.com", "builder\\\\d+\\\\.dev.com",
+                                                       "runner\\\\d\\+\\\\.example.com", "runner\\\\d+\\\\.runner89.com",
                                                        "data.example.com", "data.dev.com",
                                                        "api.example.com", "api.dev.com");
         Map<String, String> actual = ConfigManager.getPuppetNodesConfigReplacement(nodes);

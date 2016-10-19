@@ -52,7 +52,6 @@ import static com.codenvy.im.commands.CommandLibrary.createFileRestoreOrBackupCo
 import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPackCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPatchCDECCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createRepeatCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createStartServiceCommand;
@@ -189,7 +188,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
                         String property = e.getKey();
                         String value = e.getValue();
 
-                        commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                        commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
                     }
                 }
 
@@ -333,7 +332,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
                         String property = e.getKey();
                         String value = e.getValue();
 
-                        commands.add(createPropertyReplaceCommand(propertiesFileOfCodenvyBinary, "$" + property, value));
+                        commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(propertiesFileOfCodenvyBinary, property, value));
                     }
                 }
 
@@ -775,7 +774,7 @@ public class CDECMultiServerHelper extends CDECArtifactHelper {
 
             commands.add(createFileBackupCommand(file));
             commands.addAll(properties.entrySet().stream()
-                                      .map(entry -> createPropertyReplaceCommand(file, "$" + entry.getKey(), entry.getValue()))
+                                      .map(entry -> CommandLibrary.createPuppetPropertyReplaceCommand(file, entry.getKey(), entry.getValue()))
                                       .collect(Collectors.toList()));
         }
 

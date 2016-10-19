@@ -227,14 +227,14 @@ public class ConfigManager {
                 }
 
                 case BUILDER: {
-                    String replacingToken = "builder\\\\d+\\\\.example.com";
+                    String replacingToken = "builder\\\\d\\+\\\\.example.com";
                     String replacement = format("builder\\\\d+\\\\%s", getBaseNodeDomain(node));
                     replacements.put(replacingToken, replacement);
                     break;
                 }
 
                 case RUNNER: {
-                    String replacingToken = "runner\\\\d+\\\\.example.com";
+                    String replacingToken = "runner\\\\d\\+\\\\.example.com";
                     String replacement = format("runner\\\\d+\\\\%s", getBaseNodeDomain(node));
                     replacements.put(replacingToken, replacement);
                     break;

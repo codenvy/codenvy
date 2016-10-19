@@ -33,7 +33,6 @@ import com.codenvy.im.managers.NodeException;
 import com.codenvy.im.managers.UnknownInstallationTypeException;
 import com.codenvy.im.utils.HttpTransport;
 import com.codenvy.im.utils.Version;
-
 import org.eclipse.che.commons.json.JsonParseException;
 
 import java.io.IOException;
@@ -49,7 +48,6 @@ import java.util.Optional;
 import static com.codenvy.im.artifacts.ArtifactFactory.createArtifact;
 import static com.codenvy.im.commands.CommandLibrary.createFileBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createWaitServiceActiveCommand;
 import static com.codenvy.im.commands.SimpleCommand.createCommand;
@@ -158,7 +156,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                 Path file = propertiesFiles.next();
 
                 commands.add(createFileBackupCommand(file));
-                commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
             }
 
             // force applying updated puppet config on puppet agent locally
@@ -197,7 +195,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                 Path file = propertiesFiles.next();
 
                 commands.add(createFileBackupCommand(file));
-                commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
             }
 
             // force applying updated puppet config on puppet agent locally
@@ -316,7 +314,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
             Path file = propertiesFiles.next();
 
             commands.add(createFileBackupCommand(file));
-            commands.add(createPropertyReplaceCommand(file, "$" + Config.SWARM_NODES, nodeList));
+            commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, Config.SWARM_NODES, nodeList));
         }
 
         commands.add(createCommand("sudo systemctl restart puppet"));

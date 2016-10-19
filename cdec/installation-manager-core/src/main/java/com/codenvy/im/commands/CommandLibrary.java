@@ -20,7 +20,6 @@ import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.InstallOptions;
 import com.codenvy.im.managers.NodeConfig;
 import com.google.common.collect.ImmutableList;
-import org.eclipse.che.commons.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -58,18 +57,14 @@ public class CommandLibrary {
     private CommandLibrary() {
     }
 
-    public static Command createPropertyReplaceCommand(String file, String property, String value) {
-        return createPropertyReplaceCommand(file, property, value, true);
+    public static Command createPuppetPropertyReplaceCommand(Path file, String property, String value) {
+        return createPuppetPropertyReplaceCommand(file, property, value, true);
     }
 
-    public static Command createPropertyReplaceCommand(Path file, String property, String value) {
-        return createPropertyReplaceCommand(file.toString(), property, value, true);
-    }
-
-    public static Command createPropertyReplaceCommand(String file, String property, String value, boolean withSudo) {
-        String replacingToken = format("%s *= *\"[^\"]*\"", property);
-        String replacement = format("%s = \"%s\"", property, value);
-        return createReplaceCommand(file, replacingToken, replacement, withSudo);
+    public static Command createPuppetPropertyReplaceCommand(Path file, String property, String value, boolean withSudo) {
+        String replacingToken = format("(~n[^#]*\\$)%s *= *\"[^\"]*\"", property);
+        String replacement = format("\\1%s = \"%s\"", property, value);
+        return createReplaceCommand(file.toString(), replacingToken, replacement, withSudo);
     }
 
     public static Command createReplaceCommand(Path file, String replacingToken, String replacement) {
@@ -90,15 +85,17 @@ public class CommandLibrary {
 
     /**
      * The idea is to treat file as a single line and replace text respectively.
+     * Extended regular expressions syntax of 'sed' command is using for 'replacingToken' parameter (https://www.gnu.org/software/sed/manual/html_node/Extended-regexps.html)
      */
     private static String getReplaceCommand(String file, String replacingToken, String replacement, boolean withSudo) {
 
-        String command = format("sudo cat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|%1$s|%2$s|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp %3$s",
-                               replacingToken,
-                               replacement.replace("\\$", "\\\\$").replace("\n", "\\n").replace("|", "\\|").replace("&", "\\&"),
-                               file);
-
-        return withSudo ? command : command.replaceAll("sudo ", "");
+        return format("%4$scat %3$s | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|%1$s|%2$s|g' | sed 's|~n|\\n|g' > tmp.tmp && %4$smv tmp.tmp %3$s",
+                      replacingToken,
+                      replacement.replace("\\$", "\\\\$")                   // is needed to stay "\$" symbols as it
+                                 .replace("\n", "\\n")                      // is needed to replace "\\n" on "~n" for transforming multi-line content of file into the one-line form
+                                 .replace("|", "\\|").replace("&", "\\&"),
+                      file,
+                      withSudo ? "sudo " : "");
     }
 
     /**

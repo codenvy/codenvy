@@ -141,7 +141,7 @@ public class TestConfigCommand extends AbstractTestCommand {
         CommandInvoker.Result result = commandInvoker.invoke();
 
         String output = result.disableAnsi().getOutputStream();
-        assertEquals(output, "prop2=new-value\n");
+        assertEquals(output, "");
 
         verify(mockFacade).updateArtifactConfig(createArtifact(CDECArtifact.NAME),
                                                 ImmutableMap.of(propertyToUpdate, newValue));
@@ -167,7 +167,7 @@ public class TestConfigCommand extends AbstractTestCommand {
         CommandInvoker.Result result = commandInvoker.invoke();
 
         String output = result.disableAnsi().getOutputStream();
-        assertEquals(output, format("%s=%s\n", propertyToUpdate, newValue));
+        assertEquals(output, "");
 
         verify(mockFacade).updateArtifactConfig(createArtifact(CDECArtifact.NAME),
                                                 ImmutableMap.of(propertyToUpdate, newValue));
