@@ -358,11 +358,13 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
             if (context.getStatus() == WorkflowStatus.READY_TO_UPDATE_PR) {
                 final List<ViewUpdate> updates = new ArrayList<>();
                 // Display status message
-                Log.debug(this.getClass(), context.getStatus());
-                Log.debug(this.getClass(), context.getPreviousStatus());
-//                final String message = context.getPr ? messages.contributePartStatusSectionContributionCreatedMessage()
-//                                                                      : messages.contributePartStatusSectionContributionUpdatedMessage();
-                context.getViewState().setStatusMessage("sdgadg", false);
+                final String message;
+                if (context.getPreviousStatus() == WorkflowStatus.CREATING_PR) {
+                    message = messages.contributePartStatusSectionContributionCreatedMessage();
+                } else {
+                    message = messages.contributePartStatusSectionContributionUpdatedMessage();
+                }
+                context.getViewState().setStatusMessage(message, false);
                 updates.add(new StatusMessageUpdate());
 
                 // Contribution button
