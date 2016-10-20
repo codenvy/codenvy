@@ -17,7 +17,6 @@ package com.codenvy.api.audit.server;
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -32,9 +31,9 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.io.Files.append;
+import static java.util.Collections.sort;
 
 /**
  * Class for printing audit report from given data to given file.
@@ -109,6 +108,7 @@ class AuditReportPrinter {
                  ownWorkspacesNumber + " workspace" + (ownWorkspacesNumber > 1 | ownWorkspacesNumber == 0 ? "s" : "") +
                  " and has permissions in " + permissionsNumber + " workspace" +
                  (permissionsNumber > 1 | permissionsNumber == 0 ? "s" : "") + "\n", auditReport);
+        sort(workspaces, (ws1, ws2) -> ws1.getConfig().getName().compareTo(ws2.getConfig().getName()));
         for (WorkspaceImpl workspace : workspaces) {
             printUserWorkspaceInfo(workspace, user, wsPermissions, auditReport);
         }
