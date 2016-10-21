@@ -359,10 +359,10 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
                 final List<ViewUpdate> updates = new ArrayList<>();
                 // Display status message
                 final String message;
-                if (context.isUpdateMode()) {
-                    message = messages.contributePartStatusSectionContributionUpdatedMessage();
-                } else {
+                if (context.getPreviousStatus() == WorkflowStatus.CREATING_PR) {
                     message = messages.contributePartStatusSectionContributionCreatedMessage();
+                } else {
+                    message = messages.contributePartStatusSectionContributionUpdatedMessage();
                 }
                 context.getViewState().setStatusMessage(message, false);
                 updates.add(new StatusMessageUpdate());
