@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ComparisonChain.start;
 import static com.google.common.io.Files.append;
 import static java.util.Collections.sort;
 
@@ -108,7 +109,10 @@ class AuditReportPrinter {
                  ownWorkspacesNumber + " workspace" + (ownWorkspacesNumber > 1 | ownWorkspacesNumber == 0 ? "s" : "") +
                  " and has permissions in " + permissionsNumber + " workspace" +
                  (permissionsNumber > 1 | permissionsNumber == 0 ? "s" : "") + "\n", auditReport);
-        sort(workspaces, (ws1, ws2) -> ws1.getConfig().getName().compareTo(ws2.getConfig().getName()));
+        sort(workspaces, (ws1, ws2) -> start().compareTrueFirst(ws1.getNamespace().equals(user.getName()),
+                                                                ws2.getNamespace().equals(user.getName()))
+                                              .compare(ws1.getConfig().getName(), ws2.getConfig().getName())
+                                              .result());
         for (WorkspaceImpl workspace : workspaces) {
             printUserWorkspaceInfo(workspace, user, wsPermissions, auditReport);
         }
