@@ -36,12 +36,12 @@ import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
 import static java.nio.file.Files.createTempFile;
 import static java.util.Arrays.asList;
+import static java.util.Calendar.JANUARY;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.mockito.Matchers.anyString;
@@ -115,7 +115,7 @@ public class AuditManagerTest {
         //License
         CodenvyLicense license = mock(CodenvyLicense.class);
         when(license.getNumberOfUsers()).thenReturn(15);
-        when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, Calendar.JANUARY, 1).getTime());
+        when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
         when(licenseManager.load()).thenReturn(license);
         //User
         UserImpl user1 = mock(UserImpl.class);
