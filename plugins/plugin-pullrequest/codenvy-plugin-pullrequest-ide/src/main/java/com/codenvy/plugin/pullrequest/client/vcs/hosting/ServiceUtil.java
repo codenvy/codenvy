@@ -14,7 +14,7 @@
  */
 package com.codenvy.plugin.pullrequest.client.vcs.hosting;
 
-import com.codenvy.plugin.pullrequest.client.dto.HostUser;
+import com.codenvy.plugin.pullrequest.shared.dto.HostUser;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;

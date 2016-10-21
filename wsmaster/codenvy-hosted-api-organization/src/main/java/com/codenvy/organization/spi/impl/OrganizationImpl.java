@@ -23,14 +23,17 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -73,7 +76,10 @@ public class OrganizationImpl implements Organization {
 
     @ManyToOne
     @JoinColumn(name = "parent", insertable = false, updatable = false)
-    OrganizationImpl parentObj;
+    public OrganizationImpl parentObj;
+
+    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, mappedBy = "parentObj", orphanRemoval = true)
+    List<OrganizationImpl> children;
 
     public OrganizationImpl() {}
 

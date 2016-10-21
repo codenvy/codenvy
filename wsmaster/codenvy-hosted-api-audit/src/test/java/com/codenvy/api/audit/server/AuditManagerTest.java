@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Optional;
 
 import static java.nio.file.Files.createTempFile;
 import static java.util.Arrays.asList;
@@ -91,8 +90,8 @@ public class AuditManagerTest {
             "   └ Workspace1Name, is owner: false, permissions: [read, use, run, configure, setPermissions, delete]\n" +
             "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n" +
             "user2@email.com is owner of 2 workspaces and has permissions in 1 workspace\n" +
-            "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n" +
-            "   └ Workspace1Name, is owner: true, permissions: []\n";
+            "   └ Workspace1Name, is owner: true, permissions: []\n" +
+            "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
 
     private Path auditReport;
 
@@ -160,7 +159,7 @@ public class AuditManagerTest {
         //Page
         Page page = mock(Page.class);
         when(page.getItems()).thenReturn(asList(user1, user2));
-        when(page.getNextPageRef()).thenReturn(Optional.empty());
+        when(page.hasNextPage()).thenReturn(false);
         when(userManager.getAll(1, 0)).thenReturn(page);
         when(userManager.getAll(30, 0)).thenReturn(page);
 

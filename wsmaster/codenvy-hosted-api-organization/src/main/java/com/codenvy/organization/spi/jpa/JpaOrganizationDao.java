@@ -160,6 +160,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
+            manager.refresh(organization);
             manager.remove(organization);
         }
     }

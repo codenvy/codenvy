@@ -23,7 +23,7 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Api"/>
     <inherits name="org.eclipse.che.ide.ext.git.Git"/>
-    <inherits name="com.codenvy.plugin.pullrequest.projecttype.ContributionProjectType"/>
 
     <source path="client"/>
+    <source path="shared"/>
 </module>

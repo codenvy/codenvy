@@ -18,6 +18,7 @@ import com.codenvy.im.artifacts.Artifact;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.InstallManagerArtifact;
 import com.codenvy.im.managers.BackupManager;
+import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.DownloadManager;
 import com.codenvy.im.managers.InstallManager;
 import com.codenvy.im.managers.LdapManager;
@@ -73,6 +74,8 @@ public class TestDownloadInstallationManagerFacade {
     private InstallManager             installManager;
     @Mock
     private DownloadManager            downloadManager;
+    @Mock
+    private ConfigManager              configManager;
 
     private Artifact installManagerArtifact;
     private Artifact cdecArtifact;
@@ -83,15 +86,16 @@ public class TestDownloadInstallationManagerFacade {
     public void init() throws Exception {
         initMocks(this);
         installationManagerService = new InstallationManagerFacade(
-            transport,
-                                                                   saasAuthServiceProxy,
-                                                                   saasRepositoryServiceProxy,
-                                                                   ldapManager,
-                                                                   nodeManager,
-                                                                   backupManager,
-                                                                   storageManager,
-                                                                   installManager,
-                                                                   downloadManager);
+                transport,
+                configManager,
+                saasAuthServiceProxy,
+                saasRepositoryServiceProxy,
+                ldapManager,
+                nodeManager,
+                backupManager,
+                storageManager,
+                installManager,
+                downloadManager);
         this.pathCDEC = Paths.get("./target/cdec.zip");
         this.pathIM = Paths.get("./target/im.zip");
 

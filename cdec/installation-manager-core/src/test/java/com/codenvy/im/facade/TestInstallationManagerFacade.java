@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.MediaType;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -62,6 +63,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.codenvy.im.utils.Commons.toJson;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -107,6 +111,7 @@ public class TestInstallationManagerFacade extends BaseTest {
         initMocks(this);
         cdecArtifact = ArtifactFactory.createArtifact(CDECArtifact.NAME);
         installationManagerFacade = spy(new InstallationManagerFacade(transport,
+                                                                      configManager,
                                                                       saasAuthServiceProxy,
                                                                       saasRepositoryServiceProxy,
                                                                       ldapManager,
@@ -115,6 +120,24 @@ public class TestInstallationManagerFacade extends BaseTest {
                                                                       storageManager,
                                                                       installManager,
                                                                       downloadManager));
+    }
+
+    @Test
+    public void testRequestAuditReportWithProxy() throws Exception {
+        when(configManager.getHostUrl()).thenReturn("host.with.proxy");
+
+        installationManagerFacade.requestAuditReport("token", "host");
+
+        verify(transport).download(eq("host/api/audit"), eq("token"), any(Path.class), eq(MediaType.TEXT_PLAIN));
+    }
+
+    @Test
+    public void testRequestAuditReportWithoutProxy() throws Exception {
+        when(configManager.getHostUrl()).thenReturn("host");
+
+        installationManagerFacade.requestAuditReport("token", "host");
+
+        verify(transport).downloadWithoutProxy(eq("host/api/audit"), eq("token"), any(Path.class), eq(MediaType.TEXT_PLAIN));
     }
 
     @Test

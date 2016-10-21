@@ -59,6 +59,9 @@
         <class>com.codenvy.api.machine.server.recipe.RecipePermissionsImpl</class>
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
+        <class>com.codenvy.organization.spi.impl.OrganizationImpl</class>
+        <class>com.codenvy.organization.spi.impl.MemberImpl</class>
+
         <class>com.codenvy.resource.spi.impl.ResourceImpl</class>
         <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

@@ -16,14 +16,14 @@ package com.codenvy.plugin.pullrequest.client.steps;
 
 
 import com.codenvy.plugin.pullrequest.client.ContributeMessages;
-import com.codenvy.plugin.pullrequest.client.dto.Configuration;
-import com.codenvy.plugin.pullrequest.client.workflow.Context;
-import com.codenvy.plugin.pullrequest.client.workflow.Step;
-import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoHistoryInCommonException;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.client.workflow.Context;
+import com.codenvy.plugin.pullrequest.client.workflow.Step;
+import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
+import com.codenvy.plugin.pullrequest.shared.dto.Configuration;
+import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;

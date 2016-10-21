@@ -21,8 +21,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
-import org.eclipse.che.api.core.util.ValueHolder;
-import org.eclipse.che.api.core.util.Watchdog;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -33,10 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -231,34 +229,12 @@ public class MachineBackupManager {
 
     @VisibleForTesting
     void execute(String[] commandLine, int timeout) throws TimeoutException, IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(commandLine).redirectErrorStream(true);
         final ListLineConsumer outputConsumer = new ListLineConsumer();
+        Process process = ProcessUtil.executeAndWait(commandLine, timeout, SECONDS, outputConsumer);
 
-        // process will be stopped after timeout
-        Watchdog watcher = new Watchdog(timeout, TimeUnit.SECONDS);
-
-        try {
-            final Process process = pb.start();
-
-            final ValueHolder<Boolean> isTimeoutExceeded = new ValueHolder<>(false);
-            watcher.start(() -> {
-                isTimeoutExceeded.set(true);
-                ProcessUtil.kill(process);
-            });
-
-            // consume logs until process ends
-            ProcessUtil.process(process, outputConsumer);
-
-            process.waitFor();
-
-            if (isTimeoutExceeded.get()) {
-                throw new TimeoutException();
-            } else if (process.exitValue() != 0) {
-                LOG.error(outputConsumer.getText());
-                throw new IOException("Process failed. Exit code " + process.exitValue());
-            }
-        } finally {
-            watcher.stop();
+        if (process.exitValue() != 0) {
+            LOG.error(outputConsumer.getText());
+            throw new IOException("Process failed. Exit code " + process.exitValue());
         }
     }
 }

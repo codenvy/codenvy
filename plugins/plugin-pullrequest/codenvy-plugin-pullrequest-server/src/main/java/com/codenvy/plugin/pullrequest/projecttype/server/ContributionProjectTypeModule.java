@@ -14,10 +14,11 @@
  */
 package com.codenvy.plugin.pullrequest.projecttype.server;
 
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.inject.DynaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.inject.DynaModule;
 
 /**
  * The contribution project type module bindings.
