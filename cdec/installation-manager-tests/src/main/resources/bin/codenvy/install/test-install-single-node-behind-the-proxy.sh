@@ -34,8 +34,6 @@ WORKSPACE_NAME="workspace-1"
 PROJECT_NAME="project-1"
 
 # install Codenvy on-prem behind the proxy
-executeSshCommand "echo '$PROXY_IP $PROXY_SERVER' | sudo tee --append /etc/hosts > /dev/null"
-
 installCodenvy ${LATEST_CODENVY_VERSION} ${INSTALL_OPTIONS} --http-proxy-for-installation=$HTTP_PROXY --https-proxy-for-installation=$HTTPS_PROXY --no-proxy-for-installation="'$NO_PROXY'" --http-proxy-for-codenvy=$HTTP_PROXY --https-proxy-for-codenvy=$HTTPS_PROXY --no-proxy-for-codenvy="'$NO_PROXY'" --http-proxy-for-codenvy-workspaces=$HTTP_PROXY --https-proxy-for-codenvy-workspaces=$HTTPS_PROXY --no-proxy-for-codenvy-workspaces="'$NO_PROXY'" --http-proxy-for-docker-daemon=$HTTP_PASSWORDLESS_PROXY --https-proxy-for-docker-daemon=$HTTPS_PASSWORDLESS_PROXY --no-proxy-for-docker-daemon="'$NO_PROXY'" --docker-registry-mirror=$HTTPS_PASSWORDLESS_PROXY
 validateInstalledCodenvyVersion ${LATEST_CODENVY_VERSION}
 

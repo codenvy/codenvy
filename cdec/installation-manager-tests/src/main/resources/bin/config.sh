@@ -52,15 +52,15 @@ STORAGE_FILE=/usr/local/codenvy/im/storage/config.properties
 
 CODENVY_DATA_DIR=/home/codenvy/codenvy-data
 
-HTTP_PROXY=http://testuser:testpassword@proxy.ua.codenvy-dev.com:3128
-HTTPS_PROXY=http://testuser:testpassword@proxy.ua.codenvy-dev.com:3128
+HTTP_PROXY=http://testuser:testpassword@proxy.ua.codenvy-dev.com:3129
+HTTPS_PROXY=http://testuser:testpassword@proxy.ua.codenvy-dev.com:3129
 PROXY_SERVER=$(echo $HTTP_PROXY | sed 's|http://.*@\(.*\):.*|\1|')
 PROXY_SERVER_WITHOUT_CREDENTIALS="http://$(echo $HTTP_PROXY | sed 's|http://.*@\(.*\)|\1|')"
 PROXY_USERNAME=testuser
 PROXY_PASSWORD=testpassword
 PROXY_IP=172.19.11.156
-HTTP_PASSWORDLESS_PROXY=http://proxy-passwordless.ua.codenvy-dev.com:3128
-HTTPS_PASSWORDLESS_PROXY=http://proxy-passwordless.ua.codenvy-dev.com:3128
+HTTP_PASSWORDLESS_PROXY=http://proxy.ua.codenvy-dev.com:3128
+HTTPS_PASSWORDLESS_PROXY=http://proxy.ua.codenvy-dev.com:3128
 
 PATH_TO_CODENVY_PUPPET_MANIFEST="/etc/puppet/manifests/nodes/codenvy/codenvy.pp"
 
