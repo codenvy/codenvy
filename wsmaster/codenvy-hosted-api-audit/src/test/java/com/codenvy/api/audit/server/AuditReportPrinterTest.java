@@ -47,25 +47,30 @@ import static org.testng.AssertJUnit.assertEquals;
 @Listeners(value = MockitoTestNGListener.class)
 public class AuditReportPrinterTest {
 
-    private static final String AUDIT_REPORT_HEADER                                               =
+    private static final String AUDIT_REPORT_HEADER                 =
             "Number of all users: 2\n" +
             "Number of users licensed: 15\n" +
             "Date when license expires: 01 January 2016\n";
-    private static final String AUDIT_REPORT_HEADER_WITHOUT_LICENSE                               =
+    private static final String AUDIT_REPORT_HEADER_WITHOUT_LICENSE =
             "Number of all users: 2\n" +
             "[ERROR] Failed to retrieve license!\n";
-    private static final String USER_INFO_WITH_HIS_WORKSPACES_INFO                                =
-            "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n" +
+    private static final String USER_INFO_WITH_HIS_WORKSPACES_INFO  =
+            "user@email.com is owner of 1 workspace and has permissions in 3 workspaces\n" +
             "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n" +
+            "   └ Workspace0Name, is owner: false, permissions: [read, use, run, configure]\n" +
             "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n";
 
     @Mock
     UserImpl user;
     private AuditReportPrinter  auditReportPrinter;
     @Mock
+    private WorkspaceImpl       workspace0;
+    @Mock
     private WorkspaceImpl       workspace1;
     @Mock
     private WorkspaceImpl       workspace2;
+    @Mock
+    private AbstractPermissions ws0User1Permissions;
     @Mock
     private AbstractPermissions ws1User1Permissions;
     @Mock
@@ -82,26 +87,36 @@ public class AuditReportPrinterTest {
         when(user.getId()).thenReturn("User1Id");
         when(user.getName()).thenReturn("User1");
         //Workspace config
+        WorkspaceConfigImpl ws0config = mock(WorkspaceConfigImpl.class);
         WorkspaceConfigImpl ws1config = mock(WorkspaceConfigImpl.class);
         WorkspaceConfigImpl ws2config = mock(WorkspaceConfigImpl.class);
+        when(ws0config.getName()).thenReturn("Workspace0Name");
         when(ws1config.getName()).thenReturn("Workspace1Name");
         when(ws2config.getName()).thenReturn("Workspace2Name");
         //Workspace
+        workspace0 = mock(WorkspaceImpl.class);
         workspace1 = mock(WorkspaceImpl.class);
         workspace2 = mock(WorkspaceImpl.class);
+        when(workspace0.getNamespace()).thenReturn("User2");
         when(workspace1.getNamespace()).thenReturn("User1");
         when(workspace2.getNamespace()).thenReturn("User2");
+        when(workspace0.getId()).thenReturn("Workspace0Id");
         when(workspace1.getId()).thenReturn("Workspace1Id");
         when(workspace2.getId()).thenReturn("Workspace2Id");
+        when(workspace0.getConfig()).thenReturn(ws0config);
         when(workspace1.getConfig()).thenReturn(ws1config);
         when(workspace2.getConfig()).thenReturn(ws2config);
         //Permissions
+        ws0User1Permissions = mock(AbstractPermissions.class);
         ws1User1Permissions = mock(AbstractPermissions.class);
         ws2User1Permissions = mock(AbstractPermissions.class);
+        when(ws0User1Permissions.getUserId()).thenReturn("User1Id");
         when(ws1User1Permissions.getUserId()).thenReturn("User1Id");
         when(ws2User1Permissions.getUserId()).thenReturn("User1Id");
+        when(ws0User1Permissions.getInstanceId()).thenReturn("Workspace0Id");
         when(ws1User1Permissions.getInstanceId()).thenReturn("Workspace1Id");
         when(ws2User1Permissions.getInstanceId()).thenReturn("Workspace2Id");
+        when(ws0User1Permissions.getActions()).thenReturn(asList("read", "use", "run", "configure"));
         when(ws1User1Permissions.getActions()).thenReturn(asList("read", "use", "run", "configure", "setPermissions", "delete"));
         when(ws2User1Permissions.getActions()).thenReturn(asList("read", "use", "run", "configure", "setPermissions"));
 
@@ -142,13 +157,14 @@ public class AuditReportPrinterTest {
     public void shouldWriteUserInfoWithHisWorkspacesInfoToFile() throws Exception {
         //given
         Map<String, AbstractPermissions> map = new HashMap<>();
+        map.put("Workspace0Id", ws0User1Permissions);
         map.put("Workspace1Id", ws1User1Permissions);
         map.put("Workspace2Id", ws2User1Permissions);
 
         //when
         auditReportPrinter.printUserInfoWithHisWorkspacesInfo(auditReport,
                                                               user,
-                                                              asList(workspace1, workspace2),
+                                                              asList(workspace0, workspace1, workspace2),
                                                               map);
 
         //then

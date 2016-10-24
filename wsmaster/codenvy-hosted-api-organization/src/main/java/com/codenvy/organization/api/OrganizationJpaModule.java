@@ -35,6 +35,7 @@ public class OrganizationJpaModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(OrganizationDao.class).to(JpaOrganizationDao.class);
+        bind(JpaOrganizationDao.RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber.class).asEagerSingleton();
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
         bind(MemberDao.class).to(JpaMemberDao.class);
         bind(JpaMemberDao.RemoveMembersBeforeOrganizationRemovedEventSubscriber.class).asEagerSingleton();

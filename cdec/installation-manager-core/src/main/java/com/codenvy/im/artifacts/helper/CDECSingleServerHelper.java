@@ -27,7 +27,6 @@ import com.codenvy.im.managers.Config;
 import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.InstallOptions;
 import com.codenvy.im.managers.InstallType;
-import com.codenvy.im.utils.TarUtils;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.ImmutableList;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -48,7 +47,6 @@ import static com.codenvy.im.commands.CommandLibrary.createFileRestoreOrBackupCo
 import static com.codenvy.im.commands.CommandLibrary.createForcePuppetAgentCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPackCommand;
 import static com.codenvy.im.commands.CommandLibrary.createPatchCDECCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createRepeatCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createStartServiceCommand;
@@ -159,7 +157,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
                         String property = e.getKey();
                         String value = e.getValue();
 
-                        commands.add(createPropertyReplaceCommand(file, "$" + property, value));
+                        commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(file, property, value));
                     }
                 }
 
@@ -254,7 +252,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
                         String property = e.getKey();
                         String value = e.getValue();
 
-                        commands.add(createPropertyReplaceCommand(propertiesFileOfCodenvyBinary, "$" + property, value));
+                        commands.add(CommandLibrary.createPuppetPropertyReplaceCommand(propertiesFileOfCodenvyBinary, property, value));
                     }
                 }
 
@@ -495,7 +493,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
 
             commands.add(createFileBackupCommand(file));
             commands.addAll(propertiesToUpdate.entrySet().stream()
-                                      .map(entry -> createPropertyReplaceCommand(file, "$" + entry.getKey(), entry.getValue()))
+                                      .map(entry -> CommandLibrary.createPuppetPropertyReplaceCommand(file, entry.getKey(), entry.getValue()))
                                       .collect(Collectors.toList()));
         }
 

@@ -33,7 +33,11 @@ public class StackDomain extends AbstractPermissionsDomain<StackPermissionsImpl>
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
 
-    private static final List<String> ACTIONS = ImmutableList.of(READ, SEARCH, UPDATE, DELETE);
+    private static final List<String> ACTIONS = ImmutableList.of(SET_PERMISSIONS,
+                                                                 READ,
+                                                                 SEARCH,
+                                                                 UPDATE,
+                                                                 DELETE);
 
     /** Returns all the available actions for {@link StackDomain}. */
     public static List<String> getActions() { return ACTIONS; }

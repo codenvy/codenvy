@@ -1422,8 +1422,8 @@ checkNetworkInterface() {
             println
         fi
 
-        if [ -n "${newAdvertiseNetworkInterface}" ]; then
-            insertProperty "docker_cluster_advertise" "${newAdvertiseNetworkInterface}"
+        if [ -n "${newValueOfDockerClusterAdvertise}" ]; then
+            insertProperty "docker_cluster_advertise" "${newValueOfDockerClusterAdvertise}"
         else
             insertProperty "docker_cluster_advertise" "${ADVERTISE_NETWORK_INTERFACE}"
         fi

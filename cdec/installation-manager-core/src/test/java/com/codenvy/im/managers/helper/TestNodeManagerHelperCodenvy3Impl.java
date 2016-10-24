@@ -103,7 +103,7 @@ public class TestNodeManagerHelperCodenvy3Impl extends BaseTest {
         assertEquals(commands.get(1).toString(),
                      "{'command'='sudo cat /etc/puppet/" + Config.MULTI_SERVER_CUSTOM_CONFIG_PP + " " +
                      "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                     "| sed 's|$additional_runners *= *\"[^\"]*\"|$additional_runners = \"test_runner_node_url\"|g' " +
+                     "| sed -E 's|(~n[^#]*\\$)additional_runners *= *\"[^\"]*\"|\\1additional_runners = \"test_runner_node_url\"|g' " +
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp /etc/puppet/manifests/nodes/multi_server/custom_configurations.pp', 'agent'='LocalAgent'}");
         assertTrue(commands.get(2).toString().matches("\\{'command'='sudo cp /etc/puppet/" + Config.MULTI_SERVER_BASE_CONFIG_PP
@@ -115,7 +115,7 @@ public class TestNodeManagerHelperCodenvy3Impl extends BaseTest {
         assertEquals(commands.get(3).toString(),
                      "{'command'='sudo cat /etc/puppet/" + Config.MULTI_SERVER_BASE_CONFIG_PP + " " +
                      "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                     "| sed 's|$additional_runners *= *\"[^\"]*\"|$additional_runners = \"test_runner_node_url\"|g' " +
+                     "| sed -E 's|(~n[^#]*\\$)additional_runners *= *\"[^\"]*\"|\\1additional_runners = \"test_runner_node_url\"|g' " +
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp /etc/puppet/" + Config.MULTI_SERVER_BASE_CONFIG_PP + "', 'agent'='LocalAgent'}");
 
@@ -191,7 +191,7 @@ public class TestNodeManagerHelperCodenvy3Impl extends BaseTest {
         assertEquals(commands.get(1).toString(),
                      "{'command'='sudo cat /etc/puppet/" + Config.MULTI_SERVER_CUSTOM_CONFIG_PP + " " +
                      "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                     "| sed 's|$additional_runners *= *\"[^\"]*\"|$additional_runners = \"null\"|g' " +
+                     "| sed -E 's|(~n[^#]*\\$)additional_runners *= *\"[^\"]*\"|\\1additional_runners = \"null\"|g' " +
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp /etc/puppet/manifests/nodes/multi_server/custom_configurations.pp', 'agent'='LocalAgent'}");
 
@@ -204,7 +204,7 @@ public class TestNodeManagerHelperCodenvy3Impl extends BaseTest {
         assertEquals(commands.get(3).toString(),
                      "{'command'='sudo cat /etc/puppet/" + Config.MULTI_SERVER_BASE_CONFIG_PP + " " +
                      "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                     "| sed 's|$additional_runners *= *\"[^\"]*\"|$additional_runners = \"null\"|g' " +
+                     "| sed -E 's|(~n[^#]*\\$)additional_runners *= *\"[^\"]*\"|\\1additional_runners = \"null\"|g' " +
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp /etc/puppet/" + Config.MULTI_SERVER_BASE_CONFIG_PP + "', 'agent'='LocalAgent'}");
 

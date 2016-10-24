@@ -26,6 +26,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +36,6 @@ import java.util.List;
 
 import static com.codenvy.im.commands.CommandLibrary.createFileBackupCommand;
 import static com.codenvy.im.commands.CommandLibrary.createFileRestoreOrBackupCommand;
-import static com.codenvy.im.commands.CommandLibrary.createPropertyReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createReplaceCommand;
 import static com.codenvy.im.commands.CommandLibrary.createUpdateFileCommand;
 import static com.codenvy.im.commands.CommandLibrary.getFileRestoreOrBackupCommand;
@@ -60,28 +60,18 @@ public class TestCommandLibrary extends BaseTest {
     }
 
     @Test
-    public void testCreateLocalPropertyReplaceCommand() {
-        Command testCommand = createPropertyReplaceCommand("testFile", "property", "newValue");
-        assertEquals(testCommand.toString(), "{'command'='sudo cat testFile " +
-                                             "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                                             "| sed 's|property *= *\"[^\"]*\"|property = \"newValue\"|g' " +
-                                             "| sed 's|~n|\\n|g' > tmp.tmp " +
-                                             "&& sudo mv tmp.tmp testFile', 'agent'='LocalAgent'}");
-    }
+    public void testCreateLocalPuppetPropertyReplaceMultiplyLineCommand() throws IOException {
+        write(TEST_FILE.toFile(), "$property = \"first\"\n"
+                                  + "# $property = \"comment\"\n"
+                                  + "$property = \"a\n" +
+                                  "b\n" +
+                                  "c\n" +
+                                  "\"\n");
 
-    @Test
-    public void testCreateLocalPropertyReplaceMultiplyLineCommand() throws IOException {
-        write(TEST_FILE.toFile(), "$property=\"a\n" +
-                                 "b\n" +
-                                 "c\n" +
-                                 "\"\n");
-
-        Command testCommand = createPropertyReplaceCommand(TEST_FILE.toString(), "$property", "1\n" +
-                                                                                             "2\n" +
-                                                                                             "3\n", false);
+        Command testCommand = CommandLibrary.createPuppetPropertyReplaceCommand(TEST_FILE, "property", "1\n2\n3\n", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
                                              "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                                             "| sed 's|$property *= *\"[^\"]*\"|$property = \"1\\n2\\n3\\n\"|g' " +
+                                             "| sed -E 's|(~n[^#]*\\$)property *= *\"[^\"]*\"|\\1property = \"1\\n2\\n3\\n\"|g' " +
                                              "| sed 's|~n|\\n|g' > tmp.tmp " +
                                              "&& mv tmp.tmp target/testFile', " +
                                              "'agent'='LocalAgent'}");
@@ -89,20 +79,22 @@ public class TestCommandLibrary extends BaseTest {
         testCommand.execute();
 
         String content = readFileToString(TEST_FILE.toFile());
-        assertEquals(content, "$property = \"1\n" +
-                              "2\n" +
-                              "3\n" +
-                              "\"\n");
+        assertEquals(content, "$property = \"first\"\n"
+                              + "# $property = \"comment\"\n"
+                              + "$property = \"1\n"
+                              + "2\n"
+                              + "3\n"
+                              + "\"\n");
     }
 
     @Test
-    public void testCreateLocalReplaceCommand() throws IOException {
+    public void testCreateLocalPuppetReplaceCommand() throws IOException {
         write(TEST_FILE.toFile(), "old\n");
 
         Command testCommand = createReplaceCommand(TEST_FILE.toString(), "old", "\\$new | &&", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
                                              "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                                             "| sed 's|old|\\\\$new \\| \\&\\&|g' " +
+                                             "| sed -E 's|old|\\\\$new \\| \\&\\&|g' " +
                                              "| sed 's|~n|\\n|g' > tmp.tmp " +
                                              "&& mv tmp.tmp target/testFile', 'agent'='LocalAgent'}");
         testCommand.execute();
@@ -112,13 +104,34 @@ public class TestCommandLibrary extends BaseTest {
     }
 
     @Test
+    public void testCreateLocalPuppetReplaceMultilineCommand() throws IOException {
+        write(TEST_FILE.toFile(), "old\n");
+
+        Command testCommand = createReplaceCommand(TEST_FILE.toString(), "old", "\\$new\n"
+                                                                                + "new\n"
+                                                                                + "new\n", false);
+        assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
+                                             "| sed ':a;N;$!ba;s/\\n/~n/g' " +
+                                             "| sed -E 's|old|\\\\$new\\nnew\\nnew\\n|g' " +
+                                             "| sed 's|~n|\\n|g' > tmp.tmp " +
+                                             "&& mv tmp.tmp target/testFile', 'agent'='LocalAgent'}");
+        testCommand.execute();
+
+        String content = readFileToString(TEST_FILE.toFile());
+        assertEquals(content, "\\$new\n"
+                              + "new\n"
+                              + "new\n"
+                              + "\n");
+    }
+
+    @Test
     public void testCreateLocalReplaceMultiplyLineCommand() throws IOException {
         write(TEST_FILE.toFile(), "old\n");
 
         Command testCommand = createReplaceCommand(TEST_FILE.toString(), "old", "new\nnew\nnew\n", false);
         assertEquals(testCommand.toString(), "{'command'='cat target/testFile " +
                                              "| sed ':a;N;$!ba;s/\\n/~n/g' " +
-                                             "| sed 's|old|new\\nnew\\nnew\\n|g' " +
+                                             "| sed -E 's|old|new\\nnew\\nnew\\n|g' " +
                                              "| sed 's|~n|\\n|g' > tmp.tmp " +
                                              "&& mv tmp.tmp target/testFile', 'agent'='LocalAgent'}");
         testCommand.execute();
@@ -286,23 +299,31 @@ public class TestCommandLibrary extends BaseTest {
 
     @Test
     public void testCreatePatchCommand() throws Exception {
+        Path patchDir = Paths.get("target/patches");
+        File testPatchScript = patchDir.resolve(InstallType.MULTI_SERVER.toString().toLowerCase()).resolve("patch_before_update.sh").toFile();
+
+        createDirectories(patchDir);
+        writeStringToFile(testPatchScript, "${OLD_old_test_property1},${test_property1},$test_property2");
+
+        write(testPatchScript, "${OLD_old_test_property1},${test_property1},$test_property2");
+
         ImmutableMap<String, String> configProperties = ImmutableMap.of("test_property1", "$test_property2", "test_property2", "property2");
         InstallOptions installOptions = new InstallOptions().setInstallType(InstallType.MULTI_SERVER)
                                                             .setConfigProperties(configProperties);
 
-        Path patchDir = Paths.get("target/patches");
-        createDirectories(patchDir);
-        writeStringToFile(patchDir.resolve(InstallType.MULTI_SERVER.toString().toLowerCase()).resolve("patch_before_update.sh").toFile(),
-                          "echo -n \"$test_property1\"");
-
         Command command = CommandLibrary.createPatchCDECCommand(patchDir, CommandLibrary.PatchType.BEFORE_UPDATE, installOptions, new Config(ImmutableMap.of("old_test_property1", "old_property1")), new HashMap<>(ImmutableMap.of("PATCH_SCRIPT_VAR", "value")));
         assertEquals(command.toString(),
-                     format("[{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${OLD_old_test_property1}|old_property1|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${test_property1}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${test_property2}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATCH_SCRIPT_VAR}|value|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
-                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|${PATH_TO_UPDATE_INFO}|/home/%s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                     format("[{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|\\$\\{OLD_old_test_property1\\}|old_property1|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|\\$\\{test_property1\\}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|\\$\\{test_property2\\}|property2|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|\\$\\{PATCH_SCRIPT_VAR\\}|value|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
+                            + "{'command'='sudo cat target/patches/multi_server/patch_before_update.sh | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|\\$\\{PATH_TO_UPDATE_INFO\\}|/home/%s/codenvy/update.info|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}, "
                             + "{'command'='bash target/patches/multi_server/patch_before_update.sh', 'agent'='LocalAgent'}]", SYSTEM_USER_NAME));
+
+        //  This is for manual testing propose only. After uncommenting the next commands there should be next content of file 'target/patches/multi_server/patch_before_update.sh': "old_property1,property2,$test_property2"
+        //  command.execute();
+        //  String content = readFileToString(testPatchScript);
+        //  assertEquals(content, "");
     }
 
     @Test

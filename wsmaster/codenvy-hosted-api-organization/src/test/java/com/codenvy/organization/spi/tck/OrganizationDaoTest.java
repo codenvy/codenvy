@@ -174,27 +174,6 @@ public class OrganizationDaoTest {
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
     }
 
-    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById")
-    public void shouldRemoveParentOrganizationWithAllSuborganizationsTree() throws Exception {
-        //given
-        final OrganizationImpl parentOrganization = organizations[1];
-        OrganizationImpl suborganization = new OrganizationImpl(NameGenerator.generate("organization", 10),
-                                                                "subOrg",
-                                                                parentOrganization.getId());
-        OrganizationImpl secondLevelSuborganization = new OrganizationImpl(NameGenerator.generate("organization", 10),
-                                                                           "subSubOrg",
-                                                                           suborganization.getId());
-        tckRepository.createAll(Arrays.asList(suborganization, secondLevelSuborganization));
-
-        //when
-        organizationDao.remove(parentOrganization.getId());
-
-        //then
-        assertNull(notFoundToNull(() -> organizationDao.getById(organizations[1].getId())));
-        assertNull(notFoundToNull(() -> organizationDao.getById(suborganization.getId())));
-        assertNull(notFoundToNull(() -> organizationDao.getById(secondLevelSuborganization.getId())));
-    }
-
     @Test
     public void shouldNotThrowAnyExceptionOnRemovingNonExistingOrganization() throws Exception {
         organizationDao.remove("non-existing-org");
