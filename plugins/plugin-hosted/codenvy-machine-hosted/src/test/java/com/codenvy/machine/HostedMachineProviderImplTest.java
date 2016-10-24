@@ -47,6 +47,7 @@ import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONS
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -167,6 +168,7 @@ public class HostedMachineProviderImplTest {
                               isDev,
                               "net",
                               createService(),
-                              LineConsumer.DEV_NULL);
+                              LineConsumer.DEV_NULL,
+                              emptyList());
     }
 }
