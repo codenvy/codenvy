@@ -201,17 +201,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         if (systemRamInfoProvider.getSystemRamInfo().isSystemRamLimitExceeded()) {
             throw new LimitExceededException("Low RAM. Your workspace cannot be started until the system has more RAM available.");
         }
-        return checkStartedWorkspacesNumberAndPropagateStart(namespace, callback);
-    }
 
-    /**
-     * Checks that starting workspace won't exceed user's started workspaces number limit.
-     * Throws {@link LimitExceededException} in the case of started workspaces number constraint violation, otherwise
-     * performs {@code callback.call()} and returns its result.
-     */
-    @VisibleForTesting
-    <T extends WorkspaceImpl> T checkStartedWorkspacesNumberAndPropagateStart(String namespace, WorkspaceCallback<T> callback)
-            throws ServerException, NotFoundException, ConflictException {
         if (startedWorkspacesLimit < 0) {
             return callback.call();
         }
@@ -222,8 +212,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         final Lock lock = START_LOCKS.get(namespace);
         lock.lock();
         try {
-            long runningWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
-            if (runningWorkspaces >= startedWorkspacesLimit) {
+            long startedWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
+            if (startedWorkspaces >= startedWorkspacesLimit) {
                 throw new LimitExceededException(format("The maximum workspaces allowed to be started per user is set to '%d' and " +
                                                         "you are currently at that limit. This value is set by your admin with the " +
                                                         "'limits.user.workspaces.run.count' property", startedWorkspacesLimit));
