@@ -276,7 +276,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setStartedWorkspacesLimit(WorkspaceStatus.values().length).build();
         final WorkspaceCallback callback = mock(WorkspaceCallback.class);
         //Currently started workspaces with all statuses.
-        //Workspace with status 'STOPPED' wil not be counted in the check.
+        //Workspace with status 'STOPPED' will not be counted in the check.
         List<WorkspaceImpl> workspaces = new ArrayList<>();
         for (WorkspaceStatus status : WorkspaceStatus.values()) {
             WorkspaceImpl workspace = mock(WorkspaceImpl.class);
@@ -300,7 +300,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setStartedWorkspacesLimit(WorkspaceStatus.values().length - 1)
                                                                        .build();
         //Currently started workspaces with all statuses.
-        //Workspace with status 'STOPPED' wil not be counted in the check.
+        //Workspace with status 'STOPPED' will not be counted in the check.
         List<WorkspaceImpl> workspaces = new ArrayList<>();
         for (WorkspaceStatus status : WorkspaceStatus.values()) {
             WorkspaceImpl workspace = mock(WorkspaceImpl.class);
