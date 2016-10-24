@@ -14,9 +14,9 @@
  */
 package com.codenvy.plugin.pullrequest.client.vcs.hosting;
 
-import com.codenvy.plugin.pullrequest.client.dto.HostUser;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
-import com.codenvy.plugin.pullrequest.client.dto.Repository;
+import com.codenvy.plugin.pullrequest.shared.dto.HostUser;
+import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.shared.dto.Repository;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.CurrentUser;
@@ -35,7 +35,7 @@ public interface VcsHostingService {
      * @param remoteUrl
      * @return
      */
-    public VcsHostingService init(String remoteUrl);
+    VcsHostingService init(String remoteUrl);
 
     /**
      * Returns the VCS Host name.

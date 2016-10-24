@@ -17,8 +17,8 @@ package com.codenvy.plugin.pullrequest.client.workflow;
 import com.codenvy.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
 import com.codenvy.plugin.pullrequest.client.vcs.VcsService;
 import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.dto.Configuration;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.shared.dto.Configuration;
+import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -91,6 +91,7 @@ public class Context {
     /** The name of the origin remote. */
     private String         originRemoteName;
     private WorkflowStatus status;
+    private WorkflowStatus previousStatus;
     private Configuration  configuration;
     public  ViewState      viewState;
     private VcsService     vcsService;
@@ -274,7 +275,13 @@ public class Context {
         return status;
     }
 
+    @Nullable
+    public WorkflowStatus getPreviousStatus() {
+        return previousStatus;
+    }
+
     public void setStatus(@Nullable WorkflowStatus status) {
+        this.previousStatus = this.status;
         this.status = status;
     }
 

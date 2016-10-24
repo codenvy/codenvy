@@ -15,12 +15,15 @@
 package com.codenvy.plugin.pullrequest.projecttype.server;
 
 
-import com.codenvy.plugin.pullrequest.projecttype.shared.ContributionProjectTypeConstants;
+import com.codenvy.plugin.pullrequest.shared.ContributionProjectTypeConstants;
 
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static com.codenvy.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_DISPLAY_NAME;
+import static com.codenvy.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID;
 
 /**
  * The contribution project type definition.
@@ -31,7 +34,7 @@ import javax.inject.Singleton;
 public class ContributionProjectType extends ProjectTypeDef {
     @Inject
     public ContributionProjectType() {
-        super(ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_ID, ContributionProjectTypeConstants.CONTRIBUTION_PROJECT_TYPE_DISPLAY_NAME, false, true);
+        super(CONTRIBUTION_PROJECT_TYPE_ID, CONTRIBUTION_PROJECT_TYPE_DISPLAY_NAME, false, true);
 
         addVariableDefinition(ContributionProjectTypeConstants.CONTRIBUTE_LOCAL_BRANCH_NAME, "Name of local branch", false);
         addVariableDefinition(ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME, "Branch where the contribution has to be pushed", true);

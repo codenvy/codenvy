@@ -211,7 +211,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         assertTrue(commands.get(k++).toString().matches("\\{'command'='sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back ; "
                                                         + "sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', "
                                                         + "'agent'='LocalAgent'\\}"), "Actual result: " + commands.get(11).toString());
-        assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$swarm_nodes *= *\"[^\"]*\"|$swarm_nodes = \"node1.hostname:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
+        assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|(~n[^#]*\\$)swarm_nodes *= *\"[^\"]*\"|\\1swarm_nodes = \"node1.hostname:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
                                                    + "'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay --logdest=/var/log/puppet/puppet-agent.log; exit 0;', 'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='doneState=\"Checking\"; while [ \"${doneState}\" != \"Done\" ]; do     curl http://hostname:23750/info | grep '\"node1.hostname:2375\"';     if [ $? -eq 0 ]; then doneState=\"Done\";     else sleep 5;     fi; done', "
@@ -260,8 +260,8 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         assertEquals(commands.size(), 8);
 
         int i = 0;
-        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/autosign.conf | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|node1.hostname|node1.new.hostname|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/autosign.conf', 'agent'='LocalAgent'}");
-        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/autosign.conf | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|node2.hostname|node2.new.hostname|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/autosign.conf', 'agent'='LocalAgent'}");
+        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/autosign.conf | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|node1.hostname|node1.new.hostname|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/autosign.conf', 'agent'='LocalAgent'}");
+        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/autosign.conf | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|node2.hostname|node2.new.hostname|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/autosign.conf', 'agent'='LocalAgent'}");
         assertEquals(commands.get(i++).toString(), "{'command'='sudo systemctl restart puppetmaster', 'agent'='LocalAgent'}");
 
         int j = 0;
@@ -296,7 +296,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
                                       .matches("\\{'command'='sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back ; sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', 'agent'='LocalAgent'\\}"),
                    "Actual command: " + commands.get(i++).toString());
 
-        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$swarm_nodes *= *\"[^\"]*\"|$swarm_nodes = \"$host_url:2375\\nnode1.new.hostname:2375\\nnode2.new.hostname:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', 'agent'='LocalAgent'}");
+        assertEquals(commands.get(i++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|(~n[^#]*\\$)swarm_nodes *= *\"[^\"]*\"|\\1swarm_nodes = \"$host_url:2375\\nnode1.new.hostname:2375\\nnode2.new.hostname:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', 'agent'='LocalAgent'}");
         assertEquals(commands.get(i++).toString(), "{'command'='sudo systemctl restart puppet', 'agent'='LocalAgent'}");
 
     }
@@ -318,7 +318,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
                                                         + "sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', "
                                                         + "'agent'='LocalAgent'\\}"), "Actual command: " + commands.get(0).toString());
         assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | "
-                                                   + "sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$swarm_nodes *= *\"[^\"]*\"|$swarm_nodes = \"null\"|g' | "
+                                                   + "sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|(~n[^#]*\\$)swarm_nodes *= *\"[^\"]*\"|\\1swarm_nodes = \"null\"|g' | "
                                                    + "sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
                                                    + "'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay --logdest=/var/log/puppet/puppet-agent.log; exit 0;', 'agent'='LocalAgent'}");
@@ -478,7 +478,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         assertTrue(commands.get(k++).toString().matches("\\{'command'='sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back ; "
                                                         + "sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', "
                                                         + "'agent'='LocalAgent'\\}"), "Actual result: " + commands.get(0).toString());
-        assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$swarm_nodes *= *\"[^\"]*\"|$swarm_nodes = \"$host_url:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
+        assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|(~n[^#]*\\$)swarm_nodes *= *\"[^\"]*\"|\\1swarm_nodes = \"$host_url:2375\"|g' | sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
                                                    + "'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay --logdest=/var/log/puppet/puppet-agent.log; exit 0;', 'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='doneState=\"Checking\"; while [ \"${doneState}\" != \"Done\" ]; do     curl http://hostname:23750/info | grep '\"hostname:2375\"';     if [ $? -eq 0 ]; then doneState=\"Done\";     else sleep 5;     fi; done', "
@@ -496,7 +496,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
                                                         + "sudo cp /etc/puppet/manifests/nodes/codenvy/codenvy.pp /etc/puppet/manifests/nodes/codenvy/codenvy.pp.back.[0-9]+ ; ', "
                                                         + "'agent'='LocalAgent'\\}"), "Actual command: " + commands.get(0).toString());
         assertEquals(commands.get(k++).toString(), "{'command'='sudo cat /etc/puppet/manifests/nodes/codenvy/codenvy.pp | "
-                                                   + "sed ':a;N;$!ba;s/\\n/~n/g' | sed 's|$swarm_nodes *= *\"[^\"]*\"|$swarm_nodes = \"null\"|g' | "
+                                                   + "sed ':a;N;$!ba;s/\\n/~n/g' | sed -E 's|(~n[^#]*\\$)swarm_nodes *= *\"[^\"]*\"|\\1swarm_nodes = \"null\"|g' | "
                                                    + "sed 's|~n|\\n|g' > tmp.tmp && sudo mv tmp.tmp /etc/puppet/manifests/nodes/codenvy/codenvy.pp', "
                                                    + "'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "{'command'='sudo puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay --logdest=/var/log/puppet/puppet-agent.log; exit 0;', 'agent'='LocalAgent'}");

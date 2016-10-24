@@ -36,7 +36,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
-import static com.codenvy.plugin.pullrequest.projecttype.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
+import static com.codenvy.plugin.pullrequest.shared.ContributionProjectTypeConstants.CONTRIBUTE_TO_BRANCH_VARIABLE_NAME;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;

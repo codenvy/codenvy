@@ -12,37 +12,29 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.plugin.pullrequest.client.dto;
+package com.codenvy.plugin.pullrequest.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface PullRequest {
-    String getId();
+public interface Repository {
+    String getName();
 
-    PullRequest withId(String id);
+    Repository withName(String name);
 
-    String getUrl();
+    String getCloneUrl();
 
-    PullRequest withUrl(String url);
+    Repository withCloneUrl(String cloneUrl);
 
-    String getHtmlUrl();
+    boolean isFork();
 
-    PullRequest withHtmlUrl(String htmlUrl);
+    Repository withFork(boolean isFork);
 
-    String getNumber();
+    boolean isPrivateRepo();
 
-    PullRequest withNumber(String number);
+    Repository withPrivateRepo(boolean isPrivateRepo);
 
-    String getState();
+    Repository getParent();
 
-    PullRequest withState(String state);
-
-    String getHeadRef();
-
-    PullRequest withHeadRef(String head);
-
-    String getDescription();
-
-    PullRequest withDescription(String description);
+    Repository withParent(Repository parent);
 }

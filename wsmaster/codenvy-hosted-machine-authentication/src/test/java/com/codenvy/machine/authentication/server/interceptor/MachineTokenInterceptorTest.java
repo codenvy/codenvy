@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -58,9 +59,11 @@ public class MachineTokenInterceptorTest {
     private static final String USER_NAME = "username";
 
     @Mock
-    private MachineTokenRegistry tokenRegistry;
+    private MachineTokenRegistry  tokenRegistry;
     @Mock
-    private WorkspaceImpl        workspaceImpl;
+    private WorkspaceImpl         workspaceImpl;
+    @Mock
+    private WorkspaceFilesCleaner workspaceFilesCleaner;
 
     private WorkspaceManager workspaceManager;
 
@@ -82,6 +85,7 @@ public class MachineTokenInterceptorTest {
                 bindConstant().annotatedWith(Names.named("workspace.runtime.auto_snapshot")).to(false);
                 bind(WorkspaceManager.class);
                 bind(SnapshotDao.class).toInstance(mock(SnapshotDao.class));
+                bind(WorkspaceFilesCleaner.class).toInstance(workspaceFilesCleaner);
 
                 bind(MachineTokenRegistry.class).toInstance(tokenRegistry);
 

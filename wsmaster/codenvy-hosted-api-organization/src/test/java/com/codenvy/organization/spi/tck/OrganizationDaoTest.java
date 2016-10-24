@@ -32,9 +32,12 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -159,13 +162,16 @@ public class OrganizationDaoTest {
         organizationDao.update(null);
     }
 
-    @Test(expectedExceptions = NotFoundException.class,
-          dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById")
+    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById")
     public void shouldRemoveOrganization() throws Exception {
+        //given
         final OrganizationImpl organization = organizations[0];
 
+        //when
         organizationDao.remove(organization.getId());
-        organizationDao.getById(organization.getId());
+
+        //then
+        assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
     }
 
     @Test
@@ -236,5 +242,13 @@ public class OrganizationDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeOnGettingChildrenByNullableParentId() throws Exception {
         organizationDao.getByParent(null, 30, 0);
+    }
+
+    private static <T> T notFoundToNull(Callable<T> action) throws Exception {
+        try {
+            return action.call();
+        } catch (NotFoundException x) {
+            return null;
+        }
     }
 }

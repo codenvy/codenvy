@@ -114,7 +114,6 @@ public class ConfigCommand extends AbstractIMCommand {
 
         try {
             getFacade().updateArtifactConfig(cdecArtifact, ImmutableMap.of(property, value));
-            printProperties(ImmutableMap.of(property, value));
         } finally {
             getConsole().hideProgressor();
         }

@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-organization</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-permission</artifactId>
         </dependency>
         <dependency>
@@ -195,6 +200,7 @@
                                     <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
                                     <includeArtifactIds>codenvy-hosted-api-machine,
                                         codenvy-hosted-api-workspace,
+                                        codenvy-hosted-api-organization,
                                         codenvy-hosted-api-resource,
                                         codenvy-hosted-api-permission,
                                         che-core-api-account,

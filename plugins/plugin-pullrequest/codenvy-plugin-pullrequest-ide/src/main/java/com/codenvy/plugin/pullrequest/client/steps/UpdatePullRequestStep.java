@@ -15,11 +15,11 @@
 package com.codenvy.plugin.pullrequest.client.steps;
 
 import com.codenvy.plugin.pullrequest.client.utils.FactoryHelper;
-import com.codenvy.plugin.pullrequest.client.dto.Configuration;
 import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.workflow.Step;
 import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
-import com.codenvy.plugin.pullrequest.client.dto.PullRequest;
+import com.codenvy.plugin.pullrequest.shared.dto.Configuration;
+import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
 import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;

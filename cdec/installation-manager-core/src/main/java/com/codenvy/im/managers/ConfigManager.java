@@ -35,6 +35,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class ConfigManager {
                                                          + "-server-properties/" + version);
         Path properties;
         try {
-            properties = transport.download(requestUrl, tmpDir);
+            properties = transport.download(requestUrl, tmpDir, MediaType.APPLICATION_OCTET_STREAM);
         } catch (IOException e) {
             throw new IOException("Can't download installation properties. " + e.getMessage(), e);
         }
@@ -226,14 +227,14 @@ public class ConfigManager {
                 }
 
                 case BUILDER: {
-                    String replacingToken = "builder\\\\d+\\\\.example.com";
+                    String replacingToken = "builder\\\\d\\+\\\\.example.com";
                     String replacement = format("builder\\\\d+\\\\%s", getBaseNodeDomain(node));
                     replacements.put(replacingToken, replacement);
                     break;
                 }
 
                 case RUNNER: {
-                    String replacingToken = "runner\\\\d+\\\\.example.com";
+                    String replacingToken = "runner\\\\d\\+\\\\.example.com";
                     String replacement = format("runner\\\\d+\\\\%s", getBaseNodeDomain(node));
                     replacements.put(replacingToken, replacement);
                     break;

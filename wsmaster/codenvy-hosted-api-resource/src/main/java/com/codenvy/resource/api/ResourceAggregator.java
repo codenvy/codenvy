@@ -95,6 +95,8 @@ public class ResourceAggregator {
             final ResourceImpl resource1 = result.get(toDeduct.getType());
             if (resource1 != null) {
                 result.put(toDeduct.getType(), deduct(resource1, toDeduct));
+            } else {
+                throw new ConflictException(String.format("Your account doesn't have %s resource to use.", toDeduct.getType()));
             }
         }
         return new ArrayList<>(result.values());

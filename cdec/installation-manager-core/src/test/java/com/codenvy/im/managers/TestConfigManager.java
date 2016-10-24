@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.MediaType;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,6 +47,7 @@ import static java.nio.file.Files.createFile;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.endsWith;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -109,7 +111,8 @@ public class TestConfigManager extends BaseTest {
                                              "b=2\n" +
                                              "c=\n" +
                                              "d=3\\n4\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-single-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-single-server-properties/3.1.0"), any(Path.class),
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.SINGLE_SERVER);
         assertEquals(m.size(), 4);
@@ -131,7 +134,8 @@ public class TestConfigManager extends BaseTest {
                                              "user_ldap_dn=dc=codenvy-enterprise,dc=com\n" +
                                              "billing_resources_refill_cron=0 15 0 * * ?\n" +
                                              "admin_ldap_dn=dc=codenvycorp,dc=com\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         Map<String, String> m = spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
         assertEquals(m.size(), 6);
@@ -146,7 +150,8 @@ public class TestConfigManager extends BaseTest {
     @Test(expectedExceptions = IOException.class,
             expectedExceptionsMessageRegExp = "Can't download installation properties. error")
     public void testLoadDefaultCdecConfigTransportError() throws Exception {
-        doThrow(new IOException("error")).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doThrow(new IOException("error")).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                                   eq(MediaType.APPLICATION_OCTET_STREAM));
 
         spyConfigManager.loadCodenvyDefaultProperties(Version.valueOf("3.1.0"), InstallType.MULTI_SERVER);
     }
@@ -156,7 +161,8 @@ public class TestConfigManager extends BaseTest {
         Path properties = Paths.get("target/test.properties");
         FileUtils.write(properties.toFile(), "a=1\n" +
                                              "b=2\n");
-        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class));
+        doReturn(properties).when(transport).download(endsWith("codenvy-multi-server-properties/3.1.0"), any(Path.class),
+                                                      eq(MediaType.APPLICATION_OCTET_STREAM));
 
         doThrow(new IOException("error")).when(spyConfigManager).doLoadCodenvyProperties(any(Path.class));
 
@@ -304,8 +310,8 @@ public class TestConfigManager extends BaseTest {
                 new NodeConfig(NodeConfig.NodeType.RUNNER, "runner23.runner89.com")
                                                  );
 
-        Map<String, String> expected = ImmutableMap.of("builder\\\\d+\\\\.example.com", "builder\\\\d+\\\\.dev.com",
-                                                       "runner\\\\d+\\\\.example.com", "runner\\\\d+\\\\.runner89.com",
+        Map<String, String> expected = ImmutableMap.of("builder\\\\d\\+\\\\.example.com", "builder\\\\d+\\\\.dev.com",
+                                                       "runner\\\\d\\+\\\\.example.com", "runner\\\\d+\\\\.runner89.com",
                                                        "data.example.com", "data.dev.com",
                                                        "api.example.com", "api.dev.com");
         Map<String, String> actual = ConfigManager.getPuppetNodesConfigReplacement(nodes);

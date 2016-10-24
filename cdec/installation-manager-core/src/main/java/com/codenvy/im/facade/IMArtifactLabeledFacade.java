@@ -17,6 +17,7 @@ package com.codenvy.im.facade;
 import com.codenvy.im.artifacts.Artifact;
 import com.codenvy.im.artifacts.VersionLabel;
 import com.codenvy.im.managers.BackupManager;
+import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.DownloadManager;
 import com.codenvy.im.managers.DownloadNotStartedException;
 import com.codenvy.im.managers.InstallManager;
@@ -35,6 +36,7 @@ import com.codenvy.im.utils.HttpTransport;
 import com.codenvy.im.utils.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonParseException;
 
@@ -58,6 +60,7 @@ public class IMArtifactLabeledFacade extends InstallationManagerFacade {
     @Inject
     public IMArtifactLabeledFacade(@Named("saas.api.endpoint") String saasServerEndpoint,
                                    HttpTransport transport,
+                                   ConfigManager configManager,
                                    SaasAuthServiceProxy saasAuthServiceProxy,
                                    SaasRepositoryServiceProxy saasRepositoryServiceProxy,
                                    LdapManager ldapManager,
@@ -66,8 +69,8 @@ public class IMArtifactLabeledFacade extends InstallationManagerFacade {
                                    StorageManager storageManager,
                                    InstallManager installManager,
                                    DownloadManager downloadManager) {
-        super(
-            transport,
+        super(transport,
+              configManager,
               saasAuthServiceProxy,
               saasRepositoryServiceProxy,
               ldapManager,
@@ -78,6 +81,10 @@ public class IMArtifactLabeledFacade extends InstallationManagerFacade {
               downloadManager);
     }
 
+    @Override
+    public void requestAuditReport(String authToken, String host) throws IOException {
+        super.requestAuditReport(authToken, host);
+    }
 
     /** {@inheritDoc} */
     @Override

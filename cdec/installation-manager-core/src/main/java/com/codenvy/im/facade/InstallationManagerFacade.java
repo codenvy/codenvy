@@ -19,6 +19,7 @@ import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.event.Event;
 import com.codenvy.im.managers.BackupConfig;
 import com.codenvy.im.managers.BackupManager;
+import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.DownloadAlreadyStartedException;
 import com.codenvy.im.managers.DownloadManager;
 import com.codenvy.im.managers.DownloadNotStartedException;
@@ -41,10 +42,14 @@ import com.codenvy.im.response.UpdateArtifactInfo;
 import com.codenvy.im.saas.SaasAuthServiceProxy;
 import com.codenvy.im.saas.SaasRepositoryServiceProxy;
 import com.codenvy.im.utils.HttpTransport;
+import com.codenvy.im.utils.InjectorBootstrap;
 import com.codenvy.im.utils.Version;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
+
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.auth.shared.dto.Credentials;
 import org.eclipse.che.api.auth.shared.dto.Token;
@@ -52,9 +57,11 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonParseException;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.MediaType;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -75,6 +82,7 @@ import static java.lang.String.format;
 public class InstallationManagerFacade {
     protected final HttpTransport              transport;
     protected final SaasAuthServiceProxy       saasAuthServiceProxy;
+    protected final ConfigManager              configManager;
     protected final SaasRepositoryServiceProxy saasRepositoryServiceProxy;
     protected final LdapManager                ldapManager;
     protected final NodeManager                nodeManager;
@@ -85,6 +93,7 @@ public class InstallationManagerFacade {
 
     @Inject
     public InstallationManagerFacade(HttpTransport transport,
+                                     ConfigManager configManager,
                                      SaasAuthServiceProxy saasAuthServiceProxy,
                                      SaasRepositoryServiceProxy saasRepositoryServiceProxy,
                                      LdapManager ldapManager,
@@ -93,6 +102,7 @@ public class InstallationManagerFacade {
                                      StorageManager storageManager,
                                      InstallManager installManager,
                                      DownloadManager downloadManager) {
+        this.configManager = configManager;
         this.saasRepositoryServiceProxy = saasRepositoryServiceProxy;
         this.installManager = installManager;
         this.downloadManager = downloadManager;
@@ -102,6 +112,21 @@ public class InstallationManagerFacade {
         this.nodeManager = nodeManager;
         this.backupManager = backupManager;
         this.storageManager = storageManager;
+    }
+
+    /**
+     * Makes a request to download Audit report and save it to audit directory.
+     */
+    public void requestAuditReport(String authToken, String host) throws IOException {
+
+        Path path = Paths.get(InjectorBootstrap.INJECTOR.getInstance(Key.get(String.class, Names.named("installation-manager.audit_dir"))));
+
+        if (configManager.getHostUrl().equals(host)) {
+            transport.downloadWithoutProxy(host + "/api/audit", authToken, path, MediaType.TEXT_PLAIN);
+        } else {
+            transport.download(host + "/api/audit", authToken, path, MediaType.TEXT_PLAIN);
+        }
+
     }
 
     /**
@@ -559,7 +584,7 @@ public class InstallationManagerFacade {
     }
 
     /**
-     * @see com.codenvy.im.saas.SaasRepositoryServiceProxy#logAnalyticsEvent(com.codenvy.im.event.Event, null)
+     * @see com.codenvy.im.saas.SaasRepositoryServiceProxy#logAnalyticsEvent(com.codenvy.im.event.Event, String)
      */
     public void logSaasAnalyticsEvent(Event event) throws IOException {
         logSaasAnalyticsEvent(event, null);

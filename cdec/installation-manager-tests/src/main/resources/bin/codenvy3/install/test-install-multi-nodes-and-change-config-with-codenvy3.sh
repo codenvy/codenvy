@@ -56,7 +56,6 @@ auth "admin" "password" "http://${NEW_HOST_URL}"
 
 # test re-install
 # remove codenvy binaries
-
 executeSshCommand "sudo rm -rf /home/codenvy/codenvy-tomcat/webapps" "api.${HOST_URL}"
 executeSshCommand "sudo rm -rf /home/codenvy/codenvy-tomcat/webapps" "runner1.${HOST_URL}"
 executeSshCommand "sudo rm -rf /home/codenvy-im/codenvy-im-tomcat/webapps"

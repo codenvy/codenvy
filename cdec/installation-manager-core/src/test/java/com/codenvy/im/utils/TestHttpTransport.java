@@ -138,7 +138,7 @@ public class TestHttpTransport {
         java.nio.file.Path destFile = destDir.resolve("temp");
 
         Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        httpTransport.download("http://localhost:" + port + "/rest/test/download", destDir);
+        httpTransport.download("http://localhost:" + port + "/rest/test/download", destDir, MediaType.APPLICATION_OCTET_STREAM);
 
         assertTrue(Files.exists(destFile));
         try (InputStream in = Files.newInputStream(destFile)) {
@@ -151,7 +151,7 @@ public class TestHttpTransport {
         java.nio.file.Path destDir = Paths.get("target", "download");
         Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
 
-        httpTransport.download("http://localhost:" + port + "/rest/test/throwException", destDir);
+        httpTransport.download("http://localhost:" + port + "/rest/test/throwException", destDir, MediaType.APPLICATION_OCTET_STREAM);
     }
 
     @Test

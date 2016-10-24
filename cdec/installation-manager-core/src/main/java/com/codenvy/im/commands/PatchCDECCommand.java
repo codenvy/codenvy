@@ -83,7 +83,7 @@ public class PatchCDECCommand implements Command {
                 String value = oldCDECConfig.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
 
                 commands.add(createReplaceCommand(patchFile.toString(),
-                                                  format("${OLD_%s}", property),
+                                                  format("\\$\\{OLD_%s\\}", property),
                                                   value));
             }
 
@@ -94,7 +94,7 @@ public class PatchCDECCommand implements Command {
                 String value = config.getValue(property);  // work around enclosed properties like "user_ldap_user_container_dn=ou=$user_ldap_users_ou,$user_ldap_dn"
 
                 commands.add(createReplaceCommand(patchFile.toString(),
-                                                  format("${%s}", property),
+                                                  format("\\$\\{%s\\}", property),
                                                   value));
             }
 
@@ -108,7 +108,7 @@ public class PatchCDECCommand implements Command {
                 String value = e.getValue();
 
                 commands.add(createReplaceCommand(patchFile.toString(),
-                                                  format("${%s}", property),
+                                                  format("\\$\\{%s\\}", property),
                                                   value));
             }
 

@@ -145,7 +145,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
         }
 
         @Override

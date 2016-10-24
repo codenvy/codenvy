@@ -17,6 +17,7 @@ package com.codenvy.im.facade;
 import com.codenvy.im.artifacts.Artifact;
 import com.codenvy.im.artifacts.InstallManagerArtifact;
 import com.codenvy.im.managers.BackupManager;
+import com.codenvy.im.managers.ConfigManager;
 import com.codenvy.im.managers.DownloadManager;
 import com.codenvy.im.managers.InstallManager;
 import com.codenvy.im.managers.InstallOptions;
@@ -57,6 +58,7 @@ public class IMCliFilteredFacade extends IMArtifactLabeledFacade {
     @Inject
     public IMCliFilteredFacade(@Named("saas.api.endpoint") String saasServerEndpoint,
                                HttpTransport transport,
+                               ConfigManager configManager,
                                SaasAuthServiceProxy saasAuthServiceProxy,
                                SaasRepositoryServiceProxy saasRepositoryServiceProxy,
                                LdapManager ldapManager,
@@ -67,6 +69,7 @@ public class IMCliFilteredFacade extends IMArtifactLabeledFacade {
                                DownloadManager downloadManager) {
         super(saasServerEndpoint,
               transport,
+              configManager,
               saasAuthServiceProxy,
               saasRepositoryServiceProxy,
               ldapManager,

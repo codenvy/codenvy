@@ -14,6 +14,7 @@
  */
 package com.codenvy.organization.spi.jpa;
 
+import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
@@ -24,8 +25,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -161,6 +165,53 @@ public class JpaOrganizationDao implements OrganizationDao {
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
             manager.remove(organization);
+            manager.flush();
+        }
+    }
+
+    @Singleton
+    public static class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
+        private static final int PAGE_SIZE = 100;
+
+        @Inject
+        private EventService eventService;
+
+        @Inject
+        private OrganizationDao organizationDao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this, BeforeOrganizationRemovedEvent.class);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this, BeforeOrganizationRemovedEvent.class);
+        }
+
+        @Override
+        public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+            removeSuborganizations(event.getOrganization().getId(), PAGE_SIZE);
+        }
+
+        /**
+         * Removes suborganizations of given parent organization page by page
+         *
+         * @param organizationId
+         *         parent organization id
+         * @param pageSize
+         *         number of items which should removed by one request
+         */
+        void removeSuborganizations(String organizationId, int pageSize) throws ServerException {
+            Page<OrganizationImpl> suborganizationsPage;
+            do {
+                // skip count always equals to 0 because elements will be shifted after removing previous items
+                suborganizationsPage = organizationDao.getByParent(organizationId, pageSize, 0);
+                for (OrganizationImpl suborganization : suborganizationsPage.getItems()) {
+                    organizationDao.remove(suborganization.getId());
+                }
+            } while (suborganizationsPage.hasNextPage());
         }
     }
 }

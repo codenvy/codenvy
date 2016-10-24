@@ -16,14 +16,14 @@ package com.codenvy.plugin.pullrequest.client;
 
 import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
 import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Context;
 import com.codenvy.plugin.pullrequest.client.steps.CreateForkStep;
+import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
 import com.codenvy.plugin.pullrequest.client.steps.IssuePullRequestStep;
 import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnForkStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Step;
+import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
 import com.codenvy.plugin.pullrequest.client.steps.UpdatePullRequestStep;
+import com.codenvy.plugin.pullrequest.client.workflow.Context;
+import com.codenvy.plugin.pullrequest.client.workflow.Step;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,18 +41,21 @@ import static java.util.Arrays.asList;
 @Singleton
 public class GithubStagesProvider implements StagesProvider {
 
-    private static final Set<Class<? extends Step>> UPDATE_STEP_DONE_TYPES;
+    private static final Set<Class<? extends Step>> UPDATE_ORIGIN_STEP_DONE_TYPES;
+    private static final Set<Class<? extends Step>> UPDATE_FORK_STEP_DONE_TYPES;
     private static final Set<Class<? extends Step>> CREATION_ORIGIN_STEP_DONE_TYPES;
     private static final Set<Class<? extends Step>> CREATION_FORK_STEP_DONE_TYPES;
 
     static {
-        UPDATE_STEP_DONE_TYPES = ImmutableSet.of(PushBranchOnForkStep.class,
-                                                 UpdatePullRequestStep.class);
+        UPDATE_FORK_STEP_DONE_TYPES = ImmutableSet.of(PushBranchOnForkStep.class,
+                                                      UpdatePullRequestStep.class);
+        UPDATE_ORIGIN_STEP_DONE_TYPES = ImmutableSet.of(PushBranchOnOriginStep.class,
+                                                        UpdatePullRequestStep.class);
         CREATION_FORK_STEP_DONE_TYPES = ImmutableSet.of(CreateForkStep.class,
-                                                   PushBranchOnForkStep.class,
-                                                   IssuePullRequestStep.class);
+                                                        PushBranchOnForkStep.class,
+                                                        IssuePullRequestStep.class);
         CREATION_ORIGIN_STEP_DONE_TYPES = ImmutableSet.of(PushBranchOnOriginStep.class,
-                                                   IssuePullRequestStep.class);
+                                                          IssuePullRequestStep.class);
     }
 
     private final ContributeMessages messages;
@@ -68,7 +71,7 @@ public class GithubStagesProvider implements StagesProvider {
             return asList(messages.contributePartStatusSectionNewCommitsPushedStepLabel(),
                           messages.contributePartStatusSectionPullRequestUpdatedStepLabel());
         }
-        if (context.isForkAvailable()){
+        if (context.isForkAvailable()) {
             return asList(messages.contributePartStatusSectionForkCreatedStepLabel(),
                           messages.contributePartStatusSectionBranchPushedForkStepLabel(),
                           messages.contributePartStatusSectionPullRequestIssuedStepLabel());
@@ -81,7 +84,7 @@ public class GithubStagesProvider implements StagesProvider {
     @Override
     public Set<Class<? extends Step>> getStepDoneTypes(Context context) {
         if (context.isUpdateMode()) {
-            return UPDATE_STEP_DONE_TYPES;
+            return context.isForkAvailable() ? UPDATE_FORK_STEP_DONE_TYPES : UPDATE_ORIGIN_STEP_DONE_TYPES;
         }
         return context.isForkAvailable() ? CREATION_FORK_STEP_DONE_TYPES : CREATION_ORIGIN_STEP_DONE_TYPES;
     }

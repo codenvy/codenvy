@@ -30,8 +30,8 @@ import org.testng.annotations.Test;
 public class TestInstallationManagerCliWithCodenvy extends BaseIntegrationTest {
 
     @Test
-    public void testInstallSingleNodeAndChangeConfig() throws Exception {
-        doTest("codenvy/install/test-install-single-node-and-change-config.sh");
+    public void testInstallSingleNodeAndUpdateCodenvyConfig() throws Exception {
+        doTest("codenvy/install/test-install-single-node-and-update-codenvy-config.sh");
     }
 
     @Test
@@ -70,13 +70,8 @@ public class TestInstallationManagerCliWithCodenvy extends BaseIntegrationTest {
     }
 
     @Test
-    public void testLogin() throws Exception {
-        doTest("codenvy/test-login.sh");
-    }
-
-    @Test
-    public void testSetupAndUpdateCodenvyConfig() throws Exception {
-        doTest("codenvy/test-setup-and-update-codenvy-config.sh");
+    public void testAudit() throws Exception {
+        doTest("codenvy/audit/test-audit.sh");
     }
 
     /* Repeat tests in RHEL OS*/
