@@ -67,10 +67,12 @@
     <inherits name='com.codenvy.plugin.pullrequest.VstsPullRequest'/>
 
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
+    <inherits name='org.eclipse.che.plugin.csharp.CSharp'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>
     <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
+    <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
 
     <!-- Platform API GWT client dependencies                       -->
     <inherits name='org.eclipse.che.api.core.model.Model'/>
@@ -84,6 +86,7 @@
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
+    <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <!--Hosted specific -->
     <inherits name='com.codenvy.ide.profile.Profile'/>
