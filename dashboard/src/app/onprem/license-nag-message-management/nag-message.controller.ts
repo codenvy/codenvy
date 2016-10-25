@@ -52,10 +52,10 @@ export class NagMessageCtrl {
    * @param licenseLegality
    */
   checkLegality(licenseLegality) {
-    if (licenseLegality && licenseLegality.value === 'false') {
-      this.nagMessageService.showLicenseMessage();
-    } else {
+    if (licenseLegality && licenseLegality.value) {
       this.nagMessageService.hideLicenseMessage();
+    } else {
+      this.nagMessageService.showLicenseMessage();
     }
   }
 }
