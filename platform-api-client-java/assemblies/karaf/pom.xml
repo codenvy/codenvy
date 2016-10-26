@@ -16,7 +16,7 @@
     <parent>
         <artifactId>assemblies</artifactId>
         <groupId>com.codenvy.platform-api-client-java</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>assemblies-karaf</artifactId>
     <packaging>pom</packaging>

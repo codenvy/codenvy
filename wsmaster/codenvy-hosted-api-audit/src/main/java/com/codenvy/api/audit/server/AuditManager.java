@@ -160,12 +160,7 @@ public class AuditManager {
     private Page<UserImpl> getNextPage(Page<UserImpl> currentPage) throws ServerException {
         if (currentPage.hasNextPage()) {
             final PageRef nextPageRef = currentPage.getNextPageRef();
-            final long itemsBefore = nextPageRef.getItemsBefore();
-            //TODO: fix when https://github.com/eclipse/che/issues/2524 will be resolved
-            if (itemsBefore < Integer.MAX_VALUE) {
-                throw new ServerException("Skip count limit was reached while retrieving all users");
-            }
-            return userManager.getAll(nextPageRef.getPageSize(), (int)itemsBefore);
+            return userManager.getAll(nextPageRef.getPageSize(), nextPageRef.getItemsBefore());
         } else {
             return null;
         }
