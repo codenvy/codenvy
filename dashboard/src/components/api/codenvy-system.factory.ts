@@ -29,7 +29,6 @@ export class CodenvySystem {
     this.applicationNotifications = applicationNotifications;
     this.$log = $log;
 
-    this.SYSTEM_BUS = 'system';
     this.SYSTEM_RAM_CHANNEL = 'system_ram_channel';
 
     this.LOW_RAM_TITLE = 'Low RAM';
@@ -63,7 +62,7 @@ export class CodenvySystem {
    * Listen to system RAM limit channel.
    */
   listenToSystemRamEvent() {
-    let bus = this.cheWebsocket.getBus(this.SYSTEM_BUS);
+    let bus = this.cheWebsocket.getBus();
     bus.subscribe(this.SYSTEM_RAM_CHANNEL, (message) => {
       if (message.systemRamLimitExceeded) {
         this.notification = this.applicationNotifications.addErrorNotification(this.LOW_RAM_TITLE, this.LOW_RAM_MESSAGE);

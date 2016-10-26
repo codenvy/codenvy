@@ -189,7 +189,7 @@ export class LoadFactoryCtrl {
    */
   startWorkspace(workspace) {
     this.workspace = workspace;
-    var bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+    var bus = this.cheAPI.getWebsocket().getBus();
 
     if (workspace.status === 'RUNNING') {
       this.loadFactoryService.setCurrentProgressStep(4);
