@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.machine.server.spi.tck;
 
-import com.codenvy.api.machine.server.recipe.RecipeDomain;
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
@@ -24,12 +23,12 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -44,7 +43,7 @@ import static org.testng.AssertJUnit.assertEquals;
 /**
  * @author Max Shaposhnik
  */
-@Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = "RecipePermissionsDaoTck")
 public class RecipePermissionsDaoTest {
     @Inject

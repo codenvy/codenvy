@@ -20,10 +20,11 @@ import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.test.tck.TckModuleFactory;
+import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -36,7 +37,7 @@ import static org.testng.AssertJUnit.assertTrue;
 /**
  * @author Max Shaposhnik
  */
-@org.testng.annotations.Guice(moduleFactory = TckModuleFactory.class)
+@Listeners(TckListener.class)
 @Test(suiteName = "SystemPermissionsDaoTck")
 public class SystemPermissionsDaoTest {
 

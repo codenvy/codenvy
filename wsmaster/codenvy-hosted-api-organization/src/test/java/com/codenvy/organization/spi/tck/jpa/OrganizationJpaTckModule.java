@@ -22,13 +22,19 @@ import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
+import com.codenvy.organization.spi.tck.MemberDaoTest;
+import com.codenvy.organization.spi.tck.OrganizationDaoTest;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 
@@ -42,6 +48,7 @@ public class OrganizationJpaTckModule extends TckModule {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+        bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
