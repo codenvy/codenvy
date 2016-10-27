@@ -16,13 +16,14 @@ package com.codenvy.ldap.sync;
 
 import com.codenvy.ldap.LdapUserIdNormalizer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.inject.Provider;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
+import org.eclipse.che.api.core.model.user.Profile;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
@@ -41,8 +42,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -84,16 +83,18 @@ public class LdapSynchronizer {
 
     private final long                             syncPeriodMs;
     private final long                             initDelayMs;
+    private final boolean                          updateIfExists;
+    private final boolean                          removeIfMissing;
     private final Function<LdapEntry, ProfileImpl> profileMapper;
     private final Function<LdapEntry, UserImpl>    userMapper;
     private final LdapEntrySelector                selector;
     private final ConnectionFactory                connFactory;
     private final UserDao                          userDao;
     private final ProfileDao                       profileDao;
-    private final Provider<EntityManager>          emProvider;
     private final ScheduledExecutorService         scheduler;
     private final AtomicBoolean                    isSyncing;
     private final LdapUserIdNormalizer             idNormalizer;
+    private final DBUserFinder                     userFinder;
 
     /**
      * Creates an instance of synchronizer.
@@ -101,8 +102,6 @@ public class LdapSynchronizer {
      * @param connFactory
      *         the factory used for getting connections, the strategy is
      *         one connection per one synchronization
-     * @param emProvider
-     *         provider of {@link EntityManager} instance to get user identifiers
      * @param selector
      *         selector used to query users for synchronization
      * @param userDao
@@ -131,10 +130,16 @@ public class LdapSynchronizer {
      * @param profileAttributes
      *         an optional list of pairs indicating application to ldap attributes mapping.
      *         e.g. <i>lastName=sn,firstName=givenName,phone=telephoneNumber</i>
+     * @param updateIfExists
+     *         whether update those users who already present in persistence layer
+     * @param removeIfMissing
+     *         whether remove those users who are present in persistence layer while missing
+     *         from ldap storage
+     * @param userFinder
+     *         gets database users and their attributes
      */
     @Inject
     public LdapSynchronizer(ConnectionFactory connFactory,
-                            Provider<EntityManager> emProvider,
                             LdapEntrySelector selector,
                             UserDao userDao,
                             ProfileDao profileDao,
@@ -145,12 +150,14 @@ public class LdapSynchronizer {
                             @Named(USER_ID_ATTRIBUTE_NAME) String userIdAttr,
                             @Named(USER_NAME_ATTRIBUTE_NAME) String userNameAttr,
                             @Named(USER_EMAIL_ATTRIBUTE_NAME) String userEmailAttr,
-                            @Named("ldap.sync.profile.attrs") @Nullable Pair<String, String>[] profileAttributes) {
+                            @Named("ldap.sync.profile.attrs") @Nullable Pair<String, String>[] profileAttributes,
+                            @Named("ldap.sync.update_if_exists") boolean updateIfExists,
+                            @Named("ldap.sync.remove_if_missing") boolean removeIfMissing,
+                            DBUserFinder userFinder) {
         if (initDelayMs < 0) {
             throw new IllegalArgumentException("'ldap.sync.initial_delay_ms' must be >= 0, the actual value is " + initDelayMs);
         }
         this.connFactory = connFactory;
-        this.emProvider = emProvider;
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.syncPeriodMs = syncPeriodMs;
@@ -160,6 +167,9 @@ public class LdapSynchronizer {
         this.userMapper = new UserMapper(userIdAttr, userNameAttr, userEmailAttr);
         this.profileMapper = new ProfileMapper(userIdAttr, profileAttributes);
         this.isSyncing = new AtomicBoolean(false);
+        this.updateIfExists = updateIfExists;
+        this.removeIfMissing = removeIfMissing;
+        this.userFinder = userFinder;
         this.scheduler = Executors.newScheduledThreadPool(1,
                                                           new ThreadFactoryBuilder().setNameFormat("LdapSynchronizer-%d")
                                                                                     .setDaemon(false)
@@ -192,7 +202,7 @@ public class LdapSynchronizer {
     public SyncResult syncAll() throws LdapException, SyncException {
         LOG.info("Preparing synchronization environment");
         final SyncResult syncResult = new SyncResult();
-        final Set<String> existingIds = getAllUserIds();
+        final Set<String> linkingIds = userFinder.findLinkingIds();
         LOG.debug("Using selector {} for synchronization", selector);
         LOG.info("Starting synchronization of users/profiles");
         try (Connection connection = connFactory.getConnection()) {
@@ -200,30 +210,8 @@ public class LdapSynchronizer {
             long iteration = 0;
             for (LdapEntry entry : selector.select(connection)) {
                 iteration++;
-                idNormalizer.normalize(entry);
-                final UserImpl user = userMapper.apply(entry);
-                if (!isValid(user)) {
-                    continue;
-                }
-                final ProfileImpl profile = profileMapper.apply(entry);
-                try {
-                    if (existingIds.remove(user.getId())) {
-                        refreshUserAndProfile(user, profile);
-                        syncResult.refreshed++;
-                        LOG.debug("Refreshed user & profile '{}'", user.getId());
-                    } else {
-                        createUserAndProfile(user, profile);
-                        syncResult.created++;
-                        LOG.debug("Created user & profile '{}'", user.getId());
-                    }
-                } catch (RuntimeException | ConflictException | NotFoundException | ServerException x) {
-                    LOG.info(format("Couldn't synchronize(update/create) user or his profile '%s' " +
-                                    "due to occurred error, original ldap entry '%s'",
-                                    user.getId(),
-                                    entry),
-                             x);
-                    syncResult.failed++;
-                }
+
+                syncFetched(entry, linkingIds, syncResult);
 
                 // Each EACH_ENTRIES_COUNT_CHECK_INTERRUPTION synchronized entries check whether thread wasn't interrupted
                 // if it was - stop the synchronization, all the users who were not synchronized
@@ -237,18 +225,69 @@ public class LdapSynchronizer {
                 }
             }
         }
-        for (String existingId : existingIds) {
-            try {
-                userDao.remove(existingId);
-                syncResult.removed++;
-                LOG.debug("Removed user '{}'", existingId);
-            } catch (ServerException | ConflictException x) {
-                LOG.info(format("Couldn't remove user '%s' due to occurred error", existingId), x);
-                syncResult.failed++;
+
+        if (removeIfMissing && !linkingIds.isEmpty()) {
+            LOG.info("Removing users missing from ldap storage, users to remove '{}'", linkingIds.size());
+            for (String linkingId : linkingIds) {
+                try {
+                    final User user = userFinder.findOne(linkingId);
+                    userDao.remove(user.getId());
+                    syncResult.removed++;
+                    LOG.debug("Removed user '{}'", user.getId());
+                } catch (NotFoundException | ServerException | ConflictException x) {
+                    LOG.info(format("Couldn't remove user '%s' due to occurred error", linkingId), x);
+                    syncResult.failed++;
+                }
             }
         }
+
         LOG.info("Synchronization result: {}", syncResult);
         return syncResult;
+    }
+
+    /** Validates and tries to persist fetched ldap entry. */
+    private void syncFetched(LdapEntry entry, Set<String> linkingIds, SyncResult syncResult) {
+        idNormalizer.normalize(entry);
+
+        final UserImpl ldapUser = userMapper.apply(entry);
+        if (!isValid(ldapUser)) {
+            syncResult.failed++;
+            return;
+        }
+
+        final ProfileImpl ldapProfile = profileMapper.apply(entry);
+        try {
+            final String linkingId = userFinder.extractLinkingId(ldapUser);
+            if (!linkingIds.remove(linkingId)) {
+                createUserAndProfile(ldapUser, ldapProfile);
+                syncResult.created++;
+                LOG.debug("Created user & profile '{}'", ldapUser.getId());
+                return;
+            }
+
+            if (!updateIfExists) {
+                syncResult.skipped++;
+                LOG.debug("User & profile '{}' are skipped", ldapUser.getId());
+                return;
+            }
+
+            final User dbUser = userFinder.findOne(linkingId);
+            final Profile dbProfile = profileDao.getById(dbUser.getId());
+            if (updateUserAndProfile(dbUser, dbProfile, ldapUser, ldapProfile)) {
+                syncResult.updated++;
+                LOG.debug("Updated user & profile '{}'", ldapUser.getId());
+            } else {
+                syncResult.upToDate++;
+                LOG.debug("User & profile '{}' are up-to-date", ldapUser.getId());
+            }
+        } catch (RuntimeException | ConflictException | NotFoundException | ServerException x) {
+            LOG.info("Couldn't synchronize(update/create) user or his profile '{}' " +
+                     "due to occurred error, original ldap entry '{}'. Error: {}",
+                     ldapUser.getId(),
+                     entry,
+                     x.getMessage());
+            syncResult.failed++;
+        }
     }
 
     @Transactional
@@ -258,16 +297,22 @@ public class LdapSynchronizer {
     }
 
     @Transactional
-    protected void refreshUserAndProfile(UserImpl user, ProfileImpl profile) throws ServerException, NotFoundException, ConflictException {
-        userDao.update(user);
-        profileDao.update(profile);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<String> getAllUserIds() {
-        return new HashSet<>(emProvider.get()
-                                       .createNativeQuery("SELECT id FROM Usr")
-                                       .getResultList());
+    protected boolean updateUserAndProfile(User dbUser,
+                                           Profile dbProfile,
+                                           UserImpl ldapUser,
+                                           ProfileImpl ldapProfile) throws ServerException,
+                                                                           NotFoundException,
+                                                                           ConflictException {
+        boolean updated = false;
+        if (!dbUser.equals(ldapUser)) {
+            userDao.update(ldapUser);
+            updated = true;
+        }
+        if (!dbProfile.equals(ldapProfile)) {
+            profileDao.update(ldapProfile);
+            updated = true;
+        }
+        return updated;
     }
 
     private void syncSilentlyAndUnsetFlag() {
@@ -316,7 +361,8 @@ public class LdapSynchronizer {
 
     private boolean isValid(UserImpl user) {
         if (user.getId() == null) {
-            LOG.warn(format("Cannot find out user's id. Please, check configuration `%s` parameter correctness.", USER_ID_ATTRIBUTE_NAME));
+            LOG.warn(format("Cannot find out user's id. Please, check configuration `%s` parameter correctness.",
+                            USER_ID_ATTRIBUTE_NAME));
             return false;
         }
         if (user.getName() == null) {
@@ -332,36 +378,73 @@ public class LdapSynchronizer {
         return true;
     }
 
-
+    /** Describes synchronization result. */
     public static class SyncResult {
+
         private long created;
-        private long refreshed;
+        private long updated;
         private long removed;
         private long failed;
+        private long upToDate;
+        private long skipped;
 
+        /** How many users where removed. */
         public long getRemoved() {
             return removed;
         }
 
-        public long getRefreshed() {
-            return refreshed;
+        /** How many users where updated. */
+        public long getUpdated() {
+            return updated;
         }
 
+        /** How many users where created. */
         public long getCreated() {
             return created;
         }
 
+        /** How many users couldn't be created or updated. */
         public long getFailed() {
             return failed;
         }
 
+        /** How many users were not updated because the database version of them is the same. */
+        public long getUpToDate() {
+            return upToDate;
+        }
+
+        /**
+         * For how many users an attempt to create/update wasn't performed due to
+         * synchronization configuration options.
+         */
+        public long getSkipped() {
+            return skipped;
+        }
+
+        /**
+         * How many synchronization attempts were performed
+         * or how many ldap users were processed.
+         */
+        public long getProcessed() {
+            return created + updated + upToDate + failed + skipped;
+        }
+
         @Override
         public String toString() {
-            return format("created = '%d', refreshed = '%d', removed = '%d', failed = '%d'",
+            return format("processed = '%d', " +
+                          "created = '%d', " +
+                          "updated = '%d', " +
+                          "removed = '%d', " +
+                          "failed = '%d', " +
+                          "up-to-date = '%d', " +
+                          "skipped = '%d'",
+                          getProcessed(),
                           created,
-                          refreshed,
+                          updated,
                           removed,
-                          failed);
+                          failed,
+                          upToDate,
+                          skipped);
         }
     }
 

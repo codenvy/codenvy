@@ -22,7 +22,8 @@ import com.codenvy.ldap.sync.LdapEntrySelector;
 import com.codenvy.ldap.sync.LdapEntrySelectorProvider;
 import com.codenvy.ldap.sync.LdapSynchronizer;
 import com.codenvy.ldap.sync.LdapSynchronizerService;
-import com.codenvy.ldap.sync.UserMapper;
+import com.codenvy.ldap.sync.DBUserFinder;
+import com.codenvy.ldap.sync.DBUserFinderProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
@@ -51,6 +52,7 @@ public class LdapModule extends AbstractModule {
 
         bind(EntryResolver.class).toProvider(EntryResolverProvider.class);
 
+        bind(DBUserFinder.class).toProvider(DBUserFinderProvider.class);
         bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
         bind(LdapSynchronizer.class).asEagerSingleton();
         bind(LdapSynchronizerService.class);

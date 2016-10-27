@@ -171,6 +171,16 @@ property must be specified in milliseconds. Unlike period, delay MUST be a non-n
 integer value, if it is set to _0_ then synchronization will be performed immediately
 on sever startup.
 
+- __ldap.sync.user_linking_attribute__ _(optional)_ - what attribute to use
+  for linking ldap users and database users. Possible value are: _id_, _email_.
+If this attribute is not configured _id_ will be used
+
+- __ldap.sync.remove_if_missing__ - whether to remove those users who are present
+ in LDAP cache but missing from LDAP storage
+
+- __ldap.sync.update_if_exists__ - whether to update those users who are present in LDAP cache
+and were changed in LDAP storage
+
 #### Users selection configuration
 
 - __ldap.base_dn__ - the root distinguished name to search LDAP entries,
@@ -293,6 +303,8 @@ ldap.connection.sasl.quality_of_protection=NULL
 
 ldap.sync.initial_delay_ms=10000
 ldap.sync.period_ms=-1
+ldap.sync.remove_if_missing=true
+ldap.sync.update_if_exists=true
 ldap.sync.page.size=1000
 ldap.sync.page.read_timeout_ms=30000
 ldap.sync.user.additional_dn=NULL

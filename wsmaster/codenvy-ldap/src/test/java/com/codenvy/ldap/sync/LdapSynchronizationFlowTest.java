@@ -81,7 +81,7 @@ public class LdapSynchronizationFlowTest {
     }
 
     @Test
-    public void testSynchronization() throws Exception {
+    public void synchronization() throws Exception {
         // add a few users to ldap
         final UserImpl user1 = asUser(server.addDefaultLdapUser(1));
         final UserImpl user2 = asUser(server.addDefaultLdapUser(2));
@@ -90,7 +90,7 @@ public class LdapSynchronizationFlowTest {
         // sync the first time, check all the users synchronized
         SyncResult syncResult = synchronizer.syncAll();
         assertEquals(syncResult.getCreated(), 3);
-        assertEquals(syncResult.getRefreshed(), 0);
+        assertEquals(syncResult.getUpdated(), 0);
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(userDao.getTotalCount(), 3);
@@ -102,7 +102,8 @@ public class LdapSynchronizationFlowTest {
         // sync the second time
         syncResult = synchronizer.syncAll();
         assertEquals(syncResult.getCreated(), 1);
-        assertEquals(syncResult.getRefreshed(), 3);
+        assertEquals(syncResult.getUpToDate(), 3);
+        assertEquals(syncResult.getUpdated(), 0);
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(user4, userDao.getById(user4.getId()));
@@ -113,10 +114,22 @@ public class LdapSynchronizationFlowTest {
         // sync and check user is removed from database
         syncResult = synchronizer.syncAll();
         assertEquals(syncResult.getCreated(), 0);
-        assertEquals(syncResult.getRefreshed(), 3);
+        assertEquals(syncResult.getUpToDate(), 3);
+        assertEquals(syncResult.getUpdated(), 0);
         assertEquals(syncResult.getRemoved(), 1);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(userDao.getAll(3, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3, user4)));
+
+        // modify ldap user
+        server.modify("uid", user2.getId(), replaceMod("cn", "new-name"));
+
+        // sync and check user is updated
+        syncResult = synchronizer.syncAll();
+        assertEquals(syncResult.getCreated(), 0);
+        assertEquals(syncResult.getUpToDate(), 2);
+        assertEquals(syncResult.getUpdated(), 1);
+        assertEquals(syncResult.getRemoved(), 0);
+        assertEquals(syncResult.getFailed(), 0);
 
         // cleanup ldap user entries
         server.removeDefaultUser(user2.getId());
@@ -124,8 +137,8 @@ public class LdapSynchronizationFlowTest {
         server.removeDefaultUser(user4.getId());
     }
 
-    @Test(dependsOnMethods = "testSynchronization")
-    public void conflictUpdateShouldBeSolvedWithTwoSynchronizations() throws Exception {
+    @Test(dependsOnMethods = "synchronization")
+    public void conflictUpdateIsSolvedByTwoSynchronizations() throws Exception {
         // add a few users to ldap
         final UserImpl user1 = asUser(server.addDefaultLdapUser(1));
         final UserImpl user2 = asUser(server.addDefaultLdapUser(2));
@@ -142,14 +155,16 @@ public class LdapSynchronizationFlowTest {
         // should fail to sync one of users, due to name conflict
         SyncResult syncResult = synchronizer.syncAll();
         assertEquals(syncResult.getCreated(), 0);
-        assertEquals(syncResult.getRefreshed(), 1);
+        assertEquals(syncResult.getUpdated(), 0);
+        assertEquals(syncResult.getUpToDate(), 1);
         assertEquals(syncResult.getRemoved(), 1);
         assertEquals(syncResult.getFailed(), 1);
 
         // sync second time, and check that failed synchronization is resolved
         syncResult = synchronizer.syncAll();
         assertEquals(syncResult.getCreated(), 0);
-        assertEquals(syncResult.getRefreshed(), 2);
+        assertEquals(syncResult.getUpToDate(), 1);
+        assertEquals(syncResult.getUpdated(), 1);
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(userDao.getAll(2, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3)));
@@ -190,6 +205,7 @@ public class LdapSynchronizationFlowTest {
 
             // configure synchronizer
             bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
+            bind(DBUserFinder.class).toProvider(DBUserFinderProvider.class);
             bind(ConnectionFactory.class).toInstance(server.getConnectionFactory());
             bindConstant().annotatedWith(Names.named("ldap.sync.initial_delay_ms")).to(0L);
             bindConstant().annotatedWith(Names.named("ldap.sync.period_ms")).to(-1L);
@@ -198,6 +214,8 @@ public class LdapSynchronizationFlowTest {
             bindConstant().annotatedWith(Names.named("ldap.sync.user.attr.name")).to("cn");
             bindConstant().annotatedWith(Names.named("ldap.sync.page.size")).to(10);
             bindConstant().annotatedWith(Names.named("ldap.sync.page.read_timeout_ms")).to(30_000L);
+            bindConstant().annotatedWith(Names.named("ldap.sync.remove_if_missing")).to(true);
+            bindConstant().annotatedWith(Names.named("ldap.sync.update_if_exists")).to(true);
             bindConstant().annotatedWith(Names.named("ldap.base_dn")).to(server.getBaseDn());
             bindConstant().annotatedWith(Names.named("ldap.sync.user.filter")).to("(objectClass=inetOrgPerson)");
             bind(String.class).annotatedWith(Names.named("ldap.sync.group.additional_dn")).toProvider(Providers.of(null));
