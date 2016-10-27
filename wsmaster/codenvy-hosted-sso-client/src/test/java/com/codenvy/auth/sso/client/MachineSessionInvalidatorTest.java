@@ -45,6 +45,7 @@ public class MachineSessionInvalidatorTest {
         // generating a few tokens for the workspace
         final String token1 = registry.generateToken("user123", "workspace123");
         final String token2 = registry.generateToken("user234", "workspace123");
+        final String token3 = registry.generateToken("user345", "workspace123");
         // creating the sessions for the tokens
         final HttpSession httpSession1 = mockHttpSession();
         sessionStore.saveSession(token1, httpSession1);
@@ -60,6 +61,7 @@ public class MachineSessionInvalidatorTest {
         verify(httpSession1).invalidate();
         assertNull(sessionStore.getSession(token2));
         verify(httpSession2).invalidate();
+        assertNull(sessionStore.getSession(token3));
     }
 
     private static HttpSession mockHttpSession() {
