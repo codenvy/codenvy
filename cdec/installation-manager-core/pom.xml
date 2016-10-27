@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-im</artifactId>
         <groupId>com.codenvy.im</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>installation-manager-core</artifactId>
     <name>Codenvy :: IM :: Installation Manager Core</name>
@@ -339,7 +339,7 @@
                                     <target>
                                         <replace file="${project.build.directory}/classes/codenvy/installation-manager.properties">
                                             <replacetoken>installation-manager.update_server_endpoint=https://codenvy.com/update</replacetoken>
-                                            <replacevalue>installation-manager.update_server_endpoint=https://c4.codenvy-stg.com/update</replacevalue>
+                                            <replacevalue>installation-manager.update_server_endpoint=http://updater.codenvy-stg.com/update</replacevalue>
                                         </replace>
                                         <replace file="${project.build.directory}/classes/codenvy/installation-manager.properties">
                                             <replacetoken>saas.api.endpoint=https://codenvy.com/api</replacetoken>

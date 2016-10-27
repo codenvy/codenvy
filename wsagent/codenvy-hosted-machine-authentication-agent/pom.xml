@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-agent-parent</artifactId>
         <groupId>com.codenvy.onpremises.wsagent</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-machine-authentication-agent</artifactId>
     <name>Codenvy :: Hosted :: Machine Authentication Agent</name>

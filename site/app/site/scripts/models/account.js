@@ -360,7 +360,7 @@
 
             // Login with email and password
             processLogin: function(email, password, redirect_url, error){
-                login(email, password)
+                login(email.toLowerCase(), password)
                 .then(function(){
                     if (!redirect_url){
                         redirectToUrl("/dashboard/");

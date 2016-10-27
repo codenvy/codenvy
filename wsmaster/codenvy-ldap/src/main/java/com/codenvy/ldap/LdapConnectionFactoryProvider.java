@@ -16,12 +16,16 @@ package com.codenvy.ldap;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.ldaptive.BindConnectionInitializer;
+import org.ldaptive.BindRequest;
+import org.ldaptive.Connection;
 import org.ldaptive.ConnectionConfig;
 import org.ldaptive.Credential;
 import org.ldaptive.DefaultConnectionFactory;
 import org.ldaptive.ad.extended.FastBindOperation;
+import org.ldaptive.pool.BindPassivator;
 import org.ldaptive.pool.BlockingConnectionPool;
 import org.ldaptive.pool.IdlePruneStrategy;
+import org.ldaptive.pool.Passivator;
 import org.ldaptive.pool.PoolConfig;
 import org.ldaptive.pool.PooledConnectionFactory;
 import org.ldaptive.pool.SearchValidator;
@@ -140,6 +144,8 @@ public class LdapConnectionFactoryProvider implements Provider<PooledConnectionF
             cc.setSslConfig(new SslConfig());
         }
 
+        Passivator<Connection> passivator = null;
+
         if (!isNullOrEmpty(saslMechanism)) {
             final BindConnectionInitializer bc = new BindConnectionInitializer();
             final SaslConfig sc;
@@ -177,10 +183,13 @@ public class LdapConnectionFactoryProvider implements Provider<PooledConnectionF
             }
             bc.setBindSaslConfig(sc);
             cc.setConnectionInitializer(bc);
+            passivator = new BindPassivator(new BindRequest(sc));
         } else if ("*".equals(bindCredential) && "*".equals(bindDn)) {
             cc.setConnectionInitializer(new FastBindOperation.FastBindConnectionInitializer());
         } else if (!isNullOrEmpty(bindDn) && !isNullOrEmpty(bindCredential)) {
-            cc.setConnectionInitializer(new BindConnectionInitializer(bindDn, new Credential(bindCredential)));
+            Credential credential = new Credential(bindCredential);
+            cc.setConnectionInitializer(new BindConnectionInitializer(bindDn, credential));
+            passivator = new BindPassivator(new BindRequest(bindDn, credential));
         }
 
         final DefaultConnectionFactory bindCf = new DefaultConnectionFactory(cc);
@@ -214,6 +223,11 @@ public class LdapConnectionFactoryProvider implements Provider<PooledConnectionF
             pc.isValidateOnCheckOut()) {
             cp.setValidator(new SearchValidator());
         }
+
+        if (passivator != null) {
+            cp.setPassivator(passivator);
+        }
+
         if (!isNullOrEmpty(failFast)) {
             cp.setFailFastInitialize(parseBoolean(failFast));
         }

@@ -53,8 +53,10 @@ public class MachineSessionInvalidator implements EventSubscriber<WorkspaceStatu
         if (WorkspaceStatusEvent.EventType.STOPPED.equals(event.getEventType())) {
             for (String token : tokenRegistry.removeTokens(event.getWorkspaceId()).values()) {
                 final HttpSession session = sessionStore.removeSessionByToken(token);
-                session.removeAttribute("principal");
-                session.invalidate();
+                if (session != null) {
+                    session.removeAttribute("principal");
+                    session.invalidate();
+                }
             }
         }
     }

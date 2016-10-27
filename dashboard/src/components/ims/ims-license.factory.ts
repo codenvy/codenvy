@@ -206,7 +206,7 @@ export class ImsLicenseApi {
 
     // check if was OK or not
     return promise.then((licenseLegality) => {
-      this.licenseLegality.value = licenseLegality.value === true;
+      this.licenseLegality.value = licenseLegality.value === 'true';
     });
   }
 
