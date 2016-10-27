@@ -70,8 +70,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     SystemRamInfoProvider systemRamInfoProvider;
 
     @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "The maximum workspaces allowed per user is set to '2' and you are currently at that limit. " +
-                                            "This value is set by your admin with the 'limits.user.workspaces.count' property")
+          expectedExceptionsMessageRegExp = "You are only allowed to create 2 workspaces.")
     public void shouldNotBeAbleToCreateNewWorkspaceIfLimitIsExceeded() throws Exception {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
         doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
@@ -291,9 +290,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "The maximum workspaces allowed to be started per user is set to '\\d' " +
-                                            "and you are currently at that limit. This value is set by your admin " +
-                                            "with the 'limits.user.workspaces.run.count' property")
+          expectedExceptionsMessageRegExp = "You are only allowed to start \\d workspaces.")
     public void shouldNotBeAbleToStartWorkspaceIfStartedWorkspacesNumberLimitIsExceeded() throws Exception {
         when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
         //Set started workspaces limit by number of all workspaces statuses minus one to reach the limit.

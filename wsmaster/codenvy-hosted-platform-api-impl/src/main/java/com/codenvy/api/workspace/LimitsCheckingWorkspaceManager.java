@@ -214,9 +214,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         try {
             long startedWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
             if (startedWorkspaces >= startedWorkspacesLimit) {
-                throw new LimitExceededException(format("The maximum workspaces allowed to be started per user is set to '%d' and " +
-                                                        "you are currently at that limit. This value is set by your admin with the " +
-                                                        "'limits.user.workspaces.run.count' property", startedWorkspacesLimit));
+                throw new LimitExceededException(format("You are only allowed to start %d workspace%s.", startedWorkspacesLimit,
+                                                 startedWorkspacesLimit == 1 ? "" : "s"));
             }
             return callback.call();
         } finally {
@@ -245,10 +244,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         try {
             final List<WorkspaceImpl> workspaces = getByNamespace(namespace);
             if (workspaces.size() >= workspacesPerUser) {
-                throw new LimitExceededException(format("The maximum workspaces allowed per user is set to '%d' and " +
-                                                        "you are currently at that limit. This value is set by your admin with the " +
-                                                        "'limits.user.workspaces.count' property",
-                                                        workspacesPerUser),
+                throw new LimitExceededException(format("You are only allowed to create %d workspace%s.", workspacesPerUser,
+                                                        workspacesPerUser == 1 ? "" : "s"),
                                                  ImmutableMap.of("workspace_max_count", Integer.toString(workspacesPerUser)));
             }
             return callback.call();
