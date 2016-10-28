@@ -25,7 +25,7 @@ define(["jquery","underscore","views/accountformbase","models/account"],
                 AccountFormBase.prototype.initialize.apply(this,attributes);
                 Account.getUserSettings() //get user props
                 .then(function(settings){
-                    if (settings["user.self.creation.allowed"] === "true") {
+                    if (settings["che.auth.user_self_creation"] === "true") {
                             //show create-account link
                         $('#bottom-ul').prepend('<li><a href="/">Create a New Account</a></li>');
                     }

@@ -60,7 +60,7 @@
                         self.el = $(".login-form");
                         errorContainer = $(".error-container");
                         self.addValidator();
-                        if (settings["user.self.creation.allowed"] === "true") {
+                        if (settings["che.auth.user_self_creation"] === "true") {
                                 //show create-account link
                             $("#signUp").html('Create a New Account');
                             $("#signUp").click(function(){
