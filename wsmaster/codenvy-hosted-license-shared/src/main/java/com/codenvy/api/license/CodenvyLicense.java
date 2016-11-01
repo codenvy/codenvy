@@ -32,8 +32,8 @@ import static com.codenvy.api.license.LicenseFeature.USERS;
  */
 public class CodenvyLicense {
     public static final DateFormat EXPIRATION_DATE_FORMAT     = new SimpleDateFormat("yyyy/MM/dd");
-    public static final long       MAX_NUMBER_OF_FREE_USERS   = 5;
-    public static final int        MAX_NUMBER_OF_FREE_SERVERS = 1;
+    public static final long       MAX_NUMBER_OF_FREE_USERS   = 3;
+    public static final int        MAX_NUMBER_OF_FREE_SERVERS = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
 
     private final Map<LicenseFeature, String> features;
     private final String                      licenseText;
@@ -87,18 +87,6 @@ public class CodenvyLicense {
      * Returns true if user have order to create new node.
      */
     public boolean isLicenseNodesUsageLegal(int actualServers) {
-        if (actualServers == 0) {
-            return true;
-        }
-        if (isExpired()) {
-            switch (getLicenseType()) {
-                case EVALUATION_PRODUCT_KEY:
-                    return false;
-                case PRODUCT_KEY:
-                default:
-                    // do nothing
-            }
-        }
         return true;
     }
 
@@ -112,10 +100,10 @@ public class CodenvyLicense {
     public boolean isLicenseUsageLegal(long actualUsers, int actualServers) {
         if (isExpired()) {
             switch (getLicenseType()) {
+                case EVALUATION_PRODUCT_KEY:
                 case PRODUCT_KEY:
                     return actualUsers <= MAX_NUMBER_OF_FREE_USERS;   // don't take into account minimal free number of servers
 
-                case EVALUATION_PRODUCT_KEY:
                 default:
                     return isFreeUsageLegal(actualUsers, actualServers);
             }

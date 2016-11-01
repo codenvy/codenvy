@@ -55,7 +55,7 @@ export class CodenvyLicense {
     };
 
     // default number of free users
-    this.numberOfFreeUsers = 5;
+    this.numberOfFreeUsers = 3;
 
     // default license legality
     this.licenseLegality = {value: true};

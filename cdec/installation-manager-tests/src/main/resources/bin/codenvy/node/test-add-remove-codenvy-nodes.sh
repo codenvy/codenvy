@@ -37,14 +37,8 @@ validateInstalledCodenvyVersion ${LATEST_CODENVY_VERSION}
 executeIMCommand "--valid-exit-code=1" "add-node" "node1.${HOST_URL}"
 validateExpectedString ".*Use.the.following.syntax\:.add-node.--codenvy-ip.<CODENVY_IP_ADDRESS>.<NODE_DNS>.*"
 
-# throw error if no Codenvy license
-executeIMCommand "--valid-exit-code=1" "add-node" "--codenvy-ip 192.168.56.110" "node1.${HOST_URL}"
-validateExpectedString ".*Your.Codenvy.subscription.only.allows.a.single.server.*\"status\".\:.\"ERROR\".*"
-
-addCodenvyLicenseConfiguration
-storeCodenvyLicense
-
 # add node1.${HOST_URL}
+# Codenvy license error shouldn't be thrown
 executeIMCommand "add-node" "--codenvy-ip 192.168.56.110" "node1.${HOST_URL}"
 validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
 
@@ -97,6 +91,9 @@ executeSshCommand "sudo systemctl stop iptables"  # open port 23750
 doGet "http://${NEW_HOST_URL}:23750/info"
 validateExpectedString ".*Nodes\",\"2\".*\[\" ${HOST_URL}\",\"${NEW_HOST_URL}:2375\"\].*\[\" node1.${HOST_URL}\",\"node1.${NEW_HOST_URL}:2375\"\].*"
 ############# End of change Codenvy hostname workflow
+
+addCodenvyLicenseConfiguration
+storeCodenvyLicense
 
 # add node2
 executeIMCommand "add-node" "node2.${NEW_HOST_URL}"

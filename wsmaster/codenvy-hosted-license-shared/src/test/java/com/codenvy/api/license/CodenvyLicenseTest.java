@@ -68,7 +68,7 @@ public class CodenvyLicenseTest {
                 // expired evaluation product key
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
-                 CodenvyLicense.MAX_NUMBER_OF_FREE_USERS, CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                 CodenvyLicense.MAX_NUMBER_OF_FREE_USERS, CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
                  CodenvyLicense.MAX_NUMBER_OF_FREE_USERS + 1, CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
 
@@ -121,11 +121,11 @@ public class CodenvyLicenseTest {
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 5, true},
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 6, true},
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, Integer.MAX_VALUE, true},
-                //free user can use only one node with expired license
+
                 {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 0, true},
-                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 1, false},
-                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 5, false},
-                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, false},
+                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 1, true},
+                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 5, true},
+                {CodenvyLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, true},
         };
     }
 }
