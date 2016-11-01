@@ -69,7 +69,7 @@ public class TestInjectorBootstrap {
             {"installation-manager.report_dir", "target/reports"},
             {"installation-manager.update_server_endpoint", BaseTest.UPDATE_API_ENDPOINT},
             {"installation-manager.min_puppet_errors_to_interrupt_im", "3"},
-            {"che.api", BaseTest.API_ENDPOINT},
+            {"api.endpoint", BaseTest.API_ENDPOINT},
             {"saas.api.endpoint", BaseTest.SAAS_API_ENDPOINT},
             {"puppet.base_dir", "target/puppet"},
             {"os.redhat_release_file", "target/redhat-release"}
