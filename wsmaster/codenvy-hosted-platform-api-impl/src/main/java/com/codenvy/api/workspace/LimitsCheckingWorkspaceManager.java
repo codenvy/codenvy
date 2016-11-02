@@ -147,7 +147,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                              ServerException,
                                                                              NotFoundException {
         checkMaxEnvironmentRam(update.getConfig());
-        return super.updateWorkspace(id, update);
+        // Workspace must not be updated while the manager checks it's resources to allow start
+        final Lock lock = START_LOCKS.get(getWorkspace(id).getNamespace());
+        lock.lock();
+        try {
+            return super.updateWorkspace(id, update);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
