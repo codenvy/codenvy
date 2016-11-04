@@ -15,6 +15,7 @@
 package com.codenvy.auth.sso.server;
 
 import com.codenvy.api.dao.authentication.CookieBuilder;
+import com.codenvy.api.license.server.CodenvyLicenseManager;
 import com.codenvy.auth.sso.server.BearerTokenAuthenticationService.ValidationData;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
@@ -23,6 +24,8 @@ import com.codenvy.mail.MailSenderClient;
 import com.codenvy.mail.shared.dto.EmailBeanDto;
 import com.jayway.restassured.http.ContentType;
 
+import com.jayway.restassured.response.Response;
+import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -33,7 +36,11 @@ import org.testng.annotations.Test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -57,15 +64,21 @@ public class BearerTokenAuthenticationServiceTest {
     private UserCreationValidator            creationValidator;
     @Mock
     private UserCreator                      userCreator;
+    @Mock
+    private CodenvyLicenseManager            licenseManager;
 
     @InjectMocks
     private BearerTokenAuthenticationService bearerTokenAuthenticationService;
+
+    @SuppressWarnings("unused")
+    private ApiExceptionMapper apiExceptionMapper;
 
     @Test
     public void shouldSendEmailToValidateUserEmailAndUserName() throws Exception {
         bearerTokenAuthenticationService.mailSender = "noreply@host";
         ArgumentCaptor<EmailBeanDto> argumentCaptor = ArgumentCaptor.forClass(EmailBeanDto.class);
         ValidationData validationData = new ValidationData("Email", "UserName");
+        when(licenseManager.canUserBeAdded()).thenReturn(true);
 
         given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
 
@@ -76,5 +89,21 @@ public class BearerTokenAuthenticationServiceTest {
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
         assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
         assertEquals(argumentCaptorValue.getSubject(), "Verify Your Codenvy Account");
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenUserBeyondTheLicense() throws Exception {
+        bearerTokenAuthenticationService.mailSender = "noreply@host";
+        ValidationData validationData = new ValidationData("Email", "UserName");
+        when(licenseManager.canUserBeAdded()).thenReturn(false);
+
+        Response response = given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
+
+        assertEquals(response.getStatusCode(), 403);
+        assertEquals(response.prettyPrint(), String.format("{\n"
+                                                           + "    \"message\": \"%s\"\n"
+                                                           + "}",
+                                                    CodenvyLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE));
+        verifyZeroInteractions(mailSenderClient);
     }
 }

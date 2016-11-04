@@ -12,13 +12,17 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.license.shared;
 
 /**
  * @author Anatoliy Bazko
  */
-public class LicenseNotFoundException extends LicenseException {
-    public LicenseNotFoundException(String message) {
+public class InvalidLicenseException extends LicenseException {
+    public InvalidLicenseException(String message) {
         super(message);
+    }
+
+    public InvalidLicenseException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -84,7 +84,7 @@ public class ReportSender {
 
     private void sendNumberOfUsers() throws IOException, MessagingException, JsonParseException, ApiException {
         try {
-            if (licenseManager.isCodenvyUsageLegal()) {
+            if (licenseManager.isSystemUsageLegal()) {
                 // do not send a report if codenvy usage is legal.
                 return;
             }

@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.audit.server;
 
-import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.license.shared.CodenvyLicense;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;

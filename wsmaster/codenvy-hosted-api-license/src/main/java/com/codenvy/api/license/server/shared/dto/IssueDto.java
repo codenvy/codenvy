@@ -12,17 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.api.license.server.shared.dto;
+
+import com.codenvy.api.license.server.shared.model.Issue;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * @author Anatoliy Bazko
+ * @author Dmytro Nochevnov
  */
-public class LicenseException extends RuntimeException {
-    public LicenseException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@DTO
+public interface IssueDto extends Issue {
+    @Override
+    Status getStatus();
 
-    public LicenseException(String message) {
-        super(message);
-    }
+    void setStatus(Status status);
+
+    IssueDto withStatus(Status status);
+
+    @Override
+    String getMessage();
+
+    void setMessage(String message);
+
+    IssueDto withMessage(String message);
 }

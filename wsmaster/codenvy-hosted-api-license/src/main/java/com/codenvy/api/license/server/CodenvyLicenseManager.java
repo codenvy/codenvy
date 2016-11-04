@@ -14,13 +14,15 @@
  */
 package com.codenvy.api.license.server;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.CodenvyLicenseFactory;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.server.shared.dto.IssueDto;
+import com.codenvy.api.license.server.shared.dto.LegalityDto;
+import com.codenvy.api.license.server.shared.model.Issue;
+import com.codenvy.license.shared.CodenvyLicense;
+import com.codenvy.license.shared.CodenvyLicenseFactory;
+import com.codenvy.license.shared.InvalidLicenseException;
+import com.codenvy.license.shared.LicenseException;
+import com.codenvy.license.shared.LicenseNotFoundException;
 import com.codenvy.swarm.client.SwarmDockerConnector;
-
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -34,10 +36,13 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Anatoliy Bazko
@@ -51,6 +56,9 @@ public class CodenvyLicenseManager {
     private final Path                  licenseFile;
     private final UserManager           userManager;
     private final SwarmDockerConnector  dockerConnector;
+
+    public static final String LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE =
+        "Unable to add your account. The Codenvy license has reached its user limit.";
 
     @Inject
     public CodenvyLicenseManager(@Named("license-manager.license-file") String licenseFile,
@@ -129,7 +137,7 @@ public class CodenvyLicenseManager {
     /**
      * Return true if only Codenvy usage meets the constrains of license properties or free usage properties.
      **/
-    public boolean isCodenvyUsageLegal() throws ServerException, IOException {
+    public boolean isSystemUsageLegal() throws ServerException, IOException {
         long actualUsers = userManager.getTotalCount();
         int actualServers = dockerConnector.getAvailableNodes().size();
 
@@ -148,7 +156,7 @@ public class CodenvyLicenseManager {
      * @param nodeNumber
      *         number of machine nodes.
      */
-    public boolean isCodenvyNodesUsageLegal(Integer nodeNumber) throws IOException {
+    public boolean isSystemNodesUsageLegal(Integer nodeNumber) throws IOException {
         if (nodeNumber == null) {
             nodeNumber = dockerConnector.getAvailableNodes().size();
         }
@@ -159,5 +167,47 @@ public class CodenvyLicenseManager {
         } catch (LicenseException e) {
             return CodenvyLicense.isFreeUsageLegal(0, nodeNumber);  // user number doesn't matter
         }
+    }
+
+    /**
+     * Check whether current license allows adding new users due to its capacity.
+     * @throws ServerException
+     */
+    public boolean canUserBeAdded() throws ServerException {
+        long actualUsers = userManager.getTotalCount();
+
+        try {
+            CodenvyLicense codenvyLicense = load();
+            return codenvyLicense.isLicenseUsageLegal(actualUsers + 1, 0);
+        } catch (LicenseException e) {
+            return CodenvyLicense.isFreeUsageLegal(actualUsers + 1, 0);
+        }
+    }
+
+    /**
+     * Returns allowed number of users due to actual license.
+     */
+    public long getAllowedUserNumber() {
+        try {
+            CodenvyLicense codenvyLicense = load();
+            return codenvyLicense.getNumberOfUsers();
+        } catch (LicenseException e) {
+            return CodenvyLicense.MAX_NUMBER_OF_FREE_USERS;
+        }
+    }
+
+    /**
+     * Returns list of issues related to actual license.
+     */
+    public List<IssueDto> getLicenseIssues() throws ServerException {
+        List<IssueDto> issues = new ArrayList<>();
+
+        if (!canUserBeAdded()) {
+            final IssueDto userLicenseHasReachedItsLimitIssue = newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
+                                                     .withMessage(LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE);
+            issues.add(userLicenseHasReachedItsLimitIssue);
+        }
+
+        return issues;
     }
 }

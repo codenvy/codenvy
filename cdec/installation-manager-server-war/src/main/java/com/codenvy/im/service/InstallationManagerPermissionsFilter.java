@@ -36,7 +36,7 @@ import static com.codenvy.api.permission.server.SystemDomain.MANAGE_CODENVY_ACTI
 public class InstallationManagerPermissionsFilter extends CheMethodInvokerFilter {
     @Override
     protected void filter(GenericResourceMethod GenericResourceMethod, Object[] arguments) throws ApiException {
-        if (GenericResourceMethod.getMethod().getName().equals("isCodenvyUsageLegal")) {
+        if (GenericResourceMethod.getMethod().getName().equals("isSystemUsageLegal")) {
             //public method
             return;
         }

@@ -14,7 +14,7 @@
  */
 package com.codenvy.report;
 
-import com.codenvy.api.license.LicenseException;
+import com.codenvy.license.shared.LicenseException;
 import com.codenvy.api.license.server.CodenvyLicenseManager;
 import com.codenvy.mail.MailSenderClient;
 import com.codenvy.report.shared.dto.Ip;
@@ -103,7 +103,7 @@ public class ReportSenderTest {
 
     @Test
     public void shouldSendWeeklyReportBecauseOfExpiredLicense() throws IOException, JsonParseException, MessagingException, ApiException {
-        doReturn(false).when(mockLicenseManager).isCodenvyUsageLegal();
+        doReturn(false).when(mockLicenseManager).isSystemUsageLegal();
 
         spyReportSender.sendWeeklyReports();
 
@@ -115,7 +115,7 @@ public class ReportSenderTest {
 
     @Test
     public void shouldSendWeeklyReportBecauseOfLicenseException() throws IOException, JsonParseException, MessagingException, ApiException {
-        doThrow(LicenseException.class).when(mockLicenseManager).isCodenvyUsageLegal();
+        doThrow(LicenseException.class).when(mockLicenseManager).isSystemUsageLegal();
 
         spyReportSender.sendWeeklyReports();
 
@@ -128,7 +128,7 @@ public class ReportSenderTest {
     @Test
     public void shouldNotSendWeeklyReportBecauseOfNonExpiredLicense()
             throws IOException, JsonParseException, MessagingException, ApiException {
-        doReturn(true).when(mockLicenseManager).isCodenvyUsageLegal();
+        doReturn(true).when(mockLicenseManager).isSystemUsageLegal();
 
         spyReportSender.sendWeeklyReports();
 

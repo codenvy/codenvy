@@ -18,6 +18,7 @@ import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.dao.authentication.TokenGenerator;
+import com.codenvy.api.license.server.CodenvyLicenseManager;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
@@ -25,9 +26,9 @@ import com.codenvy.mail.MailSenderClient;
 import com.codenvy.mail.shared.dto.AttachmentDto;
 import com.codenvy.mail.shared.dto.EmailBeanDto;
 import com.google.common.io.Files;
-
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserValidator;
@@ -55,6 +56,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.codenvy.api.license.server.CodenvyLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
@@ -84,19 +86,20 @@ public class BearerTokenAuthenticationService {
     @Inject
     protected MailSenderClient                 mailSenderClient;
     @Inject
-    protected InputDataValidator               inputDataValidator;
+    protected     InputDataValidator    inputDataValidator;
     @Inject
-    protected CookieBuilder                    cookieBuilder;
+    protected     CookieBuilder         cookieBuilder;
     @Inject
-    protected UserCreationValidator            creationValidator;
+    protected     UserCreationValidator creationValidator;
     @Inject
-    protected UserCreator                      userCreator;
+    protected     UserCreator           userCreator;
     @Inject
-    protected UserValidator                    userNameValidator;
+    protected     UserValidator         userNameValidator;
     @Inject
     @Named("mailsender.application.from.email.address")
-    protected String                           mailSender;
-
+    protected     String                mailSender;
+    @Inject
+    protected     CodenvyLicenseManager licenseManager;
 
     /**
      * Authenticates user by provided token, than creates the ldap user
@@ -184,12 +187,18 @@ public class BearerTokenAuthenticationService {
     public Response validate(ValidationData validationData, @Context UriInfo uriInfo)
             throws ApiException, MessagingException, IOException {
 
-        inputDataValidator.validateUserMail(validationData.getEmail());
-        creationValidator.ensureUserCreationAllowed(validationData.getEmail(), validationData.getUsername());
+        String email = validationData.getEmail();
+
+        inputDataValidator.validateUserMail(email);
+        creationValidator.ensureUserCreationAllowed(email, validationData.getUsername());
+
+        if (!licenseManager.canUserBeAdded()) {
+            throw new ForbiddenException(LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE);
+        }
 
         Map<String, String> props = new HashMap<>();
         props.put("logo.cid", "codenvyLogo");
-        props.put("bearertoken", handler.generateBearerToken(validationData.getEmail(), validationData.getUsername(),
+        props.put("bearertoken", handler.generateBearerToken(email, validationData.getUsername(),
                                                              Collections.singletonMap("initiator", "email")));
         props.put("additional.query.params", uriInfo.getRequestUri().getQuery());
         props.put("com.codenvy.masterhost.url", uriInfo.getBaseUriBuilder().replacePath(null).build().toString());
@@ -203,7 +212,7 @@ public class BearerTokenAuthenticationService {
         EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
                 .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + MAIL_TEMPLATE)), props))
                 .withFrom(mailSender)
-                .withTo(validationData.getEmail())
+                .withTo(email)
                 .withReplyTo(null)
                 .withSubject("Verify Your Codenvy Account")
                 .withMimeType(TEXT_HTML)
@@ -211,8 +220,7 @@ public class BearerTokenAuthenticationService {
 
         mailSenderClient.sendMail(emailBeanDto);
 
-        LOG.info("EVENT#signup-validation-email-send# EMAIL#{}#", validationData.getEmail());
-        LOG.info("Email validation message send to {}", validationData.getEmail());
+        LOG.info("Email validation message send to {}", email);
 
         return Response.ok().build();
 

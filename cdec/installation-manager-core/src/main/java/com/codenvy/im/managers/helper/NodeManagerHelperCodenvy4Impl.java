@@ -14,10 +14,10 @@
  */
 package com.codenvy.im.managers.helper;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.license.shared.CodenvyLicense;
+import com.codenvy.license.shared.InvalidLicenseException;
+import com.codenvy.license.shared.LicenseException;
+import com.codenvy.license.shared.LicenseNotFoundException;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import com.codenvy.im.commands.Command;

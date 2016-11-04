@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.license.shared;
 
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

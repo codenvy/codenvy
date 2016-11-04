@@ -14,12 +14,12 @@
  */
 package com.codenvy.api.license.server;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseFeature;
-import com.codenvy.api.license.LicenseNotFoundException;
-import com.google.common.collect.ImmutableMap;
+import com.codenvy.api.license.server.shared.dto.LegalityDto;
+import com.codenvy.license.shared.CodenvyLicense;
+import com.codenvy.license.shared.InvalidLicenseException;
+import com.codenvy.license.shared.LicenseException;
+import com.codenvy.license.shared.LicenseFeature;
+import com.codenvy.license.shared.LicenseNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -29,7 +29,6 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,7 @@ import static java.lang.String.valueOf;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Anatoliy Bazko
@@ -63,7 +63,6 @@ import static javax.ws.rs.core.Response.status;
 public class LicenseService {
     private static final Logger LOG                                 = LoggerFactory.getLogger(LicenseService.class);
     public static final  String CODENVY_LICENSE_PROPERTY_IS_EXPIRED = "isExpired";
-    private static final String VALUE                               = "value";
 
     private final CodenvyLicenseManager licenseManager;
 
@@ -162,34 +161,31 @@ public class LicenseService {
     @GET
     @Path("/legality")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check if Codenvy usage matches Codenvy License constraints, or free usage rules.")
+    @ApiOperation(value = "Checks if Codenvy usage matches Codenvy License constraints, or free usage rules.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 500, message = "Server error")})
-    public Response isCodenvyUsageLegal() throws ApiException {
+    public LegalityDto isSystemUsageLegal() throws ApiException {
         try {
-            boolean isLicenseUsageLegal = licenseManager.isCodenvyUsageLegal();
-            Map<String, String> isCodenvyUsageLegalResponse = ImmutableMap.of(VALUE, String.valueOf(isLicenseUsageLegal));
-            return status(OK).entity(new JsonStringMapImpl<>(isCodenvyUsageLegalResponse)).build();
+            return newDto(LegalityDto.class).withIsLegal(licenseManager.isSystemUsageLegal())
+                                            .withIssues(licenseManager.getLicenseIssues());
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new ServerException("Failed to check if Codenvy usage matches Codenvy License constraints. ", e);
+            throw new ServerException("Failed to check if Codenvy usage matches Codenvy License constraints.", e);
         }
     }
 
     @GET
     @Path("/legality/node")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check if Codenvy node usage matches Codenvy License constraints, or free usage rules.",
+    @ApiOperation(value = "Checks if Codenvy machine node usage matches Codenvy License constraints, or free usage rules.",
                   notes = "If nodeNumber parameter is absent then actual number of machine nodes will be validated")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 500, message = "Server error")})
-    public Response isCodenvyNodesUsageLegal(@ApiParam("Node number for legality validation")
-                                             @QueryParam("nodeNumber")
-                                             Integer nodeNumber) throws ApiException {
+    public LegalityDto isMachineNodesUsageLegal(@ApiParam("Node number for legality validation")
+                                                @QueryParam("nodeNumber")
+                                                Integer nodeNumber) throws ApiException {
         try {
-            boolean isLicenseUsageLegal = licenseManager.isCodenvyNodesUsageLegal(nodeNumber);
-            Map<String, String> isCodenvyUsageLegalResponse = ImmutableMap.of(VALUE, valueOf(isLicenseUsageLegal));
-            return status(OK).entity(new JsonStringMapImpl<>(isCodenvyUsageLegalResponse)).build();
+            return newDto(LegalityDto.class).withIsLegal(licenseManager.isSystemNodesUsageLegal(nodeNumber));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServerException("Failed to check if Codenvy nodes usage matches Codenvy License constraints. ", e);
