@@ -1,5 +1,4 @@
 - [Beta](#beta)
-- [Team](#team)
 - [Getting Stated](#getting-stated)
     + [Explain trial system](#explain-trial-system)
     + [Explain production system](#explain-production-system)
@@ -60,6 +59,7 @@
     + [Scalability Model](#scalability-model)
     + [Deployment Model](#deployment-model)
     + [Service Architecture](#service-architecture)
+- [Team](#team)
     
 # Beta
 This packaging and deployment approach is relatively new. We do not yet consider this ready for production deployment of Codenvy. We hope to offer this as the primary production configuration by the end of 2016. Items to be added:
@@ -75,9 +75,6 @@ This packaging and deployment approach is relatively new. We do not yet consider
 5. System-level configuration of private Docker registries is not yet enabled in this packaging. It's possible to configure this manually by modifying `CODENVY_CONFIG`/manifests/codenvy.pp. However, if you run `codenvy destroy` or `codenvy init`, your configuration changes for registries will not be preserved.
 
 6. Add a `codenvy reload` command, which resarts services with a SIGHUP signal instead of a container restart. SIGHUP signals instruct container services to reload their configuration without going through a reboot cycle.
-
-# Team
-See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.
 
 # Getting Stated
 Codenvy makes cloud workspaces for develoment teams. Codenvy is installed as a set of Docker images that are used together to run Codenvy server.
@@ -505,34 +502,5 @@ Refer to [CLI](docs/cli) documentation for additional information.
 
 ### Service Architecture
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Team
+See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.
