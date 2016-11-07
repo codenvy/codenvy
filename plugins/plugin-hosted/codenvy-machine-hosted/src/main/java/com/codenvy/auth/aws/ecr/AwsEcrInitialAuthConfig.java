@@ -43,8 +43,8 @@ public class AwsEcrInitialAuthConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(AwsEcrInitialAuthConfig.class);
 
-    private static final String CONFIG_PREFIX                = "docker.registry.aws.";
-    private static final String CONFIGURATION_PREFIX_PATTERN = "docker\\.registry\\.aws\\..+";
+    private static final String CONFIG_PREFIX                = "codenvy.docker.registry.aws.";
+    private static final String CONFIGURATION_PREFIX_PATTERN = "codenvy\\.docker\\.registry\\.aws\\..+";
 
     private static final String VALID_DOCKER_PROPERTY_NAME_EXAMPLE = CONFIG_PREFIX + "aws_registry_name.parameter_name";
 

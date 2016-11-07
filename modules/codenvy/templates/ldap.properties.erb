@@ -57,3 +57,5 @@ ldap.sync.profile.attrs=<%= scope.lookupvar('codenvy::ldap_sync_profile_attrs') 
 ldap.sync.group.additional_dn=<%= scope.lookupvar('codenvy::ldap_sync_group_additional_dn') %>
 ldap.sync.group.filter=<%= scope.lookupvar('codenvy::ldap_sync_group_filter') %>
 ldap.sync.group.attr.members=<%= scope.lookupvar('codenvy::ldap_sync_group_attr_members') %>
+ldap.sync.update_if_exists=true
+ldap.sync.remove_if_missing=true

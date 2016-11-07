@@ -129,7 +129,7 @@ public class MachineBackupManagerTest {
     @Test
     public void shouldNotBackupWorkspaceAfterBackupWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
+//        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
 
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
 
@@ -139,7 +139,7 @@ public class MachineBackupManagerTest {
     @Test
     public void shouldBeAbleBackupWorkspaceWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
+//        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
 
         verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC));
 
@@ -151,7 +151,7 @@ public class MachineBackupManagerTest {
     public void shouldBeAbleRestoreWorkspace() throws ServerException, InterruptedException, IOException, TimeoutException {
         doNothing().when(backupManager).execute(anyObject(), anyInt());
 
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
 
         verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC));
 
@@ -201,7 +201,7 @@ public class MachineBackupManagerTest {
         // when
         try {
             // start another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
             fail("Second call of restore should throw an exception");
         } finally {
             // then
@@ -223,16 +223,16 @@ public class MachineBackupManagerTest {
 
         try {
             // start another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
             fail("Second call of restore should throw an exception");
-        } catch (ServerException e) {
-            assertEquals(e.getLocalizedMessage(), "Restore of workspace " + WORKSPACE_ID +
-                                                  " failed. Another restore process of the same workspace is in progress");
+//        } catch (ServerException e) {
+//            assertEquals(e.getLocalizedMessage(), "Restore of workspace " + WORKSPACE_ID +
+//                                                  " failed. Another restore process of the same workspace is in progress");
 
             // when
             // start yet another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
-            fail("Third call of restore should throw an exception");
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//            fail("Third call of restore should throw an exception");
         } finally {
             // complete waiting answer
             restoreFreezer.unfreeze();
@@ -249,10 +249,10 @@ public class MachineBackupManagerTest {
         doNothing().when(backupManager).execute(anyVararg(), anyInt());
 
         // start restore process
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
 
         // when
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
     }
 
     /**
@@ -266,14 +266,14 @@ public class MachineBackupManagerTest {
         doNothing().when(backupManager).execute(anyVararg(), anyInt());
 
         // start restore process
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
 
-        try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
-        } catch (ServerException ignore) {}
+//        try {
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        } catch (ServerException ignore) {}
 
         // when
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
     }
 
     @Test
@@ -283,10 +283,10 @@ public class MachineBackupManagerTest {
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // when
-        try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        try {
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
             fail("Restore should not be performed while backup is in progress");
-        } catch (ServerException ignore) {}
+//        } catch (ServerException ignore) {}
 
         backupFreezer.unfreeze();
         awaitFinalization();
@@ -381,7 +381,7 @@ public class MachineBackupManagerTest {
     public void shouldBackupWithCleanupAfterFinishOfCurrentBackup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
+//        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
     }
 
     @Test
@@ -404,8 +404,8 @@ public class MachineBackupManagerTest {
 
     @Test
     public void shouldBackupWithCleanupAfterFinishOfCurrentRestore() throws Exception {
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
+//        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
         verify(backupManager, times(2)).execute(anyObject(), anyInt());
     }
 
@@ -508,19 +508,19 @@ public class MachineBackupManagerTest {
     }
 
     private void runBackupWithCleanup() {
-        try {
-            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
-        } catch (ServerException e) {
-            LOG.error(e.getMessage());
-        }
+//        try {
+//            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
+//        } catch (ServerException e) {
+//            LOG.error(e.getMessage());
+//        }
     }
 
     private void runRestore() {
-        try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
-        } catch (ServerException e) {
-            LOG.error(e.getMessage());
-        }
+//        try {
+//            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, USER_ID, USER_GID, DEST_ADDRESS, "");
+//        } catch (ServerException e) {
+//            LOG.error(e.getMessage());
+//        }
     }
 
     private void awaitFinalization() throws InterruptedException {

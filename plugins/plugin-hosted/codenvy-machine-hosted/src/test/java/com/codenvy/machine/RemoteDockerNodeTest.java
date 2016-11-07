@@ -80,6 +80,7 @@ public class RemoteDockerNodeTest {
 
         //then
         verify(backupManager).restoreWorkspaceBackup(eq("WorkspaceId"),
+                                                     eq(""),
                                                      eq("MessageContent"),
                                                      eq("MessageContent"),
                                                      eq("127.0.0.1"),

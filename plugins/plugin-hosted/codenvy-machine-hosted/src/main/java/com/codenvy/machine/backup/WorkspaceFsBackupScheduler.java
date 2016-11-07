@@ -124,7 +124,7 @@ public class WorkspaceFsBackupScheduler {
         if (server == null) {
             throw new ServerException("");
         }
-        
+
 
         backupManager.backupWorkspace(machine.getWorkspaceId(),
                                       node.getProjectsFolder(),

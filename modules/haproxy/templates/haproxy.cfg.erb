@@ -60,7 +60,6 @@ frontend https-in
     acl is_logged_in hdr_sub(cookie) logged_in
     acl url_login path_beg -i /site/login
     acl url_factory url_sub -i factory
-    acl acl_im path_beg -i /im
     acl use_nginx path_reg ^/[0-9]+_.+$
     acl agent_binaries path_beg -i /agent-binaries
 

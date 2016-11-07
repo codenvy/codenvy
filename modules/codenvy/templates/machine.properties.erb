@@ -17,8 +17,10 @@ docker.client.daemon_url=http://codenvy-swarm:2375
 swarm.client.node_description_length=9
 
 # terminal
+#TODO REMOVE THIS
 che.workspace.terminal_linux_amd64=/home/codenvy-user/Downloads/terminal
 # ws agent
+#TODO REMOVE THIS
 che.workspace.agent.dev=/home/codenvy-user/Downloads/ws-agent.tar.gz
 
 machine.ws_agent.run_command=<%= scope.lookupvar('codenvy::machine_ws_agent_run_command') %>
@@ -43,6 +45,10 @@ machine.backup.restore_script=/opt/codenvy-data/conf/rsyncrestore.sh
 machine.backup.backup_duration_second=300
 machine.backup.restore_duration_second=300
 machine.backup.backup_period_second=360
+
+#cleanup workspace files
+workspace.projects_storage.cleanup.script_path=/opt/codenvy-data/conf/cleanUpWorkspaceStorage.sh
+workspace.projects_storage.cleanup.timeout_seconds=300
 
 # machine default memory allocation
 che.workspace.default_memory_mb=<%= scope.lookupvar('codenvy::machine_default_mem_size_mb') %>
@@ -77,14 +83,10 @@ che.docker.registry_for_snapshots=true
 che.docker.swap=<%= scope.lookupvar('codenvy::machine_docker_memory_swap_multiplier') %>
 
 # java opts for dev machine
-che.workspace.java_opts=-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom <% if ! @http_proxy_for_codenvy.empty? or ! @https_proxy_for_codenvy.empty? -%>-Dhttp.proxySet=true<% end -%><% if ! @http_proxy_for_codenvy.empty? -%><% if ! @http_proxy_for_codenvy.empty? and @http_proxy_for_codenvy.include? '@' -%> -Dhttp.proxyUser=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttp.proxyPassword=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttp.proxyHost=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1] %><% else -%> -Dhttp.proxyHost=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1] %><% end -%><% end -%><% if ! @https_proxy_for_codenvy.empty? -%><% if @https_proxy_for_codenvy.include? '@' -%> -Dhttps.proxyUser=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttps.proxyPassword=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttps.proxyHost=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1] %><% else -%> -Dhttps.proxyHost=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1] %><% end -%><% end -%><% if ! @no_proxy_for_codenvy.empty? -%> -Dhttp.nonProxyHosts='<%= @no_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').gsub(',','|') %>'<% end -%>
+che.workspace.java_opts=-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom <% if ! @http_proxy_for_codenvy.empty? or ! @https_proxy_for_codenvy.empty? -%>-Dhttp.proxySet=true<% end -%><% if ! @http_proxy_for_codenvy.empty? -%><% if ! @http_proxy_for_codenvy.empty? and @http_proxy_for_codenvy.include? '@' -%> -Dhttp.proxyUser=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttp.proxyPassword=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttp.proxyHost=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %><% else -%> -Dhttp.proxyHost=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttp.proxyPort=<%= @http_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %><% end -%><% end -%><% if ! @https_proxy_for_codenvy.empty? -%><% if @https_proxy_for_codenvy.include? '@' -%> -Dhttps.proxyUser=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[0] %> -Dhttps.proxyPassword=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[0].split(':')[1] %> -Dhttps.proxyHost=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split('@')[1].split(':')[1].gsub(/\/.*/,'') %><% else -%> -Dhttps.proxyHost=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[0] %> -Dhttps.proxyPort=<%= @https_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').split(':')[1].gsub(/\/.*/,'') %><% end -%><% end -%><% if ! @no_proxy_for_codenvy.empty? -%> -Dhttp.nonProxyHosts='<%= @no_proxy_for_codenvy.gsub(/^https?\:\/\//, '').gsub(/^www./,'').gsub(',','|') %>'<% end -%>
 
 # extra volumes to mount, semicolon separated.
 che.workspace.volume=<%= scope.lookupvar('codenvy::machine_server_extra_volume') %>
 
 # public key for rsync
 workspace.backup.public_key_path=/opt/codenvy-data/conf/ssh/key.pem.pub
-
-#cleanup workspace files
-workspace.projects_storage.cleanup.script_path=/opt/codenvy-data/conf/cleanUpWorkspaceStorage.sh
-workspace.projects_storage.cleanup.timeout_seconds=300
