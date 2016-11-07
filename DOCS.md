@@ -11,7 +11,7 @@
     + [Usage](#usage)
     + [Upgrading](#upgrading)
     + [Hosting](#hosting)
-    + [HTTPS](#https)
+    + [Security](#security)
     + [Add-node](#add-node)
     + [Licensing](#licensing)
 - [Installation: Production](#installation-production)
@@ -216,7 +216,11 @@ pass: password
 #### Upgrading
 #### Hosting
 We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers. If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS.
-#### HTTPS
+#### Security
+By default Codenvy runs over HTTP as this is simplest to install. You can switch to HTTPS at any time. 
+
+Refer to [HTTP/S](#https) for additional information.
+
 #### Add-node
 TODO: Ports for nodes as well
 #### Licensing
