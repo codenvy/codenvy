@@ -28,7 +28,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.lang.Size;
 
@@ -72,7 +71,7 @@ public class WorkspaceRamConsumer implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         final Object[] arguments = invocation.getArguments();
 
-        WorkspaceConfigImpl config;
+        WorkspaceConfig config;
         String envName = null;
         String namespace;
 
@@ -85,7 +84,7 @@ public class WorkspaceRamConsumer implements MethodInterceptor {
             envName = (String)arguments[1];
         } else {
             //start from config with default env
-            config = (WorkspaceConfigImpl)arguments[0];
+            config = (WorkspaceConfig)arguments[0];
             namespace = (String)arguments[1];
         }
 
