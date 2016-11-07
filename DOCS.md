@@ -13,9 +13,8 @@
     + [Hosting](#hosting)
     + [HTTPS](#https)
     + [Add-node](#add-node)
-    + [Ports for nodes as well](#ports-for-nodes-as-well)
     + [Licensing](#licensing)
-- [Installation: Production (incl. Proxies, reference the main config sections)](#installation-production-incl-proxies-reference-the-main-config-sections)
+- [Installation: Production](#installation-production)
 - [Installation: Offline](#installation-offline)
     + [Downloading images](#downloading-images)
     + [Transferring](#transferring)
@@ -23,7 +22,7 @@
 - [Uninstall](#uninstall)
 - [Configuration](#configuration)
     + [Saving Configuration in Version Control](#saving-configuration-in-version-control)
-    + [Proxies (Config: Proxies : Take section out of https://codenvy.readme.io/v5.0/docs/configuration-docker)](#proxies-config-proxies--take-section-out-of-httpscodenvyreadmeiov50docsconfiguration-docker)
+    + [Proxies](#proxies)
     + [Logs and User Data](#logs-and-user-data)
     + [Microsoft Windows and NTFS](#microsoft-windows-and-ntfs)
     + [Development Mode](#development-mode)
@@ -53,7 +52,7 @@
     + [Monitoring](#monitoring)
     + [Backup (Backup)](#backup-backup)
     + [Migration](#migration)
-    + [Disaster Recovery#### DR page (http://codenvy.readme.io/v5.0/docs/disaster-recovery)](#disaster-recovery%23%23%23%23-dr-page-httpcodenvyreadmeiov50docsdisaster-recovery)
+    + [Disaster Recovery](#disaster-recovery)
 - [Reference](#reference)
     + [CLI](#cli)
     + [API](#api)
@@ -219,9 +218,9 @@ pass: password
 We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers. If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS.
 #### HTTPS
 #### Add-node
- #### Ports for nodes as well
+TODO: Ports for nodes as well
 #### Licensing
-## Installation: Production (incl. Proxies, reference the main config sections)
+## Installation: Production
 ## Installation: Offline
 We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations. 
 
@@ -279,7 +278,7 @@ The version control sequence would be:
 4. When pulling from version control, copy `CODENVY_CONFIG/codenvy.env` into any configuration folder after initialization.
 5. You can then run `codenvy config` or `codenvy start` and the instance configuration will be generated from this file.
 
-#### Proxies (Config: Proxies : Take section out of https://codenvy.readme.io/v5.0/docs/configuration-docker)
+#### Proxies
 We support installation and operation behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
 1. Configuring Docker proxy access so that Codenvy can download images from DockerHub.
 2. Configuring Codenvy's system containers so that internal services can proxy to the Internet.
@@ -302,6 +301,8 @@ If you would like your users to have proxified access to the Internet from withi
 ```
 
 `_NO_PROXY` variable setting is required if you use a fake local DNS. Java and other internal utilities will avoid accessing a proxy for internal communications when this value is set.
+In your shell run Puppet to have the changes take affect:
+`puppet agent -t`
 
 #### Logs and User Data
 When Codenvy initializes itself, it creates a `/instance` folder in the directory to store logs, user data, the database, and instance-specific configuration. Codenvy's containers are started with `host:container` volume bindings to mount this information into and out of the containers that require it. You can save the `/instance` folder as a backup for an entire Codenvy instance. 
@@ -433,7 +434,8 @@ Codenvy workspaces can run on different physical nodes that are part of a Codenv
 #### Monitoring
 #### Backup (Backup)
 #### Migration
-#### Disaster Recovery#### DR page (http://codenvy.readme.io/v5.0/docs/disaster-recovery)
+#### Disaster Recovery
+DR page (http://codenvy.readme.io/v5.0/docs/disaster-recovery)
 ## Reference
 #### CLI
 The Codenvy CLI is a self-updating utility. Once installed on your system, it will update itself when you perform a new invocation, by checking for the appropriate version that matches `CODENVY_VERSION`. The CLI saves its version-specific progarms in `~/.codenvy/cli`. The CLI also logs command execution into `~/.codenvy/cli/cli.logs`.  
