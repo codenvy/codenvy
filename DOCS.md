@@ -364,11 +364,12 @@ If you install Codenvy with the defaults, Codenvy is reachable at http://codenvy
 
 
 ### HTTP/S
+Currently not supported in this version. In progress.
 By default Codenvy runs over HTTP as this is simplest to install. You can switch to HTTPS at any time. 
 
-There are two requirements for configuring HTTP/S:
-1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.
-2. A valid SSL certificate.
+There are two requirements for configuring HTTP/S:  
+1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
+2. A valid SSL certificate.  
 
 TODO: [https://codenvy.readme.io/v5.0/docs/security](https://codenvy.readme.io/v5.0/docs/security)
 
