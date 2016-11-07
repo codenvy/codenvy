@@ -142,7 +142,7 @@ Read the [Proxy]() section under configuration heading for additional informatio
 
 #### Install of AIO
 
-Linux:
+##### Linux:
 ```
 sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
 sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
@@ -150,7 +150,7 @@ chmod +x /usr/local/bin/codenvy
 chmod +x /usr/local/bin/cli.sh
 ```
 
-Mac:
+##### Mac:
 ```
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
@@ -169,7 +169,7 @@ sudo ifconfig lo0 alias $DOCKER_VM_IP
 # Add this to your ~/.bash_profile to have it activated in each shell window
 ```
 
-Windows:
+##### Windows:
 ```
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > codenvy.sh
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.bat > codenvy.bat
@@ -177,7 +177,7 @@ curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > cl
 set PATH=<path-to-cli>;%PATH%
 ```
 
-You can verify the CLI is working:
+##### You can verify the CLI is working:
 ```
 codenvy help
 ```
