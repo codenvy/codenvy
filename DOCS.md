@@ -61,7 +61,7 @@
     + [Deployment Model](#deployment-model)
     + [Service Architecture](#service-architecture)
     
-## Beta
+# Beta
 This packaging and deployment approach is relatively new. We do not yet consider this ready for production deployment of Codenvy. We hope to offer this as the primary production configuration by the end of 2016. Items to be added:
 
 1. `codenvy upgrade` is not yet implemented. You can switch between versions, but we do not yet support automatic data migration inside of images. 
@@ -76,10 +76,10 @@ This packaging and deployment approach is relatively new. We do not yet consider
 
 6. Add a `codenvy reload` command, which resarts services with a SIGHUP signal instead of a container restart. SIGHUP signals instruct container services to reload their configuration without going through a reboot cycle.
 
-## Team
+# Team
 See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.
 
-## Getting Stated
+# Getting Stated
 Codenvy makes cloud workspaces for develoment teams. Codenvy is installed as a set of Docker images that are used together to run Codenvy server.
 
 
@@ -90,7 +90,7 @@ Codenvy makes cloud workspaces for develoment teams. Codenvy is installed as a s
 
 
 ### Links to Resources
-## Installation: Trial
+# Installation: Trial
 
 ### System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -148,9 +148,7 @@ Read the [Proxy]() section under configuration heading for additional informatio
 
 ### Install of AIO
 
-#
-
-### Linux:
+#### Linux:
 ```
 sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
 sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
@@ -158,9 +156,7 @@ chmod +x /usr/local/bin/codenvy
 chmod +x /usr/local/bin/cli.sh
 ```
 
-#
-
-### Mac:
+#### Mac:
 ```
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
@@ -178,18 +174,13 @@ sudo ifconfig lo0 alias $DOCKER_VM_IP
 
 # Add this to your ~/.bash_profile to have it activated in each shell window
 ```
-
-#
-
-### Windows:
+#### Windows:
 ```
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > codenvy.sh
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.bat > codenvy.bat
 curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > cli.sh
 set PATH=<path-to-cli>;%PATH%
 ```
-
-#
 
 ### You can verify the CLI is working:
 ```
@@ -244,8 +235,8 @@ TODO: Ports for nodes as well
 
 
 ### Licensing
-## Installation: Production
-## Installation: Offline
+# Installation: Production
+# Installation: Offline
 We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations. 
 
 ### Downloading images
@@ -267,7 +258,7 @@ codenvy start --offline
 ```
 When invoked with the `offline` parameter, the Codenvy CLI performs a preboot sequence, which loads all saved `offline/*.tar` images including any Codenvy stack images you saved. The preboot sequence takes place before any CLI configuration, which itself depends upon Docker. The `codenvy start`, `codenvy download`, and `codenvy init` commands support `--offline` mode which triggers this preboot seequence.
 
-## Uninstall
+# Uninstall
 ```
 # Remove your Codevy configuration and destroy user projects and database
 codenvy destroy
@@ -279,7 +270,7 @@ codenvy rmi
 rm -rf ~/.codenvy
 ```
 
-## Configuration
+# Configuration
 All configuration is done with environment variables. Environment variables are stored in `CODENVY_CONFIG/codenvy.env`, a file that is generated during the `codenvy init` phase. If you rerun `codenvy init` in the same `CODENVY_CONFIG`, the process will abort unless you pass `--force` or `--pull`. You can have multiple `CODENVY_CONFIG` folders in order to keep profiles of configuration.
 
 Each variable is documented with an explanation and usually commented out. If you need to set a variable, uncomment it and configure it with your value. You can then run `codenvy config` to apply this configuration to your system. Any `codenvy start` will reapply this configuration.
@@ -368,7 +359,7 @@ CODENVY_DEVELOPMENT_REPO=<path-codenvy-repo>
 You must run Codenvy from the root of the Codenvy repository. By running in the repository, the local `codenvy.sh` and `cli.sh` scripts will override any installed CLI packages. Additionally, two containers will have host mounted files from the local repository. During the `codenvy config` phase, the repository's `/modules` and `/manifests` will be mounted into the puppet configurator.  During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container.
 
 ### Licensing
-## Config: Networking
+# Config: Networking
 
 
 ### Hostname
@@ -399,7 +390,7 @@ CODENVY_MAIL_SMTP_SOCKETFACTORY_CLASS=javax.net.ssl.SSLSocketFactory
 CODENVY_MAIL_SMTP_SOCKETFACTORY_FALLBACK=false
 ```
 
-## Config: Workspaces 
+# Config: Workspaces 
 
 
 ### Workspace Requirements
@@ -439,7 +430,7 @@ We have two temporary limitations in the Docker version of Codenvy that does not
 ### Workspace Limits
 You can place limits on how users interact with the system to control overall system resource usage. You can define how many workspaces created, RAM consumed, idle timeout, and a variety of other parameters. See "Workspace Limits" in `CODENVY_CONFIG/codenvy.env`.
 
-## Config: Authentication
+# Config: Authentication
 
 
 ### oAuth
@@ -462,14 +453,14 @@ Codenvy is compatible with an InetOrgPerson.schema. For other schemas please con
 
 Refer to [LDAP](docs/LDAP.md) documentation for additional information.
 
-## Config: Scaling
+# Config: Scaling
 Codenvy workspaces can run on different physical nodes that are part of a Codenvy cluster managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power when they have a compilation that they want done. So you will want to allocate enough physical nodes to smartly handle the right number of concurrently *running* workspaces, each of which will have a RAM block.
 
 ### Add-node
 
 
 ### Remove-node
-## Managing
+# Managing
 
 
 ### Upgrades
@@ -492,7 +483,7 @@ Codenvy workspaces can run on different physical nodes that are part of a Codenv
 
 ### Disaster Recovery
 DR page (http://codenvy.readme.io/v5.0/docs/disaster-recovery)
-## Reference
+# Reference
 
 
 ### CLI
@@ -503,7 +494,7 @@ The CLI is configured to hide most error conditions from the output screen. If y
 Refer to [CLI](docs/cli) documentation for additional information.
 
 ### API
-## Architecture
+# Architecture
 ![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
 
 ### Scalability Model
