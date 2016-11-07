@@ -1,0 +1,6 @@
+#!/bin/sh
+
+DST_FOLDER=${1}
+CLEANUP_REGEX='^(/opt/codenvy-data/fs/([0-9a-f]{2}/){3}workspace[0-9a-z]+)$'
+
+[[ ${DST_FOLDER} =~ ${CLEANUP_REGEX} ]] && sudo rm -rf "${DST_FOLDER}"

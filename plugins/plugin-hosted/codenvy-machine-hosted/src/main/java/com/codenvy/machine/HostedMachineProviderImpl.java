@@ -32,7 +32,6 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -73,8 +72,6 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                      @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                      @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
-                                     WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                                     @Named("che.workspace.projects.storage") String projectFolderPath,
                                      @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
                                      @Named("che.docker.privilege") boolean privilegeMode,
                                      @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
@@ -82,7 +79,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                                      @Named("che.docker.swap") double memorySwapMultiplier,
                                      MachineTokenRegistry tokenRegistry,
-                                     @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
+                                     @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
+                                     @Nullable @Named("che.docker.network_driver") String networkDriver)
             throws IOException {
         super(docker,
               dockerConnectorConfiguration,
@@ -94,15 +92,14 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               devMachineSystemVolumes,
               allMachinesSystemVolumes,
               allMachinesExtraHosts,
-              workspaceFolderPathProvider,
-              projectFolderPath,
               doForcePullOnBuild,
               privilegeMode,
               devMachineEnvVariables,
               allMachinesEnvVariables,
               snapshotUseRegistry,
               memorySwapMultiplier,
-              additionalNetworks);
+              additionalNetworks,
+              networkDriver);
 
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;

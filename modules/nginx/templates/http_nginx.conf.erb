@@ -1,0 +1,96 @@
+user                          nginx;
+pid                           /var/run/nginx.pid;
+error_log                     /var/log/nginx/error.log error;
+
+    # possible value is # of cores, or auto
+    worker_processes              auto;
+
+    # set high priority for nginx workers
+    worker_priority               -1;
+
+    # set limit of open files
+    # max_clients = worker_connetions * worker_processes
+
+    # limit_of_opened_files = max_clients * factor, where factor is 2 or more
+    worker_rlimit_nofile          8192;
+
+    # set mask of CPU cores usage
+    # e.g. 0001 0010 0100 1000 for usage separate cores for 4 workers on 4 cores CPU
+    # 11000000 00110000 00001100 00000011 for usage of 2 cores per worker with 4 workers on 8 cores CPU
+    #worker_cpu_affinity 01;
+
+    events {
+        worker_connections        4096;
+        use                       epoll; # optimized to serve many clients with each thread
+        multi_accept              on; # Keep accepting connections even though the server hasn't finished handling incoming connections
+    }
+
+    http {
+        include                   /etc/nginx/mime.types;
+        default_type              application/octet-stream;
+        access_log                off; # improve performance due to preventing accessing to HD
+
+        # Sendfile copies data between one FD and other from within the kernel.
+        # More efficient than read() + write(), since the requires transferring data to and from the user space.
+        sendfile                  on;
+
+        # send headers in one piece, its better then sending them one by one
+        tcp_nopush                on;
+
+        # Timeout for keep-alive connections. Server will close connections after this time.
+        keepalive_timeout         65;
+
+        # allow the server to close the connection after a client stops responding. Frees up socket-associated memory.
+        reset_timedout_connection on;
+
+        # Number of requests a client can make over the keep-alive connection.
+        #keepalive_requests 1000;
+
+        # don't buffer data sent, good for small data bursts in real time
+        #tcp_nodelay on;
+
+        # Send the client a "request timed out" if the body is not loaded by this time.
+        #client_body_timeout 10;
+
+        # If the client stops reading data, free up the stale client connection after this much time.
+        #send_timeout 2;
+        #client_max_body_size 1m;
+
+        # Compression
+        #gzip on;
+        #gzip_min_length 10240;
+        #gzip_proxied expired no-cache no-store private auth;
+        #gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml;
+
+        resolver                    127.0.0.1         ipv6=off;
+
+
+        # proxy settings
+        proxy_redirect              off;
+        proxy_connect_timeout       10;
+        proxy_send_timeout          30;
+        # proxy_read_timeout should be set back to 1m after https://jira.codenvycorp.com/browse/CHE-324
+        proxy_read_timeout          60m;
+        proxy_set_header            Host $host;
+        proxy_set_header            X-Real-IP $remote_addr;
+        proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header            X-Forwarded-Proto $scheme;
+
+        map $http_upgrade $connection_upgrade {
+          default upgrade;
+          ''      close;
+        }
+
+        server {
+          listen  81;
+          client_max_body_size 32m;
+          access_log   /var/log/nginx/access-81.log;
+          server_name  localhost;
+          location ~* ^/(?<myport>[0-9]+)_(?<myhost>[^/]+)/.*$ {
+            proxy_pass  http://$myhost:$myport;
+            # proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+          }
+        }
+}

@@ -1,0 +1,7 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+#Report configuration
+report-sender.update_server_endpoint=<% if has_variable?('codenvy::installation_manager_update_server_endpoint') %><%= scope.lookupvar('codenvy::installation_manager_update_server_endpoint') %><% else %><% end %>

@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -118,7 +119,17 @@ public class WorkspaceFsBackupScheduler {
         }
         final InstanceNode node = machineInstance.getNode();
 
-        backupManager.backupWorkspace(machine.getWorkspaceId(), node.getProjectsFolder(), node.getHost());
+        // TODO what to do here?
+        ServerImpl server = machine.getRuntime().getServers().get("22/tcp");
+        if (server == null) {
+            throw new ServerException("");
+        }
+        
+
+        backupManager.backupWorkspace(machine.getWorkspaceId(),
+                                      node.getProjectsFolder(),
+                                      node.getHost(),
+                                      server.getAddress().split(":", 2)[1]);
     }
 
     @VisibleForTesting

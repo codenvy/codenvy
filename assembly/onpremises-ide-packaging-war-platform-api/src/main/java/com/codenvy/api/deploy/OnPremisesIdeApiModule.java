@@ -36,7 +36,6 @@ import com.codenvy.auth.sso.client.filter.RequestMethodFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.machine.WsAgentHealthCheckerWithAuth;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.organization.api.OrganizationApiModule;
@@ -47,8 +46,8 @@ import com.codenvy.report.ReportModule;
 import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.service.systemram.DockerBasedSystemRamInfoProvider;
 import com.codenvy.service.systemram.SystemRamInfoProvider;
-import com.codenvy.service.systemram.SystemRamService;
 import com.codenvy.service.systemram.SystemRamLimitMessageSender;
+import com.codenvy.service.systemram.SystemRamService;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -60,7 +59,6 @@ import com.palominolabs.metrics.guice.InstrumentationModule;
 
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.agent.server.WsAgentHealthChecker;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationService;
@@ -248,8 +246,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(ServerClient.class).to(com.codenvy.auth.sso.client.MachineSsoServerClient.class);
         bind(com.codenvy.auth.sso.client.MachineSessionInvalidator.class);
 
-        bind(WsAgentHealthChecker.class).to(WsAgentHealthCheckerWithAuth.class);
-
         //SSO
         Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
                 Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
@@ -338,6 +334,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new SystemPermissionsJpaModule());
         install(new com.codenvy.api.permission.server.PermissionsModule());
+        install(new com.codenvy.api.node.server.NodeModule());
         install(new OnPremisesJpaWorkspaceModule());
         install(new com.codenvy.api.workspace.server.WorkspaceApiModule());
 
@@ -376,7 +373,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
 
         Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        agentLaunchers.addBinding().to(com.codenvy.machine.launcher.WsAgentWithAuthLauncherImpl.class);
         agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);
         agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.SshAgentLauncherImpl.class);
 
@@ -420,5 +416,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
                 .to(com.codenvy.workspace.WorkspaceFilesCleanUpScriptExecutor.class);
+        install(new com.codenvy.machine.agent.CodenvyAgentModule());
+        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
+                .to(com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.class);
     }
 }

@@ -1,0 +1,12 @@
+IMAGE_ALPINE=alpine
+IMAGE_CURL=appropriate/curl
+IMAGE_SOCAT=codenvy/socat
+IMAGE_HAPROXY=codenvy/haproxy:1.5.18
+IMAGE_PUPPET=codenvy/puppet
+IMAGE_NGINX=nginx:1.10-alpine
+IMAGE_SWARM=swarm:1.2.5
+IMAGE_REGISTRY=registry:2.5.0
+IMAGE_POSTGRES=postgres:9.5.4
+IMAGE_IP=codenvy/che-ip:nightly
+IMAGE_INIT=codenvy/init:5.0.0-M2
+IMAGE_CODENVY=codenvy/codenvy:5.0.0-M2

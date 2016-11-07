@@ -1,0 +1,78 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+global
+    log         127.0.0.1 local2
+    maxconn     4000
+
+defaults
+    mode                    http
+    log                     global
+    log-format {"type":"haproxy","timestamp":%Ts,"http_status":%ST,"http_request":"%r","remote_addr":"%ci","bytes_read":%B,"upstream_addr":"%si","backend_name":"%b","retries":%rc,"bytes_uploaded":%U,"upstream_response_time":"%Tr","upstream_connect_time":"%Tc","session_duration":"%Tt","termination_state":"%ts"}
+    option                  httplog
+    option                  dontlognull
+    option                  http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 5
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         1m
+    timeout client          1h # workaround for websocket connection without ping frames
+    timeout server          1h # workaround for websocket connection without ping frames
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 6000
+    errorfile 408 /dev/null
+
+
+backend tomcat_bk
+    mode http
+    server tomcat_bk codenvy:8080 check
+    errorfile 503 /etc/haproxy/maintenance.html
+
+backend nginx_bk
+    mode http
+    server nginx_bk codenvy-nginx:81 check
+
+frontend http-in
+    bind *:80
+    capture request header Host len 45
+    capture request header User-agent len 15
+    capture cookie logged_in len 20
+    reqidel ^X-Forwarded-Proto:.*
+    reqadd X-Forwarded-Proto:\ http
+<% if scope.lookupvar('haproxy::host_protocol') == "https" -%>
+    redirect scheme https
+
+frontend https-in
+    bind *:443 ssl crt /etc/haproxy/cert.pem <% if has_variable?('haproxy::haproxy_https_config') %><%= scope.lookupvar('haproxy::haproxy_https_config') %><% else %>no-sslv3 no-tls-tickets ciphers ALL:-ADH:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP:!RC4:!AECDH<% end %>
+    capture request header Host len 45
+    capture request header User-agent len 15
+    capture cookie logged_in len 20
+    reqidel ^X-Forwarded-Proto:.*
+    reqadd X-Forwarded-Proto:\ https
+<% end -%>
+
+    acl is_www hdr_beg(host) -i www.
+    acl is_logged_in hdr_sub(cookie) logged_in
+    acl url_login path_beg -i /site/login
+    acl url_factory url_sub -i factory
+    acl acl_im path_beg -i /im
+    acl use_nginx path_reg ^/[0-9]+_.+$
+    acl agent_binaries path_beg -i /agent-binaries
+
+    # forward requests from /f to /factory
+    reqrep ^([^\ :]*)\ /f(?!actory)(.*)     \1\ /factory\2 if { path /f /f/ }
+
+    # redirect /site/login to /site/create_account if no cookie logged_in
+    reqrep ^([^\ :]*)\ /site/login(.*)     \1\ /site/create-account\2 if url_login !is_logged_in url_factory
+    redirect prefix / code 302 if url_login !is_logged_in url_factory
+
+    # WWW redirection
+    redirect prefix <%= scope.lookupvar('haproxy::host_protocol') %>://<%= scope.lookupvar('haproxy::host_url') %> code 301 if is_www
+
+    use_backend nginx_bk if use_nginx
+    default_backend tomcat_bk

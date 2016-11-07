@@ -1,0 +1,12 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+# Configuration of sending email notifications for users
+workspace.email.created.enabled=true
+workspace.email.added.member.enabled=true
+workspace.email.removed.member.enabled=true
+
+# sender email address
+mailsender.application.from.email.address=<%= scope.lookupvar('codenvy::email_from') %>

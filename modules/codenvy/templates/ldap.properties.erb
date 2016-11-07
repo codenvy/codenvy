@@ -1,0 +1,59 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+ldap.url=<%= scope.lookupvar('codenvy::ldap_url') %>
+
+ldap.base_dn=<%= scope.lookupvar('codenvy::ldap_base_dn') %>
+ldap.auth.user.filter=<%= scope.lookupvar('codenvy::ldap_auth_user_filter') %>
+ldap.auth.authentication_type=<%= scope.lookupvar('codenvy::ldap_auth_authentication_type') %>
+
+ldap.auth.dn_format=<%= scope.lookupvar('codenvy::ldap_auth_dn_format') %>
+ldap.auth.user_password_attribute=<%= scope.lookupvar('codenvy::ldap_auth_user_password_attribute') %>
+ldap.auth.allow_multiple_dns=<%= scope.lookupvar('codenvy::ldap_auth_allow_multiple_dns') %>
+ldap.auth.subtree_search=<%= scope.lookupvar('codenvy::ldap_auth_subtree_search') %>
+
+ldap.connection.provider=<%= scope.lookupvar('codenvy::ldap_connection_provider') %>
+ldap.connection.bind.dn=<%= scope.lookupvar('codenvy::ldap_connection_bind_dn') %>
+ldap.connection.bind.password=<%= scope.lookupvar('codenvy::ldap_connection_bind_password') %>
+ldap.connection.use_ssl=<%= scope.lookupvar('codenvy::ldap_connection_use_ssl') %>
+ldap.connection.use_start_tls=<%= scope.lookupvar('codenvy::ldap_connection_use_start_tls') %>
+ldap.connection.pool.min_size=<%= scope.lookupvar('codenvy::ldap_connection_pool_min_size') %>
+ldap.connection.pool.max_size=<%= scope.lookupvar('codenvy::ldap_connection_pool_max_size') %>
+ldap.connection.pool.validate.on_checkout=<%= scope.lookupvar('codenvy::ldap_connection_pool_validate_on_checkout') %>
+ldap.connection.pool.validate.on_checkin=<%= scope.lookupvar('codenvy::ldap_connection_pool_validate_on_checkin') %>
+ldap.connection.pool.validate.period_ms=<%= scope.lookupvar('codenvy::ldap_connection_pool_validate_period_ms') %>
+ldap.connection.pool.validate.periodically=<%= scope.lookupvar('codenvy::ldap_connection_pool_validate_periodically') %>
+ldap.connection.pool.fail_fast=<%= scope.lookupvar('codenvy::ldap_connection_pool_fail_fast') %>
+ldap.connection.pool.idle_ms=<%= scope.lookupvar('codenvy::ldap_connection_pool_idle_ms') %>
+ldap.connection.pool.prune_ms=<%= scope.lookupvar('codenvy::ldap_connection_pool_prune_ms') %>
+ldap.connection.pool.block_wait_ms=<%= scope.lookupvar('codenvy::ldap_connection_pool_block_wait_ms') %>
+ldap.connection.connect_timeout_ms=<%= scope.lookupvar('codenvy::ldap_connection_connect_timeout_ms') %>
+ldap.connection.response_timeout_ms=<%= scope.lookupvar('codenvy::ldap_connection_response_timeout_ms') %>
+
+ldap.connection.ssl.trust_certificates=<%= scope.lookupvar('codenvy::ldap_connection_ssl_trust_certificates') %>
+ldap.connection.ssl.keystore.name=<%= scope.lookupvar('codenvy::ldap_connection_ssl_keystore_name') %>
+ldap.connection.ssl.keystore.password=<%= scope.lookupvar('codenvy::ldap_connection_ssl_keystore_password') %>
+ldap.connection.ssl.keystore.type=<%= scope.lookupvar('codenvy::ldap_connection_ssl_keystore_type') %>
+
+ldap.connection.sasl.realm=<%= scope.lookupvar('codenvy::ldap_connection_sasl_realm') %>
+ldap.connection.sasl.mechanism=<%= scope.lookupvar('codenvy::ldap_connection_sasl_mechanism') %>
+ldap.connection.sasl.authorization_id=<%= scope.lookupvar('codenvy::ldap_connection_sasl_authorization_id') %>
+ldap.connection.sasl.security_strength=<%= scope.lookupvar('codenvy::ldap_connection_sasl_security_strength') %>
+ldap.connection.sasl.mutual_auth=<%= scope.lookupvar('codenvy::ldap_connection_sasl_mutual_auth') %>
+ldap.connection.sasl.quality_of_protection=<%= scope.lookupvar('codenvy::ldap_connection_sasl_quality_of_protection') %>
+
+ldap.sync.initial_delay_ms=<%= scope.lookupvar('codenvy::ldap_sync_initial_delay_ms') %>
+ldap.sync.period_ms=<%= scope.lookupvar('codenvy::ldap_sync_period_ms') %>
+ldap.sync.page.size=<%= scope.lookupvar('codenvy::ldap_sync_page_size') %>
+ldap.sync.page.read_timeout_ms=<%= scope.lookupvar('codenvy::ldap_sync_page_read_timeout_ms') %>
+ldap.sync.user.additional_dn=<%= scope.lookupvar('codenvy::ldap_sync_user_additional_dn') %>
+ldap.sync.user.filter=<%= scope.lookupvar('codenvy::ldap_sync_user_filter') %>
+ldap.sync.user.attr.email=<%= scope.lookupvar('codenvy::ldap_sync_user_attr_email') %>
+ldap.sync.user.attr.id=<%= scope.lookupvar('codenvy::ldap_sync_user_attr_id') %>
+ldap.sync.user.attr.name=<%= scope.lookupvar('codenvy::ldap_sync_user_attr_name') %>
+ldap.sync.profile.attrs=<%= scope.lookupvar('codenvy::ldap_sync_profile_attrs') %>
+ldap.sync.group.additional_dn=<%= scope.lookupvar('codenvy::ldap_sync_group_additional_dn') %>
+ldap.sync.group.filter=<%= scope.lookupvar('codenvy::ldap_sync_group_filter') %>
+ldap.sync.group.attr.members=<%= scope.lookupvar('codenvy::ldap_sync_group_attr_members') %>

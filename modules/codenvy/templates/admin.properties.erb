@@ -1,0 +1,9 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+# codenvy default admin
+codenvy.admin.name=<%= scope.lookupvar('codenvy::codenvy_admin_name') %>
+codenvy.admin.initial_password=<%= scope.lookupvar('codenvy::codenvy_admin_initial_password') %>
+codenvy.admin.email=<%= scope.lookupvar('codenvy::codenvy_admin_email') %>

@@ -131,7 +131,7 @@ public class WorkspaceFsBackupSchedulerTest {
         // then
         verify(workspaceRuntimes).getMachine(WORKSPACE_ID_1, "id1");
         verify(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
-        verify(backupManager).backupWorkspace(WORKSPACE_ID_1, "/" + WORKSPACE_ID_1, "192.168.0.1");
+        verify(backupManager).backupWorkspace(WORKSPACE_ID_1, "/" + WORKSPACE_ID_1, "192.168.0.1", "22");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class WorkspaceFsBackupSchedulerTest {
         when(machineInstance.getNode()).thenReturn(node);
         when(node.getHost()).thenReturn("192.168.0.1");
         when(node.getProjectsFolder()).thenReturn("/" + WORKSPACE_ID_1);
-        doNothing().when(backupManager).backupWorkspace(anyString(), anyString(), anyString());
+        doNothing().when(backupManager).backupWorkspace(anyString(), anyString(), anyString(), anyString());
         doCallRealMethod().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         // when
@@ -194,9 +194,9 @@ public class WorkspaceFsBackupSchedulerTest {
 
         // then
         // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(backupManager, timeout(1000)).backupWorkspace(eq(WORKSPACE_ID_1), anyString(), anyString());
-        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws3"), anyString(), anyString());
-        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws4"), anyString(), anyString());
+        verify(backupManager, timeout(1000)).backupWorkspace(eq(WORKSPACE_ID_1), anyString(), anyString(), anyString());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws3"), anyString(), anyString(), anyString());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws4"), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -288,7 +288,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(backupManager, never()).backupWorkspace(anyString(), anyString(), anyString());
+        verify(backupManager, never()).backupWorkspace(anyString(), anyString(), anyString(), anyString());
     }
 
 }

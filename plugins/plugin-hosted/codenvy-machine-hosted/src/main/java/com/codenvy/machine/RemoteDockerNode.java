@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
@@ -35,9 +36,12 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.util.Collections.emptyMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -120,7 +124,8 @@ public class RemoteDockerNode implements DockerNode {
                                                  hostProjectsFolder,
                                                  execOutputs.get(0),
                                                  execOutputs.get(1),
-                                                 nodeHost);
+                                                 nodeHost,
+                                                 getSshPort());
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException("Can't restore workspace file system");
@@ -132,7 +137,10 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public void unbindWorkspace() throws MachineException {
         try {
-            backupManager.backupWorkspaceAndCleanup(workspaceId, hostProjectsFolder, nodeHost);
+            backupManager.backupWorkspaceAndCleanup(workspaceId,
+                                                    hostProjectsFolder,
+                                                    nodeHost,
+                                                    getSshPort());
         } catch (ServerException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -146,5 +154,24 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public String getHost() {
         return nodeHost;
+    }
+
+    // TODO what to do here?
+    private String getSshPort() throws MachineException {
+        ContainerInfo containerInfo;
+        try {
+            containerInfo = dockerConnector.inspectContainer(containerId);
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new MachineException("Can't unbind workspace");
+        }
+
+        Map<String, List<PortBinding>> ports = firstNonNull(containerInfo.getNetworkSettings().getPorts(), emptyMap());
+        List<PortBinding> portBindings = ports.get("22/tcp");
+        if (portBindings == null || portBindings.isEmpty()) {
+            throw new MachineException("Can't unbind workspace");
+        }
+
+        return portBindings.get(0).getHostPort();
     }
 }

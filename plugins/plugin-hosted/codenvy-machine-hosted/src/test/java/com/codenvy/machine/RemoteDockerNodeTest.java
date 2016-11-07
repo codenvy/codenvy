@@ -30,6 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -79,10 +80,10 @@ public class RemoteDockerNodeTest {
 
         //then
         verify(backupManager).restoreWorkspaceBackup(eq("WorkspaceId"),
-                                                     eq("WorkspacePath"),
                                                      eq("MessageContent"),
                                                      eq("MessageContent"),
-                                                     eq("127.0.0.1"));
+                                                     eq("127.0.0.1"),
+                                                     anyString());
     }
 
     @Test(expectedExceptions = MachineException.class,
