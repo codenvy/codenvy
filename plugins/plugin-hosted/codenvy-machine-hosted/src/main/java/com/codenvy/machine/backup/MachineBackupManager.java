@@ -75,17 +75,19 @@ public class MachineBackupManager {
     /**
      * Copies workspace files from machine's host to backup storage.
      *
+     * @param workspaceId
+     *         id of workspace that should be backed up
      * @param srcPath
      *         path to folder that should be backed up
      * @param srcAddress
      *         address of the server from which workspace files should be backed up
-     * @param workspaceId
-     *         id of workspace that should be backed up
+     * @param srcPort
+     *         port on the server that should be used for workspace files backup connection
      */
-    public void backupWorkspace(final String workspaceId,
-                                final String srcPath,
-                                final String srcAddress,
-                                String port) throws ServerException {
+    public void backupWorkspace(String workspaceId,
+                                String srcPath,
+                                String srcAddress,
+                                int srcPort) throws ServerException {
         ReentrantLock lock = workspacesBackupLocks.get(workspaceId);
         // backup workspace only if no backup with cleanup before
         if (lock != null) {
@@ -99,7 +101,11 @@ public class MachineBackupManager {
                         // because it is called after cleanup
                         return;
                     }
-                    backupWorkspace(workspaceId, srcPath, srcAddress, port, false);
+                    backupWorkspace(workspaceId,
+                                    srcPath,
+                                    srcAddress,
+                                    srcPort,
+                                    false);
                 } finally {
                     lock.unlock();
                 }
@@ -112,15 +118,19 @@ public class MachineBackupManager {
     /**
      * Copies workspace files from machine's host to backup storage and remove all files from the source.
      *
-     * @param srcAddress
-     *         address of the server from which workspace files should be backed up
      * @param workspaceId
      *         id of workspace that should be backed up
+     * @param srcPath
+     *         path to folder that should be backed up
+     * @param srcAddress
+     *         address of the server from which workspace files should be backed up
+     * @param srcPort
+     *         port on the server that should be used for workspace files backup connection
      */
-    public void backupWorkspaceAndCleanup(final String workspaceId,
+    public void backupWorkspaceAndCleanup(String workspaceId,
                                           String srcPath,
-                                          final String srcAddress,
-                                          String port) throws ServerException {
+                                          String srcAddress,
+                                          int srcPort) throws ServerException {
         ReentrantLock lock = workspacesBackupLocks.get(workspaceId);
         if (lock != null) {
             lock.lock();
@@ -130,7 +140,11 @@ public class MachineBackupManager {
                     LOG.error("Backup with cleanup of the workspace {} was invoked several times simultaneously", workspaceId);
                     return;
                 }
-                backupWorkspace(workspaceId, srcPath, srcAddress, port, true);
+                backupWorkspace(workspaceId,
+                                srcPath,
+                                srcAddress,
+                                srcPort,
+                                true);
             } finally {
                 workspacesBackupLocks.remove(workspaceId);
                 lock.unlock();
@@ -141,17 +155,17 @@ public class MachineBackupManager {
     }
 
     @VisibleForTesting
-    void backupWorkspace(final String workspaceId,
+    void backupWorkspace(String workspaceId,
                          String srcPath,
-                         final String srcAddress,
-                         String port,
+                         String srcAddress,
+                         int srcPort,
                          boolean removeSourceOnSuccess) throws ServerException {
         final File destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId);
 
         CommandLine commandLine = new CommandLine(backupScript,
                                                   srcPath,
                                                   srcAddress,
-                                                  port,
+                                                  Integer.toString(srcPort),
                                                   destPath.toString(),
                                                   Boolean.toString(removeSourceOnSuccess));
 
@@ -175,17 +189,25 @@ public class MachineBackupManager {
      *
      * @param workspaceId
      *         id of workspace that should be copied to machine
+     * @param destinationPath
+     *         path to folder that should be restored from backup
+     * @param userId
+     *         ID of user to apply permission to files on restoring
+     * @param groupId
+     *         ID of user group to apply permission to files on restoring
      * @param destAddress
-     *         address of the server where workspace should be copied to
+     *         address of a server where workspace files should be restored
+     * @param destPort
+     *         port of a server where workspace files should be restored
      * @throws ServerException
      *         if any exception occurs
      */
-    public void restoreWorkspaceBackup(final String workspaceId,
+    public void restoreWorkspaceBackup(String workspaceId,
                                        String destinationPath,
-                                       final String userId,
-                                       final String groupId,
-                                       final String destAddress,
-                                       String port) throws ServerException {
+                                       String userId,
+                                       String groupId,
+                                       String destAddress,
+                                       int destPort) throws ServerException {
         boolean restored = false;
         ReentrantLock lock = new ReentrantLock();
         lock.lock();
@@ -205,7 +227,7 @@ public class MachineBackupManager {
                                                       srcPath,
                                                       destinationPath,
                                                       destAddress,
-                                                      port,
+                                                      Integer.toString(destPort),
                                                       userId,
                                                       groupId);
 

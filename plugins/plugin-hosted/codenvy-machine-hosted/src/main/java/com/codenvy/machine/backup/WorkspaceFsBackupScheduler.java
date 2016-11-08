@@ -26,6 +26,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +51,26 @@ import java.util.concurrent.TimeUnit;
 public class WorkspaceFsBackupScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceFsBackupScheduler.class);
 
-    private final long                 syncTimeoutMillisecond;
-    private final WorkspaceRuntimes    workspaceRuntimes;
-    private final MachineBackupManager backupManager;
-
+    private final long                          syncTimeoutMillisecond;
+    private final WorkspaceRuntimes             workspaceRuntimes;
+    private final MachineBackupManager          backupManager;
     private final Map<String, Long>             lastMachineSynchronizationTime;
     private final ExecutorService               executor;
     private final ConcurrentMap<String, String> devMachinesBackupsInProgress;
+    private final Integer                       syncPort;
 
     @Inject
     public WorkspaceFsBackupScheduler(WorkspaceRuntimes workspaceRuntimes,
                                       MachineBackupManager backupManager,
-                                      @Named("machine.backup.backup_period_second") long syncTimeoutSecond) {
+                                      @Named("machine.backup.backup_period_second") long syncTimeoutSecond,
+                                      @Nullable @Named("codenvy.workspace.projects_sync_port") Integer syncPort) {
         this.workspaceRuntimes = workspaceRuntimes;
         this.backupManager = backupManager;
         this.syncTimeoutMillisecond = TimeUnit.SECONDS.toMillis(syncTimeoutSecond);
+        this.syncPort = syncPort;
 
-        this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());
+        this.executor = Executors.newCachedThreadPool(
+                new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());
         this.lastMachineSynchronizationTime = new ConcurrentHashMap<>();
         this.devMachinesBackupsInProgress = new ConcurrentHashMap<>();
     }
@@ -119,17 +123,10 @@ public class WorkspaceFsBackupScheduler {
         }
         final InstanceNode node = machineInstance.getNode();
 
-        // TODO what to do here?
-        ServerImpl server = machine.getRuntime().getServers().get("22/tcp");
-        if (server == null) {
-            throw new ServerException("");
-        }
-
-
         backupManager.backupWorkspace(machine.getWorkspaceId(),
                                       node.getProjectsFolder(),
                                       node.getHost(),
-                                      server.getAddress().split(":", 2)[1]);
+                                      getSyncPort(machine));
     }
 
     @VisibleForTesting
@@ -137,6 +134,18 @@ public class WorkspaceFsBackupScheduler {
         final Long lastMachineSyncTime = lastMachineSynchronizationTime.get(machineId);
 
         return lastMachineSyncTime == null || System.currentTimeMillis() - lastMachineSyncTime > syncTimeoutMillisecond;
+    }
+
+    private int getSyncPort(MachineImpl machine) throws ServerException {
+        if (syncPort != null) {
+            return syncPort;
+        }
+
+        ServerImpl server = machine.getRuntime().getServers().get("22/tcp");
+        if (server == null) {
+            throw new ServerException("");
+        }
+        return Integer.parseUnsignedInt(server.getAddress().split(":", 2)[1]);
     }
 
     @PreDestroy

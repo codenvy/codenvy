@@ -118,7 +118,7 @@ public class MachineBackupManagerTest {
     public void shouldBeAbleBackupWorkspace() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 
         verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC));
 
@@ -131,7 +131,7 @@ public class MachineBackupManagerTest {
         injectWorkspaceLock(WORKSPACE_ID);
 //        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 
         verify(backupManager).execute(anyObject(), anyInt());
     }
@@ -166,7 +166,7 @@ public class MachineBackupManagerTest {
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // when
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 
         backupFreezer.unfreeze();
         awaitFinalization();
@@ -350,7 +350,7 @@ public class MachineBackupManagerTest {
         ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
 
         // when
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 
         restoreFreezer.unfreeze();
         awaitFinalization();
@@ -380,7 +380,7 @@ public class MachineBackupManagerTest {
     @Test
     public void shouldBackupWithCleanupAfterFinishOfCurrentBackup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 //        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_ADDRESS, "");
     }
 
@@ -422,7 +422,7 @@ public class MachineBackupManagerTest {
         backupFreezer.unfreeze();
         awaitFinalization();
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
 
         verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
 
@@ -501,7 +501,7 @@ public class MachineBackupManagerTest {
 
     private void runBackup() {
         try {
-            backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, "");
+            backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, 25);
         } catch (ServerException e) {
             LOG.error(e.getMessage());
         }

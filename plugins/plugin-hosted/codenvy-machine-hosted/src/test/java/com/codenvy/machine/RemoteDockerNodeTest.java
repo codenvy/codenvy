@@ -20,9 +20,9 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -59,7 +59,12 @@ public class RemoteDockerNodeTest {
         when(pathProvider.getPath("WorkspaceId")).thenReturn("WorkspacePath");
         when(dockerConnector.createExec(any())).thenReturn(exec);
         when(exec.getId()).thenReturn("ExecId");
-        remoteDockerNode = new RemoteDockerNode(dockerConnector, "ContainerId", "WorkspaceId", backupManager, pathProvider);
+        remoteDockerNode = new RemoteDockerNode(dockerConnector,
+                                                "ContainerId",
+                                                "WorkspaceId",
+                                                backupManager,
+                                                pathProvider,
+                                                25);
     }
 
     @Test
@@ -84,7 +89,7 @@ public class RemoteDockerNodeTest {
                                                      eq("MessageContent"),
                                                      eq("MessageContent"),
                                                      eq("127.0.0.1"),
-                                                     anyString());
+                                                     anyInt());
     }
 
     @Test(expectedExceptions = MachineException.class,

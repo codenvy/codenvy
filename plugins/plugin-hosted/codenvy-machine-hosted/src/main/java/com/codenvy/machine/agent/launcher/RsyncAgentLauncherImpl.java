@@ -17,6 +17,7 @@ package com.codenvy.machine.agent.launcher;
 import com.codenvy.machine.RemoteDockerNode;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.NoOpAgentLaunchingChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -29,7 +30,6 @@ import javax.inject.Singleton;
  * Starts ws agent in the machine and waits until ws agent sends notification about its start.
  *
  * @author Alexander Garagatyi
- * @author Anatolii Bazko
  */
 @Singleton
 public class RsyncAgentLauncherImpl extends AbstractAgentLauncher {
