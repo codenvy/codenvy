@@ -77,6 +77,9 @@ machine.docker.server.terminal.run_command=mkdir -p ~/che && cp /mnt/che/termina
 # otherwise workspace snapshots would be saved locally.
 che.docker.registry_for_snapshots=true
 
+# docker network driver
+che.docker.network_driver=<%= scope.lookupvar('codenvy::che_machine_docker_network_driver') %>
+
 # Allows to adjust machine swap memory by multiplication current machnine memory on provided value.
 # default is 0 which means disabled swap, if set multiplier value equal to 0.5 machine swap will be
 # configured with size that equal to half of current machine memory.

@@ -225,6 +225,8 @@ node default {
 # Semicolon separated extra volumes to mount in the machine.
 # example: $machine_server_extra_volume = "/path/to/source1:/path/to/destination1:ro,Z;/path/to/source2:/path/to/destination2:ro,Z;"
   $machine_server_extra_volume = getValue("CODENVY_MACHINE_SERVER_EXTRA_VOLUME","")
+# Docker network driver for machines.
+  $che_machine_docker_network_driver = getValue("CODENVY_MACHINE_DOCKER_NETWORK_DRIVER","bridge")
 
 ###############################
 # Http proxy configuration
