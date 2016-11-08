@@ -143,7 +143,8 @@ public class WorkspaceFsBackupScheduler {
 
         ServerImpl server = machine.getRuntime().getServers().get("22/tcp");
         if (server == null) {
-            throw new ServerException("");
+            throw new ServerException(
+                    "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible");
         }
         return Integer.parseUnsignedInt(server.getAddress().split(":", 2)[1]);
     }
