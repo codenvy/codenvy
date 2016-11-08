@@ -32,16 +32,16 @@ import javax.inject.Singleton;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class RsyncAgentLauncherImpl extends AbstractAgentLauncher {
+public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
     @Inject
-    public RsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
-                                  @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
+    public ExternalRsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
+                                          @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
         super(agentMaxStartTimeMs, agentPingDelayMs, new NoOpAgentLaunchingChecker());
     }
 
     @Override
     public String getAgentId() {
-        return "org.eclipse.che.rsync-synchronizer";
+        return "com.codenvy.external_rsync";
     }
 
     @Override
@@ -51,8 +51,6 @@ public class RsyncAgentLauncherImpl extends AbstractAgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
-        super.launch(machine, agent);
-
         RemoteDockerNode node = (RemoteDockerNode)machine.getNode();
         node.bindWorkspace();
     }

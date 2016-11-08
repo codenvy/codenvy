@@ -32,10 +32,12 @@ public class CodenvyAgentModule extends AbstractModule {
 
         Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.WsAgentWithAuthLauncherImpl.class);
-        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.RsyncAgentLauncherImpl.class);
+        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
+        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.ExternalRsyncAgentLauncherImpl.class);
 
         Multibinder<Agent> agentsMultibinder = Multibinder.newSetBinder(binder(), Agent.class);
-        agentsMultibinder.addBinding().to(com.codenvy.machine.agent.RsyncAgent.class);
+        agentsMultibinder.addBinding().to(com.codenvy.machine.agent.MachineInnerRsyncAgent.class);
+        agentsMultibinder.addBinding().to(com.codenvy.machine.agent.ExternalRsyncAgent.class);
 
         bind(String.class).annotatedWith(Names.named("workspace.backup.public_key"))
                           .toProvider(com.codenvy.machine.agent.WorkspaceSyncPublicKeyProvider.class);

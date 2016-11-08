@@ -99,7 +99,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               snapshotUseRegistry,
               memorySwapMultiplier,
               additionalNetworks,
-              networkDriver);
+              networkDriver, windowsPathEscaper);
 
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;

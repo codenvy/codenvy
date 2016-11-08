@@ -21,9 +21,9 @@ import java.util.Collections;
 /**
  * @author Alexander Garagatyi
  */
-public class RsyncAgent extends AgentImpl {
-    public RsyncAgent() {
-        super("org.eclipse.che.rsync-synchronizer",
+public class MachineInnerRsyncAgent extends AgentImpl {
+    public MachineInnerRsyncAgent() {
+        super("com.codenvy.rsync_in_machine",
               "Rsync sync agent",
               null,
               "Sync support",

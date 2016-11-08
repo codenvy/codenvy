@@ -15,24 +15,61 @@
 package com.codenvy.machine.agent;
 
 import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.environment.server.AgentConfigApplier;
 import org.eclipse.che.api.environment.server.DefaultInfrastructureProvisioner;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
+import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 
+import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 /**
+ * Infrastructure provisioner that adds volume/agent for workspace files synchronization.
+ * Different strategies of synchronization are switched by property {@link #SYNC_STRATEGY_PROPERTY}.
+ *
  * @author Alexander Garagatyi
  */
 public class CodenvyInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
-    private final String pubSyncKey;
+    public static final String SYNC_STRATEGY_PROPERTY = "codenvy.sync.strategy";
 
+    private final String                      pubSyncKey;
+    private final WorkspaceFolderPathProvider workspaceFolderPathProvider;
+    private final WindowsPathEscaper          pathEscaper;
+    private final String                      projectFolderPath;
+    private final boolean                     syncAgentInMachine;
+
+    @Inject
     public CodenvyInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
-                                            @Named("workspace.backup.public_key") String pubSyncKey) {
+                                            @Named("workspace.backup.public_key") String pubSyncKey,
+                                            @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
+                                            WorkspaceFolderPathProvider workspaceFolderPathProvider,
+                                            WindowsPathEscaper pathEscaper,
+                                            @Named("che.machine.projects.internal.storage") String projectFolderPath) {
         super(agentConfigApplier);
         this.pubSyncKey = pubSyncKey;
+        this.workspaceFolderPathProvider = workspaceFolderPathProvider;
+        this.pathEscaper = pathEscaper;
+        this.projectFolderPath = projectFolderPath;
+        switch (syncStrategy) {
+            case "rsync":
+                syncAgentInMachine = false;
+                break;
+            case "rsync-agent":
+                syncAgentInMachine = true;
+                break;
+            default:
+                throw new RuntimeException(
+                        format("Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
+                               SYNC_STRATEGY_PROPERTY,
+                               syncStrategy));
+        }
     }
 
     @Override
@@ -49,15 +86,35 @@ public class CodenvyInfrastructureProvisioner extends DefaultInfrastructureProvi
                                          .findAny()
                                          .orElseThrow(() -> new EnvironmentException(
                                                  "ws-machine is not found on agents applying"));
-
+        String syncAgentId;
+        if (syncAgentInMachine) {
+            syncAgentId = "com.codenvy.rsync_in_machine";
+            internalEnv.getServices()
+                       .get(devMachineName)
+                       .getEnvironment()
+                       .put("CODENVY_SYNC_PUB_KEY", pubSyncKey);
+        } else {
+            syncAgentId = "com.codenvy.external_rsync";
+            // find path for mounting workspace FS on host
+            String projectFolderVolume;
+            try {
+                projectFolderVolume = format("%s:%s:Z",
+                                             workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
+                                             projectFolderPath);
+            } catch (IOException e) {
+                throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
+                                               internalEnv.getWorkspaceId());
+            }
+            internalEnv.getServices()
+                       .get(devMachineName)
+                       .getVolumes()
+                       .add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
+                                                   : projectFolderVolume);
+        }
         envConfig.getMachines()
                  .get(devMachineName)
                  .getAgents()
-                 .add("org.eclipse.che.rsync-synchronizer");
-        internalEnv.getServices()
-                   .get(devMachineName)
-                   .getEnvironment()
-                   .put("CODENVY_SYNC_PUB_KEY", pubSyncKey);
+                 .add(syncAgentId);
 
         super.provision(envConfig, internalEnv);
     }

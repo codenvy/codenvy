@@ -25,6 +25,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+/**
+ * Reads content of public key that is used for workspaces projects synchronization from file.
+ *
+ * @author Alexander Garagatyi
+ */
 @Singleton
 public class WorkspaceSyncPublicKeyProvider implements Provider<String> {
     private String pubKey;
