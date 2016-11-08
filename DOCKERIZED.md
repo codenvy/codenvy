@@ -1,3 +1,4 @@
+Codenvy makes cloud workspaces for develoment teams. Codenvy is installed as a set of Docker images that are used together to run Codenvy server.
 - [Beta](#beta)
 - [Getting Stated](#getting-stated)
     + [Explain trial system](#explain-trial-system)
@@ -77,8 +78,6 @@ This packaging and deployment approach is relatively new. We do not yet consider
 6. Add a `codenvy reload` command, which resarts services with a SIGHUP signal instead of a container restart. SIGHUP signals instruct container services to reload their configuration without going through a reboot cycle.
 
 # Getting Stated
-Codenvy makes cloud workspaces for develoment teams. Codenvy is installed as a set of Docker images that are used together to run Codenvy server.
-
 
 ### Explain trial system
 
