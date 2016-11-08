@@ -40,6 +40,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Igor Vinokur
  */
+// TODO fix tests. add new tests for new functionality
 @Listeners(MockitoTestNGListener.class)
 public class RemoteDockerNodeTest {
 

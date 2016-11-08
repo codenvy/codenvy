@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alexander Garagatyi
  */
+// TODO fix tests. add new tests for new functionality
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceFsBackupSchedulerTest {
     private static final int    FAKE_BACKUP_TIME_MS = 1500;

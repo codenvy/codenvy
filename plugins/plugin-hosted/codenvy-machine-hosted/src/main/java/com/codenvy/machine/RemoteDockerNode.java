@@ -74,7 +74,9 @@ public class RemoteDockerNode implements DockerNode {
                             @Assisted("workspace") String workspaceId,
                             MachineBackupManager backupManager,
                             WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                            @Nullable @Named("codenvy.workspace.projects_sync_port") Integer syncPort) throws MachineException {
+                            @Nullable @Named("codenvy.workspace.projects_sync_port") Integer syncPort)
+            throws MachineException {
+
         this.workspaceId = workspaceId;
         this.backupManager = backupManager;
         this.dockerConnector = dockerConnector;
@@ -161,6 +163,11 @@ public class RemoteDockerNode implements DockerNode {
         return nodeHost;
     }
 
+    /**
+     * Finds port which can be used for workspace projects files synchronization.
+     *
+     * @throws MachineException if port detection fails
+     */
     private int getSyncPort() throws MachineException {
         if (syncPort != null) {
             return syncPort;
@@ -171,13 +178,15 @@ public class RemoteDockerNode implements DockerNode {
             containerInfo = dockerConnector.inspectContainer(containerId);
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
-            throw new MachineException("Can't unbind workspace");
+            throw new MachineException("Workspace projects files in ws-machine are not accessible");
         }
 
         Map<String, List<PortBinding>> ports = firstNonNull(containerInfo.getNetworkSettings().getPorts(), emptyMap());
         List<PortBinding> portBindings = ports.get("22/tcp");
         if (portBindings == null || portBindings.isEmpty()) {
-            throw new MachineException("Can't unbind workspace");
+            // should not happen
+            throw new MachineException(
+                    "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible");
         }
 
         return Integer.parseUnsignedInt(portBindings.get(0).getHostPort());
