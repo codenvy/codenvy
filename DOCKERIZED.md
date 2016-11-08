@@ -334,14 +334,10 @@ You must run Codenvy from the root of the Codenvy repository. By running in the 
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. 
 
 ### Hostname
-If you install Codenvy with the defaults, Codenvy is reachable at http://codenvy.onprem. You can change the hostname by using the CLI with codenvy config --hostname=<hostname> . 
-
+TODO: Add in example of customizing hostname in the `codenvy.env` file.
 
 ### HTTP/S
-Currently not supported in this version. In progress.
-By default Codenvy runs over HTTP as this is simplest to install. You can switch to HTTPS at any time. 
-
-There are two requirements for configuring HTTP/S:  
+By default Codenvy runs over HTTP as this is simplest to install. There are two requirements for configuring HTTP/S:  
 1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
 2. A valid SSL certificate.  
 
