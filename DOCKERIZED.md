@@ -154,16 +154,16 @@ Get the Codenvy CLI. The Codenvy images and supporting utilities are downloaded 
 
 #### Linux:
 ```
-sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
-sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
+sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/codenvy.sh > /usr/local/bin/codenvy
+sudo curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/cli.sh > /usr/local/bin/cli.sh
 chmod +x /usr/local/bin/codenvy
 chmod +x /usr/local/bin/cli.sh
 ```
 
 #### Mac:
 ```
-curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > /usr/local/bin/codenvy
-curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > /usr/local/bin/cli.sh
+curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/codenvy.sh > /usr/local/bin/codenvy
+curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/cli.sh > /usr/local/bin/cli.sh
 chmod +x /usr/local/bin/codenvy
 chmod +x /usr/local/bin/cli.sh
 ```
@@ -180,9 +180,9 @@ sudo ifconfig lo0 alias $DOCKER_VM_IP
 ```
 #### Windows:
 ```
-curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.sh > codenvy.sh
-curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/codenvy.bat > codenvy.bat
-curl -sL https://raw.githubusercontent.com/codenvy/codenvy/hackathon/cli.sh > cli.sh
+curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/codenvy.sh > codenvy.sh
+curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/codenvy.bat > codenvy.bat
+curl -sL https://raw.githubusercontent.com/codenvy/codenvy/docker/cli.sh > cli.sh
 set PATH=<path-to-cli>;%PATH%
 ```
 
