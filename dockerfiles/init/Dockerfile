@@ -14,8 +14,7 @@ RUN mkdir -p /files \
 
 COPY manifests /files/manifests
 COPY modules /files/modules
-COPY README.md /files
-COPY DOCKERIZED.md /files
+COPY docs /files
 COPY codenvy.env /files
 COPY dockerfiles/init/docker-entrypoint.sh /
 RUN chmod +x docker-entrypoint.sh
