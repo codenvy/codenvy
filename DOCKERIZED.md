@@ -78,11 +78,13 @@ This packaging and deployment approach is relatively new. We do not yet consider
 7. We do a single-node deployment of etcd, which is used as a distributed key-value store. If your users are creating workspaces that use Docker compose syntax, there are scenarios where separate containers for a single workspace will be scheduled onto different physical nodes. With our single node implementation of etcd, those containers will not be part of the same network and cannot communicate with one another. Your users will yell at you. The current work around is to manually configure etcd, zookeeper, or Consul on each physical node before you add it into the Codenvy cluster, and then activate "overlay" networking mode in `codenvy.env` file. Contact us for guidance on how to configure this. For GA we will provide a distributed key value store that does not have this limitation.
 
 ## Getting Help
-If you run into an issue starting, configuring or running Codenvy, please open a GitHub issue providing:
+If you run into an issue, please open a GitHub issue providing:
 - the host distribution and release version
 - output of the `docker version` command
 - output of the `docker info` command
 - the `codenvy <command>` you used to run Codenvy
+
+If you are Codenvy customer, you can also file a ticket through our email support channel for a quicker response.
 
 ## Getting Started
 1. Get Docker 1.12+, Docker Compose 1.8+.
