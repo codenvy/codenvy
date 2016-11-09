@@ -11,12 +11,12 @@ DST_USR_ID=${5}
 DST_GRP_ID=${6}
 
 # ensure existing trailing slash to overrite permissions of destination folder too
-if [[ ${SRC_FOLDER} != */ ]]; then
+#if [[ ${SRC_FOLDER} != */ ]]; then
    SRC_FOLDER=${SRC_FOLDER}"/"
-fi
-if [[ ${DST_FOLDER} != */ ]]; then
+#fi
+#if [[ ${DST_FOLDER} != */ ]]; then
    DST_FOLDER=${DST_FOLDER}"/"
-fi
+#fi
 
 rsync --quiet --delete --partial --links --safe-links --owner --group --recursive --times --human-readable --bwlimit=7000 --executability \
       --include='.codenvy/' \

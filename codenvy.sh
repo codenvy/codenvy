@@ -70,10 +70,6 @@ init_logging() {
   # Ensure logs folder exists
   LOGS="${CHE_CLI_LOGS_FOLDER}/cli.log"
   mkdir -p "${CHE_CLI_LOGS_FOLDER}"
-  # Rename existing log file by adding .old suffix
-  if [[ -f "${LOGS}" ]]; then
-    mv -f "${LOGS}" "${LOGS}.old"
-  fi
   # Log date of CLI execution
   log "$(date)"
 

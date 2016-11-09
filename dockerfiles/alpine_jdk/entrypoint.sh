@@ -4,14 +4,6 @@
 #
 postfix -c /etc/postfix start
 #
-# Get haproxy container IP and add it to hosts to make sure
-# all requests internally go through haproxy container
-#
-
-haproxy=$(getent hosts haproxy | awk '{ print $1 }')
-
-echo "$haproxy $CODENVY_API_END_POINT" >> /etc/hosts
-
 #
 # Check if Postgres is running. There's a 5 min timeout
 # for Postgres to start. If it does not Codenvy Tomcat
