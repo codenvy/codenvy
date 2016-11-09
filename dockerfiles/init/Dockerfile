@@ -10,12 +10,12 @@
 FROM alpine:latest
 RUN mkdir -p /files \
     && mkdir -p /files/modules \
-    && mkdir -p /files/manifests
+    && mkdir -p /files/manifests \
+    && mkdir -p /files/docs
 
 COPY manifests /files/manifests
 COPY modules /files/modules
-COPY README.md /files
-COPY DOCKERIZED.md /files
+COPY docs /files/docs
 COPY codenvy.env /files
 COPY dockerfiles/init/docker-entrypoint.sh /
 RUN chmod +x docker-entrypoint.sh
