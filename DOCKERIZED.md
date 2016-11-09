@@ -73,6 +73,10 @@ This packaging and deployment approach is relatively new. We do not yet consider
 
 5. Boot2docker. We have not thoroughly tested certain configurations using boot2docker for Windows. You can expect issues if you do not set CODENVY_CONFIG or CODENVY_INSTANCE to %userprofile%.
 
+6. If you `codenvy remove-node`, we trigger a system-wide restart. Your workspaces and users are not affected. This is a temporary limitation.
+
+7. We do a single-node deployment of etcd, which is used as a distributed key-value store. If your users are creating workspaces that use Docker compose syntax, there are scenarios where separate containers for a single workspace will be scheduled onto different physical nodes. With our single node implementation of etcd, those containers will not be part of the same network and cannot communicate with one another. Your users will yell at you. The current work around is to manually configure etcd, zookeeper, or Consul on each physical node before you add it into the Codenvy cluster, and then activate "overlay" networking mode in `codenvy.env` file. Contact us for guidance on how to configure this. For GA we will provide a distributed key value store that does not have this limitation.
+
 ## Getting Help
 If you run into an issue starting, configuring or running Codenvy, please open a GitHub issue providing:
 - the host distribution and release version
@@ -127,6 +131,21 @@ We install rsync into each user's workspace to run as a background service. In t
 Some base images, like ubuntu, support this, but others like alpine, do not. If you create custom workspace recipes from Composefiles or Dockerfiles to run within Codenvy, these images must inherit from a base image that has rsync and SSH or you must ensure that these services are installed. If you do not have these services installed, the workspace will not start and provide an error to the user that may cause them to scratch their head.
 
 In the non-container installation version of Codenvy, this requirement does not exist since we install these dependencies onto each host node that is added into the Codenvy cluster. We will be working to package up the rsync agent as a container that is deployed outside of your workspace's runtime. The container will have the dependencies and then this requirement will be removed.
+
+#### Sizing
+Codenvy's core services will run on a single node as a set of microservices. Workspaces will run on the core node and additional workspace nodes that you add into a Codenvy cluster run by Swarm. The number and size of these physical nodes is determined by a few factors.
+
+You need to have enough RAM to support the number of concurrent *running* workspaces. A single user may have multiple running workspaces, but generally the common scenario is a user running a single workspace at a time. Workspace sizes are set by users when they create new workspaces, but you can define workspace limits in the configuration file that prevent RAM sprawl.
+
+For sizing, determine how much RAM you want each user to consume at a time, and then estimate the peak concurrent utilization to determine how much system-wide RAM you will want. For example, internally at Codenvy, we regularly have 75 concurrently running workspaces, each sized at 16 GB RAM, for a total expectation of 1.2TB of RAM. Our machine nodes have 128 GB RAM per node and we routinely run 10-14 machine nodes to support our internal engineering efforts.
+
+Compilation is CPU-heavy and most compilation events are queued to a single CPU. In the same Codenvy enterprise example, if our machine nodes are quad-core, we end up capacity to support 40-52 concurrent builds. If the total workspace CPU activity exceeds 40-52 events, then user performance begins to suffer due to thrashing and blocking.
+
+The default configuration of workspaces is to auto-snapshot the workspace runtime to disk whenever it is stopped, whether by the user or through idle timeout. Many stack base images can grow to be >1GB, especially if you are installing complicated software inside of them, and thus their snapshots can be sizable as well. If you allow users to have many workspaces, even if they are stopped, each of those workspaces will have a snapshot on disk. You can apply a workspace cap on the total number of workspaces that can exist, which prevents users from having too many snapshots. The monitoring system also has parameters you can set to perform routine cleanup of old workspaces, where their snapshots are destroyed or removed from the user's system.
+
+We have experitmented with adding 1000 physical nodes into a single physical cluster. You can use the `codenvy add-node` command which generates a utility for you to run on each node that should be added to the cluster. You can also run `codenvy remove-node` to automate the removal of the node from the cluster and the movement of any remaining workspaces onto another node. 
+
+The additional physical nodes must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
 
 ## Installation
 Get the Codenvy CLI. The Codenvy images and supporting utilities are downloaded and maintained by the CLI. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
@@ -249,11 +268,10 @@ user: admin
 pass: password
 ```
 
-### Hosting
+#### Hosting
 If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers. 
 
-### Upgrading
-Not yet supported. We will have a release that upgrades both your Docker images and your data files in a single operation soon.
+#### Upgrading
 
 
 ## Uninstall
@@ -269,7 +287,7 @@ rm -rf ~/.codenvy
 ```
 
 ## Configuration
-All configuration is done with environment variables. Environment variables are stored in `CODENVY_CONFIG/codenvy.env`, a file that is generated during the `codenvy init` phase. If you rerun `codenvy init` in the same `CODENVY_CONFIG`, the process will abort unless you pass `--force` or `--pull`. You can have multiple `CODENVY_CONFIG` folders in order to keep profiles of configuration.
+Configuration is done with environment variables. Environment variables are stored in `CODENVY_CONFIG/codenvy.env`, a file that is generated during the `codenvy init` phase. If you rerun `codenvy init` in the same `CODENVY_CONFIG`, the process will abort unless you pass `--force` or `--pull`. You can have multiple `CODENVY_CONFIG` folders in order to keep profiles of configuration.
 
 Each variable is documented with an explanation and usually commented out. If you need to set a variable, uncomment it and configure it with your value. You can then run `codenvy config` to apply this configuration to your system. Any `codenvy start` will reapply this configuration.
 
@@ -281,7 +299,7 @@ If you run `codenvy config`, Codenvy runs puppet to transform your puppet templa
 
 When doing an initialization, if you have `CODENVY_VERSION`, `CODENVY_HOST`, `CODENVY_CONFIG`, or `CODENVY_INSTANCE` set in memory of your shell, then those values will be inserted into your `CODENVY_CONFIG/codenvy.env` template. After initialization, you can edit any environment variable in `codenvy.env` and rerun `codenvy config` to update the system.
 
-### Saving Configuration in Version Control
+#### Saving Configuration in Version Control
 Administration teams that want to version control your Codenvy configuration should save `CODENVY_CONFIG/codenvy.env`. This is the only file that should be saved with version control. It is not necessary, and even discouraged, to save the other files in the `CODENVY_CONFIG` folder. If you were to perform a `codenvy upgrade` we may replace these files with templates that are specific to the version that is being upgraded. The `codenvy.env` file maintains fidelity between versions and we can generate instance configurations from that.
 
 The version control sequence would be:
@@ -291,7 +309,7 @@ The version control sequence would be:
 4. When pulling from version control, copy `CODENVY_CONFIG/codenvy.env` into any configuration folder after initialization.
 5. You can then run `codenvy config` or `codenvy start` and the instance configuration will be generated from this file.
     
-### Logs and User Data
+#### Logs and User Data
 When Codenvy initializes itself, it creates a `/instance` folder in the directory to store logs, user data, the database, and instance-specific configuration. Codenvy's containers are started with `host:container` volume bindings to mount this information into and out of the containers that require it. You can save the `/instance` folder as a backup for an entire Codenvy instance. 
 
 Codenvy's containers save their logs in the same location:
@@ -316,92 +334,8 @@ Instance configuration is generated by Codenvy and is updated by our internal co
 /config                            # Configuration files which are input mounted into the containers
 ```
 
-### Microsoft Windows and NTFS
-Due to differences in file system types between NTFS and what is commonly used in the Linux world, there is no convenient way to directly host mount Postgres database data from within the container onto your host. We store your database data in a Docker named volume inside your boot2docker or Docker for Windows VM. Your data is persisted permanently. If the underlying VM is destroyed, then the data will be lost.
 
-If you need to backup your Postgres data, run the following command:
-`TODO - postgres backup commands`
-
-### Development Mode
-For Codenvy developers that are building and customizing Codenvy from its source repository, there is a development that maps the runtime containers to your source repository. If you are developing in the `http://github.com/codenvy/codenvy` repository, you can turn on development mode to allow puppet configuration files and your local Codenvy assembly to be mounted into the appropriate containers. Dev mode is activated by setting environment variables and restarting (if Codenvy is running) or starting Codenvy (if this is the first run):
-```
-CODENVY_DEVELOPMENT_MODE="on"
-CODENVY_DEVELOPMENT_REPO=<path-codenvy-repo>
-```
-You must run Codenvy from the root of the Codenvy repository. By running in the repository, the local `codenvy.sh` and `cli.sh` scripts will override any installed CLI packages. Additionally, two containers will have host mounted files from the local repository. During the `codenvy config` phase, the repository's `/modules` and `/manifests` will be mounted into the puppet configurator.  During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container.
-
-### Licensing
-Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. 
-
-### Hostname
-TODO: Add in example of customizing hostname in the `codenvy.env` file.
-
-### HTTP/S
-By default Codenvy runs over HTTP as this is simplest to install. There are two requirements for configuring HTTP/S:  
-1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
-2. A valid SSL certificate.  
-
-TODO: [https://codenvy.readme.io/v5.0/docs/security](https://codenvy.readme.io/v5.0/docs/security)
-
-### SMTP
-By default, Codenvy is configured to use a dummy mail server which makes registration with user email not possible, although admin can still create users or configure oAuth. To configure Codenvy to use SMTP server of choice, provide values for the following environment variables in `codenvy.env` (below is an example for GMAIL):
-
-```
-CODENVY_MAIL_HOST=smtp.gmail.com
-CODENVY_MAIL_HOST_PORT=465
-CODENVY_MAIL_SMTP_AUTH=true
-СODENVY_MAIL_TRANSPORT_PROTOCOL=smtp
-CODENVY_MAIL_SMTP_AUTH_USERNAME=example@gmail.com
-CODENVY_MAIL_SMTP_AUTH_PASSWORD=password
-CODENVY_MAIL_SMTP_SOCKETFACTORY_PORT=465
-CODENVY_MAIL_SMTP_SOCKETFACTORY_CLASS=javax.net.ssl.SSLSocketFactory
-CODENVY_MAIL_SMTP_SOCKETFACTORY_FALLBACK=false
-```
-
-# Config: Workspaces 
-
-
-### Workspace Requirements
-Currently, Codenvy's workspaces launch a tiny rsync-agent that allows the centralized Codenvy server to backup project source code from within each workspace to the central servers. When workspaces are shut off or restarted, the project files are automatically rsync'd back into the workspace. rsync runs at workspace start, stop, and on a scheduler. This allows us to preserve the integrity of your source code if the workspace's runtime containers were to have a failure during operation.
-
-We install rsync into each user's workspace to run as a background service. In this version of Codenvy, your user workspaces requires SSH and rsync to be installed in the base image. If you are connected to the Internet, we install rsync and SSH automtaically. However, if you are doing an offline installation, then your workspace base images need to have this software included.
-
-Some base images, like ubuntu, support this, but others like alpine, do not. If you create custom workspace recipes from Composefiles or Dockerfiles to run within Codenvy, these images must inherit from a base image that has rsync and SSH or you must ensure that these services are installed. If you do not have these services installed, the workspace will not start and provide an error to the user that may cause them to scratch their head.
-
-In the non-container installation version of Codenvy, this requirement does not exist since we install these dependencies onto each host node that is added into the Codenvy cluster. We will be working to package up the rsync agent as a container that is deployed outside of your workspace's runtime. The container will have the dependencies and then this requirement will be removed.
-
-### Concurrent Workspaces
-You need to have machine RAM to support the number of concurrent workspaces open by users within your system. A single user may have multiple workspaces open, but generally use a single workspace. The default workspace size is 1GB RAM, but this can be changed by users. Also, within a single workspace, a user is able to launch additional environments for their projects, which consume additional RAM, though this is uncommon.
-
-For example, at Codenvy, we regularly have 75 concurrently running workspaces, each sized at 16 GB RAM, for a total expectation of 1200 GB of RAM. Our machine nodes have 128 GB RAM per node and we routinely run 10-14 machine nodes to support everyone.
-
-Note that compilation events are usually CPU-heavy and most compilation activities initiated by developers are sent to a single CPU. With quad-core machine nodes, we end up with capacity to support 40-52 concurrent builds in workspaces so that there is no thrashing or blocking. Your team may need more.
-
-You can add as many physical nodes into a Codenvy cluster, and Codenvy will schedule workspaces for placement on those nodes. You can use the `codenvy add-node` command which generates a utility for you to run on each node that should be added to the cluster. You can also run `codenvy remove-node` to automate the removal of the node from the cluster and the movement of any remaining workspaces onto another node. 
-
-The additional physical nodes must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
-
-We have two temporary limitations in the Docker version of Codenvy that does not exist in the production system that we are currently shipping. First, if you `codenvy remove-node`, we trigger a system-wide restart. Your workspaces and users are not affected. This limitation will be removed shortly. Second, we do a single-node deployment of etcd, which is used as a distributed key-value store. If your users are creating workspaces that use Docker compose syntax, then it is possible that separate containers for a single workspace will be scheduled onto different physical nodes. With our single node implementation of etcd, those containers will not be part of the same network and cannot communicate with one another. Your users will yell at you. To work around this problem, you can configure etcd, zookeeper, or Consul for each of your nodes into a cluster, and then activate "overlay" networking mode within the `codenvy.env` file. We are working to automate distributed etcd configuration so you don't have to worry about this.
-
-### Private Registries
-
-
-### Mirroring DockerHub
-
-
-### Private Repositories
-
-
-### Permissions
-
-
-### Workspace Limits
-You can place limits on how users interact with the system to control overall system resource usage. You can define how many workspaces created, RAM consumed, idle timeout, and a variety of other parameters. See "Workspace Limits" in `CODENVY_CONFIG/codenvy.env`.
-
-# Config: Authentication
-
-
-### oAuth
+#### oAuth
 You can configure Google, GitHub, Microsoft, BitBucket, or WSO2 oAuth for use when users login or create an account.
 
 Codenvy is shipped with a preconfigured GitHub oAuth application for the `codenvy.onprem` hostname. To enable GitHub oAuth, add `CODENVY_HOST=codenvy.onprem` to `CODENVY_CONFIG/codenvy.env` and restart. If you have a custom DNS, you need to register a GitHub oAuth application with GitHub's oAuth registration service. You will be asked for the callback URL, which is `http://<your_hostname>/api/oauth/callback`. You will receive from GitHub a client ID and secret, which must be added to `codenvy.env`:
@@ -416,44 +350,82 @@ CODENVY_GOOGLE_CLIENT_ID=yourID
 CODENVY_GOOGLE_SECRET=yourSecret
 ```
 
-### LDAP
-Codenvy is compatible with an InetOrgPerson.schema. For other schemas please contact us at info@codenvy.com.
+#### LDAP
+Codenvy is compatible with `InetOrgPerson.schema`. For other schemas please contact us at info@codenvy.com. We support user authentication, LDAP connections, SSL, SASL, and various synchronization strategies. See the [LDAP page](docs/LDAP.md) for details.
 
-Refer to [LDAP](docs/LDAP.md) documentation for additional information.
+#### Development Mode
+For Codenvy developers that are building and customizing Codenvy from its source repository, there is a development that maps the runtime containers to your source repository. If you are developing in the `http://github.com/codenvy/codenvy` repository, you can turn on development mode to allow puppet configuration files and your local Codenvy assembly to be mounted into the appropriate containers. Dev mode is activated by setting environment variables and restarting (if Codenvy is running) or starting Codenvy (if this is the first run):
+```
+CODENVY_DEVELOPMENT_MODE="on"
+CODENVY_DEVELOPMENT_REPO=<path-codenvy-repo>
+```
+You must run Codenvy from the root of the Codenvy repository. By running in the repository, the local `codenvy.sh` and `cli.sh` scripts will override any installed CLI packages. Additionally, two containers will have host mounted files from the local repository. During the `codenvy config` phase, the repository's `/modules` and `/manifests` will be mounted into the puppet configurator.  During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container.
 
-# Config: Scaling
+#### Licensing
+Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
+
+#### Hostname
+TODO: Add in example of customizing hostname in the `codenvy.env` file.
+
+#### HTTP/S
+By default Codenvy runs over HTTP as this is simplest to install. There are two requirements for configuring HTTP/S:  
+1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
+2. A valid SSL certificate.  
+
+TODO: [https://codenvy.readme.io/v5.0/docs/security](https://codenvy.readme.io/v5.0/docs/security)
+
+#### SMTP
+By default, Codenvy is configured to use a dummy mail server which makes registration with user email not possible, although admin can still create users or configure oAuth. To configure Codenvy to use SMTP server of choice, provide values for the following environment variables in `codenvy.env` (below is an example for GMAIL):
+
+```
+CODENVY_MAIL_HOST=smtp.gmail.com
+CODENVY_MAIL_HOST_PORT=465
+CODENVY_MAIL_SMTP_AUTH=true
+СODENVY_MAIL_TRANSPORT_PROTOCOL=smtp
+CODENVY_MAIL_SMTP_AUTH_USERNAME=example@gmail.com
+CODENVY_MAIL_SMTP_AUTH_PASSWORD=password
+CODENVY_MAIL_SMTP_SOCKETFACTORY_PORT=465
+CODENVY_MAIL_SMTP_SOCKETFACTORY_CLASS=javax.net.ssl.SSLSocketFactory
+CODENVY_MAIL_SMTP_SOCKETFACTORY_FALLBACK=false
+```
+
+#### Workspace Limits
+You can place limits on how users interact with the system to control overall system resource usage. You can define how many workspaces created, RAM consumed, idle timeout, and a variety of other parameters. See "Workspace Limits" in `CODENVY_CONFIG/codenvy.env`.
+
+## Managing
+
+#### Scaling
 Codenvy workspaces can run on different physical nodes that are part of a Codenvy cluster managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power when they have a compilation that they want done. So you will want to allocate enough physical nodes to smartly handle the right number of concurrently *running* workspaces, each of which will have a RAM block.
 
-### Add-node
+Each Codenvy instance generates a configuration on how to add nodes into the cluster. Run `codenvy add-node` for instructions of what to run on each physical node that should be added into the cluster. The physical node runs a script which installs some software from the Codenvy master node, configures its Docker daemon, and then registers itself as a member of the Codenvy cluster.
+
+You can remove nodes with `codenvy remove-node <ip>`.
+
+#### Upgrading
+Not yet supported. We will support this in time for Dockerized Codenvy GA.
+
+You can run `codenvy version` to see the list of available upgrade paths for your current Codenvy installation. Since Codenvy is deployed as a set of stateless Docker containers, the upgrade process involves our utilities performing a pull of the new Docker images for the new version, orderly pausing of developers services, backing up data, activating new containers for Codenvy, running internal data migration scripts, and restoring developer services. If any situation were to fail, we wipe the system, create a new Codenvy instance with the backup and launch a set of Codenvy containers matching the old version and then restoring services. Microservices are great as they allow for this simple recovery approach.
+
+#### Backup (Backup)
+You can run `codenvy backup` to create a copy of the relevant configuration information, user data, projects, and workspaces. We do not save workspace snapshots as part of a routine backup exercise. You can run `codenvy restore` to recover Codenvy from a particular backup snapshot. The backup is saved as a TAR file that you can keep in your records.
+
+##### Microsoft Windows and NTFS
+Due to differences in file system types between NTFS and what is commonly used in the Linux world, there is no convenient way to directly host mount Postgres database data from within the container onto your host. We store your database data in a Docker named volume inside your boot2docker or Docker for Windows VM. Your data is persisted permanently. If the underlying VM is destroyed, then the data will be lost.
+
+However, when you do a `codenvy backup`, we do copy the Postgres data from the container's volume to your host drive, and make it available as part of a `codenvy restore` function. The difference is that if you are browsing your `CODENVY_INSTANCE` folder, you will not see the database data on Windows.
 
 
-### Remove-node
-# Managing
+#### Runbook
 
+#### Monitoring
 
-### Upgrades
+#### Migration
+We currently do not support migrating from the puppet-based configuration of Codenvy to the Dockerized version. We do have a manual process which can be followed to move data between the puppet and Dockerized versions. The versions must be identical. Contact us to let our support team perform this migration for you.
 
+#### Disaster Recovery
+We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
-### Upgrading
-
-
-### Runbook
-
-
-### Monitoring
-
-
-### Backup (Backup)
-
-
-### Migration
-
-
-### Disaster Recovery
-DR page (http://codenvy.readme.io/v5.0/docs/disaster-recovery)
 # Reference
-
-
 ### CLI
 The Codenvy CLI is a self-updating utility. Once installed on your system, it will update itself when you perform a new invocation, by checking for the appropriate version that matches `CODENVY_VERSION`. The CLI saves its version-specific progarms in `~/.codenvy/cli`. The CLI also logs command execution into `~/.codenvy/cli/cli.logs`.  
 
@@ -464,14 +436,6 @@ Refer to [CLI](docs/cli) documentation for additional information.
 ### API
 # Architecture
 ![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
-
-### Scalability Model
-
-
-### Deployment Model
-
-
-### Service Architecture
 
 # Team
 See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.
