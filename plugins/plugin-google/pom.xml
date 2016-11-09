@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.0.0-hackathon-SNAPSHOT</version>
+        <version>5.0.0-docker-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>codenvy-plugin-google-parent</artifactId>

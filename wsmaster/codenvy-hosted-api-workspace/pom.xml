@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-master-parent</artifactId>
         <groupId>com.codenvy.onpremises.wsmaster</groupId>
-        <version>5.0.0-hackathon-SNAPSHOT</version>
+        <version>5.0.0-docker-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-api-workspace</artifactId>
     <packaging>jar</packaging>

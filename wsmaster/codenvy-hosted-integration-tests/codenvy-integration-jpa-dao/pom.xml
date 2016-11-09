@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-integration-tests</artifactId>
         <groupId>com.codenvy.integration.tests</groupId>
-        <version>5.0.0-hackathon-SNAPSHOT</version>
+        <version>5.0.0-docker-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-integration-jpa-dao</artifactId>
     <packaging>jar</packaging>

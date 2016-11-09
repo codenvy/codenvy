@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-im</artifactId>
         <groupId>com.codenvy.im</groupId>
-        <version>5.0.0-hackathon-SNAPSHOT</version>
+        <version>5.0.0-docker-SNAPSHOT</version>
     </parent>
     <artifactId>installation-manager-cli-bundle</artifactId>
     <packaging>bundle</packaging>
