@@ -30,6 +30,7 @@ Codenvy makes cloud workspaces for develoment teams. Install Codenvy as a set of
     + [HTTP/S](#https)
     + [SMTP](#smtp)
     + [Workspace Limits](#workspace-limits)
+    + [Private Docker Registries](#private-docker-registries)
 - [Managing](#managing)
     + [Scaling](#scaling)
     + [Upgrading](#upgrading)
