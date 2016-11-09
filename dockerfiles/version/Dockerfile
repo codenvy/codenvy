@@ -15,5 +15,5 @@ RUN mkdir -p /files
 COPY version /files/
 COPY dockerfiles/version/docker-entrypoint.sh /
 
-RUN chmod +x docker-entrypoint.sh 
+RUN chmod +x docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
