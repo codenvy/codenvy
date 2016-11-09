@@ -427,18 +427,16 @@ We currently do not support migrating from the puppet-based configuration of Cod
 #### Disaster Recovery
 We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
-# Reference
-### CLI
+## CLI Reference
 The Codenvy CLI is a self-updating utility. Once installed on your system, it will update itself when you perform a new invocation, by checking for the appropriate version that matches `CODENVY_VERSION`. The CLI saves its version-specific progarms in `~/.codenvy/cli`. The CLI also logs command execution into `~/.codenvy/cli/cli.logs`.  
 
 The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `cli.logs` file will have all of the traces and error output from your executions.
 
 Refer to [CLI](docs/cli) documentation for additional information.
 
-### API
-# Architecture
+## Architecture
 ![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
 
-# Team
+## Team
 See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.
 the protocol, port and whether they allow a trailing slash/.
