@@ -18,10 +18,18 @@ DST_GRP_ID=${6}
    DST_FOLDER=${DST_FOLDER}"/"
 #fi
 
+# ensure ssh key has correct permissions
+if [[ ! -f /opt/rsync_key ]]; then
+    cp $SSH_KEY /opt/rsync_key
+fi
+if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
+    chmod 0600 /opt/rsync_key
+fi
+
 rsync --quiet --delete --partial --links --safe-links --owner --group --recursive --times --human-readable --bwlimit=7000 --executability \
       --include='.codenvy/' \
       --filter=':- .gitignore' \
-      --rsh="ssh -i ${SSH_KEY} -l ${SSH_USER} -o StrictHostKeyChecking=no -p ${DST_PORT}" \
+      --rsh="ssh -i /opt/rsync_key -l ${SSH_USER} -o StrictHostKeyChecking=no -p ${DST_PORT}" \
       --rsync-path="sudo rsync" \
       --chown ${DST_USR_ID}:${DST_GRP_ID} \
       ${SRC_FOLDER} ${DST_HOST}:${DST_FOLDER}
