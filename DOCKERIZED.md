@@ -193,7 +193,7 @@ codenvy help
 ```
 The CLI is self-updating. If you modify the `cli.sh` companion script or change your `CODENVY_VERSION` then an updated CLI will be downloaded. The CLI installs its core subsystems into `~/.codenvy/cli`.
 
-If you run the CLI and you get issues (or no output), we do advanced logging and include all error messages in ~/.codenvy/cli/cli.log. It will have more information to tell you what happened.
+If you run the CLI and you get issues (or no output), we do advanced logging and include all error messages in `~/.codenvy/cli/cli.log`. It will have more information to tell you what happened.
 
 #### Proxies
 We support installation and operation behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
