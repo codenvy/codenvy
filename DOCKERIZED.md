@@ -87,7 +87,7 @@ If you run into an issue, please open a GitHub issue providing:
 If you are Codenvy customer, you can also file a ticket through our email support channel for a quicker response.
 
 ## Getting Started
-1. Get Docker 1.12+, Docker Compose 1.8+.
+1. Get Docker 1.11+, Docker Compose 1.8+.
 2. Get the CodenvY CLI.
 3. Start Codenvy.
 
