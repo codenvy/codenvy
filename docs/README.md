@@ -311,7 +311,11 @@ By default Codenvy runs over HTTP as this is simplest to install. There are two 
 1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
 2. A valid SSL certificate.  
 
-TODO: [https://codenvy.readme.io/v5.0/docs/security](https://codenvy.readme.io/v5.0/docs/security)
+To configure HTTP/S, in the `codenvy.env`:
+```
+CODENVY_HOST_PROTOCOL=https
+CODENVY_PATH_TO_HAPROXY_SSL_CERTIFICATE=<path-to-certificate>
+```
 
 #### SMTP
 By default, Codenvy is configured to use a dummy mail server which makes registration with user email not possible, although admin can still create users or configure oAuth. To configure Codenvy to use SMTP server of choice, provide values for the following environment variables in `codenvy.env` (below is an example for GMAIL):
@@ -336,6 +340,7 @@ Some enterprises use a trusted Docker registry to store their Docker images. If 
 
 There are different configurations for AWS EC2 and the Docker regsitry. You can define as many different registries as you'd like, using the numerical indicator in the environment variable. In case of adding several registries just copy set of properties and append `REGISTRY[n]` for each variable.
 
+In the `codenvy.env` file:
 ```
 CODENVY_DOCKER_REGISTRY_AUTH_REGISTRY1_URL=url1
 CODENVY_DOCKER_REGISTRY_AUTH_REGISTRY1_USERNAME=username1
