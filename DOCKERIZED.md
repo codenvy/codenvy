@@ -196,7 +196,7 @@ The CLI is self-updating. If you modify the `cli.sh` companion script or change 
 If you run the CLI and you get issues (or no output), we do advanced logging and include all error messages in `~/.codenvy/cli/cli.log`. It will have more information to tell you what happened.
 
 #### Proxies
-We support installation and operation behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
+You can install and operate behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
 1. Configuring Docker proxy access so that Codenvy can download images from DockerHub.
 2. Configuring Codenvy's system containers so that internal services can proxy to the Internet.
 3. Optionally, configuring workspace proxy settings to allow users within a workspace to proxy to the Internet.
@@ -217,7 +217,7 @@ If you would like your users to have proxified access to the Internet from withi
 # CODENVY_NO_PROXY_FOR_CODENVY_WORKSPACES=<ip-or-domains-that-do-not-require-proxy-access>
 ```
 
-`_NO_PROXY` variable setting is required if you use a fake local DNS. Java and other internal utilities will avoid accessing a proxy for internal communications when this value is set.
+A `NO_PROXY` variable is required if you use a fake local DNS. Java and other internal utilities will avoid accessing a proxy for internal communications when this value is set.
 
 #### Offline Installation
 We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations. 
@@ -272,9 +272,6 @@ pass: password
 
 #### Hosting
 If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers. 
-
-#### Upgrading
-
 
 ## Uninstall
 ```
