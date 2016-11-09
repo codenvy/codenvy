@@ -10,7 +10,8 @@
 FROM alpine:latest
 RUN mkdir -p /files \
     && mkdir -p /files/modules \
-    && mkdir -p /files/manifests
+    && mkdir -p /files/manifests \
+    && mkdir -p /files/docs
 
 COPY manifests /files/manifests
 COPY modules /files/modules
