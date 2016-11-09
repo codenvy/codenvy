@@ -51,7 +51,7 @@ public class CodenvyInfrastructureProvisioner extends DefaultInfrastructureProvi
                                             @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
                                             WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                             WindowsPathEscaper pathEscaper,
-                                            @Named("che.machine.projects.internal.storage") String projectFolderPath) {
+                                            @Named("che.workspace.projects.storage") String projectFolderPath) {
         super(agentConfigApplier);
         this.pubSyncKey = pubSyncKey;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;

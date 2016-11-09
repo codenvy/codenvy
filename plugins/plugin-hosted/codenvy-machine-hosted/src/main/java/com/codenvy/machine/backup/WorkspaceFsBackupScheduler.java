@@ -67,7 +67,7 @@ public class WorkspaceFsBackupScheduler {
         this.workspaceRuntimes = workspaceRuntimes;
         this.backupManager = backupManager;
         this.syncTimeoutMillisecond = TimeUnit.SECONDS.toMillis(syncTimeoutSecond);
-        this.syncPort = syncPort;
+        this.syncPort = syncPort == null || syncPort == 0 ? null : syncPort;
 
         this.executor = Executors.newCachedThreadPool(
                 new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());

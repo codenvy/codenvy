@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -81,6 +82,8 @@ public class HostedMachineProviderImplTest {
     @Mock
     private MachineTokenRegistry                          machineTokenRegistry;
 
+    private WindowsPathEscaper windowsPathEscaper = new WindowsPathEscaper();
+
     private MachineProviderImpl provider;
 
     private static final String  CONTAINER_ID           = "containerId";
@@ -114,6 +117,7 @@ public class HostedMachineProviderImplTest {
                                                  credentialsReader,
                                                  dockerMachineFactory,
                                                  dockerInstanceStopDetector,
+                                                 windowsPathEscaper,
                                                  emptySet(),
                                                  emptySet(),
                                                  emptySet(),

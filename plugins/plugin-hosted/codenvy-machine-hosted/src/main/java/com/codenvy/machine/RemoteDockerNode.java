@@ -81,7 +81,7 @@ public class RemoteDockerNode implements DockerNode {
         this.backupManager = backupManager;
         this.dockerConnector = dockerConnector;
         this.containerId = containerId;
-        this.syncPort = syncPort;
+        this.syncPort = syncPort == null || syncPort == 0 ? null : syncPort;
 
         try {
             String nodeHost = "127.0.0.1";

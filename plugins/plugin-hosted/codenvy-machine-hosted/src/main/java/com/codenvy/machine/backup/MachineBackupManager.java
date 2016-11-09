@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.SYNC_STRATEGY_PROPERTY;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -53,7 +55,9 @@ public class MachineBackupManager {
     private final int                                  restoreDuration;
     private final File                                 backupsRootDir;
     private final WorkspaceIdHashLocationFinder        workspaceIdHashLocationFinder;
+    private final String                               projectFolderPath;
     private final ConcurrentMap<String, ReentrantLock> workspacesBackupLocks;
+    private final boolean                              syncAgentInMachine;
 
     @Inject
     public MachineBackupManager(@Named("machine.backup.backup_script") String backupScript,
@@ -61,13 +65,30 @@ public class MachineBackupManager {
                                 @Named("machine.backup.backup_duration_second") int maxBackupDurationSec,
                                 @Named("machine.backup.restore_duration_second") int restoreDurationSec,
                                 @Named("che.user.workspaces.storage") File backupsRootDir,
-                                WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder) {
+                                WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder,
+                                @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
+                                @Named("che.workspace.projects.storage") String projectFolderPath) {
         this.backupScript = backupScript;
         this.restoreScript = restoreScript;
         this.maxBackupDuration = maxBackupDurationSec;
         this.restoreDuration = restoreDurationSec;
         this.backupsRootDir = backupsRootDir;
         this.workspaceIdHashLocationFinder = workspaceIdHashLocationFinder;
+        this.projectFolderPath = projectFolderPath;
+
+        switch (syncStrategy) {
+            case "rsync":
+                syncAgentInMachine = false;
+                break;
+            case "rsync-agent":
+                syncAgentInMachine = true;
+                break;
+            default:
+                throw new RuntimeException(
+                        format("Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
+                               SYNC_STRATEGY_PROPERTY,
+                               syncStrategy));
+        }
 
         workspacesBackupLocks = new ConcurrentHashMap<>();
     }
@@ -160,13 +181,16 @@ public class MachineBackupManager {
                          String srcAddress,
                          int srcPort,
                          boolean removeSourceOnSuccess) throws ServerException {
-        final File destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId);
+        if (syncAgentInMachine) {
+            srcPath = projectFolderPath;
+        }
+        String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
 
         CommandLine commandLine = new CommandLine(backupScript,
                                                   srcPath,
                                                   srcAddress,
                                                   Integer.toString(srcPort),
-                                                  destPath.toString(),
+                                                  destPath,
                                                   Boolean.toString(removeSourceOnSuccess));
 
         try {
@@ -219,7 +243,10 @@ public class MachineBackupManager {
                 LOG.error(err);
                 throw new ServerException(err);
             }
-            final String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
+            String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
+            if (syncAgentInMachine) {
+                destinationPath = projectFolderPath;
+            }
 
             Files.createDirectories(Paths.get(srcPath));
 

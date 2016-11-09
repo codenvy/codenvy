@@ -99,7 +99,9 @@ public class MachineBackupManagerTest {
                                                      MAX_BACKUP_DURATION_SEC,
                                                      MAX_RESTORE_DURATION_SEC,
                                                      new File(BACKUPS_ROOT_PATH),
-                                                     workspaceIdHashLocationFinder));
+                                                     workspaceIdHashLocationFinder,
+                                                     "rsync",
+                                                     "/projects-folder"));
 
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));

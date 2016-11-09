@@ -24,6 +24,7 @@ import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -67,6 +68,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                      DockerMachineFactory dockerMachineFactory,
                                      DockerInstanceStopDetector dockerInstanceStopDetector,
+                                     WindowsPathEscaper windowsPathEscaper,
                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                      @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -99,7 +101,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               snapshotUseRegistry,
               memorySwapMultiplier,
               additionalNetworks,
-              networkDriver, windowsPathEscaper);
+              networkDriver,
+              windowsPathEscaper);
 
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
