@@ -141,7 +141,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
         return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> checkLimitsAndPropagateLimitedThroughputStart(
                 namespace, () -> LimitsCheckingWorkspaceManager.super.startWorkspace(config, namespace, isTemporary)));
-
     }
 
     @Override
