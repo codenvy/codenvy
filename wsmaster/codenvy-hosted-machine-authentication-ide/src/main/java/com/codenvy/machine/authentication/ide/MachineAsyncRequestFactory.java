@@ -21,24 +21,16 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
 
@@ -56,13 +48,11 @@ import static org.eclipse.che.ide.rest.HTTPMethod.POST;
  * @author Anton Korneta
  */
 @Singleton
-public class MachineAsyncRequestFactory extends AsyncRequestFactory implements WorkspaceStoppedEvent.Handler,
-                                                                               WorkspaceStartedEvent.Handler {
+public class MachineAsyncRequestFactory extends AsyncRequestFactory implements WorkspaceStoppedEvent.Handler {
     private static final String DTO_CONTENT_TYPE   = APPLICATION_JSON;
 
     private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
     private final DtoFactory                          dtoFactory;
-    private final Provider<WorkspaceServiceClient>    workspaceServiceClientProvider;
     private final AppContext appContext;
 
     private String machineToken;
@@ -71,16 +61,13 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
     @Inject
     public MachineAsyncRequestFactory(DtoFactory dtoFactory,
                                       Provider<MachineTokenServiceClient> machineTokenServiceProvider,
-                                      Provider<WorkspaceServiceClient> workspaceServiceClientProvider,
                                       AppContext appContext,
                                       EventBus eventBus) {
         super(dtoFactory);
         this.machineTokenServiceProvider = machineTokenServiceProvider;
         this.dtoFactory = dtoFactory;
-        this.workspaceServiceClientProvider = workspaceServiceClientProvider;
         this.appContext = appContext;
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
     }
 
     @Override
@@ -131,10 +118,11 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
         machineToken = null;
+        wsAgentBaseUrl = null;
     }
 
     /**
-     * Going to check ist this request goes to WsAgent
+     * Going to check is this request goes to WsAgent
      * @param url
      * @return
      */
@@ -151,46 +139,5 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
             }
         }
         return url.contains(nullToEmpty(wsAgentBaseUrl));
-    }
-
-    @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-//        workspaceServiceClientProvider.get().getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
-//            @Override
-//            public void apply(WorkspaceDto ws) throws OperationException {
-//                MachineDto devMachineDto = ws.getRuntime().getDevMachine();
-//                wsAgentBaseUrl = new DevMachine(devMachineDto).getWsAgentBaseUrl();
-//
-//            }
-//        }).catchError(new Operation<PromiseError>() {
-//            @Override
-//            public void apply(PromiseError err) throws OperationException {
-//                Log.error(getClass(), err.getCause());
-//            }
-//        });
-    }
-
-
-    private String getWsAgentUrl(){
-        final DevMachine devMachine = appContext.getDevMachine();
-        if (devMachine != null) {
-            return devMachine.getWsAgentBaseUrl();
-        }
-        else {
-            workspaceServiceClientProvider.get().getWorkspace(appContext.getWorkspaceId()).then(new Function<WorkspaceDto, String>() {
-                @Override
-                public String apply(WorkspaceDto ws) throws FunctionException {
-                    MachineDto devMachineDto = ws.getRuntime().getDevMachine();
-                    return new DevMachine(devMachineDto).getWsAgentBaseUrl();
-
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError err) throws OperationException {
-                    Log.error(getClass(), err.getCause());
-                }
-            });
-        }
-        return "";
     }
 }
