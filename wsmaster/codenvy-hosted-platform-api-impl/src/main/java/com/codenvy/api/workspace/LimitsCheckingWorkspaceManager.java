@@ -109,7 +109,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                   ConflictException,
                                                                   NotFoundException {
         checkMaxEnvironmentRam(config);
-        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace));
+        return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                 NotFoundException,
                                                                                 ConflictException {
         checkMaxEnvironmentRam(config);
-        return checkCountAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, attributes));
+        return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, attributes));
     }
 
     @Override
@@ -139,6 +139,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                     NotFoundException,
                                                                     ConflictException {
         checkMaxEnvironmentRam(config);
+        checkNumberOfWorkspaces(namespace);
         return checkLimitsAndPropagateLimitedThroughputStart(namespace, () -> super.startWorkspace(config, namespace, isTemporary));
     }
 
@@ -222,7 +223,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
             long startedWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
             if (startedWorkspaces >= startedWorkspacesLimit) {
                 throw new LimitExceededException(format("You are only allowed to start %d workspace%s.", startedWorkspacesLimit,
-                                                 startedWorkspacesLimit == 1 ? "" : "s"));
+                                                        startedWorkspacesLimit == 1 ? "" : "s"));
             }
             return callback.call();
         } finally {
@@ -236,12 +237,17 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkCountAndPropagateCreation(String namespace,
-                                                               WorkspaceCallback<T> callback) throws ServerException,
+    <T extends WorkspaceImpl> T checkNumberOfWorkspacesAndPropagateCreation(String namespace,
+                                                                            WorkspaceCallback<T> callback) throws ServerException,
                                                                                                      NotFoundException,
                                                                                                      ConflictException {
+        checkNumberOfWorkspaces(namespace);
+        return callback.call();
+    }
+
+    private void checkNumberOfWorkspaces(String namespace) throws ServerException {
         if (workspacesPerUser < 0) {
-            return callback.call();
+            return;
         }
         // It is important to lock in this place because:
         // if workspace per user limit is 10 and user has 9, then if he sends 2 separate requests to create
@@ -255,7 +261,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                         workspacesPerUser == 1 ? "" : "s"),
                                                  ImmutableMap.of("workspace_max_count", Integer.toString(workspacesPerUser)));
             }
-            return callback.call();
         } finally {
             lock.unlock();
         }
@@ -270,10 +275,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
             Environment env = envEntry.getValue();
             final long workspaceRam = sumRam(env);
             if (workspaceRam > maxRamPerEnvMB) {
-                throw new LimitExceededException(format("The maximum RAM per workspace is set to '%dmb' and you requested '%dmb'. " +
-                                                        "This value is set by your admin with the 'limits.workspace.env.ram' property",
-                                                        maxRamPerEnvMB,
-                                                        workspaceRam),
+                throw new LimitExceededException(format("You are only allowed to use %d mb. RAM per workspace.", maxRamPerEnvMB),
                                                  ImmutableMap.of("environment_max_ram", Long.toString(maxRamPerEnvMB),
                                                                  "environment_max_ram_unit", "mb",
                                                                  "environment_ram", Long.toString(workspaceRam),

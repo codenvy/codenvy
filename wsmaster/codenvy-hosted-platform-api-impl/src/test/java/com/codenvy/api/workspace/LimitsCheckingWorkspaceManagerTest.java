@@ -47,6 +47,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -77,7 +78,19 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                          .when(manager)
                                                                                          .getByNamespace(anyString());
 
-        manager.checkCountAndPropagateCreation("user123", null);
+        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", null);
+    }
+
+    @Test(expectedExceptions = LimitExceededException.class,
+          expectedExceptionsMessageRegExp = "You are only allowed to create 2 workspaces.")
+    public void shouldNotBeAbleToCreateNewWorkspaceWhileStartingWorkspaceFromConfigIfLimitIsExceeded() throws Exception {
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
+        doNothing().when(manager).checkMaxEnvironmentRam(anyObject());
+        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
+                                                                                         .when(manager)
+                                                                                         .getByNamespace(anyString());
+
+        manager.startWorkspace(mock(WorkspaceConfig.class), "NameSpace", true);
     }
 
     @Test
@@ -88,7 +101,7 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                                                          .getByNamespace(anyString());
         final WorkspaceCallback callback = mock(WorkspaceCallback.class);
 
-        manager.checkCountAndPropagateCreation("user123", callback);
+        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", callback);
 
         verify(callback).call();
         verify(manager, never()).getWorkspaces(any());
@@ -101,7 +114,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         doReturn(emptyList()).when(manager).getByNamespace(anyString()); // <- currently used 0
 
         final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-        manager.checkCountAndPropagateCreation("user123", callback);
+        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", callback);
 
         verify(callback).call();
     }
@@ -128,8 +141,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "The maximum RAM per workspace is set to '2048mb' and you requested '3072mb'. " +
-                                            "This value is set by your admin with the 'limits.workspace.env.ram' property")
+          expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
     public void shouldNotBeAbleToCreateWorkspaceWhichExceedsRamLimit() throws Exception {
         final WorkspaceConfig config = createConfig("3gb");
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb").build();
@@ -146,8 +158,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "The maximum RAM per workspace is set to '2048mb' and you requested '2304mb'. " +
-                                            "This value is set by your admin with the 'limits.workspace.env.ram' property")
+          expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
     public void shouldNotBeAbleToCreateWorkspaceWithMultipleMachinesWhichExceedsRamLimit() throws Exception {
         final WorkspaceConfig config = createConfig("1gb", "1gb", "256mb");
 
