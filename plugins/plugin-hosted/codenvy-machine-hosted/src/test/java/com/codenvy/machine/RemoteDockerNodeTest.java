@@ -40,9 +40,9 @@ import static org.mockito.Mockito.when;
 /**
  * @author Igor Vinokur
  */
-// TODO fix tests. add new tests for new functionality
 @Listeners(MockitoTestNGListener.class)
 public class RemoteDockerNodeTest {
+    private static final String PATH = "WorkspacePath";
 
     @Mock
     private MachineBackupManager        backupManager;
@@ -57,7 +57,7 @@ public class RemoteDockerNodeTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(pathProvider.getPath("WorkspaceId")).thenReturn("WorkspacePath");
+        when(pathProvider.getPath("WorkspaceId")).thenReturn(PATH);
         when(dockerConnector.createExec(any())).thenReturn(exec);
         when(exec.getId()).thenReturn("ExecId");
         remoteDockerNode = new RemoteDockerNode(dockerConnector,
@@ -86,7 +86,7 @@ public class RemoteDockerNodeTest {
 
         //then
         verify(backupManager).restoreWorkspaceBackup(eq("WorkspaceId"),
-                                                     eq(""),
+                                                     eq(PATH),
                                                      eq("MessageContent"),
                                                      eq("MessageContent"),
                                                      eq("127.0.0.1"),

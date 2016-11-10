@@ -14,17 +14,20 @@
  */
 package com.codenvy.machine.agent.launcher;
 
-import com.codenvy.machine.RemoteDockerNode;
-
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.NoOpAgentLaunchingChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.plugin.docker.machine.DockerInstance;
+import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Starts ws agent in the machine and waits until ws agent sends notification about its start.
@@ -33,6 +36,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
+    private static final Logger LOG = getLogger(ExternalRsyncAgentLauncherImpl.class);
+
     @Inject
     public ExternalRsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                                           @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
@@ -51,7 +56,13 @@ public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
-        RemoteDockerNode node = (RemoteDockerNode)machine.getNode();
+        DockerNode node = (DockerNode)machine.getNode();
+        DockerInstance dockerMachine = (DockerInstance)machine;
         node.bindWorkspace();
+        LOG.info("Docker machine has been deployed. " +
+                 "ID '{}'. Workspace ID '{}'. " +
+                 "Container ID '{}'. Node host '{}'. Node IP '{}'",
+                 machine.getId(), machine.getWorkspaceId(),
+                 dockerMachine.getContainer(), node.getHost(), node.getIp());
     }
 }

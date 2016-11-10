@@ -54,7 +54,6 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alexander Garagatyi
  */
-// TODO fix tests. add new tests for new functionality
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceFsBackupSchedulerTest {
     private static final int    FAKE_BACKUP_TIME_MS = 1500;
@@ -86,7 +85,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
                                                        backupManager,
                                                        5 * 60,
-                                                       null));
+                                                       22));
 
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
@@ -245,7 +244,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
                                                        backupManager,
                                                        0,
-                                                       null));
+                                                       22));
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         scheduler.scheduleBackup();
@@ -270,7 +269,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
                                                        backupManager,
                                                        0,
-                                                       null));
+                                                       22));
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {

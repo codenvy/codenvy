@@ -14,14 +14,6 @@
  */
 package com.codenvy.machine.agent.launcher;
 
-import com.codenvy.machine.RemoteDockerNode;
-
-import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.NoOpAgentLaunchingChecker;
-import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.spi.Instance;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -32,28 +24,15 @@ import javax.inject.Singleton;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class MachineInnerRsyncAgentLauncherImpl extends AbstractAgentLauncher {
+public class MachineInnerRsyncAgentLauncherImpl extends ExternalRsyncAgentLauncherImpl {
     @Inject
     public MachineInnerRsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                                               @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new NoOpAgentLaunchingChecker());
+        super(agentMaxStartTimeMs, agentPingDelayMs);
     }
 
     @Override
     public String getAgentId() {
         return "com.codenvy.rsync_in_machine";
-    }
-
-    @Override
-    public String getMachineType() {
-        return "docker";
-    }
-
-    @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
-        super.launch(machine, agent);
-
-        RemoteDockerNode node = (RemoteDockerNode)machine.getNode();
-        node.bindWorkspace();
     }
 }

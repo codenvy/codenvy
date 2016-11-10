@@ -21,7 +21,6 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -67,6 +66,7 @@ public class RemoteDockerNode implements DockerNode {
     private final String               hostProjectsFolder;
     private final String               nodeHost;
     private final Integer              syncPort;
+    private final String               nodeIp;
 
     @Inject
     public RemoteDockerNode(DockerConnector dockerConnector,
@@ -74,7 +74,7 @@ public class RemoteDockerNode implements DockerNode {
                             @Assisted("workspace") String workspaceId,
                             MachineBackupManager backupManager,
                             WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                            @Nullable @Named("codenvy.workspace.projects_sync_port") Integer syncPort)
+                            @Named("codenvy.workspace.projects_sync_port") Integer syncPort)
             throws MachineException {
 
         this.workspaceId = workspaceId;
@@ -85,6 +85,7 @@ public class RemoteDockerNode implements DockerNode {
 
         try {
             String nodeHost = "127.0.0.1";
+            String nodeIp = "127.0.0.1";
             this.hostProjectsFolder = workspaceFolderPathProvider.getPath(workspaceId);
             if (dockerConnector instanceof SwarmDockerConnector) {
 
@@ -96,9 +97,11 @@ public class RemoteDockerNode implements DockerNode {
                     } else {
                         throw new MachineException("Can't extract docker node address from: " + info.getNode().getAddr());
                     }
+                    nodeIp = info.getNode().getIP();
                 }
             }
             this.nodeHost = nodeHost;
+            this.nodeIp = nodeIp;
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException("Internal server error occurs. Please contact support");
@@ -161,6 +164,11 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public String getHost() {
         return nodeHost;
+    }
+
+    @Override
+    public String getIp() {
+        return nodeIp;
     }
 
     /**

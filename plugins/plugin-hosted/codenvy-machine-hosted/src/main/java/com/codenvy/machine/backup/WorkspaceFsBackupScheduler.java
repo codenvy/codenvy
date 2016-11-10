@@ -26,7 +26,6 @@ import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class WorkspaceFsBackupScheduler {
     public WorkspaceFsBackupScheduler(WorkspaceRuntimes workspaceRuntimes,
                                       MachineBackupManager backupManager,
                                       @Named("machine.backup.backup_period_second") long syncTimeoutSecond,
-                                      @Nullable @Named("codenvy.workspace.projects_sync_port") Integer syncPort) {
+                                      @Named("codenvy.workspace.projects_sync_port") Integer syncPort) {
         this.workspaceRuntimes = workspaceRuntimes;
         this.backupManager = backupManager;
         this.syncTimeoutMillisecond = TimeUnit.SECONDS.toMillis(syncTimeoutSecond);
@@ -97,7 +96,7 @@ public class WorkspaceFsBackupScheduler {
                                     lastMachineSynchronizationTime.put(machineId, System.currentTimeMillis());
                                 } catch (NotFoundException ignore) {
                                     // it is ok, machine was stopped while this backup task was in the executor queue
-                                } catch (ServerException e) {
+                                } catch (Exception e) {
                                     LOG.error(e.getLocalizedMessage(), e);
                                 } finally {
                                     devMachinesBackupsInProgress.remove(machineId);
