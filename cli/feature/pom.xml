@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-cli</artifactId>
         <groupId>com.codenvy.cli</groupId>
-        <version>5.0.0-docker-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>cli-feature</artifactId>
     <packaging>feature</packaging>

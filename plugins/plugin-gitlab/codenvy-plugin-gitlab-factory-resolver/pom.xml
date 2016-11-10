@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-gitlab-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.0.0-docker-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-gitlab-factory-resolver</artifactId>
     <packaging>jar</packaging>
