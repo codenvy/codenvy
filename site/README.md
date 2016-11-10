@@ -1,12 +1,12 @@
 Dependencies
 =======
 
-[package.json](https://github.com/codenvy/odyssey/blob/master/package.json) contains detailed information on both runtime and development dependencies.
+[package.json](https://github.com/codenvy/codenvy/blob/master/site/package.json) contains detailed information on both runtime and development dependencies.
 
-To run odyssey locally and to be able to build project for deployment you will need:
+To run site locally and to be able to build project for deployment you will need:
 Install environment on Ubuntu 14.04
 =======
-
+```
 sudo apt-get -y install git curl libdigest-sha-perl gcc
 sudo apt-get -y install ruby-full build-essential ruby-compass
 echo 'export PATH=$HOME/local/bin:$PATH' >> ~/.bashrc
@@ -28,7 +28,7 @@ sudo gem install jekyll
 npm install -g gulp grunt-cli bower
 npm install -g grunt-cli #  (For user-dashboard)
 npm install -g bower # (For user-dashboard)
-
+```
 !!! BUG (It needs to fix last exported PATH by adding :$PATH)
 
 source ~/.bashrc

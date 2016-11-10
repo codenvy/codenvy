@@ -14,6 +14,8 @@
  */
 package com.codenvy.plugin.webhooks.connectors;
 
+import com.google.common.io.CharStreams;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -21,13 +23,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,10 +33,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Base64;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
@@ -97,33 +100,90 @@ public class JenkinsConnector implements Connector {
     }
 
     protected Optional<String> getCurrentJenkinsJobConfiguration() {
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(jobConfigXmlUrl);
-        Invocation.Builder builder = target.request(APPLICATION_XML);
-        Response response = builder.get();
-        if (response.getStatus() == 200) {
-            String responseString = response.readEntity(String.class);
-            return Optional.of(responseString);
-        } else {
-            LOG.error(response.getStatus() + " - " + response.readEntity(String.class));
-            return Optional.empty();
+        try {
+            URL url = new URL(jobConfigXmlUrl);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            try {
+                if (url.getUserInfo() != null) {
+                    String basicAuth = "Basic " + new String(Base64.getEncoder().encode(url.getUserInfo().getBytes()));
+                    connection.setRequestProperty("Authorization", basicAuth);
+                }
+                connection.setRequestMethod("GET");
+                connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, APPLICATION_XML);
+                final int responseCode = connection.getResponseCode();
+                if ((responseCode / 100) != 2) {
+                    InputStream in = connection.getErrorStream();
+                    if (in == null) {
+                        in = connection.getInputStream();
+                    }
+                    final String str;
+                    try (Reader reader = new InputStreamReader(in)) {
+                        str = CharStreams.toString(reader);
+                    }
+                    throw new IOException(str);
+                }
+                try (Reader reader = new InputStreamReader(connection.getInputStream())) {
+                    return Optional.of(CharStreams.toString(reader));
+                }
+
+            } catch (IOException e) {
+                LOG.error("Can't get Jenkins job configuration", e);
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+
+        } catch (IOException e) {
+            LOG.error("Can't get Jenkins job configuration", e);
         }
+        return Optional.empty();
     }
 
     protected void updateJenkinsJobDescription(String factoryUrl, Document configDocument, Node descriptionNode) {
         String descriptionContent = descriptionNode.getTextContent();
         descriptionNode.setTextContent(descriptionContent + "\n" + "<a href=\"" + factoryUrl + "\">" + factoryUrl + "</a>");
         String updatedJobConfigXml = documentToXml(configDocument);
+        try {
+            URL url = new URL(jobConfigXmlUrl);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            try {
+                if (url.getUserInfo() != null) {
+                    String basicAuth = "Basic " + new String(Base64.getEncoder().encode(url.getUserInfo().getBytes()));
+                    connection.setRequestProperty("Authorization", basicAuth);
+                }
+                connection.setRequestMethod("POST");
+                connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, APPLICATION_XML);
+                connection.addRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+                connection.setDoOutput(true);
 
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(jobConfigXmlUrl);
-        Invocation.Builder builder = target.request(APPLICATION_XML).header(HttpHeaders.CONTENT_TYPE, APPLICATION_XML);
-        Response response = builder.post(Entity.xml(updatedJobConfigXml));
+                try (OutputStream output = connection.getOutputStream()) {
+                    output.write(updatedJobConfigXml.getBytes());
+                }
+                final int responseCode = connection.getResponseCode();
+                if ((responseCode / 100) != 2) {
+                    InputStream in = connection.getErrorStream();
+                    if (in == null) {
+                        in = connection.getInputStream();
+                    }
+                    final String str;
+                    try (Reader reader = new InputStreamReader(in)) {
+                        str = CharStreams.toString(reader);
+                    }
+                    LOG.error(str);
+                } else {
+                    LOG.debug("factory link {} successfully added on description of Jenkins job ", factoryUrl, jobName);
+                }
+            } catch (IOException e) {
+                LOG.error("Can't get Jenkins job configuration", e);
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
 
-        if (response.getStatus() == 200) {
-            LOG.debug("factory link {} successfully added on description of Jenkins job ", factoryUrl, jobName);
-        } else {
-            LOG.error(response.getStatus() + " - " + response.readEntity(String.class));
+        } catch (IOException e) {
+            LOG.error("Can't get Jenkins job configuration", e);
         }
     }
 

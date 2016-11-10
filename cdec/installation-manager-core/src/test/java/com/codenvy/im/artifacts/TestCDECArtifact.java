@@ -1006,7 +1006,7 @@ public class TestCDECArtifact extends BaseTest {
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", ETC_PUPPET));
 
-        assertEquals(commands.get(k++).toString(), "{'command'='testFile=\"/home/codenvy/codenvy-data/cloud-ide-local-configuration/general.properties\"; while true; do     if sudo grep \"api.endpoint=http://new/api\" ${testFile}; then break; fi;     sleep 5; done; "
+        assertEquals(commands.get(k++).toString(), "{'command'='testFile=\"/home/codenvy/codenvy-data/cloud-ide-local-configuration/general.properties\"; while true; do     if sudo grep \"http://new/api\" ${testFile}; then break; fi;     sleep 5; done; "
                                                    + "sleep 15; # delay to involve into start of rebooting api server', 'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "Wait until artifact 'codenvy' becomes alive");
     }
@@ -1091,7 +1091,7 @@ public class TestCDECArtifact extends BaseTest {
                      "| sed 's|~n|\\n|g' > tmp.tmp " +
                      "&& sudo mv tmp.tmp %1$s/manifests/nodes/single_server/single_server.pp', 'agent'='LocalAgent'}", ETC_PUPPET));
 
-        assertEquals(commands.get(k++).toString(), "{'command'='testFile=\"/home/codenvy/codenvy-data/cloud-ide-local-configuration/general.properties\"; while true; do     if sudo grep \"api.endpoint=http://new/api\" ${testFile}; then break; fi;     sleep 5; done; "
+        assertEquals(commands.get(k++).toString(), "{'command'='testFile=\"/home/codenvy/codenvy-data/cloud-ide-local-configuration/general.properties\"; while true; do     if sudo grep \"http://new/api\" ${testFile}; then break; fi;     sleep 5; done; "
                                                    + "sleep 15; # delay to involve into start of rebooting api server', 'agent'='LocalAgent'}");
         assertEquals(commands.get(k++).toString(), "Wait until artifact 'codenvy' becomes alive");
     }
