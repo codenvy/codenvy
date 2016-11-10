@@ -43,6 +43,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.nullToEmpty;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
@@ -138,29 +139,58 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
      * @return
      */
     private boolean isWsAgentRequest(String url) {
-        if (appContext.getWorkspace() == null || RUNNING.equals(appContext.getWorkspace().getStatus())) {
+        if (appContext.getWorkspace() == null || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
             return false; //ws-agent not started
         }
         if (isNullOrEmpty(wsAgentBaseUrl)) {
-            return false;
+            final DevMachine devMachine = appContext.getDevMachine();
+            if (devMachine != null) {
+                wsAgentBaseUrl = devMachine.getWsAgentBaseUrl();
+            } else {
+                return false;
+            }
         }
-        return url.startsWith(wsAgentBaseUrl);
+        return url.contains(nullToEmpty(wsAgentBaseUrl));
     }
 
     @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-        workspaceServiceClientProvider.get().getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
-            @Override
-            public void apply(WorkspaceDto ws) throws OperationException {
-                MachineDto devMachineDto = ws.getRuntime().getDevMachine();
-                wsAgentBaseUrl = new DevMachine(devMachineDto).getWsAgentBaseUrl();
+//        workspaceServiceClientProvider.get().getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
+//            @Override
+//            public void apply(WorkspaceDto ws) throws OperationException {
+//                MachineDto devMachineDto = ws.getRuntime().getDevMachine();
+//                wsAgentBaseUrl = new DevMachine(devMachineDto).getWsAgentBaseUrl();
+//
+//            }
+//        }).catchError(new Operation<PromiseError>() {
+//            @Override
+//            public void apply(PromiseError err) throws OperationException {
+//                Log.error(getClass(), err.getCause());
+//            }
+//        });
+    }
 
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError err) throws OperationException {
-                Log.error(getClass(), err.getCause());
-            }
-        });
+
+    private String getWsAgentUrl(){
+        final DevMachine devMachine = appContext.getDevMachine();
+        if (devMachine != null) {
+            return devMachine.getWsAgentBaseUrl();
+        }
+        else {
+            workspaceServiceClientProvider.get().getWorkspace(appContext.getWorkspaceId()).then(new Function<WorkspaceDto, String>() {
+                @Override
+                public String apply(WorkspaceDto ws) throws FunctionException {
+                    MachineDto devMachineDto = ws.getRuntime().getDevMachine();
+                    return new DevMachine(devMachineDto).getWsAgentBaseUrl();
+
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError err) throws OperationException {
+                    Log.error(getClass(), err.getCause());
+                }
+            });
+        }
+        return "";
     }
 }
