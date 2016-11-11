@@ -16,10 +16,10 @@ package com.codenvy.auth.sso.server.ticket;
 
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.TicketManager;
-import com.codenvy.api.event.user.RemoveUserEvent;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.PostUserRemovedEvent;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -40,9 +40,9 @@ public class LogoutOnUserRemoveSubscriber {
 
     @PostConstruct
     public void start() {
-        eventService.subscribe(new EventSubscriber<RemoveUserEvent>() {
+        eventService.subscribe(new EventSubscriber<PostUserRemovedEvent>() {
             @Override
-            public void onEvent(RemoveUserEvent event) {
+            public void onEvent(PostUserRemovedEvent event) {
                 if (null != event && null != event.getUserId()) {
                     String id = event.getUserId();
 
