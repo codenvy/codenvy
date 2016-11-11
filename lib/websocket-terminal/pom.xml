@@ -20,11 +20,11 @@
     <parent>
         <artifactId>codenvy-lib-parent</artifactId>
         <groupId>com.codenvy.lib</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>codenvy-websocket-terminal</artifactId>
-    <version>5.0.0-M7-SNAPSHOT</version>
+    <version>5.0.0-M8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Lib :: Terminal</name>
     <dependencies>

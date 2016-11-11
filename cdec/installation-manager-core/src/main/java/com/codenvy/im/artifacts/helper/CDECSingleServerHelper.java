@@ -505,7 +505,7 @@ public class CDECSingleServerHelper extends CDECArtifactHelper {
             // wait until there is changed configuration on API server
             commands.add(createCommand(format("testFile=\"%1$s/general.properties\"; " +
                                               "while true; do " +
-                                              "    if sudo grep \"api.endpoint=http://%2$s/api\" ${testFile}; then break; fi; " +
+                                              "    if sudo grep \"http://%2$s/api\" ${testFile}; then break; fi; " +
                                               "    sleep 5; " +  // sleep 5 sec
                                               "done; " +
                                               "sleep 15; # delay to involve into start of rebooting api server",

@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-integration-tests</artifactId>
         <groupId>com.codenvy.integration.tests</groupId>
-        <version>5.0.0-M7-SNAPSHOT</version>
+        <version>5.0.0-M8-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-integration-jpa-dao</artifactId>
     <packaging>jar</packaging>

@@ -255,10 +255,15 @@ setRunOptions() {
 }
 
 # $1 - url
-# given: $1="http://test:8080/path"
+# given: $1="http://test:8080/"
 # returns: "http://test:8080"
 removeTrailingSlash() {
-    echo $(echo $1 | sed "s/\/[^/]*$//")
+    local value=$1
+    if [[ "$value" =~ .*/$ ]]; then
+        echo $(echo $value | sed "s/\/[^/]*$//");
+    else
+        echo $value
+    fi;
 }
 
 # $1 - url
