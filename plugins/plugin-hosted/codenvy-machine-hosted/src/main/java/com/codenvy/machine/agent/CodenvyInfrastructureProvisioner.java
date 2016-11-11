@@ -26,6 +26,7 @@ import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -111,10 +112,8 @@ public class CodenvyInfrastructureProvisioner extends DefaultInfrastructureProvi
                        .add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
                                                    : projectFolderVolume);
         }
-        envConfig.getMachines()
-                 .get(devMachineName)
-                 .getAgents()
-                 .add(syncAgentId);
+        List<String> agents = envConfig.getMachines().get(devMachineName).getAgents();
+        agents.add(agents.indexOf("org.eclipse.che.ws-agent"), syncAgentId);
 
         super.provision(envConfig, internalEnv);
     }

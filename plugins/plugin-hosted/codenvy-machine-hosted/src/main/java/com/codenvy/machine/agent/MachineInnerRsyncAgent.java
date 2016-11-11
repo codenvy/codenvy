@@ -19,6 +19,9 @@ import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import java.util.Collections;
 
 /**
+ * Agent that runs inside of dev machine container and ensures that rsync is available and
+ * public key for SSH access is added to authorized keys.
+ *
  * @author Alexander Garagatyi
  */
 public class MachineInnerRsyncAgent extends AgentImpl {
@@ -49,72 +52,61 @@ public class MachineInnerRsyncAgent extends AgentImpl {
               "# Red Hat Enterprise Linux 7 \n" +
               "############################\n" +
               "if echo ${LINUX_TYPE} | grep -qi \"rhel\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} yum -y install ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} yum -y install ${PACKAGES};\n" +
+              "    }\n" +
               "# Ubuntu 14.04 16.04 / Linux Mint 17 \n" +
               "####################################\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"ubuntu\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} apt-get update;\n" +
-              " ${SUDO} apt-get -y install ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} apt-get update;\n" +
+              "        ${SUDO} apt-get -y install ${PACKAGES};\n" +
+              "    }\n" +
               "# Debian 8\n" +
               "##########\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"debian\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} apt-get update;\n" +
-              " ${SUDO} apt-get -y install ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} apt-get update;\n" +
+              "        ${SUDO} apt-get -y install ${PACKAGES};\n" +
+              "    }\n" +
               "# Fedora 23\n" +
               "###########\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"fedora\"; then\n" +
-              " PACKAGES=${PACKAGES}\" procps-ng\"\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} dnf -y install ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    PACKAGES=${PACKAGES}\" procps-ng\"\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} dnf -y install ${PACKAGES};\n" +
+              "    }\n" +
               "# CentOS 7.1 & Oracle Linux 7.1\n" +
               "###############################\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"centos\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} yum -y install ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} yum -y install ${PACKAGES};\n" +
+              "    }\n" +
               "# openSUSE 13.2\n" +
               "###############\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"opensuse\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} zypper install -y ${PACKAGES};\n" +
-              " }\n" +
-              " #${SUDO} sed 's@session\\s*required\\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/rsync\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} zypper install -y ${PACKAGES};\n" +
+              "    }\n" +
               "# Alpine 3.3\n" +
               "############$$\n" +
               "elif echo ${LINUX_TYPE} | grep -qi \"alpine\"; then\n" +
-              " command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
-              " test \"${PACKAGES}\" = \"\" || {\n" +
-              " ${SUDO} apk update;\n" +
-              " ${SUDO} apk add rsync ${PACKAGES};\n" +
-              " }\n\n" +
+              "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n" +
+              "    test \"${PACKAGES}\" = \"\" || {\n" +
+              "        ${SUDO} apk update;\n" +
+              "        ${SUDO} apk add rsync ${PACKAGES};\n" +
+              "    }\n\n" +
               "else\n" +
-              " >&2 echo \"Unrecognized Linux Type\"\n" +
-              " >&2 cat /etc/os-release\n" +
-              " exit 1\n" +
+              "    >&2 echo \"Unrecognized Linux Type\"\n" +
+              "    >&2 cat /etc/os-release\n" +
+              "    exit 1\n" +
               "fi\n\n" +
-              "#command -v pidof >/dev/null 2>&1 && {\n" +
-              " #pidof rsync >/dev/null 2>&1 && exit\n" +
-              "#} || {\n" +
-              "# ps -fC rsync >/dev/null 2>&1 && exit\n" +
-              "#}\n\n\n" +
               "mkdir -p ~/.ssh\n" +
               "echo ${CODENVY_SYNC_PUB_KEY} >> ~/.ssh/authorized_keys",
               null);

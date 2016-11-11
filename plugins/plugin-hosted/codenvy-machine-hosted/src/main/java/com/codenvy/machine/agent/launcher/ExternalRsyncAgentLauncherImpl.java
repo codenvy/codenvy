@@ -56,6 +56,8 @@ public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
+        super.launch(machine, agent);
+
         DockerNode node = (DockerNode)machine.getNode();
         DockerInstance dockerMachine = (DockerInstance)machine;
         node.bindWorkspace();

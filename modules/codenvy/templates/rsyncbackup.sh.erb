@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
 SSH_USER=user
@@ -9,13 +9,13 @@ SRC_PORT=${3}
 DST_FOLDER=${4}
 REMOVE_ON_SUCCESS=${5=false}
 
-# ensure existing trailing slash to overrite permissions of destination folder too
-#if [[ ${SRC_FOLDER} != */ ]]; then
+# ensure existing trailing slash to overwrite permissions of destination folder too
+if [[ ${SRC_FOLDER} != */ ]]; then
    SRC_FOLDER=${SRC_FOLDER}"/"
-#fi
-#if [[ ${DST_FOLDER} != */ ]]; then
+fi
+if [[ ${DST_FOLDER} != */ ]]; then
    DST_FOLDER=${DST_FOLDER}"/"
-#fi
+fi
 
 # ensure ssh key has correct permissions
 if [[ ! -f /opt/rsync_key ]]; then
