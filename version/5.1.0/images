@@ -7,6 +7,6 @@ IMAGE_NGINX=nginx:1.10-alpine
 IMAGE_SWARM=swarm:1.2.5
 IMAGE_REGISTRY=registry:2.5.0
 IMAGE_POSTGRES=postgres:9.5.4
-IMAGE_IP=codenvy/che-ip:nightly
+IMAGE_IP=eclipse/che-ip:nightly
 IMAGE_INIT=codenvy/init:5.1.0
 IMAGE_CODENVY=codenvy/codenvy:5.1.0

@@ -1,20 +1,20 @@
 node default {
 ######################################################################################################
-# CODENVY SYSTEM 
+# CODENVY SYSTEM
 #
 # Fundamental parameters that affect the initial system operation.
 #
-# CODENVY_VERSION  
+# CODENVY_VERSION
 #     Sets the version of Codenvy to download and use. We respect this variable
 #     during 'codenvy init' and 'codenvy download'. Once a Codenvy instance has been
 #     generated, CODENVY_VERSION is set to the value in codenvy.env, in the instance
-#     folder and it locks the version for which Codenvy is running. If you set 
+#     folder and it locks the version for which Codenvy is running. If you set
 #     CODENVY_VERSION to a value that is diferent from what is set in codenvy.ver
-#     Codenvy will not start until this conflict is realized. You can upgrade 
+#     Codenvy will not start until this conflict is realized. You can upgrade
 #     a Codenvy install from one version to another with 'codenvy upgrade'.
   $codenvy_version = getValue("CODENVY_VERSION","nightly")
 
-# CODENVY_HOST  
+# CODENVY_HOST
 #    The IP address or DNS name of where the Codenvy endpoint will service your users.
 #    If you are running this on a local system, we auto-detect this value as the IP
 #    address of your Docker daemon. On many systems, especially those from cloud hosters
@@ -178,23 +178,23 @@ node default {
 # But it will affect on some functionality that depends on oAuth services like github integration.
 #
 # Google. Optional, but it can be used to log in / register an account
-  $google_client_id = getValue("CODENVY_GOOGLE_CLIENT_ID","your_google_client_id")
-  $google_secret = getValue("CODENVY_GOOGLE_SECRET","your_google_secret")
+  $google_client_id = getValue("CODENVY_GOOGLE_CLIENT_ID","NULL")
+  $google_secret = getValue("CODENVY_GOOGLE_SECRET","NULL")
 # Github. Optional, but it can be used to log in / register an account
-  $github_client_id = getValue("CODENVY_GITHUB_CLIENT_ID","423531cf41d6c13e1b3b")
-  $github_secret = getValue("CODENVY_GITHUB_SECRET","e708bfc28c541a8f25feac4466c93611d9018a3d")
+  $github_client_id = getValue("CODENVY_GITHUB_CLIENT_ID","NULL")
+  $github_secret = getValue("CODENVY_GITHUB_SECRET","NULL")
 # BitBucket. Leave is as is, unless you need to use BitBucket oAuth.
-  $bitbucket_client_id = getValue("CODENVY_BITBUCKET_CLIENT_ID","your_bitbucket_client_id")
-  $bitbucket_secret = getValue("CODENVY_BITBUCKET_SECRET","your_bitbucket_secret")
+  $bitbucket_client_id = getValue("CODENVY_BITBUCKET_CLIENT_ID","NULL")
+  $bitbucket_secret = getValue("CODENVY_BITBUCKET_SECRET","NULL")
 # WSO2. Leave is as is, unless you need to use WSO2 oAuth. Visit - https://cloud.wso2.com/
-  $wso2_client_id = getValue("CODENVY_WSO2_CLIENT_ID","your_wso2_client_id")
-  $wso2_secret = getValue("CODENVY_WSO2_SECRET","your_wso2_secret")
+  $wso2_client_id = getValue("CODENVY_WSO2_CLIENT_ID","NULL")
+  $wso2_secret = getValue("CODENVY_WSO2_SECRET","NULL")
 # ProjectLocker. Leave it as is, unless you need oAuth with ProjectLocker. Visit - http://projectlocker.com/
-  $projectlocker_client_id = getValue("CODENVY_PROJECTLOCKER_CLIENT_ID","your_projectlocker_client_id")
-  $projectlocker_secret = getValue("CODENVY_PROJECTLOCKER_SECRET","your_projectlocker_secret")
+  $projectlocker_client_id = getValue("CODENVY_PROJECTLOCKER_CLIENT_ID","NULL")
+  $projectlocker_secret = getValue("CODENVY_PROJECTLOCKER_SECRET","NULL")
 # Microsoft
-  $microsoft_client_id = getValue("CODENVY_MICROSOFT_CLIENT_ID","your_microsoft_client_id")
-  $microsoft_secret = getValue("CODENVY_MICROSOFT_SECRET","your_microsoft_secret")
+  $microsoft_client_id = getValue("CODENVY_MICROSOFT_CLIENT_ID","NULL")
+  $microsoft_secret = getValue("CODENVY_MICROSOFT_SECRET","NULL")
 
 ###############################
 # Codenvy Workspace configurations

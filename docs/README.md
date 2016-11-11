@@ -71,8 +71,8 @@ If you are Codenvy customer, you can also file a ticket through our email suppor
 
 ## Getting Started
 1. Get Docker 1.11+, Docker Compose 1.8+.
-2. Get the CodenvY CLI.
-3. Start Codenvy.
+2. Get the [Codenvy CLI](#installation).
+3. [Start Codenvy](#usage).
 
 ## System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -254,7 +254,7 @@ pass: password
 ```
 
 #### Hosting
-If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers. 
+If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `eclipse/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers.
 
 ## Uninstall
 ```
@@ -346,7 +346,11 @@ You must run Codenvy from the root of the Codenvy repository. By running in the 
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
 
 #### Hostname
-TODO: Add in example of customizing hostname in the `codenvy.env` file.
+The IP address or DNS name of where the Codenvy endpoint will service your users. If you are running this on a local system, we auto-detect this value as the IP address of your Docker daemon. On many systems, especially those from cloud hosters like DigitalOcean, you may have to explicitly set this to the external IP address or DNS entry provided by the provider.
+
+```
+CODENVY_HOST=<ip address or dns entry>
+```
 
 #### HTTP/S
 By default Codenvy runs over HTTP as this is simplest to install. There are two requirements for configuring HTTP/S:  
