@@ -730,7 +730,7 @@ public class TestInstallCommand extends AbstractTestCommand {
     @Test
     public void shouldReturnPathToUpdateInfoFile() {
         assertEquals(spyCommand.getPathToUpdateInfoFile().toString(),
-                     format("/home/%s/codenvy/update.info", SYSTEM_USER_NAME));
+                     format("%s/codenvy/update.info", System.getProperty("user.home")));
     }
 
     @Test
