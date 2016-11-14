@@ -8,6 +8,8 @@ target/
 bin/
 test-output/
 node_modules
+instance/
+config/
 
 # Idea #
 ##################
@@ -24,7 +26,6 @@ node_modules
 *.exe
 *.o
 *.so
-*.sh
 
 # Packages #
 ############
@@ -41,6 +42,7 @@ node_modules
 *.war
 *.ear
 
+vagcc
 
 
 # Logs and databases #

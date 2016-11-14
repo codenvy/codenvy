@@ -1,0 +1,47 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+oauth.google.clientid=<%= scope.lookupvar('codenvy::google_client_id') %>
+oauth.google.clientsecret=<%= scope.lookupvar('codenvy::google_secret') %>
+oauth.google.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.google.authuri=NULL
+oauth.google.tokenuri=NULL
+
+che.oauth.github.clientid=<%= scope.lookupvar('codenvy::github_client_id') %>
+che.oauth.github.clientsecret=<%= scope.lookupvar('codenvy::github_secret') %>
+che.oauth.github.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+che.oauth.github.authuri=https://github.com/login/oauth/authorize
+che.oauth.github.tokenuri=https://github.com/login/oauth/access_token
+
+oauth.wso2.clientid=<%= scope.lookupvar('codenvy::wso2_client_id') %>
+oauth.wso2.clientsecret=<%= scope.lookupvar('codenvy::wso2_secret') %>
+oauth.wso2.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.wso2.authuri=https://identity.cloud.wso2.com:443/oauth2/authorize
+oauth.wso2.tokenuri=https://identity.cloud.wso2.com:443/oauth2/token
+oauth.wso2.useruri=https://identity.cloud.wso2.com:443/oauth2/userinfo
+oauth.wso2.git.pattern=(http|https)://((([0-9a-fA-F]{32}(:x-oauth-basic)?)|([0-9a-zA-Z-_.]+))@)?git\\.cloud\\.wso2\\.com(:[0-9]{1,5})?/.+\\.git
+
+oauth.bitbucket.clientid=<%= scope.lookupvar('codenvy::bitbucket_client_id') %>
+oauth.bitbucket.clientsecret=<%= scope.lookupvar('codenvy::bitbucket_secret') %>
+oauth.bitbucket.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.bitbucket.authuri=https://bitbucket.org/site/oauth2/authorize
+oauth.bitbucket.tokenuri=https://bitbucket.org/site/oauth2/access_token
+oauth.bitbucket.useruri=https://bitbucket.org/api/2.0/user
+
+oauth.projectlocker.clientid=<%= scope.lookupvar('codenvy::projectlocker_client_id') %>
+oauth.projectlocker.clientsecret=<%= scope.lookupvar('codenvy::projectlocker_secret') %>
+oauth.projectlocker.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.projectlocker.authuri=https://portal.projectlocker.com/oauth2/authorize
+oauth.projectlocker.tokenuri=https://portal.projectlocker.com/oauth2/token
+oauth.projectlocker.git.pattern=https://(([0-9a-zA-Z-_.%]+)@)?git6\\.projectlocker\\.com(:[0-9]{1,5})?/.+\\.git
+oauth.projectlocker.useruri=<none>
+
+oauth.microsoft.clientid=<%= scope.lookupvar('codenvy::microsoft_client_id') %>
+oauth.microsoft.clientsecret=<%= scope.lookupvar('codenvy::microsoft_secret') %>
+oauth.microsoft.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.microsoft.authuri=https://app.vssps.visualstudio.com/oauth2/authorize
+oauth.microsoft.tokenuri=https://app.vssps.visualstudio.com/oauth2/token
+oauth.microsoft.useruri=https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0
+oauth.microsoft.git.pattern=https://([0-9a-zA-Z-_.%]+)\\.visualstudio\\.com/.*/?_git/.+

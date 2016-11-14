@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.machine.launcher;
+package com.codenvy.machine.agent.launcher;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 

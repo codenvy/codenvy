@@ -1,0 +1,33 @@
+#!/bin/bash
+
+SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
+SSH_USER=user
+
+SRC_FOLDER=${1}
+SRC_HOST=${2}
+SRC_PORT=${3}
+DST_FOLDER=${4}
+REMOVE_ON_SUCCESS=${5=false}
+
+# ensure existing trailing slash to overwrite permissions of destination folder too
+if [[ ${SRC_FOLDER} != */ ]]; then
+   SRC_FOLDER=${SRC_FOLDER}"/"
+fi
+if [[ ${DST_FOLDER} != */ ]]; then
+   DST_FOLDER=${DST_FOLDER}"/"
+fi
+
+# ensure ssh key has correct permissions
+if [[ ! -f /opt/rsync_key ]]; then
+    cp $SSH_KEY /opt/rsync_key
+fi
+if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
+    chmod 0600 /opt/rsync_key
+fi
+
+rsync --quiet --delete --partial --links --safe-links --recursive --times --human-readable --bwlimit=7000 --executability \
+              --include='.codenvy/' \
+              --filter=':- .gitignore' \
+              --rsh="ssh -i /opt/rsync_key -l ${SSH_USER} -o StrictHostKeyChecking=no -p ${SRC_PORT}" \
+              --rsync-path="sudo rsync" \
+              ${SRC_HOST}:${SRC_FOLDER} ${DST_FOLDER}

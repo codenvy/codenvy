@@ -1,0 +1,9 @@
+*
+!assembly/onpremises-ide-packaging-tomcat-codenvy-allinone
+!manifests
+!modules
+!docs
+!*.md
+!dockerfiles
+!version
+!*.env

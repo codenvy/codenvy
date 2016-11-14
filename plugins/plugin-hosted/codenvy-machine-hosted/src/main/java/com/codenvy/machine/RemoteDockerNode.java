@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
@@ -32,12 +33,16 @@ import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.util.Collections.emptyMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -60,20 +65,27 @@ public class RemoteDockerNode implements DockerNode {
     private final String               containerId;
     private final String               hostProjectsFolder;
     private final String               nodeHost;
+    private final Integer              syncPort;
+    private final String               nodeIp;
 
     @Inject
     public RemoteDockerNode(DockerConnector dockerConnector,
                             @Assisted("container") String containerId,
                             @Assisted("workspace") String workspaceId,
                             MachineBackupManager backupManager,
-                            WorkspaceFolderPathProvider workspaceFolderPathProvider) throws MachineException {
+                            WorkspaceFolderPathProvider workspaceFolderPathProvider,
+                            @Named("codenvy.workspace.projects_sync_port") Integer syncPort)
+            throws MachineException {
+
         this.workspaceId = workspaceId;
         this.backupManager = backupManager;
         this.dockerConnector = dockerConnector;
         this.containerId = containerId;
+        this.syncPort = syncPort == null || syncPort == 0 ? null : syncPort;
 
         try {
             String nodeHost = "127.0.0.1";
+            String nodeIp = "127.0.0.1";
             this.hostProjectsFolder = workspaceFolderPathProvider.getPath(workspaceId);
             if (dockerConnector instanceof SwarmDockerConnector) {
 
@@ -85,9 +97,11 @@ public class RemoteDockerNode implements DockerNode {
                     } else {
                         throw new MachineException("Can't extract docker node address from: " + info.getNode().getAddr());
                     }
+                    nodeIp = info.getNode().getIP();
                 }
             }
             this.nodeHost = nodeHost;
+            this.nodeIp = nodeIp;
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException("Internal server error occurs. Please contact support");
@@ -120,7 +134,8 @@ public class RemoteDockerNode implements DockerNode {
                                                  hostProjectsFolder,
                                                  execOutputs.get(0),
                                                  execOutputs.get(1),
-                                                 nodeHost);
+                                                 nodeHost,
+                                                 getSyncPort());
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new MachineException("Can't restore workspace file system");
@@ -132,7 +147,10 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public void unbindWorkspace() throws MachineException {
         try {
-            backupManager.backupWorkspaceAndCleanup(workspaceId, hostProjectsFolder, nodeHost);
+            backupManager.backupWorkspaceAndCleanup(workspaceId,
+                                                    hostProjectsFolder,
+                                                    nodeHost,
+                                                    getSyncPort());
         } catch (ServerException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -146,5 +164,39 @@ public class RemoteDockerNode implements DockerNode {
     @Override
     public String getHost() {
         return nodeHost;
+    }
+
+    @Override
+    public String getIp() {
+        return nodeIp;
+    }
+
+    /**
+     * Finds port which can be used for workspace projects files synchronization.
+     *
+     * @throws MachineException if port detection fails
+     */
+    private int getSyncPort() throws MachineException {
+        if (syncPort != null) {
+            return syncPort;
+        }
+
+        ContainerInfo containerInfo;
+        try {
+            containerInfo = dockerConnector.inspectContainer(containerId);
+        } catch (IOException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            throw new MachineException("Workspace projects files in ws-machine are not accessible");
+        }
+
+        Map<String, List<PortBinding>> ports = firstNonNull(containerInfo.getNetworkSettings().getPorts(), emptyMap());
+        List<PortBinding> portBindings = ports.get("22/tcp");
+        if (portBindings == null || portBindings.isEmpty()) {
+            // should not happen
+            throw new MachineException(
+                    "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible");
+        }
+
+        return Integer.parseUnsignedInt(portBindings.get(0).getHostPort());
     }
 }

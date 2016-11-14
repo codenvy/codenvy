@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
@@ -30,12 +31,11 @@ import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
-import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
+import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -72,8 +72,6 @@ public class HostedMachineProviderImplTest {
     @Mock
     private DockerNode                                    dockerNode;
     @Mock
-    private WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
-    @Mock
     private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
     @Mock
     private ContainerInfo                                 containerInfo;
@@ -84,9 +82,10 @@ public class HostedMachineProviderImplTest {
     @Mock
     private MachineTokenRegistry                          machineTokenRegistry;
 
+    private WindowsPathEscaper windowsPathEscaper = new WindowsPathEscaper();
+
     private MachineProviderImpl provider;
 
-    private static final String  PROJECT_FOLDER_PATH    = "/projects";
     private static final String  CONTAINER_ID           = "containerId";
     private static final String  WORKSPACE_ID           = "wsId";
     private static final String  MACHINE_NAME           = "machineName";
@@ -118,13 +117,12 @@ public class HostedMachineProviderImplTest {
                                                  credentialsReader,
                                                  dockerMachineFactory,
                                                  dockerInstanceStopDetector,
+                                                 windowsPathEscaper,
                                                  emptySet(),
                                                  emptySet(),
                                                  emptySet(),
                                                  emptySet(),
                                                  null,
-                                                 workspaceFolderPathProvider,
-                                                 PROJECT_FOLDER_PATH,
                                                  false,
                                                  false,
                                                  emptySet(),
@@ -132,7 +130,8 @@ public class HostedMachineProviderImplTest {
                                                  SNAPSHOT_USE_REGISTRY,
                                                  MEMORY_SWAP_MULTIPLIER,
                                                  machineTokenRegistry,
-                                                 emptySet());
+                                                 emptySet(),
+                                                 null);
 
         createInstanceFromRecipe(true);
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);

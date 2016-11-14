@@ -65,10 +65,9 @@ executeSshCommand "sudo grep \"che.api=http://${NEW_HOST_URL}/api\" /home/codenv
 
 # verify changes on installation-manager service
 executeSshCommand "sudo cat /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
-executeSshCommand "sudo grep \"che.api=http://${NEW_HOST_URL}/api\" /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
+executeSshCommand "sudo grep \"api.endpoint=http://${NEW_HOST_URL}/api\" /home/codenvy-im/codenvy-im-data/conf/installation-manager.properties"
 
-authWithoutRealmAndServerDns "admin" "password" "http://${NEW_HOST_URL}"
-
+doAuth "admin" "password" "" "http://${NEW_HOST_URL}"
 
 ### shouldn't fail on unknown host url
 executeIMCommand "config --hostname=unknown890934857203489520.com"
