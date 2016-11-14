@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -49,23 +50,26 @@ import java.util.concurrent.TimeUnit;
 public class WorkspaceFsBackupScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceFsBackupScheduler.class);
 
-    private final long                 syncTimeoutMillisecond;
-    private final WorkspaceRuntimes    workspaceRuntimes;
-    private final MachineBackupManager backupManager;
-
+    private final long                          syncTimeoutMillisecond;
+    private final WorkspaceRuntimes             workspaceRuntimes;
+    private final MachineBackupManager          backupManager;
     private final Map<String, Long>             lastMachineSynchronizationTime;
     private final ExecutorService               executor;
     private final ConcurrentMap<String, String> devMachinesBackupsInProgress;
+    private final Integer                       syncPort;
 
     @Inject
     public WorkspaceFsBackupScheduler(WorkspaceRuntimes workspaceRuntimes,
                                       MachineBackupManager backupManager,
-                                      @Named("machine.backup.backup_period_second") long syncTimeoutSecond) {
+                                      @Named("machine.backup.backup_period_second") long syncTimeoutSecond,
+                                      @Named("codenvy.workspace.projects_sync_port") Integer syncPort) {
         this.workspaceRuntimes = workspaceRuntimes;
         this.backupManager = backupManager;
         this.syncTimeoutMillisecond = TimeUnit.SECONDS.toMillis(syncTimeoutSecond);
+        this.syncPort = syncPort == null || syncPort == 0 ? null : syncPort;
 
-        this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());
+        this.executor = Executors.newCachedThreadPool(
+                new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());
         this.lastMachineSynchronizationTime = new ConcurrentHashMap<>();
         this.devMachinesBackupsInProgress = new ConcurrentHashMap<>();
     }
@@ -92,7 +96,7 @@ public class WorkspaceFsBackupScheduler {
                                     lastMachineSynchronizationTime.put(machineId, System.currentTimeMillis());
                                 } catch (NotFoundException ignore) {
                                     // it is ok, machine was stopped while this backup task was in the executor queue
-                                } catch (ServerException e) {
+                                } catch (Exception e) {
                                     LOG.error(e.getLocalizedMessage(), e);
                                 } finally {
                                     devMachinesBackupsInProgress.remove(machineId);
@@ -118,7 +122,10 @@ public class WorkspaceFsBackupScheduler {
         }
         final InstanceNode node = machineInstance.getNode();
 
-        backupManager.backupWorkspace(machine.getWorkspaceId(), node.getProjectsFolder(), node.getHost());
+        backupManager.backupWorkspace(machine.getWorkspaceId(),
+                                      node.getProjectsFolder(),
+                                      node.getHost(),
+                                      getSyncPort(machine));
     }
 
     @VisibleForTesting
@@ -126,6 +133,19 @@ public class WorkspaceFsBackupScheduler {
         final Long lastMachineSyncTime = lastMachineSynchronizationTime.get(machineId);
 
         return lastMachineSyncTime == null || System.currentTimeMillis() - lastMachineSyncTime > syncTimeoutMillisecond;
+    }
+
+    private int getSyncPort(MachineImpl machine) throws ServerException {
+        if (syncPort != null) {
+            return syncPort;
+        }
+
+        ServerImpl server = machine.getRuntime().getServers().get("22/tcp");
+        if (server == null) {
+            throw new ServerException(
+                    "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible");
+        }
+        return Integer.parseUnsignedInt(server.getAddress().split(":", 2)[1]);
     }
 
     @PreDestroy

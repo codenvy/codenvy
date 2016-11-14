@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2012] - [2013] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+
+<!--
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+-->
+
+<included>
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>localhost</syslogHost>
+       <port>5140</port>
+       <facility>user</facility>
+       <suffixPattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</suffixPattern>
+    </appender>
+<appender name="email" class="ch.qos.logback.classic.net.SMTPAppender">
+   <SMTPHost>localhost</SMTPHost>
+   <SMTPPort>25</SMTPPort>
+   <SSL>false</SSL>
+        <to><%= scope.lookupvar('codenvy::email_to').encode(:xml => :text) %></to>
+        <from><%= scope.lookupvar('codenvy::email_from').encode(:xml => :text) %></from>
+   <subject><%= scope.lookupvar('codenvy::email_subject').encode(:xml => :text) %></subject>
+   <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</pattern>
+   </layout>
+    <CyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+      <BufferSize>5</BufferSize>
+    </CyclicBufferTracker>
+</appender>
+<root>
+<appender-ref ref="SYSLOG"/>
+<appender-ref ref="email"/>
+</root>
+</included>

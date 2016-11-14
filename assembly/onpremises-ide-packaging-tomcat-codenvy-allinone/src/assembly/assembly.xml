@@ -18,10 +18,38 @@
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
     <id>tomcat-zip</id>
     <formats>
+        <format>dir</format>
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy.onpremises:onpremises-ide-packaging-tomcat-ext-server</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents/linux_amd64/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy.lib:codenvy-websocket-terminal:tar.gz:linux_amd64</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents/linux_arm7/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy.lib:codenvy-websocket-terminal:tar.gz:linux_arm7</include>
+            </includes>
+        </dependencySet>
         <dependencySet>
             <unpack>true</unpack>
             <outputDirectory></outputDirectory>
@@ -107,4 +135,11 @@
             </includes>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>${project.basedir}/src/assembly/server.xml</source>
+            <outputDirectory>conf</outputDirectory>
+            <destName>server.xml</destName>
+        </file>
+    </files>
 </assembly>

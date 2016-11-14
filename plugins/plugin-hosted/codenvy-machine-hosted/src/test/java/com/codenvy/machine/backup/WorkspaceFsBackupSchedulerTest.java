@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static java.lang.Thread.sleep;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -81,7 +82,10 @@ public class WorkspaceFsBackupSchedulerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 5 * 60));
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
+                                                       backupManager,
+                                                       5 * 60,
+                                                       22));
 
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
@@ -131,7 +135,7 @@ public class WorkspaceFsBackupSchedulerTest {
         // then
         verify(workspaceRuntimes).getMachine(WORKSPACE_ID_1, "id1");
         verify(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
-        verify(backupManager).backupWorkspace(WORKSPACE_ID_1, "/" + WORKSPACE_ID_1, "192.168.0.1");
+        verify(backupManager).backupWorkspace(WORKSPACE_ID_1, "/" + WORKSPACE_ID_1, "192.168.0.1", 22);
     }
 
     @Test
@@ -186,7 +190,7 @@ public class WorkspaceFsBackupSchedulerTest {
         when(machineInstance.getNode()).thenReturn(node);
         when(node.getHost()).thenReturn("192.168.0.1");
         when(node.getProjectsFolder()).thenReturn("/" + WORKSPACE_ID_1);
-        doNothing().when(backupManager).backupWorkspace(anyString(), anyString(), anyString());
+        doNothing().when(backupManager).backupWorkspace(anyString(), anyString(), anyString(), anyInt());
         doCallRealMethod().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         // when
@@ -194,9 +198,9 @@ public class WorkspaceFsBackupSchedulerTest {
 
         // then
         // add this verification with timeout to ensure that thread executor had enough time before verification of call
-        verify(backupManager, timeout(1000)).backupWorkspace(eq(WORKSPACE_ID_1), anyString(), anyString());
-        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws3"), anyString(), anyString());
-        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws4"), anyString(), anyString());
+        verify(backupManager, timeout(1000)).backupWorkspace(eq(WORKSPACE_ID_1), anyString(), anyString(), anyInt());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws3"), anyString(), anyString(), anyInt());
+        verify(backupManager, timeout(1000).never()).backupWorkspace(eq("ws4"), anyString(), anyString(), anyInt());
     }
 
     @Test
@@ -237,7 +241,10 @@ public class WorkspaceFsBackupSchedulerTest {
         // given
         workspaces.clear();
         MachineImpl machine = addWorkspace("ws3", "ms3");
-        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 0));
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
+                                                       backupManager,
+                                                       0,
+                                                       22));
         doNothing().when(scheduler).backupWorkspaceInMachine(any(MachineImpl.class));
 
         scheduler.scheduleBackup();
@@ -259,7 +266,10 @@ public class WorkspaceFsBackupSchedulerTest {
         // given
         workspaces.clear();
         MachineImpl machine = addWorkspace("ws3", "ms3");
-        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes, backupManager, 0));
+        scheduler = spy(new WorkspaceFsBackupScheduler(workspaceRuntimes,
+                                                       backupManager,
+                                                       0,
+                                                       22));
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -288,7 +298,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(backupManager, never()).backupWorkspace(anyString(), anyString(), anyString());
+        verify(backupManager, never()).backupWorkspace(anyString(), anyString(), anyString(), anyInt());
     }
 
 }

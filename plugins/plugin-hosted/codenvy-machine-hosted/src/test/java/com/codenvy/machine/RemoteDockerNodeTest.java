@@ -20,9 +20,9 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -30,6 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class RemoteDockerNodeTest {
+    private static final String PATH = "WorkspacePath";
 
     @Mock
     private MachineBackupManager        backupManager;
@@ -55,10 +57,15 @@ public class RemoteDockerNodeTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(pathProvider.getPath("WorkspaceId")).thenReturn("WorkspacePath");
+        when(pathProvider.getPath("WorkspaceId")).thenReturn(PATH);
         when(dockerConnector.createExec(any())).thenReturn(exec);
         when(exec.getId()).thenReturn("ExecId");
-        remoteDockerNode = new RemoteDockerNode(dockerConnector, "ContainerId", "WorkspaceId", backupManager, pathProvider);
+        remoteDockerNode = new RemoteDockerNode(dockerConnector,
+                                                "ContainerId",
+                                                "WorkspaceId",
+                                                backupManager,
+                                                pathProvider,
+                                                25);
     }
 
     @Test
@@ -79,10 +86,11 @@ public class RemoteDockerNodeTest {
 
         //then
         verify(backupManager).restoreWorkspaceBackup(eq("WorkspaceId"),
-                                                     eq("WorkspacePath"),
+                                                     eq(PATH),
                                                      eq("MessageContent"),
                                                      eq("MessageContent"),
-                                                     eq("127.0.0.1"));
+                                                     eq("127.0.0.1"),
+                                                     anyInt());
     }
 
     @Test(expectedExceptions = MachineException.class,

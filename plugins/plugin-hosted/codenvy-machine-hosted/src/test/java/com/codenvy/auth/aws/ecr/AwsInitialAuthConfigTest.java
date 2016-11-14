@@ -39,7 +39,7 @@ import static org.testng.Assert.assertNotNull;
 @Listeners(MockitoTestNGListener.class)
 public class AwsInitialAuthConfigTest {
 
-    private final String CONFIG_PREFIX = "docker.registry.aws.";
+    private final String CONFIG_PREFIX = "codenvy.docker.registry.aws.";
 
     private static final String AWS_ACCOUNT_ID    = "id";
     private static final String AWS_REGION        = "region";

@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.SYNC_STRATEGY_PROPERTY;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -53,7 +55,9 @@ public class MachineBackupManager {
     private final int                                  restoreDuration;
     private final File                                 backupsRootDir;
     private final WorkspaceIdHashLocationFinder        workspaceIdHashLocationFinder;
+    private final String                               projectFolderPath;
     private final ConcurrentMap<String, ReentrantLock> workspacesBackupLocks;
+    private final boolean                              syncAgentInMachine;
 
     @Inject
     public MachineBackupManager(@Named("machine.backup.backup_script") String backupScript,
@@ -61,13 +65,30 @@ public class MachineBackupManager {
                                 @Named("machine.backup.backup_duration_second") int maxBackupDurationSec,
                                 @Named("machine.backup.restore_duration_second") int restoreDurationSec,
                                 @Named("che.user.workspaces.storage") File backupsRootDir,
-                                WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder) {
+                                WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder,
+                                @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
+                                @Named("che.workspace.projects.storage") String projectFolderPath) {
         this.backupScript = backupScript;
         this.restoreScript = restoreScript;
         this.maxBackupDuration = maxBackupDurationSec;
         this.restoreDuration = restoreDurationSec;
         this.backupsRootDir = backupsRootDir;
         this.workspaceIdHashLocationFinder = workspaceIdHashLocationFinder;
+        this.projectFolderPath = projectFolderPath;
+
+        switch (syncStrategy) {
+            case "rsync":
+                syncAgentInMachine = false;
+                break;
+            case "rsync-agent":
+                syncAgentInMachine = true;
+                break;
+            default:
+                throw new RuntimeException(
+                        format("Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
+                               SYNC_STRATEGY_PROPERTY,
+                               syncStrategy));
+        }
 
         workspacesBackupLocks = new ConcurrentHashMap<>();
     }
@@ -75,16 +96,19 @@ public class MachineBackupManager {
     /**
      * Copies workspace files from machine's host to backup storage.
      *
+     * @param workspaceId
+     *         id of workspace that should be backed up
      * @param srcPath
      *         path to folder that should be backed up
      * @param srcAddress
      *         address of the server from which workspace files should be backed up
-     * @param workspaceId
-     *         id of workspace that should be backed up
+     * @param srcPort
+     *         port on the server that should be used for workspace files backup connection
      */
-    public void backupWorkspace(final String workspaceId,
-                                final String srcPath,
-                                final String srcAddress) throws ServerException {
+    public void backupWorkspace(String workspaceId,
+                                String srcPath,
+                                String srcAddress,
+                                int srcPort) throws ServerException {
         ReentrantLock lock = workspacesBackupLocks.get(workspaceId);
         // backup workspace only if no backup with cleanup before
         if (lock != null) {
@@ -98,7 +122,11 @@ public class MachineBackupManager {
                         // because it is called after cleanup
                         return;
                     }
-                    backupWorkspace(workspaceId, srcPath, srcAddress, false);
+                    backupWorkspace(workspaceId,
+                                    srcPath,
+                                    srcAddress,
+                                    srcPort,
+                                    false);
                 } finally {
                     lock.unlock();
                 }
@@ -111,16 +139,19 @@ public class MachineBackupManager {
     /**
      * Copies workspace files from machine's host to backup storage and remove all files from the source.
      *
+     * @param workspaceId
+     *         id of workspace that should be backed up
      * @param srcPath
      *         path to folder that should be backed up
      * @param srcAddress
      *         address of the server from which workspace files should be backed up
-     * @param workspaceId
-     *         id of workspace that should be backed up
+     * @param srcPort
+     *         port on the server that should be used for workspace files backup connection
      */
-    public void backupWorkspaceAndCleanup(final String workspaceId,
-                                          final String srcPath,
-                                          final String srcAddress) throws ServerException {
+    public void backupWorkspaceAndCleanup(String workspaceId,
+                                          String srcPath,
+                                          String srcAddress,
+                                          int srcPort) throws ServerException {
         ReentrantLock lock = workspacesBackupLocks.get(workspaceId);
         if (lock != null) {
             lock.lock();
@@ -130,7 +161,11 @@ public class MachineBackupManager {
                     LOG.error("Backup with cleanup of the workspace {} was invoked several times simultaneously", workspaceId);
                     return;
                 }
-                backupWorkspace(workspaceId, srcPath, srcAddress, true);
+                backupWorkspace(workspaceId,
+                                srcPath,
+                                srcAddress,
+                                srcPort,
+                                true);
             } finally {
                 workspacesBackupLocks.remove(workspaceId);
                 lock.unlock();
@@ -141,16 +176,21 @@ public class MachineBackupManager {
     }
 
     @VisibleForTesting
-    void backupWorkspace(final String workspaceId,
-                         final String srcPath,
-                         final String srcAddress,
+    void backupWorkspace(String workspaceId,
+                         String srcPath,
+                         String srcAddress,
+                         int srcPort,
                          boolean removeSourceOnSuccess) throws ServerException {
-        final File destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId);
+        if (syncAgentInMachine) {
+            srcPath = projectFolderPath;
+        }
+        String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
 
         CommandLine commandLine = new CommandLine(backupScript,
                                                   srcPath,
                                                   srcAddress,
-                                                  destPath.toString(),
+                                                  Integer.toString(srcPort),
+                                                  destPath,
                                                   Boolean.toString(removeSourceOnSuccess));
 
         try {
@@ -173,18 +213,25 @@ public class MachineBackupManager {
      *
      * @param workspaceId
      *         id of workspace that should be copied to machine
-     * @param destPath
-     *         path where files should be copied to
+     * @param destinationPath
+     *         path to folder that should be restored from backup
+     * @param userId
+     *         ID of user to apply permission to files on restoring
+     * @param groupId
+     *         ID of user group to apply permission to files on restoring
      * @param destAddress
-     *         address of the server where workspace should be copied to
+     *         address of a server where workspace files should be restored
+     * @param destPort
+     *         port of a server where workspace files should be restored
      * @throws ServerException
      *         if any exception occurs
      */
-    public void restoreWorkspaceBackup(final String workspaceId,
-                                       final String destPath,
-                                       final String userId,
-                                       final String groupId,
-                                       final String destAddress) throws ServerException {
+    public void restoreWorkspaceBackup(String workspaceId,
+                                       String destinationPath,
+                                       String userId,
+                                       String groupId,
+                                       String destAddress,
+                                       int destPort) throws ServerException {
         boolean restored = false;
         ReentrantLock lock = new ReentrantLock();
         lock.lock();
@@ -196,14 +243,18 @@ public class MachineBackupManager {
                 LOG.error(err);
                 throw new ServerException(err);
             }
-            final String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
+            String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
+            if (syncAgentInMachine) {
+                destinationPath = projectFolderPath;
+            }
 
             Files.createDirectories(Paths.get(srcPath));
 
             CommandLine commandLine = new CommandLine(restoreScript,
                                                       srcPath,
-                                                      destPath,
+                                                      destinationPath,
                                                       destAddress,
+                                                      Integer.toString(destPort),
                                                       userId,
                                                       groupId);
 

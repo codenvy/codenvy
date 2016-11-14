@@ -1,0 +1,107 @@
+#!/bin/sh
+
+init() {
+  BLUE='\033[1;34m'
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  YELLOW='\033[38;5;220m'
+  NC='\033[0m'
+
+  VERBOSE=false
+  MASTER_HOST=###MASTERHOST###
+}
+
+error() {
+  printf "${RED}ERROR:${NC} %s\n" "${1}"
+}
+
+has_docker() {
+  hash docker 2>/dev/null && return 0 || return 1
+}
+
+check_docker() {
+  if ! has_docker; then
+    error "Error - Docker not found. Get it at https://docs.docker.com/engine/installation/."
+    error "        Docker can be installed with command 'curl -sSL https://get.docker.com/ | sh'"
+    error "           or 'wget -qO- https://get.docker.com/ | sh'"
+    return 1;
+  fi
+
+  if ! docker ps > /dev/null 2>&1; then
+    output=$(docker ps)
+    error "Error - Docker not installed properly: ${output}"
+    return 1;
+  fi
+}
+
+get_config() {
+  while test $# -gt 0; do
+    case ${1} in
+      --user)
+        shift
+        USER=${1}
+      ;;
+      --pass | --password)
+        shift
+        PASSWORD=${1}
+      ;;
+      --ip)
+        shift
+        NODE_IP=${1}
+      ;;
+      --verbose)
+        VERBOSE=true
+      ;;
+      *)
+        error "Unknown parameter ${1} found. Use options: --user, --pass, --ip, --verbose"
+        exit 1
+      ;;
+    esac
+    shift
+  done
+
+  if [ -z "${USER}" ]; then
+    read -p "Codenvy admin username:" </dev/tty USER
+  fi
+  if [ -z "${PASSWORD}" ]; then
+    read -p "Codenvy admin password:" </dev/tty PASSWORD
+  fi
+  if [ -z "${NODE_IP}" ]; then
+    read -p "This host public IP:" </dev/tty NODE_IP
+  fi
+}
+
+login_on_master() {
+  VERBOSITY_FLAG="-s"
+  if [ "${VERBOSE}" = true ]; then
+    VERBOSITY_FLAG="-v"
+  fi
+  TOKEN_RESPONSE=$(curl --fail ${VERBOSITY_FLAG} -H "Content-Type: application/json" -X POST -d "{\"username\":\"${USER}\", \"password\":\"${PASSWORD}\"}" http://${MASTER_HOST}/api/auth/login)
+  if [ "$?" != "0" ]; then
+    echo "Unable to get auth token. Check your login and password."
+    return 1
+  fi
+
+  # extract token
+  TOKEN=$(echo ${TOKEN_RESPONSE} | sed 's/.*"value"\s*:\s*"\([^"]*\)*".*/\1/')
+}
+
+add_node() {
+  login_on_master
+
+  # register node by using token.
+  curl -H "Content-Type: application/json" -X POST -d "{\"ip\" : \"${NODE_IP}\"}" http://${MASTER_HOST}/api/nodes?token=$TOKEN
+  echo ""
+}
+
+# See: https://sipb.mit.edu/doc/safe-shell/
+set -e
+set -u
+
+init
+
+check_docker
+
+get_config "$@"
+
+add_node
