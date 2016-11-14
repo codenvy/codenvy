@@ -292,7 +292,7 @@ check_mounts() {
   if [[ "${DATA_MOUNT}" != "not set" ]]; then
     DEFAULT_CODENVY_CONFIG="${DATA_MOUNT}"/config
     DEFAULT_CODENVY_INSTANCE="${DATA_MOUNT}"/instance
-    DEFAULT_CODENVY_BACKUP="${DATA_MOUNT}"
+    DEFAULT_CODENVY_BACKUP="${DATA_MOUNT}"/backup
   elif [[ "${DATA_MOUNT}" = "not set" ]] && [[ "$TRIAD" = "set" ]]; then  
     DEFAULT_CODENVY_CONFIG="${CONFIG_MOUNT}"
     DEFAULT_CODENVY_INSTANCE="${INSTANCE_MOUNT}"

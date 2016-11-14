@@ -1135,8 +1135,7 @@ cmd_restore() {
   mkdir -p "${CODENVY_CONTAINER_CONFIG}"
   docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
              -v "${CODENVY_HOST_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME}" \
-               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME} \
-                             -C /root/codenvy-config"
+             alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME} -C /root/codenvy-config"
 
   info "restore" "Recovering instance data..."
   mkdir -p "${CODENVY_CONTAINER_INSTANCE}"
@@ -1147,14 +1146,12 @@ cmd_restore() {
     docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
     docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
                -v "${CODENVY_HOST_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" \
-              -v codenvy-postgresql-volume:/root/codenvy-instance/data/postgres \
-                 alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} \
-                               -C /root/codenvy-instance"
+               -v codenvy-postgresql-volume:/root/codenvy-instance/data/postgres \
+               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance"
   else
     docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
                -v "${CODENVY_HOST_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" \
-                 alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} \
-                               -C /root/codenvy-instance"
+               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance"
   fi
 }
 
