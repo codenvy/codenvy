@@ -255,6 +255,18 @@ check_docker() {
     error "Docker issues - 'docker ps' fails."
     return 1;
   fi
+
+  DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
+
+  MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
+  MINOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:2:2})
+
+  # Docker needs to be greater than or equal to 1.11
+  if [[ ${MAJOR_VERSION_ID} -lt 1 ]] ||
+     [[ ${MINOR_VERSION_ID} -lt 11 ]]; then
+       error "Error - Docker 1.11 or greater required."
+       return 1;
+  fi
 }
 
 check_docker_compose() {
