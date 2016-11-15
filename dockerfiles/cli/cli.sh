@@ -668,6 +668,7 @@ generate_configuration_with_puppet() {
   info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
   # Note - bug in docker requires relative path for env, not absolute
   log "docker_run -it --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+                  --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
                   -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
@@ -676,13 +677,14 @@ generate_configuration_with_puppet() {
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff \"$@\""
   docker_run -it  --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
+                  --env-file=/version/$CODENVY_VERSION/images \
                   -v "${CODENVY_HOST_INSTANCE}":/opt/codenvy:rw \
                   -v "${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}":/etc/puppet/manifests:ro \
                   -v "${CODENVY_HOST_CONFIG_MODULES_FOLDER}":/etc/puppet/modules:ro \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff "$@" >> "${LOGS}"
+                                /etc/puppet/manifests/codenvy.pp --show_diff "$@"
 }
 
 # return date in format which can be used as a unique file or dir name
@@ -832,18 +834,15 @@ cmd_config() {
   fi
 
   # Run the docker configurator
-  generate_configuration_with_puppet 
+  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+    # generate configs and print puppet output logs to console if dev mode is on
+    generate_configuration_with_puppet
+  else
+    generate_configuration_with_puppet >> "${LOGS}"
+  fi
 
   # Replace certain environment file lines with their container counterparts
   info "config" "Customizing docker-compose for running in a container"
-  CODENVY_ENVFILE_REGISTRY="${CODENVY_CONTAINER_INSTANCE}/config/registry/registry.env"
-  CODENVY_ENVFILE_POSTGRES="${CODENVY_CONTAINER_INSTANCE}/config/postgres/postgres.env"
-  CODENVY_ENVFILE_CODENVY="${CODENVY_CONTAINER_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
-
-  sed "s|^.*registry\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_REGISTRY}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-  sed "s|^.*postgres\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_POSTGRES}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-  sed "s|^.*codenvy\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_CODENVY}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-
   # If this is windows, we need to add a special volume for postgres
   if has_docker_for_windows_client; then
     sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
