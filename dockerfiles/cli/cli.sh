@@ -38,7 +38,7 @@ cli_init() {
 
   CODENVY_VERSION_FILE="codenvy.ver"
   CODENVY_ENVIRONMENT_FILE="codenvy.env"
-  CODENVY_COMPOSE_FILE="docker-compose.yml"
+  CODENVY_COMPOSE_FILE="docker-compose-container.yml"
   CODENVY_SERVER_CONTAINER_NAME="codenvy_codenvy_1"
   CODENVY_CONFIG_BACKUP_FILE_NAME="codenvy_config_backup.tar"
   CODENVY_INSTANCE_BACKUP_FILE_NAME="codenvy_instance_backup.tar"
@@ -665,7 +665,16 @@ confirm_operation() {
 # Runs puppet image to generate codenvy configuration
 generate_configuration_with_puppet() {
   debug $FUNCNAME
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
+
+  if is_docker_for_windows; then
+    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/registry/registry.env")
+    POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env")
+    CODENVY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
+  else
+    REGISTRY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/registry/registry.env"
+    POSTGRES_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env"
+    CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
+  fi
   # Note - bug in docker requires relative path for env, not absolute
   log "docker_run -it --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
@@ -681,6 +690,9 @@ generate_configuration_with_puppet() {
                   -v "${CODENVY_HOST_INSTANCE}":/opt/codenvy:rw \
                   -v "${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}":/etc/puppet/manifests:ro \
                   -v "${CODENVY_HOST_CONFIG_MODULES_FOLDER}":/etc/puppet/modules:ro \
+                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
+                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
+                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
@@ -833,6 +845,7 @@ cmd_config() {
         "${CODENVY_CONTAINER_INSTANCE}/dev"
   fi
 
+  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
   # Run the docker configurator
   if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
     # generate configs and print puppet output logs to console if dev mode is on

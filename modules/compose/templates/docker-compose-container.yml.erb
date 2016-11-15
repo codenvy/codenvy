@@ -85,7 +85,7 @@ services:
   registry:
     image: <%= ENV["IMAGE_REGISTRY"] %>
     env_file:
-      - '<%= ENV["REGISTRY_ENV_FILE"] %>'
+      - '/codenvy/instance/config/registry/registry.env'
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/registry:/var/lib/registry'
     ports:
@@ -103,7 +103,7 @@ services:
   postgres:
     image: <%= ENV["IMAGE_POSTGRES"] %>
     env_file:
-      - '<%= ENV["POSTGRES_ENV_FILE"] %>'
+      - '/codenvy/instance/config/postgres/postgres.env'
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/usr/share/postgresql/postgresql.conf.sample'
@@ -123,7 +123,7 @@ services:
       - haproxy
       - postgres
     env_file:
-      - '<%= ENV["CODENVY_ENV_FILE"] %>'
+      - '/codenvy/instance/config/codenvy/codenvy.env'
     volumes:
        - '<%= scope.lookupvar('compose::puppet_src_folder') -%>:/puppet-configuration'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/:/opt/codenvy-data/logs/'
