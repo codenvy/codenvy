@@ -125,6 +125,7 @@ public class HostedMachineProviderImplTest {
                                                  null,
                                                  false,
                                                  false,
+                                                 -1,
                                                  emptySet(),
                                                  emptySet(),
                                                  SNAPSHOT_USE_REGISTRY,
