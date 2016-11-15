@@ -681,6 +681,9 @@ generate_configuration_with_puppet() {
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
                   -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
+                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
+                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
+                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
