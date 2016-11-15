@@ -4,7 +4,7 @@ Codenvy makes cloud workspaces for develoment teams. Install, run, and manage Co
 ### Quick Start
 With Docker 1.11+ on Windows, Mac, or Linux:
 ```
-$ docker run codenvy/cli:nightly start
+$ docker run codenvy/cli start
 ```
 
 ### TOC
@@ -28,8 +28,7 @@ $ docker run codenvy/cli:nightly start
 - [Uninstall](#uninstall)
 - [Configuration](#configuration)
     + [Saving Configuration in Version Control](#saving-configuration-in-version-control)
-    + [Logs and User Data](#logs-and-user-data)
-    + [oAuth](#oauth)
+    + [Logs and User Data](#logs-and-user-data)    + [oAuth](#oauth)
     + [LDAP](#ldap)
     + [Development Mode](#development-mode)
     + [Licensing](#licensing)
@@ -55,11 +54,11 @@ When the following are implemented, this Docker approach will be declared genera
 
 1. `codenvy upgrade` is not yet implemented. You can switch between versions, but we do not yet support automatic data migration inside of images. 
 
-2. Network overlay mode. If you are running a Codenvy cluster on different physical nodes and your users launch compose workspaces that themselves have multiple containers, there are cases where Swarm will place those different containers on different physical nodes. This is great for scalability. However, our default networking mode is `bridge`, which will prevent those workspace containers from seeing each other, and your users will scratch their heads. We are testing an `overlay` mode which configures `etcd` automatically that will let workspace containers see one another regardless of where Swarm places their operation.
+2. Migrations. We do not yet support migrating an existing Codenvy installation that uses our Puppet-based infrastructure into a Dockerized infrastructure of the same version. Currently, Dockerized Codenvy installations need to be different installations apart from the puppetized infrastructure.
 
-3. Migrations. We do not yet support migrating an existing Codenvy installation that uses our Puppet-based infrastructure into a Dockerized infrastructure of the same version. Currently, Dockerized Codenvy installations need to be different installations apart from the puppetized infrastructure.
+3. Admin dashboard. We provide an administrators' dashboard within the UI. This admin dashboard has not yet been updated for a dockerized version where there is a simpler configuration approach. We are updating this in an upcoming sprint.
 
-4. We do a single-node deployment of etcd, which is used as a distributed key-value store. If your users are creating workspaces that use Docker compose syntax, there are scenarios where separate containers for a single workspace will be scheduled onto different physical nodes. With our single node implementation of etcd, those containers will not be part of the same network and cannot communicate with one another. Your users will yell at you. The current work around is to manually configure etcd, zookeeper, or Consul on each physical node before you add it into the Codenvy cluster, and then activate "overlay" networking mode in `codenvy.env` file. Contact us for guidance on how to configure this. For GA we will provide a distributed key value store that does not have this limitation.
+4. In some limited firewall cases, workspaces will not start. This happens because certain internal Codenvy traffic is sent over an external IP address which is routed through your system's firewall. We can use socat and internal IP addresses within our Swarm cluster to avoid this issue.
 
 ## Getting Help
 If you are Codenvy customer, file a ticket through email support for a quicker response.
@@ -144,9 +143,9 @@ There is nothing additional you need to install other than Docker.
 #### Verification:
 You can verify that the CLI is working:
 ```
-docker run codenvy/cli:nightly help
+docker run codenvy/cli help
 ```
-The CLI is bound inside of Docker images that are tagged with different versions. If you were to run `codenvy/cli:latest` this will run the latest shipping release of Codenvy and the CLI. This list of all versions available can be seen by running `codenvy version` or browsing the list of [tags available in Docker Hub](https://hub.docker.com/r/codenvy/cli/tags/).
+The CLI is bound inside of Docker images that are tagged with different versions. If you were to run `codenvy/cli:5.0.0-latest` this will run the latest shipping release of Codenvy and the CLI. This list of all versions available can be seen by running `codenvy version` or browsing the list of [tags available in Docker Hub](https://hub.docker.com/r/codenvy/cli/tags/).
 
 #### Proxies
 You can install and operate behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
@@ -225,8 +224,6 @@ Usage: docker run -it --rm
            --network ]                   Test connectivity between codenvy sub-systems
 
 Variables:
-    CODENVY_DEVELOPMENT_MODE             If 'on', then mounts host source folders into Docker images
-    CODENVY_DEVELOPMENT_REPO             Location of host git repo that contains source code to be mounted
     CODENVY_HOST                         IP address or hostname of the server Codenvy is running on 
 ```
 
@@ -278,7 +275,7 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
 ```
 
 #### Hosting
-If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `codenvy/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers requiring you to explicitly set this value.
+If you are hosting Codenvy at a cloud service like DigitalOcean, set `CODENVY_HOST` to the server's IP address or its DNS. We use an internal utility, `eclipse/che-ip`, to determine the default value for `CODENVY_HOST`, which is your server's IP address. This works well on desktops, but usually fails on hosted servers requiring you to explicitly set this value.
 
 ```
 docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
@@ -365,16 +362,17 @@ Codenvy is compatible with `InetOrgPerson.schema`. For other schemas please cont
 #### Development Mode
 For Codenvy developers that are building and customizing Codenvy from its source repository, you can run Codenvy in development mode where your local assembly is used instead of the one that is provided in the default containers downloaded from DockerHub. This allows for a rapid edit / build / run cycle. 
 
-Dev mode is activated by volume mounting the Codenvy git source repository to `:/repo` in your Docker run command.
+Dev mode is activated by volume mounting the Codenvy git repository to `:/repo` in your Docker run command.
 ```
 docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
                     -v <local-path>:/codenvy
                     -v <local-repo>:/repo
                        codenvy/cli:<version> [COMMAND]
 ``` 
-During the `codenvy config` phase, the repository's `/modules` and `/manifests` will be mounted into the puppet configurator.  During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container.
-
-You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
+Dev mode will use files from your host repository in three ways:
+1. During the `codenvy config` phase, the source repository's `/modules` and `/manifests` will be used instead of the ones that are included in the `codenvy/init` container.
+2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
+3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
 
 #### Licensing
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
@@ -470,9 +468,7 @@ These variables can be set in your local environment shell before running and th
 
 | Variable | Description |
 |----------|-------------|
-| `CODENVY_HOST` | The IP address or DNS name of the Codenvy service. We use `codenvy/che-ip` to attempt discovery if not set. |
-| `CODENVY_DEVELOPMENT_MODE` | If `on`, then will mount `CODENVY_DEVELOPMENT_REPO`, overriding the files in Codenvy config and containers. |
-| `CODENVY_DEVELOPMENT_REPO` | The location of the `http://github.com/codenvy/codenvy` local clone. |
+| `CODENVY_HOST` | The IP address or DNS name of the Codenvy service. We use `eclipse/che-ip` to attempt discovery if not set. |
 
 Codenvy depends upon Docker images. We use Docker images in three ways:
 1. As cross-platform utilites within the CLI. For example, in scenarios where we need to perform a `curl` operation, we use a small Docker image to perform this function. We do this as a precaution as many operating systems (like Windows) do not have curl installed.

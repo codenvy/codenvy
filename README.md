@@ -1,32 +1,26 @@
-# Codenvy
+# Codenvy 
+Cloud workspaces for development teams. One-click Docker environments to create workspaces [with production runtimes](https://codenvy.com/solutions/bootstrapping). [Team onboarding and collaboraiton with workspace automation](https://codenvy.com/product/next-generation) and permissions letting devs sync their desktop IDE or use our gorgeous Eclipse Che IDE. [Workspace platform for DevOps](https://codenvy.com/product/technology) to manage workspaces at scale with programmable and customizable infrastructure.
+ 
+![Eclipse Che](https://www.eclipse.org/che/images/banner@2x.png "Eclipse Che")
 
-https://www.codenvy.com/.  
-On-demand developer workspaces to improve agile workflow and automate developer bootstrapping.
+### Getting Started
+You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. The [docs will get you going](docs/README.md). Quick start:
 
-![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
+```
+docker run codenvy/cli start
+```
 
-### Workspaces With Runtimes
-Workspaces are composed of projects and runtimes. Create portable and moavable workspaces that run anywhere, anytime in the cloud or on your desktop ... [Read More](https://www.eclipse.org/che/features/#new-workspace)
+The `codenvy` repository is where we do development. Your license grants you access to the source code for customization, but you are not able to redistribute the source code or use it in commercial endeavors.
 
-### Codenvy Developer
-Portable, shareable developer workspaces for any programming language or framework.
-
-### Codenvy Team
-Workspaces integrated with issue managment, version control, and continuous integration.
-
-### Codenvy Enterprise
-Workspaces with user permissions, SSO, elasticity and resource management.
-
-### Deployment Types
-You can use Codenvy at our cloud, download it for installation, or get a private installation with our managed hosting services.
-
-Follow the [step by step guide](http://codenvy.readme.io/docs/installation-getting-started) to install Codenvy.
+- [Submit bugs and feature requests](http://github.com/codenvy/codenvy/issues) and help us verify them
+- Review [source code changes](http://github.com/codenvy/codenvy/pulls)
+- [Review the docs](https://github.com/codenvy/codenvy/docs/README.md) and make improvements
 
 ### License
-Codenvy is licensed under Codenvy Fair Source 5 for the first five users. You can purchase a commercial Codenvy license from sales.
+Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf) that includes premium support.
 
-### Dependencies
-Codenvy requires CentOS / RHEL 7.1+ as the only initial dependency. Our installation scripts will install an installation manager based upon Java, which then coordinates the installation of Puppet. Puppet then configures the rest of the system with dependencies for Docker, Swarm, and a variety of other packages.
+### Customiziing 
+There are many ways to customize Codenvy out-of-the-box. Codenvy is customized using Eclipse Che including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 
 
 ### Clone
 
@@ -46,16 +40,11 @@ cd onpremises-ide-packaging-tomcat-codenvy-allinone\target\
 # Assembly:
 onpremises-ide-packaging-tomcat-codenvy-allinone-${version}.zip
 
-# Update Codenvy's puppet with the new assembly:
-cd /etc/puppet/files/servers/prod/aio/
-rm onpremises-ide-packaging-tomcat-codenvy-allinone-${version}.zip
-cp ~/onpremises-ide-packaging-tomcat-codenvy-allinone-${version}.zip .
-puppet agent -t
+# Run Codenvy with a custom assembly - volume moutn this codenvy repository
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v <path-to-repo>:/repo codenvy/cli start
 ```
-Codenvy will perform a short maintenance window and will be available at the hostname configured by the admin.
 
 ### Engage
-* **Customize:** [Runtimes, stacks, commands, assemblies, extensions, plug-ins](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md).
 * **Support:** [We love to help you](https://codenvy.com/support/).
 * **Developers:** Plug-in developers can get API help at [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [codenvy.com](https://codenvy.com).
