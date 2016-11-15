@@ -138,8 +138,9 @@ check_host_volume_mount() {
   echo 'test' > /codenvy/test > "${LOGS}" 2>&1
   
   if [[ ! -f /codenvy/test ]]; then
-    error "Docker installed, but unable to volume mount files from your host."
+    error "Docker installed, but unable to write files to your host."
     error "Have you enabled Docker to allow mounting host directories?"
+    error "Did our CLI not have user rights to create files on your host?"
     return 2;
   fi
 
