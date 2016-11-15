@@ -989,7 +989,6 @@ cmd_rmi() {
 
 cmd_upgrade() {
   debug $FUNCNAME
-  info "upgrade" "Not yet implemented"
 
   if [ $# -eq 0 ]; then
     info "upgrade" "No upgrade target provided. Run '${CHE_MINI_PRODUCT_NAME} version' for a list of upgradeable versions."
@@ -1004,7 +1003,25 @@ cmd_upgrade() {
 
   # If here, this version is validly upgradeable.  You can upgrade from
   # $(get_installed_version) to $1
-  echo "remove me -- you entered a version that you can upgrade to"
+  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
+    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
+    if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+      cmd_stop
+    fi
+  fi
+  ## todo: add option to skip backup
+  cmd_backup
+  ## Download version images
+  get_image_manifest ${1}
+  IFS=$'\n'
+  for SINGLE_IMAGE in $IMAGE_LIST; do
+    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
+    update_image_if_not_found $VALUE_IMAGE
+  done
+  ## Try start
+  if ! cmd_start; then
+    cmd_restore;
+  fi
 
 }
 
