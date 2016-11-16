@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
 /**
+ * Docker instance implementation that prevents multiple container commits on the same node at the same time.
+ *
  * @author Max Shaposhnik
  */
 public class HostedDockerInstance extends DockerInstance {
