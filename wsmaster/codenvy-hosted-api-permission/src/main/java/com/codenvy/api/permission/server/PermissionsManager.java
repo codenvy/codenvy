@@ -106,7 +106,7 @@ public class PermissionsManager {
                                                          .filter(action -> !allowedActions.contains(action))
                                                          .collect(Collectors.toSet());
         if (!unsupportedActions.isEmpty()) {
-            throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support next action(s): " +
+            throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support following action(s): " +
                                         unsupportedActions.stream()
                                                           .collect(Collectors.joining(", ")));
         }
@@ -243,7 +243,7 @@ public class PermissionsManager {
             return false;
         }
 
-        Page<? extends AbstractPermissions> page = permissionsStorage.getByInstance(instanceId, 0, 30);
+        Page<? extends AbstractPermissions> page = permissionsStorage.getByInstance(instanceId, 30, 0);
         boolean hasForeignSetPermission;
         while (!(hasForeignSetPermission = hasForeignSetPermission(page.getItems(), userId))
                && page.hasNextPage()) {

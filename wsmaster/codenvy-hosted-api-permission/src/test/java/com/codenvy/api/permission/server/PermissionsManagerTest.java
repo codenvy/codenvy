@@ -94,21 +94,49 @@ public class PermissionsManagerTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Domain with id 'test' doesn't support following action\\(s\\): unsupported")
+    public void shouldNotStorePermissionsWhenItHasUnsupportedAction() throws Exception {
+        final Permissions permissions = DtoFactory.newDto(PermissionsDto.class)
+                                                  .withUserId("user")
+                                                  .withDomainId("test")
+                                                  .withInstanceId("test123")
+                                                  .withActions(singletonList("unsupported"));
+        permissionsManager.storePermission(permissions);
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Can't edit permissions because there is not any another user with permission 'setPermissions'")
     public void shouldNotStorePermissionsWhenItRemoveLastSetPermissions() throws Exception {
-        final TestPermissionsImpl firstPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
-        final TestPermissionsImpl secondPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
+        final TestPermissionsImpl foreignPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl ownPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
 
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
-        doReturn(new Page<>(singletonList(firstPermissions), 0, 1, 2))
-                .doReturn(new Page<>(singletonList(secondPermissions), 1, 1, 2))
+        doReturn(new Page<>(singletonList(foreignPermissions), 0, 1, 2))
+                .doReturn(new Page<>(singletonList(ownPermissions), 1, 1, 2))
                 .when(permissionsDao).getByInstance(anyString(), anyInt(), anyInt());
 
         permissionsManager.storePermission(new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
     }
 
     @Test
-    public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAllOnStorring() throws Exception {
+    public void shouldStorePermissionsWhenItRemoveSetPermissionsButThereIsAnotherOne() throws Exception {
+        final TestPermissionsImpl foreignPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("setPermissions"));
+        final TestPermissionsImpl ownPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
+
+        when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
+
+        doReturn(new Page<>(singletonList(ownPermissions), 0, 30, 31))
+                .doReturn(new Page<>(singletonList(foreignPermissions), 1, 30, 31))
+                .when(permissionsDao).getByInstance(anyString(), anyInt(), anyInt());
+
+        permissionsManager.storePermission(new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
+
+        verify(permissionsDao).getByInstance("test123", 30, 0);
+        verify(permissionsDao).getByInstance("test123", 30, 30);
+    }
+
+    @Test
+    public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAllOnStoring() throws Exception {
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(false);
 
         permissionsManager.storePermission(new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
@@ -212,8 +240,8 @@ public class PermissionsManagerTest {
         }
 
         @Override
-        protected TestPermissionsImpl doCreateInstance(String userId, String instanceId, List allowedActions) {
-            return new TestPermissionsImpl("user", "test", "test123", singletonList(SET_PERMISSIONS));
+        protected TestPermissionsImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
+            return new TestPermissionsImpl("user", "test", "test123", allowedActions);
         }
     }
 
