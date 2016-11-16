@@ -1032,7 +1032,6 @@ cmd_version() {
   text "$CHE_PRODUCT_NAME:\n"
   text "  Version:      %s\n" $(get_installed_version)
   text "  Installed:    %s\n" $(get_installed_installdate)
-  text "  CLI version:  $CHE_CLI_VERSION\n"
 
   if is_initialized; then
     text "\n"
@@ -1245,8 +1244,6 @@ cmd_debug() {
   info "CODENVY_BACKUP            = ${CODENVY_HOST_BACKUP}"
   info ""
   info "-----------  PLATFORM INFO  -----------"
-#  info "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
-  info "CLI_VERSION               = ${CHE_CLI_VERSION}"
   info "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   info "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
   info "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"

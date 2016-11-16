@@ -68,6 +68,7 @@ If you run into an issue, please [open a GitHub issue](http://github.com/codenvy
 - output of the `docker version` command
 - output of the `docker info` command
 - the full Docker run syntax you used for the `codenvy <command>`
+- the output of `/instance/logs/cli/cli.log`
 
 ## System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -120,7 +121,7 @@ We have experitmented with adding 1000 physical nodes into a single physical clu
 The additional physical nodes must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
 
 ## Installation
-The Codenvy CLI (a Docker image itself) is downloaded when you perform your first `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
+The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
 
 #### Nightly and Latest
 Each version of Codenvy is available in images with a label that matches the version, such as `codenvy/cli:<version>`. You can see the full list of versions [available by browsing DockerHub](https://hub.docker.com/r/codenvy/cli/tags/).
@@ -481,7 +482,7 @@ We currently do not support migrating from the puppet-based configuration of Cod
 We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `cli.logs` file will have all of the traces and error output from your executions.
+The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `/instance/logs/cli/cli.logs` file contains traces and error output from your execution.
 
 ### `codenvy init`
 Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. If you only provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance`, `config`, and `backup` subfolder of `<path>`. If you provide three volume mounts of `<path-1>:/codenvy/config`, `<path-2>:/codenvy/instance`, `<path-3>:/codenvy/backup` then these specific folders will be used instead of the subfolders approach. The `codenvy.env` file is placed into the `/codenvy/config` folder, which is the file you use to configure how Codenvy is configured and run. Other files in this folder are used by Codenvy's configuration system to structure the runtime microservices. 
