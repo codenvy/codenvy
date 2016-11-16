@@ -1006,11 +1006,13 @@ cmd_upgrade() {
   ## Download version images
   info "upgrade" "Downloading $1 images..."
   get_image_manifest ${1}
+  SAVEIFS=$IFS
   IFS=$'\n'
   for SINGLE_IMAGE in ${IMAGE_LIST}; do
     VALUE_IMAGE=$(echo ${SINGLE_IMAGE} | cut -d'=' -f2)
     update_image_if_not_found ${VALUE_IMAGE}
   done
+  IFS=$SAVEIFS
   info "upgrade" "Downloading done."
 
   if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
