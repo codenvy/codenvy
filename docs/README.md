@@ -399,13 +399,13 @@ Dev mode will use files from your host repository in three ways:
 2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
 3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
 
-To activate jpda suspend mode for debugging codenvy server initialization just pass env var **CODENVY_DEBUG_SUSPEND=true** to the cli.
+To activate jpda suspend mode for debugging codenvy server initialization, in the `codenvy.env`:
 ```
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                    -v <local-path>:/codenvy \
-                    -v <local-repo>:/repo \
-                    -e "CODENVY_DEBUG_SUSPEND=true" \
-                       codenvy/cli:<version> [COMMAND]
+CODENVY_DEBUG_SUSPEND=true
+```
+To change codenvy debug port, in the `codenvy.env`:
+```
+CODENVY_DEBUG_PORT=8000
 ```
 
 #### Licensing

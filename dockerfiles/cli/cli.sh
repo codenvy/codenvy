@@ -687,7 +687,6 @@ generate_configuration_with_puppet() {
                   -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
                   -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
                   -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
-                  -e "CODENVY_DEBUG_SUSPEND=${CODENVY_DEBUG_SUSPEND:-false}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
@@ -700,7 +699,6 @@ generate_configuration_with_puppet() {
                   -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
                   -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
                   -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
-                  -e "CODENVY_DEBUG_SUSPEND=${CODENVY_DEBUG_SUSPEND:-false}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
