@@ -687,6 +687,7 @@ generate_configuration_with_puppet() {
                   -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
                   -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
                   -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
+                  -e "ENABLE_JPDA_SUSPEND=${ENABLE_JPDA_SUSPEND:-false}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
