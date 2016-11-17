@@ -763,7 +763,7 @@ cmd_init() {
     text "\n"
     read -p "      I accept the license: [Y/n] " -n 1 -r
     text "\n"
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
       return 2;
     fi
   fi
