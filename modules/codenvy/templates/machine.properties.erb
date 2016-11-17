@@ -98,3 +98,7 @@ workspace.backup.public_key_path=/opt/codenvy-data/conf/ssh/key.pem.pub
 codenvy.sync.strategy=rsync-agent
 
 codenvy.workspace.projects_sync_port=0
+
+# Limits the number of processes that can be forked inside a cgroup. Set -1 for unlimited.
+# Since 4.3 kernel.
+che.docker.pids_limit=512

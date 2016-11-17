@@ -26,12 +26,13 @@ export class CodenvyAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyFactory, codenvyFactoryTemplate, codenvyUser, codenvyPermissions, codenvySystem) {
+  constructor(codenvyFactory, codenvyFactoryTemplate, codenvyUser, codenvyPermissions, codenvySystem, codenvyLicense) {
     this.codenvyFactory = codenvyFactory;
     this.codenvyFactoryTemplate = codenvyFactoryTemplate;
     this.codenvyUser = codenvyUser;
     this.codenvyPermissions = codenvyPermissions;
     this.codenvySystem = codenvySystem;
+    this.codenvyLicense = codenvyLicense;
   }
 
   /**
@@ -48,6 +49,15 @@ export class CodenvyAPI {
    */
   getFactoryTemplate() {
     return this.codenvyFactoryTemplate;
+  }
+
+  /**
+   * The Codenvy License API interaction service.
+   *
+   * @returns {CodenvyLicense}
+   */
+  getLicense() {
+    return codenvyLicense;
   }
 
   /**

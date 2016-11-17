@@ -15,9 +15,6 @@
 'use strict';
 
 import {AdminsUserManagementConfig} from './user-management/user-management-config';
-import {OnPremisesAdminInstallationConfig} from './onprem-administration/installation/installation-config';
-import {OnPremisesAdminAvailableSoftwareCtrl} from './onprem-administration/software/software.controller';
-import {AvailableSoftwarePanel} from './onprem-administration/software/software.directive';
 import {OnPremisesAdminYourLicenseCtrl} from './onprem-administration/yourlicense/yourlicense.controller';
 import {YourLicensePanel} from './onprem-administration/yourlicense/yourlicense.directive';
 
@@ -25,9 +22,7 @@ export class AdminConfig {
 
   constructor(register) {
 
-    register.directive('cdvyAvailableSoftware', AvailableSoftwarePanel);
     register.directive('cdvyYourLicense', YourLicensePanel);
-    register.controller('OnPremisesAdminAvailableSoftwareCtrl', OnPremisesAdminAvailableSoftwareCtrl);
     register.controller('OnPremisesAdminYourLicenseCtrl', OnPremisesAdminYourLicenseCtrl);
 
     // configure routes
@@ -39,6 +34,5 @@ export class AdminConfig {
     });
 
     new AdminsUserManagementConfig(register);
-    new OnPremisesAdminInstallationConfig(register);
   }
 }

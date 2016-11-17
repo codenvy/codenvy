@@ -13,16 +13,13 @@ init_host_ip() {
   GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host eclipse/che-ip:nightly)}
 }
 
-init_logging() {
+init_constants() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
   RED='\033[0;31m'
   YELLOW='\033[38;5;220m'
   NC='\033[0m'
-
-  # Which che CLI version to run?
-  DEFAULT_CHE_CLI_VERSION="latest"
-  CHE_CLI_VERSION=${CHE_CLI_VERSION:-${DEFAULT_CHE_CLI_VERSION}}
+  LOG_INITIALIZED=false
 
   DEFAULT_CHE_PRODUCT_NAME="CODENVY"
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
@@ -33,33 +30,19 @@ init_logging() {
 
   # Turns on stack trace
   DEFAULT_CHE_CLI_DEBUG="false"
-  CHE_CLI_DEBUG=${CHE_CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
+  CHE_CLI_DEBUG=${CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
 
   # Activates console output
   DEFAULT_CHE_CLI_INFO="true"
-  CHE_CLI_INFO=${CHE_CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
+  CHE_CLI_INFO=${CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
 
   # Activates console warnings
   DEFAULT_CHE_CLI_WARN="true"
-  CHE_CLI_WARN=${CHE_CLI_WARN:-${DEFAULT_CHE_CLI_WARN}}
+  CHE_CLI_WARN=${CLI_WARN:-${DEFAULT_CHE_CLI_WARN}}
 
   # Activates console output
   DEFAULT_CHE_CLI_LOG="true"
-  CHE_CLI_LOG=${CHE_CLI_LOG:-${DEFAULT_CHE_CLI_LOG}}
-
-  # Initialize CLI folder
-  CLI_DIR=~/."${CHE_MINI_PRODUCT_NAME}"/cli
-  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
-
-  # Initialize logging into a log file
-  DEFAULT_CHE_CLI_LOGS_FOLDER="${CLI_DIR}"
-  CHE_CLI_LOGS_FOLDER="${CHE_CLI_LOGS_FOLDER:-${DEFAULT_CHE_CLI_LOGS_FOLDER}}"
-
-  # Ensure logs folder exists
-  LOGS="${CHE_CLI_LOGS_FOLDER}/cli.log"
-  mkdir -p "${CHE_CLI_LOGS_FOLDER}"
-  # Log date of CLI execution
-  log "$(date)"
+  CHE_CLI_LOG=${CLI_LOG:-${DEFAULT_CHE_CLI_LOG}}
 
   USAGE="
 Usage: docker run -it --rm 
@@ -89,6 +72,10 @@ Usage: docker run -it --rm
 
 Variables:
     CODENVY_HOST                         IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
+    CLI_DEBUG                            Default=false.Prints stack trace during execution
+    CLI_INFO                             Default=true. Prints out INFO messages to standard out
+    CLI_WARN                             Default=true. Prints WARN messages to standard out
+    CLI_LOG                              Default=true. Prints messages to cli.log file
 "
 }
 
@@ -96,9 +83,11 @@ Variables:
 # Usage:
 #   log <argument> [other arguments]
 log() {
-  if is_log; then
-    echo "$@" >> "${LOGS}"
-  fi 
+  if [[ "$LOG_INITIALIZED"  = "true" ]]; then
+    if is_log; then
+      echo "$@" >> "${LOGS}"
+    fi 
+  fi
 }
 
 usage () {
@@ -119,11 +108,11 @@ info() {
     PRINT_COMMAND=""
     PRINT_STATEMENT=$1
   else
-    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1):"
+    PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1): "
     PRINT_STATEMENT=$2
   fi
   if is_info; then
-    printf "${GREEN}INFO:${NC} %s %s\n" \
+    printf "${GREEN}INFO:${NC} %s%s\n" \
               "${PRINT_COMMAND}" \
               "${PRINT_STATEMENT}"
   fi
@@ -236,6 +225,21 @@ check_docker() {
     return 1;
   fi
 
+  # If DOCKER_HOST is not set, then it should bind mounted
+  if [ -z "${DOCKER_HOST+x}" ]; then
+    if ! docker ps > /dev/null 2>&1; then
+      info "Welcome to Codenvy!"
+      info ""
+      info "We did not detect a valid DOCKER_HOST."
+      info ""
+      info "Rerun the CLI:"
+      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+      info "                      -v <local-path>:/codenvy"
+      info "                           codenvy/cli [COMMAND]"
+      return 2;
+    fi
+  fi
+
   DOCKER_VERSION=($(docker version |  grep  "Version:" | sed 's/Version://'))
 
   MAJOR_VERSION_ID=$(echo ${DOCKER_VERSION[0]:0:1})
@@ -246,21 +250,6 @@ check_docker() {
      [[ ${MINOR_VERSION_ID} -lt 11 ]]; then
        error "Error - Docker engine 1.11+ required."
        return 2;
-  fi
-
-  # If DOCKER_HOST is not set, then it should bind mounted
-  if [ -z "${DOCKER_HOST+x}" ]; then
-      if ! docker ps >> "${LOGS}" 2>&1; then
-        info "Welcome to Codenvy!"
-        info ""
-        info "We did not detect a valid DOCKER_HOST." 
-        info ""
-        info "Rerun the CLI:"
-        info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock "
-        info "                      -v <local-path>:/codenvy "
-        info "                         codenvy/cli $@"    
-        return 2;
-      fi
   fi
 
   # Detect version so that we can provide better error warnings
@@ -303,17 +292,17 @@ check_mounts() {
     info "We did not detect a host mounted data directory."
     info ""
     info "Rerun with a single path:"
-    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock "
-    info "                      -v <local-path>:/codenvy "
-    info "                         codenvy/cli:${CODENVY_VERSION} $@"    
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-path>:/codenvy"
+    info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
     info ""
     info ""
     info "Or rerun with paths for config, instance, and backup (all required):"
-    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock "
-    info "                      -v <local-config-path>:/codenvy/config "
-    info "                      -v <local-instance-path>:/codenvy/instance "
-    info "                      -v <local-backup-path>:/codenvy/backup "
-    info "                         codenvy/cli:${CODENVY_VERSION} $@"    
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-config-path>:/codenvy/config"
+    info "                      -v <local-instance-path>:/codenvy/instance"
+    info "                      -v <local-backup-path>:/codenvy/backup"
+    info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
     return 2;
   fi
 
@@ -347,16 +336,16 @@ check_mounts() {
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
       info "                      -v <local-path>:/codenvy"
       info "                      -v <local-repo>:/repo"
-      info "                         codenvy/cli:${CODENVY_VERSION} $@"    
+      info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
       info ""
       info ""
       info "Or rerun with paths for config, instance, and backup (all required):"
-      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock "
-      info "                      -v <local-config-path>:/codenvy/config "
-      info "                      -v <local-instance-path>:/codenvy/instance "
-      info "                      -v <local-backup-path>:/codenvy/backup "
+      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+      info "                      -v <local-config-path>${NC}:/codenvy/config"
+      info "                      -v <local-instance-path>${NC}:/codenvy/instance"
+      info "                      -v <local-backup-path>${NC}:/codenvy/backup"
       info "                      -v <local-repo>:/repo"
-      info "                         codenvy/cli:${CODENVY_VERSION} $@"    
+      info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
       return 2
     fi
     if [[ ! -d $(echo "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"/"${DEFAULT_CODENVY_DEVELOPMENT_TOMCAT}"-*/) ]]; then
@@ -368,6 +357,20 @@ check_mounts() {
     fi
   fi
 }
+
+init_logging() {
+  # Initialize CLI folder
+  CLI_DIR="${CODENVY_CONTAINER_INSTANCE}/logs/cli"
+  test -d "${CLI_DIR}" || mkdir -p "${CLI_DIR}"
+
+  # Ensure logs folder exists
+  LOGS="${CLI_DIR}/cli.log"
+  LOG_INITIALIZED=true
+
+  # Log date of CLI execution
+  log "$(date)"
+}
+
 
 get_container_bind_folder() {
   THIS_CONTAINER_ID=$(get_this_container_id)
@@ -478,14 +481,20 @@ curl() {
 }
 
 init() {
-  init_logging
+  init_constants
 
   if [[ $# == 0 ]]; then
     usage;
   fi
 
+  # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
+
+  # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
+
+  # Only initialize after mounts have been established so we can write cli.log out to a mount folder
+  init_logging "$@"
 
   if [[ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]]; then
      # Use the CLI that is inside the repository.  

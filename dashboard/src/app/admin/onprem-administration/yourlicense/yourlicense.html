@@ -91,16 +91,6 @@
           </div>
         </div>
         <div ng-switch-default></div>
-        <che-label-container che-label-name="Source Code">
-            <span class="onprem-license-info-row">
-              <span ng-if="!onPremisesAdminYourLicenseCtrl.installedVersion">N/A</span>
-              <che-link
-                ng-if="onPremisesAdminYourLicenseCtrl.installedVersion"
-                ng-href="https://install.codenvycorp.com/codenvy/codenvy-src-{{onPremisesAdminYourLicenseCtrl.installedVersion}}.zip"
-                che-link-text="https://install.codenvycorp.com/codenvy/codenvy-src-{{onPremisesAdminYourLicenseCtrl.installedVersion}}.zip"
-                che-no-padding="true" che-new-window></che-link>
-            </span>
-        </che-label-container>
         <ng-form name="licenseForm" flex class="license-form">
           <div flex="90" layout="column" layout-align="center start" class="input-part">
             <label class="che-label-container-label">License Key:</label>

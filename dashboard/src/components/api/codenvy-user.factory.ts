@@ -24,11 +24,11 @@ export class CodenvyUser {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $resource, $cookies, imsLicenseApi, codenvyPermissions) {
+  constructor($q, $resource, $cookies, codenvyLicense, codenvyPermissions) {
     this.$q = $q;
     this.$resource = $resource;
     this.$cookies = $cookies;
-    this.imsLicenseApi = imsLicenseApi;
+    this.codenvyLicense = codenvyLicense;
     this.codenvyPermissions = codenvyPermissions;
 
     // remote call
@@ -99,7 +99,7 @@ export class CodenvyUser {
     promise.then((user) => {
       //update users map
       this.usersMap.set(user.id, user);//add user
-      this.imsLicenseApi.fetchLicenseLegality();//fetch license legality
+      this.codenvyLicense.fetchLicenseLegality();//fetch license legality
     });
 
     return promise;
@@ -305,7 +305,7 @@ export class CodenvyUser {
     promise.then(() => {
       //update users map
       this.usersMap.delete(userId);//remove user
-      this.imsLicenseApi.fetchLicenseLegality();//fetch license legality
+      this.codenvyLicense.fetchLicenseLegality();//fetch license legality
     });
 
     return promise;

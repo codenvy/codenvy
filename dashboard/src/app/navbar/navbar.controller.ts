@@ -20,14 +20,13 @@ export class CodenvyNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, codenvyAPI, imsArtifactApi, $rootScope, $http, $window, $cookies, $resource) {
+  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, codenvyAPI, $rootScope, $http, $window, $cookies, $resource) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
-    this.imsArtifactApi = imsArtifactApi;
     this.codenvyUser = codenvyAPI.getUser();
     this.codenvyPermissions = codenvyAPI.getPermissions();
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];

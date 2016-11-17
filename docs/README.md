@@ -68,6 +68,7 @@ If you run into an issue, please [open a GitHub issue](http://github.com/codenvy
 - output of the `docker version` command
 - output of the `docker info` command
 - the full Docker run syntax you used for the `codenvy <command>`
+- the output of `/instance/logs/cli/cli.log`
 
 ## System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -120,7 +121,27 @@ We have experitmented with adding 1000 physical nodes into a single physical clu
 The additional physical nodes must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
 
 ## Installation
-The Codenvy CLI (a Docker image itself) is downloaded when you perform your first `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
+The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
+
+#### Nightly and Latest
+Each version of Codenvy is available in images with a label that matches the version, such as `codenvy/cli:<version>`. You can see the full list of versions [available by browsing DockerHub](https://hub.docker.com/r/codenvy/cli/tags/).
+
+We maintain special "redirection" labels which reference special versions of Codenvy:
+
+| Variable | Description |
+|----------|-------------|
+| `latest` | The most recent stable release of Codenvy. |
+| `5.0.0-latest` | The most recent stable release of Codenvy on the 5.x branch. |
+| `nightly` | The nightly build of Codenvy. |
+
+The software referenced by these labels can change over time. Since Docker will cache images locally, the `codenvy/cli:<version>` image that you are running locally may not be current with the one cached on DockerHub.  Additionally, the `codenvy/cli:<version>` image that you are running references a manifest of Docker images that Codenvy depends upon, which can also change if you are using these special redirection tags.
+
+To avoid these issues, there are two things you should do.
+
+1. To verify that you have the most current version of the redirection image, `docker pull eclipse/cli:<version>`.
+2. When running the CLI, commands that use other Docker images have an optional `--pull` and `--force` command line option [which will instruct the CLI to check DockerHub](https://github.com/codenvy/codenvy/tree/master/docs#codenvy-init) for a newer version and pull it down. Using these flags will slow down performance, but ensures that your local cache is current.
+
+If you are running Codenvy using a tagged version that is a not a redirection label, such as `5.0.0-M7`, then these caching issues will not happen, as the software installed is tagged and specific to that particular version, never changing over time.
 
 #### Linux:
 There is nothing additional you need to install other than Docker.
@@ -231,7 +252,7 @@ In these docs, when you see `codenvy [COMMAND]`, it is assumed that you run the 
 
 #### Sample Start
 For example, to start the nightly build of Codenvy with its data saved on Windows in C:\tmp:
-`docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v /c/tmp:/codenvy codenvy/cli:nightly start`
+`docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v /c/tmp:/codenvy codenvy/cli:5.0.0-latest start`
 
 This installs a Codenvy configuration, downloads Codenvy's Docker images, run pre-flight port checks, boot Codenvy's services, and run post-flight checks. You do not need root access to start Codenvy, unless your environment requires it for Docker operations.
 
@@ -259,6 +280,8 @@ The administrative login is:
 user: admin
 pass: password
 ```
+#### Versions
+While we provide `nightly`, `latest`, and `5.0.0-latest` [redirection versions](https://github.com/codenvy/codenvy/tree/master/docs#nightly-and-latest) which are tags that simplify helping you retrieve a certain build, you should always run Codenvy with a specific version label to avoid [redirection caching issues](https://github.com/codenvy/codenvy/tree/master/docs#nightly-and-latest). So, running `docker run codenvy/cli` is great syntax for testing and getting started quickly, you should always run `docker run codenvy/cli:<version>` for production usage.
 
 #### Volume Mounts
 If you volume mount a single local folder to `<your-local-path>:/codenvy`, then Codenvy creates `/codenvy/config` (configuration files), `/codenvy/instance` (user data, projects, runtime logs, and database), and `/codenvy/backup` (data backup).
@@ -337,7 +360,8 @@ User data is stored in:
 Instance configuration is generated by Codenvy and is updated by our internal configuration utilities. These 'generated' configuration files should not be modified and stored in:
 ```
 /codenvy.var                       # Version of Codenvy installed
-/docker-compose.yml                # Docker compose to launch internal services
+/docker-compose-container.yml      # Docker compose to launch internal services
+/docker-compose.yml                # Docker compose to launch Codenvy from the host without contianer
 /config                            # Configuration files which are input mounted into the containers
 ```
 
@@ -459,7 +483,7 @@ We currently do not support migrating from the puppet-based configuration of Cod
 We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `cli.logs` file will have all of the traces and error output from your executions.
+The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `/instance/logs/cli/cli.logs` file contains traces and error output from your execution.
 
 ### `codenvy init`
 Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. If you only provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance`, `config`, and `backup` subfolder of `<path>`. If you provide three volume mounts of `<path-1>:/codenvy/config`, `<path-2>:/codenvy/instance`, `<path-3>:/codenvy/backup` then these specific folders will be used instead of the subfolders approach. The `codenvy.env` file is placed into the `/codenvy/config` folder, which is the file you use to configure how Codenvy is configured and run. Other files in this folder are used by Codenvy's configuration system to structure the runtime microservices. 
@@ -541,7 +565,7 @@ Adds a new physical node into the Codenvy cluster. That node must have Docker pr
 Takes a single parameter, `ip`, which is the external IP address of the remote physical node to be removed from the Codenvy cluster. This utility does not remove any software from the remote node, but it does ensure that workspace runtimes are not executing on that node. 
 
 ## Architecture
-TBD
+![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
 
 ## Team
 See [Contributors](../../graphs/contributors) for the complete list of developers that have contributed to this project.

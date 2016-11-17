@@ -14,7 +14,6 @@
  */
 'use strict';
 
-import {ResetServerPropsCtrl} from './admin/reset-server-properties/reset-server-properties.controller';
 import {NagMessageCtrl} from './license-nag-message-management/nag-message.controller';
 import {NagMessageService} from './license-nag-message-management/nag-message.service';
 import {NagMessage} from './license-nag-message-management/nag-message.directive';

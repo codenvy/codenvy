@@ -24,19 +24,19 @@ export class NagMessageCtrl {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($scope, cheAPI, codenvyAPI, imsLicenseApi, nagMessageService, codenvyPermissions) {
+  constructor($scope, cheAPI, codenvyAPI, codenvyLicense, nagMessageService, codenvyPermissions) {
     this.$scope = $scope;
     this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
-    this.imsLicenseApi = imsLicenseApi;
+    this.codenvyLicense = codenvyLicense;
     this.nagMessageService = nagMessageService;
 
     this.userServices = codenvyPermissions.getUserServices();
-    this.numberOfFreeUsers = imsLicenseApi.getNumberOfFreeUsers();
+    this.numberOfFreeUsers = codenvyLicense.getNumberOfFreeUsers();
 
-    let licenseLegality = imsLicenseApi.getLicenseLegality();
+    let licenseLegality = codenvyLicense.getLicenseLegality();
 
-    this.imsLicenseApi.fetchLicenseLegality().finally(() => {
+    this.codenvyLicense.fetchLicenseLegality().finally(() => {
       this.checkLegality(licenseLegality);
     });
 

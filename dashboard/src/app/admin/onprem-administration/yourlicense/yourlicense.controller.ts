@@ -20,33 +20,17 @@ export class OnPremisesAdminYourLicenseCtrl {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor(imsLicenseApi, imsArtifactApi, cheNotification) {
-    this.imsLicenseApi = imsLicenseApi;
-    this.imsArtifactApi = imsArtifactApi;
+  constructor(codenvyLicense, cheNotification) {
+    this.codenvyLicense = codenvyLicense;
     this.cheNotification = cheNotification;
 
-    this.license = imsLicenseApi.getLicense();
-
-    let artifactsList = imsArtifactApi.getInstalledArtifactsList();
+    this.license = codenvyLicense.getLicense();
 
     this.isLoading = true;
-    artifactsList.then((artifacts) => {
-      if (artifacts) {
-        for (let artifact of artifacts) {
-          if (artifact.artifact === 'codenvy') {
-            this.installedVersion = artifact.version;
-            break;
-          }
-        }
-      }
-    }, (error)=> {
-      this.isLoading = false;
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Installation manager server error.');
-    });
 
     this.checkLicense();
 
-    this.numberOfFreeUsers = imsLicenseApi.getNumberOfFreeUsers();
+    this.numberOfFreeUsers = codenvyLicense.getNumberOfFreeUsers();
   }
 
 
@@ -57,7 +41,7 @@ export class OnPremisesAdminYourLicenseCtrl {
     this.isLicenseExpired = !this.license.properties || this.license.properties.isExpired === 'true';
     this.licenseState = 'LICENSE';
     this.newLicense = angular.copy(this.license.key);
-    this.maxUsers = this.imsLicenseApi.getNumberOfAllowedUsers();
+    this.maxUsers = this.codenvyLicense.getNumberOfAllowedUsers();
     //change date format from 'yyyy/mm/dd' to 'mm/dd/yyyy'
     this.expirationDate = this.license.properties.EXPIRATION.replace( /(\d{4})\/(\d{2})\/(\d{2})/, "$2/$3/$1");
     this.isLoading = false;
@@ -72,7 +56,7 @@ export class OnPremisesAdminYourLicenseCtrl {
     if (this.license.key) {
       this.updateLicenseState();
     } else {
-      this.imsLicenseApi.fetchLicense().then(() => {
+      this.codenvyLicense.fetchLicense().then(() => {
         this.updateLicenseState();
       }, () => { //if no license
         this.isLoading = false;
@@ -87,7 +71,7 @@ export class OnPremisesAdminYourLicenseCtrl {
    * Delete current  license
    */
   deleteLicense() {
-    let promise = this.imsLicenseApi.deleteLicense();
+    let promise = this.codenvyLicense.deleteLicense();
 
     this.isLoading = true;
     promise.then(()=> {
@@ -106,14 +90,14 @@ export class OnPremisesAdminYourLicenseCtrl {
    * Add new license
    */
   addLicense() {
-    let promise = this.imsLicenseApi.addLicense(this.newLicense);
+    let promise = this.codenvyLicense.addLicense(this.newLicense);
 
     this.isLoading = true;
     promise.then(()=> {
       this.isLoading = false;
       this.isLicenseInvalid = false;
       this.cheNotification.showInfo('License successfully added.');
-      this.imsLicenseApi.fetchLicenseProperties().then(()=> {
+      this.codenvyLicense.fetchLicenseProperties().then(()=> {
         this.checkLicense();
       });
     }, (error)=> {

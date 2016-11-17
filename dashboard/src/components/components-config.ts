@@ -14,13 +14,11 @@
  */
 'use strict';
 
-import {ImsApiConfig} from './ims/imsapi-config';
 import {CodenvyApiConfig} from './api/codenvy-api-config';
 
 export class CodenvyComponentsConfig {
 
   constructor(register) {
-    new ImsApiConfig(register);
     new CodenvyApiConfig(register);
   }
 }

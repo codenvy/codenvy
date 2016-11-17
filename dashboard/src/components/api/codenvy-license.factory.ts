@@ -18,7 +18,7 @@
  * This class is handling the license API retrieval
  * @author Oleksii Orel
  */
-export class ImsLicenseApi {
+export class CodenvyLicense {
 
   /**
    * Default constructor that is using resource

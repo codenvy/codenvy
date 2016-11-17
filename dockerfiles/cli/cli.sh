@@ -17,6 +17,8 @@ cli_init() {
 
   DEFAULT_CODENVY_CLI_ACTION="help"
   CODENVY_CLI_ACTION=${CODENVY_CLI_ACTION:-${DEFAULT_CODENVY_CLI_ACTION}}
+  
+  CODENVY_LICENSE=true
 
   init_host_ip
   DEFAULT_CODENVY_HOST=$GLOBAL_HOST_IP
@@ -38,7 +40,7 @@ cli_init() {
 
   CODENVY_VERSION_FILE="codenvy.ver"
   CODENVY_ENVIRONMENT_FILE="codenvy.env"
-  CODENVY_COMPOSE_FILE="docker-compose.yml"
+  CODENVY_COMPOSE_FILE="docker-compose-container.yml"
   CODENVY_SERVER_CONTAINER_NAME="codenvy_codenvy_1"
   CODENVY_CONFIG_BACKUP_FILE_NAME="codenvy_config_backup.tar"
   CODENVY_INSTANCE_BACKUP_FILE_NAME="codenvy_instance_backup.tar"
@@ -138,8 +140,9 @@ check_host_volume_mount() {
   echo 'test' > /codenvy/test > "${LOGS}" 2>&1
   
   if [[ ! -f /codenvy/test ]]; then
-    error "Docker installed, but unable to volume mount files from your host."
+    error "Docker installed, but unable to write files to your host."
     error "Have you enabled Docker to allow mounting host directories?"
+    error "Did our CLI not have user rights to create files on your host?"
     return 2;
   fi
 
@@ -665,30 +668,55 @@ confirm_operation() {
 # Runs puppet image to generate codenvy configuration
 generate_configuration_with_puppet() {
   debug $FUNCNAME
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
+
+  if is_docker_for_windows; then
+    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/registry/registry.env")
+    POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env")
+    CODENVY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
+  else
+    REGISTRY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/registry/registry.env"
+    POSTGRES_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env"
+    CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
+  fi
   # Note - bug in docker requires relative path for env, not absolute
   log "docker_run -it --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+                  --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
                   -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
+                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
+                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
+                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff \"$@\""
   docker_run -it  --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
+                  --env-file=/version/$CODENVY_VERSION/images \
                   -v "${CODENVY_HOST_INSTANCE}":/opt/codenvy:rw \
                   -v "${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}":/etc/puppet/manifests:ro \
                   -v "${CODENVY_HOST_CONFIG_MODULES_FOLDER}":/etc/puppet/modules:ro \
+                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
+                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
+                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff "$@" >> "${LOGS}"
+                                /etc/puppet/manifests/codenvy.pp --show_diff "$@"
 }
 
 # return date in format which can be used as a unique file or dir name
 # example 2016-10-31-1477931458
 get_current_date() {
     date +'%Y-%m-%d-%s'
+}
+
+require_license() {
+  if [[ "${CODENVY_LICENSE}" = "true" ]]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 ###########################################################################
@@ -727,6 +755,17 @@ cmd_init() {
 
   if [ -z ${IMAGE_INIT+x} ]; then
     get_image_manifest $CODENVY_VERSION
+  fi
+
+  if require_license; then
+    info ""
+    info "init" "Do you accept the ${CHE_MINI_PRODUCT_NAME} license? (https://codenvy.com/legal/fair-source/)"
+    text "\n"
+    read -p "      I accept the license: [Y/n] " -n 1 -r
+    text "\n"
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      return 2;
+    fi
   fi
 
   info "init" "Installing configuration and bootstrap variables:"
@@ -831,19 +870,17 @@ cmd_config() {
         "${CODENVY_CONTAINER_INSTANCE}/dev"
   fi
 
+  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
   # Run the docker configurator
-  generate_configuration_with_puppet 
+  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+    # generate configs and print puppet output logs to console if dev mode is on
+    generate_configuration_with_puppet
+  else
+    generate_configuration_with_puppet >> "${LOGS}"
+  fi
 
   # Replace certain environment file lines with their container counterparts
   info "config" "Customizing docker-compose for running in a container"
-  CODENVY_ENVFILE_REGISTRY="${CODENVY_CONTAINER_INSTANCE}/config/registry/registry.env"
-  CODENVY_ENVFILE_POSTGRES="${CODENVY_CONTAINER_INSTANCE}/config/postgres/postgres.env"
-  CODENVY_ENVFILE_CODENVY="${CODENVY_CONTAINER_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
-
-  sed "s|^.*registry\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_REGISTRY}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-  sed "s|^.*postgres\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_POSTGRES}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-  sed "s|^.*codenvy\.env.*$|\ \ \ \ \ \ \-\ \'${CODENVY_ENVFILE_CODENVY}\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-
   # If this is windows, we need to add a special volume for postgres
   if has_docker_for_windows_client; then
     sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
@@ -953,13 +990,11 @@ cmd_destroy() {
   docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
              -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
                 alpine:3.4 sh -c "rm -rf /root/codenvy-instance/* && rm -rf /root/codenvy-config/*"
-  log "rm -rf \"${CODENVY_CONTAINER_CONFIG}\" >> \"${LOGS}\""
-  log "rm -rf \"${CODENVY_CONTAINER_INSTANCE}\" >> \"${LOGS}\""
+  LOG_INITIALIZED=false
   rm -rf "${CODENVY_CONTAINER_CONFIG}"
   rm -rf "${CODENVY_CONTAINER_INSTANCE}"
   if has_docker_for_windows_client; then
-    log "docker volume rm codenvy-postgresql-volume >> \"${LOGS}\" 2>&1 || true"
-    docker volume rm codenvy-postgresql-volume >> "${LOGS}" 2>&1 || true
+    docker volume rm codenvy-postgresql-volume > /dev/null 2>&1  || true
   fi
 }
 
@@ -989,7 +1024,6 @@ cmd_rmi() {
 
 cmd_upgrade() {
   debug $FUNCNAME
-  info "upgrade" "Not yet implemented"
 
   if [ $# -eq 0 ]; then
     info "upgrade" "No upgrade target provided. Run '${CHE_MINI_PRODUCT_NAME} version' for a list of upgradeable versions."
@@ -1004,7 +1038,32 @@ cmd_upgrade() {
 
   # If here, this version is validly upgradeable.  You can upgrade from
   # $(get_installed_version) to $1
-  echo "remove me -- you entered a version that you can upgrade to"
+  ## Download version images
+  info "upgrade" "Downloading $1 images..."
+  get_image_manifest ${1}
+  SAVEIFS=$IFS
+  IFS=$'\n'
+  for SINGLE_IMAGE in ${IMAGE_LIST}; do
+    VALUE_IMAGE=$(echo ${SINGLE_IMAGE} | cut -d'=' -f2)
+    update_image_if_not_found ${VALUE_IMAGE}
+  done
+  IFS=$SAVEIFS
+  info "upgrade" "Downloading done."
+
+  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
+    info "upgrade" "Stopping currently running instance..."
+    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id ${CODENVY_SERVER_CONTAINER_NAME})
+    if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+      cmd_stop
+    fi
+  fi
+  info "upgrade" "Preparing backup..."
+  cmd_backup
+  ## Try start
+  if ! cmd_start; then
+    info "upgrade" "Startup failed, restoring latest backup..."
+    cmd_restore;
+  fi
 
 }
 
@@ -1016,7 +1075,6 @@ cmd_version() {
   text "$CHE_PRODUCT_NAME:\n"
   text "  Version:      %s\n" $(get_installed_version)
   text "  Installed:    %s\n" $(get_installed_installdate)
-  text "  CLI version:  $CHE_CLI_VERSION\n"
 
   if is_initialized; then
     text "\n"
@@ -1229,8 +1287,6 @@ cmd_debug() {
   info "CODENVY_BACKUP            = ${CODENVY_HOST_BACKUP}"
   info ""
   info "-----------  PLATFORM INFO  -----------"
-#  info "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
-  info "CLI_VERSION               = ${CHE_CLI_VERSION}"
   info "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   info "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
   info "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
