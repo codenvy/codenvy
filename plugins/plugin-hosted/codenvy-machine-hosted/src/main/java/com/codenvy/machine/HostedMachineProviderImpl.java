@@ -154,8 +154,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE),
                               progressMonitor);
 
-        }
-        catch (ImageNotFoundException e) {
+        } catch (ImageNotFoundException e) {
             throw new SourceNotFoundException(e.getLocalizedMessage(), e);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
