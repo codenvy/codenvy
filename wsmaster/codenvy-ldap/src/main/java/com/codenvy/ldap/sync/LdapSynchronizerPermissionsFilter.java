@@ -28,7 +28,7 @@ import javax.ws.rs.Path;
  * Rejects/allows access to the methods of {@link LdapSynchronizerService}.
  *
  * <p>All the service methods MUST be allowed only to those users who have
- * {@link SystemDomain#MANAGE_CODENVY_ACTION} permission.
+ * {@link SystemDomain#MANAGE_SYSTEM_ACTION} permission.
  *
  * @author Yevhenii Voevodin
  */
@@ -40,6 +40,6 @@ public class LdapSynchronizerPermissionsFilter extends CheMethodInvokerFilter {
     protected void filter(GenericResourceMethod resource, Object[] args) throws ApiException {
         EnvironmentContext.getCurrent()
                           .getSubject()
-                          .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+                          .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 }
