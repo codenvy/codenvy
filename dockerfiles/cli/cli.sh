@@ -762,7 +762,7 @@ cmd_init() {
     info "init" "Do you accept the ${CHE_MINI_PRODUCT_NAME} license? (https://codenvy.com/legal/fair-source/)"
     text "\n"
     read -p "      I accept the license: [Y/n] " -n 1 -r
-    text "\n\n"
+    text "\n"
     if [[ $REPLY =~ ^[Nn]$ ]]; then
       return 2;
     fi
