@@ -388,15 +388,23 @@ For Codenvy developers that are building and customizing Codenvy from its source
 
 Dev mode is activated by volume mounting the Codenvy git repository to `:/repo` in your Docker run command.
 ```
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
-                    -v <local-path>:/codenvy
-                    -v <local-repo>:/repo
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/codenvy \
+                    -v <local-repo>:/repo \
                        codenvy/cli:<version> [COMMAND]
 ``` 
 Dev mode will use files from your host repository in three ways:
 1. During the `codenvy config` phase, the source repository's `/modules` and `/manifests` will be used instead of the ones that are included in the `codenvy/init` container.
 2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
 3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
+To activate jpda suspend mode for debugging codenvy server initialization just pass env var **ENABLE_JPDA_SUSPEND=true** to the cli.
+```
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/codenvy \
+                    -v <local-repo>:/repo \
+                    -e "ENABLE_JPDA_SUSPEND=true" \
+                       codenvy/cli:<version> [COMMAND]
+```
 
 #### Licensing
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
