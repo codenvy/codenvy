@@ -23,9 +23,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.plugin.docker.compose.yaml.ComposeEnvironmentParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -42,6 +41,7 @@ import static com.codenvy.api.workspace.TestObjects.createConfig;
 import static com.codenvy.api.workspace.TestObjects.createRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.Size.parseSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -349,7 +349,7 @@ public class LimitsCheckingWorkspaceManagerTest {
             systemRamInfoProvider = mock(SystemRamInfoProvider.class);
             when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
 
-            environmentParser = new EnvironmentParser(new ComposeFileParser(), mock(RecipeDownloader.class));
+            environmentParser = new EnvironmentParser(singletonMap("compose", new ComposeEnvironmentParser(null)));
         }
 
         public LimitsCheckingWorkspaceManager build() {

@@ -161,6 +161,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
 
         install(new org.eclipse.che.api.machine.server.MachineModule());
+        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         install(new org.eclipse.che.swagger.deploy.DocsModule());
 
