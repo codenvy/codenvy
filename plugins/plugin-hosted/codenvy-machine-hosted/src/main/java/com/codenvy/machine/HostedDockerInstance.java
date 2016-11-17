@@ -14,7 +14,6 @@
  */
 package com.codenvy.machine;
 
-import com.google.common.util.concurrent.Striped;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -30,16 +29,19 @@ import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 /**
- * Docker instance implementation that prevents multiple container commits on the same node at the same time.
+ * Docker instance implementation that limits number of simultaneous container commits on the given node.
  *
  * @author Max Shaposhnik
  */
 public class HostedDockerInstance extends DockerInstance {
 
-    private static final Striped<Lock> NODE_LOCKS = Striped.lazyWeakLock(16);
+    private static final Map<String, Semaphore> SEMAPHORES = new ConcurrentHashMap<>();
+    private static int concurrentCommits;
 
     @Inject
     public HostedDockerInstance(DockerConnector docker,
@@ -53,7 +55,8 @@ public class HostedDockerInstance extends DockerInstance {
                                 @Assisted LineConsumer outputConsumer,
                                 DockerInstanceStopDetector dockerInstanceStopDetector,
                                 DockerInstanceProcessesCleaner processesCleaner,
-                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) {
+                                @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                                @Named("che.docker.concurrent_commits_on_node") int concurrentCommits) {
         super(docker,
               registry,
               registryNamespace,
@@ -66,16 +69,31 @@ public class HostedDockerInstance extends DockerInstance {
               dockerInstanceStopDetector,
               processesCleaner,
               snapshotUseRegistry);
+        HostedDockerInstance.concurrentCommits = concurrentCommits;
     }
 
     @Override
-    protected void commitContainer(String repository, String tag) throws IOException {
-        final Lock nodeLock = NODE_LOCKS.get(getNode().getHost());
-        nodeLock.lock();
+    protected void commitContainer(String repository, String tag) throws IOException, InterruptedException {
+        final Semaphore nodeSemahore = getSemaphore(getNode().getHost());
+        nodeSemahore.acquire();
         try {
             super.commitContainer(repository, tag);
         } finally {
-            nodeLock.unlock();
+            nodeSemahore.release();
         }
     }
+
+    private Semaphore getSemaphore(String key) {
+        Semaphore semaphore = SEMAPHORES.get(key);
+        if (semaphore == null) {
+            Semaphore newSemaphore = new Semaphore(concurrentCommits, true);
+            semaphore = SEMAPHORES.putIfAbsent(key,newSemaphore);
+            if (semaphore == null) {
+                semaphore = newSemaphore;
+            }
+        }
+        System.out.println("~~~~~~~~~~~~" + semaphore);
+        return semaphore;
+    }
+
 }
