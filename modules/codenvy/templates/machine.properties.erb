@@ -102,3 +102,9 @@ codenvy.workspace.projects_sync_port=0
 # Limits the number of processes that can be forked inside a cgroup. Set -1 for unlimited.
 # Since 4.3 kernel.
 che.docker.pids_limit=512
+
+# Adds options when mounting the /projects volume.
+che.docker.volumes_projects_options=Z
+
+# Adds options when mounting the /mnt/che/terminal, /mnt/che/ws-agent.tar.gz, /mnt/che/conf volume
+che.docker.volumes_agent_options=ro,Z
