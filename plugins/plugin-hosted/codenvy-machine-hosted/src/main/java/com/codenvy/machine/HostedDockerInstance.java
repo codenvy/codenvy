@@ -40,7 +40,7 @@ import java.util.concurrent.Semaphore;
  */
 public class HostedDockerInstance extends DockerInstance {
 
-    private static final Map<String, Semaphore> SEMAPHORES = new ConcurrentHashMap<>();
+    private static final Map<String, Semaphore> semaphores = new ConcurrentHashMap<>();
     private final int concurrentCommits;
 
     @Inject
@@ -80,17 +80,17 @@ public class HostedDockerInstance extends DockerInstance {
             super.commitContainer(repository, tag);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IOException(e);
+            throw new IOException(e.getLocalizedMessage(), e);
         } finally {
             nodeSemaphore.release();
         }
     }
 
     private Semaphore getSemaphore(String key) {
-        Semaphore semaphore = SEMAPHORES.get(key);
+        Semaphore semaphore = semaphores.get(key);
         if (semaphore == null) {
             Semaphore newSemaphore = new Semaphore(concurrentCommits, true);
-            semaphore = SEMAPHORES.putIfAbsent(key, newSemaphore);
+            semaphore = semaphores.putIfAbsent(key, newSemaphore);
             if (semaphore == null) {
                 semaphore = newSemaphore;
             }

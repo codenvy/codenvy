@@ -146,6 +146,45 @@ public class HostedDockerInstanceTest {
     }
 
 
+    @Test
+    public void shouldBeAbleToCommitSimultaneouslyOnDifferentNodes() throws Exception {
+
+        String repo1 = "repo1";
+        String repo2 = "repo2";
+        String repo3 = "repo3";
+
+        WaitingAnswer<Void> waitingAnswer1 = new WaitingAnswer<>();
+        WaitingAnswer<Void> waitingAnswer2 = new WaitingAnswer<>();
+
+        doAnswer(waitingAnswer1).when(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo1)));
+        doAnswer(waitingAnswer2).when(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo2)));
+
+        // Starting threads #1 & 2
+        executor.execute(() -> performCommit(repo1, TAG));
+        executor.execute(() -> performCommit(repo2, TAG));
+        waitingAnswer1.waitAnswerCall(1, TimeUnit.SECONDS);
+        waitingAnswer2.waitAnswerCall(1, TimeUnit.SECONDS);
+
+        // thread #3 run on other node
+        when(dockerNode.getHost()).thenReturn("host2");
+        // when
+        executor.execute(() -> performCommit(repo3, TAG));
+
+        Thread.sleep(200); //to allow thread # 3 start
+
+        // thread #3 commit executed too
+        verify(dockerInstance).commitContainer(eq(repo3), eq(TAG));
+        verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
+
+        // completing first 2 calls
+        waitingAnswer1.completeAnswer();
+        waitingAnswer2.completeAnswer();
+
+        // then
+        awaitFinalization();
+    }
+
+
     private Machine getMachine(MachineConfig config,
                                String owner,
                                String machineId,
