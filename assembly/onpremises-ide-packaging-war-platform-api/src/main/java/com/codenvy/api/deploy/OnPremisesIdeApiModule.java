@@ -38,6 +38,7 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.machine.HostedDockerInstance;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -161,6 +162,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
 
         install(new org.eclipse.che.api.machine.server.MachineModule());
+        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         install(new org.eclipse.che.swagger.deploy.DocsModule());
 
@@ -340,7 +342,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new FactoryModuleBuilder()
                         .implement(org.eclipse.che.api.machine.server.spi.Instance.class,
-                                   org.eclipse.che.plugin.docker.machine.DockerInstance.class)
+                                   com.codenvy.machine.HostedDockerInstance.class)
                         .implement(org.eclipse.che.api.machine.server.spi.InstanceProcess.class,
                                    org.eclipse.che.plugin.docker.machine.DockerProcess.class)
                         .implement(org.eclipse.che.plugin.docker.machine.node.DockerNode.class,

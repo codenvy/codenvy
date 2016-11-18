@@ -21,8 +21,6 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.environment.server.compose.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
@@ -36,6 +34,8 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
+import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +78,7 @@ public final class TestObjects {
                                                                                  Long.toString(Size.parseSize(machineRams[i])))));
             }
         }
-        ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
+        ComposeEnvironment composeEnvironment = new ComposeEnvironment();
         composeEnvironment.setServices(services);
         String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
         EnvironmentRecipeImpl recipe = new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);

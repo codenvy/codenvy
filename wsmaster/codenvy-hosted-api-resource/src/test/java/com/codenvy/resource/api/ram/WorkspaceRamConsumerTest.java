@@ -24,9 +24,8 @@ import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.compose.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.environment.server.compose.ComposeServiceImpl;
+import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
+import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -36,6 +35,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.plugin.docker.compose.yaml.ComposeEnvironmentParser;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -80,9 +80,9 @@ public class WorkspaceRamConsumerTest {
     @Mock
     RecipeDownloader recipeDownloader;
 
-    ComposeFileParser composeFileParser = new ComposeFileParser();
+    ComposeEnvironmentParser composeFileParser = new ComposeEnvironmentParser(recipeDownloader);
 
-    EnvironmentParser environmentParser = new EnvironmentParser(composeFileParser, recipeDownloader);
+    EnvironmentParser environmentParser = new EnvironmentParser(singletonMap("compose", composeFileParser));
 
     @InjectMocks
     private WorkspaceRamConsumer ramConsumer;
@@ -232,7 +232,7 @@ public class WorkspaceRamConsumerTest {
                                                                                                        machineRamsMb[i] + "mb"))))));
             }
         }
-        ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
+        ComposeEnvironment composeEnvironment = new ComposeEnvironment();
         composeEnvironment.setServices(services);
         String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
         EnvironmentRecipeImpl recipe = new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);

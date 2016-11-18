@@ -405,7 +405,7 @@ get_container_repo_folder() {
 
 get_container_cli_folder() {
   THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/cli" $THIS_CONTAINER_ID)
+  FOLDER=$(get_container_host_bind_folder ":/cli/cli.log" $THIS_CONTAINER_ID)
   echo "${FOLDER:=not set}"
 }
 

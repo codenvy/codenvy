@@ -68,7 +68,7 @@ If you run into an issue, please [open a GitHub issue](http://github.com/codenvy
 - output of the `docker version` command
 - output of the `docker info` command
 - the full Docker run syntax you used for the `codenvy <command>`
-- the output of `/instance/logs/cli/cli.log`
+- the output of `cli.log` - see [CLI Reference](#cli-reference)
 
 ## System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -388,15 +388,25 @@ For Codenvy developers that are building and customizing Codenvy from its source
 
 Dev mode is activated by volume mounting the Codenvy git repository to `:/repo` in your Docker run command.
 ```
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
-                    -v <local-path>:/codenvy
-                    -v <local-repo>:/repo
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/codenvy \
+                    -v <local-repo>:/repo \
                        codenvy/cli:<version> [COMMAND]
 ``` 
 Dev mode will use files from your host repository in three ways:
+
 1. During the `codenvy config` phase, the source repository's `/modules` and `/manifests` will be used instead of the ones that are included in the `codenvy/init` container.
 2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
 3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
+
+To activate jpda suspend mode for debugging codenvy server initialization, in the `codenvy.env`:
+```
+CODENVY_DEBUG_SUSPEND=true
+```
+To change codenvy debug port, in the `codenvy.env`:
+```
+CODENVY_DEBUG_PORT=8000
+```
 
 #### Licensing
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
@@ -483,7 +493,14 @@ We currently do not support migrating from the puppet-based configuration of Cod
 We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `/instance/logs/cli/cli.logs` file contains traces and error output from your execution.
+The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
+
+```
+docker run --rm -it 
+           -v /var/run/docker.sock:/var/run/docker.sock 
+           -v /c/codenvy:/codenvy 
+           -v /c/codenvy/cli:/cli codenvy/cli:nightly [COMMAND]
+```
 
 ### `codenvy init`
 Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. If you only provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance`, `config`, and `backup` subfolder of `<path>`. If you provide three volume mounts of `<path-1>:/codenvy/config`, `<path-2>:/codenvy/instance`, `<path-3>:/codenvy/backup` then these specific folders will be used instead of the subfolders approach. The `codenvy.env` file is placed into the `/codenvy/config` folder, which is the file you use to configure how Codenvy is configured and run. Other files in this folder are used by Codenvy's configuration system to structure the runtime microservices. 
