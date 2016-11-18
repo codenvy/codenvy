@@ -32,6 +32,7 @@ import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -42,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -98,7 +100,7 @@ public class HostedDockerInstanceTest {
     @BeforeMethod
     public void setUp() throws IOException {
         when(dockerNode.getHost()).thenReturn("host1");
-        dockerInstance = getDockerInstance();
+        dockerInstance = Mockito.spy(getDockerInstance());
         executor = Executors.newFixedThreadPool(3);
     }
 
@@ -125,7 +127,10 @@ public class HostedDockerInstanceTest {
         // when
         executor.execute(() -> performCommit(repo3, TAG));
 
-        // thread #3 should wait - semaphore is red
+        Thread.sleep(200); //to allow thread # 3 start
+
+        // thread #3 is entered  method but should wait - semaphore is red
+        verify(dockerInstance).commitContainer(eq(repo3), eq(TAG));
         verify(dockerConnectorMock, never()).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
 
         // completing first 2 calls
@@ -170,7 +175,7 @@ public class HostedDockerInstanceTest {
     private void performCommit(String repo, String tag) {
         try {
             dockerInstance.commitContainer(repo, tag);
-        } catch (IOException | InterruptedException ignore) {
+        } catch (IOException ignore) {
         }
     }
 

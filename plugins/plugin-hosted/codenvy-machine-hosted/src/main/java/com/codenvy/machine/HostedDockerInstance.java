@@ -80,6 +80,7 @@ public class HostedDockerInstance extends DockerInstance {
             super.commitContainer(repository, tag);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new IOException(e);
         } finally {
             nodeSemaphore.release();
         }
