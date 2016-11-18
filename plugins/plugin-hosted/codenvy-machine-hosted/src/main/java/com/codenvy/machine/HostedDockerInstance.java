@@ -73,11 +73,13 @@ public class HostedDockerInstance extends DockerInstance {
     }
 
     @Override
-    protected void commitContainer(String repository, String tag) throws IOException, InterruptedException {
+    protected void commitContainer(String repository, String tag) throws IOException {
         final Semaphore nodeSemahore = getSemaphore(getNode().getHost());
-        nodeSemahore.acquire();
         try {
+            nodeSemahore.acquire();
             super.commitContainer(repository, tag);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } finally {
             nodeSemahore.release();
         }
