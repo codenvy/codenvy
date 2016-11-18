@@ -44,9 +44,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
@@ -170,10 +172,8 @@ public class HostedDockerInstanceTest {
         // when
         executor.execute(() -> performCommit(repo3, TAG));
 
-        Thread.sleep(200); //to allow thread # 3 start
-
         // thread #3 commit executed too
-        verify(dockerInstance).commitContainer(eq(repo3), eq(TAG));
+        verify(dockerInstance, atLeastOnce()).commitContainer(eq(repo3), eq(TAG));
         verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
 
         // completing first 2 calls
