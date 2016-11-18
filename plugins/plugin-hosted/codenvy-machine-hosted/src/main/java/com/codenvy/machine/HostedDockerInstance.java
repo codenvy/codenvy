@@ -41,7 +41,7 @@ import java.util.concurrent.Semaphore;
 public class HostedDockerInstance extends DockerInstance {
 
     private static final Map<String, Semaphore> SEMAPHORES = new ConcurrentHashMap<>();
-    private static int concurrentCommits;
+    private final int concurrentCommits;
 
     @Inject
     public HostedDockerInstance(DockerConnector docker,
@@ -69,7 +69,7 @@ public class HostedDockerInstance extends DockerInstance {
               dockerInstanceStopDetector,
               processesCleaner,
               snapshotUseRegistry);
-        HostedDockerInstance.concurrentCommits = concurrentCommits;
+        this.concurrentCommits = concurrentCommits;
     }
 
     @Override
