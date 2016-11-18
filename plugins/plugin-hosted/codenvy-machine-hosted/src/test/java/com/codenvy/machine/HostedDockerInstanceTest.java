@@ -187,12 +187,12 @@ public class HostedDockerInstanceTest {
         private final String compareValue;
 
         public CommitParamsMatcher(String compareValue) {
-            this.compareValue= compareValue;
+            this.compareValue = compareValue;
         }
 
         @Override
         public boolean matches(Object argument) {
-            CommitParams item = (CommitParams) argument;
+            CommitParams item = (CommitParams)argument;
             return item.getRepository().equals(compareValue);
         }
     }
