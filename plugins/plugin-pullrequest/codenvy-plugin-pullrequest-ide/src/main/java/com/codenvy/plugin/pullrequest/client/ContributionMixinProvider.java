@@ -113,74 +113,78 @@ public class ContributionMixinProvider {
         eventBus.addHandler(SelectionChangedEvent.TYPE, new SelectionChangedHandler() {
             @Override
             public void onSelectionChanged(SelectionChangedEvent event) {
-                final Project rootProject = appContext.getRootProject();
-
-                if (lastSelected != null && lastSelected.equals(rootProject)) {
-                    return;
-                }
-
-                final PartStack toolingPartStack = workspaceAgent.getPartStack(TOOLING);
-
-                if (rootProject == null) {
-
-                    if (toolingPartStack.containsPart(contributePart)) {
-                        invalidateContext(lastSelected);
-                        hidePart();
-                    }
-                } else if (hasVcsService(rootProject)) {
-
-                    if (hasContributionMixin(rootProject)) {
-
-                        vcsHostingServiceProvider.getVcsHostingService(rootProject).then(new Operation<VcsHostingService>() {
-                            @Override
-                            public void apply(VcsHostingService vcsHostingService) throws OperationException {
-                                workflowExecutor.init(vcsHostingService, rootProject);
-                                addPart(toolingPartStack);
-                            }
-                        });
-                    } else {
-                        vcsHostingServiceProvider.getVcsHostingService(rootProject)
-                                                 .then(new Operation<VcsHostingService>() {
-                                                     @Override
-                                                     public void apply(final VcsHostingService vcsHostingService)
-                                                             throws OperationException {
-                                                         addMixin(rootProject)
-                                                                 .then(new Operation<Project>() {
-                                                                     @Override
-                                                                     public void apply(Project project) throws OperationException {
-                                                                         workflowExecutor.init(vcsHostingService, project);
-
-                                                                         addPart(toolingPartStack);
-
-                                                                         lastSelected = project;
-                                                                     }
-                                                                 })
-                                                                 .catchError(new Operation<PromiseError>() {
-                                                                     @Override
-                                                                     public void apply(final PromiseError error) throws OperationException {
-                                                                         invalidateContext(rootProject);
-                                                                         hidePart();
-                                                                     }
-                                                                 });
-                                                     }
-                                                 })
-                                                 .catchError(new Operation<PromiseError>() {
-                                                     @Override
-                                                     public void apply(final PromiseError error) throws OperationException {
-                                                         invalidateContext(rootProject);
-                                                         hidePart();
-                                                     }
-                                                 });
-                    }
-
-                } else {
-                    invalidateContext(rootProject);
-                    hidePart();
-                }
-
-                lastSelected = rootProject;
+                processCurrentProject();
             }
         });
+    }
+
+    void processCurrentProject() {
+        final Project rootProject = appContext.getRootProject();
+
+        if (lastSelected != null && lastSelected.equals(rootProject)) {
+            return;
+        }
+
+        final PartStack toolingPartStack = workspaceAgent.getPartStack(TOOLING);
+
+        if (rootProject == null) {
+
+            if (toolingPartStack.containsPart(contributePart)) {
+                invalidateContext(lastSelected);
+                hidePart();
+            }
+        } else if (hasVcsService(rootProject)) {
+
+            if (hasContributionMixin(rootProject)) {
+
+                vcsHostingServiceProvider.getVcsHostingService(rootProject).then(new Operation<VcsHostingService>() {
+                    @Override
+                    public void apply(VcsHostingService vcsHostingService) throws OperationException {
+                        workflowExecutor.init(vcsHostingService, rootProject);
+                        addPart(toolingPartStack);
+                    }
+                });
+            } else {
+                vcsHostingServiceProvider.getVcsHostingService(rootProject)
+                                         .then(new Operation<VcsHostingService>() {
+                                             @Override
+                                             public void apply(final VcsHostingService vcsHostingService)
+                                                     throws OperationException {
+                                                 addMixin(rootProject)
+                                                         .then(new Operation<Project>() {
+                                                             @Override
+                                                             public void apply(Project project) throws OperationException {
+                                                                 workflowExecutor.init(vcsHostingService, project);
+
+                                                                 addPart(toolingPartStack);
+
+                                                                 lastSelected = project;
+                                                             }
+                                                         })
+                                                         .catchError(new Operation<PromiseError>() {
+                                                             @Override
+                                                             public void apply(final PromiseError error) throws OperationException {
+                                                                 invalidateContext(rootProject);
+                                                                 hidePart();
+                                                             }
+                                                         });
+                                             }
+                                         })
+                                         .catchError(new Operation<PromiseError>() {
+                                             @Override
+                                             public void apply(final PromiseError error) throws OperationException {
+                                                 invalidateContext(rootProject);
+                                                 hidePart();
+                                             }
+                                         });
+            }
+
+        } else {
+            invalidateContext(rootProject);
+            hidePart();
+        }
+
+        lastSelected = rootProject;
     }
 
     private void invalidateContext(Project project) {
