@@ -92,7 +92,6 @@ public class HostedDockerInstance extends DockerInstance {
                 semaphore = newSemaphore;
             }
         }
-        System.out.println("~~~~~~~~~~~~" + semaphore);
         return semaphore;
     }
 

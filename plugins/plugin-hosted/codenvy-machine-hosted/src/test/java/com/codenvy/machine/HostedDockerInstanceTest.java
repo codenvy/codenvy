@@ -116,6 +116,7 @@ public class HostedDockerInstanceTest {
         doAnswer(waitingAnswer1).when(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo1)));
         doAnswer(waitingAnswer2).when(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo2)));
 
+        // Starting threads #1 & 2
         executor.execute(() -> performCommit(repo1, TAG));
         executor.execute(() -> performCommit(repo2, TAG));
         waitingAnswer1.waitAnswerCall(1, TimeUnit.SECONDS);
