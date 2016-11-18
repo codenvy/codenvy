@@ -155,7 +155,6 @@ public class ContributionMixinProvider {
                                                              @Override
                                                              public void apply(Project project) throws OperationException {
                                                                  workflowExecutor.init(vcsHostingService, project);
-
                                                                  addPart(toolingPartStack);
 
                                                                  lastSelected = project;
@@ -189,7 +188,6 @@ public class ContributionMixinProvider {
 
     private void invalidateContext(Project project) {
         final Optional<Context> context = workflowExecutor.getContext(project.getName());
-
         if (context.isPresent()) {
             workflowExecutor.invalidateContext(context.get().getProject());
         }
