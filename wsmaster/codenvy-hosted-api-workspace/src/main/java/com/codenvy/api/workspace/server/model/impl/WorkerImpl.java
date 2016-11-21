@@ -20,6 +20,7 @@ import com.codenvy.api.workspace.server.model.Worker;
 
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
@@ -56,14 +57,14 @@ import java.util.List;
                                     "AND worker.workspaceId = :workspaceId ")
         }
 )
-@Table(indexes = {@Index(columnList = "userId, workspaceId", unique = true),
-                  @Index(columnList = "workspaceId")})
+@Table(name = "worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {
 
+    @Column(name = "workspaceid")
     private String workspaceId;
 
     @ManyToOne
-    @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
+    @JoinColumn(name = "workspaceid", insertable = false, updatable = false)
     private WorkspaceImpl workspace;
 
     public WorkerImpl() {

@@ -29,14 +29,17 @@ import org.apache.directory.shared.ldap.entry.Modification;
 import org.apache.directory.shared.ldap.entry.ServerEntry;
 import org.apache.directory.shared.ldap.entry.client.ClientModification;
 import org.apache.directory.shared.ldap.entry.client.DefaultClientAttribute;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.jpa.JpaProfileDao;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.ldaptive.ConnectionFactory;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterClass;
@@ -47,6 +50,7 @@ import java.util.HashSet;
 
 import static java.util.Arrays.asList;
 import static org.apache.directory.shared.ldap.entry.ModificationOperation.REPLACE_ATTRIBUTE;
+import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -197,8 +201,9 @@ public class LdapSynchronizationFlowTest {
         protected void configure() {
             // configure dependencies
             bind(EventService.class).in(Singleton.class);
-            bind(JpaInitializer.class).asEagerSingleton();
-            bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+            bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
+            bind(DBInitializer.class).asEagerSingleton();
+            bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
 
             install(new JpaPersistModule("test"));
             install(new UserJpaModule());

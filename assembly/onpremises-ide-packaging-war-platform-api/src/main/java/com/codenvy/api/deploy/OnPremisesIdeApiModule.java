@@ -63,8 +63,6 @@ import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationService;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
@@ -110,6 +108,11 @@ import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.stack.StackService;
 import org.eclipse.che.commons.schedule.executor.ScheduleModule;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.JndiDataSourceProvider;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
@@ -120,6 +123,9 @@ import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
+import org.flywaydb.core.internal.util.PlaceholderReplacer;
+
+import javax.sql.DataSource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.matcher.Matchers.subclassesOf;
@@ -187,8 +193,10 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
 
         install(new JpaPersistModule("main"));
-        bind(JpaInitializer.class).asEagerSingleton();
-        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+        bind(SchemaInitializer.class).to(FlywaySchemaInitializer.class);
+        bind(DBInitializer.class).asEagerSingleton();
+        bind(DataSource.class).toProvider(JndiDataSourceProvider.class);
+        bind(PlaceholderReplacer.class).toProvider(PlaceholderReplacerProvider.class);
         install(new UserJpaModule());
         install(new SshJpaModule());
         install(new WorkspaceJpaModule());

@@ -62,15 +62,14 @@ import java.util.List;
                                     "AND recipePermission.userId IS NULL ")
         }
 )
-@Table(indexes = {@Index(columnList = "userId, recipeId", unique = true),
-                  @Index(columnList = "recipeId")})
+@Table(name = "recipepermissions")
 public class RecipePermissionsImpl extends AbstractPermissions {
 
-    @Column
+    @Column(name = "recipeid")
     private String recipeId;
 
     @ManyToOne
-    @JoinColumn(name = "recipeId", insertable = false, updatable = false)
+    @JoinColumn(name = "recipeid", insertable = false, updatable = false)
     private RecipeImpl recipe;
 
     public RecipePermissionsImpl() {}

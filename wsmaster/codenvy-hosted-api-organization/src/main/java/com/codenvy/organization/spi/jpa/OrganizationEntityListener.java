@@ -17,8 +17,8 @@ package com.codenvy.organization.spi.jpa;
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
-import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.core.db.jpa.CascadeRemovalException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

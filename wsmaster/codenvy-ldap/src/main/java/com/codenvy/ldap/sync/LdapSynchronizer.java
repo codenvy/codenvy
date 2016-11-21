@@ -21,7 +21,6 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -30,6 +29,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.core.db.DBInitializer;
 import org.ldaptive.Connection;
 import org.ldaptive.ConnectionFactory;
 import org.ldaptive.LdapEntry;
@@ -144,7 +144,7 @@ public class LdapSynchronizer {
                             UserDao userDao,
                             ProfileDao profileDao,
                             LdapUserIdNormalizer idNormalizer,
-                            EntityListenerInjectionManagerInitializer jpaInitializer,
+                            DBInitializer dbInitializer,
                             @Named("ldap.sync.period_ms") long syncPeriodMs,
                             @Named("ldap.sync.initial_delay_ms") long initDelayMs,
                             @Named(USER_ID_ATTRIBUTE_NAME) String userIdAttr,
