@@ -86,6 +86,8 @@ generate_configuration_with_puppet() {
     POSTGRES_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env"
     CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
   fi
+
+  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
   # Note - bug in docker requires relative path for env, not absolute
   GENERATE_CONFIG_COMMAND="docker_run -it  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
@@ -95,15 +97,33 @@ generate_configuration_with_puppet() {
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
+                  -e \"CODENVY_ENVIRONMENT=development\" \
+                  -e \"CODENVY_CONFIG=${CODENVY_HOST_CONFIG}\" \
+                  -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
+                  -e \"CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}\" \
+                  -e \"CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}\" \
                       $IMAGE_PUPPET \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff"
-
-  # do not forwad output to log in development mode
-  if [ "${CODENVY_DEVELOPMENT_MODE}" != "on" ]; then
-    GENERATE_CONFIG_COMMAND+=" >> \"${LOGS}\""
+  else
+  GENERATE_CONFIG_COMMAND="docker_run -it  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+                  --env-file=/version/$CODENVY_VERSION/images \
+                  -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
+                  -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
+                  -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
+                  -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
+                  -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
+                  -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
+                  -e \"CODENVY_ENVIRONMENT=production\" \
+                  -e \"CODENVY_CONFIG=${CODENVY_HOST_CONFIG}\" \
+                  -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
+                      $IMAGE_PUPPET \
+                          apply --modulepath \
+                                /etc/puppet/modules/ \
+                                /etc/puppet/manifests/codenvy.pp --show_diff >> \"${LOGS}\""
   fi
+
   log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}
 }
