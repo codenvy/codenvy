@@ -10,11 +10,10 @@
 #   cd ..\..\ <-- Root of the codenvy source repository
 #   docker build -f dockerfiles/init/Dockerfile -t codenvy/init:<version> .
 #
-FROM alpine:latest
 # use:
 #    docker run -v $(pwd):/codenvy codenvy/init:<version>
 
-FROM alpine:latest
+FROM alpine:3.4
 RUN mkdir -p /files \
     && mkdir -p /files/modules \
     && mkdir -p /files/manifests \
