@@ -1,3 +1,15 @@
+# Copyright (c) 2016 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# build:
+#   docker build -t codenvy/haproxy:<version> .
+#
+# use:
+#    docker run codenvy/haproxy:<version>
+
 FROM alpine:3.4
 
 ENV HAPROXY_MAJOR 1.5
@@ -41,11 +53,11 @@ RUN set -x \
     && apk add --virtual .haproxy-rundeps $runDeps \
     && apk del .build-deps
 RUN apk add --update rsyslog
-RUN     sed -i 's/#$ModLoad imudp/$ModLoad imudp/g' /etc/rsyslog.conf && \
+RUN sed -i 's/#$ModLoad imudp/$ModLoad imudp/g' /etc/rsyslog.conf && \
     sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/g' /etc/rsyslog.conf
-COPY docker-entrypoint.sh /
-RUN chmod +x docker-entrypoint.sh && mkdir -p /etc/rsyslog.d /service/rsyslog
+COPY entrypoint.sh /
+RUN chmod +x entrypoint.sh && mkdir -p /etc/rsyslog.d /service/rsyslog
 ADD haproxy.conf /etc/rsyslog.d/haproxy.conf
 ADD rsyslog.conf /etc/rsyslog.conf
 EXPOSE 80 443
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
