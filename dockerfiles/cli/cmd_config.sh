@@ -100,10 +100,10 @@ generate_configuration_with_puppet() {
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff"
 
-  log ${GENERATE_CONFIG_COMMAND}
   # do not forwad output to log in development mode
   if [ "${CODENVY_DEVELOPMENT_MODE}" != "on" ]; then
     GENERATE_CONFIG_COMMAND+=" >> \"${LOGS}\""
   fi
+  log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}
 }
