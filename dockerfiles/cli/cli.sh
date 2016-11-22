@@ -11,9 +11,19 @@
 
 cli_init() {
 
-  grab_offline_images
+  # Constants
+  CODENVY_MANIFEST_DIR="/version"
+  CODENVY_CONTAINER_OFFLINE_FOLDER="/${CHE_MINI_PRODUCT_NAME}/backup"
+  CODENVY_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver"
+  CODENVY_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
+  CODENVY_COMPOSE_FILE="docker-compose-container.yml"
+  CODENVY_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
+  CODENVY_CONFIG_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_config_backup.tar"
+  CODENVY_INSTANCE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_instance_backup.tar"
+  DOCKER_CONTAINER_NAME_PREFIX="${CHE_MINI_PRODUCT_NAME}_"
+
+  grab_offline_images "$@"
   grab_initial_images
-  check_host_volume_mount
 
   DEFAULT_CODENVY_CLI_ACTION="help"
   CODENVY_CLI_ACTION=${CODENVY_CLI_ACTION:-${DEFAULT_CODENVY_CLI_ACTION}}
@@ -25,34 +35,23 @@ cli_init() {
   CODENVY_HOST=${CODENVY_HOST:-${DEFAULT_CODENVY_HOST}}
 
   if [[ "${CODENVY_HOST}" = "" ]]; then
-      info "Welcome to Codenvy!"
-      info ""
-      info "We did not auto-detect a valid HOST or IP address."
-      info "Pass CODENVY_HOST with your hostname or IP address."
-      info ""
-      info "Rerun the CLI:"
-      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <local-path>:/codenvy"
-      info "                      -e CODENVY_HOST=<your-ip-or-host>"
-      info "                         codenvy/cli:${CODENVY_VERSION} $@"
-      return 2;
+    info "Welcome to Codenvy!"
+    info ""
+    info "We did not auto-detect a valid HOST or IP address."
+    info "Pass CODENVY_HOST with your hostname or IP address."
+    info ""
+    info "Rerun the CLI:"
+    info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
+    info "                      -v <local-path>:/codenvy"
+    info "                      -e CODENVY_HOST=<your-ip-or-host>"
+    info "                         codenvy/cli:${CODENVY_IMAGE_VERSION} $@"
+    return 2;
   fi
-
-  CODENVY_VERSION_FILE="codenvy.ver"
-  CODENVY_ENVIRONMENT_FILE="codenvy.env"
-  CODENVY_COMPOSE_FILE="docker-compose-container.yml"
-  CODENVY_SERVER_CONTAINER_NAME="codenvy_codenvy_1"
-  CODENVY_CONFIG_BACKUP_FILE_NAME="codenvy_config_backup.tar"
-  CODENVY_INSTANCE_BACKUP_FILE_NAME="codenvy_instance_backup.tar"
-  DOCKER_CONTAINER_NAME_PREFIX="codenvy_"
 
   REFERENCE_HOST_ENVIRONMENT_FILE="${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
   REFERENCE_HOST_COMPOSE_FILE="${CODENVY_HOST_INSTANCE}/${CODENVY_COMPOSE_FILE}"
   REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CODENVY_CONTAINER_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
   REFERENCE_CONTAINER_COMPOSE_FILE="${CODENVY_CONTAINER_INSTANCE}/${CODENVY_COMPOSE_FILE}"
-
-  CODENVY_MANIFEST_DIR="/version"
-  CODENVY_OFFLINE_FOLDER="/codenvy/backup"
 
   CODENVY_HOST_CONFIG_MANIFESTS_FOLDER="$CODENVY_HOST_CONFIG/manifests"
   CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CODENVY_CONTAINER_CONFIG/manifests"
@@ -71,32 +70,41 @@ cli_init() {
       warning "Boot2docker for Windows - CODENVY_CONFIG set to $CODENVY_HOST_CONFIG"
     fi
   fi
+
+  # Do not perform a version compatibility check if running upgrade command.
+  # The upgrade command has its own internal checks for version compatibility.
+  if [ $1 != "upgrade" ]; then 
+    verify_version_compatibility
+  else
+    verify_version_upgrade_compatibility
+  fi
 }
 
+init_host_ip() {
+  GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host eclipse/che-ip:nightly)}
+}
 
 grab_offline_images(){
   # If you are using codenvy in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
-  if [ ! -z ${2+x} ]; then
-    if [ "${2}" == "--offline" ]; then
-      info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
+  if [[ "$@" == *"--offline"* ]]; then
+    info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
-      if [ ! -d offline ]; then
-        info "init" "You requested offline loading of images, but could not find 'offline/'"
+    if [ ! -d ${CODENVY_CONTAINER_OFFLINE_FOLDER} ]; then
+      info "init" "You requested offline image loading, but '${CODENVY_CONTAINER_OFFLINE_FOLDER}' folder not found"
+      return 2;
+    fi
+
+    IFS=$'\n'
+    for file in "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/*.tar 
+    do
+      if ! $(docker load < "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
+        error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
         return 2;
       fi
-
-      IFS=$'\n'
-      for file in "offline"/*.tar 
-      do
-        if ! $(docker load < "offline"/"${file##*/}" > /dev/null); then
-          error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
-          return 2;
-        fi
-        info "init" "Loading ${file##*/}..."
-      done
-    fi
+      info "init" "Loading ${file##*/}..."
+    done
   fi
 }
 
@@ -136,184 +144,24 @@ grab_initial_images() {
   fi
 }
 
-check_host_volume_mount() {
-  echo 'test' > /codenvy/test >> "${LOGS}" 2>&1
-  
-  if [[ ! -f /codenvy/test ]]; then
-    error "Docker installed, but unable to write files to your host."
-    error "Have you enabled Docker to allow mounting host directories?"
-    error "Did our CLI not have user rights to create files on your host?"
+cli_parse () {
+  debug $FUNCNAME
+  COMMAND="cmd_$1"
+  COMMAND_CONTAINER_FILE="${SCRIPTS_CONTAINER_SOURCE_DIR}"/$COMMAND.sh
+
+  if [ ! -f "${COMMAND_CONTAINER_FILE}" ]; then
+    error "You passed an unknown command line option."
     return 2;
   fi
 
-  rm -rf /codenvy/test 
-}
+  # Need to load all files in advance so commands can invoke other commands.
+  for COMMAND_FILE in "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_*.sh
+  do
+    source "${COMMAND_FILE}"
+  done
 
-cli_parse () {
-  debug $FUNCNAME
-  if [ $# -eq 0 ]; then
-    CHE_CLI_ACTION="help"
-  else
-    case $1 in
-      version|init|config|start|stop|restart|destroy|rmi|config|upgrade|download|backup|restore|offline|update|add-node|remove-node|list-nodes|info|network|debug|help|-h|--help)
-        CHE_CLI_ACTION=$1
-      ;;
-      *)
-        # unknown option
-        error "You passed an unknown command line option."
-        return 1;
-      ;;
-    esac
-  fi
-}
-
-cli_cli() {
-  case ${CHE_CLI_ACTION} in
-    download)
-      shift
-      cmd_download "$@"
-    ;;
-    init)
-      shift
-      cmd_init "$@"
-    ;;
-    config)
-      shift
-      cmd_config "$@"
-    ;;
-    start)
-      shift
-      cmd_start "$@"
-    ;;
-    stop)
-      shift
-      cmd_stop "$@"
-    ;;
-    restart)
-      shift
-      cmd_restart "$@"
-    ;;
-    destroy)
-      shift
-      cmd_destroy "$@"
-    ;;
-    rmi)
-      shift
-      cmd_rmi "$@"
-    ;;
-    upgrade)
-      shift
-      cmd_upgrade "$@"
-    ;;
-    version)
-      shift
-      cmd_version "$@"
-    ;;
-    backup)
-      shift
-      cmd_backup "$@"
-    ;;
-    restore)
-      shift
-      cmd_restore "$@"
-    ;;
-    offline)
-      shift
-      cmd_offline
-    ;;
-    info)
-      shift
-      cmd_info "$@"
-    ;;
-    debug)
-      shift
-      cmd_debug "$@"
-    ;;
-    network)
-      shift
-      cmd_network "$@"
-    ;;
-    add-node)
-      shift
-      cmd_add_node
-    ;;
-    remove-node)
-      shift
-      cmd_remove_node "$@"
-    ;;
-    list-nodes)
-      shift
-      cmd_list_nodes
-    ;;
-    help)
-      usage
-    ;;
-  esac
-}
-
-get_mount_path() {
-  debug $FUNCNAME
-  FULL_PATH=$(get_full_path "${1}")
-  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
-  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
-  echo $CLEAN_PATH
-}
-
-get_full_path() {
-  debug $FUNCNAME
-  # create full directory path
-  echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
-}
-
-convert_windows_to_posix() {
-  debug $FUNCNAME
-  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
-}
-
-convert_posix_to_windows() {
-  debug $FUNCNAME
-  # Remove leading slash
-  VALUE="${1:1}"
-
-  # Get first character (drive letter)
-  VALUE2="${VALUE:0:1}"
-
-  # Replace / with \
-  VALUE3=$(echo ${VALUE} | tr '/' '\\' | sed 's/\\/\\\\/g')
-
-  # Replace c\ with c:\ for drive letter
-  echo "$VALUE3" | sed "s/./$VALUE2:/1"
-}
-
-get_clean_path() {
-  debug $FUNCNAME
-  INPUT_PATH=$1
-  # \some\path => /some/path
-  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
-  # /somepath/ => /somepath
-  OUTPUT_PATH=${OUTPUT_PATH%/}
-  # /some//path => /some/path
-  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
-  # "/some/path" => /some/path
-  OUTPUT_PATH=${OUTPUT_PATH//\"}
-  echo ${OUTPUT_PATH}
-}
-
-get_docker_host_ip() {
-  debug $FUNCNAME
-#  case $(get_docker_install_type) in
-#   boot2docker)
-#     NETWORK_IF="eth1"
-#   ;;
-#   native)
-#     NETWORK_IF="docker0"
-#   ;;
-#   *)
-#     NETWORK_IF="eth0"
-#   ;;
-#  esac
-
-  echo $GLOBAL_HOST_IP
+  shift
+  eval $COMMAND "$@"
 }
 
 get_docker_install_type() {
@@ -329,10 +177,9 @@ get_docker_install_type() {
   fi
 }
 
-
 has_docker_for_windows_client(){
   debug $FUNCNAME
-  if [[ $(get_docker_host_ip) = "10.0.75.2" ]]; then
+  if [[ "${GLOBAL_HOST_IP}" = "10.0.75.2" ]]; then
     return 0
   else
     return 1
@@ -427,10 +274,7 @@ update_image() {
 }
 
 port_open(){
-
-#  log "netstat -an | grep 0.0.0.0:$1 >> \"${LOGS}\" 2>&1"
-#  netstat -an | grep 0.0.0.0:$1 >> "${LOGS}" 2>&1
-#  docker run --rm --net host alpine netstat -an | grep ${CODENVY_HOST}:$1 >> "${LOGS}" 2>&1
+  debug $FUNCNAME
 
   docker run -d -p $1:$1 --name fake alpine:3.4 httpd -f -p $1 -h /etc/ > /dev/null 2>&1
   NETSTAT_EXIT=$?
@@ -530,13 +374,21 @@ check_if_booted() {
   fi
 }
 
-#TODO - is_initialized will return as initialized with empty directories
 is_initialized() {
   debug $FUNCNAME
   if [[ -d "${CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
      [[ -d "${CODENVY_CONTAINER_CONFIG_MODULES_FOLDER}" ]] && \
-     [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]] && \
-     [[ -f "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}" ]]; then
+     [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_configed() {
+  debug $FUNCNAME
+  if [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]] && \
+     [[ -f "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE ]]; then
     return 0
   else
     return 1
@@ -581,66 +433,231 @@ get_image_manifest() {
   done
 }
 
-can_upgrade() {
-  #  4.7.2 -> 5.0.0-M2-SNAPSHOT  <insert-syntax>
-  #  4.7.2 -> 4.7.3              <insert-syntax>
-  while IFS='' read -r line || [[ -n "$line" ]]; do
-    VER=$(echo $line | cut -d ' ' -f1)
-    UPG=$(echo $line | cut -d ' ' -f2)
-
-    # Loop through and find all matching versions
-    if [[ "${VER}" == "${1}" ]]; then
-      if [[ "${UPG}" == "${2}" ]]; then
-        return 0
-      fi
-    fi
-  done < "$CODENVY_MANIFEST_DIR"/upgrades
-
-  return 1
-}
-
-print_upgrade_manifest() {
-  #  4.7.2 -> 5.0.0-M2-SNAPSHOT  <insert-syntax>
-  #  4.7.2 -> 4.7.3              <insert-syntax>
-  while IFS='' read -r line || [[ -n "$line" ]]; do
-    VER=$(echo $line | cut -d ' ' -f1)
-    UPG=$(echo $line | cut -d ' ' -f2)
-    text "  "
-    text "%s" $VER
-    for i in `seq 1 $((25-${#VER}))`; do text " "; done
-    text "%s" $UPG
-    text "\n"
-  done < "$CODENVY_MANIFEST_DIR"/upgrades
-}
-
-print_version_manifest() {
-  while IFS='' read -r line || [[ -n "$line" ]]; do
-    VER=$(echo $line | cut -d ' ' -f1)
-    CHA=$(echo $line | cut -d ' ' -f2)
-    UPG=$(echo $line | cut -d ' ' -f3)
-    text "  "
-    text "%s" $VER
-    for i in `seq 1 $((25-${#VER}))`; do text " "; done
-    text "%s" $CHA
-    for i in `seq 1 $((18-${#CHA}))`; do text " "; done
-    text "%s" $UPG
-    text "\n"
-  done < "$CODENVY_MANIFEST_DIR"/versions
-}
-
 get_installed_version() {
-  if ! is_initialized; then
-    echo "<not-installed>"
+  if ! is_configed; then
+    echo "<not-configed>"
   else
-    cat "${CODENVY_CONTAINER_CONFIG}"/$CODENVY_VERSION_FILE
+    cat "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE
   fi
 }
 
-get_installed_installdate() {
+get_envfile_version() {
   if ! is_initialized; then
-    echo "<not-installed>"
+    echo "<not-initialized>"
   else
-    cat "${CODENVY_CONFIG}"/$CODENVY_VERSION_FILE
+    echo $(grep CODENVY_VERSION= "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" | cut -f2 -d"=")
+  fi
+}
+
+get_image_version() {
+  echo "$CODENVY_IMAGE_VERSION"
+}
+
+less_than() {
+  for (( i=0; i<${#1}; i++ )); do
+    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
+      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
+        return 0
+      fi
+    fi 
+  done
+  return 1
+}
+
+compare_cli_version_to_envfile_version() {
+  IMAGE_VERSION=$(get_image_version)
+  ENV_FILE_VERSION=$(get_envfile_version)
+ 
+
+  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ##      - If they match, good
+  ##      - If they don't match and one is nightly, fail
+  ##      - If they don't match, then if CLI is older fail with message to get proper CLI
+  ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
+  if [[ "$ENV_FILE_VERSION" = "$IMAGE_VERSION" ]]; then
+    echo "match"
+  elif [ "$ENV_FILE_VERSION" = "nightly" ] || 
+       [ "$IMAGE_VERSION" = "nightly" ]; then
+    echo "nightly"
+  elif less_than $ENV_FILE_VERSION $IMAGE_VERSION; then
+    echo "envfile-less-cli"
+  else
+    echo "cli-less-envfile"
+  fi
+}
+
+compare_installed_version_to_envfile_version() {
+  ENV_FILE_VERSION=$(get_envfile_version)
+  INSTALLED_VERSION=$(get_installed_version)
+
+  ## Second, compare proposed .env version to already installed version
+  ##      - If they match, then continue
+  ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
+  ##      - If they do not match, then if .env is older, then fail with message that this is not good 
+  if [[ "$ENV_FILE_VERSION" = "$INSTALLED_VERSION" ]]; then
+    echo "match"
+  elif less_than $ENV_FILE_VERSION $INSTALLED_VERSION; then
+    echo "envfile-less-install"
+  else
+    echo "install-less-envfile"
+  fi
+}
+
+verify_version_compatibility() {
+  ## Two levels of checks
+  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ##      - If they match, good
+  ##      - If they don't match and one is nightly, fail
+  ##      - If they don't match, then if CLI is older fail with message to get proper CLI
+  ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
+  ## Second, compare proposed .env version to already installed version
+  ##      - If they match, then continue
+  ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
+  ##      - If they do not match, then if .env is older, then fail with message that this is not good 
+
+  CODENVY_IMAGE_VERSION=$(get_image_version)
+
+  if is_initialized; then
+    COMPARE_CLI_ENV=$(compare_cli_version_to_envfile_version)
+    ENV_FILE_VERSION=$(get_envfile_version)
+
+    case "${COMPARE_CLI_ENV}" in
+      "match") 
+      ;;
+      "nightly")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your configured version '$ENV_FILE_VERSION'."
+        error ""
+        error "The 'nightly' CLI is only compatible with 'nightly' configured versions."
+        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a tagged version."
+        error ""
+        error "Run the CLI as '${CHE_MINI_PRODUCT_NAME}/cli:<version>' to install a tagged version."
+        return 2
+      ;;
+      "envfile-less-cli")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your configured version '$ENV_FILE_VERSION'."
+        error ""
+        error "Run '${CHE_MINI_PRODUCT_NAME} upgrade' to migrate your old version to '$CODENVY_IMAGE_VERSION."
+        error "Or, modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version with your CLI version '$CODENVY_IMAGE_VERSION'."
+        return 2
+      ;;
+      "cli-less-envfile")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$ENV_FILE_VERSION'."
+        error ""
+        error "You cannot use an older CLI with a newer configuration."
+        error ""
+        error "Run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$ENV_FILE_VERSION' to match your configuration."
+        return 2
+      ;;
+    esac
+  fi
+
+  # Scenario #2 should only be checked if the system is already configured
+  if is_configed; then
+    COMPARE_INSTALL_ENV=$(compare_installed_version_to_envfile_version)
+    INSTALLED_VERSION=$(get_installed_version)
+    case "${COMPARE_INSTALL_ENV}" in
+      "match") 
+      ;;
+      "envfile-less-install")
+        error ""
+        error "Your configured version '$ENV_FILE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "You cannot configure $CHE_MINI_PRODUCT_NAME to an older version - downgrades not supported."
+        return 2
+      ;;
+      "install-less-envfile")
+        error ""
+        error "Your configured version '$ENV_FILE_VERSION' is newer than your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "Run '${CHE_MINI_PRODUCT_NAME} upgrade' to migrate your installation to '$ENV_FILE_VERSION."
+        error "Or, modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version with your installed version '$INSTALLED_VERSION'."
+        return 2
+      ;;
+    esac
+  fi
+}
+
+verify_version_upgrade_compatibility() {
+  ## Two levels of checks
+  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ##      - If they match, nothing to upgrade
+  ##      - If they don't match and one is nightly, fail upgrade is not supported for nightly
+  ##      - If they don't match, then if CLI is older fail with message that we do not support downgrade
+  ##      - If they don't match, then if CLI is newer then good
+  ## Second, compare proposed .env version to already installed version
+  ##      - If they match, then ok to upgrade, we will update the ENV file 
+  ##      - If they do not match, then if .env is newer, then fail with message that ENV file & install must match before upgrade
+  ##      - If they do not match, then if .env is older, then fail with message that ENV file & install must match before upgrade 
+
+  CODENVY_IMAGE_VERSION=$(get_image_version)
+
+  if ! is_initialized || ! is_configed; then 
+    info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
+    return 2
+  fi
+
+  if is_initialized; then
+    COMPARE_CLI_ENV=$(compare_cli_version_to_envfile_version)
+    ENV_FILE_VERSION=$(get_envfile_version)
+
+    case "${COMPARE_CLI_ENV}" in
+      "match") 
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your configured version '$ENV_FILE_VERSION'."
+        error ""
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer version to upgrade."
+        error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
+        return 2
+      ;;
+      "nightly")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or configured version '$ENV_FILE_VERSION' is nightly."
+        error ""
+        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a non-nightly version."
+        error "You can 'docker pull ${CHE_MINI_PRODUCT_NAME}/cli:nightly' to get a newer nightly version."
+        return 2
+      ;;
+      "envfile-less-cli")
+      ;;
+      "cli-less-envfile")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$ENV_FILE_VERSION'."
+        error ""
+        error "You cannot upgrade to an older version."
+        error ""
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer version to upgrade."
+        error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
+        return 2
+      ;;
+    esac
+  fi
+
+  # Scenario #2 should only be checked if the system is already configured
+  if is_configed; then
+    COMPARE_INSTALL_ENV=$(compare_installed_version_to_envfile_version)
+    INSTALLED_VERSION=$(get_installed_version)
+    case "${COMPARE_INSTALL_ENV}" in
+      "match") 
+      ;;
+      "envfile-less-install"|"install-less-envfile")
+        error ""
+        error "Your CLI version '$CODENVY_IMAGE_VERSION' is newer (good), but:"
+        error "   Configured version = '$ENV_FILE_VERSION'"
+        error "   Installed version  = '$INSTALLED_VERSION'"
+        error ""
+        error "The configured and installed versions must match before upgrade proceeds."
+        error ""
+        error "Modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version to your installed version '$INSTALLED_VERSION'."
+        error "Then run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer Docker image to initiate an upgrade."
+        error ""
+        error "We could automatically make this change."
+        error "However, having configured and installed version be different is unusual and should be checked by a human."
+        return 2
+      ;;
+    esac
   fi
 }
 
@@ -663,761 +680,4 @@ confirm_operation() {
       return 0;
     fi
   fi
-}
-
-# Runs puppet image to generate codenvy configuration
-generate_configuration_with_puppet() {
-  debug $FUNCNAME
-
-  if is_docker_for_windows; then
-    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/registry/registry.env")
-    POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env")
-    CODENVY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
-  else
-    REGISTRY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/registry/registry.env"
-    POSTGRES_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env"
-    CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
-  fi
-  # Note - bug in docker requires relative path for env, not absolute
-  log "docker_run -it --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
-                  --env-file=/version/$CODENVY_VERSION/images \
-                  -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
-                  -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
-                  -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
-                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
-                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
-                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
-                      $IMAGE_PUPPET \
-                          apply --modulepath \
-                                /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff \"$@\""
-  docker_run -it  --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" \
-                  --env-file=/version/$CODENVY_VERSION/images \
-                  -v "${CODENVY_HOST_INSTANCE}":/opt/codenvy:rw \
-                  -v "${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}":/etc/puppet/manifests:ro \
-                  -v "${CODENVY_HOST_CONFIG_MODULES_FOLDER}":/etc/puppet/modules:ro \
-                  -e "REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}" \
-                  -e "POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}" \
-                  -e "CODENVY_ENV_FILE=${CODENVY_ENV_FILE}" \
-                      $IMAGE_PUPPET \
-                          apply --modulepath \
-                                /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff "$@"
-}
-
-# return date in format which can be used as a unique file or dir name
-# example 2016-10-31-1477931458
-get_current_date() {
-    date +'%Y-%m-%d-%s'
-}
-
-require_license() {
-  if [[ "${CODENVY_LICENSE}" = "true" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-###########################################################################
-### END HELPER FUNCTIONS
-###
-### START CLI COMMANDS
-###########################################################################
-cmd_download() {
-  FORCE_UPDATE=${1:-"--no-force"}
-
-  get_image_manifest $CODENVY_VERSION
-
-  IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-    if [[ $FORCE_UPDATE == "--force" ]] ||
-       [[ $FORCE_UPDATE == "--pull" ]]; then
-      update_image $FORCE_UPDATE $VALUE_IMAGE
-    else
-      update_image_if_not_found $VALUE_IMAGE
-    fi
-  done
-}
-
-cmd_init() {
-  FORCE_UPDATE=${1:-"--no-force"}
-  if [ "${FORCE_UPDATE}" == "--no-force" ]; then
-    # If codenvy.environment file exists, then fail
-    if is_initialized; then
-      info "init" "Already initialized."
-      return 1
-    fi
-  fi
-
-  cmd_download $FORCE_UPDATE
-
-  if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CODENVY_VERSION
-  fi
-
-  if require_license; then
-    info ""
-    info "init" "Do you accept the ${CHE_MINI_PRODUCT_NAME} license? (https://codenvy.com/legal/fair-source/)"
-    text "\n"
-    read -p "      I accept the license: [Y/n] " -n 1 -r
-    text "\n"
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-      return 2;
-    fi
-  fi
-
-  info "init" "Installing configuration and bootstrap variables:"
-  log "mkdir -p \"${CODENVY_CONTAINER_CONFIG}\""
-  mkdir -p "${CODENVY_CONTAINER_CONFIG}"
-  log "mkdir -p \"${CODENVY_CONTAINER_INSTANCE}\""
-  mkdir -p "${CODENVY_CONTAINER_INSTANCE}"
-
-  if [ ! -w "${CODENVY_CONTAINER_CONFIG}" ]; then
-    error "CODENVY_CONTAINER_CONFIG is not writable. Aborting."
-    return 1;
-  fi
-
-  if [ ! -w "${CODENVY_CONTAINER_INSTANCE}" ]; then
-    error "CODENVY_CONTAINER_INSTANCE is not writable. Aborting."
-    return 1;
-  fi
-
-  # in development mode we use init files from repo otherwise we use it from docker image
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}":/files \
-                   $IMAGE_INIT
-  else
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy $IMAGE_INIT
-  fi
-
-  # After initialization, add codenvy.env with self-discovery.
-  sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-  info "init" "  CODENVY_HOST=${CODENVY_HOST}"
-
-  sed -i'.bak' "s|#CODENVY_VERSION=.*|CODENVY_VERSION=${CODENVY_VERSION}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-  info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
-  sed -i'.bak' "s|#CODENVY_CONFIG=.*|CODENVY_CONFIG=${CODENVY_HOST_CONFIG}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-  info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
-  sed -i'.bak' "s|#CODENVY_INSTANCE=.*|CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-  info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
-  sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-
-  if [ "${CODENVY_DEVELOPMENT_MODE}" == "on" ]; then
-    sed -i'.bak' "s|#CODENVY_ENVIRONMENT=.*|CODENVY_ENVIRONMENT=development|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_ENVIRONMENT=development"
-    sed -i'.bak' "s|#CODENVY_DEVELOPMENT_REPO=.*|CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}"
-    sed -i'.bak' "s|#CODENVY_DEVELOPMENT_TOMCAT=.*|CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}"
-  else
-    sed -i'.bak' "s|#CODENVY_ENVIRONMENT=.*|CODENVY_ENVIRONMENT=production|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_ENVIRONMENT=production"
-  fi
-
-  rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
-
-  # Write the Codenvy version to codenvy.ver
-  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}"
-}
-
-cmd_config() {
-
-  # If the system is not initialized, initalize it.
-  # If the system is already initialized, but a user wants to update images, then re-download.
-  FORCE_UPDATE=${1:-"--no-force"}
-  if ! is_initialized; then
-    cmd_init $FORCE_UPDATE
-  elif [[ "${FORCE_UPDATE}" == "--pull" ]] || \
-       [[ "${FORCE_UPDATE}" == "--force" ]]; then
-    cmd_download $FORCE_UPDATE
-  fi
-
-  # If the CODENVY_VERSION set by an environment variable does not match the value of
-  # the codenvy.ver file of the installed instance, then do not proceed as there is a
-  # confusion between what the user has set and what the instance expects.
-  INSTALLED_VERSION=$(get_installed_version)
-  if [[ $CODENVY_VERSION != $INSTALLED_VERSION ]]; then
-    info "config" "CODENVY_VERSION=$CODENVY_VERSION does not match ${CODENVY_ENVIRONMENT_FILE}=$INSTALLED_VERSION. Aborting."
-    info "config" "This happens if the <version> of your Docker image is different from ${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
-    return 1
-  fi
-
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CODENVY_VERSION
-  fi
-
-  # Development mode
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
-    # if dev mode is on, pick configuration sources from repo.
-    # please note that in production mode update of configuration sources must be only on update.
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}":/files \
-                  $IMAGE_INIT
-
-    # in development mode to avoid permissions issues we copy tomcat assembly to ${CODENVY_INSTANCE}
-    # if codenvy development tomcat exist we remove it
-    if [[ -d "${CODENVY_CONTAINER_INSTANCE}/dev" ]]; then
-        log "docker_run -v \"${CODENVY_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
-        docker_run -v "${CODENVY_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/*"
-        log "rm -rf \"${CODENVY_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
-        rm -rf "${CODENVY_CONTAINER_INSTANCE}/dev"
-    fi
-    # copy codenvy development tomcat to ${CODENVY_INSTANCE} folder
-    cp -r "$(get_mount_path $(echo $CODENVY_CONTAINER_DEVELOPMENT_REPO/$DEFAULT_CODENVY_DEVELOPMENT_TOMCAT-*/))" \
-        "${CODENVY_CONTAINER_INSTANCE}/dev"
-  fi
-
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
-  # Run the docker configurator
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
-    # generate configs and print puppet output logs to console if dev mode is on
-    generate_configuration_with_puppet
-  else
-    generate_configuration_with_puppet >> "${LOGS}"
-  fi
-
-  # Replace certain environment file lines with their container counterparts
-  info "config" "Customizing docker-compose for running in a container"
-  # If this is windows, we need to add a special volume for postgres
-  if has_docker_for_windows_client; then
-    sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-
-    echo "" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-
-    # On Windows, it is not possible to volume mount postgres data folder directly
-    # This creates a named volume which will store postgres data in docker for win VM
-    # TODO - in future, we can write synchronizer utility to copy data from win VM to host
-    log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
-    docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
-  fi
-}
-
-cmd_start() {
-  debug $FUNCNAME
-
-  # If Codenvy is already started or booted, then terminate early.
-  if container_exist_by_name $CODENVY_SERVER_CONTAINER_NAME; then
-    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
-    if container_is_running ${CURRENT_CODENVY_SERVER_CONTAINER_ID} && \
-       server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
-       info "start" "$CHE_MINI_PRODUCT_NAME is already running"
-       info "start" "Server logs at \"docker logs -f ${CODENVY_SERVER_CONTAINER_NAME}\""
-       info "start" "Ver: $(get_installed_version)"
-       if ! is_docker_for_mac; then
-         info "start" "Use: http://${CODENVY_HOST}"
-         info "start" "API: http://${CODENVY_HOST}/swagger"
-       else
-         info "start" "Use: http://localhost"
-         info "start" "API: http://localhost/swagger"
-       fi
-       return
-    fi
-  fi
-
-  # To protect users from accidentally updating their Codenvy servers when they didn't mean
-  # to, which can happen if CODENVY_VERSION=latest
-  FORCE_UPDATE=${1:-"--no-force"}
-  # Always regenerate puppet configuration from environment variable source, whether changed or not.
-  # If the current directory is not configured with an .env file, it will initialize
-  cmd_config $FORCE_UPDATE
-
-  # Begin tests of open ports that we require
-  info "start" "Preflight checks"
-  text   "         port 80 (http):       $(port_open 80 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 443 (https):     $(port_open 443 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 5000 (registry): $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  if ! $(port_open 80) || ! $(port_open 443) || ! $(port_open 5000); then
-    echo ""
-    error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-    return 1;
-  fi
-  text "\n"
-
-  # Start Codenvy
-  # Note bug in docker requires relative path, not absolute path to compose file
-  info "start" "Starting containers..."
-  log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME up -d >> \"${LOGS}\" 2>&1"
-  docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                 -p=$CHE_MINI_PRODUCT_NAME up -d >> "${LOGS}" 2>&1
-  check_if_booted
-}
-
-cmd_stop() {
-  debug $FUNCNAME
-
-  if [ $# -gt 0 ]; then
-    error "${CHE_MINI_PRODUCT_NAME} stop: You passed unknown options. Aborting."
-    return
-  fi
-
-  info "stop" "Stopping containers..."
-  if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME stop >> "${LOGS}" 2>&1 || true
-    info "stop" "Removing containers..."
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
-    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
-  fi
-}
-
-cmd_restart() {
-  debug $FUNCNAME
-
-  FORCE_UPDATE=${1:-"--no-force"}
-    info "restart" "Restarting..."
-    cmd_stop
-    cmd_start ${FORCE_UPDATE}
-}
-
-cmd_destroy() {
-  debug $FUNCNAME
-
-  WARNING="destroy !!! Stopping services and !!! deleting data !!! this is unrecoverable !!!"
-  if ! confirm_operation "${WARNING}" "$@"; then
-    return;
-  fi
-
-  cmd_stop
-
-  info "destroy" "Deleting instance and config..."
-  log "docker_run -v \"${CODENVY_HOST_CONFIG}\":/codenvy-config -v \"${CODENVY_HOST_INSTANCE}\":/codenvy-instance alpine:3.4 sh -c \"rm -rf /root/codenvy-instance/* && rm -rf /root/codenvy-config/*\""
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
-             -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-                alpine:3.4 sh -c "rm -rf /root/codenvy-instance/* && rm -rf /root/codenvy-config/*"
-
-  rm -rf "${CODENVY_CONTAINER_CONFIG}"
-  rm -rf "${CODENVY_CONTAINER_INSTANCE}"
-  if has_docker_for_windows_client; then
-    docker volume rm codenvy-postgresql-volume > /dev/null 2>&1  || true
-  fi
-}
-
-cmd_rmi() {
-  info "rmi" "Checking registry for version '$CODENVY_VERSION' images"
-  if ! has_version_registry $CODENVY_VERSION; then
-    version_error $CODENVY_VERSION
-    return 1;
-  fi
-
-  WARNING="rmi !!! Removing images disables codenvy and forces a pull !!!"
-  if ! confirm_operation "${WARNING}" "$@"; then
-    return;
-  fi
-
-  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CODENVY_VERSION/images)
-  IFS=$'\n'
-  info "rmi" "Removing ${CHE_MINI_PRODUCT_NAME} Docker images..."
-
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-    info "rmi" "Removing $VALUE_IMAGE..."
-    log "docker rmi -f ${VALUE_IMAGE} >> \"${LOGS}\" 2>&1 || true"
-    docker rmi -f $VALUE_IMAGE >> "${LOGS}" 2>&1 || true
-  done
-}
-
-cmd_upgrade() {
-  debug $FUNCNAME
-
-  if [ $# -eq 0 ]; then
-    info "upgrade" "No upgrade target provided. Run '${CHE_MINI_PRODUCT_NAME} version' for a list of upgradeable versions."
-    return 2;
-  fi
-
-  if ! can_upgrade $(get_installed_version) ${1}; then
-    info "upgrade" "Your current version $(get_installed_version) is not upgradeable to $1."
-    info "upgrade" "Run '${CHE_MINI_PRODUCT_NAME} version' to see your upgrade options."
-    return 2;
-  fi
-
-  # If here, this version is validly upgradeable.  You can upgrade from
-  # $(get_installed_version) to $1
-  ## Download version images
-  info "upgrade" "Downloading $1 images..."
-  get_image_manifest ${1}
-  SAVEIFS=$IFS
-  IFS=$'\n'
-  for SINGLE_IMAGE in ${IMAGE_LIST}; do
-    VALUE_IMAGE=$(echo ${SINGLE_IMAGE} | cut -d'=' -f2)
-    update_image_if_not_found ${VALUE_IMAGE}
-  done
-  IFS=$SAVEIFS
-  info "upgrade" "Downloading done."
-
-  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    info "upgrade" "Stopping currently running instance..."
-    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id ${CODENVY_SERVER_CONTAINER_NAME})
-    if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
-      cmd_stop
-    fi
-  fi
-  info "upgrade" "Preparing backup..."
-  cmd_backup
-  ## Try start
-  if ! cmd_start; then
-    info "upgrade" "Startup failed, restoring latest backup..."
-    cmd_restore;
-  fi
-
-}
-
-cmd_version() {
-  debug $FUNCNAME
-
-  error "!!! this information is experimental - upgrade not yet available !!!"
-  echo ""
-  text "$CHE_PRODUCT_NAME:\n"
-  text "  Version:      %s\n" $(get_installed_version)
-  text "  Installed:    %s\n" $(get_installed_installdate)
-
-  if is_initialized; then
-    text "\n"
-    text "Upgrade Options:\n"
-    text "  INSTALLED VERSION        UPRADEABLE TO\n"
-    print_upgrade_manifest $(get_installed_version)
-  fi
-
-  text "\n"
-  text "Available:\n"
-  text "  VERSION                  CHANNEL           UPGRADEABLE FROM\n"
-  if is_initialized; then
-    print_version_manifest $(get_installed_version)
-  else
-    print_version_manifest $CODENVY_VERSION
-  fi
-}
-
-cmd_backup() {
-  debug $FUNCNAME
-
-  # possibility to skip codenvy projects backup
-  SKIP_BACKUP_CODENVY_DATA=${1:-"--no-skip-data"}
-  if [[ "${SKIP_BACKUP_CODENVY_DATA}" == "--skip-data" ]]; then
-    TAR_EXTRA_EXCLUDE="--exclude=data/codenvy"
-  else
-    TAR_EXTRA_EXCLUDE=""
-  fi
-
-  if [[ ! -d "${CODENVY_CONTAINER_CONFIG}" ]] || \
-     [[ ! -d "${CODENVY_CONTAINER_INSTANCE}" ]]; then
-    error "Cannot find existing CODENVY_CONFIG or CODENVY_INSTANCE."
-    return;
-  fi
-
-  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    error "$CHE_MINI_PRODUCT_NAME is running. Stop before performing a backup."
-    return 2;
-  fi
-
-  if [[ ! -d "${CODENVY_CONTAINER_BACKUP}" ]]; then
-    mkdir -p "${CODENVY_CONTAINER_BACKUP}"
-  fi
-
-  # check if backups already exist and if so we move it with time stamp in name
-  if [[ -f "${CODENVY_CONTAINER_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}" ]]; then
-    mv "${CODENVY_CONTAINER_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}" \
-        "${CODENVY_CONTAINER_BACKUP}/moved-$(get_current_date)-${CODENVY_CONFIG_BACKUP_FILE_NAME}"
-  fi
-  if [[ -f "${CODENVY_CONTAINER_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" ]]; then
-    mv "${CODENVY_CONTAINER_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" \
-        "${CODENVY_CONTAINER_BACKUP}/moved-$(get_current_date)-${CODENVY_INSTANCE_BACKUP_FILE_NAME}"
-  fi
-
-  info "backup" "Saving configuration..."
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
-             -v "${CODENVY_HOST_BACKUP}":/root/backup \
-                 alpine:3.4 sh -c "tar czf /root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME} -C /root/codenvy-config ."
-
-  info "backup" "Saving instance data..."
-  # if windows we backup data volume
-  if has_docker_for_windows_client; then
-    docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-               -v "${CODENVY_HOST_BACKUP}":/root/backup \
-               -v codenvy-postgresql-volume:/root/codenvy-instance/data/postgres \
-                 alpine:3.4 sh -c "tar czf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance . --exclude=logs ${TAR_EXTRA_EXCLUDE}"
-  else
-    docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-              -v "${CODENVY_HOST_BACKUP}":/root/backup \
-                 alpine:3.4 sh -c "tar czf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance . --exclude=logs ${TAR_EXTRA_EXCLUDE}"
-  fi
-
-  info ""
-  info "backup" "Configuration data saved in ${CODENVY_HOST_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}"
-  info "backup" "Instance data saved in ${CODENVY_HOST_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}"
-}
-
-cmd_restore() {
-  debug $FUNCNAME
-
-  if [[ -d "${CODENVY_CONTAINER_CONFIG}" ]] || \
-     [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]]; then
-
-    WARNING="Restoration overwrites existing configuration and data. Are you sure?"
-    if ! confirm_operation "${WARNING}" "$@"; then
-      return;
-    fi
-  fi
-
-  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    error "Codenvy is running. Stop before performing a restore. Aborting"
-    return;
-  fi
-
-  if [[ ! -f "${CODENVY_CONTAINER_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}" ]] || \
-     [[ ! -f "${CODENVY_CONTAINER_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" ]]; then
-    error "Backup files not found. To do restore please do backup first."
-    return;
-  fi
-
-  # remove config and instance folders
-  log "docker_run -v \"${CODENVY_HOST_CONFIG}\":/codenvy-config \
-                  -v \"${CODENVY_HOST_INSTANCE}\":/codenvy-instance \
-                    alpine:3.4 sh -c \"rm -rf /root/codenvy-instance/* \
-                                   && rm -rf /root/codenvy-config/*\""
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
-             -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-                alpine:3.4 sh -c "rm -rf /root/codenvy-instance/* \
-                              && rm -rf /root/codenvy-config/*"
-  log "rm -rf \"${CODENVY_CONTAINER_CONFIG}\" >> \"${LOGS}\""
-  log "rm -rf \"${CODENVY_CONTAINER_INSTANCE}\" >> \"${LOGS}\""
-  rm -rf "${CODENVY_CONTAINER_CONFIG}"
-  rm -rf "${CODENVY_CONTAINER_INSTANCE}"
-
-  info "restore" "Recovering configuration..."
-  mkdir -p "${CODENVY_CONTAINER_CONFIG}"
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
-             -v "${CODENVY_HOST_BACKUP}/${CODENVY_CONFIG_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME}" \
-             alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_CONFIG_BACKUP_FILE_NAME} -C /root/codenvy-config"
-
-  info "restore" "Recovering instance data..."
-  mkdir -p "${CODENVY_CONTAINER_INSTANCE}"
-  if has_docker_for_windows_client; then
-    log "docker volume rm codenvy-postgresql-volume >> \"${LOGS}\" 2>&1 || true"
-    docker volume rm codenvy-postgresql-volume >> "${LOGS}" 2>&1 || true
-    log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
-    docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
-    docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-               -v "${CODENVY_HOST_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" \
-               -v codenvy-postgresql-volume:/root/codenvy-instance/data/postgres \
-               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance"
-  else
-    docker_run -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-               -v "${CODENVY_HOST_BACKUP}/${CODENVY_INSTANCE_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME}" \
-               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_INSTANCE_BACKUP_FILE_NAME} -C /root/codenvy-instance"
-  fi
-}
-
-cmd_offline() {
-  info "offline" "Checking registry for version '$CODENVY_VERSION' images"
-  if ! has_version_registry $CODENVY_VERSION; then
-    version_error $CODENVY_VERSION
-    return 1;
-  fi
-
-  # Make sure the images have been pulled and are in your local Docker registry
-  cmd_download
-
-  mkdir -p $CODENVY_OFFLINE_FOLDER
-
-  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CODENVY_VERSION/images)
-  IFS=$'\n'
-  info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} Docker images as tar files..."
-
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
-    TAR_NAME=$(echo $VALUE_IMAGE | sed "s|\/|_|")
-    info "offline" "Saving $CODENVY_HOST_BACKUP/$TAR_NAME.tar..."
-    if ! $(docker save $VALUE_IMAGE > $CODENVY_OFFLINE_FOLDER/$TAR_NAME.tar); then
-      error "Docker was interrupted while saving $CODENVY_OFFLINE_FOLDER/$TAR_NAME.tar"
-      return 1;
-    fi
-  done
-
-  info "offline" "Done!"
-}
-
-cmd_info() {
-  debug $FUNCNAME
-  if [ $# -eq 0 ]; then
-    TESTS="--debug"
-  else
-    TESTS=$1
-  fi
-
-  case $TESTS in
-    --all|-all)
-      cmd_debug
-      cmd_network
-    ;;
-    --network|-network)
-      cmd_network
-    ;;
-    --debug|-debug)
-      cmd_debug
-    ;;
-    *)
-      info "info" "Unknown info flag passed: $1."
-      return;
-    ;;
-  esac
-}
-
-cmd_debug() {
-  debug $FUNCNAME
-  info "---------------------------------------"
-  info "------------   CLI INFO   -------------"
-  info "---------------------------------------"
-  info ""
-  info "-----------  CODENVY INFO  ------------"
-  info "CODENVY_VERSION           = ${CODENVY_VERSION}"
-  info "CODENVY_INSTANCE          = ${CODENVY_HOST_INSTANCE}"
-  info "CODENVY_CONFIG            = ${CODENVY_HOST_CONFIG}"
-  info "CODENVY_HOST              = ${CODENVY_HOST}"
-  info "CODENVY_REGISTRY          = ${CODENVY_MANIFEST_DIR}"
-  info "CODENVY_DEVELOPMENT_MODE  = ${CODENVY_DEVELOPMENT_MODE}"
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
-    info "CODENVY_DEVELOPMENT_REPO  = ${CODENVY_HOST_DEVELOPMENT_REPO}"
-  fi
-  info "CODENVY_BACKUP            = ${CODENVY_HOST_BACKUP}"
-  info ""
-  info "-----------  PLATFORM INFO  -----------"
-  info "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
-  info "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
-  info "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
-  info "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
-  info "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
-  info "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
-  info "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
-  info ""
-}
-
-cmd_network() {
-  debug $FUNCNAME
-
-  if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CODENVY_VERSION
-  fi
-
-  info ""
-  info "---------------------------------------"
-  info "--------   CONNECTIVITY TEST   --------"
-  info "---------------------------------------"
-  # Start a fake workspace agent
-  log "docker run -d -p 12345:80 --name fakeagent alpine:3.4 httpd -f -p 80 -h /etc/ >> \"${LOGS}\""
-  docker run -d -p 12345:80 --name fakeagent alpine:3.4 httpd -f -p 80 -h /etc/ >> "${LOGS}"
-
-  AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
-  AGENT_INTERNAL_PORT=80
-  AGENT_EXTERNAL_IP=$CODENVY_HOST
-  AGENT_EXTERNAL_PORT=12345
-
-
-  ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
-  HTTP_CODE=$(curl -I localhost:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o "${LOGS}" --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" >> "${LOGS}"
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser    => Workspace Agent (localhost): Connection succeeded"
-  else
-      info "Browser    => Workspace Agent (localhost): Connection failed"
-  fi
-
-  ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
-  HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o "${LOGS}" --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" >> "${LOGS}"
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection succeeded"
-  else
-      info "Browser    => Workspace Agent ($AGENT_EXTERNAL_IP): Connection failed"
-  fi
-
-  ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity
-  export HTTP_CODE=$(docker_run --name fakeserver \
-                                --entrypoint=curl \
-                                ${IMAGE_CODENVY} \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                                  -s -o "${LOGS}" \
-                                  --write-out "%{http_code}")
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Server     => Workspace Agent (External IP): Connection succeeded"
-  else
-      info "Server     => Workspace Agent (External IP): Connection failed"
-  fi
-
-  ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity
-  export HTTP_CODE=$(docker_run --name fakeserver \
-                                --entrypoint=curl \
-                                ${IMAGE_CODENVY} \
-                                  -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
-                                  -s -o "${LOGS}" \
-                                  --write-out "%{http_code}")
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      info "Server     => Workspace Agent (Internal IP): Connection succeeded"
-  else
-      info "Server     => Workspace Agent (Internal IP): Connection failed"
-  fi
-
-  log "docker rm -f fakeagent >> \"${LOGS}\""
-  docker rm -f fakeagent >> "${LOGS}"
-}
-
-# Prints command that should be executed on a node to add it to swarm cluster
-cmd_add_node() {
-  info "add-node" "1. For the node you want to add, verify that Docker is installed."
-  info "add-node" "2. Collect the externally accessible IP address or DNS of the node."
-  info "add-node" "3. Grab your Codenvy admin user name and password."
-  info "add-node" "4. SSH into the remote node and execute:"
-  printf "                             ${YELLOW}bash <(curl -sSL http://${CODENVY_HOST}/api/nodes/script) --user <admin-user> --password <admin-pass> --ip <node-ip>${NC}"
-  echo ""
-  info "add-node" "5. The node will configure itself and update the Codenvy cluster."
-}
-
-# Removes node from swarm cluster configuration and restarts swarm container
-cmd_remove_node() {
-  if [ $# -eq 0 ]; then
-    error "No IP provided"
-    return 1
-  fi
-
-  NODE_IP=${1}
-  NODES=$(grep "^CODENVY_SWARM_NODES=" "${CODENVY_CONFIG}/codenvy.env" | sed "s/.*=//")
-  NODES_ARRAY=(${NODES//,/ })
-  REMOVE_NODE="CODENVY_SWARM_NODES="
-  for NODE in "${NODES_ARRAY[@]}"; do
-    if [ "${NODE/$NODE_IP}" = "$NODE" ] ; then
-      REMOVE_NODE+=${NODE}","
-    fi
-  done
-
-  # remove trailing coma
-  REMOVE_NODE=$(echo "${REMOVE_NODE}" | sed 's/\(.*\),/\1/g')
-
-  ## TODO added "" for OSX - find portable solution
-  sed -i'.bak' -e "s|^CODENVY_SWARM_NODES=.*|${REMOVE_NODE}|" "${CODENVY_CONFIG}/codenvy.env"
-
-  # TODO: Restart should not be needed.  Find way to deregister nodes.
-  cmd_restart
-}
-
-# Shows list of the docker nodes in the swarm cluster
-cmd_list_nodes() {
-  ## TODO use
-  ## - config to get all configured nodes
-  ## - instance to get all registered nodes
-  ## - call to swarm api to get all enabled nodes
-  ## Print output that marks all the nodes in accordance to it state
-  cat "${CODENVY_INSTANCE}/config/swarm/node_list"
 }

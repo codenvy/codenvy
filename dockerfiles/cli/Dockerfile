@@ -38,6 +38,7 @@ RUN set -x \
 
 COPY codenvy.sh /scripts/
 COPY cli.sh /scripts/
+COPY cmd_*.sh /scripts/
 COPY version /version/
 
 RUN chmod +x /scripts/codenvy.sh

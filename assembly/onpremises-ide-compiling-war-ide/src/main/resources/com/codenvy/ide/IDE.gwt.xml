@@ -73,6 +73,7 @@
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
     <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
+    <inherits name="org.eclipse.che.ide.ext.java.testing.core.TestExtension"/>
 
     <!-- Platform API GWT client dependencies                       -->
     <inherits name='org.eclipse.che.api.core.model.Model'/>

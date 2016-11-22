@@ -48,6 +48,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -173,7 +174,7 @@ public class HostedDockerInstanceTest {
         executor.execute(() -> performCommit(repo3, TAG));
 
         // thread #3 commit executed too
-        verify(dockerInstance, atLeastOnce()).commitContainer(eq(repo3), eq(TAG));
+        verify(dockerInstance, timeout(2000)).commitContainer(eq(repo3), eq(TAG));
         verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
 
         // completing first 2 calls
