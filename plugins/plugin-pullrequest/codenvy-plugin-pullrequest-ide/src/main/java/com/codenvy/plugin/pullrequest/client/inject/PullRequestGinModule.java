@@ -14,7 +14,6 @@
  */
 package com.codenvy.plugin.pullrequest.client.inject;
 
-import com.codenvy.plugin.pullrequest.client.ContributionMixinProvider;
 import com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitView;
 import com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitViewImpl;
 import com.codenvy.plugin.pullrequest.client.parts.contribute.ContributePartView;
@@ -26,10 +25,8 @@ import com.codenvy.plugin.pullrequest.client.steps.WaitForkOnRemoteStepFactory;
 import com.codenvy.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 
 import javax.inject.Singleton;
 
@@ -55,6 +52,5 @@ public class PullRequestGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(PushBranchStepFactory.class));
         install(new GinFactoryModuleBuilder().build(AddForkRemoteStepFactory.class));
 
-        GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ContributionMixinProvider.class);
     }
 }

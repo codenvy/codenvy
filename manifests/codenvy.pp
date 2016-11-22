@@ -272,6 +272,10 @@ node default {
   $puppet_src_folder = getValue("CODENVY_CONFIG","/path/to/codenvy/codenvy/puppet/sources")
 # path to codenvy tomcat for development mode
   $codenvy_development_tomcat = getValue("CODENVY_DEVELOPMENT_TOMCAT","/path/to/codenvy_tomcat")
+# codenvy debug port
+  $codenvy_debug_port = getValue("CODENVY_DEBUG_PORT","8000")
+# codenvy debug suspend
+  $codenvy_debug_suspend = getValue("CODENVY_DEBUG_SUSPEND","false")
 
 ###############################
 # Include base module

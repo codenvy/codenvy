@@ -18,7 +18,7 @@
 #
 detect_user_for_upload() {
     case "${SERVER}" in
-      "a9" | "a10" | "a11" | "machines" | "nightly4" )
+      "a9" | "a10" | "a11" | "a12" | "machines" | "nightly4" )
           SSH_KEY_NAME=upl-dev
           SSH_USER_NAME=upl-dev
       ;;
@@ -110,10 +110,10 @@ PUPPET_DNS=puppet.codenvycorp.com
 DATE=`date '+%y%m%d-%H%M%S'`
 CLOUD_IDE_HOME=`pwd`
 SCOPE_HELP="\033[31mNeed to select target to upload as first argument.\npossible values: aio, api, site, machine, all\e[0m"
-SERVER_HELP="\033[31mNeed to select server where to upload as second argument.\npossible values: a9, a10, a11, nightly4, machines\e[0m"
+SERVER_HELP="\033[31mNeed to select server where to upload as second argument.\npossible values: a9, a10, a11, a12, nightly4, machines\e[0m"
 #checking possible scope values
 case "$1" in
-   "prod" | "a9" | "a10" | "a11" | "nightly4" | "machines" )
+   "prod" | "a9" | "a10" | "a11" | "a12" | "nightly4" | "machines" )
       echo "Selected '$1' as cloud for update"
       SERVER=$1
    ;;
@@ -124,7 +124,7 @@ case "$1" in
 esac
 
 case "${SERVER}" in
-    "a9" | "a10" | "a11" )
+    "a9" | "a10" | "a11" | "a12" )
       echo "Selected 'aio' as scope for update"
       SCOPE='aio'
       shift

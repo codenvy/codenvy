@@ -36,13 +36,14 @@ RUN set -x \
 	&& rm docker.tgz \
 	&& docker -v
 
-COPY codenvy.sh /cli/
-COPY cli.sh /cli/
+COPY codenvy.sh /scripts/
+COPY cli.sh /scripts/
+COPY cmd_*.sh /scripts/
 COPY version /version/
 
-RUN chmod +x /cli/codenvy.sh
+RUN chmod +x /scripts/codenvy.sh
 
-ENTRYPOINT ["/cli/codenvy.sh"]
+ENTRYPOINT ["/scripts/codenvy.sh"]
 
 
 

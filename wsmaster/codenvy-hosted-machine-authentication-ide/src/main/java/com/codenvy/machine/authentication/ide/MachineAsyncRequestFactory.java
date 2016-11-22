@@ -15,7 +15,6 @@
 package com.codenvy.machine.authentication.ide;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
-import com.google.common.base.Strings;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -26,6 +25,8 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -33,6 +34,9 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.nullToEmpty;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
@@ -46,20 +50,23 @@ import static org.eclipse.che.ide.rest.HTTPMethod.POST;
 @Singleton
 public class MachineAsyncRequestFactory extends AsyncRequestFactory implements WorkspaceStoppedEvent.Handler {
     private static final String DTO_CONTENT_TYPE   = APPLICATION_JSON;
-    private static final String WS_AGENT_PATH_PART = "/wsagent/";
 
     private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
     private final DtoFactory                          dtoFactory;
+    private final AppContext appContext;
 
     private String machineToken;
+    private String wsAgentBaseUrl;
 
     @Inject
     public MachineAsyncRequestFactory(DtoFactory dtoFactory,
                                       Provider<MachineTokenServiceClient> machineTokenServiceProvider,
+                                      AppContext appContext,
                                       EventBus eventBus) {
         super(dtoFactory);
         this.machineTokenServiceProvider = machineTokenServiceProvider;
         this.dtoFactory = dtoFactory;
+        this.appContext = appContext;
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
@@ -68,7 +75,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
                                            String url,
                                            Object dtoBody,
                                            boolean async) {
-        if (!url.contains(WS_AGENT_PATH_PART)) {
+        if (!isWsAgentRequest(url)) {
             return super.doCreateRequest(method, url, dtoBody, async);
         }
         return doCreateMachineRequest(method, url, dtoBody, async);
@@ -91,7 +98,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
     }
 
     private Promise<String> getMachineToken() {
-        if (!Strings.isNullOrEmpty(machineToken)) {
+        if (!isNullOrEmpty(machineToken)) {
             return Promises.resolve(machineToken);
         } else {
             return machineTokenServiceProvider.get()
@@ -111,5 +118,26 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
         machineToken = null;
+        wsAgentBaseUrl = null;
+    }
+
+    /**
+     * Going to check is this request goes to WsAgent
+     * @param url
+     * @return
+     */
+    private boolean isWsAgentRequest(String url) {
+        if (appContext.getWorkspace() == null || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
+            return false; //ws-agent not started
+        }
+        if (isNullOrEmpty(wsAgentBaseUrl)) {
+            final DevMachine devMachine = appContext.getDevMachine();
+            if (devMachine != null) {
+                wsAgentBaseUrl = devMachine.getWsAgentBaseUrl();
+            } else {
+                return false;
+            }
+        }
+        return url.contains(nullToEmpty(wsAgentBaseUrl));
     }
 }

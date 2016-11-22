@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
+import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
@@ -57,6 +58,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -140,6 +142,7 @@ public class WorkspacePermissionsFilterTest {
 
     @Test
     public void shouldCheckNamespaceAccessOnFetchingWorkspacesByNamespace() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(false);
         doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
 
         final Response response = given().auth()
@@ -149,8 +152,27 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/namespace/userok");
 
         assertEquals(response.getStatusCode(), 200);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
         verify(workspaceService).getByNamespace(any(), eq("userok"));
         verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
+        verifyZeroInteractions(subject);
+    }
+
+    @Test
+    public void shouldNotCheckNamespaceAccessIfUserHasManageCodenvyPermissionOnFetchingWorkspacesByNamespace() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(true);
+        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/namespace/userok");
+
+        assertEquals(response.getStatusCode(), 200);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
+        verify(workspaceService).getByNamespace(any(), eq("userok"));
+        verify(permissionsFilter, never()).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
     }
 
@@ -312,7 +334,8 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
-    public void shouldCheckPermissionsOnWorkspaceStopping() throws Exception {
+    public void shouldCheckUserPermissionsOnWorkspaceStopping() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(false);
         when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
@@ -323,8 +346,26 @@ public class WorkspacePermissionsFilterTest {
                                          .delete(SECURE_PATH + "/workspace/{id}/runtime");
 
         assertEquals(response.getStatusCode(), 204);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
         verify(workspaceService).stop(eq("workspace123"), any());
         verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
+    }
+
+    @Test
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasManageCodenvyPermissionOnWorkspaceStopping() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(true);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .pathParam("id", "workspace123")
+                                         .contentType("application/json")
+                                         .when()
+                                         .delete(SECURE_PATH + "/workspace/{id}/runtime");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
+        verify(workspaceService).stop(eq("workspace123"), any());
+        verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
@@ -376,7 +417,8 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
-    public void shouldCheckPermissionsOnGetWorkspaceByKey() throws Exception {
+    public void shouldCheckUserPermissionsOnGetWorkspaceByKey() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(false);
         when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
 
         final Response response = given().auth()
@@ -387,8 +429,26 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/{key}");
 
         assertEquals(response.getStatusCode(), 204);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
         verify(workspaceService).getByKey(eq("workspace123"));
         verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
+    }
+
+    @Test
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasManageCodenvyPermissionOnGetWorkspaceByKey() throws Exception {
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)).thenReturn(true);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .pathParam("key", "workspace123")
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/{key}");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION));
+        verify(workspaceService).getByKey(eq("workspace123"));
+        verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
 
     @Test
@@ -587,6 +647,7 @@ public class WorkspacePermissionsFilterTest {
                                                                                           String method,
                                                                                           String action) throws Exception {
         doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+        when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_CODENVY_ACTION))).thenReturn(false);
         when(workspace.getNamespace()).thenReturn(USERNAME);
 
         Response response = request(given().auth()
@@ -597,7 +658,7 @@ public class WorkspacePermissionsFilterTest {
                                     method);
         //Successful 2xx
         assertEquals(response.getStatusCode() / 100, 2);
-        verify(subject, never()).hasPermission(any(), any(), any());
+        verify(subject, never()).hasPermission(not(Matchers.eq(SystemDomain.DOMAIN_ID)), any(), any());
     }
 
     @Test

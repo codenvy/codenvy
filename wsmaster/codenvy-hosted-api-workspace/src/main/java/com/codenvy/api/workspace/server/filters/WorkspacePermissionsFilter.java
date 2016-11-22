@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
+import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 
@@ -81,6 +82,9 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 return;
 
             case "getByNamespace": {
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                    return;
+                }
                 checkManageNamespaceAccess(currentSubject, ((String)arguments[1]));
                 return;
             }
@@ -101,6 +105,9 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "stop":
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                    return;
+                }
             case "startById":
             case "createSnapshot":
                 key = ((String)arguments[0]);
@@ -112,8 +119,11 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 action = READ;
                 break;
 
-            case "checkAgentHealth":
             case "getByKey":
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                    return;
+                }
+            case "checkAgentHealth":
                 key = ((String)arguments[0]);
                 action = READ;
                 break;
@@ -167,8 +177,8 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
     }
 
     private void checkManageNamespaceAccess(Subject currentSubject, @Nullable String namespace) throws ServerException,
-                                                                                               NotFoundException,
-                                                                                               ForbiddenException {
+                                                                                                       NotFoundException,
+                                                                                                       ForbiddenException {
         checkNamespaceAccess(currentSubject, namespace, MANAGE_WORKSPACES);
     }
 

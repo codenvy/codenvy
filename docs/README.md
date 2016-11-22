@@ -6,6 +6,7 @@ With Docker 1.11+ on Windows, Mac, or Linux:
 ```
 $ docker run codenvy/cli start
 ```
+This command will give you additional instructions on how to run the Codenvy CLI while setting your hostname, configuring volume mounts, and testing your Docker setup.
 
 ### TOC
 - [Beta](#beta)
@@ -52,13 +53,11 @@ This Dockerized packaging is new. We continue to support our [puppet-based insta
 
 When the following are implemented, this Docker approach will be declared generally available:
 
-1. `codenvy upgrade` is not yet implemented. You can switch between versions, but we do not yet support automatic data migration inside of images. 
+1. Migrations. We do not yet support migrating an existing Codenvy installation that uses our Puppet-based infrastructure into a Dockerized infrastructure of the same version. Currently, Dockerized Codenvy installations need to be different installations apart from the puppetized infrastructure.
 
-2. Migrations. We do not yet support migrating an existing Codenvy installation that uses our Puppet-based infrastructure into a Dockerized infrastructure of the same version. Currently, Dockerized Codenvy installations need to be different installations apart from the puppetized infrastructure.
+2. Admin dashboard. We provide an administrators' dashboard within the UI. This admin dashboard has not yet been updated for a dockerized version where there is a simpler configuration approach. We are updating this in an upcoming sprint.
 
-3. Admin dashboard. We provide an administrators' dashboard within the UI. This admin dashboard has not yet been updated for a dockerized version where there is a simpler configuration approach. We are updating this in an upcoming sprint.
-
-4. In some limited firewall cases, workspaces will not start. This happens because certain internal Codenvy traffic is sent over an external IP address which is routed through your system's firewall. We can use socat and internal IP addresses within our Swarm cluster to avoid this issue.
+3. In some limited firewall cases, workspaces will not start. This happens because certain internal Codenvy traffic is sent over an external IP address which is routed through your system's firewall. We can use socat and internal IP addresses within our Swarm cluster to avoid this issue.
 
 ## Getting Help
 If you are Codenvy customer, file a ticket through email support for a quicker response.
@@ -68,7 +67,7 @@ If you run into an issue, please [open a GitHub issue](http://github.com/codenvy
 - output of the `docker version` command
 - output of the `docker info` command
 - the full Docker run syntax you used for the `codenvy <command>`
-- the output of `/instance/logs/cli/cli.log`
+- the output of `cli.log` - see [CLI Reference](#cli-reference)
 
 ## System Requirements
 Codenvy installs on Linux, Mac and Windows. 
@@ -196,7 +195,7 @@ A `NO_PROXY` variable is required if you use a fake local DNS. Java and other in
 We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations. 
 
 ##### Save Docker Images
-While connected to the Internet and with access to DockerHub, download Codenvy's Docker images as a set of files with `codenvy offline`. Codenvy will download all dependent images and save them to `/codenvy/backup/*.tar` with each image saved as its own file. The version tag of the CLI Docker image will be used to determine which versions of dependent images to download. There is about 1GB of data that will be saved.
+While connected to the Internet and with access to DockerHub, download Codenvy's Docker images as a set of files with `codenvy offline`. Codenvy will download all dependent images and save them to `/codenvy/backup/*.tar` with each image saved as its own file. The `/backup` folder will be created as a subdirectory of `/codenvy` if that is the only folder you mount, otherwise you can direct mount a host folder to that directory. The version tag of the CLI Docker image will be used to determine which versions of dependent images to download. There is about 1GB of data that will be saved.
 
 ##### Save Codenvy CLI
 ```
@@ -220,32 +219,51 @@ When invoked with the `--offline` parameter, the Codenvy CLI performs a preboot 
 ## Usage
 #### Syntax
 ```
-Usage: docker run -it --rm
+Usage: docker run -it --rm 
                   -v /var/run/docker.sock:/var/run/docker.sock
                   -v <host-path-for-codenvy-data>:/codenvy
-                  codenvy/cli:<version> [COMMAND]
+                  ${CHE_MINI_PRODUCT_NAME}/cli:<version> [COMMAND]
 
-    init [--pull|--force|--offline]      Initializes a directory with a codenvy configuration
-    config                               Generates a codenvy config from vars; run on any start / restart
-    start [--pull|--force|--offline]     Starts codenvy services
-    stop                                 Stops codenvy services
-    restart [--pull|--force]             Restart codenvy services
-    destroy [--quiet]                    Stops services, and deletes codenvy instance data
-    rmi [--quiet]                        Removes the Docker images for CODENVY_VERSION, forcing a repull
-    add-node                             Adds a physical node to serve workspaces intto the codenvy cluster
-    remove-node <ip>                     Removes the physical node from the codenvy cluster
+    help                                 This message
     version                              Installed version and upgrade paths
-    upgrade                              Upgrades Codenvy to another version with migrations and backups
+    init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+         [--no-force                         Default - uses cached local Docker images
+          --pull                             Checks for newer images from DockerHub  
+          --force                            Removes all images and re-pulls all images from DockerHub
+          --offline                          Uses images saved to disk from the offline command
+          --accept-license                   Auto accepts the Codenvy license during installation
+          --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
+    start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
+    stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
+    restart [--pull | --force]           Restart ${CHE_MINI_PRODUCT_NAME} services
+    destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+            [--quiet                         Does not ask for confirmation before destroying instance data
+             --cli]                          If :/cli is mounted, will destroy the cli.log
+    rmi [--quiet]                        Removes the Docker images for <version>, forcing a repull
+    config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
+    add-node                             Adds a physical node to serve workspaces intto the ${CHE_MINI_PRODUCT_NAME} cluster
+    remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
+    upgrade                              Upgrades Codenvy from one version to another with migrations and backups
     download [--pull|--force|--offline]  Pulls Docker images for the current Codenvy version
-    offline                              Saves codenvy Docker images into TAR files for offline install
-    backup [--quiet|--skip-data] Backups codenvy configuration and data to CODENVY_BACKUP_FOLDER
-    restore [--quiet]                    Restores codenvy configuration and data from CODENVY_BACKUP_FOLDER
-    info [ --all                         Run all debugging tests
-           --debug                       Displays system information
-           --network ]                   Test connectivity between codenvy sub-systems
+    backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to /codenvy/backup volume mount
+    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from /codenvy/backup mount
+    offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
+    info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI 
+         [ --all                             Run all debugging tests
+           --debug                           Displays system information
+           --network]                        Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
+    ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
+    mount <wksp-name>                    Synchronize workspace with current working directory
+    action <action-name> [--help]        Start action on ${CHE_MINI_PRODUCT_NAME} instance
+    compile <mvn-command>                SDK - Builds Che source code or modules
+    test <test-name> [--help]            Start test on ${CHE_MINI_PRODUCT_NAME} instance
 
 Variables:
-    CODENVY_HOST                         IP address or hostname of the server Codenvy is running on 
+    CODENVY_HOST                         IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
+    CLI_DEBUG                            Default=false.Prints stack trace during execution
+    CLI_INFO                             Default=true. Prints out INFO messages to standard out
+    CLI_WARN                             Default=true. Prints WARN messages to standard out
+    CLI_LOG                              Default=true. Prints messages to cli.log file
 ```
 
 In these docs, when you see `codenvy [COMMAND]`, it is assumed that you run the CLI with the full `docker run ...` syntax. We short hand the docs for readability.
@@ -388,15 +406,25 @@ For Codenvy developers that are building and customizing Codenvy from its source
 
 Dev mode is activated by volume mounting the Codenvy git repository to `:/repo` in your Docker run command.
 ```
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
-                    -v <local-path>:/codenvy
-                    -v <local-repo>:/repo
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/codenvy \
+                    -v <local-repo>:/repo \
                        codenvy/cli:<version> [COMMAND]
 ``` 
 Dev mode will use files from your host repository in three ways:
+
 1. During the `codenvy config` phase, the source repository's `/modules` and `/manifests` will be used instead of the ones that are included in the `codenvy/init` container.
 2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
 3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
+
+To activate jpda suspend mode for debugging codenvy server initialization, in the `codenvy.env`:
+```
+CODENVY_DEBUG_SUSPEND=true
+```
+To change codenvy debug port, in the `codenvy.env`:
+```
+CODENVY_DEBUG_PORT=8000
+```
 
 #### Licensing
 Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
@@ -464,9 +492,21 @@ Each Codenvy instance generates a configuration on how to add nodes into the clu
 You can remove nodes with `codenvy remove-node <ip>`.
 
 #### Upgrading
-Not yet supported. We will support this in time for Dockerized Codenvy GA.
+Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M7, then:
+```
+# Get the new version of Codenvy
+docker pull codenvy/cli:5.0.0-M7
 
-You can run `codenvy version` to see the list of available upgrade paths for your current Codenvy installation. Since Codenvy is deployed as a set of stateless Docker containers, the upgrade process involves our utilities performing a pull of the new Docker images for the new version, orderly pausing of developers services, backing up data, activating new containers for Codenvy, running internal data migration scripts, and restoring developer services. If any situation were to fail, we wipe the system, create a new Codenvy instance with the backup and launch a set of Codenvy containers matching the old version and then restoring services. Microservices are great as they allow for this simple recovery approach.
+# You now have two codenvy/cli images (one for each version)
+# Perform an upgrade - use the new image to upgrade old installation
+docker run <volume-mounts> codenvy/cli:5.0.0-M7 upgrade
+``` 
+
+The upgrade command has numerous checks to prevent you from upgrading Codenvy if the new image and the old version are not compatiable. In order for the upgrade procedure to proceed, the CLI image must be newer than the value of 'CODENVY_VERSION' in '/config/codenvy.env', and 'CODENVY_VERSION' in '/config/codenvy.env' must match your installed version defined in '/instance/codenvy.ver'.
+
+The upgrade process is a) to perform a version compatibility check, b) download new Docker images that are needed to run the new version of Codenvy, c) stop Codenvy if it is currently running triggering a maintenance window, d) backup your installation, e) reinstall your configuration with an initialization of the new version, and f) start Codenvy.
+
+You can run `codenvy version` to see the list of available upgrade paths for your current Codenvy installation.
 
 #### Backup (Backup)
 You can run `codenvy backup` to create a copy of the relevant configuration information, user data, projects, and workspaces. We do not save workspace snapshots as part of a routine backup exercise. You can run `codenvy restore` to recover Codenvy from a particular backup snapshot. The backup is saved as a TAR file that you can keep in your records.
@@ -483,7 +523,14 @@ We currently do not support migrating from the puppet-based configuration of Cod
 We maintain a disaster recovery [policy and best practices](http://codenvy.readme.io/v5.0/docs/disaster-recovery).
 
 ## CLI Reference
-The CLI is configured to hide most error conditions from the output screen. If you believe that Codenvy or the CLI is starting with errors, the `/instance/logs/cli/cli.logs` file contains traces and error output from your execution.
+The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
+
+```
+docker run --rm -it 
+           -v /var/run/docker.sock:/var/run/docker.sock 
+           -v /c/codenvy:/codenvy 
+           -v /c/codenvy/cli:/cli codenvy/cli:nightly [COMMAND]
+```
 
 ### `codenvy init`
 Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. If you only provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance`, `config`, and `backup` subfolder of `<path>`. If you provide three volume mounts of `<path-1>:/codenvy/config`, `<path-2>:/codenvy/instance`, `<path-3>:/codenvy/backup` then these specific folders will be used instead of the subfolders approach. The `codenvy.env` file is placed into the `/codenvy/config` folder, which is the file you use to configure how Codenvy is configured and run. Other files in this folder are used by Codenvy's configuration system to structure the runtime microservices. 
@@ -507,7 +554,11 @@ You can control the nature of how Codenvy downloads these images with command li
 | `--no-force` | Default behavior. Will download an image if not found locally. A local check of the image will see if an image of a matching name is in your local registry and then skip the pull if it is found. This mode does not check DockerHub for a newer version of the same image. |
 | `--pull` | Will always perform a `docker pull` when an image is requested. If there is a newer version of the same tagged image at DockerHub, it will pull it, or use the one in local cache. This keeps your images up to date, but execution is slower. |
 | `--force` | Performs a forced removal of the local image using `docker rmi` and then pulls it again (anew) from DockerHub. You can use this as a way to clean your local cache and ensure that all images are new. |
-| `--offline` | Loads Docker images from `offline/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
+| `--offline` | Loads Docker images from `backup/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
+
+The initialization of a Codenvy installation requires the acceptance of our default Fair Source 3 license agreement, which allows for some access to the source code and [usage for up to three people](http://codenvy.com/legal). You can auto-accept the license agreement without prompting for a response for silent installation by passing the `--accept-license` command line option.
+
+You can reinstall Codenvy on a folder that is already initialized and preserve your `/codenvy/codenvy.env` values by passing the `--reinit` flag.
 
 ### `codenvy config`
 Generates a Codenvy instance configuration using the templates and environment variables stored in `/codenvy/config` and places the configuration in `/codenvy/instance`. Uses puppet to generate the configuration files for Codenvy, haproxy, swarm, socat, nginx, and postgres which are mounted when Codenvy services are started. This command is executed on every `start` or `restart`.
@@ -526,7 +577,9 @@ Stops all of the Codenvy service containers and removes them.
 Performs a `codenvy stop` followed by a `codenvy start`, respecting `--pull`, `--force`, and `--offline`.
 
 ### `codenvy destroy`
-Deletes `/codenvy/config` and `/codenvy/instance`, including destroying all user workspaces, projects, data, and user database. If you provide `--force` then the confirmation warning will be skipped.
+Deletes `/codenvy/config` and `/codenvy/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped. 
+
+If you have mounted the `:/cli` path, then we write the `cli.log` to your host directory. By default, this log is not destroyed in a `codenvy destroy` command so that you can maintain a record of all CLI executions. You can also have this file removed from your host by mounting `:/cli` and passing the `--cli` parameter to this command.
 
 ### `codenvy offline`
 Saves all of the Docker images that Codenvy requires into `/codenvy/backup/*.tar` files. Each image is saved as its own file. If the `backup` folder is available on a machine that is disconnected from the Internet and you start Codenvy with `--offline`, the CLI pre-boot sequence will load all of the Docker images in the `/codenvy/backup/` folder.
@@ -540,12 +593,24 @@ Used to download Docker images that will be stored in your Docker images reposit
 This command is invoked by `codenvy init` before initialization to download the images for the version specified by `codenvy/cli:<version>`.
 
 ### `codenvy version`
-Provides information on the current version, the available versions that are hosted in Codenvy's repositories, and if you have a `/codenvy/instance`, then also the available upgrade paths. `codenvy upgrade` enforces upgrade sequences and will prevent you from upgrading one version to another version where data migrations cannot be guaranteed.
+Provides information on the current version and the available versions that are hosted in Codenvy's repositories. `codenvy upgrade` enforces upgrade sequences and will prevent you from upgrading one version to another version where data migrations cannot be guaranteed.
 
 ### `codenvy upgrade`
 Manages the sequence of upgrading Codenvy from one version to another. Run `codenvy version` to get a list of available versions that you can upgrade to.
 
-Do *not* upgrade by wiping your Codenvy images and using a new version. There is a possibility that you will corrupt your system. We have multiple checks that will stop you from starting Codenvy if the `codenvy/cli:<version>` differs from the one that is in `/codenvy/instance/codenvy.ver`.  In some releases, we change the underlying database schema model, and we need to run internal migration scripts that transforms the old data model into the new format. The `codenvy upgrade` function ensures that you are upgrading to a supported version where a clean data migration for your existing database can be completed.
+Upgrading Codenvy is done by using a `codenvy/cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M7, then:
+```
+# Get the new version of Codenvy
+docker pull codenvy/cli:5.0.0-M7
+
+# You now have two codenvy/cli images (one for each version)
+# Perform an upgrade - use the new image to upgrade old installation
+docker run <volume-mounts> codenvy/cli:5.0.0-M7 upgrade
+``` 
+
+The upgrade command has numerous checks to prevent you from upgrading Codenvy if the new image and the old version are not compatiable. In order for the upgrade procedure to proceed, the CLI image must be newer than the value of 'CODENVY_VERSION' in '/config/codenvy.env', and 'CODENVY_VERSION' in '/config/codenvy.env' must match your installed version defined in '/instance/codenvy.ver'.
+
+The upgrade process is a) to perform a version compatibility check, b) download new Docker images that are needed to run the new version of Codenvy, c) stop Codenvy if it is currently running triggering a maintenance window, d) backup your installation, e) reinstall your configuration with an initialization of the new version, and f) start Codenvy.
 
 ### `codenvy info`
 Displays system state and debugging information. `--network` runs a test to take your `CODENVY_HOST` value to test for networking connectivity simulating browser > Codenvy and Codenvy > workspace connectivity.

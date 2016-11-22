@@ -46,7 +46,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>wsagent.war</outputFileNameMapping>
+            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
                 <include>com.codenvy.onpremises:onpremises-ide-packaging-war-ext-server</include>
             </includes>
