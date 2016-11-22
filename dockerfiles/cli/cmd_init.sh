@@ -94,7 +94,7 @@ cmd_init() {
 
   if [[ "${REINIT}" = "true" ]]; then
     # If this is a reinit, grab the .reinit file and use it as the environment file
-    mv -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    mv -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   else       
 
     # Otherwise, we are using the templated version and making some modifications.

@@ -44,7 +44,7 @@ cmd_upgrade() {
   cmd_backup
 
   info "upgrade" "Reinitializing the system with your configuration..."
-  cmd_reinit --accept-license --reinit
+  cmd_init --accept-license --reinit
 
   cmd_start
 }
