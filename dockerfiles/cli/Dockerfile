@@ -19,7 +19,7 @@ FROM alpine:3.4
 RUN mkdir -p /codenvy \
     && mkdir -p /version \
     && mkdir -p /cli \
-    && apk add --no-cache ca-certificates curl openssl \
+    && apk add --no-cache ca-certificates curl openssl jq \
     && apk add --update bash \
     && rm -rf /var/cache/apk/*
 
