@@ -92,9 +92,8 @@ cmd_init() {
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy $IMAGE_INIT
   fi
 
-  # After initialization, add environment file.
   if [[ "${REINIT}" = "true" ]]; then
-    # If this is a reinit, move the .reinit file and use it as the environment file
+    # If this is a reinit, grab the .reinit file and use it as the environment file
     mv -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   else       
 
