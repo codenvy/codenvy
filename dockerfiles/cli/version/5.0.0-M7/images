@@ -8,4 +8,4 @@ IMAGE_POSTGRES=postgres:9.5.4
 IMAGE_INIT=codenvy/init:5.0.0-M7
 IMAGE_CODENVY=codenvy/codenvy:5.0.0-M7
 IMAGE_COMPOSE=docker/compose:1.8.1
-IMAGE_RSYSLOG=codenvy/rsyslog:8.20.0
+IMAGE_RSYSLOG=codenvy/rsyslog:8.18.0
