@@ -6,5 +6,5 @@ cp -rf /files/modules /copy
 cp -rf /files/docs /copy
 # do not copy codenvy.env if exist
 if [ ! -f  /copy/codenvy.env ]; then
-    cp /files/codenvy.env /copy
+    cp /files/manifests/codenvy.env /copy
 fi
