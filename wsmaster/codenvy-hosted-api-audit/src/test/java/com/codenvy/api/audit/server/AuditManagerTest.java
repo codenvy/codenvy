@@ -14,8 +14,8 @@
  */
 package com.codenvy.api.audit.server;
 
-import com.codenvy.license.shared.CodenvyLicense;
-import com.codenvy.license.shared.LicenseException;
+import com.codenvy.api.license.shared.CodenvyLicense;
+import com.codenvy.api.license.shared.exception.LicenseException;
 import com.codenvy.api.license.server.CodenvyLicenseManager;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;

@@ -14,15 +14,15 @@
  */
 package com.codenvy.api.license.server;
 
-import com.codenvy.api.license.server.shared.dto.IssueDto;
-import com.codenvy.api.license.server.shared.dto.LegalityDto;
-import com.codenvy.api.license.server.shared.model.Issue;
-import com.codenvy.license.shared.CodenvyLicense;
-import com.codenvy.license.shared.CodenvyLicenseFactory;
-import com.codenvy.license.shared.InvalidLicenseException;
-import com.codenvy.license.shared.LicenseException;
-import com.codenvy.license.shared.LicenseFeature;
-import com.codenvy.license.shared.LicenseNotFoundException;
+import com.codenvy.api.license.shared.dto.IssueDto;
+import com.codenvy.api.license.shared.dto.LegalityDto;
+import com.codenvy.api.license.shared.model.Issue;
+import com.codenvy.api.license.shared.CodenvyLicense;
+import com.codenvy.api.license.shared.CodenvyLicenseFactory;
+import com.codenvy.api.license.shared.exception.InvalidLicenseException;
+import com.codenvy.api.license.shared.exception.LicenseException;
+import com.codenvy.api.license.shared.LicenseFeature;
+import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;

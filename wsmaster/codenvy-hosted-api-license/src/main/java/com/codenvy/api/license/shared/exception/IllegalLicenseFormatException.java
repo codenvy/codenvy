@@ -12,30 +12,17 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server.shared.dto;
-
-import com.codenvy.api.license.server.shared.model.Legality;
-import org.eclipse.che.dto.shared.DTO;
-
-import java.util.List;
+package com.codenvy.api.license.shared.exception;
 
 /**
- * @author Dmytro Nochevnov
+ * @author Anatoliy Bazko
  */
-@DTO
-public interface LegalityDto extends Legality {
+public class IllegalLicenseFormatException extends InvalidLicenseException {
+    public IllegalLicenseFormatException(String message) {
+        super(message);
+    }
 
-    @Override
-    boolean getIsLegal();
-
-    void setIsLegal(boolean isLegal);
-
-    LegalityDto withIsLegal(boolean isLegal);
-
-    @Override
-    List<IssueDto> getIssues();
-
-    void setIssues(List<IssueDto> issues);
-
-    LegalityDto withIssues(List<IssueDto> issues);
+    public IllegalLicenseFormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

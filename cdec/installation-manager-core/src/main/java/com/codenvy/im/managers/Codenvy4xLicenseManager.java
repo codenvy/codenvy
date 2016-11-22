@@ -14,11 +14,11 @@
  */
 package com.codenvy.im.managers;
 
-import com.codenvy.license.shared.CodenvyLicense;
-import com.codenvy.license.shared.CodenvyLicenseFactory;
-import com.codenvy.license.shared.InvalidLicenseException;
-import com.codenvy.license.shared.LicenseException;
-import com.codenvy.license.shared.LicenseNotFoundException;
+import com.codenvy.api.license.shared.CodenvyLicense;
+import com.codenvy.api.license.shared.CodenvyLicenseFactory;
+import com.codenvy.api.license.shared.exception.InvalidLicenseException;
+import com.codenvy.api.license.shared.exception.LicenseException;
+import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 

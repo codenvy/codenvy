@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.license.shared;
+package com.codenvy.api.license.shared;
 
 import com.google.common.collect.ImmutableMap;
 import org.testng.annotations.DataProvider;

@@ -12,27 +12,30 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server.shared.model;
+package com.codenvy.api.license.shared.dto;
+
+import com.codenvy.api.license.shared.model.Legality;
+import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 /**
- * Describes issue with license.
- *
  * @author Dmytro Nochevnov
  */
-public interface Issue {
+@DTO
+public interface LegalityDto extends Legality {
 
-    enum Status {
-        USER_LICENSE_HAS_REACHED_ITS_LIMIT
-    }
+    @Override
+    boolean getIsLegal();
 
-    /**
-     * Check if license is legal.
-     */
-    Status getStatus();
+    void setIsLegal(boolean isLegal);
 
+    LegalityDto withIsLegal(boolean isLegal);
 
-    /**
-     * Check if license is legal.
-     */
-    String getMessage();
+    @Override
+    List<IssueDto> getIssues();
+
+    void setIssues(List<IssueDto> issues);
+
+    LegalityDto withIssues(List<IssueDto> issues);
 }

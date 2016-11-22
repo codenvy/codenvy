@@ -12,17 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.license.shared;
+package com.codenvy.api.license.shared.model;
 
 /**
- * @author Anatoliy Bazko
+ * Describes issue with license.
+ *
+ * @author Dmytro Nochevnov
  */
-public class IllegalLicenseFormatException extends InvalidLicenseException {
-    public IllegalLicenseFormatException(String message) {
-        super(message);
+public interface Issue {
+
+    enum Status {
+        USER_LICENSE_HAS_REACHED_ITS_LIMIT
     }
 
-    public IllegalLicenseFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    /**
+     * Get status of issue.
+     */
+    Status getStatus();
+
+
+    /**
+     * Get message of issue.
+     */
+    String getMessage();
 }

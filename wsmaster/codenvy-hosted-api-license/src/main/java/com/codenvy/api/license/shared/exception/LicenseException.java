@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.license.shared;
+package com.codenvy.api.license.shared.exception;
 
 /**
  * @author Anatoliy Bazko

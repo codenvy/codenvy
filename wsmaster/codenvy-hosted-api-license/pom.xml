@@ -30,10 +30,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-license-shared</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-machine-hosted</artifactId>
         </dependency>
@@ -48,6 +44,10 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.license4j</groupId>
+            <artifactId>license4j-runtime-library</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -168,10 +168,10 @@
                 </dependencies>
                 <configuration>
                     <dtoPackages>
-                        <package>com.codenvy.api.license.server.shared.dto</package>
+                        <package>com.codenvy.api.license.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>com.codenvy.api.license.server.shared.dto.DtoServerImpls</genClassName>
+                    <genClassName>com.codenvy.api.license.shared.dto.DtoServerImpls</genClassName>
                     <impl>server</impl>
                 </configuration>
             </plugin>

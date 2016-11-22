@@ -12,26 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server.shared.model;
+package com.codenvy.api.license.shared.dto;
 
-import com.codenvy.api.license.server.shared.dto.IssueDto;
-
-import java.util.List;
+import com.codenvy.api.license.shared.model.Issue;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Describes legality of usage of Codenvy according to actual license.
- *
  * @author Dmytro Nochevnov
  */
-public interface Legality {
+@DTO
+public interface IssueDto extends Issue {
+    @Override
+    Status getStatus();
 
-    /**
-     * Check if Codenvy usage is legal.
-     */
-    boolean getIsLegal();
+    void setStatus(Status status);
 
-    /**
-     * Get list of issues related to actual license.
-     */
-    List<IssueDto> getIssues();
+    IssueDto withStatus(Status status);
+
+    @Override
+    String getMessage();
+
+    void setMessage(String message);
+
+    IssueDto withMessage(String message);
 }
