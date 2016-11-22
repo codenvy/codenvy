@@ -95,7 +95,7 @@ cmd_init() {
   # After initialization, add environment file.
   if [[ "${REINIT}" = "true" ]]; then
     # If this is a reinit, move the .reinit file and use it as the environment file
-    mv -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    mv -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   else       
     # Otherwise, we are using the templated version and making some modifications.
     sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
