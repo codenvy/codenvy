@@ -142,7 +142,7 @@ NETWORK_PORTS=${OUTPUT}
 
 EXT_HOST_PORT_REGEX="4401/tcp=\[PortBinding\{hostIp='[0-9.]*', hostPort='([0-9]*)'\}\]"
 EXT_HOST_PORT=$([[ "$NETWORK_PORTS" =~ $EXT_HOST_PORT_REGEX ]] && echo ${BASH_REMATCH[1]})
-URL_OF_PROJECT_API="http://${HOST_URL}/${EXT_HOST_PORT}_node1.${HOST_URL}/wsagent/ext/project"
+URL_OF_PROJECT_API="http://${HOST_URL}/${EXT_HOST_PORT}_node1.${HOST_URL}/wsagent/api/project"
 
 # obtain machine token
 doGet "http://${HOST_URL}/api/machine/token/${WORKSPACE_ID}?token=${TOKEN}"
