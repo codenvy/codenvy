@@ -97,19 +97,15 @@ cmd_init() {
     # If this is a reinit, move the .reinit file and use it as the environment file
     mv -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   else       
+
     # Otherwise, we are using the templated version and making some modifications.
     sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+
     info "init" "  CODENVY_HOST=${CODENVY_HOST}"
-
-    # TODO @Tyler clean up
-    sed -i'.bak' "s|#CODENVY_VERSION=.*|CODENVY_VERSION=${CODENVY_VERSION}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
     info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
-
     info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
     info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
-
-    # still need sed for swarm nodes
-    sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
 
     if [ "${CODENVY_DEVELOPMENT_MODE}" == "on" ]; then
       info "init" "  CODENVY_ENVIRONMENT=development"
@@ -121,6 +117,8 @@ cmd_init() {
 
     rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
   fi
+
+  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}"
 }
 
 require_license() {
