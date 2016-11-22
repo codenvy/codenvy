@@ -101,12 +101,12 @@ cmd_init() {
     # Otherwise, we are using the templated version and making some modifications.
     sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
     sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
 
     info "init" "  CODENVY_HOST=${CODENVY_HOST}"
     info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
     info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
     info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
-
     if [ "${CODENVY_DEVELOPMENT_MODE}" == "on" ]; then
       info "init" "  CODENVY_ENVIRONMENT=development"
       info "init" "  CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}"
@@ -114,10 +114,9 @@ cmd_init() {
     else
       info "init" "  CODENVY_ENVIRONMENT=production"
     fi
-
-    rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
   fi
 
+  # Encode the version that we initialized into the version file
   echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}"
 }
 
