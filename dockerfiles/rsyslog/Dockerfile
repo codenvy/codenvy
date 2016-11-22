@@ -1,6 +1,6 @@
 FROM alpine:3.4
 
-RUN  apk add --update rsyslog \
+RUN  apk add --update "rsyslog=8.18.0-r0" \
   && rm -rf /var/cache/apk/*
 
 EXPOSE 514 514/udp
