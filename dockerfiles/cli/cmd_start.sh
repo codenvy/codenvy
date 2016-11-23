@@ -53,8 +53,13 @@ cmd_start() {
   # Start Codenvy
   # Note bug in docker requires relative path, not absolute path to compose file
   info "start" "Starting containers..."
-  log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME up -d >> \"${LOGS}\" 2>&1"
-  docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                 -p=$CHE_MINI_PRODUCT_NAME up -d >> "${LOGS}" 2>&1
+  COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
+
+  if [ "${CODENVY_DEVELOPMENT_MODE}" != "on" ]; then
+    COMPOSE_UP_COMMAND+=" >> \"${LOGS}\" 2>&1"
+  fi
+
+  log ${COMPOSE_UP_COMMAND}
+  eval ${COMPOSE_UP_COMMAND}
   check_if_booted
 }

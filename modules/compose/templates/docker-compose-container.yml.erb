@@ -146,6 +146,7 @@ services:
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/:/opt/codenvy-data/logs/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/che-machines-logs/:/opt/codenvy-data/che-machines-logs/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/fs/:/opt/codenvy-data/fs/'
+       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/license/:/opt/codenvy-data/license/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/che-machines/:/opt/codenvy-data/che-machines/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf:/opt/codenvy-data/conf'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf/server.xml:/opt/codenvy-tomcat/conf/server.xml'
