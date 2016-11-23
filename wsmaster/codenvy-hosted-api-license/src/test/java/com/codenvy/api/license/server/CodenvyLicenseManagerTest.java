@@ -16,9 +16,9 @@ package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.model.Issue;
-import com.codenvy.api.license.shared.CodenvyLicense;
-import com.codenvy.api.license.shared.CodenvyLicenseFactory;
-import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.CodenvyLicenseFactory;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.collect.ImmutableList;
@@ -40,8 +40,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 
-import static com.codenvy.api.license.shared.CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS;
-import static com.codenvy.api.license.shared.CodenvyLicense.MAX_NUMBER_OF_FREE_USERS;
+import static com.codenvy.api.license.CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS;
+import static com.codenvy.api.license.CodenvyLicense.MAX_NUMBER_OF_FREE_USERS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Mockito.doReturn;

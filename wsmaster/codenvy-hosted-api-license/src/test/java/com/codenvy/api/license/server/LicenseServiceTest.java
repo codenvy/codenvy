@@ -17,12 +17,12 @@ package com.codenvy.api.license.server;
 import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.dto.LegalityDto;
 import com.codenvy.api.license.shared.model.Issue;
-import com.codenvy.api.license.shared.CodenvyLicense;
-import com.codenvy.api.license.shared.CodenvyLicenseFactory;
-import com.codenvy.api.license.shared.exception.InvalidLicenseException;
-import com.codenvy.api.license.shared.exception.LicenseException;
-import com.codenvy.api.license.shared.LicenseFeature;
-import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.CodenvyLicenseFactory;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.LicenseFeature;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
@@ -256,10 +256,6 @@ public class LicenseServiceTest {
                      newDto(LegalityDto.class).withIsLegal(true));
     }
 
-    private LegalityDto getLegalityDtoFromJson(Response response) {
-        return DtoFactory.getInstance().createDtoFromJson(response.asString(), LegalityDto.class);
-    }
-
     @Test
     public void testIsCodenvyGivenNodesUsageLegal() throws IOException, ServerException {
         doReturn(true).when(licenseManager).isSystemNodesUsageLegal(2);
@@ -286,6 +282,10 @@ public class LicenseServiceTest {
 
         Response response = given().when().get("/license/legality/node");
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    private LegalityDto getLegalityDtoFromJson(Response response) {
+        return DtoFactory.getInstance().createDtoFromJson(response.asString(), LegalityDto.class);
     }
 
 }

@@ -12,8 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.shared;
+package com.codenvy.api.license;
 
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.LicenseFeature;
 import com.google.common.collect.ImmutableMap;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

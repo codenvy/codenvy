@@ -15,11 +15,11 @@
 package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.shared.dto.LegalityDto;
-import com.codenvy.api.license.shared.CodenvyLicense;
-import com.codenvy.api.license.shared.exception.InvalidLicenseException;
-import com.codenvy.api.license.shared.exception.LicenseException;
-import com.codenvy.api.license.shared.LicenseFeature;
-import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.LicenseFeature;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

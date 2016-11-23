@@ -12,15 +12,15 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.shared;
+package com.codenvy.api.license;
 
-import com.codenvy.api.license.shared.CodenvyLicense.LicenseType;
-import com.codenvy.api.license.shared.exception.IllegalLicenseFormatException;
+import com.codenvy.api.license.CodenvyLicense.LicenseType;
+import com.codenvy.api.license.exception.IllegalLicenseFormatException;
 
 import java.text.ParseException;
 import java.util.IllegalFormatException;
 
-import static com.codenvy.api.license.shared.CodenvyLicense.EXPIRATION_DATE_FORMAT;
+import static com.codenvy.api.license.CodenvyLicense.EXPIRATION_DATE_FORMAT;
 import static java.lang.String.format;
 
 /**

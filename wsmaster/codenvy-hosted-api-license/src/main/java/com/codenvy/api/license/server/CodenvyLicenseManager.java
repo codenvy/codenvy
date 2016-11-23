@@ -16,11 +16,11 @@ package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.model.Issue;
-import com.codenvy.api.license.shared.CodenvyLicense;
-import com.codenvy.api.license.shared.CodenvyLicenseFactory;
-import com.codenvy.api.license.shared.exception.InvalidLicenseException;
-import com.codenvy.api.license.shared.exception.LicenseException;
-import com.codenvy.api.license.shared.exception.LicenseNotFoundException;
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.CodenvyLicenseFactory;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;

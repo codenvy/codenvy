@@ -16,6 +16,7 @@ package com.codenvy.auth.sso.server;
 
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.shared.dto.LegalityDto;
 import com.codenvy.auth.sso.server.BearerTokenAuthenticationService.ValidationData;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
@@ -26,6 +27,8 @@ import com.jayway.restassured.http.ContentType;
 
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -36,6 +39,7 @@ import org.testng.annotations.Test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,10 +104,8 @@ public class BearerTokenAuthenticationServiceTest {
         Response response = given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
 
         assertEquals(response.getStatusCode(), 403);
-        assertEquals(response.prettyPrint(), String.format("{\n"
-                                                           + "    \"message\": \"%s\"\n"
-                                                           + "}",
-                                                    CodenvyLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE));
+        assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
+                     newDto(ServiceError.class).withMessage(CodenvyLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE));
         verifyZeroInteractions(mailSenderClient);
     }
 }

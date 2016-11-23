@@ -12,10 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.shared;
+package com.codenvy.api.license;
 
-import com.codenvy.api.license.shared.exception.IllegalLicenseFormatException;
-import com.codenvy.api.license.shared.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.IllegalLicenseFormatException;
+import com.codenvy.api.license.exception.InvalidLicenseException;
 import com.license4j.License;
 import com.license4j.LicenseValidator;
 import com.license4j.ValidationStatus;

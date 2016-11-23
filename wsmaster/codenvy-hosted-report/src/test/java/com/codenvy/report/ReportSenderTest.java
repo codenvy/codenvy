@@ -14,7 +14,7 @@
  */
 package com.codenvy.report;
 
-import com.codenvy.api.license.shared.exception.LicenseException;
+import com.codenvy.api.license.exception.LicenseException;
 import com.codenvy.api.license.server.CodenvyLicenseManager;
 import com.codenvy.mail.MailSenderClient;
 import com.codenvy.report.shared.dto.Ip;
