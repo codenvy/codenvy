@@ -5,6 +5,19 @@
 version: '2'
 services:
 
+########################
+# RSYSLOG
+########################
+  rsyslog:
+    image: <%= ENV["IMAGE_RSYSLOG"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
+    ulimits:
+      nproc: 163840
+      nofile:
+        soft: 163840
+        hard: 163840
+    restart: always
 
 ########################
 # HAPROXY
@@ -17,12 +30,12 @@ services:
 <% end -%>
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/haproxy/maintenance.html:/etc/haproxy/maintenance.html'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy/'
     ports:
       - '80:80'
       - '443:443'
     links:
       - 'nginx:codenvy-nginx'
+      - 'rsyslog:codenvy-rsyslog'
     ulimits:
       nproc: 163840
       nofile:
