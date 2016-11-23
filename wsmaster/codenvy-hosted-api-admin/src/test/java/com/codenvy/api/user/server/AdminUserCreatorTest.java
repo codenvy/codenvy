@@ -24,11 +24,12 @@ import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
@@ -42,6 +43,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyListOf;
@@ -150,13 +152,13 @@ public class AdminUserCreatorTest {
         protected void configure() {
             install(new InitModule(PostConstruct.class));
             install(new JpaPersistModule("test"));
-            bind(JpaInitializer.class).asEagerSingleton();
+            bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
+            bind(DBInitializer.class).asEagerSingleton();
             bind(UserManager.class).toInstance(userManager);
             bindConstant().annotatedWith(Names.named("codenvy.admin.name")).to(NAME);
             bindConstant().annotatedWith(Names.named("codenvy.admin.initial_password")).to(PASSWORD);
             bindConstant().annotatedWith(Names.named("codenvy.admin.email")).to(EMAIL);
             bind(PermissionsManager.class).toInstance(permissionsManager);
-            bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
         }
     }
 

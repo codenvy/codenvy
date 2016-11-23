@@ -66,10 +66,8 @@
         <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <property name="eclipselink.exception-handler" value="org.eclipse.che.api.core.postgresql.jdbc.jpa.eclipselink.PostgreSqlExceptionHandler"/>
+            <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler"/>
             <property name="eclipselink.target-server" value="None"/>
-            <property name="eclipselink.ddl-generation" value="create-tables"/>
-            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="SEVERE"/>
         </properties>

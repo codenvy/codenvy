@@ -16,8 +16,10 @@ package com.codenvy.api.permission.server.model.impl;
 
 import com.codenvy.api.permission.server.SystemDomain;
 
+import javax.persistence.AssociationOverride;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -43,7 +45,7 @@ import java.util.List;
                                     "FROM SystemPermissions permissions ")
         }
 )
-@Table(indexes = @Index(columnList = "userId", unique = true))
+@Table(name = "systempermissions")
 public class SystemPermissionsImpl extends AbstractPermissions {
 
     public SystemPermissionsImpl() {

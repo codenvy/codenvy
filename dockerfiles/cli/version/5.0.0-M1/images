@@ -1,5 +1,5 @@
 IMAGE_SOCAT=codenvy/socat:1.7.3.1
-IMAGE_HAPROXY=codenvy/haproxy:1.5.18
+IMAGE_HAPROXY=haproxy:1.5.18-alpine
 IMAGE_PUPPET=codenvy/puppet:4.6.2
 IMAGE_NGINX=nginx:1.10-alpine
 IMAGE_SWARM=swarm:1.2.5
@@ -8,3 +8,4 @@ IMAGE_POSTGRES=postgres:9.5.4
 IMAGE_INIT=codenvy/init:5.0.0-M1
 IMAGE_CODENVY=codenvy/codenvy:5.0.0-M1
 IMAGE_COMPOSE=docker/compose:1.8.1
+IMAGE_RSYSLOG=codenvy/rsyslog:8.18.0

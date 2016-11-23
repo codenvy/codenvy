@@ -92,37 +92,31 @@ cmd_init() {
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy $IMAGE_INIT
   fi
 
-  # After initialization, add environment file.
   if [[ "${REINIT}" = "true" ]]; then
-    # If this is a reinit, move the .reinit file and use it as the environment file
+    # If this is a reinit, grab the .reinit file and use it as the environment file
     mv -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".reinit "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
   else       
+
     # Otherwise, we are using the templated version and making some modifications.
     sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_HOST=${CODENVY_HOST}"
-
-    sed -i'.bak' "s|#CODENVY_VERSION=.*|CODENVY_VERSION=${CODENVY_VERSION}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
-    sed -i'.bak' "s|#CODENVY_CONFIG=.*|CODENVY_CONFIG=${CODENVY_HOST_CONFIG}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
-    sed -i'.bak' "s|#CODENVY_INSTANCE=.*|CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
     sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
 
+    info "init" "  CODENVY_HOST=${CODENVY_HOST}"
+    info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
+    info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
+    info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
     if [ "${CODENVY_DEVELOPMENT_MODE}" == "on" ]; then
-      sed -i'.bak' "s|#CODENVY_ENVIRONMENT=.*|CODENVY_ENVIRONMENT=development|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
       info "init" "  CODENVY_ENVIRONMENT=development"
-      sed -i'.bak' "s|#CODENVY_DEVELOPMENT_REPO=.*|CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
       info "init" "  CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}"
-      sed -i'.bak' "s|#CODENVY_DEVELOPMENT_TOMCAT=.*|CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
       info "init" "  CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}"
     else
-      sed -i'.bak' "s|#CODENVY_ENVIRONMENT=.*|CODENVY_ENVIRONMENT=production|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
       info "init" "  CODENVY_ENVIRONMENT=production"
     fi
-
-    rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
   fi
+
+  # Encode the version that we initialized into the version file
+  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}"
 }
 
 require_license() {

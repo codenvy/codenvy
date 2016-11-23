@@ -23,17 +23,13 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -60,23 +56,26 @@ import java.util.Objects;
         }
 )
 
-@Table(indexes = {@Index(columnList = "parent")})
+@Table(name = "organization")
 public class OrganizationImpl implements Organization {
     public static final String ORGANIZATIONAL_ACCOUNT = "organizational";
 
     @Id
+    @Column(name = "id")
     private String id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private AccountImpl account;
 
-    @Column
+    @Column(name = "parent")
     private String parent;
 
+    // Mapping exists for explicit constraints which allows
+    // jpa backend to perform operations in correct order
     @ManyToOne
     @JoinColumn(name = "parent", insertable = false, updatable = false)
-    public OrganizationImpl parentObj;
+    private OrganizationImpl parentObj;
 
     public OrganizationImpl() {}
 

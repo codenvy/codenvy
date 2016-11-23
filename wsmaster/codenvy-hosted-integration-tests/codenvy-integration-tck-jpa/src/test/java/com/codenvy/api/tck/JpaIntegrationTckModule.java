@@ -19,7 +19,6 @@ import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.spi.tck.RecipePermissionsDaoTest;
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.SystemDomain;
-import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
 import com.codenvy.api.permission.server.jpa.JpaSystemPermissionsDao;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
@@ -51,8 +50,6 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
@@ -89,8 +86,12 @@ import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
+import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,23 +132,7 @@ public class JpaIntegrationTckModule extends TckModule {
         final String dbUser = System.getProperty("jdbc.user");
         final String dbPassword = System.getProperty("jdbc.password");
 
-        // Tries to establish connection 10 times with 1 second delay
-        boolean isAvailable = false;
-        for (int i = 0; i < 10 && !isAvailable; i++) {
-            try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
-                isAvailable = true;
-            } catch (SQLException x) {
-                LOG.warn("An attempt to connect to the database failed with an error: {}", x.getLocalizedMessage());
-            }
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException x) {
-                throw new RuntimeException(x.getLocalizedMessage(), x);
-            }
-        }
-        if (!isAvailable) {
-            throw new IllegalStateException("Couldn't initialize connection with a database");
-        }
+        waitConnectionIsEstablished(dbUrl, dbUser, dbPassword);
 
         properties.put(JDBC_URL, dbUrl);
         properties.put(JDBC_USER, dbUser);
@@ -157,9 +142,14 @@ public class JpaIntegrationTckModule extends TckModule {
         JpaPersistModule main = new JpaPersistModule("main");
         main.properties(properties);
         install(main);
-
-        bind(JpaInitializer.class).asEagerSingleton();
-        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUser(dbUser);
+        dataSource.setPassword(dbPassword);
+        dataSource.setUrl(dbUrl);
+        bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(dataSource,
+                                                                             "che-schema",
+                                                                             "codenvy-schema"));
+        bind(DBInitializer.class).asEagerSingleton();
         bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
         //repositories
@@ -232,7 +222,6 @@ public class JpaIntegrationTckModule extends TckModule {
 
         // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
         bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);
-        bind(org.eclipse.che.api.core.postgresql.jdbc.jpa.eclipselink.PostgreSqlExceptionHandler.class);
 
         //Creates empty multibinder to avoid error during container starting
         Multibinder.newSetBinder(binder(),
@@ -240,6 +229,24 @@ public class JpaIntegrationTckModule extends TckModule {
                                  Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
     }
 
+    private static void waitConnectionIsEstablished(String dbUrl, String dbUser, String dbPassword) {
+        boolean isAvailable = false;
+        for (int i = 0; i < 20 && !isAvailable; i++) {
+            try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+                isAvailable = true;
+            } catch (SQLException x) {
+                LOG.warn("An attempt to connect to the database failed with an error: {}", x.getLocalizedMessage());
+                try {
+                    TimeUnit.MILLISECONDS.sleep(500);
+                } catch (InterruptedException interruptedX) {
+                    throw new RuntimeException(interruptedX.getLocalizedMessage(), interruptedX);
+                }
+            }
+        }
+        if (!isAvailable) {
+            throw new IllegalStateException("Couldn't initialize connection with a database");
+        }
+    }
 
     @Transactional
     public static class PreferenceJpaTckRepository implements TckRepository<Pair<String, Map<String, String>>> {

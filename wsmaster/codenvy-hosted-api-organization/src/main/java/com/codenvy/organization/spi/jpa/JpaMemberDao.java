@@ -26,8 +26,8 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

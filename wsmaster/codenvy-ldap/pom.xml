@@ -98,6 +98,14 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-db</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>
@@ -108,11 +116,6 @@
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-persist</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-jdbc</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -136,6 +139,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-sql-schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
@@ -152,7 +160,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-jdbc-vendor-h2</artifactId>
+            <artifactId>che-core-db-vendor-h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-sql-schema</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -198,6 +211,19 @@
                             <ignoredDependencies>
                                 <ignoredDependency>com.codenvy.onpremises.wsmaster:codenvy-hosted-api-permission</ignoredDependency>
                             </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>resource-dependencies</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>che-core-sql-schema,
+                                codenvy-sql-schema</includeArtifactIds>
+                            <includes>che-schema/,codenvy-schema/</includes>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

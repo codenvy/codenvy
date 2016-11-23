@@ -50,10 +50,6 @@ import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
@@ -81,6 +77,13 @@ import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.event.CascadeRemovalEvent;
+import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
@@ -109,6 +112,7 @@ import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.crea
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -200,12 +204,14 @@ public class JpaEntitiesCascadeRemovalTest {
         injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
-                bind(EventService.class).in(Singleton.class);
-
-                bind(JpaInitializer.class).asEagerSingleton();
-                bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
-                install(new InitModule(PostConstruct.class));
                 install(new JpaPersistModule("main"));
+                bind(EventService.class).in(Singleton.class);
+                bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(),
+                                                                                     "che-schema",
+                                                                                     "codenvy-schema"));
+                bind(DBInitializer.class).asEagerSingleton();
+                bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+                install(new InitModule(PostConstruct.class));
                 install(new UserJpaModule());
                 install(new AccountModule());
                 install(new SshJpaModule());

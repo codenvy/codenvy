@@ -13,7 +13,6 @@ cmd_upgrade() {
   debug $FUNCNAME
 
   CODENVY_IMAGE_VERSION=$(get_image_version)
-  ENV_FILE_VERSION=$(get_envfile_version)
 
   # If we got here, this means:
   #   image version > configured & installed version

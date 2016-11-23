@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2016 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -82,7 +82,7 @@ Usage: docker run -it --rm
 
 Variables:
     CODENVY_HOST                         IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
-    CLI_DEBUG                            Default=false.Prints stack trace during execution
+    CLI_DEBUG                            Default=false. Prints stack trace during execution
     CLI_INFO                             Default=true. Prints out INFO messages to standard out
     CLI_WARN                             Default=true. Prints WARN messages to standard out
     CLI_LOG                              Default=true. Prints messages to cli.log file
@@ -373,7 +373,7 @@ check_mounts() {
       info "Welcome to Codenvy!"
       info ""
       info "You volume mounted a valid Codenvy repo to :/repo, but we could not find a Tomcat assembly."
-      info "Have you built /assembly/onpremises-ide-packaging-tomcat-codenvy-allinone?"
+      info "Have you built /assembly/onpremises-ide-packaging-tomcat-codenvy-allinone with 'mvn clean install'?"
       return 2
     fi
   fi

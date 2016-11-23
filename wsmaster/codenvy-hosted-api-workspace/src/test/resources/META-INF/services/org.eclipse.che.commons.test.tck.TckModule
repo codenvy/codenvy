@@ -1,2 +1,1 @@
-com.codenvy.api.workspace.server.spi.jpa.StackPermissionsTckModule
-com.codenvy.api.workspace.server.spi.jpa.WorkerTckModule
+com.codenvy.api.workspace.server.spi.jpa.JpaTckModule

@@ -1,13 +1,19 @@
-
+# Copyright (c) 2016 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
 # Initializes an empty directory with the templates needed to configure and run Codenvy.
 #
-# Build:
+# build:
 #   cd ..\..\ <-- Root of the codenvy source repository
 #   docker build -f dockerfiles/init/Dockerfile -t codenvy/init:<version> .
 #
-# Use:
-#    docker run -v $(pwd):/copy codenvy/init:<version>
-FROM alpine:latest
+# use:
+#    docker run -v $(pwd):/codenvy codenvy/init:<version>
+
+FROM alpine:3.4
 RUN mkdir -p /files \
     && mkdir -p /files/modules \
     && mkdir -p /files/manifests \
@@ -16,7 +22,6 @@ RUN mkdir -p /files \
 COPY manifests /files/manifests
 COPY modules /files/modules
 COPY docs /files/docs
-COPY codenvy.env /files
-COPY dockerfiles/init/docker-entrypoint.sh /
-RUN chmod +x docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+COPY dockerfiles/init/entrypoint.sh /
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2016 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ FROM alpine:3.4
 RUN mkdir -p /codenvy \
     && mkdir -p /version \
     && mkdir -p /cli \
-    && apk add --no-cache ca-certificates curl openssl \
+    && apk add --no-cache ca-certificates curl openssl jq \
     && apk add --update bash \
     && rm -rf /var/cache/apk/*
 

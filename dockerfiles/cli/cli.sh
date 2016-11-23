@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2016 Codenvy, S.A.
+# Copyright (c) 2016 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ cli_init() {
   # Constants
   CODENVY_MANIFEST_DIR="/version"
   CODENVY_CONTAINER_OFFLINE_FOLDER="/${CHE_MINI_PRODUCT_NAME}/backup"
-  CODENVY_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver"
+  CODENVY_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
   CODENVY_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
   CODENVY_COMPOSE_FILE="docker-compose-container.yml"
   CODENVY_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
@@ -30,7 +30,7 @@ cli_init() {
   
   CODENVY_LICENSE=true
 
-  init_host_ip
+  GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host eclipse/che-ip:nightly)}
   DEFAULT_CODENVY_HOST=$GLOBAL_HOST_IP
   CODENVY_HOST=${CODENVY_HOST:-${DEFAULT_CODENVY_HOST}}
 
@@ -78,10 +78,6 @@ cli_init() {
   else
     verify_version_upgrade_compatibility
   fi
-}
-
-init_host_ip() {
-  GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host eclipse/che-ip:nightly)}
 }
 
 grab_offline_images(){
@@ -385,7 +381,7 @@ is_initialized() {
   fi
 }
 
-is_configed() {
+is_configured() {
   debug $FUNCNAME
   if [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]] && \
      [[ -f "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE ]]; then
@@ -434,18 +430,18 @@ get_image_manifest() {
 }
 
 get_installed_version() {
-  if ! is_configed; then
+  if ! is_configured; then
     echo "<not-configed>"
   else
     cat "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE
   fi
 }
 
-get_envfile_version() {
+get_configured_version() {
   if ! is_initialized; then
     echo "<not-initialized>"
   else
-    echo $(grep CODENVY_VERSION= "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" | cut -f2 -d"=")
+    cat "${CODENVY_CONTAINER_CONFIG}"/$CODENVY_VERSION_FILE
   fi
 }
 
@@ -464,53 +460,54 @@ less_than() {
   return 1
 }
 
-compare_cli_version_to_envfile_version() {
+compare_cli_version_to_configured_version() {
   IMAGE_VERSION=$(get_image_version)
-  ENV_FILE_VERSION=$(get_envfile_version)
+  CONFIGURED_VERSION=$(get_configured_version)
  
 
-  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ## First, compare the CLI image version to what version was initialized in /config/*.ver.do_not_modify
   ##      - If they match, good
   ##      - If they don't match and one is nightly, fail
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-  if [[ "$ENV_FILE_VERSION" = "$IMAGE_VERSION" ]]; then
+  if [[ "$CONFIGURED_VERSION" = "$IMAGE_VERSION" ]]; then
     echo "match"
-  elif [ "$ENV_FILE_VERSION" = "nightly" ] || 
+  elif [ "$CONFIGURED_VERSION" = "nightly" ] || 
        [ "$IMAGE_VERSION" = "nightly" ]; then
     echo "nightly"
-  elif less_than $ENV_FILE_VERSION $IMAGE_VERSION; then
-    echo "envfile-less-cli"
+  elif less_than $CONFIGURED_VERSION $IMAGE_VERSION; then
+    echo "config-less-cli"
   else
-    echo "cli-less-envfile"
+    echo "cli-less-config"
   fi
 }
 
-compare_installed_version_to_envfile_version() {
-  ENV_FILE_VERSION=$(get_envfile_version)
+compare_installed_version_to_configured_version() {
+  CONFIGURED_VERSION=$(get_configured_version)
   INSTALLED_VERSION=$(get_installed_version)
 
-  ## Second, compare proposed .env version to already installed version
+  ## Second, compare /config/*.ver.donotmofiy to /instance/*.ver.donotmodify
   ##      - If they match, then continue
   ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
   ##      - If they do not match, then if .env is older, then fail with message that this is not good 
-  if [[ "$ENV_FILE_VERSION" = "$INSTALLED_VERSION" ]]; then
+  if [[ "$CONFIGURED_VERSION" = "$INSTALLED_VERSION" ]]; then
     echo "match"
-  elif less_than $ENV_FILE_VERSION $INSTALLED_VERSION; then
-    echo "envfile-less-install"
+  elif less_than $CONFIGURED_VERSION $INSTALLED_VERSION; then
+    echo "config-less-install"
   else
-    echo "install-less-envfile"
+    echo "install-less-config"
   fi
 }
 
 verify_version_compatibility() {
+  ## If ! is_configured, then the system hasn't been installed
   ## Two levels of checks
-  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ## First, compare the CLI image version to what version was initialized in /config/*.ver.donotmodify
   ##      - If they match, good
   ##      - If they don't match and one is nightly, fail
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-  ## Second, compare proposed .env version to already installed version
+  ## Second, compare /config/*.ver.donotmofiy to /instance/*.ver.do_not_modify
   ##      - If they match, then continue
   ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
   ##      - If they do not match, then if .env is older, then fail with message that this is not good 
@@ -518,15 +515,15 @@ verify_version_compatibility() {
   CODENVY_IMAGE_VERSION=$(get_image_version)
 
   if is_initialized; then
-    COMPARE_CLI_ENV=$(compare_cli_version_to_envfile_version)
-    ENV_FILE_VERSION=$(get_envfile_version)
+    COMPARE_CLI_ENV=$(compare_cli_version_to_configured_version)
+    CONFIGURED_VERSION=$(get_configured_version)
 
     case "${COMPARE_CLI_ENV}" in
       "match") 
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your configured version '$ENV_FILE_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your configured version '$CONFIGURED_VERSION'."
         error ""
         error "The 'nightly' CLI is only compatible with 'nightly' configured versions."
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a tagged version."
@@ -534,46 +531,45 @@ verify_version_compatibility() {
         error "Run the CLI as '${CHE_MINI_PRODUCT_NAME}/cli:<version>' to install a tagged version."
         return 2
       ;;
-      "envfile-less-cli")
+      "config-less-cli")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your configured version '$ENV_FILE_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your configured version '$CONFIGURED_VERSION'."
         error ""
-        error "Run '${CHE_MINI_PRODUCT_NAME} upgrade' to migrate your old version to '$CODENVY_IMAGE_VERSION."
-        error "Or, modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version with your CLI version '$CODENVY_IMAGE_VERSION'."
+        error "Run '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION upgrade' to migrate your installation to '$CODENVY_IMAGE_VERSION'."
+        error "Or, run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$CONFIGURED_VERSION' to have the CLI match your existing installed version."
         return 2
       ;;
-      "cli-less-envfile")
+      "cli-less-config")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$ENV_FILE_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$CONFIGURED_VERSION'."
         error ""
         error "You cannot use an older CLI with a newer configuration."
         error ""
-        error "Run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$ENV_FILE_VERSION' to match your configuration."
+        error "Run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$CONFIGURED_VERSION' to have the CLI match your existing installed version."
         return 2
       ;;
     esac
   fi
 
   # Scenario #2 should only be checked if the system is already configured
-  if is_configed; then
-    COMPARE_INSTALL_ENV=$(compare_installed_version_to_envfile_version)
+  if is_configured; then
+    COMPARE_INSTALL_ENV=$(compare_installed_version_to_configured_version)
     INSTALLED_VERSION=$(get_installed_version)
     case "${COMPARE_INSTALL_ENV}" in
       "match") 
       ;;
-      "envfile-less-install")
+      "config-less-install"|"install-less-config")
         error ""
-        error "Your configured version '$ENV_FILE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '$CODENVY_IMAGE_VERSION' matches your configed version (good), but:"
+        error "   Configured version = '$CONFIGURED_VERSION'"
+        error "   Installed version  = '$INSTALLED_VERSION'"
         error ""
-        error "You cannot configure $CHE_MINI_PRODUCT_NAME to an older version - downgrades not supported."
-        return 2
-      ;;
-      "install-less-envfile")
+        error "The configured and installed versions must match before other operations proceed."
         error ""
-        error "Your configured version '$ENV_FILE_VERSION' is newer than your installed version '$INSTALLED_VERSION'."
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:${INSTALLED_VERSION} init --reinit' to configure the proper version."
         error ""
-        error "Run '${CHE_MINI_PRODUCT_NAME} upgrade' to migrate your installation to '$ENV_FILE_VERSION."
-        error "Or, modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version with your installed version '$INSTALLED_VERSION'."
+        error "We could automatically do this for you."
+        error "However, having configed and installed versions mismatch is unusual and should be checked by a human."
         return 2
       ;;
     esac
@@ -594,41 +590,41 @@ verify_version_upgrade_compatibility() {
 
   CODENVY_IMAGE_VERSION=$(get_image_version)
 
-  if ! is_initialized || ! is_configed; then 
+  if ! is_initialized || ! is_configured; then 
     info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
     return 2
   fi
 
   if is_initialized; then
-    COMPARE_CLI_ENV=$(compare_cli_version_to_envfile_version)
-    ENV_FILE_VERSION=$(get_envfile_version)
+    COMPARE_CLI_ENV=$(compare_cli_version_to_configured_version)
+    CONFIGURED_VERSION=$(get_configured_version)
 
     case "${COMPARE_CLI_ENV}" in
       "match") 
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your configured version '$ENV_FILE_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your configured version '$CONFIGURED_VERSION'."
         error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer version to upgrade."
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
         error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
         return 2
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or configured version '$ENV_FILE_VERSION' is nightly."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or configured version '$CONFIGURED_VERSION' is nightly."
         error ""
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a non-nightly version."
         error "You can 'docker pull ${CHE_MINI_PRODUCT_NAME}/cli:nightly' to get a newer nightly version."
         return 2
       ;;
-      "envfile-less-cli")
+      "config-less-cli")
       ;;
-      "cli-less-envfile")
+      "cli-less-config")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$ENV_FILE_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$CONFIGURED_VERSION'."
         error ""
-        error "You cannot upgrade to an older version."
+        error "You cannot use '${CHE_MINI_PRODUCT_NAME} upgrade' to downgrade versions."
         error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer version to upgrade."
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
         error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
         return 2
       ;;
@@ -636,25 +632,25 @@ verify_version_upgrade_compatibility() {
   fi
 
   # Scenario #2 should only be checked if the system is already configured
-  if is_configed; then
-    COMPARE_INSTALL_ENV=$(compare_installed_version_to_envfile_version)
+  if is_configured; then
+    COMPARE_INSTALL_ENV=$(compare_installed_version_to_configured_version)
     INSTALLED_VERSION=$(get_installed_version)
     case "${COMPARE_INSTALL_ENV}" in
       "match") 
       ;;
-      "envfile-less-install"|"install-less-envfile")
+      "config-less-install"|"install-less-config")
         error ""
         error "Your CLI version '$CODENVY_IMAGE_VERSION' is newer (good), but:"
-        error "   Configured version = '$ENV_FILE_VERSION'"
+        error "   Configured version = '$CONFIGURED_VERSION'"
         error "   Installed version  = '$INSTALLED_VERSION'"
         error ""
         error "The configured and installed versions must match before upgrade proceeds."
         error ""
-        error "Modify '${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}' to match your configured version to your installed version '$INSTALLED_VERSION'."
-        error "Then run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade>' with a newer Docker image to initiate an upgrade."
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:${INSTALLED_VERSION} init --reinit' to configure the proper version."
+        error "You then can run '$CHE_MINI_PRODUCT_NAME/cli:$CODENVY_IMAGE_VERSION upgrade' successfully."
         error ""
-        error "We could automatically make this change."
-        error "However, having configured and installed version be different is unusual and should be checked by a human."
+        error "We could automatically do this for you."
+        error "However, having configed and installed versions mismatch is unusual and should be checked by a human."
         return 2
       ;;
     esac

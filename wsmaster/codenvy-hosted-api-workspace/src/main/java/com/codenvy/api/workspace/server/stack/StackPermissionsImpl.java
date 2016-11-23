@@ -66,11 +66,11 @@ import java.util.List;
                   @Index(columnList = "stackId")})
 public class StackPermissionsImpl extends AbstractPermissions {
 
-    @Column
+    @Column(name = "stackid")
     private String stackId;
 
     @ManyToOne
-    @JoinColumn(name = "stackId", insertable = false, updatable = false)
+    @JoinColumn(name = "stackid", insertable = false, updatable = false)
     private StackImpl stack;
 
     public StackPermissionsImpl() {}
