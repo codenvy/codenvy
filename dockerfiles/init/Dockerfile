@@ -13,7 +13,12 @@
 # use:
 #    docker run -v $(pwd):/codenvy codenvy/init:<version>
 
-FROM alpine:3.4
+FROM puppet/puppet-agent-alpine:4.6.2
+
+# install openssh needed to generate ssh keys
+RUN apk --update add openssh \
+  && rm -rf /var/cache/apk/*
+
 RUN mkdir -p /files \
     && mkdir -p /files/modules \
     && mkdir -p /files/manifests \
