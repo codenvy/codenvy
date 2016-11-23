@@ -120,6 +120,10 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/usr/share/postgresql/postgresql.conf.sample'
+<% if scope.lookupvar('codenvy::env') != 'production' -%>
+    ports:
+      - '5432:5432'
+<% end -%>
     ulimits:
       nproc: 163840
       nofile:
