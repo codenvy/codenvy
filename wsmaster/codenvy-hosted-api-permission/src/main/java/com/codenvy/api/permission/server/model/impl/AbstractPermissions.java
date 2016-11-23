@@ -18,13 +18,11 @@ import com.codenvy.api.permission.shared.model.Permissions;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
@@ -46,18 +44,18 @@ public abstract class AbstractPermissions implements Permissions {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     protected String id;
 
-    @Column
+    @Column(name = "userid")
     protected String userId;
 
     @OneToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    @JoinColumn(name = "userid", insertable = false, updatable = false)
     private UserImpl user;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "actions")
-    @CollectionTable(indexes = @Index(columnList = "actions"))
     protected List<String> actions;
 
     @Transient

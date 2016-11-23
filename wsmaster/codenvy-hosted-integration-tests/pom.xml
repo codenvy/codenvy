@@ -29,6 +29,5 @@
     <modules>
         <module>codenvy-integration-tck-jpa</module>
         <module>codenvy-integration-cascade-jpa</module>
-        <module>codenvy-integration-jpa-dao</module>
     </modules>
 </project>

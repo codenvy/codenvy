@@ -57,7 +57,6 @@
         <com.nimbusds.version>3.0</com.nimbusds.version>
         <commons-configuration.version>1.10</commons-configuration.version>
         <de.flapdoodle.embed-mongo.version>1.50.0</de.flapdoodle.embed-mongo.version>
-        <jdbc.postgresql-driver.version>9.4.1211</jdbc.postgresql-driver.version>
         <jline.version>2.12</jline.version>
         <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <maven.releases.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-releases/</maven.releases.repo.url>
@@ -65,7 +64,7 @@
         <org.apache.apacheds.version>1.5.7</org.apache.apacheds.version>
         <org.apache.karaf.version>3.0.2</org.apache.karaf.version>
         <org.apache.sshd.version>0.9.0</org.apache.sshd.version>
-        <org.flyway.version>3.1</org.flyway.version>
+        <org.flyway.version>4.0.3</org.flyway.version>
         <org.ldaptive.version>1.2.0</org.ldaptive.version>
         <org.mongodb.version>3.2.1</org.mongodb.version>
         <org.osgi.version>5.0.0</org.osgi.version>
@@ -357,11 +356,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-api-jdbc-vendor-postgresql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-license</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -554,6 +548,11 @@
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-ldap</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-sql-schema</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -844,19 +843,19 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-jdbc</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-jdbc-vendor-h2</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-db</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-db-vendor-h2</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
@@ -915,11 +914,6 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${org.osgi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${jdbc.postgresql-driver.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>

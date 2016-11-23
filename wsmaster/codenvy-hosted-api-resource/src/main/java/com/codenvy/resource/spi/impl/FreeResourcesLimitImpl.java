@@ -17,22 +17,16 @@ package com.codenvy.resource.spi.impl;
 import com.codenvy.resource.model.FreeResourcesLimit;
 import com.codenvy.resource.model.Resource;
 
-import org.eclipse.che.account.spi.AccountImpl;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,15 +48,16 @@ import java.util.stream.Collectors;
                             query = "SELECT COUNT(limit) FROM FreeResourcesLimit limit")
         }
 )
+@Table(name = "freeresourceslimit")
 public class FreeResourcesLimitImpl implements FreeResourcesLimit {
     @Id
+    @Column(name = "accountid")
     private String accountId;
 
-    @PrimaryKeyJoinColumn
-    private AccountImpl account;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinTable
+    @JoinTable(name = "freeresourceslimit_resource",
+               joinColumns = @JoinColumn(name = "freeresourceslimit_accountid"),
+               inverseJoinColumns = @JoinColumn(name = "resources_id"))
     private List<ResourceImpl> resources;
 
     public FreeResourcesLimitImpl() {

@@ -25,12 +25,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -43,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
 import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
@@ -121,8 +124,8 @@ public class OnPremisesJpaWorkspaceDaoTest {
     @AfterClass
     public void shutdown() throws Exception {
         manager.getEntityManagerFactory().close();
+        H2TestHelper.shutdownDefault();
     }
-
 
     @Test
     public void shouldFindStackByPermissions() throws Exception {
@@ -137,19 +140,9 @@ public class OnPremisesJpaWorkspaceDaoTest {
         @Override
         protected void configure() {
             bind(JpaStackDao.class).to(OnPremisesJpaStackDao.class);
-
-            Map<String, String> properties = new HashMap<>();
-            if (System.getProperty("jdbc.driver") != null) {
-                properties.put(JDBC_DRIVER, System.getProperty("jdbc.driver"));
-                properties.put(JDBC_URL, System.getProperty("jdbc.url"));
-                properties.put(JDBC_USER, System.getProperty("jdbc.user"));
-                properties.put(JDBC_PASSWORD, System.getProperty("jdbc.password"));
-            }
-            JpaPersistModule main = new JpaPersistModule("main");
-            main.properties(properties);
-            install(main);
-            bind(JpaInitializer.class).asEagerSingleton();
-            bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
+            install(new JpaPersistModule("main"));
+            bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
+            bind(DBInitializer.class).asEagerSingleton();
         }
     }
 }

@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
@@ -29,6 +30,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
@@ -151,6 +153,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               // don't build an image on a node under maintenance
                                               .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE),
                               progressMonitor);
+
+        } catch (ImageNotFoundException e) {
+            throw new SourceNotFoundException(e.getLocalizedMessage(), e);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
         } finally {

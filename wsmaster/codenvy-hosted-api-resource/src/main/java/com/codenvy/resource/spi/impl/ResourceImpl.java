@@ -22,23 +22,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * @author Sergii Leschenko
  */
 @Entity(name = "Resource")
+@Table(name = "resource")
 public class ResourceImpl implements Resource {
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String type;
 
-    @Basic(optional = false)
+    @Column(name = "amount", nullable = false)
     private long amount;
 
-    @Column(nullable = false)
+    @Column(name = "unit", nullable = false)
     private String unit;
 
     public ResourceImpl() {}

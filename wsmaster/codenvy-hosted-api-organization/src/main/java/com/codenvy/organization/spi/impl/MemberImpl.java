@@ -62,14 +62,13 @@ import java.util.List;
                                     "WHERE m.userId = :userId ")
         }
 )
-@Table(indexes = {@Index(columnList = "userId, organizationId", unique = true),
-                  @Index(columnList = "organizationId")})
+@Table(name = "member")
 public class MemberImpl extends AbstractPermissions implements Member {
-    @Column
+    @Column(name = "organizationid")
     private String organizationId;
 
     @ManyToOne
-    @JoinColumn(name = "organizationId", referencedColumnName = "id",
+    @JoinColumn(name = "organizationid", referencedColumnName = "id",
                 insertable = false, updatable = false)
     private OrganizationImpl organization;
 
