@@ -14,6 +14,8 @@ init_constants() {
   GREEN='\033[0;32m'
   RED='\033[0;31m'
   YELLOW='\033[38;5;220m'
+  BOLD='\033[1m'
+  UNDERLINE='\033[4m'
   NC='\033[0m'
   LOG_INITIALIZED=false
 
