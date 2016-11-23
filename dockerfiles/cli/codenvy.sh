@@ -124,11 +124,11 @@ info() {
     PRINT_STATEMENT=$2
   fi
   if is_info; then
-    printf "${GREEN}INFO:${NC} %s%s\n" \
+    printf "${GREEN}INFO:${NC} %b%b\n" \
               "${PRINT_COMMAND}" \
               "${PRINT_STATEMENT}"
   fi
-  log $(printf "INFO: %s %s\n" \
+  log $(printf "INFO: %b %b\n" \
         "${PRINT_COMMAND}" \
         "${PRINT_STATEMENT}")
 }
