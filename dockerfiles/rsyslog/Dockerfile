@@ -4,16 +4,13 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# Contributors:
-#   Tyler Jewell - Initial Implementation
-#
-# Contains the Codenvy CLI.
+# Contains the rsyslog server
 #
 # build:
-#   docker build -t codenvy/cli .
+#   docker build -t codenvy/rsyslog:<version> .
 #
 # use:
-#    docker run -v $(pwd):/codenvy codenvy/cli [command]
+#    docker run codenvy/rsyslog:<version>
 
 FROM alpine:3.4
 
