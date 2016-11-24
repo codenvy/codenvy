@@ -38,6 +38,11 @@ cmd_destroy() {
   log "docker_run -v \"${CODENVY_HOST_INSTANCE}\":/root/instance alpine:3.4 sh -c \"rm -rf /root/instance/*\""
   docker_run -v "${CODENVY_HOST_INSTANCE}":/root/instance alpine:3.4 sh -c "rm -rf /root/instance/*"
 
+  # If development mode, delete extra /dev folder
+  if [[ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]]; then
+    docker_run -v "${CODENVY_HOST_INSTANCE}"/dev:/root/instance alpine:3.4 sh -c "rm -rf /root/instance/*"
+  fi
+
   rm -rf "${CODENVY_CONTAINER_INSTANCE}"
 
   if has_docker_for_windows_client; then
