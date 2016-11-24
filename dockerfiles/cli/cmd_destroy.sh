@@ -49,16 +49,18 @@ cmd_destroy() {
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
   if has_docker_for_windows_client; then
-    docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
-                  alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
-                                 && rm -rf /root/codenvy/instance \
-                                 && rm -rf /root/codenvy/codenvy.env" > /dev/null 2>&1  || true
-    docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
-                  alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
-                                 && rm -rf /root/codenvy/instance \
-                                 && rm -rf /root/codenvy/codenvy.env" > /dev/null 2>&1  || true
+    if [[ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]]; then
+      docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
+                    alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
+                                   && rm -rf /root/codenvy/instance \
+                                   && rm -rf /root/codenvy/codenvy.env" > /dev/null 2>&1  || true
+      docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
+                    alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
+                                   && rm -rf /root/codenvy/instance \
+                                   && rm -rf /root/codenvy/codenvy.env" > /dev/null 2>&1  || true
+    fi
   fi
-  
+
   rm -rf "${CODENVY_CONTAINER_INSTANCE}"
 
   if has_docker_for_windows_client; then
