@@ -242,14 +242,14 @@ check_docker() {
     if ! docker ps > /dev/null 2>&1; then
       info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
-      info "To start $CHE_FORMAL_PRODUCT_NAME, rerun with:"
+      info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
       info "  1: Mounting 'docker.sock', which let's us access Docker"
       info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
       info ""
       info "Syntax:"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
       info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                           $CHE_MINI_PRODUCT_NAME/cli start"
+      info "                           $CHE_MINI_PRODUCT_NAME/cli $1"
       return 2;
     fi
   fi
@@ -300,14 +300,14 @@ check_mounts() {
     info ""
     info "We need some information before we can start ${CHE_FORMAL_PRODUCT_NAME}."
     info ""
-    info "To start $CHE_FORMAL_PRODUCT_NAME, rerun with:"
+    info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
     info "  1: Mounting 'docker.sock', which let's us access Docker"
     info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
     info ""
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
+    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
     info ""
     info ""
     info "Or run with overrides for instance and/or backup:"
@@ -315,7 +315,7 @@ check_mounts() {
     info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
     info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
     info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
+    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
     return 2;
   fi
 
@@ -364,7 +364,7 @@ check_mounts() {
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
       info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
+      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
       info ""
       info ""
       info "Or run with overrides for instance, and backup (all required):"
@@ -373,10 +373,7 @@ check_mounts() {
       info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
       info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
-      info ""
-      info "We may uncover additional flags to add when you run this command."
-      info "We will help you at each step to provide a successful boot."
+      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
       return 2
     fi
     if [[ ! -d $(echo "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"/"${DEFAULT_CODENVY_DEVELOPMENT_TOMCAT}"-*/) ]]; then
