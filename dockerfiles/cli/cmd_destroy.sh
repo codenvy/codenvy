@@ -35,13 +35,15 @@ cmd_destroy() {
   cmd_stop
 
   info "destroy" "Deleting instance and config..."
-  log "docker_run -v \"${CODENVY_HOST_INSTANCE}\":/root/instance alpine:3.4 sh -c \"rm -rf /root/instance/*\""
-  docker_run -v "${CODENVY_HOST_INSTANCE}":/root/instance alpine:3.4 sh -c "rm -rf /root/instance/*"
 
-  # If development mode, delete extra /dev folder
-  if [[ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]]; then
-    docker_run -v "${CODENVY_HOST_INSTANCE}"/dev:/root/instance alpine:3.4 sh -c "rm -rf /root/instance/*"
-  fi
+  log "docker_run -v \"${CODENVY_HOST_CONFIG}\":/codenvy \
+                    alpine:3.4 sh -c \"rm -rf /root/codenvy/docs \
+                                   && rm -rf /root/codenvy/instance \
+                                   && rm -rf /root/codenvy/codenvy.env\""
+  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
+                alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
+                               && rm -rf /root/codenvy/instance \
+                               && rm -rf /root/codenvy/codenvy.env"
 
   rm -rf "${CODENVY_CONTAINER_INSTANCE}"
 

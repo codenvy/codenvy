@@ -109,7 +109,9 @@ generate_configuration_with_puppet() {
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff"
   else
-  GENERATE_CONFIG_COMMAND="docker_run -it  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+  GENERATE_CONFIG_COMMAND="docker_run -it \
+                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+                  --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
