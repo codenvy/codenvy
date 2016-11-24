@@ -416,6 +416,31 @@ verify_version_compatibility() {
       ;;
     esac
   fi
+
+  # Per request of the engineers, check to see if the locally cached nightly version is older
+  # than the one stored on DockerHub.
+  if [[ "${CODENVY_IMAGE_VERSION}" = "nightly" ]]; then
+
+    #TODO: Florent, there are two places where we use URLs like this (another is in version)
+    #      This URL will be different for ARTIK, Che, Codenvy
+    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/codenvy/cli/tags/nightly/)
+
+    # Retrieve info on current nightly
+    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" $CHE_MINI_PRODUCT_NAME/cli:nightly)
+    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
+    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
+
+    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
+    # So after you download the image locally, then the local image "created" value reflects when it
+    # was originally built, creating a istuation where the local cached version is always older than
+    # what is on DockerHub, even if you just pulled it.
+    # Solution is to compare the dates, and only print warning message if the locally created ate
+    # is less than the updated date on dockerhub.
+    if $(less_than ${LOCAL_CREATION_DATE:8:2} ${REMOTE_CREATION_DATE:8:2}); then
+      warning "Your local $CHE_MINI_PRODUCT_NAME/cli:nightly image is older than the version on DockerHub."
+      warning "Run 'docker pull $CHE_MINI_PRODUCT_NAME/cli:nightly' to update your CLI."
+    fi
+  fi
 }
 
 verify_version_upgrade_compatibility() {
