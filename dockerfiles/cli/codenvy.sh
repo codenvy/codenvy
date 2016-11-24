@@ -24,6 +24,9 @@ init_constants() {
   DEFAULT_CHE_MINI_PRODUCT_NAME="codenvy"
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
 
+  DEFAULT_CHE_FORMAL_PRODUCT_NAME="Codenvy"
+  CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
+
   # Turns on stack trace
   DEFAULT_CHE_CLI_DEBUG="false"
   CHE_CLI_DEBUG=${CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
@@ -43,7 +46,7 @@ init_constants() {
   USAGE="
 Usage: docker run -it --rm 
                   -v /var/run/docker.sock:/var/run/docker.sock
-                  -v <host-path-for-codenvy-data>:/codenvy
+                  -v <LOCAL_DATA_PATH>:/$CHE_MINI_PRODUCT_NAME
                   ${CHE_MINI_PRODUCT_NAME}/cli:<version> [COMMAND]
 
     help                                 This message
@@ -77,7 +80,6 @@ Usage: docker run -it --rm
     ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
     mount <wksp-name>                    Synchronize workspace with current working directory
     action <action-name> [--help]        Start action on ${CHE_MINI_PRODUCT_NAME} instance
-    compile <mvn-command>                SDK - Builds Che source code or modules
     test <test-name> [--help]            Start test on ${CHE_MINI_PRODUCT_NAME} instance
 
 Variables:
@@ -238,14 +240,16 @@ check_docker() {
   # If DOCKER_HOST is not set, then it should bind mounted
   if [ -z "${DOCKER_HOST+x}" ]; then
     if ! docker ps > /dev/null 2>&1; then
-      info "Welcome to Codenvy!"
+      info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
-      info "We did not detect a valid DOCKER_HOST."
+      info "To start $CHE_FORMAL_PRODUCT_NAME, rerun with:"
+      info "  1: Mounting 'docker.sock', which let's us access Docker"
+      info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
       info ""
-      info "Rerun the CLI:"
+      info "Syntax:"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <local-path>:/codenvy"
-      info "                           codenvy/cli [COMMAND]"
+      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+      info "                           $CHE_MINI_PRODUCT_NAME/cli start"
       return 2;
     fi
   fi
@@ -283,54 +287,53 @@ check_mounts() {
   # Verify that we can write to the host file system from the container
   check_host_volume_mount
 
-  DATA_MOUNT=$(get_container_bind_folder)
-  CONFIG_MOUNT=$(get_container_config_folder)
-  INSTANCE_MOUNT=$(get_container_instance_folder)
-  BACKUP_MOUNT=$(get_container_backup_folder)
-  REPO_MOUNT=$(get_container_repo_folder)
-  CLI_MOUNT=$(get_container_cli_folder)
-  SYNC_MOUNT=$(get_container_sync_folder)
-  UNISON_PROFILE_MOUNT=$(get_container_unison_folder)
+  DATA_MOUNT=$(get_container_folder ":/codenvy")
+  INSTANCE_MOUNT=$(get_container_folder ":/codenvy/instance")
+  BACKUP_MOUNT=$(get_container_folder ":/codenvy/backup")
+  REPO_MOUNT=$(get_container_folder ":/repo")
+  CLI_MOUNT=$(get_container_folder ":/cli")
+  SYNC_MOUNT=$(get_container_folder ":/sync")
+  UNISON_PROFILE_MOUNT=$(get_container_folder ":/unison")
    
-  TRIAD=""
-  if [[ "${CONFIG_MOUNT}" != "not set" ]] && \
-     [[ "${INSTANCE_MOUNT}" != "not set" ]] && \
-     [[ "${BACKUP_MOUNT}" != "not set" ]]; then
-     TRIAD="set"
-  fi
-
-  if [[ "${DATA_MOUNT}" != "not set" ]]; then
-    DEFAULT_CODENVY_CONFIG="${DATA_MOUNT}"/config
-    DEFAULT_CODENVY_INSTANCE="${DATA_MOUNT}"/instance
-    DEFAULT_CODENVY_BACKUP="${DATA_MOUNT}"/backup
-  elif [[ "${DATA_MOUNT}" = "not set" ]] && [[ "$TRIAD" = "set" ]]; then  
-    DEFAULT_CODENVY_CONFIG="${CONFIG_MOUNT}"
-    DEFAULT_CODENVY_INSTANCE="${INSTANCE_MOUNT}"
-    DEFAULT_CODENVY_BACKUP="${BACKUP_MOUNT}"
-  else
-    info "Welcome to Codenvy!"
+  if [[ "${DATA_MOUNT}" = "not set" ]]; then
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""
-    info "We did not detect a host mounted data directory."
+    info "We need some information before we can start ${CHE_FORMAL_PRODUCT_NAME}."
     info ""
-    info "Rerun with a single path:"
+    info "To start $CHE_FORMAL_PRODUCT_NAME, rerun with:"
+    info "  1: Mounting 'docker.sock', which let's us access Docker"
+    info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
+    info ""
+    info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <local-path>:/codenvy"
-    info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
+    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
     info ""
     info ""
-    info "Or rerun with paths for config, instance, and backup (all required):"
+    info "Or run with overrides for instance and/or backup:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <local-config-path>:/codenvy/config"
-    info "                      -v <local-instance-path>:/codenvy/instance"
-    info "                      -v <local-backup-path>:/codenvy/backup"
-    info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
+    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+    info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
+    info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
+    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
     return 2;
   fi
 
-  # if CONFIG_MOUNT && INSTANCE_MOUNT both set, then use those values.
+  DEFAULT_CODENVY_CONFIG="${DATA_MOUNT}"
+  DEFAULT_CODENVY_INSTANCE="${DATA_MOUNT}"/instance
+  DEFAULT_CODENVY_BACKUP="${DATA_MOUNT}"/backup
+
+  if [[ "${INSTANCE_MOUNT}" != "not set" ]]; then
+    DEFAULT_CODENVY_INSTANCE="${INSTANCE_MOUNT}"
+  fi
+
+  if [[ "${BACKUP_MOUNT}" != "not set" ]]; then
+    DEFAULT_CODENVY_BACKUP="${BACKUP_MOUNT}"
+  fi
+
   #   Set offline to CONFIG_MOUNT
   CODENVY_HOST_CONFIG=${CODENVY_CONFIG:-${DEFAULT_CODENVY_CONFIG}}
-  CODENVY_CONTAINER_CONFIG="/codenvy/config"
+  CODENVY_CONTAINER_CONFIG="/codenvy"
 
   CODENVY_HOST_INSTANCE=${CODENVY_INSTANCE:-${DEFAULT_CODENVY_INSTANCE}}
   CODENVY_CONTAINER_INSTANCE="/codenvy/instance"
@@ -349,30 +352,37 @@ check_mounts() {
     CODENVY_DEVELOPMENT_TOMCAT="${CODENVY_HOST_INSTANCE}/dev"
 
     if [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
-      info "Welcome to Codenvy!"
+      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
       info ""
-      info "You volume mounted :/repo, but we did not detect a valid Codenvy source repo."
+      info "You volume mounted ':/repo', but we did not detect a valid Codenvy source repo."
       info ""
-      info "Rerun with a single path:"
+      info "Volume mounting ':/repo' activate dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
+      info ""
+      info "Please check the path you mounted to verify that is a valid $CHE_FORMAL_PRODUCT_NAME git repository."
+      info ""
+      info "Simplest syntax::"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <local-path>:/codenvy"
-      info "                      -v <local-repo>:/repo"
-      info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
+      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+      info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
+      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
       info ""
       info ""
-      info "Or rerun with paths for config, instance, and backup (all required):"
+      info "Or run with overrides for instance, and backup (all required):"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <local-config-path>${NC}:/codenvy/config"
-      info "                      -v <local-instance-path>${NC}:/codenvy/instance"
-      info "                      -v <local-backup-path>${NC}:/codenvy/backup"
-      info "                      -v <local-repo>:/repo"
-      info "                         codenvy/cli:${CODENVY_VERSION} [COMMAND]"
+      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+      info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
+      info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
+      info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
+      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} start"
+      info ""
+      info "We may uncover additional flags to add when you run this command."
+      info "We will help you at each step to provide a successful boot."
       return 2
     fi
     if [[ ! -d $(echo "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"/"${DEFAULT_CODENVY_DEVELOPMENT_TOMCAT}"-*/) ]]; then
-      info "Welcome to Codenvy!"
+      info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
       info ""
-      info "You volume mounted a valid Codenvy repo to :/repo, but we could not find a Tomcat assembly."
+      info "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a Tomcat assembly."
       info "Have you built /assembly/onpremises-ide-packaging-tomcat-codenvy-allinone with 'mvn clean install'?"
       return 2
     fi
@@ -385,7 +395,7 @@ check_host_volume_mount() {
   if [[ ! -f /codenvy/test ]]; then
     error "Docker installed, but unable to write files to your host."
     error "Have you enabled Docker to allow mounting host directories?"
-    error "Did our CLI not have user rights to create files on your host?"
+    error "Did you give our CLI rights to create files on your host?"
     return 2;
   fi
 
@@ -453,52 +463,9 @@ init_logging() {
   log "$(date)"
 }
 
-
-get_container_bind_folder() {
+get_container_folder() {
   THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/codenvy" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_config_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/codenvy/config" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_instance_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/codenvy/instance" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_backup_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/codenvy/backup" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_repo_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/repo" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_cli_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/cli" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_sync_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/sync" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_container_unison_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder ":/unison" $THIS_CONTAINER_ID)
+  FOLDER=$(get_container_host_bind_folder "$1" $THIS_CONTAINER_ID)
   echo "${FOLDER:=not set}"
 }
 

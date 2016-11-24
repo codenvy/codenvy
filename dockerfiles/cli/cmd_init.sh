@@ -86,7 +86,7 @@ cmd_init() {
   # in development mode we use init files from repo otherwise we use it from docker image
   if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}":/files \
+               -v "${CODENVY_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                    $IMAGE_INIT
   else
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy $IMAGE_INIT
@@ -116,7 +116,7 @@ cmd_init() {
   fi
 
   # Encode the version that we initialized into the version file
-  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_CONFIG}/${CODENVY_VERSION_FILE}"
+  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
 }
 
 require_license() {

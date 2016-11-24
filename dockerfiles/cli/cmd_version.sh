@@ -16,18 +16,13 @@ cmd_version() {
   echo ""
   text "CLI Version:             %s\n" $(get_image_version)
   if is_initialized; then
-    text "Configured Version:      %s\n" $(get_configured_version)
-  else
-    text "Configured Version:      <not-configured>\n"
-  fi
-  if is_configured; then
     text "Installed Version:       %s\n" $(get_installed_version)
   else
     text "Installed Version:       <not-installed>\n"
   fi
   text "\n"
 #  text "DockerHub Versions:\n"
-  text "DATE                                   TAG\n"
+  text "DATE PUBLISHED                         VERSION ON DOCKERHUB\n"
   VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/codenvy/cli/tags/)
   NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
   COUNTER=0

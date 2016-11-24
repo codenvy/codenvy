@@ -63,3 +63,133 @@ cmd_start() {
   eval ${COMPOSE_UP_COMMAND}
   check_if_booted
 }
+
+cmd_stop() {
+  debug $FUNCNAME
+
+  if [ $# -gt 0 ]; then
+    error "${CHE_MINI_PRODUCT_NAME} stop: You passed unknown options. Aborting."
+    return
+  fi
+
+  info "stop" "Stopping containers..."
+  if is_initialized; then
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME stop >> "${LOGS}" 2>&1 || true
+    info "stop" "Removing containers..."
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
+  fi
+}
+
+cmd_restart() {
+  debug $FUNCNAME
+
+  FORCE_UPDATE=${1:-"--no-force"}
+    info "restart" "Restarting..."
+    cmd_stop
+    cmd_start ${FORCE_UPDATE}
+}
+
+port_open(){
+  debug $FUNCNAME
+
+  docker run -d -p $1:$1 --name fake alpine:3.4 httpd -f -p $1 -h /etc/ > /dev/null 2>&1
+  NETSTAT_EXIT=$?
+  docker rm -f fake > /dev/null 2>&1
+
+  if [ $NETSTAT_EXIT = 125 ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+container_exist_by_name(){
+  docker inspect ${1} > /dev/null 2>&1
+  if [ "$?" == "0" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_server_container_id() {
+  log "docker inspect -f '{{.Id}}' ${1}"
+  docker inspect -f '{{.Id}}' ${1}
+}
+
+wait_until_container_is_running() {
+  CONTAINER_START_TIMEOUT=${1}
+
+  ELAPSED=0
+  until container_is_running ${2} || [ ${ELAPSED} -eq "${CONTAINER_START_TIMEOUT}" ]; do
+    log "sleep 1"
+    sleep 1
+    ELAPSED=$((ELAPSED+1))
+  done
+}
+
+container_is_running() {
+  if [ "$(docker ps -qa -f "status=running" -f "id=${1}" | wc -l)" -eq 0 ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+wait_until_server_is_booted () {
+  SERVER_BOOT_TIMEOUT=${1}
+
+  ELAPSED=0
+  until server_is_booted ${2} || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    log "sleep 2"
+    sleep 2
+    # Total hack - having to restart haproxy for some reason on windows
+    if is_docker_for_windows || is_docker_for_mac; then
+      log "docker restart codenvy_haproxy_1 >> \"${LOGS}\" 2>&1"
+      docker restart codenvy_haproxy_1 >> "${LOGS}" 2>&1
+    fi
+    ELAPSED=$((ELAPSED+1))
+  done
+}
+
+server_is_booted() {
+  HTTP_STATUS_CODE=$(curl -I -k $CODENVY_HOST/api/ \
+                     -s -o "${LOGS}" --write-out "%{http_code}")
+  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+check_if_booted() {
+  CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
+  wait_until_container_is_running 20 ${CURRENT_CODENVY_SERVER_CONTAINER_ID}
+  if ! container_is_running ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
+    return 2
+  fi
+
+  info "start" "Services booting..."
+  info "start" "Server logs at \"docker logs -f ${CODENVY_SERVER_CONTAINER_NAME}\""
+  wait_until_server_is_booted 60 ${CURRENT_CODENVY_SERVER_CONTAINER_ID}
+
+  if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+    info "start" "Booted and reachable"
+    info "start" "Ver: $(get_installed_version)"
+    if ! is_docker_for_mac; then
+      info "start" "Use: http://${CODENVY_HOST}"
+      info "start" "API: http://${CODENVY_HOST}/swagger"
+    else
+      info "start" "Use: http://localhost"
+      info "start" "API: http://localhost/swagger"
+    fi
+  else
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CODENVY_SERVER_CONTAINER_NAME}\" to inspect the issue."
+    return 2
+  fi
+}

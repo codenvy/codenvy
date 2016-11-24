@@ -7,7 +7,8 @@
 #
 
 cp -rf /files/docs /copy
+
 # do not copy codenvy.env if exist
 if [ ! -f  /copy/codenvy.env ]; then
-    cp /files/manifests/codenvy.env /copy
+    cp /etc/puppet/manifests/codenvy.env /copy
 fi

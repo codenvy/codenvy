@@ -35,13 +35,11 @@ cmd_destroy() {
   cmd_stop
 
   info "destroy" "Deleting instance and config..."
-  log "docker_run -v \"${CODENVY_HOST_CONFIG}\":/codenvy-config -v \"${CODENVY_HOST_INSTANCE}\":/codenvy-instance alpine:3.4 sh -c \"rm -rf /root/codenvy-instance/* && rm -rf /root/codenvy-config/*\""
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy-config \
-             -v "${CODENVY_HOST_INSTANCE}":/root/codenvy-instance \
-                alpine:3.4 sh -c "rm -rf /root/codenvy-instance/* && rm -rf /root/codenvy-config/*"
+  log "docker_run -v \"${CODENVY_HOST_INSTANCE}\":/root/instance alpine:3.4 sh -c \"rm -rf /root/instance/*\""
+  docker_run -v "${CODENVY_HOST_INSTANCE}":/root/instance alpine:3.4 sh -c "rm -rf /root/instance/*"
 
-  rm -rf "${CODENVY_CONTAINER_CONFIG}"
   rm -rf "${CODENVY_CONTAINER_INSTANCE}"
+
   if has_docker_for_windows_client; then
     docker volume rm codenvy-postgresql-volume > /dev/null 2>&1  || true
   fi
