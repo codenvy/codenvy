@@ -227,18 +227,6 @@ is_debug() {
   fi
 }
 
-has_docker() {
-  hash docker 2>/dev/null && return 0 || return 1
-}
-
-has_compose() {
-  hash docker-compose 2>/dev/null && return 0 || return 1
-}
-
-has_curl() {
-  hash curl 2>/dev/null && return 0 || return 1
-}
-
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
@@ -392,67 +380,6 @@ check_mounts() {
   fi
 }
 
-check_host_volume_mount() {
-  echo 'test' > ${CHE_CONTAINER_ROOT}/test
-  
-  if [[ ! -f ${CHE_CONTAINER_ROOT}/test ]]; then
-    error "Docker installed, but unable to write files to your host."
-    error "Have you enabled Docker to allow mounting host directories?"
-    error "Did you give our CLI rights to create files on your host?"
-    return 2;
-  fi
-
-  rm -rf ${CHE_CONTAINER_ROOT}/test
-}
-
-get_mount_path() {
-  debug $FUNCNAME
-  FULL_PATH=$(get_full_path "${1}")
-  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
-  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
-  echo $CLEAN_PATH
-}
-
-get_full_path() {
-  debug $FUNCNAME
-  # create full directory path
-  echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
-}
-
-convert_windows_to_posix() {
-  debug $FUNCNAME
-  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
-}
-
-convert_posix_to_windows() {
-  debug $FUNCNAME
-  # Remove leading slash
-  VALUE="${1:1}"
-
-  # Get first character (drive letter)
-  VALUE2="${VALUE:0:1}"
-
-  # Replace / with \
-  VALUE3=$(echo ${VALUE} | tr '/' '\\' | sed 's/\\/\\\\/g')
-
-  # Replace c\ with c:\ for drive letter
-  echo "$VALUE3" | sed "s/./$VALUE2:/1"
-}
-
-get_clean_path() {
-  debug $FUNCNAME
-  INPUT_PATH=$1
-  # \some\path => /some/path
-  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
-  # /somepath/ => /somepath
-  OUTPUT_PATH=${OUTPUT_PATH%/}
-  # /some//path => /some/path
-  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
-  # "/some/path" => /some/path
-  OUTPUT_PATH=${OUTPUT_PATH//\"}
-  echo ${OUTPUT_PATH}
-}
-
 init_logging() {
   # Initialize CLI folder
   CLI_DIR="/cli"
@@ -466,65 +393,6 @@ init_logging() {
   log "$(date)"
 }
 
-get_container_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder "$1" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_this_container_id() {
-  hostname
-}
-
-get_container_host_bind_folder() {
-  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:${CHE_CONTAINER_ROOT}
-  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
-  
-  # Remove /var/run/docker.sock:/var/run/docker.sock
-  VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
-
-  # Remove leading and trailing spaces
-  VALUE2=$(echo "${VALUE}" | xargs)
-
-  MOUNT=""
-  IFS=$' '
-  for SINGLE_BIND in $VALUE2; do
-    case $SINGLE_BIND in
-      *$1)
-        MOUNT="${MOUNT} ${SINGLE_BIND}"
-        echo "${MOUNT}" | cut -f1 -d":" | xargs
-      ;;
-      *)
-        # Super ugly - since we parse by space, if the next parameter is not a colon, then
-        # we know that next parameter is second part of a directory with a space in it.
-        if [[ ${SINGLE_BIND} != *":"* ]]; then
-          MOUNT="${MOUNT} ${SINGLE_BIND}"
-        else
-          MOUNT=""
-        fi
-      ;;
-    esac
-  done
-}
-
-docker_run() {
-  debug $FUNCNAME
-  # Setup options for connecting to docker host
-  if [ -z "${DOCKER_HOST+x}" ]; then
-      DOCKER_HOST="/var/run/docker.sock"
-  fi
-
-  if [ -S "$DOCKER_HOST" ]; then
-    docker run --rm -v $DOCKER_HOST:$DOCKER_HOST \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
-  else
-    docker run --rm -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
-  fi
-}
-
 docker_compose() {
   debug $FUNCNAME
 
@@ -535,19 +403,15 @@ docker_compose() {
                   docker/compose:1.8.1 "$@"
   fi
 }
-
-curl() {
-  if ! has_curl; then
-    log "docker run --rm --net=host appropriate/curl \"$@\""
-    docker run --rm --net=host appropriate/curl "$@"
-  else
-    log "$(which curl) \"$@\""
-    $(which curl) "$@"
-  fi
-}
-
 init() {
   init_constants
+
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
+  # add helper scripts
+  for COMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
+  do
+    source "${COMMAND_FILE}"
+  done
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"

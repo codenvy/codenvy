@@ -164,65 +164,6 @@ cli_parse () {
   eval $COMMAND "$@"
 }
 
-get_docker_install_type() {
-  debug $FUNCNAME
-  if is_boot2docker; then
-    echo "boot2docker"
-  elif is_docker_for_windows; then
-    echo "docker4windows"
-  elif is_docker_for_mac; then
-    echo "docker4mac"
-  else
-    echo "native"
-  fi
-}
-
-has_docker_for_windows_client(){
-  debug $FUNCNAME
-  if [[ "${GLOBAL_HOST_IP}" = "10.0.75.2" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_boot2docker() {
-  debug $FUNCNAME
-  if uname -r | grep -q 'boot2docker'; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_docker_for_windows() {
-  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && has_docker_for_windows_client; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_docker_for_mac() {
-  debug $FUNCNAME
-  if uname -r | grep -q 'moby' && ! has_docker_for_windows_client; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_native() {
-  debug $FUNCNAME
-  if [ $(get_docker_install_type) = "native" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-
 has_env_variables() {
   debug $FUNCNAME
   PROPERTIES=$(env | grep CODENVY_)
@@ -530,20 +471,6 @@ port_open(){
   fi
 }
 
-container_exist_by_name(){
-  docker inspect ${1} > /dev/null 2>&1
-  if [ "$?" == "0" ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-get_server_container_id() {
-  log "docker inspect -f '{{.Id}}' ${1}"
-  docker inspect -f '{{.Id}}' ${1}
-}
-
 wait_until_container_is_running() {
   CONTAINER_START_TIMEOUT=${1}
 
@@ -553,14 +480,6 @@ wait_until_container_is_running() {
     sleep 1
     ELAPSED=$((ELAPSED+1))
   done
-}
-
-container_is_running() {
-  if [ "$(docker ps -qa -f "status=running" -f "id=${1}" | wc -l)" -eq 0 ]; then
-    return 1
-  else
-    return 0
-  fi
 }
 
 wait_until_server_is_booted () {
