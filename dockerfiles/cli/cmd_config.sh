@@ -30,7 +30,7 @@ cmd_config() {
     # if dev mode is on, pick configuration sources from repo.
     # please note that in production mode update of configuration sources must be only on update.
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}":/files \
+               -v "${CODENVY_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                   $IMAGE_INIT
 
     # in development mode to avoid permissions issues we copy tomcat assembly to ${CODENVY_INSTANCE}
@@ -89,36 +89,38 @@ generate_configuration_with_puppet() {
 
   if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
   # Note - bug in docker requires relative path for env, not absolute
-  GENERATE_CONFIG_COMMAND="docker_run -it  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+  GENERATE_CONFIG_COMMAND="docker_run -it \
+                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
-                  -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
-                  -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
+                  -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
+                  -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
                   -e \"CODENVY_ENVIRONMENT=development\" \
-                  -e \"CODENVY_CONFIG=${CODENVY_HOST_CONFIG}\" \
+                  -e \"CODENVY_CONFIG=${CODENVY_HOST_INSTANCE}\" \
                   -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
                   -e \"CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}\" \
                   -e \"CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}\" \
-                      $IMAGE_PUPPET \
+                  --entrypoint=/usr/bin/puppet \
+                      $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff"
   else
-  GENERATE_CONFIG_COMMAND="docker_run -it  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
+  GENERATE_CONFIG_COMMAND="docker_run -it \
+                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
-                  -v \"${CODENVY_HOST_CONFIG_MANIFESTS_FOLDER}\":/etc/puppet/manifests:ro \
-                  -v \"${CODENVY_HOST_CONFIG_MODULES_FOLDER}\":/etc/puppet/modules:ro \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
                   -e \"CODENVY_ENVIRONMENT=production\" \
-                  -e \"CODENVY_CONFIG=${CODENVY_HOST_CONFIG}\" \
+                  -e \"CODENVY_CONFIG=${CODENVY_HOST_INSTANCE}\" \
                   -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
-                      $IMAGE_PUPPET \
+                  --entrypoint=/usr/bin/puppet \
+                      $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff >> \"${LOGS}\""

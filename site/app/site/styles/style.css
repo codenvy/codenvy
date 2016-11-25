@@ -1,5 +1,7 @@
-@import url(https://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic);
-
+@font-face {
+    font-family: 'Open Sans';
+    src: local('Open Sans'), local('OpenSans'), url('/site/lib/fonts/open-sans-latin.woff2') format('woff2');
+}
 /* #####################  RESET CSS  ##################### */
 
 html, body, div, span, applet, object, iframe,
@@ -62,10 +64,11 @@ a {
 	-moz-transition:background 1s ease;
 	transition:background 1s ease;
 	font-weight: bold;
+	color: #697BB0;
 }
 a:hover {
-	text-decoration:none;
-	color: #4EABFF;
+	text-decoration:underline;
+	color: #697BB0;
 }
 ::selection{
 	background:#282828;
@@ -80,7 +83,7 @@ a:hover {
 /*Main CSS*/
 
 body,h1,h2,h3,h4,h5,h6,a{
-	font-family: 'Lato', sans-serif;
+	font-family: 'Open Sans';
 }
 .no-padding{
 	padding:0;
@@ -101,8 +104,8 @@ body,h1,h2,h3,h4,h5,h6,a{
 /*SignUp Page*/
 .signup-page, .error-page{
 	height:100vh;
-	background-color:#21252B;
-	color:#3E4856;
+	background-color:#1B2B57;
+	color:#4A90E2;
 }
 .signup-page, .error-page{
 	display:table;
@@ -112,11 +115,23 @@ body,h1,h2,h3,h4,h5,h6,a{
 	display: table-cell;
     vertical-align: middle;
 }
+
+.error-page-vmiddle{
+    margin-top: 30vh;
+}
+
 .signup-page .logo, .error-page .logo{
-	height:41px;
-	width:246px;
+	height:50px;
+	width:277px;
 	margin:20px 0px 21px 0px;
 }
+
+.error-page .logo{
+	height:50px;
+	width:277px;
+	margin:0px 0px 40px 10px;
+}
+
 .signup-page h2, .error-page h2{
 	font-size:24px;
 	line-height:30px;
@@ -246,7 +261,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 }
 
 .signup-page p, .error-page p{
-	font-size:14px;
+	font-size:22px;
 	line-height:24px;
 	font-weight:300;
 	padding:0 10px;
@@ -354,11 +369,9 @@ body,h1,h2,h3,h4,h5,h6,a{
 	}
 	
 	.signup-page, .error-page {
-	  background:#01496e;
+	  background:#1B2B57;
 	}
-	.signup-page .logo, .error-page {
-	  margin-bottom: 24px;
-	}
+
 	.signup-page h2, .error-page h2 {
 	  font-size: 22px;
 	  line-height: 26px;
@@ -392,32 +405,27 @@ body,h1,h2,h3,h4,h5,h6,a{
 }
 
 .error-container {
-	margin: 10px 130px;
-	background-color: #F47A44;    
-	border-radius: 5px;
-	font-size:14px;
-	border-radius:5px;
-	background:#FFFFFF;
-	color: #4EABFF;
-	font-weight:400;
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    font-weight: 400;
+    text-align: left;
+    margin: 20px 130px;
+    border-radius: 5px;
+    background: rgb(215, 52, 45);
 }
 .light {
 	width: 947px;
-    background: #fff;
-    border: solid 1px #d9dbdf;
     padding: 45px 0px 80px 0px;
-    color: #44484b;
-    width: 947px;
 }
 .light h1 {
-        font-size: 36px;
-        text-align: center;
-        text-transform: uppercase;
+        font-size: 32px;
+        text-align: left;
+        font-weight: 600;
     }
 .light .subtitle-line   {
-    width: 50px;
-    border-top: solid 1px #44484b;
-    margin: 30px auto 30px auto;
+    width: 100%;
+    border-top: solid 1px #fff;
+    margin: 20px auto 20px auto;
 }
 
 .light hr {
@@ -425,13 +433,13 @@ body,h1,h2,h3,h4,h5,h6,a{
 	margin: 30px auto;
 }
 .light p {
-	text-align: center;
+	text-align: left;
 	font-weight: 500;
-	color: #595e62;
+	color: #fff;
+    line-height: 26px;
 }
 .expanded {
 	padding: 10px;
-	border: 1px solid #4EABFF;	
 }
 .short-line {
 	width: 55px;
@@ -482,4 +490,12 @@ img.imgcenter {
     font-weight: 300;
     color: #fff;
 	margin: 50px auto;
+}
+
+.fa-exclamation {
+	padding: 10px 22px;
+	margin-right: 15px;
+	background-color:#2C3E7F;
+	border-radius:6px;
+	color: #fff;
 }

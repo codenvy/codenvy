@@ -18,8 +18,7 @@ cli_init() {
   CODENVY_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
   CODENVY_COMPOSE_FILE="docker-compose-container.yml"
   CODENVY_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
-  CODENVY_CONFIG_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_config_backup.tar"
-  CODENVY_INSTANCE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_instance_backup.tar"
+  CODENVY_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   DOCKER_CONTAINER_NAME_PREFIX="${CHE_MINI_PRODUCT_NAME}_"
 
   grab_offline_images "$@"
@@ -35,16 +34,16 @@ cli_init() {
   CODENVY_HOST=${CODENVY_HOST:-${DEFAULT_CODENVY_HOST}}
 
   if [[ "${CODENVY_HOST}" = "" ]]; then
-    info "Welcome to Codenvy!"
+    info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
     info ""
     info "We did not auto-detect a valid HOST or IP address."
-    info "Pass CODENVY_HOST with your hostname or IP address."
+    info "Pass ${CHE_PRODUCT_NAME}_HOST with your hostname or IP address."
     info ""
     info "Rerun the CLI:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <local-path>:/codenvy"
     info "                      -e CODENVY_HOST=<your-ip-or-host>"
-    info "                         codenvy/cli:${CODENVY_IMAGE_VERSION} $@"
+    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_IMAGE_VERSION} $@"
     return 2;
   fi
 
@@ -53,11 +52,11 @@ cli_init() {
   REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CODENVY_CONTAINER_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
   REFERENCE_CONTAINER_COMPOSE_FILE="${CODENVY_CONTAINER_INSTANCE}/${CODENVY_COMPOSE_FILE}"
 
-  CODENVY_HOST_CONFIG_MANIFESTS_FOLDER="$CODENVY_HOST_CONFIG/manifests"
-  CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CODENVY_CONTAINER_CONFIG/manifests"
+  CODENVY_HOST_CONFIG_MANIFESTS_FOLDER="$CODENVY_HOST_INSTANCE/manifests"
+  CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CODENVY_CONTAINER_INSTANCE/manifests"
 
-  CODENVY_HOST_CONFIG_MODULES_FOLDER="$CODENVY_HOST_CONFIG/modules"
-  CODENVY_CONTAINER_CONFIG_MODULES_FOLDER="$CODENVY_CONTAINER_CONFIG/modules"
+  CODENVY_HOST_CONFIG_MODULES_FOLDER="$CODENVY_HOST_INSTANCE/modules"
+  CODENVY_CONTAINER_CONFIG_MODULES_FOLDER="$CODENVY_CONTAINER_INSTANCE/modules"
 
   # TODO: Change this to use the current folder or perhaps ~?
   if is_boot2docker && has_docker_for_windows_client; then
@@ -143,12 +142,15 @@ grab_initial_images() {
 cli_parse () {
   debug $FUNCNAME
   COMMAND="cmd_$1"
-  COMMAND_CONTAINER_FILE="${SCRIPTS_CONTAINER_SOURCE_DIR}"/$COMMAND.sh
 
-  if [ ! -f "${COMMAND_CONTAINER_FILE}" ]; then
-    error "You passed an unknown command line option."
-    return 2;
-  fi
+  case $1 in
+      init|config|start|stop|restart|backup|restore|info|offline|add-node|remove-nodes|destroy|download|rmi|upgrade|version|ssh|mount|action|test|compile|help)
+      ;;
+      *)
+         error "You passed an unknown command."
+         return 2
+      ;;
+  esac
 
   # Need to load all files in advance so commands can invoke other commands.
   for COMMAND_FILE in "${SCRIPTS_CONTAINER_SOURCE_DIR}"/cmd_*.sh
@@ -269,6 +271,249 @@ update_image() {
   text "\n"
 }
 
+is_initialized() {
+  debug $FUNCNAME
+  if [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]] && \
+     [[ -f "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE ]] && \
+     [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_configured() {
+  debug $FUNCNAME
+  if [[ -d "${CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
+     [[ -d "${CODENVY_CONTAINER_CONFIG_MODULES_FOLDER}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+has_version_registry() {
+  if [ -d /version/$1 ]; then
+    return 0;
+  else
+    return 1;
+  fi
+}
+
+list_versions(){
+  # List all subdirectories and then print only the file name
+  for version in /version/* ; do
+    text " ${version##*/}\n"
+  done
+}
+
+version_error(){
+  text "\nWe could not find version '$1'. Available versions:\n"
+  list_versions
+  text "\nSet CODENVY_VERSION=<version> and rerun.\n\n"
+}
+
+### Returns the list of Codenvy images for a particular version of Codenvy
+### Sets the images as environment variables after loading from file
+get_image_manifest() {
+  info "cli" "Checking registry for version '$1' images"
+  if ! has_version_registry $1; then
+    version_error $1
+    return 1;
+  fi
+
+  IMAGE_LIST=$(cat /version/$1/images)
+  IFS=$'\n'
+  for SINGLE_IMAGE in $IMAGE_LIST; do
+    log "eval $SINGLE_IMAGE"
+    eval $SINGLE_IMAGE
+  done
+}
+
+get_installed_version() {
+  if ! is_initialized; then
+    echo "<not-configed>"
+  else
+    cat "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE
+  fi
+}
+
+get_image_version() {
+  echo "$CODENVY_IMAGE_VERSION"
+}
+
+less_than() {
+  for (( i=0; i<${#1}; i++ )); do
+    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
+      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
+        return 0
+      fi
+    fi 
+  done
+  return 1
+}
+
+compare_cli_version_to_installed_version() {
+  IMAGE_VERSION=$(get_image_version)
+  INSTALLED_VERSION=$(get_installed_version)
+ 
+  if [[ "$INSTALLED_VERSION" = "$IMAGE_VERSION" ]]; then
+    echo "match"
+  elif [ "$INSTALLED_VERSION" = "nightly" ] || 
+       [ "$IMAGE_VERSION" = "nightly" ]; then
+    echo "nightly"
+  elif less_than $INSTALLED_VERSION $IMAGE_VERSION; then
+    echo "install-less-cli"
+  else
+    echo "cli-less-install"
+  fi
+}
+
+verify_version_compatibility() {
+  ## If ! is_initialized, then the system hasn't been installed
+  ## First, compare the CLI image version to what version was initialized in /config/*.ver.donotmodify
+  ##      - If they match, good
+  ##      - If they don't match and one is nightly, fail
+  ##      - If they don't match, then if CLI is older fail with message to get proper CLI
+  ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
+
+  CODENVY_IMAGE_VERSION=$(get_image_version)
+
+  if is_initialized; then
+    COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
+    INSTALLED_VERSION=$(get_installed_version)
+
+    case "${COMPARE_CLI_ENV}" in
+      "match") 
+      ;;
+      "nightly")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "The 'nightly' CLI is only compatible with 'nightly' installed versions."
+        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
+        error ""
+        error "Run the CLI as '${CHE_MINI_PRODUCT_NAME}/cli:<version>' to install a tagged version."
+        return 2
+      ;;
+      "install-less-cli")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "Run '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION upgrade' to migrate your installation to '$CODENVY_IMAGE_VERSION'."
+        error "Or, run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$INSTALLED_VERSION' to match the CLI with your installed version."
+        return 2
+      ;;
+      "cli-less-install")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "You cannot use an older CLI with a newer installation."
+        error ""
+        error "Run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$INSTALLED_VERSION' to match the CLI with your existing installed version."
+        return 2
+      ;;
+    esac
+  fi
+
+  # Per request of the engineers, check to see if the locally cached nightly version is older
+  # than the one stored on DockerHub.
+  if [[ "${CODENVY_IMAGE_VERSION}" = "nightly" ]]; then
+
+    #TODO: Florent, there are two places where we use URLs like this (another is in version)
+    #      This URL will be different for ARTIK, Che, Codenvy
+    REMOTE_NIGHTLY_JSON=$(curl -s https://hub.docker.com/v2/repositories/codenvy/cli/tags/nightly/)
+
+    # Retrieve info on current nightly
+    LOCAL_CREATION_DATE=$(docker inspect --format="{{.Created }}" $CHE_MINI_PRODUCT_NAME/cli:nightly)
+    REMOTE_CREATION_DATE=$(echo $REMOTE_NIGHTLY_JSON | jq ".last_updated")
+    REMOTE_CREATION_DATE="${REMOTE_CREATION_DATE//\"}"
+
+    # Unfortunatley, the "last_updated" date on DockerHub is the date it was uploaded, not created.
+    # So after you download the image locally, then the local image "created" value reflects when it
+    # was originally built, creating a istuation where the local cached version is always older than
+    # what is on DockerHub, even if you just pulled it.
+    # Solution is to compare the dates, and only print warning message if the locally created ate
+    # is less than the updated date on dockerhub.
+    if $(less_than ${LOCAL_CREATION_DATE:8:2} ${REMOTE_CREATION_DATE:8:2}); then
+      warning "Your local $CHE_MINI_PRODUCT_NAME/cli:nightly image is older than the version on DockerHub."
+      warning "Run 'docker pull $CHE_MINI_PRODUCT_NAME/cli:nightly' to update your CLI."
+    fi
+  fi
+}
+
+verify_version_upgrade_compatibility() {
+  ## Two levels of checks
+  ## First, compare the CLI image version to what the admin has configured in /config/.env file
+  ##      - If they match, nothing to upgrade
+  ##      - If they don't match and one is nightly, fail upgrade is not supported for nightly
+  ##      - If they don't match, then if CLI is older fail with message that we do not support downgrade
+  ##      - If they don't match, then if CLI is newer then good
+  CODENVY_IMAGE_VERSION=$(get_image_version)
+
+  if ! is_initialized || ! is_configured; then 
+    info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
+    return 2
+  fi
+
+  if is_initialized; then
+    COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
+    CONFIGURED_VERSION=$(get_installed_version)
+
+    case "${COMPARE_CLI_ENV}" in
+      "match") 
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
+        error "View available versions with '$CHE_MINI_PRODUCT_NAME version'."
+        return 2
+      ;;
+      "nightly")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or installed version '$INSTALLED_VERSION' is nightly."
+        error ""
+        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
+        error "You can 'docker pull ${CHE_MINI_PRODUCT_NAME}/cli:nightly' to get a newer nightly version."
+        return 2
+      ;;
+      "install-less-cli")
+      ;;
+      "cli-less-install")
+        error ""
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error ""
+        error "You cannot use '${CHE_MINI_PRODUCT_NAME} upgrade' to downgrade versions."
+        error ""
+        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
+        error "View available versions with '$CHE_MINI_PRODUCT_NAME version'."
+        return 2
+      ;;
+    esac
+  fi
+}
+
+# Usage:
+#   confirm_operation <Warning message> [--force|--no-force]
+confirm_operation() {
+  debug $FUNCNAME
+
+  FORCE_OPERATION=${2:-"--no-force"}
+
+  if [ ! "${FORCE_OPERATION}" == "--quiet" ]; then
+    # Warn user with passed message
+    info "${1}"
+    text "\n"
+    read -p "      Are you sure? [N/y] " -n 1 -r
+    text "\n\n"
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      return 1;
+    else
+      return 0;
+    fi
+  fi
+}
+
 port_open(){
   debug $FUNCNAME
 
@@ -350,8 +595,8 @@ check_if_booted() {
     return 2
   fi
 
+  info "start" "Services booting..."
   info "start" "Server logs at \"docker logs -f ${CODENVY_SERVER_CONTAINER_NAME}\""
-  info "start" "Server booting..."
   wait_until_server_is_booted 60 ${CURRENT_CODENVY_SERVER_CONTAINER_ID}
 
   if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
@@ -367,313 +612,5 @@ check_if_booted() {
   else
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CODENVY_SERVER_CONTAINER_NAME}\" to inspect the issue."
     return 2
-  fi
-}
-
-is_initialized() {
-  debug $FUNCNAME
-  if [[ -d "${CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
-     [[ -d "${CODENVY_CONTAINER_CONFIG_MODULES_FOLDER}" ]] && \
-     [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_configured() {
-  debug $FUNCNAME
-  if [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]] && \
-     [[ -f "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-has_version_registry() {
-  if [ -d /version/$1 ]; then
-    return 0;
-  else
-    return 1;
-  fi
-}
-
-list_versions(){
-  # List all subdirectories and then print only the file name
-  for version in /version/* ; do
-    text " ${version##*/}\n"
-  done
-}
-
-version_error(){
-  text "\nWe could not find version '$1'. Available versions:\n"
-  list_versions
-  text "\nSet CODENVY_VERSION=<version> and rerun.\n\n"
-}
-
-### Returns the list of Codenvy images for a particular version of Codenvy
-### Sets the images as environment variables after loading from file
-get_image_manifest() {
-  info "cli" "Checking registry for version '$1' images"
-  if ! has_version_registry $1; then
-    version_error $1
-    return 1;
-  fi
-
-  IMAGE_LIST=$(cat /version/$1/images)
-  IFS=$'\n'
-  for SINGLE_IMAGE in $IMAGE_LIST; do
-    log "eval $SINGLE_IMAGE"
-    eval $SINGLE_IMAGE
-  done
-}
-
-get_installed_version() {
-  if ! is_configured; then
-    echo "<not-configed>"
-  else
-    cat "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE
-  fi
-}
-
-get_configured_version() {
-  if ! is_initialized; then
-    echo "<not-initialized>"
-  else
-    cat "${CODENVY_CONTAINER_CONFIG}"/$CODENVY_VERSION_FILE
-  fi
-}
-
-get_image_version() {
-  echo "$CODENVY_IMAGE_VERSION"
-}
-
-less_than() {
-  for (( i=0; i<${#1}; i++ )); do
-    if [[ ${1:$i:1} != ${2:$i:1} ]]; then
-      if [ ${1:$i:1} -lt ${2:$i:1} ]; then
-        return 0
-      fi
-    fi 
-  done
-  return 1
-}
-
-compare_cli_version_to_configured_version() {
-  IMAGE_VERSION=$(get_image_version)
-  CONFIGURED_VERSION=$(get_configured_version)
- 
-
-  ## First, compare the CLI image version to what version was initialized in /config/*.ver.do_not_modify
-  ##      - If they match, good
-  ##      - If they don't match and one is nightly, fail
-  ##      - If they don't match, then if CLI is older fail with message to get proper CLI
-  ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-  if [[ "$CONFIGURED_VERSION" = "$IMAGE_VERSION" ]]; then
-    echo "match"
-  elif [ "$CONFIGURED_VERSION" = "nightly" ] || 
-       [ "$IMAGE_VERSION" = "nightly" ]; then
-    echo "nightly"
-  elif less_than $CONFIGURED_VERSION $IMAGE_VERSION; then
-    echo "config-less-cli"
-  else
-    echo "cli-less-config"
-  fi
-}
-
-compare_installed_version_to_configured_version() {
-  CONFIGURED_VERSION=$(get_configured_version)
-  INSTALLED_VERSION=$(get_installed_version)
-
-  ## Second, compare /config/*.ver.donotmofiy to /instance/*.ver.donotmodify
-  ##      - If they match, then continue
-  ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
-  ##      - If they do not match, then if .env is older, then fail with message that this is not good 
-  if [[ "$CONFIGURED_VERSION" = "$INSTALLED_VERSION" ]]; then
-    echo "match"
-  elif less_than $CONFIGURED_VERSION $INSTALLED_VERSION; then
-    echo "config-less-install"
-  else
-    echo "install-less-config"
-  fi
-}
-
-verify_version_compatibility() {
-  ## If ! is_configured, then the system hasn't been installed
-  ## Two levels of checks
-  ## First, compare the CLI image version to what version was initialized in /config/*.ver.donotmodify
-  ##      - If they match, good
-  ##      - If they don't match and one is nightly, fail
-  ##      - If they don't match, then if CLI is older fail with message to get proper CLI
-  ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
-  ## Second, compare /config/*.ver.donotmofiy to /instance/*.ver.do_not_modify
-  ##      - If they match, then continue
-  ##      - If they do not match, then if .env is newer, then fail with message to run upgrade first
-  ##      - If they do not match, then if .env is older, then fail with message that this is not good 
-
-  CODENVY_IMAGE_VERSION=$(get_image_version)
-
-  if is_initialized; then
-    COMPARE_CLI_ENV=$(compare_cli_version_to_configured_version)
-    CONFIGURED_VERSION=$(get_configured_version)
-
-    case "${COMPARE_CLI_ENV}" in
-      "match") 
-      ;;
-      "nightly")
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your configured version '$CONFIGURED_VERSION'."
-        error ""
-        error "The 'nightly' CLI is only compatible with 'nightly' configured versions."
-        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a tagged version."
-        error ""
-        error "Run the CLI as '${CHE_MINI_PRODUCT_NAME}/cli:<version>' to install a tagged version."
-        return 2
-      ;;
-      "config-less-cli")
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your configured version '$CONFIGURED_VERSION'."
-        error ""
-        error "Run '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION upgrade' to migrate your installation to '$CODENVY_IMAGE_VERSION'."
-        error "Or, run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$CONFIGURED_VERSION' to have the CLI match your existing installed version."
-        return 2
-      ;;
-      "cli-less-config")
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$CONFIGURED_VERSION'."
-        error ""
-        error "You cannot use an older CLI with a newer configuration."
-        error ""
-        error "Run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$CONFIGURED_VERSION' to have the CLI match your existing installed version."
-        return 2
-      ;;
-    esac
-  fi
-
-  # Scenario #2 should only be checked if the system is already configured
-  if is_configured; then
-    COMPARE_INSTALL_ENV=$(compare_installed_version_to_configured_version)
-    INSTALLED_VERSION=$(get_installed_version)
-    case "${COMPARE_INSTALL_ENV}" in
-      "match") 
-      ;;
-      "config-less-install"|"install-less-config")
-        error ""
-        error "Your CLI version '$CODENVY_IMAGE_VERSION' matches your configed version (good), but:"
-        error "   Configured version = '$CONFIGURED_VERSION'"
-        error "   Installed version  = '$INSTALLED_VERSION'"
-        error ""
-        error "The configured and installed versions must match before other operations proceed."
-        error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:${INSTALLED_VERSION} init --reinit' to configure the proper version."
-        error ""
-        error "We could automatically do this for you."
-        error "However, having configed and installed versions mismatch is unusual and should be checked by a human."
-        return 2
-      ;;
-    esac
-  fi
-}
-
-verify_version_upgrade_compatibility() {
-  ## Two levels of checks
-  ## First, compare the CLI image version to what the admin has configured in /config/.env file
-  ##      - If they match, nothing to upgrade
-  ##      - If they don't match and one is nightly, fail upgrade is not supported for nightly
-  ##      - If they don't match, then if CLI is older fail with message that we do not support downgrade
-  ##      - If they don't match, then if CLI is newer then good
-  ## Second, compare proposed .env version to already installed version
-  ##      - If they match, then ok to upgrade, we will update the ENV file 
-  ##      - If they do not match, then if .env is newer, then fail with message that ENV file & install must match before upgrade
-  ##      - If they do not match, then if .env is older, then fail with message that ENV file & install must match before upgrade 
-
-  CODENVY_IMAGE_VERSION=$(get_image_version)
-
-  if ! is_initialized || ! is_configured; then 
-    info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
-    return 2
-  fi
-
-  if is_initialized; then
-    COMPARE_CLI_ENV=$(compare_cli_version_to_configured_version)
-    CONFIGURED_VERSION=$(get_configured_version)
-
-    case "${COMPARE_CLI_ENV}" in
-      "match") 
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your configured version '$CONFIGURED_VERSION'."
-        error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
-        error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
-        return 2
-      ;;
-      "nightly")
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or configured version '$CONFIGURED_VERSION' is nightly."
-        error ""
-        error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a non-nightly version."
-        error "You can 'docker pull ${CHE_MINI_PRODUCT_NAME}/cli:nightly' to get a newer nightly version."
-        return 2
-      ;;
-      "config-less-cli")
-      ;;
-      "cli-less-config")
-        error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your configured version '$CONFIGURED_VERSION'."
-        error ""
-        error "You cannot use '${CHE_MINI_PRODUCT_NAME} upgrade' to downgrade versions."
-        error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
-        error "View all available versions: https://hub.docker.com/r/$CHE_MINI_PRODUCT_NAME/cli/tags/."
-        return 2
-      ;;
-    esac
-  fi
-
-  # Scenario #2 should only be checked if the system is already configured
-  if is_configured; then
-    COMPARE_INSTALL_ENV=$(compare_installed_version_to_configured_version)
-    INSTALLED_VERSION=$(get_installed_version)
-    case "${COMPARE_INSTALL_ENV}" in
-      "match") 
-      ;;
-      "config-less-install"|"install-less-config")
-        error ""
-        error "Your CLI version '$CODENVY_IMAGE_VERSION' is newer (good), but:"
-        error "   Configured version = '$CONFIGURED_VERSION'"
-        error "   Installed version  = '$INSTALLED_VERSION'"
-        error ""
-        error "The configured and installed versions must match before upgrade proceeds."
-        error ""
-        error "Run '$CHE_MINI_PRODUCT_NAME/cli:${INSTALLED_VERSION} init --reinit' to configure the proper version."
-        error "You then can run '$CHE_MINI_PRODUCT_NAME/cli:$CODENVY_IMAGE_VERSION upgrade' successfully."
-        error ""
-        error "We could automatically do this for you."
-        error "However, having configed and installed versions mismatch is unusual and should be checked by a human."
-        return 2
-      ;;
-    esac
-  fi
-}
-
-# Usage:
-#   confirm_operation <Warning message> [--force|--no-force]
-confirm_operation() {
-  debug $FUNCNAME
-
-  FORCE_OPERATION=${2:-"--no-force"}
-
-  if [ ! "${FORCE_OPERATION}" == "--quiet" ]; then
-    # Warn user with passed message
-    info "${1}"
-    text "\n"
-    read -p "      Are you sure? [N/y] " -n 1 -r
-    text "\n\n"
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-      return 1;
-    else
-      return 0;
-    fi
   fi
 }

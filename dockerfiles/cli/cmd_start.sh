@@ -63,3 +63,32 @@ cmd_start() {
   eval ${COMPOSE_UP_COMMAND}
   check_if_booted
 }
+
+cmd_stop() {
+  debug $FUNCNAME
+
+  if [ $# -gt 0 ]; then
+    error "${CHE_MINI_PRODUCT_NAME} stop: You passed unknown options. Aborting."
+    return
+  fi
+
+  info "stop" "Stopping containers..."
+  if is_initialized; then
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME stop >> "${LOGS}" 2>&1 || true
+    info "stop" "Removing containers..."
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
+    docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
+                   -p=$CHE_MINI_PRODUCT_NAME rm --force >> "${LOGS}" 2>&1 || true
+  fi
+}
+
+cmd_restart() {
+  debug $FUNCNAME
+
+  FORCE_UPDATE=${1:-"--no-force"}
+    info "restart" "Restarting..."
+    cmd_stop
+    cmd_start ${FORCE_UPDATE}
+}

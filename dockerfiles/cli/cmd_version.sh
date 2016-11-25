@@ -14,27 +14,22 @@ cmd_version() {
 
   # Do not perform any logging in this method as it is runnable before the system is bootstrap
   echo ""
-  text "CLI Version:             %s\n" $(get_image_version)
+  text "Your CLI version is '%s'.\n" $(get_image_version)
   if is_initialized; then
-    text "Configured Version:      %s\n" $(get_configured_version)
+    text "Your installed version is '%s'.\n" $(get_installed_version)
   else
-    text "Configured Version:      <not-configured>\n"
+    text "Your installed version is '<not-installed>'.\n"
   fi
-  if is_configured; then
-    text "Installed Version:       %s\n" $(get_installed_version)
-  else
-    text "Installed Version:       <not-installed>\n"
-  fi
-  text "\n"
-#  text "DockerHub Versions:\n"
-  text "DATE                                   TAG\n"
+  text "Available on DockerHub:\n"
   VERSION_LIST_JSON=$(curl -s https://hub.docker.com/v2/repositories/codenvy/cli/tags/)
   NUMBER_OF_VERSIONS=$(echo $VERSION_LIST_JSON | jq '.count')
   COUNTER=0
   while [  $COUNTER -lt $NUMBER_OF_VERSIONS ]; do
     TAG=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].name")
-    DATE=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].last_updated")
-    text "${DATE//\"}            ${TAG//\"}\n"
+#    DATE=$(echo $VERSION_LIST_JSON | jq ".results[$COUNTER].last_updated")
+#   DATE=${DATE:0:10}
+#    text "${DATE//\"}            ${TAG//\"}\n"
+    text "  ${TAG//\"}\n"
     let COUNTER=COUNTER+1 
   done
 }

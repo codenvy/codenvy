@@ -7,21 +7,29 @@
 # Initializes an empty directory with the templates needed to configure and run Codenvy.
 #
 # build:
-#   cd ..\..\ <-- Root of the codenvy source repository
-#   docker build -f dockerfiles/init/Dockerfile -t codenvy/init:<version> .
+#   docker build -t codenvy/init:<version> .
 #
-# use:
-#    docker run -v $(pwd):/codenvy codenvy/init:<version>
+# use (to copy files onto folder):
+#   docker run -v $(pwd):/codenvy codenvy/init:<version>
+#
+# use (to run puppet config):
+#   docker run <puppet-mounts> --entrypoint=/usr/bin/puppet codenvy/init:<version> apply <puppet-apply-options>
 
-FROM alpine:3.4
+
+FROM puppet/puppet-agent-alpine:4.6.2
+
+# install openssh needed to generate ssh keys
+RUN apk --update add openssh \
+  && rm -rf /var/cache/apk/*
+
 RUN mkdir -p /files \
-    && mkdir -p /files/modules \
-    && mkdir -p /files/manifests \
-    && mkdir -p /files/docs
+    && mkdir -p /etc/puppet/modules \
+    && mkdir -p /etc/puppet/manifests \
+    && mkdir -p /files/docs 
 
-COPY manifests /files/manifests
-COPY modules /files/modules
+COPY manifests /etc/puppet/manifests
+COPY modules /etc/puppet/modules
 COPY docs /files/docs
-COPY dockerfiles/init/entrypoint.sh /
+COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
