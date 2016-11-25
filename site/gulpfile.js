@@ -164,8 +164,8 @@ gulp.task('copy_prod',['copy_src','duplicate_html','prod_cfg','css','rjs','jekyl
     '!'+paths.prod+'site/custom_pages/**/*.html',
     '!'+paths.prod+'site/admin.html',
     '!'+paths.prod+'site/email-templates_onpremises/*.html',
-    paths.prod+'**/amd-app-*.js', // minified JS
-    paths.prod+'**/*-*.css', // minified CSS
+    paths.prod+'**/amd-app*.js', // minified JS
+    paths.prod+'**/*.css', // minified CSS
     paths.prod+'**/*.jpg',
     paths.prod+'**/*.ico',
     paths.prod+'**/*.png',
@@ -551,8 +551,8 @@ gulp.task('copy_onprem_se',
     '!'+paths.onpremSE+'site/admin.html',
     '!'+paths.onpremSE+'site/email-templates_onpremises/*.html',
     '!'+paths.onpremSE+'site/email-templates/*.html',
-    paths.onpremSE+'**/amd-app-*.js', // minified JS
-    paths.onpremSE+'**/*-*.css', // minified CSS
+    paths.onpremSE+'**/amd-app*.js', // minified JS
+    paths.onpremSE+'**/*.css', // minified CSS
     paths.onpremSE+'**/*.jpg',
     paths.onpremSE+'**/*.ico',
     paths.onpremSE+'**/*.png',
