@@ -255,7 +255,7 @@ check_docker() {
       info "Syntax:"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
       info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                           $CHE_MINI_PRODUCT_NAME/cli $1"
+      info "                           $CHE_MINI_PRODUCT_NAME/cli $*"
       return 2;
     fi
   fi
