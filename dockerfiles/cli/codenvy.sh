@@ -26,6 +26,10 @@ init_constants() {
   DEFAULT_CHE_MINI_PRODUCT_NAME="codenvy"
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
 
+  # Path to root folder inside the container
+  DEFAULT_CHE_CONTAINER_ROOT="/codenvy"
+  CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
+
   DEFAULT_CHE_FORMAL_PRODUCT_NAME="Codenvy"
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
 
@@ -72,8 +76,8 @@ Usage: docker run -it --rm
     remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
     upgrade                              Upgrades Codenvy from one version to another with migrations and backups
     download [--pull|--force|--offline]  Pulls Docker images for the current Codenvy version
-    backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to /codenvy/backup volume mount
-    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from /codenvy/backup mount
+    backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
     offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
     info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI 
          [ --all                             Run all debugging tests
@@ -289,9 +293,9 @@ check_mounts() {
   # Verify that we can write to the host file system from the container
   check_host_volume_mount
 
-  DATA_MOUNT=$(get_container_folder ":/codenvy")
-  INSTANCE_MOUNT=$(get_container_folder ":/codenvy/instance")
-  BACKUP_MOUNT=$(get_container_folder ":/codenvy/backup")
+  DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
+  INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
+  BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
   REPO_MOUNT=$(get_container_folder ":/repo")
   CLI_MOUNT=$(get_container_folder ":/cli")
   SYNC_MOUNT=$(get_container_folder ":/sync")
@@ -335,13 +339,13 @@ check_mounts() {
 
   #   Set offline to CONFIG_MOUNT
   CODENVY_HOST_CONFIG=${CODENVY_CONFIG:-${DEFAULT_CODENVY_CONFIG}}
-  CODENVY_CONTAINER_CONFIG="/codenvy"
+  CODENVY_CONTAINER_CONFIG="${CHE_CONTAINER_ROOT}"
 
   CODENVY_HOST_INSTANCE=${CODENVY_INSTANCE:-${DEFAULT_CODENVY_INSTANCE}}
-  CODENVY_CONTAINER_INSTANCE="/codenvy/instance"
+  CODENVY_CONTAINER_INSTANCE="${CHE_CONTAINER_ROOT}/instance"
 
   CODENVY_HOST_BACKUP=${CODENVY_BACKUP:-${DEFAULT_CODENVY_BACKUP}}
-  CODENVY_CONTAINER_BACKUP="/codenvy/backup"
+  CODENVY_CONTAINER_BACKUP="${CHE_CONTAINER_ROOT}/backup"
 
   ### DEV MODE VARIABLES
   CODENVY_DEVELOPMENT_MODE="off"
@@ -389,16 +393,16 @@ check_mounts() {
 }
 
 check_host_volume_mount() {
-  echo 'test' > /codenvy/test
+  echo 'test' > ${CHE_CONTAINER_ROOT}/test
   
-  if [[ ! -f /codenvy/test ]]; then
+  if [[ ! -f ${CHE_CONTAINER_ROOT}/test ]]; then
     error "Docker installed, but unable to write files to your host."
     error "Have you enabled Docker to allow mounting host directories?"
     error "Did you give our CLI rights to create files on your host?"
     return 2;
   fi
 
-  rm -rf /codenvy/test 
+  rm -rf ${CHE_CONTAINER_ROOT}/test
 }
 
 get_mount_path() {
@@ -473,7 +477,7 @@ get_this_container_id() {
 }
 
 get_container_host_bind_folder() {
-  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:/codenvy  
+  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:${CHE_CONTAINER_ROOT}
   BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
   
   # Remove /var/run/docker.sock:/var/run/docker.sock
