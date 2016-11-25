@@ -136,7 +136,7 @@ public class JpaStackPermissionsDaoTest {
 
         assertTrue(dao.getByInstance(publicPermission.getInstanceId(), 30, 0)
                       .getItems()
-                      .contains(publicPermission));
+                      .contains(new StackPermissionsImpl(publicPermission)));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class JpaStackPermissionsDaoTest {
         dao.store(publicPermission);
 
         final Page<StackPermissionsImpl> permissions = dao.getByInstance(publicPermission.getInstanceId(), 30, 0);
-        assertTrue(permissions.getItems().contains(publicPermission));
+        assertTrue(permissions.getItems().contains(new StackPermissionsImpl(publicPermission)));
         assertTrue(permissions.getItems().stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
     }
 

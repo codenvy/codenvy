@@ -80,6 +80,10 @@ public class MemberImpl extends AbstractPermissions implements Member {
         this.organizationId = organizationId;
     }
 
+    public MemberImpl(Member member) {
+        this(member.getUserId(), member.getOrganizationId(), member.getActions());
+    }
+
     @Override
     public String getInstanceId() {
         return organizationId;

@@ -40,6 +40,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of {@link MemberDao}.
@@ -81,18 +82,11 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
     }
 
     @Override
-    @Transactional
     public MemberImpl getMember(String organizationId, String userId) throws NotFoundException, ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         requireNonNull(userId, "Required non-null user id");
         try {
-            final EntityManager manager = managerProvider.get();
-            return manager.createNamedQuery("Member.getMember", MemberImpl.class)
-                          .setParameter("userId", userId)
-                          .setParameter("organizationId", organizationId)
-                          .getSingleResult();
-        } catch (NoResultException e) {
-            throw new NotFoundException(String.format("Membership of user %s in organization %s was not found", userId, organizationId));
+            return new MemberImpl(getEntity(wildcardToNull(userId), organizationId));
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -109,7 +103,10 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
                                                     .setParameter("organizationId", organizationId)
                                                     .setMaxResults(maxItems)
                                                     .setFirstResult((int)skipCount)
-                                                    .getResultList();
+                                                    .getResultList()
+                                                    .stream()
+                                                    .map(MemberImpl::new)
+                                                    .collect(toList());
             final Long membersCount = manager.createNamedQuery("Member.getCountByOrganizationId", Long.class)
                                              .setParameter("organizationId", organizationId)
                                              .getSingleResult();
@@ -127,7 +124,10 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
             final EntityManager manager = managerProvider.get();
             return manager.createNamedQuery("Member.getByUser", MemberImpl.class)
                           .setParameter("userId", userId)
-                          .getResultList();
+                          .getResultList()
+                          .stream()
+                          .map(MemberImpl::new)
+                          .collect(toList());
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -164,6 +164,24 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         if (!members.isEmpty()) {
             manager.remove(members.get(0));
         }
+    }
+
+    @Override
+    protected MemberImpl getEntity(String userId, String instanceId) throws NotFoundException {
+        try {
+            return doGet(userId, instanceId);
+        } catch (NoResultException e) {
+            throw new NotFoundException(String.format("Membership of user %s in organization %s was not found", userId, instanceId));
+        }
+    }
+
+    @Transactional
+    protected MemberImpl doGet(String userId, String instanceId) {
+        return managerProvider.get()
+                              .createNamedQuery("Member.getMember", MemberImpl.class)
+                              .setParameter("userId", userId)
+                              .setParameter("organizationId", instanceId)
+                              .getSingleResult();
     }
 
     @Singleton

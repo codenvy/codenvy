@@ -75,6 +75,10 @@ public class WorkerImpl extends AbstractPermissions implements Worker {
         this.workspaceId = workspaceId;
     }
 
+    public WorkerImpl(Worker worker) {
+        this(worker.getWorkspaceId(), worker.getUserId(), worker.getActions());
+    }
+
     @Override
     public String getInstanceId() {
         return workspaceId;

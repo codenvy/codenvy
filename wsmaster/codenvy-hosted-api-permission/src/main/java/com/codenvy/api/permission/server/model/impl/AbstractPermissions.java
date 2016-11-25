@@ -70,7 +70,10 @@ public abstract class AbstractPermissions implements Permissions {
 
     public AbstractPermissions(String userId, List<String> actions) {
         this.userIdHolder = userId;
-        this.actions = new ArrayList<>(actions);
+        this.userId = userId;
+        if (actions != null) {
+            this.actions = new ArrayList<>(actions);
+        }
     }
 
     /**
@@ -129,7 +132,8 @@ public abstract class AbstractPermissions implements Permissions {
         if (this == obj) return true;
         if (!(obj instanceof AbstractPermissions)) return false;
         final AbstractPermissions other = (AbstractPermissions)obj;
-        return Objects.equals(getUserId(), other.getUserId()) &&
+        return Objects.equals(id, other.id) &&
+               Objects.equals(getUserId(), other.getUserId()) &&
                Objects.equals(getInstanceId(), other.getInstanceId()) &&
                Objects.equals(getDomainId(), other.getDomainId()) &&
                Objects.equals(getActions(), other.getActions());
@@ -138,6 +142,7 @@ public abstract class AbstractPermissions implements Permissions {
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(getUserId());
         hash = 31 * hash + Objects.hashCode(getInstanceId());
         hash = 31 * hash + Objects.hashCode(getDomainId());
@@ -147,9 +152,10 @@ public abstract class AbstractPermissions implements Permissions {
 
     @Override
     public String toString() {
-        return "Permissions{" +
-               "user='" + getUserId() + '\'' +
-               ", actions=" + getActions() +
+        return "AbstractPermissions{" +
+               "id='" + id + '\'' +
+               ", user=" + user +
+               ", actions=" + actions +
                '}';
     }
 }
