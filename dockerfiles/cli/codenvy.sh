@@ -62,7 +62,7 @@ Usage: docker run -it --rm
           --pull                             Checks for newer images from DockerHub  
           --force                            Removes all images and re-pulls all images from DockerHub
           --offline                          Uses images saved to disk from the offline command
-          --accept-license                   Auto accepts the Codenvy license during installation
+          --accept-license                   Auto accepts the ${CHE_FORMAL_PRODUCT_NAME} license during installation
           --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
     start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
     stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
@@ -74,8 +74,8 @@ Usage: docker run -it --rm
     config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
     add-node                             Adds a physical node to serve workspaces intto the ${CHE_MINI_PRODUCT_NAME} cluster
     remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
-    upgrade                              Upgrades Codenvy from one version to another with migrations and backups
-    download [--pull|--force|--offline]  Pulls Docker images for the current Codenvy version
+    upgrade                              Upgrades ${CHE_FORMAL_PRODUCT_NAME} from one version to another with migrations and backups
+    download [--pull|--force|--offline]  Pulls Docker images for the current ${CHE_FORMAL_PRODUCT_NAME} version
     backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
     restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
     offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
@@ -360,7 +360,7 @@ check_mounts() {
     if [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
       info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
       info ""
-      info "You volume mounted ':/repo', but we did not detect a valid Codenvy source repo."
+      info "You volume mounted ':/repo', but we did not detect a valid ${CHE_FORMAL_PRODUCT_NAME} source repo."
       info ""
       info "Volume mounting ':/repo' activate dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
       info ""
