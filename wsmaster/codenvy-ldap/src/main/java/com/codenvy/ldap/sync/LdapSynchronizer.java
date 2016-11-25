@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.util.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
@@ -172,6 +173,8 @@ public class LdapSynchronizer {
         this.userFinder = userFinder;
         this.scheduler = Executors.newScheduledThreadPool(1,
                                                           new ThreadFactoryBuilder().setNameFormat("LdapSynchronizer-%d")
+                                                                                    .setUncaughtExceptionHandler(
+                                                                                            LoggingUncaughtExceptionHandler.getInstance())
                                                                                     .setDaemon(false)
                                                                                     .build());
     }
