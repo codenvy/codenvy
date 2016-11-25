@@ -44,7 +44,7 @@ cli_init() {
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <local-path>:/codenvy"
     info "                      -e CODENVY_HOST=<your-ip-or-host>"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_IMAGE_VERSION} $@"
+    info "                         $CODENVY_IMAGE_NAME $*"
     return 2;
   fi
 

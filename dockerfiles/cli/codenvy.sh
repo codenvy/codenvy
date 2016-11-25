@@ -26,12 +26,12 @@ init_constants() {
   DEFAULT_CHE_MINI_PRODUCT_NAME="codenvy"
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
 
-  # Path to root folder inside the container
-  DEFAULT_CHE_CONTAINER_ROOT="/codenvy"
-  CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
-
   DEFAULT_CHE_FORMAL_PRODUCT_NAME="Codenvy"
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
+
+  # Path to root folder inside the container
+  DEFAULT_CHE_CONTAINER_ROOT="/${CHE_MINI_PRODUCT_NAME}"
+  CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
 
   # Turns on stack trace
   DEFAULT_CHE_CLI_DEBUG="false"
@@ -54,44 +54,44 @@ init_usage() {
   USAGE="
 Usage: docker run -it --rm 
                   -v /var/run/docker.sock:/var/run/docker.sock
-                  -v <LOCAL_DATA_PATH>:/$CHE_MINI_PRODUCT_NAME
-                  ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} [COMMAND]
+                  -v <LOCAL_DATA_PATH>:${CHE_CONTAINER_ROOT}
+                  ${CODENVY_IMAGE_NAME} [COMMAND]
 
     help                                 This message
     version                              Installed version and upgrade paths
-    init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+    init                                 Initializes a directory with a ${CHE_FORMAL_PRODUCT_NAME} install
          [--no-force                         Default - uses cached local Docker images
           --pull                             Checks for newer images from DockerHub  
           --force                            Removes all images and re-pulls all images from DockerHub
           --offline                          Uses images saved to disk from the offline command
           --accept-license                   Auto accepts the ${CHE_FORMAL_PRODUCT_NAME} license during installation
           --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
-    start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
-    stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
-    restart [--pull | --force]           Restart ${CHE_MINI_PRODUCT_NAME} services
-    destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+    start [--pull | --force | --offline] Starts ${CHE_FORMAL_PRODUCT_NAME} services
+    stop                                 Stops ${CHE_FORMAL_PRODUCT_NAME} services
+    restart [--pull | --force]           Restart ${CHE_FORMAL_PRODUCT_NAME} services
+    destroy                              Stops services, and deletes ${CHE_FORMAL_PRODUCT_NAME} instance data
             [--quiet                         Does not ask for confirmation before destroying instance data
              --cli]                          If :/cli is mounted, will destroy the cli.log
     rmi [--quiet]                        Removes the Docker images for <version>, forcing a repull
-    config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
-    add-node                             Adds a physical node to serve workspaces intto the ${CHE_MINI_PRODUCT_NAME} cluster
-    remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
+    config                               Generates a ${CHE_FORMAL_PRODUCT_NAME} config from vars; run on any start / restart
+    add-node                             Adds a physical node to serve workspaces intto the ${CHE_FORMAL_PRODUCT_NAME} cluster
+    remove-node <ip>                     Removes the physical node from the ${CHE_FORMAL_PRODUCT_NAME} cluster
     upgrade                              Upgrades ${CHE_FORMAL_PRODUCT_NAME} from one version to another with migrations and backups
     download [--pull|--force|--offline]  Pulls Docker images for the current ${CHE_FORMAL_PRODUCT_NAME} version
-    backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
-    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
-    offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
-    info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI 
+    backup [--quiet | --skip-data]       Backups $${CHE_FORMAL_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+    restore [--quiet]                    Restores ${CHE_FORMAL_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+    offline                              Saves ${CHE_FORMAL_PRODUCT_NAME} Docker images into TAR files for offline install
+    info                                 Displays info about ${CHE_FORMAL_PRODUCT_NAME} and the CLI
          [ --all                             Run all debugging tests
            --debug                           Displays system information
-           --network]                        Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
+           --network]                        Test connectivity between ${CHE_FORMAL_PRODUCT_NAME} sub-systems
     ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
     mount <wksp-name>                    Synchronize workspace with current working directory
-    action <action-name> [--help]        Start action on ${CHE_MINI_PRODUCT_NAME} instance
-    test <test-name> [--help]            Start test on ${CHE_MINI_PRODUCT_NAME} instance
+    action <action-name> [--help]        Start action on ${CHE_FORMAL_PRODUCT_NAME} instance
+    test <test-name> [--help]            Start test on ${CHE_FORMAL_PRODUCT_NAME} instance
 
 Variables:
-    CODENVY_HOST                         IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
+    CODENVY_HOST                         IP address or hostname where ${CHE_FORMAL_PRODUCT_NAME} will serve its users
     CLI_DEBUG                            Default=false. Prints stack trace during execution
     CLI_INFO                             Default=true. Prints out INFO messages to standard out
     CLI_WARN                             Default=true. Prints WARN messages to standard out
@@ -251,13 +251,11 @@ check_docker() {
       info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
       info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-      info "  1: Mounting 'docker.sock', which let's us access Docker"
-      info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
+      info "  Mounting 'docker.sock', which let's us access Docker"
       info ""
       info "Syntax:"
-      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                           $CHE_MINI_PRODUCT_NAME/cli $*"
+      info "  docker run -it --rm ${BOLD} -v /var/run/docker.sock:/var/run/docker.sock${NC}"
+      info "                  $CHE_MINI_PRODUCT_NAME/cli $*"
       return 2;
     fi
   fi
@@ -314,16 +312,16 @@ check_mounts() {
     info ""
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                         ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} $*"
+    info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+    info "                         ${CODENVY_IMAGE_NAME} $*"
     info ""
     info ""
     info "Or run with overrides for instance and/or backup:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
-    info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
-    info "                         ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} $*"
+    info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+    info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
+    info "                      -v <YOUR_BACKUP_PATH>:${CHE_CONTAINER_ROOT}/backup"
+    info "                         ${CODENVY_IMAGE_NAME} $*"
     return 2;
   fi
 
@@ -370,18 +368,18 @@ check_mounts() {
       info ""
       info "Simplest syntax::"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+      info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+      info "                         ${CODENVY_IMAGE_NAME} $*"
       info ""
       info ""
       info "Or run with overrides for instance, and backup (all required):"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
-      info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
+      info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+      info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
+      info "                      -v <YOUR_BACKUP_PATH>:${CHE_CONTAINER_ROOT}/backup"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+      info "                         ${CODENVY_IMAGE_NAME} $*"
       return 2
     fi
     if [[ ! -d $(echo "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"/"${DEFAULT_CODENVY_DEVELOPMENT_TOMCAT}"-*/) ]]; then
