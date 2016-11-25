@@ -48,12 +48,14 @@ init_constants() {
   # Activates console output
   DEFAULT_CHE_CLI_LOG="true"
   CHE_CLI_LOG=${CLI_LOG:-${DEFAULT_CHE_CLI_LOG}}
+}
 
+init_usage() {
   USAGE="
 Usage: docker run -it --rm 
                   -v /var/run/docker.sock:/var/run/docker.sock
                   -v <LOCAL_DATA_PATH>:/$CHE_MINI_PRODUCT_NAME
-                  ${CHE_MINI_PRODUCT_NAME}/cli:<version> [COMMAND]
+                  ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} [COMMAND]
 
     help                                 This message
     version                              Installed version and upgrade paths
@@ -313,7 +315,7 @@ check_mounts() {
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+    info "                         ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} $*"
     info ""
     info ""
     info "Or run with overrides for instance and/or backup:"
@@ -321,7 +323,7 @@ check_mounts() {
     info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
     info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
     info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+    info "                         ${CODENVY_IMAGE_NAME}:${CODENVY_IMAGE_VERSION} $*"
     return 2;
   fi
 
@@ -549,12 +551,13 @@ curl() {
 init() {
   init_constants
 
+  # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
+  check_docker "$@"
+
+  init_usage
   if [[ $# == 0 ]]; then
     usage;
   fi
-
-  # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
-  check_docker "$@"
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
