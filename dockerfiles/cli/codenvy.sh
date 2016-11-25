@@ -52,7 +52,7 @@ init_constants() {
 
 init_usage() {
   USAGE="
-Usage: docker run -it --rm 
+Usage: docker run -it --rm
                   -v /var/run/docker.sock:/var/run/docker.sock
                   -v <LOCAL_DATA_PATH>:${CHE_CONTAINER_ROOT}
                   ${CODENVY_IMAGE_NAME} [COMMAND]
@@ -61,7 +61,7 @@ Usage: docker run -it --rm
     version                              Installed version and upgrade paths
     init                                 Initializes a directory with a ${CHE_FORMAL_PRODUCT_NAME} install
          [--no-force                         Default - uses cached local Docker images
-          --pull                             Checks for newer images from DockerHub  
+          --pull                             Checks for newer images from DockerHub
           --force                            Removes all images and re-pulls all images from DockerHub
           --offline                          Uses images saved to disk from the offline command
           --accept-license                   Auto accepts the ${CHE_FORMAL_PRODUCT_NAME} license during installation

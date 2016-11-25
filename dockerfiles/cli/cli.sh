@@ -93,7 +93,7 @@ grab_offline_images(){
     fi
 
     IFS=$'\n'
-    for file in "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/*.tar 
+    for file in "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/*.tar
     do
       if ! $(docker load < "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
         error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
@@ -386,7 +386,7 @@ verify_version_compatibility() {
     INSTALLED_VERSION=$(get_installed_version)
 
     case "${COMPARE_CLI_ENV}" in
-      "match") 
+      "match")
       ;;
       "nightly")
         error ""
@@ -453,7 +453,7 @@ verify_version_upgrade_compatibility() {
   ##      - If they don't match, then if CLI is newer then good
   CODENVY_IMAGE_VERSION=$(get_image_version)
 
-  if ! is_initialized || ! is_configured; then 
+  if ! is_initialized || ! is_configured; then
     info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
     return 2
   fi
@@ -463,7 +463,7 @@ verify_version_upgrade_compatibility() {
     CONFIGURED_VERSION=$(get_installed_version)
 
     case "${COMPARE_CLI_ENV}" in
-      "match") 
+      "match")
         error ""
         error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your installed version '$INSTALLED_VERSION'."
         error ""
