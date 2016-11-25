@@ -149,6 +149,7 @@ cli_parse () {
       ;;
       *)
          error "You passed an unknown command."
+         usage
          return 2
       ;;
   esac
