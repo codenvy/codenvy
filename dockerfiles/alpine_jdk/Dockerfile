@@ -82,6 +82,5 @@ RUN apk upgrade --update && \
             /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
             /opt/codenvy-data/license
-ADD entrypoint.sh /opt/entrypoint.sh
-RUN chmod a+x /opt/entrypoint.sh
-ENTRYPOINT ["/opt/entrypoint.sh"]
+
+RUN postfix -c /etc/postfix start
