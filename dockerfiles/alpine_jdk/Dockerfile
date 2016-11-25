@@ -83,4 +83,4 @@ RUN apk upgrade --update && \
             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
             /opt/codenvy-data/license
 
-RUN postfix -c /etc/postfix start
+CMD [ "postfix", "-c", "/etc/postfix", "start" ]
