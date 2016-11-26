@@ -4,9 +4,9 @@ class registry {
     ensure  => "directory",
     mode    => "755",
   } ->
-  file { "/opt/codenvy/config/registry/registry.env":
+  file { "/opt/codenvy/config/registry/config.yml":
     ensure  => "present",
-    content => template("registry/registry.erb"),
+    content => template("registry/config.yml.erb"),
     mode    => '644',
   }
 }

@@ -97,10 +97,9 @@ services:
 ########################
   registry:
     image: <%= ENV["IMAGE_REGISTRY"] %>
-    env_file:
-      - '/codenvy/instance/config/registry/registry.env'
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/registry:/var/lib/registry'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/registry/config.yml:/etc/docker/registry/config.yml'
     ports:
       - '5000:5000'
     ulimits:
