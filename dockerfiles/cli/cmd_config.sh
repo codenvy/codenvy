@@ -89,7 +89,7 @@ generate_configuration_with_puppet() {
 
   if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
   # Note - bug in docker requires relative path for env, not absolute
-  GENERATE_CONFIG_COMMAND="docker_run -it \
+  GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
@@ -109,7 +109,7 @@ generate_configuration_with_puppet() {
                                 /etc/puppet/modules/ \
                                 /etc/puppet/manifests/codenvy.pp --show_diff"
   else
-  GENERATE_CONFIG_COMMAND="docker_run -it \
+  GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CODENVY_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
