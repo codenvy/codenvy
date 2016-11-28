@@ -22,11 +22,11 @@ cmd_config() {
   fi
 
   if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CODENVY_VERSION
+    get_image_manifest $CHE_VERSION
   fi
 
   # Development mode
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     # if dev mode is on, pick configuration sources from repo.
     # please note that in production mode update of configuration sources must be only on update.
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
@@ -69,7 +69,7 @@ cmd_config() {
   fi
 
   # Write the installed version to the *.ver file into the instance folder
-  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
+  echo "$CHE_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
 
 }
 
@@ -87,11 +87,11 @@ generate_configuration_with_puppet() {
     CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
   fi
 
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
   # Note - bug in docker requires relative path for env, not absolute
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
-                  --env-file=/version/$CODENVY_VERSION/images \
+                  --env-file=/version/$CHE_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
                   -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
@@ -111,7 +111,7 @@ generate_configuration_with_puppet() {
   else
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
-                  --env-file=/version/$CODENVY_VERSION/images \
+                  --env-file=/version/$CHE_VERSION/images \
                   -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \

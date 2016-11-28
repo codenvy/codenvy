@@ -44,7 +44,7 @@ cli_init() {
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
     info "                      -v <local-path>:/codenvy"
     info "                      -e CODENVY_HOST=<your-ip-or-host>"
-    info "                         $CODENVY_IMAGE_NAME $*"
+    info "                         $CHE_IMAGE_NAME $*"
     return 2;
   fi
 
@@ -253,7 +253,7 @@ list_versions(){
 version_error(){
   text "\nWe could not find version '$1'. Available versions:\n"
   list_versions
-  text "\nSet CODENVY_VERSION=<version> and rerun.\n\n"
+  text "\nSet CHE_VERSION=<version> and rerun.\n\n"
 }
 
 ### Returns the list of Codenvy images for a particular version of Codenvy
@@ -282,7 +282,7 @@ get_installed_version() {
 }
 
 get_image_version() {
-  echo "$CODENVY_IMAGE_VERSION"
+  echo "$CHE_IMAGE_VERSION"
 }
 
 less_than() {
@@ -320,7 +320,7 @@ verify_version_compatibility() {
   ##      - If they don't match, then if CLI is older fail with message to get proper CLI
   ##      - If they don't match, then if CLLI is newer fail with message to run upgrade first
 
-  CODENVY_IMAGE_VERSION=$(get_image_version)
+  CHE_IMAGE_VERSION=$(get_image_version)
 
   if is_initialized; then
     COMPARE_CLI_ENV=$(compare_cli_version_to_installed_version)
@@ -331,7 +331,7 @@ verify_version_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' does not match your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' does not match your installed version '$INSTALLED_VERSION'."
         error ""
         error "The 'nightly' CLI is only compatible with 'nightly' installed versions."
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
@@ -341,15 +341,15 @@ verify_version_compatibility() {
       ;;
       "install-less-cli")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is newer than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' is newer than your installed version '$INSTALLED_VERSION'."
         error ""
-        error "Run '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION upgrade' to migrate your installation to '$CODENVY_IMAGE_VERSION'."
+        error "Run '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION upgrade' to migrate your installation to '$CHE_IMAGE_VERSION'."
         error "Or, run the CLI with '${CHE_MINI_PRODUCT_NAME}/cli:$INSTALLED_VERSION' to match the CLI with your installed version."
         return 2
       ;;
       "cli-less-install")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
         error ""
         error "You cannot use an older CLI with a newer installation."
         error ""
@@ -361,7 +361,7 @@ verify_version_compatibility() {
 
   # Per request of the engineers, check to see if the locally cached nightly version is older
   # than the one stored on DockerHub.
-  if [[ "${CODENVY_IMAGE_VERSION}" = "nightly" ]]; then
+  if [[ "${CHE_IMAGE_VERSION}" = "nightly" ]]; then
 
     #TODO: Florent, there are two places where we use URLs like this (another is in version)
     #      This URL will be different for ARTIK, Che, Codenvy
@@ -392,7 +392,7 @@ verify_version_upgrade_compatibility() {
   ##      - If they don't match and one is nightly, fail upgrade is not supported for nightly
   ##      - If they don't match, then if CLI is older fail with message that we do not support downgrade
   ##      - If they don't match, then if CLI is newer then good
-  CODENVY_IMAGE_VERSION=$(get_image_version)
+  CHE_IMAGE_VERSION=$(get_image_version)
 
   if ! is_initialized || ! is_configured; then
     info "upgrade" "$CHE_MINI_PRODUCT_NAME is not installed or configured. Nothing to upgrade."
@@ -406,7 +406,7 @@ verify_version_upgrade_compatibility() {
     case "${COMPARE_CLI_ENV}" in
       "match")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is identical to your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' is identical to your installed version '$INSTALLED_VERSION'."
         error ""
         error "Run '$CHE_MINI_PRODUCT_NAME/cli:<version> upgrade' with a newer version to upgrade."
         error "View available versions with '$CHE_MINI_PRODUCT_NAME version'."
@@ -414,7 +414,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "nightly")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' or installed version '$INSTALLED_VERSION' is nightly."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' or installed version '$INSTALLED_VERSION' is nightly."
         error ""
         error "You may not '${CHE_MINI_PRODUCT_NAME} upgrade' from 'nightly' to a numbered (tagged) version."
         error "You can 'docker pull ${CHE_MINI_PRODUCT_NAME}/cli:nightly' to get a newer nightly version."
@@ -424,7 +424,7 @@ verify_version_upgrade_compatibility() {
       ;;
       "cli-less-install")
         error ""
-        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CODENVY_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
+        error "Your CLI version '${CHE_MINI_PRODUCT_NAME}/cli:$CHE_IMAGE_VERSION' is older than your installed version '$INSTALLED_VERSION'."
         error ""
         error "You cannot use '${CHE_MINI_PRODUCT_NAME} upgrade' to downgrade versions."
         error ""
@@ -533,5 +533,16 @@ check_if_booted() {
   else
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CODENVY_SERVER_CONTAINER_NAME}\" to inspect the issue."
     return 2
+  fi
+}
+
+docker_compose() {
+  debug $FUNCNAME
+
+  if has_compose; then
+    docker-compose "$@"
+  else
+    docker_run -v "${CODENVY_HOST_INSTANCE}":"${CODENVY_CONTAINER_INSTANCE}" \
+                  docker/compose:1.8.1 "$@"
   fi
 }

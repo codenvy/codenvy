@@ -32,7 +32,7 @@ cmd_start() {
   fi
 
   # To protect users from accidentally updating their Codenvy servers when they didn't mean
-  # to, which can happen if CODENVY_VERSION=latest
+  # to, which can happen if CHE_VERSION=latest
   FORCE_UPDATE=${1:-"--no-force"}
   # Always regenerate puppet configuration from environment variable source, whether changed or not.
   # If the current directory is not configured with an .env file, it will initialize
@@ -55,7 +55,7 @@ cmd_start() {
   info "start" "Starting containers..."
   COMPOSE_UP_COMMAND="docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=\"${CHE_MINI_PRODUCT_NAME}\" up -d"
 
-  if [ "${CODENVY_DEVELOPMENT_MODE}" != "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE}" != "on" ]; then
     COMPOSE_UP_COMMAND+=" >> \"${LOGS}\" 2>&1"
   fi
 

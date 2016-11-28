@@ -4,17 +4,7 @@ node default {
 #
 # Fundamental parameters that affect the initial system operation.
 #
-# CODENVY_VERSION  
-#     Sets the version of Codenvy to download and use. We respect this variable
-#     during 'codenvy init' and 'codenvy download'. Once a Codenvy instance has been
-#     generated, CODENVY_VERSION is set to the value in codenvy.env, in the instance
-#     folder and it locks the version for which Codenvy is running. If you set 
-#     CODENVY_VERSION to a value that is diferent from what is set in codenvy.ver
-#     Codenvy will not start until this conflict is realized. You can upgrade 
-#     a Codenvy install from one version to another with 'codenvy upgrade'.
-  $codenvy_version = getValue("CODENVY_VERSION","nightly")
-
-# CODENVY_HOST  
+# CODENVY_HOST
 #    The IP address or DNS name of where the Codenvy endpoint will service your users.
 #    If you are running this on a local system, we auto-detect this value as the IP
 #    address of your Docker daemon. On many systems, especially those from cloud hosters

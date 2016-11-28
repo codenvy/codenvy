@@ -12,7 +12,7 @@
 cmd_download() {
   FORCE_UPDATE=${1:-"--no-force"}
 
-  get_image_manifest $CODENVY_VERSION
+  get_image_manifest $CHE_VERSION
 
   IFS=$'\n'
   for SINGLE_IMAGE in $IMAGE_LIST; do

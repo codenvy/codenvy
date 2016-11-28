@@ -17,14 +17,12 @@
 
 FROM eclipse/che-base:nightly
 
-COPY codenvy.sh /scripts/
-COPY cli.sh /scripts/
-COPY cmd_*.sh /scripts/
+COPY scripts /scripts/
 COPY version /version/
 
-RUN mkdir /codenvy && chmod +x /scripts/codenvy.sh
+RUN mkdir /codenvy && chmod +x /scripts/entrypoint.sh
 
-ENTRYPOINT ["/scripts/codenvy.sh"]
+ENTRYPOINT ["/scripts/entrypoint.sh"]
 
 
 

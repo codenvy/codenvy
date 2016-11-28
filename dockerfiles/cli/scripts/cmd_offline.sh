@@ -10,9 +10,9 @@
 #
 
 cmd_offline() {
-  info "offline" "Grabbing image manifest for version '$CODENVY_VERSION'"
-  if ! has_version_registry $CODENVY_VERSION; then
-    version_error $CODENVY_VERSION
+  info "offline" "Grabbing image manifest for version '$CHE_VERSION'"
+  if ! has_version_registry $CHE_VERSION; then
+    version_error $CHE_VERSION
     return 1;
   fi
 
@@ -21,7 +21,7 @@ cmd_offline() {
 
   mkdir -p $CODENVY_CONTAINER_OFFLINE_FOLDER
 
-  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CODENVY_VERSION/images)
+  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CHE_VERSION/images)
   IFS=$'\n'
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} Docker images as tar files..."
 

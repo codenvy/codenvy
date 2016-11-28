@@ -41,14 +41,14 @@ cmd_init() {
     fi
   fi
 
-  if [[ "${CODENVY_IMAGE_VERSION}" = "nightly" ]]; then
+  if [[ "${CHE_IMAGE_VERSION}" = "nightly" ]]; then
     warning "($CHE_MINI_PRODUCT_NAME init): 'nightly' installations cannot be upgraded to non-nightly versions"
   fi
 
   cmd_download $FORCE_UPDATE
 
   if [ -z ${IMAGE_INIT+x} ]; then
-    get_image_manifest $CODENVY_VERSION
+    get_image_manifest $CHE_VERSION
   fi
 
   if require_license; then
@@ -81,7 +81,7 @@ cmd_init() {
   fi
 
   # in development mode we use init files from repo otherwise we use it from docker image
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
                -v "${CODENVY_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                    $IMAGE_INIT
@@ -98,10 +98,10 @@ cmd_init() {
     rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
 
     info "init" "  CODENVY_HOST=${CODENVY_HOST}"
-    info "init" "  CODENVY_VERSION=${CODENVY_VERSION}"
+    info "init" "  CODENVY_VERSION=${CHE_VERSION}"
     info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
     info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
-    if [ "${CODENVY_DEVELOPMENT_MODE}" == "on" ]; then
+    if [ "${CHE_DEVELOPMENT_MODE}" == "on" ]; then
       info "init" "  CODENVY_ENVIRONMENT=development"
       info "init" "  CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}"
       info "init" "  CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}"
@@ -111,7 +111,7 @@ cmd_init() {
   fi
 
   # Encode the version that we initialized into the version file
-  echo "$CODENVY_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
+  echo "$CHE_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
 }
 
 require_license() {

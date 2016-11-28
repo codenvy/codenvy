@@ -13,7 +13,7 @@ cmd_network() {
   debug $FUNCNAME
 
   if [ -z ${IMAGE_PUPPET+x} ]; then
-    get_image_manifest $CODENVY_VERSION
+    get_image_manifest $CHE_VERSION
   fi
 
   info ""

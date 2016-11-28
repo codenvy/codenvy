@@ -49,7 +49,7 @@ cmd_destroy() {
   # Super weird bug.  For some reason on windows, this command has to be run 3x for everything
   # to be destroyed properly if you are in dev mode.
   if has_docker_for_windows_client; then
-    if [[ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]]; then
+    if [[ "${CHE_DEVELOPMENT_MODE}" = "on" ]]; then
       docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
                     alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
                                    && rm -rf /root/codenvy/instance \

@@ -16,13 +16,13 @@ cmd_debug() {
   info "---------------------------------------"
   info ""
   info "-----------  CODENVY INFO  ------------"
-  info "CODENVY_VERSION           = ${CODENVY_VERSION}"
+  info "CODENVY_VERSION           = ${CHE_VERSION}"
   info "CODENVY_INSTANCE          = ${CODENVY_HOST_INSTANCE}"
   info "CODENVY_CONFIG            = ${CODENVY_HOST_CONFIG}"
   info "CODENVY_HOST              = ${CODENVY_HOST}"
   info "CODENVY_REGISTRY          = ${CODENVY_MANIFEST_DIR}"
-  info "CODENVY_DEVELOPMENT_MODE  = ${CODENVY_DEVELOPMENT_MODE}"
-  if [ "${CODENVY_DEVELOPMENT_MODE}" = "on" ]; then
+  info "CODENVY_DEVELOPMENT_MODE  = ${CHE_DEVELOPMENT_MODE}"
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     info "CODENVY_DEVELOPMENT_REPO  = ${CODENVY_HOST_DEVELOPMENT_REPO}"
   fi
   info "CODENVY_BACKUP            = ${CODENVY_HOST_BACKUP}"

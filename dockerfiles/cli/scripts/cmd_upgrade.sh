@@ -12,7 +12,7 @@
 cmd_upgrade() {
   debug $FUNCNAME
 
-  CODENVY_IMAGE_VERSION=$(get_image_version)
+  CHE_IMAGE_VERSION=$(get_image_version)
 
   # If we got here, this means:
   #   image version > configured & installed version
@@ -21,8 +21,8 @@ cmd_upgrade() {
   # We can now upgrade using the information contained in the CLI image
 
   ## Download version images
-  info "upgrade" "Downloading $CHE_MINI_PRODUCT_NAME images for version $CODENVY_IMAGE_VERSION..."
-  get_image_manifest $CODENVY_IMAGE_VERSION
+  info "upgrade" "Downloading $CHE_MINI_PRODUCT_NAME images for version $CHE_IMAGE_VERSION..."
+  get_image_manifest $CHE_IMAGE_VERSION
   SAVEIFS=$IFS
   IFS=$'\n'
   for SINGLE_IMAGE in ${IMAGE_LIST}; do
