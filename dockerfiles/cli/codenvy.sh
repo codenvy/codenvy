@@ -14,6 +14,8 @@ init_constants() {
   GREEN='\033[0;32m'
   RED='\033[0;31m'
   YELLOW='\033[38;5;220m'
+  BOLD='\033[1m'
+  UNDERLINE='\033[4m'
   NC='\033[0m'
   LOG_INITIALIZED=false
 
@@ -26,6 +28,10 @@ init_constants() {
 
   DEFAULT_CHE_FORMAL_PRODUCT_NAME="Codenvy"
   CHE_FORMAL_PRODUCT_NAME=${CHE_FORMAL_PRODUCT_NAME:-${DEFAULT_CHE_FORMAL_PRODUCT_NAME}}
+
+  # Path to root folder inside the container
+  DEFAULT_CHE_CONTAINER_ROOT="/${CHE_MINI_PRODUCT_NAME}"
+  CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT:-${DEFAULT_CHE_CONTAINER_ROOT}}
 
   # Turns on stack trace
   DEFAULT_CHE_CLI_DEBUG="false"
@@ -42,48 +48,50 @@ init_constants() {
   # Activates console output
   DEFAULT_CHE_CLI_LOG="true"
   CHE_CLI_LOG=${CLI_LOG:-${DEFAULT_CHE_CLI_LOG}}
+}
 
+init_usage() {
   USAGE="
-Usage: docker run -it --rm 
+Usage: docker run -it --rm
                   -v /var/run/docker.sock:/var/run/docker.sock
-                  -v <LOCAL_DATA_PATH>:/$CHE_MINI_PRODUCT_NAME
-                  ${CHE_MINI_PRODUCT_NAME}/cli:<version> [COMMAND]
+                  -v <LOCAL_DATA_PATH>:${CHE_CONTAINER_ROOT}
+                  ${CODENVY_IMAGE_NAME} [COMMAND]
 
     help                                 This message
     version                              Installed version and upgrade paths
-    init                                 Initializes a directory with a ${CHE_MINI_PRODUCT_NAME} install
+    init                                 Initializes a directory with a ${CHE_FORMAL_PRODUCT_NAME} install
          [--no-force                         Default - uses cached local Docker images
-          --pull                             Checks for newer images from DockerHub  
+          --pull                             Checks for newer images from DockerHub
           --force                            Removes all images and re-pulls all images from DockerHub
           --offline                          Uses images saved to disk from the offline command
-          --accept-license                   Auto accepts the Codenvy license during installation
+          --accept-license                   Auto accepts the ${CHE_FORMAL_PRODUCT_NAME} license during installation
           --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
-    start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
-    stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services
-    restart [--pull | --force]           Restart ${CHE_MINI_PRODUCT_NAME} services
-    destroy                              Stops services, and deletes ${CHE_MINI_PRODUCT_NAME} instance data
+    start [--pull | --force | --offline] Starts ${CHE_FORMAL_PRODUCT_NAME} services
+    stop                                 Stops ${CHE_FORMAL_PRODUCT_NAME} services
+    restart [--pull | --force]           Restart ${CHE_FORMAL_PRODUCT_NAME} services
+    destroy                              Stops services, and deletes ${CHE_FORMAL_PRODUCT_NAME} instance data
             [--quiet                         Does not ask for confirmation before destroying instance data
              --cli]                          If :/cli is mounted, will destroy the cli.log
     rmi [--quiet]                        Removes the Docker images for <version>, forcing a repull
-    config                               Generates a ${CHE_MINI_PRODUCT_NAME} config from vars; run on any start / restart
-    add-node                             Adds a physical node to serve workspaces intto the ${CHE_MINI_PRODUCT_NAME} cluster
-    remove-node <ip>                     Removes the physical node from the ${CHE_MINI_PRODUCT_NAME} cluster
-    upgrade                              Upgrades Codenvy from one version to another with migrations and backups
-    download [--pull|--force|--offline]  Pulls Docker images for the current Codenvy version
-    backup [--quiet | --skip-data]           Backups ${CHE_MINI_PRODUCT_NAME} configuration and data to /codenvy/backup volume mount
-    restore [--quiet]                    Restores ${CHE_MINI_PRODUCT_NAME} configuration and data from /codenvy/backup mount
-    offline                              Saves ${CHE_MINI_PRODUCT_NAME} Docker images into TAR files for offline install
-    info                                 Displays info about ${CHE_MINI_PRODUCT_NAME} and the CLI 
+    config                               Generates a ${CHE_FORMAL_PRODUCT_NAME} config from vars; run on any start / restart
+    add-node                             Adds a physical node to serve workspaces intto the ${CHE_FORMAL_PRODUCT_NAME} cluster
+    remove-node <ip>                     Removes the physical node from the ${CHE_FORMAL_PRODUCT_NAME} cluster
+    upgrade                              Upgrades ${CHE_FORMAL_PRODUCT_NAME} from one version to another with migrations and backups
+    download [--pull|--force|--offline]  Pulls Docker images for the current ${CHE_FORMAL_PRODUCT_NAME} version
+    backup [--quiet | --skip-data]       Backups $${CHE_FORMAL_PRODUCT_NAME} configuration and data to ${CHE_CONTAINER_ROOT}/backup volume mount
+    restore [--quiet]                    Restores ${CHE_FORMAL_PRODUCT_NAME} configuration and data from ${CHE_CONTAINER_ROOT}/backup mount
+    offline                              Saves ${CHE_FORMAL_PRODUCT_NAME} Docker images into TAR files for offline install
+    info                                 Displays info about ${CHE_FORMAL_PRODUCT_NAME} and the CLI
          [ --all                             Run all debugging tests
            --debug                           Displays system information
-           --network]                        Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
+           --network]                        Test connectivity between ${CHE_FORMAL_PRODUCT_NAME} sub-systems
     ssh <wksp-name> [machine-name]       SSH to a workspace if SSH agent enabled
     mount <wksp-name>                    Synchronize workspace with current working directory
-    action <action-name> [--help]        Start action on ${CHE_MINI_PRODUCT_NAME} instance
-    test <test-name> [--help]            Start test on ${CHE_MINI_PRODUCT_NAME} instance
+    action <action-name> [--help]        Start action on ${CHE_FORMAL_PRODUCT_NAME} instance
+    test <test-name> [--help]            Start test on ${CHE_FORMAL_PRODUCT_NAME} instance
 
 Variables:
-    CODENVY_HOST                         IP address or hostname where ${CHE_MINI_PRODUCT_NAME} will serve its users
+    CODENVY_HOST                         IP address or hostname where ${CHE_FORMAL_PRODUCT_NAME} will serve its users
     CLI_DEBUG                            Default=false. Prints stack trace during execution
     CLI_INFO                             Default=true. Prints out INFO messages to standard out
     CLI_WARN                             Default=true. Prints WARN messages to standard out
@@ -124,11 +132,11 @@ info() {
     PRINT_STATEMENT=$2
   fi
   if is_info; then
-    printf "${GREEN}INFO:${NC} %s%s\n" \
+    printf "${GREEN}INFO:${NC} %b%b\n" \
               "${PRINT_COMMAND}" \
               "${PRINT_STATEMENT}"
   fi
-  log $(printf "INFO: %s %s\n" \
+  log $(printf "INFO: %b %b\n" \
         "${PRINT_COMMAND}" \
         "${PRINT_STATEMENT}")
 }
@@ -219,18 +227,6 @@ is_debug() {
   fi
 }
 
-has_docker() {
-  hash docker 2>/dev/null && return 0 || return 1
-}
-
-has_compose() {
-  hash docker-compose 2>/dev/null && return 0 || return 1
-}
-
-has_curl() {
-  hash curl 2>/dev/null && return 0 || return 1
-}
-
 check_docker() {
   if ! has_docker; then
     error "Docker not found. Get it at https://docs.docker.com/engine/installation/."
@@ -243,13 +239,11 @@ check_docker() {
       info "Welcome to ${CHE_FORMAL_PRODUCT_NAME}!"
       info ""
       info "$CHE_FORMAL_PRODUCT_NAME commands require additional parameters:"
-      info "  1: Mounting 'docker.sock', which let's us access Docker"
-      info "  2: A local path where ${CHE_FORMAL_PRODUCT_NAME} will save user data"
+      info "  Mounting 'docker.sock', which let's us access Docker"
       info ""
       info "Syntax:"
-      info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                           $CHE_MINI_PRODUCT_NAME/cli $1"
+      info "  docker run -it --rm ${BOLD} -v /var/run/docker.sock:/var/run/docker.sock${NC}"
+      info "                  $CHE_MINI_PRODUCT_NAME/cli $*"
       return 2;
     fi
   fi
@@ -287,9 +281,9 @@ check_mounts() {
   # Verify that we can write to the host file system from the container
   check_host_volume_mount
 
-  DATA_MOUNT=$(get_container_folder ":/codenvy")
-  INSTANCE_MOUNT=$(get_container_folder ":/codenvy/instance")
-  BACKUP_MOUNT=$(get_container_folder ":/codenvy/backup")
+  DATA_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}")
+  INSTANCE_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/instance")
+  BACKUP_MOUNT=$(get_container_folder ":${CHE_CONTAINER_ROOT}/backup")
   REPO_MOUNT=$(get_container_folder ":/repo")
   CLI_MOUNT=$(get_container_folder ":/cli")
   SYNC_MOUNT=$(get_container_folder ":/sync")
@@ -306,16 +300,16 @@ check_mounts() {
     info ""
     info "Simplest syntax:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+    info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+    info "                         ${CODENVY_IMAGE_NAME} $*"
     info ""
     info ""
     info "Or run with overrides for instance and/or backup:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-    info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
-    info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
-    info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+    info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+    info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
+    info "                      -v <YOUR_BACKUP_PATH>:${CHE_CONTAINER_ROOT}/backup"
+    info "                         ${CODENVY_IMAGE_NAME} $*"
     return 2;
   fi
 
@@ -333,13 +327,13 @@ check_mounts() {
 
   #   Set offline to CONFIG_MOUNT
   CODENVY_HOST_CONFIG=${CODENVY_CONFIG:-${DEFAULT_CODENVY_CONFIG}}
-  CODENVY_CONTAINER_CONFIG="/codenvy"
+  CODENVY_CONTAINER_CONFIG="${CHE_CONTAINER_ROOT}"
 
   CODENVY_HOST_INSTANCE=${CODENVY_INSTANCE:-${DEFAULT_CODENVY_INSTANCE}}
-  CODENVY_CONTAINER_INSTANCE="/codenvy/instance"
+  CODENVY_CONTAINER_INSTANCE="${CHE_CONTAINER_ROOT}/instance"
 
   CODENVY_HOST_BACKUP=${CODENVY_BACKUP:-${DEFAULT_CODENVY_BACKUP}}
-  CODENVY_CONTAINER_BACKUP="/codenvy/backup"
+  CODENVY_CONTAINER_BACKUP="${CHE_CONTAINER_ROOT}/backup"
 
   ### DEV MODE VARIABLES
   CODENVY_DEVELOPMENT_MODE="off"
@@ -354,7 +348,7 @@ check_mounts() {
     if [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"  ]] || [[ ! -d "${CODENVY_CONTAINER_DEVELOPMENT_REPO}/assembly" ]]; then
       info "Welcome to $CHE_FORMAL_PRODUCT_NAME!"
       info ""
-      info "You volume mounted ':/repo', but we did not detect a valid Codenvy source repo."
+      info "You volume mounted ':/repo', but we did not detect a valid ${CHE_FORMAL_PRODUCT_NAME} source repo."
       info ""
       info "Volume mounting ':/repo' activate dev mode, using assembly and CLI files from $CHE_FORMAL_PRODUCT_NAME repo."
       info ""
@@ -362,18 +356,18 @@ check_mounts() {
       info ""
       info "Simplest syntax::"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
+      info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+      info "                         ${CODENVY_IMAGE_NAME} $*"
       info ""
       info ""
       info "Or run with overrides for instance, and backup (all required):"
       info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-      info "                      -v <YOUR_LOCAL_PATH>:/$CHE_MINI_PRODUCT_NAME"
-      info "                      -v <YOUR_INSTANCE_PATH>:/$CHE_MINI_PRODUCT_NAME/instance"
-      info "                      -v <YOUR_BACKUP_PATH>:/$CHE_MINI_PRODUCT_NAME/backup"
+      info "                      -v <YOUR_LOCAL_PATH>:${CHE_CONTAINER_ROOT}"
+      info "                      -v <YOUR_INSTANCE_PATH>:${CHE_CONTAINER_ROOT}/instance"
+      info "                      -v <YOUR_BACKUP_PATH>:${CHE_CONTAINER_ROOT}/backup"
       info "                      -v <YOUR_${CHE_PRODUCT_NAME}_REPO>:/repo"
-      info "                         $CHE_MINI_PRODUCT_NAME/cli:${CODENVY_VERSION} $1"
+      info "                         ${CODENVY_IMAGE_NAME} $*"
       return 2
     fi
     if [[ ! -d $(echo "${CODENVY_CONTAINER_DEVELOPMENT_REPO}"/"${DEFAULT_CODENVY_DEVELOPMENT_TOMCAT}"-*/) ]]; then
@@ -384,67 +378,6 @@ check_mounts() {
       return 2
     fi
   fi
-}
-
-check_host_volume_mount() {
-  echo 'test' > /codenvy/test
-  
-  if [[ ! -f /codenvy/test ]]; then
-    error "Docker installed, but unable to write files to your host."
-    error "Have you enabled Docker to allow mounting host directories?"
-    error "Did you give our CLI rights to create files on your host?"
-    return 2;
-  fi
-
-  rm -rf /codenvy/test 
-}
-
-get_mount_path() {
-  debug $FUNCNAME
-  FULL_PATH=$(get_full_path "${1}")
-  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
-  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
-  echo $CLEAN_PATH
-}
-
-get_full_path() {
-  debug $FUNCNAME
-  # create full directory path
-  echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
-}
-
-convert_windows_to_posix() {
-  debug $FUNCNAME
-  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
-}
-
-convert_posix_to_windows() {
-  debug $FUNCNAME
-  # Remove leading slash
-  VALUE="${1:1}"
-
-  # Get first character (drive letter)
-  VALUE2="${VALUE:0:1}"
-
-  # Replace / with \
-  VALUE3=$(echo ${VALUE} | tr '/' '\\' | sed 's/\\/\\\\/g')
-
-  # Replace c\ with c:\ for drive letter
-  echo "$VALUE3" | sed "s/./$VALUE2:/1"
-}
-
-get_clean_path() {
-  debug $FUNCNAME
-  INPUT_PATH=$1
-  # \some\path => /some/path
-  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
-  # /somepath/ => /somepath
-  OUTPUT_PATH=${OUTPUT_PATH%/}
-  # /some//path => /some/path
-  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
-  # "/some/path" => /some/path
-  OUTPUT_PATH=${OUTPUT_PATH//\"}
-  echo ${OUTPUT_PATH}
 }
 
 init_logging() {
@@ -460,65 +393,6 @@ init_logging() {
   log "$(date)"
 }
 
-get_container_folder() {
-  THIS_CONTAINER_ID=$(get_this_container_id)
-  FOLDER=$(get_container_host_bind_folder "$1" $THIS_CONTAINER_ID)
-  echo "${FOLDER:=not set}"
-}
-
-get_this_container_id() {
-  hostname
-}
-
-get_container_host_bind_folder() {
-  # BINDS in the format of var/run/docker.sock:/var/run/docker.sock <path>:/codenvy  
-  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${2}" | cut -d '[' -f 2 | cut -d ']' -f 1)
-  
-  # Remove /var/run/docker.sock:/var/run/docker.sock
-  VALUE=${BINDS/\/var\/run\/docker\.sock\:\/var\/run\/docker\.sock/}
-
-  # Remove leading and trailing spaces
-  VALUE2=$(echo "${VALUE}" | xargs)
-
-  MOUNT=""
-  IFS=$' '
-  for SINGLE_BIND in $VALUE2; do
-    case $SINGLE_BIND in
-      *$1)
-        MOUNT="${MOUNT} ${SINGLE_BIND}"
-        echo "${MOUNT}" | cut -f1 -d":" | xargs
-      ;;
-      *)
-        # Super ugly - since we parse by space, if the next parameter is not a colon, then
-        # we know that next parameter is second part of a directory with a space in it.
-        if [[ ${SINGLE_BIND} != *":"* ]]; then
-          MOUNT="${MOUNT} ${SINGLE_BIND}"
-        else
-          MOUNT=""
-        fi
-      ;;
-    esac
-  done
-}
-
-docker_run() {
-  debug $FUNCNAME
-  # Setup options for connecting to docker host
-  if [ -z "${DOCKER_HOST+x}" ]; then
-      DOCKER_HOST="/var/run/docker.sock"
-  fi
-
-  if [ -S "$DOCKER_HOST" ]; then
-    docker run --rm -v $DOCKER_HOST:$DOCKER_HOST \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
-  else
-    docker run --rm -e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH \
-                    -v $HOME:$HOME \
-                    -w "$(pwd)" "$@"
-  fi
-}
-
 docker_compose() {
   debug $FUNCNAME
 
@@ -529,26 +403,23 @@ docker_compose() {
                   docker/compose:1.8.1 "$@"
   fi
 }
-
-curl() {
-  if ! has_curl; then
-    log "docker run --rm --net=host appropriate/curl \"$@\""
-    docker run --rm --net=host appropriate/curl "$@"
-  else
-    log "$(which curl) \"$@\""
-    $(which curl) "$@"
-  fi
-}
-
 init() {
   init_constants
 
-  if [[ $# == 0 ]]; then
-    usage;
-  fi
+  SCRIPTS_BASE_CONTAINER_SOURCE_DIR="/scripts/base"
+  # add helper scripts
+  for COMMAND_FILE in "${SCRIPTS_BASE_CONTAINER_SOURCE_DIR}"/*.sh
+  do
+    source "${COMMAND_FILE}"
+  done
 
   # Make sure Docker is working and we have /var/run/docker.sock mounted or valid DOCKER_HOST
   check_docker "$@"
+
+  init_usage
+  if [[ $# == 0 ]]; then
+    usage;
+  fi
 
   # Only verify mounts after Docker is confirmed to be working.
   check_mounts "$@"
