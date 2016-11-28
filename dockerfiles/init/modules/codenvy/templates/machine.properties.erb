@@ -7,7 +7,7 @@ machine.project.location=/opt/codenvy-data/che-machines
 che.workspace.logs=/opt/codenvy-data/che-machines-logs
 
 # docker registry for snapshots
-che.docker.registry=<%= scope.lookupvar('codenvy::host_url') %>:5000
+che.docker.registry=<%= scope.lookupvar('codenvy::docker_registry_for_workspace_snapshots') %>
 # namespace for snapshots
 che.docker.namespace=NULL
 che.docker.unused_containers_cleanup_min=60
