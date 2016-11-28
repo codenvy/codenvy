@@ -43,10 +43,10 @@ che.workspace.no_proxy=<%= scope.lookupvar('codenvy::no_proxy_for_codenvy_worksp
 
 # During the stop of the workspace automatically creates a snapshot if the value is {true},
 # otherwise just stops the workspace.
-che.workspace.auto_snapshot=false
+che.workspace.auto_snapshot=<%= scope.lookupvar('codenvy::workspace_auto_snapshot') %>
 # During the start of the workspace automatically restored it from a snapshot if the value is {true},
 # otherwise just creates the new workspace.
-che.workspace.auto_restore=false
+che.workspace.auto_restore=<%= scope.lookupvar('codenvy::workspace_auto_restore') %>
 
 # Reserved names that cannot be used as account names
 che.auth.reserved_user_names=api,dashboard,factory,ide-resources,main,site,swagger,ws,f,update,install-single,install-multi,install-codenvy,blog,im,codenvy,che,root
