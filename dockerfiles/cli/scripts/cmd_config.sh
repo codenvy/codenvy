@@ -29,21 +29,21 @@ cmd_config() {
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     # if dev mode is on, pick configuration sources from repo.
     # please note that in production mode update of configuration sources must be only on update.
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
+    docker_run -v "${CHE_HOST_CONFIG}":/copy \
+               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                   $IMAGE_INIT
 
-    # in development mode to avoid permissions issues we copy tomcat assembly to ${CODENVY_INSTANCE}
-    # if codenvy development tomcat exist we remove it
-    if [[ -d "${CODENVY_CONTAINER_INSTANCE}/dev" ]]; then
-        log "docker_run -v \"${CODENVY_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
-        docker_run -v "${CODENVY_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/*"
-        log "rm -rf \"${CODENVY_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
-        rm -rf "${CODENVY_CONTAINER_INSTANCE}/dev"
+    # in development mode to avoid permissions issues we copy tomcat assembly to ${CHE_INSTANCE}
+    # if ${CHE_FORMAL_PRODUCT_NAME} development tomcat exist we remove it
+    if [[ -d "${CHE_CONTAINER_INSTANCE}/dev" ]]; then
+        log "docker_run -v \"${CHE_HOST_INSTANCE}/dev\":/root/dev alpine:3.4 sh -c \"rm -rf /root/dev/*\""
+        docker_run -v "${CHE_HOST_INSTANCE}/dev":/root/dev alpine:3.4 sh -c "rm -rf /root/dev/*"
+        log "rm -rf \"${CHE_HOST_INSTANCE}/dev\" >> \"${LOGS}\""
+        rm -rf "${CHE_CONTAINER_INSTANCE}/dev"
     fi
-    # copy codenvy development tomcat to ${CODENVY_INSTANCE} folder
-    cp -r "$(echo $CODENVY_CONTAINER_DEVELOPMENT_REPO/$DEFAULT_CODENVY_DEVELOPMENT_TOMCAT-*/)" \
-        "${CODENVY_CONTAINER_INSTANCE}/dev"
+    # copy ${CHE_FORMAL_PRODUCT_NAME} development tomcat to ${CHE_INSTANCE} folder
+    cp -r "$(echo $CHE_CONTAINER_DEVELOPMENT_REPO/$CHE_ASSEMBLY_IN_REPO)" \
+        "${CHE_CONTAINER_INSTANCE}/dev"
   fi
 
   info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
@@ -69,22 +69,22 @@ cmd_config() {
   fi
 
   # Write the installed version to the *.ver file into the instance folder
-  echo "$CHE_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
+  echo "$CHE_VERSION" > "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}"
 
 }
 
-# Runs puppet image to generate codenvy configuration
+# Runs puppet image to generate ${CHE_FORMAL_PRODUCT_NAME} configuration
 generate_configuration_with_puppet() {
   debug $FUNCNAME
 
   if is_docker_for_windows; then
-    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/registry/registry.env")
-    POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env")
-    CODENVY_ENV_FILE=$(convert_posix_to_windows "${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
+    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/registry/registry.env")
+    POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/postgres/postgres.env")
+    CODENVY_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
   else
-    REGISTRY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/registry/registry.env"
-    POSTGRES_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/postgres/postgres.env"
-    CODENVY_ENV_FILE="${CODENVY_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
+    REGISTRY_ENV_FILE="${CHE_HOST_INSTANCE}/config/registry/registry.env"
+    POSTGRES_ENV_FILE="${CHE_HOST_INSTANCE}/config/postgres/postgres.env"
+    CODENVY_ENV_FILE="${CHE_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
   fi
 
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
@@ -92,38 +92,38 @@ generate_configuration_with_puppet() {
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
-                  -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
-                  -v \"${CODENVY_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
+                  -v \"${CHE_HOST_INSTANCE}\":/opt${CHE_CONTAINER_ROOT}:rw \
+                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
+                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
-                  -e \"CODENVY_ENVIRONMENT=development\" \
-                  -e \"CODENVY_CONFIG=${CODENVY_HOST_INSTANCE}\" \
-                  -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
-                  -e \"CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}\" \
-                  -e \"CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}\" \
+                  -e \"CHE_ENVIRONMENT=development\" \
+                  -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
+                  -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
+                  -e \"CHE_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}\" \
+                  -e \"CHE_ASSEMBLY=${CHE_ASSEMBLY}\" \
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff"
+                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff"
   else
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CODENVY_HOST_INSTANCE}\":/opt/codenvy:rw \
+                  -v \"${CHE_HOST_INSTANCE}\":/opt${CHE_CONTAINER_ROOT}:rw \
                   -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
-                  -e \"CODENVY_ENVIRONMENT=production\" \
-                  -e \"CODENVY_CONFIG=${CODENVY_HOST_INSTANCE}\" \
-                  -e \"CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}\" \
+                  -e \"CHE_ENVIRONMENT=production\" \
+                  -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
+                  -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/codenvy.pp --show_diff >> \"${LOGS}\""
+                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff >> \"${LOGS}\""
   fi
 
   log ${GENERATE_CONFIG_COMMAND}

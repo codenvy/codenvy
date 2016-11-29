@@ -24,7 +24,7 @@ node default {
 ###############################
 #
 # Environment definition, please set this to "production" for production use
-  $env = getValue("CODENVY_ENVIRONMENT","production")
+  $env = getValue("CHE_ENVIRONMENT","production")
 
 ##############################
 # default admin credentials
@@ -254,14 +254,14 @@ node default {
 ###############################
 #
 # Codenvy folders on host machine
-  $codenvy_folder = getValue("CODENVY_INSTANCE","/tmp/codenvy")
+  $codenvy_folder = getValue("CHE_INSTANCE","/tmp/codenvy")
 
 ###############################
 # Codenvy developmet mode
 # path to codenvy puppet sources for development mode
-  $puppet_src_folder = getValue("CODENVY_CONFIG","/path/to/codenvy/codenvy/puppet/sources")
+  $puppet_src_folder = getValue("CHE_CONFIG","/path/to/codenvy/codenvy/puppet/sources")
 # path to codenvy tomcat for development mode
-  $codenvy_development_tomcat = getValue("CODENVY_DEVELOPMENT_TOMCAT","/path/to/codenvy_tomcat")
+  $codenvy_development_tomcat = getValue("CHE_ASSEMBLY","/path/to/codenvy_tomcat")
 # codenvy debug port
   $codenvy_debug_port = getValue("CODENVY_DEBUG_PORT","8000")
 # codenvy debug suspend

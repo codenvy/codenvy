@@ -12,46 +12,46 @@
 cmd_restore() {
   debug $FUNCNAME
 
-  if [[ -d "${CODENVY_CONTAINER_CONFIG}" ]]; then
+  if [[ -d "${CHE_CONTAINER_CONFIG}" ]]; then
     WARNING="Restoration overwrites existing configuration and data. Are you sure?"
     if ! confirm_operation "${WARNING}" "$@"; then
       return;
     fi
   fi
 
-  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
-    error "Codenvy is running. Stop before performing a restore. Aborting"
+  if get_server_container_id "${CHE_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
+    error "${CHE_FORMAL_PRODUCT_NAME} is running. Stop before performing a restore. Aborting"
     return;
   fi
 
-  if [[ ! -f "${CODENVY_CONTAINER_BACKUP}/${CODENVY_BACKUP_FILE_NAME}" ]]; then
+  if [[ ! -f "${CHE_CONTAINER_BACKUP}/${CHE_BACKUP_FILE_NAME}" ]]; then
     error "Backup files not found. To do restore please do backup first."
     return;
   fi
 
   # remove config and instance folders
-  log "docker_run -v \"${CODENVY_HOST_CONFIG}\":/codenvy \
-                    alpine:3.4 sh -c \"rm -rf /root/codenvy/docs \
-                                   && rm -rf /root/codenvy/instance \
-                                   && rm -rf /root/codenvy/codenvy.env\""
-  docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
-                alpine:3.4 sh -c "rm -rf /root/codenvy/docs \
-                              && rm -rf /root/codenvy/instance \
-                              &&  rm -rf /root/codenvy/codenvy.env"
+  log "docker_run -v \"${CHE_HOST_CONFIG}\":${CHE_CONTAINER_ROOT} \
+                    alpine:3.4 sh -c \"rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                                   && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                                   && rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env\""
+  docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+                alpine:3.4 sh -c "rm -rf /root${CHE_CONTAINER_ROOT}/docs \
+                              && rm -rf /root${CHE_CONTAINER_ROOT}/instance \
+                              &&  rm -rf /root${CHE_CONTAINER_ROOT}/${CHE_MINI_PRODUCT_NAME}.env"
 
-  info "restore" "Recovering codenvy data..."
+  info "restore" "Recovering ${CHE_FORMAL_PRODUCT_NAME} data..."
   if has_docker_for_windows_client; then
     log "docker volume rm codenvy-postgresql-volume >> \"${LOGS}\" 2>&1 || true"
     docker volume rm codenvy-postgresql-volume >> "${LOGS}" 2>&1 || true
     log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
     docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
-    docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
-               -v "${CODENVY_HOST_BACKUP}/${CODENVY_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_BACKUP_FILE_NAME}" \
-               -v codenvy-postgresql-volume:/root/codenvy/instance/data/postgres \
-               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_BACKUP_FILE_NAME} -C /root/codenvy"
+    docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+               -v "${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}":"/root/backup/${CHE_BACKUP_FILE_NAME}" \
+               -v codenvy-postgresql-volume:/root${CHE_CONTAINER_ROOT}/instance/data/postgres \
+               alpine:3.4 sh -c "tar xf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT}"
   else
-    docker_run -v "${CODENVY_HOST_CONFIG}":/root/codenvy \
-               -v "${CODENVY_HOST_BACKUP}/${CODENVY_BACKUP_FILE_NAME}":"/root/backup/${CODENVY_BACKUP_FILE_NAME}" \
-               alpine:3.4 sh -c "tar xf /root/backup/${CODENVY_BACKUP_FILE_NAME} -C /root/codenvy"
+    docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
+               -v "${CHE_HOST_BACKUP}/${CHE_BACKUP_FILE_NAME}":"/root/backup/${CHE_BACKUP_FILE_NAME}" \
+               alpine:3.4 sh -c "tar xf /root/backup/${CHE_BACKUP_FILE_NAME} -C /root${CHE_CONTAINER_ROOT}"
   fi
 }

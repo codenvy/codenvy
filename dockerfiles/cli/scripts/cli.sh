@@ -12,21 +12,21 @@
 cli_init() {
 
   # Constants
-  CODENVY_MANIFEST_DIR="/version"
-  CODENVY_CONTAINER_OFFLINE_FOLDER="/${CHE_MINI_PRODUCT_NAME}/backup"
-  CODENVY_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
-  CODENVY_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
-  CODENVY_COMPOSE_FILE="docker-compose-container.yml"
-  CODENVY_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
-  CODENVY_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
+  CHE_MANIFEST_DIR="/version"
+  CHE_CONTAINER_OFFLINE_FOLDER="/${CHE_MINI_PRODUCT_NAME}/backup"
+  CHE_VERSION_FILE="${CHE_MINI_PRODUCT_NAME}.ver.do_not_modify"
+  CHE_ENVIRONMENT_FILE="${CHE_MINI_PRODUCT_NAME}.env"
+  CHE_COMPOSE_FILE="docker-compose-container.yml"
+  CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
+  CHE_BACKUP_FILE_NAME="${CHE_MINI_PRODUCT_NAME}_backup.tar.gz"
   DOCKER_CONTAINER_NAME_PREFIX="${CHE_MINI_PRODUCT_NAME}_"
-  CODENVY_COMPOSE_STOP_TIMEOUT="180"
+  CHE_COMPOSE_STOP_TIMEOUT="180"
 
   grab_offline_images "$@"
   grab_initial_images
 
-  DEFAULT_CODENVY_CLI_ACTION="help"
-  CODENVY_CLI_ACTION=${CODENVY_CLI_ACTION:-${DEFAULT_CODENVY_CLI_ACTION}}
+  DEFAULT_CHE_CLI_ACTION="help"
+  CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
   
   CODENVY_LICENSE=true
 
@@ -42,32 +42,32 @@ cli_init() {
     info ""
     info "Rerun the CLI:"
     info "  docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock"
-    info "                      -v <local-path>:/codenvy"
+    info "                      -v <local-path>:${CHE_CONTAINER_ROOT}"
     info "                      -e CODENVY_HOST=<your-ip-or-host>"
     info "                         $CHE_IMAGE_NAME $*"
     return 2;
   fi
 
-  REFERENCE_HOST_ENVIRONMENT_FILE="${CODENVY_HOST_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
-  REFERENCE_HOST_COMPOSE_FILE="${CODENVY_HOST_INSTANCE}/${CODENVY_COMPOSE_FILE}"
-  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CODENVY_CONTAINER_CONFIG}/${CODENVY_ENVIRONMENT_FILE}"
-  REFERENCE_CONTAINER_COMPOSE_FILE="${CODENVY_CONTAINER_INSTANCE}/${CODENVY_COMPOSE_FILE}"
+  REFERENCE_HOST_ENVIRONMENT_FILE="${CHE_HOST_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_HOST_COMPOSE_FILE="${CHE_HOST_INSTANCE}/${CHE_COMPOSE_FILE}"
+  REFERENCE_CONTAINER_ENVIRONMENT_FILE="${CHE_CONTAINER_CONFIG}/${CHE_ENVIRONMENT_FILE}"
+  REFERENCE_CONTAINER_COMPOSE_FILE="${CHE_CONTAINER_INSTANCE}/${CHE_COMPOSE_FILE}"
 
-  CODENVY_HOST_CONFIG_MANIFESTS_FOLDER="$CODENVY_HOST_INSTANCE/manifests"
-  CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CODENVY_CONTAINER_INSTANCE/manifests"
+  CHE_HOST_CONFIG_MANIFESTS_FOLDER="$CHE_HOST_INSTANCE/manifests"
+  CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER="$CHE_CONTAINER_INSTANCE/manifests"
 
-  CODENVY_HOST_CONFIG_MODULES_FOLDER="$CODENVY_HOST_INSTANCE/modules"
-  CODENVY_CONTAINER_CONFIG_MODULES_FOLDER="$CODENVY_CONTAINER_INSTANCE/modules"
+  CHE_HOST_CONFIG_MODULES_FOLDER="$CHE_HOST_INSTANCE/modules"
+  CHE_CONTAINER_CONFIG_MODULES_FOLDER="$CHE_CONTAINER_INSTANCE/modules"
 
   # TODO: Change this to use the current folder or perhaps ~?
   if is_boot2docker && has_docker_for_windows_client; then
-    if [[ "${CODENVY_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
-      CODENVY_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CODENVY_INSTANCE set to $CODENVY_HOST_INSTANCE"
+    if [[ "${CHE_HOST_INSTANCE,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_INSTANCE=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_INSTANCE set to $CHE_HOST_INSTANCE"
     fi
-    if [[ "${CODENVY_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
-      CODENVY_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
-      warning "Boot2docker for Windows - CODENVY_CONFIG set to $CODENVY_HOST_CONFIG"
+    if [[ "${CHE_HOST_CONFIG,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_HOST_CONFIG=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_CONFIG set to $CHE_HOST_CONFIG"
     fi
   fi
 
@@ -81,21 +81,21 @@ cli_init() {
 }
 
 grab_offline_images(){
-  # If you are using codenvy in offline mode, images must be loaded here
+  # If you are using ${CHE_FORMAL_PRODUCT_NAME} in offline mode, images must be loaded here
   # This is the point where we know that docker is working, but before we run any utilities
   # that require docker.
   if [[ "$@" == *"--offline"* ]]; then
     info "init" "Importing ${CHE_MINI_PRODUCT_NAME} Docker images from tars..."
 
-    if [ ! -d ${CODENVY_CONTAINER_OFFLINE_FOLDER} ]; then
-      info "init" "You requested offline image loading, but '${CODENVY_CONTAINER_OFFLINE_FOLDER}' folder not found"
+    if [ ! -d ${CHE_CONTAINER_OFFLINE_FOLDER} ]; then
+      info "init" "You requested offline image loading, but '${CHE_CONTAINER_OFFLINE_FOLDER}' folder not found"
       return 2;
     fi
 
     IFS=$'\n'
-    for file in "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/*.tar
+    for file in "${CHE_CONTAINER_OFFLINE_FOLDER}"/*.tar
     do
-      if ! $(docker load < "${CODENVY_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
+      if ! $(docker load < "${CHE_CONTAINER_OFFLINE_FOLDER}"/"${file##*/}" > /dev/null); then
         error "Failed to restore ${CHE_MINI_PRODUCT_NAME} Docker images"
         return 2;
       fi
@@ -216,8 +216,8 @@ update_image() {
 
 is_initialized() {
   debug $FUNCNAME
-  if [[ -d "${CODENVY_CONTAINER_INSTANCE}" ]] && \
-     [[ -f "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE ]] && \
+  if [[ -d "${CHE_CONTAINER_INSTANCE}" ]] && \
+     [[ -f "${CHE_CONTAINER_INSTANCE}"/$CHE_VERSION_FILE ]] && \
      [[ -f "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" ]]; then
     return 0
   else
@@ -227,8 +227,8 @@ is_initialized() {
 
 is_configured() {
   debug $FUNCNAME
-  if [[ -d "${CODENVY_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
-     [[ -d "${CODENVY_CONTAINER_CONFIG_MODULES_FOLDER}" ]]; then
+  if [[ -d "${CHE_CONTAINER_CONFIG_MANIFESTS_FOLDER}" ]] && \
+     [[ -d "${CHE_CONTAINER_CONFIG_MODULES_FOLDER}" ]]; then
     return 0
   else
     return 1
@@ -256,7 +256,7 @@ version_error(){
   text "\nSet CHE_VERSION=<version> and rerun.\n\n"
 }
 
-### Returns the list of Codenvy images for a particular version of Codenvy
+### Returns the list of ${CHE_FORMAL_PRODUCT_NAME} images for a particular version of ${CHE_FORMAL_PRODUCT_NAME}
 ### Sets the images as environment variables after loading from file
 get_image_manifest() {
   info "cli" "Checking registry for version '$1' images"
@@ -277,7 +277,7 @@ get_installed_version() {
   if ! is_initialized; then
     echo "<not-configed>"
   else
-    cat "${CODENVY_CONTAINER_INSTANCE}"/$CODENVY_VERSION_FILE
+    cat "${CHE_CONTAINER_INSTANCE}"/$CHE_VERSION_FILE
   fi
 }
 
@@ -509,18 +509,18 @@ server_is_booted() {
 }
 
 check_if_booted() {
-  CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
-  wait_until_container_is_running 20 ${CURRENT_CODENVY_SERVER_CONTAINER_ID}
-  if ! container_is_running ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+  CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+  wait_until_container_is_running 20 ${CURRENT_CHE_SERVER_CONTAINER_ID}
+  if ! container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for ${CHE_MINI_PRODUCT_NAME} container to start."
     return 2
   fi
 
   info "start" "Services booting..."
-  info "start" "Server logs at \"docker logs -f ${CODENVY_SERVER_CONTAINER_NAME}\""
-  wait_until_server_is_booted 60 ${CURRENT_CODENVY_SERVER_CONTAINER_ID}
+  info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+  wait_until_server_is_booted 60 ${CURRENT_CHE_SERVER_CONTAINER_ID}
 
-  if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+  if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
     info "start" "Booted and reachable"
     info "start" "Ver: $(get_installed_version)"
     if ! is_docker_for_mac; then
@@ -531,7 +531,7 @@ check_if_booted() {
       info "start" "API: http://localhost/swagger"
     fi
   else
-    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CODENVY_SERVER_CONTAINER_NAME}\" to inspect the issue."
+    error "(${CHE_MINI_PRODUCT_NAME} start): Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
     return 2
   fi
 }
@@ -542,7 +542,7 @@ docker_compose() {
   if has_compose; then
     docker-compose "$@"
   else
-    docker_run -v "${CODENVY_HOST_INSTANCE}":"${CODENVY_CONTAINER_INSTANCE}" \
+    docker_run -v "${CHE_HOST_INSTANCE}":"${CHE_CONTAINER_INSTANCE}" \
                   docker/compose:1.8.1 "$@"
   fi
 }

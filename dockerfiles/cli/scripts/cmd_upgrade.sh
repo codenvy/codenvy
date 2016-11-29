@@ -32,10 +32,10 @@ cmd_upgrade() {
   IFS=$SAVEIFS
   info "upgrade" "Downloading done."
 
-  if get_server_container_id "${CODENVY_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
+  if get_server_container_id "${CHE_SERVER_CONTAINER_NAME}" >> "${LOGS}" 2>&1; then
     info "upgrade" "Stopping currently running instance..."
-    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id ${CODENVY_SERVER_CONTAINER_NAME})
-    if server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id ${CHE_SERVER_CONTAINER_NAME})
+    if server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
       cmd_stop
     fi
   fi

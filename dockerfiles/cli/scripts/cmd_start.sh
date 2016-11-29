@@ -13,12 +13,12 @@ cmd_start() {
   debug $FUNCNAME
 
   # If Codenvy is already started or booted, then terminate early.
-  if container_exist_by_name $CODENVY_SERVER_CONTAINER_NAME; then
-    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
-    if container_is_running ${CURRENT_CODENVY_SERVER_CONTAINER_ID} && \
-       server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+  if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
+    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+    if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
+       server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
        info "start" "$CHE_MINI_PRODUCT_NAME is already running"
-       info "start" "Server logs at \"docker logs -f ${CODENVY_SERVER_CONTAINER_NAME}\""
+       info "start" "Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
        info "start" "Ver: $(get_installed_version)"
        if ! is_docker_for_mac; then
          info "start" "Use: http://${CODENVY_HOST}"
@@ -74,9 +74,9 @@ cmd_stop() {
 
   info "stop" "Stopping containers..."
   if is_initialized; then
-    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CODENVY_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
+    log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \
-                   -p=$CHE_MINI_PRODUCT_NAME stop -t ${CODENVY_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
+                   -p=$CHE_MINI_PRODUCT_NAME stop -t ${CHE_COMPOSE_STOP_TIMEOUT} >> "${LOGS}" 2>&1 || true
     info "stop" "Removing containers..."
     log "docker_compose --file=\"${REFERENCE_CONTAINER_COMPOSE_FILE}\" -p=$CHE_MINI_PRODUCT_NAME rm >> \"${LOGS}\" 2>&1 || true"
     docker_compose --file="${REFERENCE_CONTAINER_COMPOSE_FILE}" \

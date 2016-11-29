@@ -16,12 +16,12 @@ cmd_rmi() {
     return 1;
   fi
 
-  WARNING="rmi !!! Removing images disables codenvy and forces a pull !!!"
+  WARNING="rmi !!! Removing images disables ${CHE_FORMAL_PRODUCT_NAME} and forces a pull !!!"
   if ! confirm_operation "${WARNING}" "$@"; then
     return;
   fi
 
-  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CHE_VERSION/images)
+  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
   IFS=$'\n'
   info "rmi" "Removing ${CHE_MINI_PRODUCT_NAME} Docker images..."
 

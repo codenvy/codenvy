@@ -12,10 +12,10 @@
 cmd_action() {
   debug $FUNCNAME
 
-  if container_exist_by_name $CODENVY_SERVER_CONTAINER_NAME; then
-    CURRENT_CODENVY_SERVER_CONTAINER_ID=$(get_server_container_id $CODENVY_SERVER_CONTAINER_NAME)
-    if container_is_running ${CURRENT_CODENVY_SERVER_CONTAINER_ID} && \
-       server_is_booted ${CURRENT_CODENVY_SERVER_CONTAINER_ID}; then
+  if container_exist_by_name $CHE_SERVER_CONTAINER_NAME; then
+    CURRENT_CHE_SERVER_CONTAINER_ID=$(get_server_container_id $CHE_SERVER_CONTAINER_NAME)
+    if container_is_running ${CURRENT_CHE_SERVER_CONTAINER_ID} && \
+       server_is_booted ${CURRENT_CHE_SERVER_CONTAINER_ID}; then
 
         # Not loaded as part of the init process to save on download time
         update_image_if_not_found eclipse/che-action:nightly

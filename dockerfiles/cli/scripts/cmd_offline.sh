@@ -19,18 +19,18 @@ cmd_offline() {
   # Make sure the images have been pulled and are in your local Docker registry
   cmd_download
 
-  mkdir -p $CODENVY_CONTAINER_OFFLINE_FOLDER
+  mkdir -p $CHE_CONTAINER_OFFLINE_FOLDER
 
-  IMAGE_LIST=$(cat "$CODENVY_MANIFEST_DIR"/$CHE_VERSION/images)
+  IMAGE_LIST=$(cat "$CHE_MANIFEST_DIR"/$CHE_VERSION/images)
   IFS=$'\n'
   info "offline" "Saving ${CHE_MINI_PRODUCT_NAME} Docker images as tar files..."
 
   for SINGLE_IMAGE in $IMAGE_LIST; do
     VALUE_IMAGE=$(echo $SINGLE_IMAGE | cut -d'=' -f2)
     TAR_NAME=$(echo $VALUE_IMAGE | sed "s|\/|_|")
-    info "offline" "Saving $CODENVY_HOST_BACKUP/$TAR_NAME.tar..."
-    if ! $(docker save $VALUE_IMAGE > $CODENVY_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar); then
-      error "Docker was interrupted while saving $CODENVY_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar"
+    info "offline" "Saving $CHE_HOST_BACKUP/$TAR_NAME.tar..."
+    if ! $(docker save $VALUE_IMAGE > $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar); then
+      error "Docker was interrupted while saving $CHE_CONTAINER_OFFLINE_FOLDER/$TAR_NAME.tar"
       return 1;
     fi
   done

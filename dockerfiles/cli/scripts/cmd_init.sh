@@ -32,7 +32,7 @@ cmd_init() {
   done
 
   if [ "${FORCE_UPDATE}" == "--no-force" ]; then
-    # If codenvy.environment file exists, then fail
+    # If ${CHE_FORMAL_PRODUCT_NAME}.environment file exists, then fail
     if is_initialized; then
       if [[ "${REINIT}" = "false" ]]; then
         info "init" "Already initialized."
@@ -65,28 +65,28 @@ cmd_init() {
   fi
 
   info "init" "Installing configuration and bootstrap variables:"
-  log "mkdir -p \"${CODENVY_CONTAINER_CONFIG}\""
-  mkdir -p "${CODENVY_CONTAINER_CONFIG}"
-  log "mkdir -p \"${CODENVY_CONTAINER_INSTANCE}\""
-  mkdir -p "${CODENVY_CONTAINER_INSTANCE}"
+  log "mkdir -p \"${CHE_CONTAINER_CONFIG}\""
+  mkdir -p "${CHE_CONTAINER_CONFIG}"
+  log "mkdir -p \"${CHE_CONTAINER_INSTANCE}\""
+  mkdir -p "${CHE_CONTAINER_INSTANCE}"
 
-  if [ ! -w "${CODENVY_CONTAINER_CONFIG}" ]; then
-    error "CODENVY_CONTAINER_CONFIG is not writable. Aborting."
+  if [ ! -w "${CHE_CONTAINER_CONFIG}" ]; then
+    error "CHE_CONTAINER_CONFIG is not writable. Aborting."
     return 1;
   fi
 
-  if [ ! -w "${CODENVY_CONTAINER_INSTANCE}" ]; then
-    error "CODENVY_CONTAINER_INSTANCE is not writable. Aborting."
+  if [ ! -w "${CHE_CONTAINER_INSTANCE}" ]; then
+    error "CHE_CONTAINER_INSTANCE is not writable. Aborting."
     return 1;
   fi
 
   # in development mode we use init files from repo otherwise we use it from docker image
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy \
-               -v "${CODENVY_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
+    docker_run -v "${CHE_HOST_CONFIG}":/copy \
+               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
                    $IMAGE_INIT
   else
-    docker_run -v "${CODENVY_HOST_CONFIG}":/copy $IMAGE_INIT
+    docker_run -v "${CHE_HOST_CONFIG}":/copy $IMAGE_INIT
   fi
 
   # If this is is a reinit, we should not overwrite these core template files.
@@ -98,20 +98,20 @@ cmd_init() {
     rm -rf "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}".bak > /dev/null 2>&1
 
     info "init" "  CODENVY_HOST=${CODENVY_HOST}"
-    info "init" "  CODENVY_VERSION=${CHE_VERSION}"
-    info "init" "  CODENVY_CONFIG=${CODENVY_HOST_CONFIG}"
-    info "init" "  CODENVY_INSTANCE=${CODENVY_HOST_INSTANCE}"
+    info "init" "  ${CHE_PRODUCT_NAME}_VERSION=${CHE_VERSION}"
+    info "init" "  ${CHE_PRODUCT_NAME}_CONFIG=${CHE_HOST_CONFIG}"
+    info "init" "  ${CHE_PRODUCT_NAME}_INSTANCE=${CHE_HOST_INSTANCE}"
     if [ "${CHE_DEVELOPMENT_MODE}" == "on" ]; then
-      info "init" "  CODENVY_ENVIRONMENT=development"
-      info "init" "  CODENVY_DEVELOPMENT_REPO=${CODENVY_HOST_DEVELOPMENT_REPO}"
-      info "init" "  CODENVY_DEVELOPMENT_TOMCAT=${CODENVY_DEVELOPMENT_TOMCAT}"
+      info "init" "  ${CHE_PRODUCT_NAME}_ENVIRONMENT=development"
+      info "init" "  ${CHE_PRODUCT_NAME}_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}"
+      info "init" "  ${CHE_PRODUCT_NAME}_ASSEMBLY=${CHE_ASSEMBLY}"
     else
-      info "init" "  CODENVY_ENVIRONMENT=production"
+      info "init" "  ${CHE_PRODUCT_NAME}_ENVIRONMENT=production"
     fi
   fi
 
   # Encode the version that we initialized into the version file
-  echo "$CHE_VERSION" > "${CODENVY_CONTAINER_INSTANCE}/${CODENVY_VERSION_FILE}"
+  echo "$CHE_VERSION" > "${CHE_CONTAINER_INSTANCE}/${CHE_VERSION_FILE}"
 }
 
 require_license() {
