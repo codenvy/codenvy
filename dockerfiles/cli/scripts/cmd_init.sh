@@ -84,6 +84,7 @@ cmd_init() {
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     docker_run -v "${CHE_HOST_CONFIG}":/copy \
                -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init:/files \
+               -v "${CHE_HOST_DEVELOPMENT_REPO}"/dockerfiles/init/manifests/codenvy.env:/etc/puppet/manifests/codenvy.env \
                    $IMAGE_INIT
   else
     docker_run -v "${CHE_HOST_CONFIG}":/copy $IMAGE_INIT
