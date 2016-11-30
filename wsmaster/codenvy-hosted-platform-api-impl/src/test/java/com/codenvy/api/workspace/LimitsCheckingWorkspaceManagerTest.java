@@ -15,23 +15,24 @@
 package com.codenvy.api.workspace;
 
 import com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.WorkspaceCallback;
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
+import com.codenvy.resource.api.usage.ResourceUsageManager;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.codenvy.service.systemram.SystemRamInfo;
 import com.codenvy.service.systemram.SystemRamInfoProvider;
-import com.google.common.collect.ImmutableList;
 
+import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,7 +47,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -63,61 +63,158 @@ import static org.testng.Assert.assertNull;
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi
  * @author Igor Vinokur
+ * @author Sergii Leshchenko
  */
 @Listeners(MockitoTestNGListener.class)
 public class LimitsCheckingWorkspaceManagerTest {
+    public static final String NAMESPACE  = "namespace";
+    public static final String ACCOUNT_ID = "accountId";
+    @Mock
+    private WorkspaceDao             workspaceDao;
     @Mock
     private SystemRamInfoProvider    systemRamInfoProvider;
     @Mock
     private EnvironmentRamCalculator environmentRamCalculator;
+    @Mock
+    private Account                  account;
+    @Mock
+    private ResourceUsageManager     resourceUsageManager;
 
-    @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "You are only allowed to create 2 workspaces.")
-    public void shouldNotBeAbleToCreateNewWorkspaceIfLimitIsExceeded() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
-        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
-                                                                                         .when(manager)
-                                                                                         .getByNamespace(anyString());
+    @Test
+    public void shouldUseRamOfSpecifiedEnvironmentOnCheckingAvailabilityOfRamResource() throws Exception {
+        //given
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                 .build();
 
-        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", null);
-    }
+        when(environmentRamCalculator.calculate(any())).thenReturn(3000L);
 
-    @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "You are only allowed to create 2 workspaces.")
-    public void shouldNotBeAbleToCreateNewWorkspaceWhileStartingWorkspaceFromConfigIfLimitIsExceeded() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
-        doNothing().when(manager).checkMaxEnvironmentRam(anyObject());
-        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
-                                                                                         .when(manager)
-                                                                                         .getByNamespace(anyString());
+        WorkspaceConfig config = createConfig("3gb");
+        String envToStart = config.getDefaultEnv();
 
-        manager.startWorkspace(mock(WorkspaceConfig.class), "NameSpace", true);
+        //when
+        manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, envToStart);
+
+        //then
+        verify(environmentRamCalculator).calculate(config.getEnvironments().get(envToStart));
+        verify(resourceUsageManager).checkResourcesAvailability(ACCOUNT_ID, singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                           3000,
+                                                                                                           RamResourceType.UNIT)));
     }
 
     @Test
-    public void shouldNotCheckAllowedWorkspacesPerUserWhenItIsSetToMinusOne() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setWorkspacesPerUser(-1).build();
-        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))) // <- currently used 2
-                                                                                         .when(manager)
-                                                                                         .getByNamespace(anyString());
-        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
+    public void shouldUseRamOfDefaultEnvironmentOnCheckingAvailabilityOfRamResourceWhen() throws Exception {
+        //given
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                 .build();
 
-        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", callback);
+        when(environmentRamCalculator.calculate(any())).thenReturn(3000L);
 
-        verify(callback).call();
-        verify(manager, never()).getWorkspaces(any());
+        WorkspaceConfig config = createConfig("3gb");
+
+        //when
+        manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
+
+        //then
+        verify(environmentRamCalculator).calculate(config.getEnvironments().get(config.getDefaultEnv()));
+        verify(resourceUsageManager).checkResourcesAvailability(ACCOUNT_ID, singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                                                           3000,
+                                                                                                           RamResourceType.UNIT)));
     }
 
+    @Test(expectedExceptions = LimitExceededException.class,
+          expectedExceptionsMessageRegExp = "Workspace namespace/workspace.. needs 3000MB to start. Your account has 200MB and 100MB " +
+                                            "in use\\. The workspace can't be start\\. Stop other workspaces or grant more resources\\.")
+    public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRamResource() throws Exception {
+        doThrow(new NoEnoughResourcesException(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                              200L,
+                                                                              RamResourceType.UNIT)),
+                                               singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                              3000L,
+                                                                              RamResourceType.UNIT)),
+                                               emptyList()))
+                .when(resourceUsageManager).checkResourcesAvailability(any(), any());
+        doReturn(singletonList(new ResourceImpl(RamResourceType.ID,
+                                                100L,
+                                                RamResourceType.UNIT)))
+                .when(resourceUsageManager).getUsedResources(any());
+
+        //given
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                 .build();
+
+        when(environmentRamCalculator.calculate(any())).thenReturn(3000L);
+
+        WorkspaceConfig config = createConfig("3gb");
+
+        //when
+        manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
+    }
 
     @Test
-    public void shouldCallCreateCallBackIfEverythingIsOkayWithLimits() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
-        doReturn(emptyList()).when(manager).getByNamespace(anyString()); // <- currently used 0
+    public void shouldNotThrowLimitExceedExceptionIfAccountHasEnoughAvailableWorkspaceResource() throws Exception {
+        //given
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .build();
 
-        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-        manager.checkNumberOfWorkspacesAndPropagateCreation("user123", callback);
+        //when
+        manager.checkWorkspaceResourceAvailability(ACCOUNT_ID);
 
-        verify(callback).call();
+        //then
+        verify(resourceUsageManager).checkResourcesAvailability(ACCOUNT_ID, singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                                                           1,
+                                                                                                           WorkspaceResourceType.UNIT)));
+    }
+
+    @Test(expectedExceptions = LimitExceededException.class,
+          expectedExceptionsMessageRegExp = "You are only allowed to create 5 workspaces.")
+    public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableWorkspaceResource() throws Exception {
+        //given
+        doThrow(new NoEnoughResourcesException(singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                              5,
+                                                                              WorkspaceResourceType.UNIT)),
+                                               emptyList(),
+                                               emptyList()))
+                .when(resourceUsageManager).checkResourcesAvailability(any(), any());
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .build();
+
+        //when
+        manager.checkWorkspaceResourceAvailability(ACCOUNT_ID);
+    }
+
+    @Test
+    public void shouldNotThrowLimitExceedExceptionIfAccountHasEnoughAvailableRuntimeResource() throws Exception {
+        //given
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .build();
+
+        //when
+        manager.checkRuntimeResourceAvailability(ACCOUNT_ID);
+
+        //then
+        verify(resourceUsageManager).checkResourcesAvailability(ACCOUNT_ID, singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                                                                           1,
+                                                                                                           RuntimeResourceType.UNIT)));
+    }
+
+    @Test(expectedExceptions = LimitExceededException.class,
+          expectedExceptionsMessageRegExp = "You are only allowed to start 5 workspaces.")
+    public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRuntimeResource() throws Exception {
+        //given
+        doThrow(new NoEnoughResourcesException(singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                                              5,
+                                                                              RuntimeResourceType.UNIT)),
+                                               emptyList(),
+                                               emptyList()))
+                .when(resourceUsageManager).checkResourcesAvailability(any(), any());
+        LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
+                                                                 .build();
+
+        //when
+        manager.checkRuntimeResourceAvailability(ACCOUNT_ID);
     }
 
     @Test(expectedExceptions = LimitExceededException.class,
@@ -127,7 +224,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setSystemRamInfoProvider(systemRamInfoProvider).build();
         doReturn(emptyList()).when(manager).getByNamespace(anyString());
 
-        manager.checkLimitsAndPropagateStart("NameSpace", null);
+        manager.checkSystemRamLimitAndPropagateStart(null);
     }
 
     @Test
@@ -136,7 +233,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
         doReturn(singletonList(createRuntime("1gb", "1gb"))).when(manager).getByNamespace(anyString());
 
-        manager.checkLimitsAndPropagateStart("NameSpace", callback);
+        manager.checkSystemRamLimitAndPropagateStart(callback);
 
         verify(callback).call();
     }
@@ -156,35 +253,13 @@ public class LimitsCheckingWorkspaceManagerTest {
     @Test
     public void shouldNotCheckWorkspaceRamLimitIfItIsSetToMinusOne() throws Exception {
         final WorkspaceConfig config = createConfig("3gb");
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("-1").build();
-
-        manager.checkMaxEnvironmentRam(config);
-    }
-
-    @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
-    public void shouldNotBeAbleToCreateWorkspaceWithMultipleMachinesWhichExceedsRamLimit() throws Exception {
-        when(environmentRamCalculator.calculate(any())).thenReturn(2304L);
-        final WorkspaceConfig config = createConfig("1gb", "1gb", "256mb");
-
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb")
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("-1")
                                                                        .setEnvironmentRamCalculator(environmentRamCalculator)
                                                                        .build();
 
         manager.checkMaxEnvironmentRam(config);
-    }
 
-    @Test
-    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesIncludingMachineWithoutLimitsWhichDoesNotExceedRamLimit()
-            throws Exception {
-        when(environmentRamCalculator.calculate(any())).thenReturn(2560L);
-        final WorkspaceConfig config = createConfig("1gb", "1gb", null);
-
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("3gb")
-                                                                       .setEnvironmentRamCalculator(environmentRamCalculator)
-                                                                       .build();
-
-        manager.checkMaxEnvironmentRam(config);
+        verify(environmentRamCalculator, never()).calculate(anyObject());
     }
 
     @Test
@@ -196,7 +271,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager)
                                                                       .getByNamespace(anyString());
 
-        manager.checkLimitsAndPropagateLimitedThroughputStart("NameSpace", callback);
+        manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
         verify(semaphore).acquire();
         verify(semaphore).release();
@@ -208,9 +283,9 @@ public class LimitsCheckingWorkspaceManagerTest {
         Semaphore semaphore = mock(Semaphore.class);
         WorkspaceCallback callback = mock(WorkspaceCallback.class);
         manager.startSemaphore = semaphore;
-        doThrow(new Exception()).when(manager).checkLimitsAndPropagateStart(anyString(), anyObject());
+        doThrow(new Exception()).when(manager).checkSystemRamLimitAndPropagateStart(anyObject());
 
-        manager.checkLimitsAndPropagateLimitedThroughputStart(anyString(), callback);
+        manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
         verify(semaphore).acquire();
         verify(semaphore).release();
@@ -218,11 +293,12 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     @Test
     public void shouldSetSemaphoreToNullIfThroughputPropertyIsZero() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxSameTimeStartWSRequests(0)
+                                                                       .build();
         WorkspaceCallback callback = mock(WorkspaceCallback.class);
         doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager).getByNamespace(anyString());
 
-        manager.checkLimitsAndPropagateLimitedThroughputStart("NameSpace", callback);
+        manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
         assertNull(manager.startSemaphore);
     }
@@ -234,7 +310,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager)
                                                                       .getByNamespace(anyString());
 
-        manager.checkLimitsAndPropagateLimitedThroughputStart("NameSpace", callback);
+        manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
         assertNull(manager.startSemaphore);
     }
@@ -254,12 +330,12 @@ public class LimitsCheckingWorkspaceManagerTest {
             invokeProcessLatch.countDown();
             invokeProcessLatch.await();
             return null;
-        }).when(manager).checkLimitsAndPropagateStart(anyString(), anyObject());
+        }).when(manager).checkSystemRamLimitAndPropagateStart(anyObject());
         Runnable runnable = () -> {
             try {
                 final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-                manager.checkLimitsAndPropagateLimitedThroughputStart("NameSpace", callback);
-            } catch (Exception e) {
+                manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
+            } catch (Exception ignored) {
             }
         };
         //Run 7 threads (more than number of allowed same time requests) that want to request RAM check at the same time.
@@ -273,64 +349,12 @@ public class LimitsCheckingWorkspaceManagerTest {
         executor.submit(runnable);
 
         //Wait for throughput limit will be reached and check that RAM check was performed only in allowed number of threads.
-        verify(manager, timeout(300).times(5)).checkLimitsAndPropagateStart(anyString(), anyObject());
+        verify(manager, timeout(300).times(5)).checkSystemRamLimitAndPropagateStart(anyObject());
 
         //Execute paused threads to release the throughput limit for other threads.
         invokeProcessLatch.countDown();
         //Wait for throughput limit will be released and check that RAM check was performed in other threads.
-        verify(manager, timeout(300).times(7)).checkLimitsAndPropagateStart(anyString(), anyObject());
-    }
-
-    @Test
-    public void shouldCallCreateCallBackIfStartedWorkspacesNumberLimitIsNotExceeded() throws Exception {
-        //Set started workspaces limit by number of all workspaces statuses.
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setStartedWorkspacesLimit(WorkspaceStatus.values().length).build();
-        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-        //Currently started workspaces with all statuses.
-        //Workspace with status 'STOPPED' will not be counted in the check.
-        List<WorkspaceImpl> workspaces = new ArrayList<>();
-        for (WorkspaceStatus status : WorkspaceStatus.values()) {
-            WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-            when(workspace.getStatus()).thenReturn(status);
-            workspaces.add(workspace);
-        }
-        doReturn(workspaces).when(manager).getByNamespace(anyString());
-
-        manager.checkLimitsAndPropagateStart("user123", callback);
-
-        verify(callback).call();
-    }
-
-    @Test(expectedExceptions = LimitExceededException.class,
-          expectedExceptionsMessageRegExp = "You are only allowed to start \\d workspaces.")
-    public void shouldNotBeAbleToStartWorkspaceIfStartedWorkspacesNumberLimitIsExceeded() throws Exception {
-        when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
-        //Set started workspaces limit by number of all workspaces statuses minus one to reach the limit.
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setStartedWorkspacesLimit(WorkspaceStatus.values().length - 1)
-                                                                       .build();
-        //Currently started workspaces with all statuses.
-        //Workspace with status 'STOPPED' will not be counted in the check.
-        List<WorkspaceImpl> workspaces = new ArrayList<>();
-        for (WorkspaceStatus status : WorkspaceStatus.values()) {
-            WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-            when(workspace.getStatus()).thenReturn(status);
-            workspaces.add(workspace);
-        }
-        doReturn(workspaces).when(manager).getByNamespace(anyString());
-
-        manager.checkLimitsAndPropagateStart("user123", null);
-    }
-
-    @Test
-    public void shouldNotCheckStartedWorkspacesNumberWhenItIsSetToMinusOne() throws Exception {
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setStartedWorkspacesLimit(-1).build();
-        doReturn(ImmutableList.of(mock(WorkspaceImpl.class), mock(WorkspaceImpl.class))).when(manager).getByNamespace(anyString());
-        final WorkspaceCallback callback = mock(WorkspaceCallback.class);
-
-        manager.checkLimitsAndPropagateStart("user123", callback);
-
-        verify(callback).call();
-        verify(manager, never()).getByNamespace(any());
+        verify(manager, timeout(300).times(7)).checkSystemRamLimitAndPropagateStart(anyObject());
     }
 
     private static ManagerBuilder managerBuilder() throws ServerException {
@@ -339,54 +363,35 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     private static class ManagerBuilder {
 
-        private EnvironmentRamCalculator environmentRamCalculator;
-        private SystemRamInfoProvider    systemRamInfoProvider;
         private String                   maxRamPerEnv;
-        private boolean                  defaultAutoSnapshot;
-        private boolean                  defaultAutoRestore;
-        private int                      workspacesPerUser;
-        private int                      startedWorkspacesLimit;
         private int                      maxSameTimeStartWSRequests;
-        private WorkspaceSharedPool      sharedPool;
+        private SystemRamInfoProvider    systemRamInfoProvider;
+        private EnvironmentRamCalculator environmentRamCalculator;
+        private ResourceUsageManager     resourceUsageManager;
 
         ManagerBuilder() throws ServerException {
-            workspacesPerUser = 2;
-            startedWorkspacesLimit = 2;
             maxRamPerEnv = "1gb";
             maxSameTimeStartWSRequests = 0;
-            defaultAutoSnapshot = false;
-            defaultAutoRestore = false;
 
             systemRamInfoProvider = mock(SystemRamInfoProvider.class);
-            sharedPool = mock(WorkspaceSharedPool.class);
             when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
         }
 
         public LimitsCheckingWorkspaceManager build() {
-            return spy(new LimitsCheckingWorkspaceManager(workspacesPerUser,
-                                                          startedWorkspacesLimit,
+            return spy(new LimitsCheckingWorkspaceManager(null,
+                                                          null,
+                                                          null,
+                                                          null,
+                                                          false,
+                                                          false,
+                                                          null,
+                                                          null,
                                                           maxRamPerEnv,
                                                           maxSameTimeStartWSRequests,
                                                           systemRamInfoProvider,
-                                                          null,
-                                                          null,
-                                                          null,
-                                                          null,
-                                                          null,
-                                                          defaultAutoSnapshot,
-                                                          defaultAutoRestore,
                                                           environmentRamCalculator,
-                                                          sharedPool));
-        }
-
-        ManagerBuilder setWorkspacesPerUser(int workspacesPerUser) {
-            this.workspacesPerUser = workspacesPerUser;
-            return this;
-        }
-
-        ManagerBuilder setStartedWorkspacesLimit(int startedWorkspacesLimit) {
-            this.startedWorkspacesLimit = startedWorkspacesLimit;
-            return this;
+                                                          resourceUsageManager,
+                                                          null));
         }
 
         ManagerBuilder setMaxRamPerEnv(String maxRamPerEnv) {
@@ -406,6 +411,11 @@ public class LimitsCheckingWorkspaceManagerTest {
 
         ManagerBuilder setEnvironmentRamCalculator(EnvironmentRamCalculator environmentRamCalculator) {
             this.environmentRamCalculator = environmentRamCalculator;
+            return this;
+        }
+
+        ManagerBuilder setResourceUsageManager(ResourceUsageManager resourceUsageManager) {
+            this.resourceUsageManager = resourceUsageManager;
             return this;
         }
     }

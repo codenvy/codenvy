@@ -14,13 +14,19 @@
  */
 package com.codenvy.api.workspace;
 
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
+import com.codenvy.resource.api.usage.ResourceUsageManager;
+import com.codenvy.resource.api.usage.ResourcesLocks;
+import com.codenvy.resource.model.Resource;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.codenvy.service.systemram.SystemRamInfoProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Striped;
 
 import org.eclipse.che.account.api.AccountManager;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -36,18 +42,21 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.commons.lang.concurrent.CloseableLock;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static java.util.Collections.singletonList;
 
 /**
  * Manager that checks limits and delegates all its operations to the {@link WorkspaceManager}.
@@ -59,42 +68,40 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 @Singleton
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
-    private static final Striped<Lock> CREATE_LOCKS = Striped.lazyWeakLock(100);
-    private static final Striped<Lock> START_LOCKS  = Striped.lazyWeakLock(100);
-
     private final SystemRamInfoProvider    systemRamInfoProvider;
     private final EnvironmentRamCalculator environmentRamCalculator;
-
-    private final int workspacesPerUser;
-    private final int startedWorkspacesLimit;
+    private final ResourceUsageManager     resourceUsageManager;
+    private final ResourcesLocks           resourcesLocks;
+    private final AccountManager           accountManager;
 
     private final long maxRamPerEnvMB;
-
 
     @VisibleForTesting
     Semaphore startSemaphore;
 
     @Inject
-    public LimitsCheckingWorkspaceManager(@Named("limits.user.workspaces.count") int workspacesPerUser,
-                                          @Named("limits.user.workspaces.run.count") int startedWorkspacesLimit,
-                                          @Named("limits.workspace.env.ram") String maxRamPerEnv,
-                                          @Named("limits.workspace.start.throughput") int maxSameTimeStartWSRequests,
-                                          SystemRamInfoProvider systemRamInfoProvider,
-                                          WorkspaceDao workspaceDao,
+    public LimitsCheckingWorkspaceManager(WorkspaceDao workspaceDao,
                                           WorkspaceRuntimes runtimes,
                                           EventService eventService,
-                                          SnapshotDao snapshotDao,
                                           AccountManager accountManager,
                                           @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
+                                          SnapshotDao snapshotDao,
+                                          WorkspaceSharedPool sharedPool,
+                                          //own injects
+                                          @Named("limits.workspace.env.ram") String maxRamPerEnv,
+                                          @Named("limits.workspace.start.throughput") int maxSameTimeStartWSRequests,
+                                          SystemRamInfoProvider systemRamInfoProvider,
                                           EnvironmentRamCalculator environmentRamCalculator,
-                                          WorkspaceSharedPool sharedPool) {
+                                          ResourceUsageManager resourceUsageManager,
+                                          ResourcesLocks resourcesLocks) {
         super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao, sharedPool);
-        this.startedWorkspacesLimit = startedWorkspacesLimit;
         this.systemRamInfoProvider = systemRamInfoProvider;
-        this.workspacesPerUser = workspacesPerUser;
         this.environmentRamCalculator = environmentRamCalculator;
         this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
+        this.resourceUsageManager = resourceUsageManager;
+        this.resourcesLocks = resourcesLocks;
+        this.accountManager = accountManager;
 
         if (maxSameTimeStartWSRequests > 0) {
             this.startSemaphore = new Semaphore(maxSameTimeStartWSRequests);
@@ -107,7 +114,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                   ConflictException,
                                                                   NotFoundException {
         checkMaxEnvironmentRam(config);
-        return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace));
+        String accountId = accountManager.getByName(namespace).getId();
+        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+            checkWorkspaceResourceAvailability(accountId);
+
+            return super.createWorkspace(config, namespace);
+        }
     }
 
     @Override
@@ -117,7 +129,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                 NotFoundException,
                                                                                 ConflictException {
         checkMaxEnvironmentRam(config);
-        return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> super.createWorkspace(config, namespace, attributes));
+        String accountId = accountManager.getByName(namespace).getId();
+        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+            checkWorkspaceResourceAvailability(accountId);
+
+            return super.createWorkspace(config, namespace, attributes);
+        }
     }
 
     @Override
@@ -126,8 +143,15 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                         @Nullable Boolean restore) throws NotFoundException,
                                                                           ServerException,
                                                                           ConflictException {
-        return checkLimitsAndPropagateLimitedThroughputStart(getWorkspace(workspaceId).getNamespace(),
-                                                             () -> super.startWorkspace(workspaceId, envName, restore));
+        WorkspaceImpl workspace = this.getWorkspace(workspaceId);
+        String accountId = workspace.getAccount().getId();
+
+        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+            checkRuntimeResourceAvailability(accountId);
+            checkRamResourcesAvailability(accountId, workspace.getNamespace(), workspace.getConfig(), envName);
+
+            return checkSystemRamLimitAndPropagateLimitedThroughputStart(() -> super.startWorkspace(workspaceId, envName, restore));
+        }
     }
 
     @Override
@@ -137,8 +161,15 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                     NotFoundException,
                                                                     ConflictException {
         checkMaxEnvironmentRam(config);
-        return checkNumberOfWorkspacesAndPropagateCreation(namespace, () -> checkLimitsAndPropagateLimitedThroughputStart(
-                namespace, () -> LimitsCheckingWorkspaceManager.super.startWorkspace(config, namespace, isTemporary)));
+
+        String accountId = accountManager.getByName(namespace).getId();
+        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+            checkWorkspaceResourceAvailability(accountId);
+            checkRuntimeResourceAvailability(accountId);
+            checkRamResourcesAvailability(accountId, namespace, config, null);
+
+            return checkSystemRamLimitAndPropagateLimitedThroughputStart(() -> super.startWorkspace(config, namespace, isTemporary));
+        }
     }
 
     @Override
@@ -146,13 +177,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                              ServerException,
                                                                              NotFoundException {
         checkMaxEnvironmentRam(update.getConfig());
+
+        WorkspaceImpl workspace = this.getWorkspace(id);
+        String accountId = workspace.getAccount().getId();
+
         // Workspace must not be updated while the manager checks it's resources to allow start
-        final Lock lock = START_LOCKS.get(getWorkspace(id).getNamespace());
-        lock.lock();
-        try {
+        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
             return super.updateWorkspace(id, update);
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -167,7 +198,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     }
 
     /**
-     * One of the checks in {@link #checkLimitsAndPropagateStart(String, WorkspaceCallback)}
+     * One of the checks in {@link #checkSystemRamLimitAndPropagateStart(WorkspaceCallback)}
      * is needed to deny starting workspace, if system RAM limit exceeded.
      * This check may be slow because it is based on request to swarm for memory amount allocated on all nodes, but it
      * can't be performed more than specified times at the same time, and the semaphore is used to control that.
@@ -178,14 +209,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * limits.workspace.start.throughput property configures how many permits can be handled at the same time.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkLimitsAndPropagateLimitedThroughputStart(String namespace, WorkspaceCallback<T> callback)
+    <T extends WorkspaceImpl> T checkSystemRamLimitAndPropagateLimitedThroughputStart(WorkspaceCallback<T> callback)
             throws ServerException, NotFoundException, ConflictException {
         if (startSemaphore == null) {
-            return checkLimitsAndPropagateStart(namespace, callback);
+            return checkSystemRamLimitAndPropagateStart(callback);
         } else {
             try {
                 startSemaphore.acquire();
-                return checkLimitsAndPropagateStart(namespace, callback);
+                return checkSystemRamLimitAndPropagateStart(callback);
             } catch (InterruptedException e) {
                 currentThread().interrupt();
                 throw new ServerException(e.getMessage(), e);
@@ -202,62 +233,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
      * performs {@code callback.call()} and returns its result.
      */
     @VisibleForTesting
-    <T extends WorkspaceImpl> T checkLimitsAndPropagateStart(String namespace, WorkspaceCallback<T> callback)
+    <T extends WorkspaceImpl> T checkSystemRamLimitAndPropagateStart(WorkspaceCallback<T> callback)
             throws ServerException, NotFoundException, ConflictException {
         if (systemRamInfoProvider.getSystemRamInfo().isSystemRamLimitExceeded()) {
             throw new LimitExceededException("Low RAM. Your workspace cannot be started until the system has more RAM available.");
         }
 
-        if (startedWorkspacesLimit < 0) {
-            return callback.call();
-        }
-
-        // It is important to lock in this place because:
-        // if started workspaces number limit is 10 and user has 9 started workspaces, then if he sends 2 separate requests
-        // to start a workspace, it may start both of them, because started workspaces number check is not atomic one.
-        final Lock lock = START_LOCKS.get(namespace);
-        lock.lock();
-        try {
-            long startedWorkspaces = getByNamespace(namespace).stream().filter(ws -> STOPPED != ws.getStatus()).count();
-            if (startedWorkspaces >= startedWorkspacesLimit) {
-                throw new LimitExceededException(format("You are only allowed to start %d workspace%s.", startedWorkspacesLimit,
-                                                        startedWorkspacesLimit == 1 ? "" : "s"));
-            }
-            return callback.call();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Checks that created workspace won't exceed user's workspaces limit.
-     * Throws {@link BadRequestException} in the case of workspace limit constraint violation, otherwise
-     * performs {@code callback.call()} and returns its result.
-     */
-    @VisibleForTesting
-    <T extends WorkspaceImpl> T checkNumberOfWorkspacesAndPropagateCreation(String namespace,
-                                                                            WorkspaceCallback<T> callback) throws ServerException,
-                                                                                                                  NotFoundException,
-                                                                                                                  ConflictException {
-        if (workspacesPerUser < 0) {
-            return callback.call();
-        }
-        // It is important to lock in this place because:
-        // if workspace per user limit is 10 and user has 9, then if he sends 2 separate requests to create
-        // a new workspace, it may create both of them, because workspace count check is not atomic one
-        final Lock lock = CREATE_LOCKS.get(namespace);
-        lock.lock();
-        try {
-            final List<WorkspaceImpl> workspaces = getByNamespace(namespace);
-            if (workspaces.size() >= workspacesPerUser) {
-                throw new LimitExceededException(format("You are only allowed to create %d workspace%s.", workspacesPerUser,
-                                                        workspacesPerUser == 1 ? "" : "s"),
-                                                 ImmutableMap.of("workspace_max_count", Integer.toString(workspacesPerUser)));
-            }
-            return callback.call();
-        } finally {
-            lock.unlock();
-        }
+        return callback.call();
     }
 
     @VisibleForTesting
@@ -278,5 +260,77 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         }
     }
 
+    @VisibleForTesting
+    void checkRamResourcesAvailability(String accountId, String namespace, WorkspaceConfig config, @Nullable String envName)
+            throws NotFoundException, ServerException, ConflictException {
 
+        final Environment environment = config.getEnvironments().get(firstNonNull(envName, config.getDefaultEnv()));
+        final ResourceImpl ramToUse = new ResourceImpl(RamResourceType.ID,
+                                                       environmentRamCalculator.calculate(environment),
+                                                       RamResourceType.UNIT);
+        try {
+            resourceUsageManager.checkResourcesAvailability(accountId, singletonList(ramToUse));
+        } catch (NoEnoughResourcesException e) {
+            final Resource requiredRam = e.getRequiredResources().get(0);// starting of workspace requires only RAM resource
+            final Resource availableRam = getRamResource(e.getAvailableResources());
+            final Resource usedRam = getRamResource(resourceUsageManager.getUsedResources(accountId));
+
+            throw new LimitExceededException(format("Workspace %s/%s needs %s to start. Your account has %s and %s in use. " +
+                                                    "The workspace can't be start. Stop other workspaces or grant more resources.",
+                                                    namespace,
+                                                    config.getName(),
+                                                    printResourceInfo(requiredRam),
+                                                    printResourceInfo(availableRam),
+                                                    printResourceInfo(usedRam)));
+        }
+    }
+
+    @VisibleForTesting
+    void checkWorkspaceResourceAvailability(String accountId) throws NotFoundException, ServerException {
+        try {
+            resourceUsageManager.checkResourcesAvailability(accountId,
+                                                            Collections.singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                                                       1,
+                                                                                                       WorkspaceResourceType.UNIT)));
+        } catch (NoEnoughResourcesException e) {
+            long totalAvailableWorkspaces = e.getAvailableResources().get(0).getAmount();
+            throw new LimitExceededException(format("You are only allowed to create %d workspace%s.",
+                                                    totalAvailableWorkspaces,
+                                                    totalAvailableWorkspaces == 1 ? "" : "s"),
+                                             ImmutableMap.of("workspace_max_count", Long.toString(totalAvailableWorkspaces)));
+        }
+    }
+
+    @VisibleForTesting
+    void checkRuntimeResourceAvailability(String accountId) throws NotFoundException, ServerException {
+        try {
+            resourceUsageManager.checkResourcesAvailability(accountId,
+                                                            Collections.singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                                                                       1,
+                                                                                                       RuntimeResourceType.UNIT)));
+        } catch (NoEnoughResourcesException e) {
+            long totalAvailableRuntimes = e.getAvailableResources().get(0).getAmount();
+            throw new LimitExceededException(format("You are only allowed to start %d workspace%s.",
+                                                    totalAvailableRuntimes,
+                                                    totalAvailableRuntimes == 1 ? "" : "s"));
+        }
+    }
+
+    /**
+     * Returns RAM resources from list or RAM resource with 0 amount it list doesn't contain it
+     */
+    private Resource getRamResource(List<? extends Resource> resources) {
+        Optional<? extends Resource> ramOpt = resources.stream()
+                                                       .filter(r -> r.getType().equals(RamResourceType.ID))
+                                                       .findAny();
+        if (ramOpt.isPresent()) {
+            return ramOpt.get();
+        } else {
+            return new ResourceImpl(RamResourceType.ID, 0, RamResourceType.UNIT);
+        }
+    }
+
+    private String printResourceInfo(Resource resource) {
+        return resource.getAmount() + resource.getUnit().toUpperCase();
+    }
 }

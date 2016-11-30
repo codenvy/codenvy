@@ -16,6 +16,7 @@ package com.codenvy.resource.api.free;
 
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.shared.dto.ResourceDto;
 
 import org.eclipse.che.api.core.BadRequestException;
 
@@ -28,22 +29,28 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * Utils for validation of {@link Resource}
+ * Utils for validation of {@link Resource}.
  *
  * @author Sergii Leschenko
  */
 @Singleton
 public class ResourceValidator {
     private final Map<String, Set<String>> resourcesTypesToUnits;
+    private final Map<String, String>      resourcesTypesToDefaultUnit;
 
     @Inject
     public ResourceValidator(Set<ResourceType> supportedResources) {
         this.resourcesTypesToUnits = supportedResources.stream()
                                                        .collect(toMap(ResourceType::getId, ResourceType::getSupportedUnits));
+        this.resourcesTypesToDefaultUnit = supportedResources.stream()
+                                                             .collect(toMap(ResourceType::getId, ResourceType::getDefaultUnit));
     }
 
     /**
      * Validates given {@code resource}
+     *
+     * <p>{@link ResourceDto#getUnit()} can be null then
+     * {@link ResourceType#getDefaultUnit() default unit} of {@link ResourceDto#getType() specified type} will be set.
      *
      * @param resource
      *         resource to validate
@@ -54,7 +61,7 @@ public class ResourceValidator {
      * @throws BadRequestException
      *         when {@code resource} has non supported unit
      */
-    public void check(Resource resource) throws BadRequestException {
+    public void validate(ResourceDto resource) throws BadRequestException {
         if (resource == null) {
             throw new BadRequestException("Missed resource");
         }
@@ -65,10 +72,14 @@ public class ResourceValidator {
             throw new BadRequestException("Specified resources type '" + resource.getType() + "' is not supported");
         }
 
-        if (!units.contains(resource.getUnit())) {
-            throw new BadRequestException("Specified resources type '" + resource.getType() + "' support only following units: " +
-                                          units.stream()
-                                               .collect(Collectors.joining(", ")));
+        if (resource.getUnit() == null) {
+            resource.setUnit(resourcesTypesToDefaultUnit.get(resource.getType()));
+        } else {
+            if (!units.contains(resource.getUnit())) {
+                throw new BadRequestException("Specified resources type '" + resource.getType() + "' support only following units: " +
+                                              units.stream()
+                                                   .collect(Collectors.joining(", ")));
+            }
         }
     }
 }

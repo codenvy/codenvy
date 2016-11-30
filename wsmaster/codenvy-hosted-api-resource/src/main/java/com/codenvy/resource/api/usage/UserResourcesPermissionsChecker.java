@@ -25,6 +25,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class UserResourcesPermissionsChecker implements ResourcesPermissionsChecker {
+    @Override
     public void checkResourcesVisibility(String accountId) throws ForbiddenException {
         if (EnvironmentContext.getCurrent().getSubject().getUserId().equals(accountId)) {
             //user should be able to see resources of his personal account
@@ -34,6 +35,7 @@ public class UserResourcesPermissionsChecker implements ResourcesPermissionsChec
         throw new ForbiddenException("User is not authorized to see resources information of requested account.");
     }
 
+    @Override
     public String getAccountType() {
         return UserImpl.PERSONAL_ACCOUNT;
     }

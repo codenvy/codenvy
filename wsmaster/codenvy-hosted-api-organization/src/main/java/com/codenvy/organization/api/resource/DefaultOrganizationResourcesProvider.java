@@ -18,7 +18,9 @@ import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.resource.api.free.DefaultResourcesProvider;
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -31,7 +33,7 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 
 /**
  * Provided free resources that are available for usage by organizational accounts by default.
@@ -42,12 +44,18 @@ import static java.util.Collections.singletonList;
 public class DefaultOrganizationResourcesProvider implements DefaultResourcesProvider {
     private final OrganizationManager organizationManager;
     private final long                ramPerOrganization;
+    private final int                 workspacesPerOrganization;
+    private final int                 runtimesPerOrganization;
 
     @Inject
     public DefaultOrganizationResourcesProvider(OrganizationManager organizationManager,
-                                                @Named("limits.organization.workspaces.ram") String ramPerOrganization) {
+                                                @Named("limits.organization.workspaces.ram") String ramPerOrganization,
+                                                @Named("limits.organization.workspaces.count") int workspacesPerOrganization,
+                                                @Named("limits.organization.workspaces.run.count") int runtimesPerOrganization) {
         this.organizationManager = organizationManager;
         this.ramPerOrganization = "-1".equals(ramPerOrganization) ? -1 : Size.parseSizeToMegabytes(ramPerOrganization);
+        this.workspacesPerOrganization = workspacesPerOrganization;
+        this.runtimesPerOrganization = runtimesPerOrganization;
     }
 
     @Override
@@ -60,7 +68,9 @@ public class DefaultOrganizationResourcesProvider implements DefaultResourcesPro
         final Organization organization = organizationManager.getById(accountId);
         // only root organizations should have own resources
         if (organization.getParent() == null) {
-            return singletonList(new ResourceImpl(RamResourceType.ID, ramPerOrganization, RamResourceType.UNIT));
+            return asList(new ResourceImpl(RamResourceType.ID, ramPerOrganization, RamResourceType.UNIT),
+                          new ResourceImpl(WorkspaceResourceType.ID, workspacesPerOrganization, WorkspaceResourceType.UNIT),
+                          new ResourceImpl(RuntimeResourceType.ID, runtimesPerOrganization, RuntimeResourceType.UNIT));
         }
 
         return Collections.emptyList();

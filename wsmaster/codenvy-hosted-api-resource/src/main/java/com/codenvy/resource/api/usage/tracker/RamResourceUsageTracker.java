@@ -12,8 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.ram;
+package com.codenvy.resource.api.usage.tracker;
 
+import com.codenvy.resource.api.RamResourceType;
 import com.codenvy.resource.api.ResourceUsageTracker;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
@@ -22,9 +23,9 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
@@ -38,27 +39,28 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
  */
 @Singleton
 public class RamResourceUsageTracker implements ResourceUsageTracker {
-    private final WorkspaceManager workspaceManager;
-    private final AccountManager   accountManager;
+    private final Provider<WorkspaceManager> workspaceManagerProvider;
+    private final AccountManager             accountManager;
 
     @Inject
-    public RamResourceUsageTracker(WorkspaceManager workspaceManager, AccountManager accountManager) {
-        this.workspaceManager = workspaceManager;
+    public RamResourceUsageTracker(Provider<WorkspaceManager> workspaceManagerProvider, AccountManager accountManager) {
+        this.workspaceManagerProvider = workspaceManagerProvider;
         this.accountManager = accountManager;
     }
 
     @Override
     public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
-        final List<WorkspaceImpl> accountWorkspaces = workspaceManager.getByNamespace(account.getName());
-        final long currentlyUsedRamMB = accountWorkspaces.stream()
-                                                         .filter(ws -> STOPPED != ws.getStatus())
-                                                         .map(ws -> ws.getRuntime().getMachines())
-                                                         .flatMap(List::stream)
-                                                         .mapToInt(machine -> machine.getConfig()
-                                                                                     .getLimits()
-                                                                                     .getRam())
-                                                         .sum();
+        final long currentlyUsedRamMB = workspaceManagerProvider.get()
+                                                                .getByNamespace(account.getName())
+                                                                .stream()
+                                                                .filter(ws -> STOPPED != ws.getStatus())
+                                                                .map(ws -> ws.getRuntime().getMachines())
+                                                                .flatMap(List::stream)
+                                                                .mapToInt(machine -> machine.getConfig()
+                                                                                            .getLimits()
+                                                                                            .getRam())
+                                                                .sum();
         if (currentlyUsedRamMB > 0) {
             return Optional.of(new ResourceImpl(RamResourceType.ID, currentlyUsedRamMB, RamResourceType.UNIT));
         } else {

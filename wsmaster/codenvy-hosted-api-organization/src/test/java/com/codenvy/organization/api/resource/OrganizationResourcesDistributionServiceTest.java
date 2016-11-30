@@ -87,7 +87,7 @@ public class OrganizationResourcesDistributionServiceTest {
                .post(SECURE_PATH + "/organization/resource/organization123");
 
         verify(organizationResourcesDistributor).distribute("organization123", resources);
-        verify(resourceValidator).check(resource);
+        verify(resourceValidator).validate(resource);
     }
 
     @Test

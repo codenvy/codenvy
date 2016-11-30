@@ -35,6 +35,7 @@ import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE
  */
 @Singleton
 public class OrganizationResourcesPermissionsChecker implements ResourcesPermissionsChecker {
+    @Override
     public void checkResourcesVisibility(String accountId) throws ForbiddenException {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         if (subject.hasPermission(DOMAIN_ID, accountId, CREATE_WORKSPACES)
@@ -48,6 +49,7 @@ public class OrganizationResourcesPermissionsChecker implements ResourcesPermiss
         throw new ForbiddenException("User is not authorized to see resources information of requested organization.");
     }
 
+    @Override
     public String getAccountType() {
         return OrganizationImpl.ORGANIZATIONAL_ACCOUNT;
     }

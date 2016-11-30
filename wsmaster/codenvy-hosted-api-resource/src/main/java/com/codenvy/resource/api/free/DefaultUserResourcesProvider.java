@@ -14,7 +14,9 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -27,7 +29,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 
 /**
  * Provided free resources that are available for usage by personal accounts by default.
@@ -37,10 +39,16 @@ import static java.util.Collections.singletonList;
 @Singleton
 public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
     private final long ramPerUser;
+    private final int  workspacesPerUser;
+    private final int  runtimesPerUser;
 
     @Inject
-    public DefaultUserResourcesProvider(@Named("limits.user.workspaces.ram") String ramPerUser) {
+    public DefaultUserResourcesProvider(@Named("limits.user.workspaces.ram") String ramPerUser,
+                                        @Named("limits.user.workspaces.count") int workspacesPerUser,
+                                        @Named("limits.user.workspaces.run.count") int runtimesPerUser) {
         this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
+        this.workspacesPerUser = workspacesPerUser;
+        this.runtimesPerUser = runtimesPerUser;
     }
 
     @Override
@@ -50,6 +58,8 @@ public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
 
     @Override
     public List<ResourceImpl> getResources(String accountId) throws ServerException, NotFoundException {
-        return singletonList(new ResourceImpl(RamResourceType.ID, ramPerUser, RamResourceType.UNIT));
+        return asList(new ResourceImpl(RamResourceType.ID, ramPerUser, RamResourceType.UNIT),
+                      new ResourceImpl(WorkspaceResourceType.ID, workspacesPerUser, WorkspaceResourceType.UNIT),
+                      new ResourceImpl(RuntimeResourceType.ID, runtimesPerUser, RuntimeResourceType.UNIT));
     }
 }

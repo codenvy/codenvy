@@ -16,6 +16,8 @@ package com.codenvy.resource.api.free;
 
 import com.codenvy.resource.model.FreeResourcesLimit;
 import com.codenvy.resource.model.Resource;
+import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
+import com.codenvy.resource.shared.dto.ResourceDto;
 
 import org.eclipse.che.api.core.BadRequestException;
 
@@ -49,9 +51,9 @@ public class FreeResourcesLimitValidator {
      *         when {@code freeResourcesLimit} is null
      * @throws BadRequestException
      *         when any of {@code freeResourcesLimit.getResources} is not valid
-     * @see ResourceValidator#check(Resource)
+     * @see ResourceValidator#validate(ResourceDto)
      */
-    public void check(FreeResourcesLimit freeResourcesLimit) throws BadRequestException {
+    public void check(FreeResourcesLimitDto freeResourcesLimit) throws BadRequestException {
         if (freeResourcesLimit == null) {
             throw new BadRequestException("Missed free resources limit description.");
         }
@@ -60,12 +62,12 @@ public class FreeResourcesLimitValidator {
         }
 
         Set<String> resourcesToSet = new HashSet<>();
-        for (Resource resource : freeResourcesLimit.getResources()) {
+        for (ResourceDto resource : freeResourcesLimit.getResources()) {
             if (!resourcesToSet.add(resource.getType())) {
                 throw new BadRequestException(format("Free resources limit should contain only one resources with type '%s'.",
                                                      resource.getType()));
             }
-            resourceValidator.check(resource);
+            resourceValidator.validate(resource);
         }
     }
 }

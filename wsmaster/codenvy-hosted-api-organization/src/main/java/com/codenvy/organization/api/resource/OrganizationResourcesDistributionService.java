@@ -24,7 +24,6 @@ import com.codenvy.organization.api.DtoConverter;
 import com.codenvy.organization.shared.dto.OrganizationDistributedResourcesDto;
 import com.codenvy.organization.shared.model.OrganizationDistributedResources;
 import com.codenvy.resource.api.free.ResourceValidator;
-import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.shared.dto.ResourceDto;
 
 import org.eclipse.che.api.core.BadRequestException;
@@ -57,7 +56,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Sergii Leschenko
  */
-@Api(value = "/organization/resource", description = "REST API for resources distribution between suborganizations")
+@Api(value = "organization-resource", description = "REST API for resources distribution between suborganizations")
 @Path("/organization/resource")
 public class OrganizationResourcesDistributionService extends Service {
     private final OrganizationResourcesDistributor resourcesDistributor;
@@ -91,12 +90,12 @@ public class OrganizationResourcesDistributionService extends Service {
                                                                                                     ConflictException,
                                                                                                     NotFoundException {
         Set<String> resourcesToSet = new HashSet<>();
-        for (Resource resource : resources) {
+        for (ResourceDto resource : resources) {
             if (!resourcesToSet.add(resource.getType())) {
                 throw new BadRequestException(format("Resources to distribute must contain only one resource with type '%s'.",
                                                      resource.getType()));
             }
-            resourceValidator.check(resource);
+            resourceValidator.validate(resource);
         }
 
         resourcesDistributor.distribute(suborganizationId, resources);

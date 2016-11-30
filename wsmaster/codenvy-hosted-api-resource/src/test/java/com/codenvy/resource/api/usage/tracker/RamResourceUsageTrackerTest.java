@@ -12,8 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.ram;
+package com.codenvy.resource.api.usage.tracker;
 
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.usage.tracker.RamResourceUsageTracker;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.account.api.AccountManager;
@@ -29,9 +31,11 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +60,8 @@ public class RamResourceUsageTrackerTest {
     @Mock
     private Account          account;
     @Mock
+    private Provider<WorkspaceManager> workspaceManagerProvider;
+    @Mock
     private WorkspaceManager workspaceManager;
     @Mock
     private AccountManager   accountManager;
@@ -63,12 +69,30 @@ public class RamResourceUsageTrackerTest {
     @InjectMocks
     private RamResourceUsageTracker ramUsageTracker;
 
+    @BeforeMethod
+    public void setUp() throws Exception {
+        when(workspaceManagerProvider.get()).thenReturn(workspaceManager);
+    }
+
     @Test(expectedExceptions = NotFoundException.class,
           expectedExceptionsMessageRegExp = "Account was not found")
     public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedRam() throws Exception {
         when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));
 
         ramUsageTracker.getUsedResource("account123");
+    }
+
+    @Test
+    public void shouldReturnEmptyOptionalWhenAccountHasOnlyStoppedWorkspaces() throws Exception {
+        when(accountManager.getById(any())).thenReturn(account);
+        when(account.getName()).thenReturn("testAccount");
+
+        when(workspaceManager.getByNamespace(anyString()))
+                .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
+
+        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
+
+        assertFalse(usedRamOpt.isPresent());
     }
 
     @Test
@@ -105,7 +129,7 @@ public class RamResourceUsageTrackerTest {
         verify(workspaceManager).getByNamespace(eq("testAccount"));
     }
 
-    /** Creates users workspace object based on the owner and machines RAM. */
+    /** Creates users workspace object based on the status and machines RAM. */
     public static WorkspaceImpl createWorkspace(WorkspaceStatus status, Integer... machineRams) {
         final List<MachineImpl> machines = new ArrayList<>(machineRams.length - 1);
         for (Integer machineRam : machineRams) {

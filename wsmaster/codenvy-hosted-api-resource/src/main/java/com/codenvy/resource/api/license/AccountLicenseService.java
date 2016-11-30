@@ -39,7 +39,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Sergii Leschenko
  */
-@Api(value = "/license/account", description = "Account License REST API")
+@Api(value = "license-account", description = "Account License REST API")
 @Path("/license/account")
 public class AccountLicenseService {
     private AccountLicenseManager accountAccountLicenseManager;

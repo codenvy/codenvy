@@ -69,7 +69,7 @@ public class FreeResourcesLimitValidatorTest {
         Mockito.doNothing()
                .doThrow(new BadRequestException("invalid resource"))
                .when(resourceValidator)
-               .check(any());
+               .validate(any());
 
         //when
         validator.check(DtoFactory.newDto(FreeResourcesLimitDto.class)

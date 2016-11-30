@@ -48,7 +48,7 @@ public class EnvironmentRamCalculatorTest {
     }
 
     @Test
-    public void shouldUseDefauntMachineRamWhenCalculatingRamOfEnvironmentWithMultipleMachinesIncludingMachineWithoutLimits()
+    public void shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentWithMultipleMachinesIncludingMachineWithoutLimits()
             throws Exception {
 
         long ram = environmentRamCalculator.calculate(TestObjects.createEnvironment("1gb", "512mb", null));

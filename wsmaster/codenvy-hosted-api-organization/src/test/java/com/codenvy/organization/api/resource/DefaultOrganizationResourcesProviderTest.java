@@ -16,7 +16,9 @@ package com.codenvy.organization.api.resource;
 
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.mockito.Mock;
@@ -50,7 +52,9 @@ public class DefaultOrganizationResourcesProviderTest {
     @BeforeMethod
     public void setUp() throws Exception {
         organizationResourcesProvider = new DefaultOrganizationResourcesProvider(organizationManager,
-                                                                                 "2gb");
+                                                                                 "2gb",
+                                                                                 10,
+                                                                                 5);
         when(organizationManager.getById(anyString())).thenReturn(organization);
     }
 
@@ -68,7 +72,7 @@ public class DefaultOrganizationResourcesProviderTest {
     }
 
     @Test
-    public void shouldProvideDefaultResourcesForSuborganization() throws Exception {
+    public void shouldProvideDefaultResourcesForRootOrganization() throws Exception {
         //given
         when(organization.getParent()).thenReturn(null);
 
@@ -77,9 +81,15 @@ public class DefaultOrganizationResourcesProviderTest {
 
         //then
         verify(organizationManager).getById("organization123");
-        assertEquals(defaultResources.size(), 1);
-        assertEquals(defaultResources.get(0), new ResourceImpl(RamResourceType.ID,
-                                                               2048,
-                                                               RamResourceType.UNIT));
+        assertEquals(defaultResources.size(), 3);
+        assertTrue(defaultResources.contains(new ResourceImpl(RamResourceType.ID,
+                                                              2048,
+                                                              RamResourceType.UNIT)));
+        assertTrue(defaultResources.contains(new ResourceImpl(WorkspaceResourceType.ID,
+                                                              10,
+                                                              WorkspaceResourceType.UNIT)));
+        assertTrue(defaultResources.contains(new ResourceImpl(RuntimeResourceType.ID,
+                                                              5,
+                                                              RuntimeResourceType.UNIT)));
     }
 }

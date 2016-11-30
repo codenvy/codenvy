@@ -14,7 +14,9 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.api.RuntimeResourceType;
+import com.codenvy.resource.api.RamResourceType;
+import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -34,7 +36,7 @@ public class DefaultUserResourcesProviderTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        resourcesProvider = new DefaultUserResourcesProvider("2gb");
+        resourcesProvider = new DefaultUserResourcesProvider("2gb", 10, 5);
     }
 
     @Test
@@ -52,9 +54,16 @@ public class DefaultUserResourcesProviderTest {
         final List<ResourceImpl> defaultResources = resourcesProvider.getResources("user123");
 
         //then
-        Assert.assertEquals(defaultResources.size(), 1);
-        Assert.assertEquals(defaultResources.get(0), new ResourceImpl(RamResourceType.ID,
-                                                                      2048,
-                                                                      RamResourceType.UNIT));
+        Assert.assertEquals(defaultResources.size(), 3);
+        Assert.assertTrue(defaultResources.contains(new ResourceImpl(RamResourceType.ID,
+                                                                     2048,
+                                                                     RamResourceType.UNIT)));
+        Assert.assertTrue(defaultResources.contains(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                     10,
+                                                                     WorkspaceResourceType.UNIT)));
+        Assert.assertTrue(defaultResources.contains(new ResourceImpl(RuntimeResourceType.ID,
+                                                                     5,
+                                                                     RuntimeResourceType.UNIT)));
+
     }
 }

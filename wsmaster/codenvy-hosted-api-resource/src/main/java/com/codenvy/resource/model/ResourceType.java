@@ -40,6 +40,11 @@ public interface ResourceType {
     Set<String> getSupportedUnits();
 
     /**
+     * Returns default unit.
+     */
+    String getDefaultUnit();
+
+    /**
      * Defines function for aggregating two resources of this type.
      *
      * @param resourceA

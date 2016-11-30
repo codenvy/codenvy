@@ -22,23 +22,18 @@ import com.codenvy.resource.api.free.FreeResourcesProvider;
 import com.codenvy.resource.api.license.AccountLicenseService;
 import com.codenvy.resource.api.license.LicenseServicePermissionsFilter;
 import com.codenvy.resource.api.license.ResourcesProvider;
-import com.codenvy.resource.api.ram.RamResourceType;
-import com.codenvy.resource.api.ram.RamResourceUsageTracker;
-import com.codenvy.resource.api.ram.StartWorkspaceResourcesLocker;
 import com.codenvy.resource.api.usage.ResourceUsageService;
-import com.codenvy.resource.api.usage.ResourcesPermissionsChecker;
 import com.codenvy.resource.api.usage.ResourceUsageServicePermissionsFilter;
+import com.codenvy.resource.api.usage.ResourcesPermissionsChecker;
 import com.codenvy.resource.api.usage.UserResourcesPermissionsChecker;
+import com.codenvy.resource.api.usage.tracker.RamResourceUsageTracker;
+import com.codenvy.resource.api.usage.tracker.RuntimeResourceUsageTracker;
+import com.codenvy.resource.api.usage.tracker.WorkspaceResourceUsageTracker;
 import com.codenvy.resource.model.ResourceType;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
-
-import static com.google.inject.matcher.Matchers.subclassesOf;
-import static org.eclipse.che.inject.Matchers.names;
 
 /**
  * @author Sergii Leschenko
@@ -63,17 +58,17 @@ public class ResourceModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), ResourcesProvider.class)
                    .addBinding().to(FreeResourcesProvider.class);
 
-        Multibinder.newSetBinder(binder(), ResourceType.class)
-                   .addBinding().to(RamResourceType.class);
+        Multibinder<ResourceType> resourcesTypesBinder = Multibinder.newSetBinder(binder(), ResourceType.class);
+        resourcesTypesBinder.addBinding().to(RamResourceType.class);
+        resourcesTypesBinder.addBinding().to(WorkspaceResourceType.class);
+        resourcesTypesBinder.addBinding().to(RuntimeResourceType.class);
 
         Multibinder.newSetBinder(binder(), ResourcesPermissionsChecker.class)
                    .addBinding().to(UserResourcesPermissionsChecker.class);
 
-        final StartWorkspaceResourcesLocker startWorkspaceResourcesLocker = new StartWorkspaceResourcesLocker();
-        requestInjection(startWorkspaceResourcesLocker);
-        bindInterceptor(subclassesOf(WorkspaceManager.class), names("startWorkspace"), startWorkspaceResourcesLocker);
-
         Multibinder<ResourceUsageTracker> usageTrackersBinder = Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
         usageTrackersBinder.addBinding().to(RamResourceUsageTracker.class);
+        usageTrackersBinder.addBinding().to(WorkspaceResourceUsageTracker.class);
+        usageTrackersBinder.addBinding().to(RuntimeResourceUsageTracker.class);
     }
 }
