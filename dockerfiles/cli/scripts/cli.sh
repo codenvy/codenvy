@@ -500,7 +500,9 @@ wait_until_server_is_booted () {
 
 server_is_booted() {
   HTTP_STATUS_CODE=$(curl -I -k $CODENVY_HOST/api/ \
-                     -s -o "${LOGS}" --write-out "%{http_code}")
+                     -s -o /dev/null --write-out "%{http_code}")
+  log "${HTTP_STATUS_CODE}"
+
   if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
     return 0
   else
