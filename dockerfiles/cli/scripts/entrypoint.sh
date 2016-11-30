@@ -16,13 +16,16 @@ CHE_CONTAINER_ROOT="/codenvy"
 CHE_ASSEMBLY_IN_REPO_MODULE_NAME="assembly/onpremises-ide-packaging-tomcat-codenvy-allinone"
 CHE_ASSEMBLY_IN_REPO="${CHE_ASSEMBLY_IN_REPO_MODULE_NAME}/target/onpremises-ide-packaging-tomcat-codenvy-allinone-*/"
 CHE_SCRIPTS_CONTAINER_SOURCE_DIR="/repo/dockerfiles/cli/scripts"
+CHE_LICENSE=true
+CHE_LICENSE_URL="https://codenvy.com/legal/fair-source/"
+CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
 
 init_usage() {
   USAGE="
 Usage: docker run -it --rm
                   -v /var/run/docker.sock:/var/run/docker.sock
                   -v <LOCAL_DATA_PATH>:${CHE_CONTAINER_ROOT}
-                  ${CHE_IMAGE_NAME} [COMMAND]
+                  ${CHE_IMAGE_FULLNAME} [COMMAND]
 
     help                                 This message
     version                              Installed version and upgrade paths
@@ -67,4 +70,6 @@ Variables:
 }
 
 source /scripts/base/startup.sh
+
+
 start "$@"
