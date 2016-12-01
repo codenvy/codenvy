@@ -27,8 +27,8 @@
     <name>Onpremises IDE :: ZIP    :: Terminal</name>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.lib</groupId>
-            <artifactId>codenvy-websocket-terminal</artifactId>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
             <type>zip</type>
             <classifier>linux_amd64</classifier>
         </dependency>
