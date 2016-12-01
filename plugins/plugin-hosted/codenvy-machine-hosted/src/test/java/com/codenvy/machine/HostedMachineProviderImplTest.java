@@ -132,7 +132,11 @@ public class HostedMachineProviderImplTest {
                                                  MEMORY_SWAP_MULTIPLIER,
                                                  machineTokenRegistry,
                                                  emptySet(),
-                                                 null);
+                                                 null,
+                                                 null,
+                                                 null,
+                                                 0,
+                                                 0);
 
         createInstanceFromRecipe(true);
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);

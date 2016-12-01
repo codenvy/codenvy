@@ -103,6 +103,29 @@ codenvy.workspace.projects_sync_port=0
 # Since 4.3 kernel.
 che.docker.pids_limit=512
 
+# Sets parent cgroup for cgroups of containers created by workspaces.
+# This allows an admin to set custom cgroup limitations to all containers of workspaces by configuring cgroups.
+# Example:
+# /my_group
+# my_another_group
+che.docker.parent_cgroup=<%= scope.lookupvar('codenvy::machine_docker_parent_cgroup') %>
+
+# Sets set of CPUs that can be used by each container of started workspace.
+# Example:
+# 0-3
+# 1,4
+che.docker.cpuset_cpus=<%= scope.lookupvar('codenvy::machine_docker_cpuset_cpus') %>
+
+# Next 2 properties set limits on CPU consumption by containers of started workspaces.
+# Period sets amount of units per CPU core.
+# Quota sets amount of units available for container per whole CPU.
+# Max value of quota could be period * number of CPU cores in a system.
+# Example:
+# che.docker.cpu_period=5000
+# che.docker.cpu_quota=10000
+che.docker.cpu_period=<%= scope.lookupvar('codenvy::machine_docker_cpu_period') %>
+che.docker.cpu_quota=<%= scope.lookupvar('codenvy::machine_docker_cpu_quota') %>
+
 # Adds options when mounting the /projects volume.
 che.docker.volumes_projects_options=Z
 
