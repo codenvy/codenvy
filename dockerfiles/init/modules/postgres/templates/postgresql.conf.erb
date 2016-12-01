@@ -396,11 +396,11 @@ log_min_error_statement = error	# values in order of decreasing detail:
 
 
 <% if scope.lookupvar('postgres::env') == 'production' -%>
-		log_min_duration_statement = 1000
+log_min_duration_statement = 2000
 <% else -%>
-		log_min_duration_statement = 0
+log_min_duration_statement = 0
 <% end -%>
-          # -1 is disabled, 0 logs all statements
+					# -1 is disabled, 0 logs all statements
 					# and their durations, > 0 logs only
 					# statements running at least this number
 					# of milliseconds

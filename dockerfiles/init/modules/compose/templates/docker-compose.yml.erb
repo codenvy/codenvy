@@ -129,7 +129,9 @@ services:
       - '<%= ENV["POSTGRES_ENV_FILE"] %>'
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/usr/share/postgresql/postgresql.conf.sample'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/postgres/:/var/log/postgresql'
+    command: postgres -c config_file=/etc/postgresql.conf
 <% if scope.lookupvar('codenvy::env') != 'production' -%>
     ports:
       - '5432:5432'
