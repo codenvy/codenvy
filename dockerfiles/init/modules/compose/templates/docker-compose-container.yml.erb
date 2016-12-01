@@ -13,9 +13,11 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/rsyslog.conf:/etc/rsyslog.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/haproxy.conf:/etc/rsyslog.d/haproxy.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/postgre.conf:/etc/rsyslog.d/postgre.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/swarm.conf:/etc/rsyslog.d/swarm.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/postgre/:/var/log/postgre'
     ports:
       - '5140:514'
     ulimits:
@@ -130,7 +132,6 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/postgres/:/var/log/postgresql'
     command: postgres -c config_file=/etc/postgresql.conf
 <% if scope.lookupvar('codenvy::env') != 'production' -%>
     ports:
@@ -142,6 +143,11 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:5140"
+        syslog-facility: "local0"
 
 ########################
 # CODENVY
