@@ -19,9 +19,9 @@ class rsyslog {
     content => template("rsyslog/swarm.conf.erb"),
     mode    => '644',
   } ->
-  file { "/opt/codenvy/config/rsyslog/postgre.conf":
+  file { "/opt/codenvy/config/rsyslog/postgres.conf":
     ensure  => "present",
-    content => template("rsyslog/postgre.conf.erb"),
+    content => template("rsyslog/postgres.conf.erb"),
     mode    => '644',
   }
 }
