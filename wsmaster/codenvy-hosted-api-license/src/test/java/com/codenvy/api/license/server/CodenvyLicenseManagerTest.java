@@ -32,21 +32,16 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 import static com.codenvy.api.license.CodenvyLicense.MAX_NUMBER_OF_FREE_SERVERS;
@@ -56,8 +51,6 @@ import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -85,20 +78,16 @@ public class CodenvyLicenseManagerTest {
 
     private static final String LICENSE_TEXT               = "# (id: 1)\nlicense text";
     private static final String NEW_LICENSE_TEXT           = "# (id: 2)\nnew license text";
-    private static final String LICENSE_STORAGE_PREFIX_DIR = "licenseStorage-";
-    private static final String LICENSE                    = "license";
     private static final String LICENSE_QUALIFIER          = "1";
     private static final long   USER_NUMBER                = 3;
     private static final int    NODES_NUMBER               = 2;
 
     @Mock
-    private CodenvyLicense           mockCodenvyLicense;
-    @Mock
-    private CodenvyLicenseFactory    licenseFactory;
-    @Mock
     private CodenvyLicense           codenvyLicense;
     @Mock
     private CodenvyLicense           newCodenvyLicense;
+    @Mock
+    private CodenvyLicenseFactory    licenseFactory;
     @Mock
     private SwarmDockerConnector     swarmDockerConnector;
     @Mock
@@ -109,9 +98,8 @@ public class CodenvyLicenseManagerTest {
     private CodenvyLicenseActionDao  codenvyLicenseActionDao;
     @Mock
     private CodenvyLicenseActionImpl codenvyLicenseAction;
-
-    private File testDirectory;
-    private File licenseFile;
+    @Mock
+    private CodenvyLicenseStorage    codenvyLicenseStorage;
 
     private CodenvyLicenseManager codenvyLicenseManager;
 
@@ -119,11 +107,6 @@ public class CodenvyLicenseManagerTest {
     public void setUp() throws Exception {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource(".");
         assertNotNull(resource);
-
-        File targetDir = new File(resource.getPath()).getParentFile();
-        testDirectory = new File(targetDir, NameGenerator.generate(LICENSE_STORAGE_PREFIX_DIR, 4));
-        licenseFile = new File(testDirectory, LICENSE);
-        Files.createDirectories(testDirectory.toPath());
 
         when(licenseFactory.create(LICENSE_TEXT)).thenReturn(codenvyLicense);
         when(licenseFactory.create(NEW_LICENSE_TEXT)).thenReturn(newCodenvyLicense);
@@ -140,16 +123,11 @@ public class CodenvyLicenseManagerTest {
 
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
-        codenvyLicenseManager = spy(new CodenvyLicenseManager(licenseFile.getAbsolutePath(),
-                                                              licenseFactory,
+        codenvyLicenseManager = spy(new CodenvyLicenseManager(licenseFactory,
                                                               userManager,
                                                               swarmDockerConnector,
-                                                              codenvyLicenseActionDao));
-    }
-
-    @AfterMethod
-    public void tearDown() throws Exception {
-        IoUtil.deleteRecursive(testDirectory);
+                                                              codenvyLicenseActionDao,
+                                                              codenvyLicenseStorage));
     }
 
     /**
@@ -171,8 +149,7 @@ public class CodenvyLicenseManagerTest {
         assertFalse(isNullOrEmpty(action.getLicenseQualifier()));
 
         verify(codenvyLicense).getLicenseText();
-        assertTrue(Files.exists(licenseFile.toPath()));
-        assertEquals(LICENSE_TEXT, readFileToString(licenseFile, UTF_8));
+        verify(codenvyLicenseStorage).persistLicense(LICENSE_TEXT);
     }
 
     /**
@@ -207,6 +184,8 @@ public class CodenvyLicenseManagerTest {
         codenvyLicenseManager.store(LICENSE_TEXT);
 
         verify(codenvyLicenseActionDao, times(1)).store(any(CodenvyLicenseActionImpl.class));
+
+        when(codenvyLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
         codenvyLicenseManager.delete();
 
@@ -253,9 +232,6 @@ public class CodenvyLicenseManagerTest {
 
         codenvyLicenseManager.store(NEW_LICENSE_TEXT);
 
-        assertEquals(NEW_LICENSE_TEXT, readFileToString(licenseFile, UTF_8));
-        assertTrue(Files.exists(licenseFile.toPath()));
-
         verify(codenvyLicenseActionDao).remove(PRODUCT_LICENSE, ACCEPTED);
         verify(codenvyLicenseActionDao).remove(PRODUCT_LICENSE, EXPIRED);
         verify(codenvyLicenseActionDao).store(any(CodenvyLicenseActionImpl.class));
@@ -272,9 +248,8 @@ public class CodenvyLicenseManagerTest {
      */
     @Test
     public void shouldRemoveLicense() throws Exception {
-        codenvyLicenseManager.store(LICENSE_TEXT);
+        when(codenvyLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
-        Mockito.reset(codenvyLicenseActionDao);
         codenvyLicenseManager.delete();
 
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
@@ -284,11 +259,13 @@ public class CodenvyLicenseManagerTest {
         assertEquals(expireAction.getActionType(), EXPIRED);
         assertEquals(expireAction.getLicenseQualifier(), LICENSE_QUALIFIER);
 
-        assertFalse(Files.exists(licenseFile.toPath()));
+        verify(codenvyLicenseStorage).clean();
     }
 
     @Test(expectedExceptions = LicenseNotFoundException.class)
     public void shouldThrowLicenseNotFoundExceptionIfWeTryToDeleteLicenseFromEmptyStorage() throws ApiException {
+        when(codenvyLicenseStorage.loadLicense()).thenThrow(new LicenseNotFoundException("License not found"));
+
         codenvyLicenseManager.delete();
     }
 
@@ -343,23 +320,19 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void shouldLoadLicense() throws Exception {
-        codenvyLicenseManager.store(LICENSE_TEXT);
+        when(codenvyLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
         CodenvyLicense license = codenvyLicenseManager.load();
 
-        verify(licenseFactory, times(2)).create(LICENSE_TEXT);
+        verify(codenvyLicenseStorage).loadLicense();
+        verify(licenseFactory).create(LICENSE_TEXT);
         assertEquals(license, codenvyLicense);
-    }
-
-    @Test(expectedExceptions = LicenseNotFoundException.class)
-    public void shouldThrowLicenseNotFoundExceptionIfWeTryToGetLicenseFromEmptyStorage() {
-        codenvyLicenseManager.load();
     }
 
     @Test
     public void testIsCodenvyLicenseUsageLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(true).when(mockCodenvyLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(true).when(codenvyLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
 
         assertTrue(codenvyLicenseManager.isSystemUsageLegal());
     }
@@ -376,8 +349,8 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyLicenseUsageNotLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(false).when(mockCodenvyLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(false).when(codenvyLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
 
         assertFalse(codenvyLicenseManager.isSystemUsageLegal());
     }
@@ -394,16 +367,16 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyActualNodesUsageLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(true).when(mockCodenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(true).when(codenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
 
         assertTrue(codenvyLicenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void testIsCodenvyGivenNodesUsageLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(true).when(mockCodenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(true).when(codenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
 
         assertTrue(codenvyLicenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
         verify(swarmDockerConnector, never()).getAvailableNodes();
@@ -411,16 +384,16 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void testIsCodenvyActualNodesUsageNotLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(false).when(mockCodenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(false).when(codenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
 
         assertFalse(codenvyLicenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void testIsCodenvyGivenNodesUsageNotLegal() throws IOException, ServerException {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(false).when(mockCodenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(false).when(codenvyLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
 
         assertFalse(codenvyLicenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
         verify(swarmDockerConnector, never()).getAvailableNodes();
@@ -447,8 +420,8 @@ public class CodenvyLicenseManagerTest {
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToLicense() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(true).when(mockCodenvyLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(true).when(codenvyLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
         assertTrue(codenvyLicenseManager.canUserBeAdded());
     }
@@ -464,8 +437,8 @@ public class CodenvyLicenseManagerTest {
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToLicense() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn(false).when(mockCodenvyLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn(false).when(codenvyLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
         assertFalse(codenvyLicenseManager.canUserBeAdded());
     }
@@ -481,8 +454,8 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void shouldReturnAllowedUserNumberDueToLicense() {
-        doReturn(mockCodenvyLicense).when(codenvyLicenseManager).load();
-        doReturn((int)USER_NUMBER).when(mockCodenvyLicense).getNumberOfUsers();
+        doReturn(codenvyLicense).when(codenvyLicenseManager).load();
+        doReturn((int)USER_NUMBER).when(codenvyLicense).getNumberOfUsers();
 
         assertEquals(codenvyLicenseManager.getAllowedUserNumber(), USER_NUMBER);
     }
