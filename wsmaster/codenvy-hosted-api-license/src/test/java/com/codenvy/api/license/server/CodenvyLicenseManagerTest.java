@@ -128,6 +128,8 @@ public class CodenvyLicenseManagerTest {
         when(licenseFactory.create(LICENSE_TEXT)).thenReturn(codenvyLicense);
         when(licenseFactory.create(NEW_LICENSE_TEXT)).thenReturn(newCodenvyLicense);
         when(codenvyLicense.getLicenseText()).thenReturn(LICENSE_TEXT);
+        when(codenvyLicense.getLicenseId()).thenReturn("1");
+        when(newCodenvyLicense.getLicenseId()).thenReturn("2");
         when(newCodenvyLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
 

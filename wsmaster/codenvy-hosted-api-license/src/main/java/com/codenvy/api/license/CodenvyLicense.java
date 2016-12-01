@@ -14,12 +14,17 @@
  */
 package com.codenvy.api.license;
 
+import com.codenvy.api.license.exception.IllegalLicenseFormatException;
+import com.license4j.License;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents valid Codenvy license.
@@ -27,20 +32,23 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 public class CodenvyLicense {
-    public static final DateFormat EXPIRATION_DATE_FORMAT     = new SimpleDateFormat("yyyy/MM/dd");
-    public static final long       MAX_NUMBER_OF_FREE_USERS   = 3;
-    public static final int        MAX_NUMBER_OF_FREE_SERVERS = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
+    private static final Pattern    LICENSE_ID                 = Pattern.compile(".*\\(id: ([0-9]+)\\)");
+    public static final  DateFormat EXPIRATION_DATE_FORMAT     = new SimpleDateFormat("yyyy/MM/dd");
+    public static final  long       MAX_NUMBER_OF_FREE_USERS   = 3;
+    public static final  int        MAX_NUMBER_OF_FREE_SERVERS = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
 
     private final Map<LicenseFeature, String> features;
-    private final String                      licenseText;
+    private final License                     license;
+    private final String                      id;
 
-    CodenvyLicense(String licenseText, Map<LicenseFeature, String> features) {
+    CodenvyLicense(License license, Map<LicenseFeature, String> features) {
         this.features = features;
-        this.licenseText = licenseText;
+        this.license = license;
+        this.id = extractLicenseId();
     }
 
     public String getLicenseText() {
-        return licenseText;
+        return license.getLicenseString();
     }
 
     /**
@@ -109,6 +117,13 @@ public class CodenvyLicense {
     }
 
     /**
+     * Returns license id generated with license4j manager.
+     */
+    public String getLicenseId() {
+        return id;
+    }
+
+    /**
      * @return false if (actual number of users > MAX_NUMBER_OF_FREE_USERS) OR (actual number of nodes > MAX_NUMBER_OF_FREE_SERVERS)
      */
     public static boolean isFreeUsageLegal(long actualUsers, int actualServers) {
@@ -119,6 +134,16 @@ public class CodenvyLicense {
     private Object doGetFeature(LicenseFeature feature) {
         return feature.parseValue(features.get(feature));
     }
+
+    private String extractLicenseId() {
+        Matcher matcher = LICENSE_ID.matcher(getLicenseText());
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        throw new IllegalLicenseFormatException("Unrecognized license format. Id not found");
+    }
+
 
     /**
      * Codenvy license type.

@@ -14,9 +14,6 @@
  */
 package com.codenvy.api.license;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.CodenvyLicenseFactory;
-import com.codenvy.api.license.LicenseFeature;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;

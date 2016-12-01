@@ -76,7 +76,7 @@ public class CodenvyLicenseFactory {
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
             validateFeaturesFormat(features);
 
-            return new CodenvyLicense(licenseText, features);
+            return new CodenvyLicense(license, features);
         } catch (IllegalArgumentException e) {
             throw new InvalidLicenseException(e.getMessage(), e);
         }

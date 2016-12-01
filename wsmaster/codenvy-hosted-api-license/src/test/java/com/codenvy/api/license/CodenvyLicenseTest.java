@@ -14,14 +14,19 @@
  */
 package com.codenvy.api.license;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.LicenseFeature;
 import com.google.common.collect.ImmutableMap;
+import com.license4j.License;
+
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Map;
 
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -29,11 +34,20 @@ import static org.testng.Assert.assertEquals;
  * @author Dmytro Nochevnov
  * @author Alexander Andrienko
  */
+@Listeners(value = {MockitoTestNGListener.class})
 public class CodenvyLicenseTest {
+
+    @Mock
+    private License license;
 
     public static final String EXPIRED_DATE     = "1990/12/31";
     public static final String NON_EXPIRED_DATE = "2100/12/31";
     public static final int    LICENSED_USERS   = 10;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        when(license.getLicenseString()).thenReturn("## (id: 123)\nabc");
+    }
 
     @Test(dataProvider = "getDataToTestIsLicenseUsageLegal")
     public void testIsLicenseUsageLegal(String type, String expiration, int users, long actualUsers, int actualServers,
@@ -41,9 +55,9 @@ public class CodenvyLicenseTest {
         Map<LicenseFeature, String> features = ImmutableMap.of(LicenseFeature.TYPE, type,
                                                                LicenseFeature.EXPIRATION, expiration,
                                                                LicenseFeature.USERS, String.valueOf(users));
-        CodenvyLicense license = new CodenvyLicense("", features);
+        CodenvyLicense codenvyLicense = new CodenvyLicense(license, features);
 
-        boolean result = license.isLicenseUsageLegal(actualUsers, actualServers);
+        boolean result = codenvyLicense.isLicenseUsageLegal(actualUsers, actualServers);
         assertEquals(result, isLicenseUsageLegal);
     }
 
@@ -104,9 +118,9 @@ public class CodenvyLicenseTest {
     @Test(dataProvider = "getDataToTestIsLegalToAddNode")
           public void testIsLegalToAddNode(String type, String expiration, int actualServers, boolean isAddNodeLegal) {
         Map<LicenseFeature, String> features = ImmutableMap.of(LicenseFeature.TYPE, type, LicenseFeature.EXPIRATION, expiration);
-        CodenvyLicense license = new CodenvyLicense("", features);
+        CodenvyLicense codenvyLicense = new CodenvyLicense(license, features);
 
-        boolean result = license.isLicenseNodesUsageLegal(actualServers);
+        boolean result = codenvyLicense.isLicenseNodesUsageLegal(actualServers);
         assertEquals(result, isAddNodeLegal);
     }
 

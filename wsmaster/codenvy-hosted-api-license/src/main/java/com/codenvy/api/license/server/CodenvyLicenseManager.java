@@ -48,8 +48,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
@@ -68,8 +66,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 @Singleton
 public class CodenvyLicenseManager {
-
-    private static final Pattern LICENSE_ID = Pattern.compile(".*\\(id: ([0-9]+)\\)");
 
     private final CodenvyLicenseFactory   licenseFactory;
     private final Path                    licenseFile;
@@ -111,10 +107,8 @@ public class CodenvyLicenseManager {
             throw new LicenseException(e.getMessage(), e);
         }
 
-        String licenseQualifier = extractLicenseId(licenseText);
-
         removeActionsOfExpiredLicense();
-        removeActionsOfDifferentLicenseAndStoreNew(licenseQualifier);
+        removeActionsOfDifferentLicenseAndStoreNew(codenvyLicense.getLicenseId());
     }
 
     private void removeActionsOfDifferentLicenseAndStoreNew(String licenseQualifier) throws ApiException {
@@ -166,8 +160,7 @@ public class CodenvyLicenseManager {
      *         if error occurred while deleting license
      */
     public void delete() throws LicenseException, ApiException {
-        String licenseText = readLicenseText();
-        String licenseQualifier = extractLicenseId(licenseText);
+        CodenvyLicense codenvyLicense = load();
 
         try {
             Files.delete(licenseFile);
@@ -178,7 +171,7 @@ public class CodenvyLicenseManager {
         }
 
         codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
-        addLicenseAction(PRODUCT_LICENSE, EXPIRED, licenseQualifier);
+        addLicenseAction(PRODUCT_LICENSE, EXPIRED, codenvyLicense.getLicenseId());
     }
 
     /**
@@ -317,15 +310,6 @@ public class CodenvyLicenseManager {
                                                attributes);
 
         codenvyLicenseActionDao.store(codenvyLicenseAction);
-    }
-
-    private String extractLicenseId(@NotNull String licenseText) throws BadRequestException {
-        Matcher matcher = LICENSE_ID.matcher(licenseText);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-
-        throw new BadRequestException("License Id is absent");
     }
 
     private String readLicenseText() throws LicenseException {
