@@ -42,13 +42,24 @@ public class JpaCodenvyLicenseActionDao implements CodenvyLicenseActionDao {
     protected Provider<EntityManager> managerProvider;
 
     @Override
-    public void store(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
+    public void insert(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
         requireNonNull(codenvyLicenseAction, "Required non-null codenvy license action");
 
         try {
-            doStore(codenvyLicenseAction);
+            doInsert(codenvyLicenseAction);
         } catch (DuplicateKeyException e) {
             throw new ConflictException("Codenvy license action already exists");
+        } catch (RuntimeException e) {
+            throw new ServerException(e);
+        }
+    }
+
+    @Override
+    public void upsert(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
+        requireNonNull(codenvyLicenseAction, "Required non-null codenvy license action");
+
+        try {
+            doUpsert(codenvyLicenseAction);
         } catch (RuntimeException e) {
             throw new ServerException(e);
         }
@@ -81,17 +92,30 @@ public class JpaCodenvyLicenseActionDao implements CodenvyLicenseActionDao {
     }
 
     @Transactional
-    protected void doStore(CodenvyLicenseActionImpl codenvyLicenseAction) {
+    protected void doInsert(CodenvyLicenseActionImpl codenvyLicenseAction) {
         managerProvider.get().persist(codenvyLicenseAction);
     }
 
     @Transactional
-    protected void doRemove(Constants.License licenseType, Constants.Action licenseAction) throws ServerException {
+    protected void doRemove(Constants.License licenseType, Constants.Action actionType) throws ServerException {
         try {
-            CodenvyLicenseActionImpl action = getByLicenseAndAction(licenseType, licenseAction);
+            CodenvyLicenseActionImpl action = getByLicenseAndAction(licenseType, actionType);
             managerProvider.get().remove(action);
-        } catch (NotFoundException e) {
-            return;
+        } catch (NotFoundException ignored) {
+        }
+    }
+
+    @Transactional
+    protected void doUpsert(CodenvyLicenseActionImpl codenvyLicenseAction) {
+        EntityManager entityManager = managerProvider.get();
+        try {
+            entityManager.createNamedQuery("LicenseAction.getByLicenseAndAction", CodenvyLicenseActionImpl.class)
+                         .setParameter("license_type", codenvyLicenseAction.getLicenseType())
+                         .setParameter("action_type", codenvyLicenseAction.getActionType())
+                         .getSingleResult();
+            entityManager.merge(codenvyLicenseAction);
+        } catch (NoResultException e) {
+            entityManager.persist(codenvyLicenseAction);
         }
     }
 }

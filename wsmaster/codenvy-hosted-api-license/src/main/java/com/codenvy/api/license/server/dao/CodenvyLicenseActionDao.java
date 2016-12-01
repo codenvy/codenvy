@@ -29,7 +29,7 @@ import org.eclipse.che.api.core.ServerException;
 public interface CodenvyLicenseActionDao {
 
     /**
-     * Stores license action.
+     * Inserts license action record.
      *
      * @param codenvyLicenseAction
      *      any license action
@@ -38,10 +38,12 @@ public interface CodenvyLicenseActionDao {
      * @throws ServerException
      *      any other error occurred
      */
-    void store(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+    void insert(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+
+    void upsert(CodenvyLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
 
     /**
-     * Removes codenvy license actions.
+     * Removes codenvy license action record.
      *
      * @param licenseType
      *          the type of the license

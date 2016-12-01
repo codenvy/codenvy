@@ -142,7 +142,7 @@ public class CodenvyLicenseManagerTest {
         codenvyLicenseManager.store(LICENSE_TEXT);
 
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
-        verify(codenvyLicenseActionDao).store(actionCaptor.capture());
+        verify(codenvyLicenseActionDao).insert(actionCaptor.capture());
         CodenvyLicenseActionImpl action = actionCaptor.getValue();
         assertEquals(action.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(action.getActionType(), ACCEPTED);
@@ -163,7 +163,7 @@ public class CodenvyLicenseManagerTest {
         codenvyLicenseManager.store(LICENSE_TEXT);
         codenvyLicenseManager.store(LICENSE_TEXT);
 
-        verify(codenvyLicenseActionDao, times(1)).store(any(CodenvyLicenseActionImpl.class));
+        verify(codenvyLicenseActionDao, times(1)).insert(any(CodenvyLicenseActionImpl.class));
     }
 
     /**
@@ -183,7 +183,7 @@ public class CodenvyLicenseManagerTest {
 
         codenvyLicenseManager.store(LICENSE_TEXT);
 
-        verify(codenvyLicenseActionDao, times(1)).store(any(CodenvyLicenseActionImpl.class));
+        verify(codenvyLicenseActionDao, times(1)).insert(any(CodenvyLicenseActionImpl.class));
 
         when(codenvyLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
@@ -191,7 +191,7 @@ public class CodenvyLicenseManagerTest {
 
         verify(codenvyLicenseActionDao, times(1)).remove(eq(PRODUCT_LICENSE), eq(EXPIRED));
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
-        verify(codenvyLicenseActionDao, times(2)).store(actionCaptor.capture());
+        verify(codenvyLicenseActionDao, times(2)).insert(actionCaptor.capture());
         CodenvyLicenseActionImpl value = actionCaptor.getAllValues().get(1);
         assertEquals(value.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(value.getActionType(), EXPIRED);
@@ -204,7 +204,7 @@ public class CodenvyLicenseManagerTest {
         verify(codenvyLicenseActionDao, times(1)).remove(eq(PRODUCT_LICENSE), eq(ACCEPTED));
         verify(codenvyLicenseActionDao, times(2)).remove(eq(PRODUCT_LICENSE), eq(EXPIRED));
         actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
-        verify(codenvyLicenseActionDao, times(3)).store(actionCaptor.capture());
+        verify(codenvyLicenseActionDao, times(3)).insert(actionCaptor.capture());
         value = actionCaptor.getAllValues().get(2);
         assertEquals(value.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(value.getActionType(), ACCEPTED);
@@ -234,7 +234,7 @@ public class CodenvyLicenseManagerTest {
 
         verify(codenvyLicenseActionDao).remove(PRODUCT_LICENSE, ACCEPTED);
         verify(codenvyLicenseActionDao).remove(PRODUCT_LICENSE, EXPIRED);
-        verify(codenvyLicenseActionDao).store(any(CodenvyLicenseActionImpl.class));
+        verify(codenvyLicenseActionDao).insert(any(CodenvyLicenseActionImpl.class));
     }
 
     /**
@@ -253,7 +253,7 @@ public class CodenvyLicenseManagerTest {
         codenvyLicenseManager.delete();
 
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
-        verify(codenvyLicenseActionDao, times(1)).store(actionCaptor.capture());
+        verify(codenvyLicenseActionDao, times(1)).insert(actionCaptor.capture());
         CodenvyLicenseActionImpl expireAction = actionCaptor.getValue();
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), EXPIRED);
@@ -271,14 +271,11 @@ public class CodenvyLicenseManagerTest {
 
     @Test
     public void shouldAcceptFairSourceLicense() throws Exception {
-        when(codenvyLicenseActionDao.getByLicenseAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-                .thenThrow(new NotFoundException("Codenvy license not found"));
-
         FairSourceLicenseAcceptanceImpl fairSourceLicenseAcceptance = new FairSourceLicenseAcceptanceImpl("fn", "ln", "em@codenvy.com");
         codenvyLicenseManager.acceptFairSourceLicense(fairSourceLicenseAcceptance);
 
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
-        verify(codenvyLicenseActionDao).store(actionCaptor.capture());
+        verify(codenvyLicenseActionDao).insert(actionCaptor.capture());
         CodenvyLicenseActionImpl value = actionCaptor.getValue();
         assertEquals(value.getLicenseType(), FAIR_SOURCE_LICENSE);
         assertEquals(value.getActionType(), ACCEPTED);
@@ -295,10 +292,10 @@ public class CodenvyLicenseManagerTest {
         FairSourceLicenseAcceptanceImpl fairSourceLicenseAcceptance = new FairSourceLicenseAcceptanceImpl("fn", "ln", "em@codenvy.com");
         codenvyLicenseManager.acceptFairSourceLicense(fairSourceLicenseAcceptance);
 
-        verify(codenvyLicenseActionDao, times(1)).store(any(CodenvyLicenseActionImpl.class));
+        verify(codenvyLicenseActionDao, times(1)).insert(any(CodenvyLicenseActionImpl.class));
 
         codenvyLicenseManager.acceptFairSourceLicense(fairSourceLicenseAcceptance);
-        verify(codenvyLicenseActionDao, times(1)).store(any(CodenvyLicenseActionImpl.class));
+        verify(codenvyLicenseActionDao, times(1)).insert(any(CodenvyLicenseActionImpl.class));
         verify(codenvyLicenseActionDao, never()).remove(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED));
     }
 

@@ -14,22 +14,11 @@
  */
 package com.codenvy.api.license.server;
 
-import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
-import com.google.inject.AbstractModule;
-
-import org.eclipse.che.inject.DynaModule;
-
 /**
- * @author Alexander Andrienko
+ * @author Anatolii Bazko
  */
-@DynaModule
-public class LicenseModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(LicenseService.class);
-        bind(LicenseServicePermissionsFilter.class);
-        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
-        bind(CodenvyLicenseActionHandler.class).asEagerSingleton();
-    }
+public interface CodenvyLicenseManagerObservable {
+    void addObserver(CodenvyLicenseManagerObserver observer);
+
+    void removeObserver(CodenvyLicenseManagerObserver observer);
 }

@@ -14,22 +14,18 @@
  */
 package com.codenvy.api.license.server;
 
-import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
-import com.google.inject.AbstractModule;
+import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
 
-import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.api.core.ApiException;
 
 /**
- * @author Alexander Andrienko
+ * @author Anatolii Bazko
  */
-@DynaModule
-public class LicenseModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(LicenseService.class);
-        bind(LicenseServicePermissionsFilter.class);
-        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
-        bind(CodenvyLicenseActionHandler.class).asEagerSingleton();
-    }
+public interface CodenvyLicenseManagerObserver {
+    void onCodenvyFairSourceLicenseAccepted(FairSourceLicenseAcceptance licenseAcceptance) throws ApiException;
+
+    void onProductLicenseDeleted(CodenvyLicense codenvyLicense) throws ApiException;
+
+    void onProductLicenseStored(CodenvyLicense codenvyLicense) throws ApiException;
 }

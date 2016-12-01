@@ -16,6 +16,8 @@ package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.exception.LicenseException;
 import com.codenvy.api.license.exception.LicenseNotFoundException;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import javax.inject.Named;
 import java.io.IOException;
@@ -32,10 +34,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @author Anatolii Bazko
  */
+@Singleton
 public class CodenvyLicenseStorage {
     private final Path licenseFile;
     private final Path activatedLicenseFile;
 
+    @Inject
     public CodenvyLicenseStorage(@Named("license-manager.license-file") String licenseFile) {
         this.licenseFile = Paths.get(licenseFile);
         this.activatedLicenseFile = Paths.get(licenseFile + ".act");

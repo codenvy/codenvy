@@ -31,6 +31,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 import static java.util.Arrays.asList;
@@ -50,7 +51,7 @@ public class JpaCodenvyLicenseActionDaoTest {
     @Inject
     private EventService                            eventService;
     @Inject
-    private JpaCodenvyLicenseActionDao              codenvyLicenseDao;
+    private JpaCodenvyLicenseActionDao              dao;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -72,19 +73,37 @@ public class JpaCodenvyLicenseActionDaoTest {
         codenvyLicenseRepository.createAll(asList(codenvyLicenseActions));
     }
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldThrowExceptionIfLicenseActionAlreadyExists() throws Exception {
-        codenvyLicenseDao.store(new CodenvyLicenseActionImpl(FAIR_SOURCE_LICENSE,
-                                                             ACCEPTED,
-                                                             System.currentTimeMillis(),
-                                                             null,
-                                                             ImmutableMap.of()));
+
+    @AfterMethod
+    public void cleanUp() throws Exception {
+        codenvyLicenseRepository.removeAll();
     }
 
     @Test
-    public void shouldFindRecordByTypeAndAction() throws Exception {
-        CodenvyLicenseActionImpl codenvyLicenseAction =
-                codenvyLicenseDao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+    public void shouldInsertNewRecord() throws Exception {
+        dao.insert(new CodenvyLicenseActionImpl(FAIR_SOURCE_LICENSE,
+                                                EXPIRED,
+                                                System.currentTimeMillis(),
+                                                null,
+                                                ImmutableMap.of("prop1", "value1")));
+
+        CodenvyLicenseActionImpl action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, EXPIRED);
+        assertNotNull(action);
+    }
+
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionOnInsertIfRecordExists() throws Exception {
+        dao.insert(new CodenvyLicenseActionImpl(FAIR_SOURCE_LICENSE,
+                                                ACCEPTED,
+                                                System.currentTimeMillis(),
+                                                null,
+                                                ImmutableMap.of()));
+    }
+
+    @Test
+    public void shouldFindRecordByLicenseAndAction() throws Exception {
+        CodenvyLicenseActionImpl codenvyLicenseAction = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
 
         assertNotNull(codenvyLicenseAction);
         assertNotNull(codenvyLicenseAction.getAttributes().isEmpty());
@@ -92,19 +111,38 @@ public class JpaCodenvyLicenseActionDaoTest {
     }
 
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionIfActionNotFound() throws Exception {
-        codenvyLicenseDao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, Constants.Action.EXPIRED);
+    public void shouldThrowNotFoundExceptionIfRecordAbsent() throws Exception {
+        dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, Constants.Action.EXPIRED);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldRemoveCodenvyLicenseAction() throws Exception {
-        codenvyLicenseDao.remove(PRODUCT_LICENSE, ACCEPTED);
+    public void shouldRemoveRecord() throws Exception {
+        assertNotNull(dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED));
 
-        codenvyLicenseDao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
+        dao.remove(PRODUCT_LICENSE, ACCEPTED);
+
+        dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
     }
 
-    @AfterMethod
-    public void cleanUp() throws Exception {
-        codenvyLicenseRepository.removeAll();
+    @Test
+    public void shouldNotThrowExceptionOnRemoveIfRecordAbsent() throws Exception {
+        dao.remove(PRODUCT_LICENSE, ACCEPTED);
+        dao.remove(PRODUCT_LICENSE, ACCEPTED);
+    }
+
+    @Test
+    public void shouldUpdaterRecord() throws Exception {
+        CodenvyLicenseActionImpl action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        assertEquals(action.getAttributes().get("prop1"), "value1");
+
+        dao.upsert(new CodenvyLicenseActionImpl(FAIR_SOURCE_LICENSE,
+                                                ACCEPTED,
+                                                System.currentTimeMillis(),
+                                                null,
+                                                ImmutableMap.of("prop2", "value2")));
+
+        action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        assertEquals(action.getAttributes().size(), 1);
+        assertEquals(action.getAttributes().get("prop2"), "value2");
     }
 }
