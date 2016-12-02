@@ -59,7 +59,9 @@ public class JpaCodenvyLicenseActionDaoTest {
                                                                                              ACCEPTED,
                                                                                              System.currentTimeMillis(),
                                                                                              null,
-                                                                                             ImmutableMap.of("prop1", "value1")),
+                                                                                             ImmutableMap.of("prop1", "value1",
+                                                                                                             "prop2", "value2",
+                                                                                                             "prop3", "value3")),
                                                                 new CodenvyLicenseActionImpl(PRODUCT_LICENSE,
                                                                                              ACCEPTED,
                                                                                              System.currentTimeMillis(),
@@ -106,8 +108,10 @@ public class JpaCodenvyLicenseActionDaoTest {
         CodenvyLicenseActionImpl codenvyLicenseAction = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
 
         assertNotNull(codenvyLicenseAction);
-        assertNotNull(codenvyLicenseAction.getAttributes().isEmpty());
+        assertEquals(codenvyLicenseAction.getAttributes().size(), 3);
         assertEquals(codenvyLicenseAction.getAttributes().get("prop1"), "value1");
+        assertEquals(codenvyLicenseAction.getAttributes().get("prop2"), "value2");
+        assertEquals(codenvyLicenseAction.getAttributes().get("prop3"), "value2");
     }
 
     @Test(expectedExceptions = NotFoundException.class)

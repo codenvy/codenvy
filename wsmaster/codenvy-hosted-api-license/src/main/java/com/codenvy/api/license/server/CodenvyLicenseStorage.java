@@ -42,7 +42,7 @@ public class CodenvyLicenseStorage {
     @Inject
     public CodenvyLicenseStorage(@Named("license-manager.license-file") String licenseFile) {
         this.licenseFile = Paths.get(licenseFile);
-        this.activatedLicenseFile = Paths.get(licenseFile + ".act");
+        this.activatedLicenseFile = Paths.get(licenseFile + ".activated");
     }
 
     /**

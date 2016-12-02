@@ -48,7 +48,7 @@ import static org.testng.Assert.assertNull;
 @Listeners(value = {MockitoTestNGListener.class})
 public class CodenvyLicenseActionHandlerTest {
 
-    private static final String LICENSE_QUALIFIER = "id";
+    private static final String LICENSE_ID = "id";
 
     @Mock
     private CodenvyLicenseActionDao     dao;
@@ -63,7 +63,7 @@ public class CodenvyLicenseActionHandlerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(codenvyLicense.getLicenseId()).thenReturn(LICENSE_QUALIFIER);
+        when(codenvyLicense.getLicenseId()).thenReturn(LICENSE_ID);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class CodenvyLicenseActionHandlerTest {
         CodenvyLicenseActionImpl expireAction = actionCaptor.getValue();
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), EXPIRED);
-        assertEquals(expireAction.getLicenseQualifier(), LICENSE_QUALIFIER);
+        assertEquals(expireAction.getLicenseQualifier(), LICENSE_ID);
     }
 
     @Test
@@ -112,12 +112,12 @@ public class CodenvyLicenseActionHandlerTest {
         CodenvyLicenseActionImpl expireAction = actionCaptor.getValue();
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), ACCEPTED);
-        assertEquals(expireAction.getLicenseQualifier(), LICENSE_QUALIFIER);
+        assertEquals(expireAction.getLicenseQualifier(), LICENSE_ID);
     }
 
     @Test
     public void ifSameProductLicenseStoredShouldNotAddAcceptedRecordShouldDeletedExpirationRecord() throws Exception {
-        when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_QUALIFIER);
+        when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_ID);
         when(dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(codenvyLicenseAction);
 
         codenvyLicenseActionHandler.onProductLicenseStored(codenvyLicense);
@@ -141,6 +141,6 @@ public class CodenvyLicenseActionHandlerTest {
         CodenvyLicenseActionImpl expireAction = actionCaptor.getValue();
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), ACCEPTED);
-        assertEquals(expireAction.getLicenseQualifier(), LICENSE_QUALIFIER);
+        assertEquals(expireAction.getLicenseQualifier(), LICENSE_ID);
     }
 }

@@ -67,7 +67,7 @@ public class CodenvyLicenseManagerTest {
     private static final String ACTIVATED_LICENSE_TEXT = "# (id: 1)\nactivated license text";
     private static final String LICENSE_TEXT           = "# (id: 1)\nlicense text";
     private static final String NEW_LICENSE_TEXT       = "# (id: 2)\nnew license text";
-    private static final String LICENSE_QUALIFIER      = "1";
+    private static final String LICENSE_ID             = "1";
     private static final long   USER_NUMBER            = 3;
     private static final int    NODES_NUMBER           = 2;
 
@@ -102,11 +102,11 @@ public class CodenvyLicenseManagerTest {
         when(licenseFactory.create(LICENSE_TEXT)).thenReturn(codenvyLicense);
         when(licenseFactory.create(NEW_LICENSE_TEXT)).thenReturn(newCodenvyLicense);
         when(codenvyLicense.getLicenseText()).thenReturn(LICENSE_TEXT);
-        when(codenvyLicense.getLicenseId()).thenReturn("1");
+        when(codenvyLicense.getLicenseId()).thenReturn(LICENSE_ID);
         when(newCodenvyLicense.getLicenseId()).thenReturn("2");
         when(newCodenvyLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_QUALIFIER);
+        when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_ID);
 
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
