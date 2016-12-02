@@ -18,7 +18,6 @@ import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.CodenvyLicenseActionImpl;
 import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
-import com.codenvy.api.license.shared.model.Constants;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -117,7 +116,7 @@ public class CodenvyLicenseActionHandlerTest {
     }
 
     @Test
-    public void ifSameProductLicenseStoredShouldNotAddRecord() throws Exception {
+    public void ifSameProductLicenseStoredShouldNotAddAcceptedRecordShouldDeletedExpirationRecord() throws Exception {
         when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_QUALIFIER);
         when(dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(codenvyLicenseAction);
 
@@ -125,7 +124,7 @@ public class CodenvyLicenseActionHandlerTest {
 
         verify(dao, never()).upsert(any(CodenvyLicenseActionImpl.class));
         verify(dao, never()).insert(any(CodenvyLicenseActionImpl.class));
-        verify(dao, never()).remove(any(Constants.License.class), any(Constants.Action.class));
+        verify(dao).remove(PRODUCT_LICENSE, EXPIRED);
     }
 
     @Test

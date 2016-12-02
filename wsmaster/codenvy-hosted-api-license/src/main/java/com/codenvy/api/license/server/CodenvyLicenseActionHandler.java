@@ -86,14 +86,13 @@ public class CodenvyLicenseActionHandler implements CodenvyLicenseManagerObserve
     public void onProductLicenseStored(CodenvyLicense codenvyLicense) throws ApiException {
         try {
             CodenvyLicenseActionImpl prevCodenvyLicenseAction = codenvyLicenseActionDao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
+            codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
+
             if (prevCodenvyLicenseAction.getLicenseQualifier().equalsIgnoreCase(codenvyLicense.getLicenseId())) {
                 return;
-            } else {
-                codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
             }
         } catch (NotFoundException ignored) {
         }
-
 
         CodenvyLicenseActionImpl codenvyLicenseAction
                 = new CodenvyLicenseActionImpl(PRODUCT_LICENSE,
