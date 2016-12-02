@@ -43,9 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
-import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
-import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -62,6 +60,7 @@ public class CodenvyLicenseManager implements CodenvyLicenseManagerObservable {
     private final SwarmDockerConnector                dockerConnector;
     private final CodenvyLicenseActionDao             codenvyLicenseActionDao;
     private final CodenvyLicenseStorage               codenvyLicenseStorage;
+    private final CodenvyLicenseActivator             codenvyLicenseActivator;
     private final List<CodenvyLicenseManagerObserver> observers;
 
     public static final String UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE   = "Unable to add your account. The Codenvy license has reached its user limit.";
@@ -72,12 +71,14 @@ public class CodenvyLicenseManager implements CodenvyLicenseManagerObservable {
                                  UserManager userManager,
                                  SwarmDockerConnector dockerConnector,
                                  CodenvyLicenseActionDao codenvyLicenseActionDao,
-                                 CodenvyLicenseStorage codenvyLicenseStorage) {
+                                 CodenvyLicenseStorage codenvyLicenseStorage,
+                                 CodenvyLicenseActivator codenvyLicenseActivator) {
         this.licenseFactory = licenseFactory;
         this.userManager = userManager;
         this.dockerConnector = dockerConnector;
         this.codenvyLicenseActionDao = codenvyLicenseActionDao;
         this.codenvyLicenseStorage = codenvyLicenseStorage;
+        this.codenvyLicenseActivator = codenvyLicenseActivator;
         this.observers = new LinkedList<>();
     }
 
@@ -93,6 +94,10 @@ public class CodenvyLicenseManager implements CodenvyLicenseManagerObservable {
         requireNonNull(licenseText, "Codenvy license can't be null");
 
         CodenvyLicense codenvyLicense = licenseFactory.create(licenseText);
+        String activatedLicenseText = codenvyLicenseActivator.activateIfRequired(codenvyLicense);
+        if (activatedLicenseText != null) {
+            codenvyLicenseStorage.persistActivatedLicense(activatedLicenseText);
+        }
         codenvyLicenseStorage.persistLicense(codenvyLicense.getLicenseText());
 
         for (CodenvyLicenseManagerObserver observer : observers) {
@@ -113,22 +118,31 @@ public class CodenvyLicenseManager implements CodenvyLicenseManagerObservable {
     @Nullable
     public CodenvyLicense load() throws LicenseException {
         String licenseText = codenvyLicenseStorage.loadLicense();
-        return licenseFactory.create(licenseText);
+        CodenvyLicense codenvyLicense = licenseFactory.create(licenseText);
+        codenvyLicenseActivator.validateActivation(codenvyLicense);
+        return codenvyLicense;
     }
 
     /**
      * Deletes Codenvy license from the storage.
      *
+     * @throws LicenseNotFoundException
+     *      if Codenvy license not found
      * @throws LicenseException
-     *         if error occurred while deleting license
+     *       if error occurred while deleting license
      */
     public void delete() throws LicenseException, ApiException {
-        CodenvyLicense codenvyLicense = load();
-        codenvyLicenseStorage.clean();
+        String licenseText = codenvyLicenseStorage.loadLicense();
 
-        codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
-        for (CodenvyLicenseManagerObserver observer : observers) {
-            observer.onProductLicenseDeleted(codenvyLicense);
+        try {
+            CodenvyLicense codenvyLicense = licenseFactory.create(licenseText);
+            codenvyLicenseStorage.clean();
+
+            for (CodenvyLicenseManagerObserver observer : observers) {
+                observer.onProductLicenseDeleted(codenvyLicense);
+            }
+        } catch (InvalidLicenseException e) {
+            codenvyLicenseStorage.clean();
         }
     }
 

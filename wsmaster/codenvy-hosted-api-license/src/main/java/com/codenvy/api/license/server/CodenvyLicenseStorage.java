@@ -98,7 +98,7 @@ public class CodenvyLicenseStorage {
      * @throws LicenseException
      *      if unexpected error occurred
      * @throws LicenseNotFoundException
-     *      if unexpected error occurred
+     *      if license file not found
      */
     public String loadLicense() {
         return doLoadLicense(licenseFile);
@@ -110,7 +110,7 @@ public class CodenvyLicenseStorage {
      * @throws LicenseException
      *      if unexpected error occurred
      * @throws LicenseNotFoundException
-     *      if unexpected error occurred
+     *      if license file not found
      */
     public String loadActivatedLicense() {
         return doLoadLicense(activatedLicenseFile);

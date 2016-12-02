@@ -12,30 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.shared.model;
+package com.codenvy.api.license.exception;
 
 /**
  * @author Anatolii Bazko
  */
-public class Constants {
-
-    public static final char[] PRODUCT_ID = "OPL-STN-SM".toCharArray();
-
-    /**
-     * Codenvy license actions.
-     */
-    public enum Action {
-        ACCEPTED,
-        EXPIRED
+public class LicenseNotActivatedException extends LicenseException {
+    public LicenseNotActivatedException(String message) {
+        super(message);
     }
-
-    /**
-     * Codenvy license types.
-     */
-    public enum License {
-        FAIR_SOURCE_LICENSE,
-        PRODUCT_LICENSE
-    }
-
-    private Constants() { }
 }

@@ -16,6 +16,7 @@ package com.codenvy.api.license;
 
 import com.codenvy.api.license.exception.IllegalLicenseFormatException;
 import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.shared.model.Constants;
 import com.license4j.License;
 import com.license4j.LicenseValidator;
 import com.license4j.ValidationStatus;
@@ -40,7 +41,7 @@ public class CodenvyLicenseFactory {
 
     @Inject
     public CodenvyLicenseFactory(@Named("license-manager.public_key") String publicKey) {
-        this.productId = "OPL-STN-SM".toCharArray();
+        this.productId = Constants.PRODUCT_ID;
         this.publicKey = publicKey;
     }
 

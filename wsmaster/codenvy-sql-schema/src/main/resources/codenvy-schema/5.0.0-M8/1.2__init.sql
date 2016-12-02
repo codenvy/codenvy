@@ -32,6 +32,6 @@ CREATE TABLE license_action_attributes (
 );
 
 -- constraints
-ALTER TABLE license_action_attributes ADD CONSTRAINT unq_license_action_attributes_0 UNIQUE (license_type, action_type, value);
+ALTER TABLE license_action_attributes ADD CONSTRAINT unq_license_action_attributes_0 UNIQUE (license_type, action_type, name);
 ALTER TABLE license_action_attributes ADD CONSTRAINT fk_license_action_attributes_0 FOREIGN KEY (license_type, action_type) REFERENCES license_action (license_type, action_type);
 --------------------------------------------------------------------------------

@@ -131,6 +131,17 @@ public class CodenvyLicense {
                && actualServers <= MAX_NUMBER_OF_FREE_SERVERS;
     }
 
+    /**
+     * Indicates if Codenvy license required activation.
+     */
+    public boolean isActivationRequired() {
+        return license.isActivationRequired();
+    }
+
+    public License getOrigin() {
+        return license;
+    }
+
     private Object doGetFeature(LicenseFeature feature) {
         return feature.parseValue(features.get(feature));
     }
