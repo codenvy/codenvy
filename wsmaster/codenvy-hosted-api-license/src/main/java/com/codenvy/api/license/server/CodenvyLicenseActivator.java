@@ -47,6 +47,11 @@ public class CodenvyLicenseActivator {
         this.productId = Constants.PRODUCT_ID;
     }
 
+    /**
+     * Activates license if it requires.
+     *
+     * @return Codenvy license activation text or {@code null} if license doesn't require activation
+     */
     @Nullable
     public String activateIfRequired(CodenvyLicense codenvyLicense) {
         try {
