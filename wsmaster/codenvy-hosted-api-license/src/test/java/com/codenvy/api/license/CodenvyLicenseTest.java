@@ -38,7 +38,7 @@ import static org.testng.Assert.assertEquals;
 public class CodenvyLicenseTest {
 
     @Mock
-    private License license;
+    private License license4j;
 
     public static final String EXPIRED_DATE     = "1990/12/31";
     public static final String NON_EXPIRED_DATE = "2100/12/31";
@@ -46,7 +46,7 @@ public class CodenvyLicenseTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(license.getLicenseString()).thenReturn("## (id: 123)\nabc");
+        when(license4j.getLicenseString()).thenReturn("## (id: 123)\nabc");
     }
 
     @Test(dataProvider = "getDataToTestIsLicenseUsageLegal")
@@ -55,7 +55,7 @@ public class CodenvyLicenseTest {
         Map<LicenseFeature, String> features = ImmutableMap.of(LicenseFeature.TYPE, type,
                                                                LicenseFeature.EXPIRATION, expiration,
                                                                LicenseFeature.USERS, String.valueOf(users));
-        CodenvyLicense codenvyLicense = new CodenvyLicense(license, features);
+        CodenvyLicense codenvyLicense = new CodenvyLicense(license4j, features);
 
         boolean result = codenvyLicense.isLicenseUsageLegal(actualUsers, actualServers);
         assertEquals(result, isLicenseUsageLegal);
@@ -118,7 +118,7 @@ public class CodenvyLicenseTest {
     @Test(dataProvider = "getDataToTestIsLegalToAddNode")
           public void testIsLegalToAddNode(String type, String expiration, int actualServers, boolean isAddNodeLegal) {
         Map<LicenseFeature, String> features = ImmutableMap.of(LicenseFeature.TYPE, type, LicenseFeature.EXPIRATION, expiration);
-        CodenvyLicense codenvyLicense = new CodenvyLicense(license, features);
+        CodenvyLicense codenvyLicense = new CodenvyLicense(license4j, features);
 
         boolean result = codenvyLicense.isLicenseNodesUsageLegal(actualServers);
         assertEquals(result, isAddNodeLegal);
