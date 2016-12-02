@@ -65,8 +65,6 @@ public class CodenvyLicenseActivator {
 
         switch (license.getActivationStatus()) {
             case ACTIVATION_COMPLETED:
-            case ACTIVATION_NOT_REQUIRED:
-            case ALREADY_ACTIVATED_ON_ANOTHER_COMPUTER:
                 return license.getLicenseString();
             default:
                 throw new LicenseNotActivatedException("Codenvy license activation failed. Error code: " + license.getActivationStatus());
@@ -89,17 +87,21 @@ public class CodenvyLicenseActivator {
         try {
             String activatedLicenseText = codenvyLicenseStorage.loadActivatedLicense();
             License license = LicenseValidator.validate(activatedLicenseText, publicKey, String.valueOf(productId), null, null, null, null);
-            if (license.getValidationStatus() != ValidationStatus.LICENSE_VALID) {
-                throw new LicenseNotActivatedException("Codenvy activation license text is not valid.");
+            switch (license.getValidationStatus()) {
+                case LICENSE_VALID:
+                case MISMATCH_HARDWARE_ID:
+                    break;
+                default:
+                    throw new LicenseNotActivatedException(
+                            "Codenvy activation license text is not valid. Error code: " + license.getValidationStatus());
             }
 
             switch (license.getActivationStatus()) {
                 case ACTIVATION_COMPLETED:
-                case ACTIVATION_NOT_REQUIRED:
-                case ALREADY_ACTIVATED_ON_ANOTHER_COMPUTER:
                     return;
                 default:
-                    throw new LicenseNotActivatedException("Codenvy license is not activated.");
+                    throw new LicenseNotActivatedException(
+                            "Codenvy license is not activated. Error code: " + license.getActivationStatus());
             }
         } catch (LicenseNotFoundException e) {
             throw new LicenseNotActivatedException("Codenvy license is not activated.");
