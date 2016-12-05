@@ -99,6 +99,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    depends_on:
+      - rsyslog
     logging:
       driver: syslog
       options:
@@ -121,6 +123,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    depends_on:
+       - rsyslog
     logging:
       driver: syslog
       options:
