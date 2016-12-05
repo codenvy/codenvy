@@ -48,6 +48,16 @@ public class CodenvyLicenseActivator {
     }
 
     /**
+     * For testing purpose.
+     */
+    @Deprecated
+    CodenvyLicenseActivator(CodenvyLicenseStorage codenvyLicenseStorage, String publicKey, char[] productId) {
+        this.codenvyLicenseStorage = codenvyLicenseStorage;
+        this.publicKey = publicKey;
+        this.productId = productId;
+    }
+
+    /**
      * Activates license if it requires.
      *
      * @return Codenvy license activation text or {@code null} if license doesn't require activation

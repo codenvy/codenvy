@@ -59,7 +59,7 @@ public class CodenvyLicenseStorageTest {
         Path targetDir = Paths.get(resource.getPath()).getParent();
         testDirectory = targetDir.resolve(NameGenerator.generate("license-storage-", 4));
         licenseFile = testDirectory.resolve("license");
-        activatedLicenseFile = testDirectory.resolve("license.act");
+        activatedLicenseFile = testDirectory.resolve("license.activated");
         Files.createDirectories(testDirectory);
 
         licenseStorage = new CodenvyLicenseStorage(licenseFile.toString());

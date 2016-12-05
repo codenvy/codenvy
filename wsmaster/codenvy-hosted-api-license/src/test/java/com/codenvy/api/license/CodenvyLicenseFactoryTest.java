@@ -94,7 +94,7 @@ public class CodenvyLicenseFactoryTest {
         Properties properties = new Properties();
         properties.load(new FileInputStream(testPropertiesPath));
         String testPublicKey = (String)properties.get("license-manager.public_key");
-        codenvyLicenseFactory = new CodenvyLicenseFactory("testId".toCharArray() ,testPublicKey);
+        codenvyLicenseFactory = new CodenvyLicenseFactory("testId".toCharArray(), testPublicKey);
     }
 
     @Test

@@ -61,7 +61,7 @@ public class JpaCodenvyLicenseActionDaoTest {
                                                                                              null,
                                                                                              ImmutableMap.of("prop1", "value1",
                                                                                                              "prop2", "value2",
-                                                                                                             "prop3", "value3")),
+                                                                                                             "prop3", "value2")),
                                                                 new CodenvyLicenseActionImpl(PRODUCT_LICENSE,
                                                                                              ACCEPTED,
                                                                                              System.currentTimeMillis(),
