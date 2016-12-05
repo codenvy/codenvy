@@ -16,7 +16,9 @@ package com.codenvy.api.audit.server;
 
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.server.CodenvyLicenseActionHandler;
 import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.shared.model.CodenvyLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
@@ -36,12 +38,18 @@ import org.testng.annotations.Test;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 import static java.nio.file.Files.createTempFile;
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JANUARY;
+import static java.util.Calendar.MARCH;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.mockito.Matchers.anyString;
@@ -59,6 +67,9 @@ import static org.testng.Assert.assertEquals;
 public class AuditManagerTest {
 
     private static final String FULL_AUDIT_REPORT                                  =
+            "admin@codenvy.com accepted Fair Source license agreement at 2016 March 03 22:15:00\n" +
+            "admin@codenvy.com accepted Codenvy license agreement 1234 at 2016 March 04 22:15:00\n" +
+            "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n" +
             "Number of all users: 2\n" +
             "Number of users licensed: 15\n" +
             "Date when license expires: 01 January 2016\n" +
@@ -68,6 +79,9 @@ public class AuditManagerTest {
             "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n" +
             "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
     private static final String AUDIT_REPORT_WITHOUT_LICENSE                       =
+            "admin@codenvy.com accepted Fair Source license agreement at 2016 March 03 22:15:00\n" +
+            "admin@codenvy.com accepted Codenvy license agreement 1234 at 2016 March 04 22:15:00\n" +
+            "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n" +
             "Number of all users: 2\n" +
             "[ERROR] Failed to retrieve license!\n" +
             "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n" +
@@ -76,13 +90,19 @@ public class AuditManagerTest {
             "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n" +
             "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
     private static final String AUDIT_REPORT_WITHOUT_USER_WORKSPACES               =
+            "admin@codenvy.com accepted Fair Source license agreement at 2016 March 03 22:15:00\n" +
+            "admin@codenvy.com accepted Codenvy license agreement 1234 at 2016 March 04 22:15:00\n" +
+            "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n" +
             "Number of all users: 2\n" +
             "Number of users licensed: 15\n" +
             "Date when license expires: 01 January 2016\n" +
-            "[ERROR] Failed to receive list of related workspaces for user User1Id!\n" +
+            "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n" +
             "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n" +
             "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
     private static final String AUDIT_REPORT_WITHOUT_USER_PERMISSIONS_TO_WORKSPACE =
+            "admin@codenvy.com accepted Fair Source license agreement at 2016 March 03 22:15:00\n" +
+            "admin@codenvy.com accepted Codenvy license agreement 1234 at 2016 March 04 22:15:00\n" +
+            "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n" +
             "Number of all users: 2\n" +
             "Number of users licensed: 15\n" +
             "Date when license expires: 01 January 2016\n" +
@@ -96,17 +116,19 @@ public class AuditManagerTest {
     private Path auditReport;
 
     @Mock
-    private UserManager           userManager;
+    private UserManager                 userManager;
     @Mock
-    private WorkspaceManager      workspaceManager;
+    private WorkspaceManager            workspaceManager;
     @Mock
-    private PermissionsManager    permissionsManager;
+    private PermissionsManager          permissionsManager;
     @Mock
-    private CodenvyLicenseManager licenseManager;
+    private CodenvyLicenseManager       licenseManager;
     @Mock
-    private WorkspaceImpl         workspace1;
+    private CodenvyLicenseActionHandler codenvyLicenseActionHandler;
     @Mock
-    private WorkspaceImpl         workspace2;
+    private WorkspaceImpl               workspace1;
+    @Mock
+    private WorkspaceImpl               workspace2;
 
     private AuditManager auditManager;
 
@@ -117,6 +139,25 @@ public class AuditManagerTest {
         when(license.getNumberOfUsers()).thenReturn(15);
         when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
         when(licenseManager.load()).thenReturn(license);
+
+        CodenvyLicenseAction acceptFairSourceLicenseAction = mock(CodenvyLicenseAction.class);
+        when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(acceptFairSourceLicenseAction.getActionTimestamp())
+                .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
+        when(codenvyLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
+
+        CodenvyLicenseAction acceptProductLicenseAction = mock(CodenvyLicenseAction.class);
+        when(acceptProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(acceptProductLicenseAction.getLicenseQualifier()).thenReturn("1234");
+        when(acceptProductLicenseAction.getActionTimestamp())
+                .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
+        when(codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(acceptProductLicenseAction);
+
+        CodenvyLicenseAction expireProductLicenseAction = mock(CodenvyLicenseAction.class);
+        when(expireProductLicenseAction.getLicenseQualifier()).thenReturn("1234");
+        when(expireProductLicenseAction.getActionTimestamp())
+                .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
+        when(codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(expireProductLicenseAction);
         //User
         UserImpl user1 = mock(UserImpl.class);
         UserImpl user2 = mock(UserImpl.class);
@@ -166,7 +207,8 @@ public class AuditManagerTest {
         when(userManager.getTotalCount()).thenReturn(2L);
 
         auditManager =
-                new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, new AuditReportPrinter());
+                new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, codenvyLicenseActionHandler,
+                                 new AuditReportPrinter());
         auditReport = createTempFile("report", ".txt");
     }
 

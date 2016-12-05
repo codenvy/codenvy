@@ -17,6 +17,9 @@ package com.codenvy.api.license.server;
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.CodenvyLicenseActionImpl;
+import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
+import com.codenvy.api.license.shared.model.CodenvyLicenseAction;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,9 +27,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
@@ -43,20 +49,21 @@ import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LIC
 public class CodenvyLicenseActionHandler implements CodenvyLicenseManagerObserver {
 
     private final CodenvyLicenseActionDao codenvyLicenseActionDao;
+    private final UserManager             userManager;
+
 
     @Inject
-    public CodenvyLicenseActionHandler(CodenvyLicenseManager codenvyLicenseManager, CodenvyLicenseActionDao codenvyLicenseActionDao) {
+    public CodenvyLicenseActionHandler(CodenvyLicenseManager codenvyLicenseManager,
+                                       CodenvyLicenseActionDao codenvyLicenseActionDao,
+                                       UserManager userManager) {
         this.codenvyLicenseActionDao = codenvyLicenseActionDao;
+        this.userManager = userManager;
         codenvyLicenseManager.addObserver(this);
     }
 
     @Override
     public void onCodenvyFairSourceLicenseAccepted(FairSourceLicenseAcceptance fairSourceLicenseAcceptance) throws ApiException {
-        Map<String, String> attributes = new HashMap<>(3);
-        attributes.put("firstName", fairSourceLicenseAcceptance.getFirstName());
-        attributes.put("lastName", fairSourceLicenseAcceptance.getLastName());
-        attributes.put("email", fairSourceLicenseAcceptance.getEmail());
-
+        Map<String, String> attributes = new FairSourceLicenseAcceptanceImpl(fairSourceLicenseAcceptance).toAttributes();
         try {
             CodenvyLicenseActionImpl codenvyLicenseAction
                     = new CodenvyLicenseActionImpl(FAIR_SOURCE_LICENSE,
@@ -84,6 +91,10 @@ public class CodenvyLicenseActionHandler implements CodenvyLicenseManagerObserve
 
     @Override
     public void onProductLicenseStored(CodenvyLicense codenvyLicense) throws ApiException {
+        EnvironmentContext current = EnvironmentContext.getCurrent();
+        String userId = current.getSubject().getUserId();
+        User user = userManager.getById(userId);
+
         try {
             CodenvyLicenseActionImpl prevCodenvyLicenseAction = codenvyLicenseActionDao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
             codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
@@ -99,8 +110,26 @@ public class CodenvyLicenseActionHandler implements CodenvyLicenseManagerObserve
                                                ACCEPTED,
                                                System.currentTimeMillis(),
                                                codenvyLicense.getLicenseId(),
-                                               Collections.emptyMap());
+                                               Collections.singletonMap("email", user.getEmail()));
 
         codenvyLicenseActionDao.upsert(codenvyLicenseAction);
+    }
+
+    /**
+     * Finds license action.
+     *
+     * @param licenseType
+     *          the type of the license
+     * @param actionType
+     *          the action happened with license
+     * @return {@link CodenvyLicenseAction}
+     * @throws ServerException
+     *      if unexpected error occurred
+     * @throws NotFoundException
+     *      if no action found
+     */
+    public CodenvyLicenseAction findAction(Constants.License licenseType, Constants.Action actionType) throws ServerException,
+                                                                                                              NotFoundException {
+        return codenvyLicenseActionDao.getByLicenseAndAction(licenseType, actionType);
     }
 }

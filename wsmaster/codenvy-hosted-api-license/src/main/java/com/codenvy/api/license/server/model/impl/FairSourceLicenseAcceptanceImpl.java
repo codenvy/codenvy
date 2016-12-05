@@ -16,6 +16,8 @@ package com.codenvy.api.license.server.model.impl;
 
 import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,6 +34,18 @@ public class FairSourceLicenseAcceptanceImpl implements FairSourceLicenseAccepta
         this.email = email;
     }
 
+    public FairSourceLicenseAcceptanceImpl(FairSourceLicenseAcceptance fairSourceLicenseAcceptance) {
+        this(fairSourceLicenseAcceptance.getFirstName(),
+             fairSourceLicenseAcceptance.getLastName(),
+             fairSourceLicenseAcceptance.getEmail());
+    }
+
+    public FairSourceLicenseAcceptanceImpl(Map<String, String> attributes) {
+        this(attributes.get("firstName"),
+             attributes.get("lastName"),
+             attributes.get("email"));
+    }
+
     @Override
     public String getFirstName() {
         return firstName;
@@ -45,6 +59,14 @@ public class FairSourceLicenseAcceptanceImpl implements FairSourceLicenseAccepta
     @Override
     public String getEmail() {
         return email;
+    }
+
+    public Map<String, String> toAttributes() {
+        Map<String, String> attributes = new HashMap<>(3);
+        attributes.put("firstName", firstName);
+        attributes.put("lastName", lastName);
+        attributes.put("email", email);
+        return attributes;
     }
 
     @Override

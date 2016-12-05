@@ -22,10 +22,15 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -36,6 +41,7 @@ import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE
 import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,12 +64,26 @@ public class CodenvyLicenseActionHandlerTest {
     private CodenvyLicense              codenvyLicense;
     @Mock
     private CodenvyLicenseActionImpl    codenvyLicenseAction;
+    @Mock
+    private UserManager                 userManager;
     @InjectMocks
     private CodenvyLicenseActionHandler codenvyLicenseActionHandler;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        final EnvironmentContext ctx = new EnvironmentContext();
+        ctx.setSubject(new SubjectImpl("test-user-name", "test-user-id", "test-token", false));
+        EnvironmentContext.setCurrent(ctx);
+
+        User user = mock(User.class);
+        when(user.getEmail()).thenReturn("test@user");
+        when(userManager.getById("test-user-id")).thenReturn(user);
         when(codenvyLicense.getLicenseId()).thenReturn(LICENSE_ID);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        EnvironmentContext.reset();
     }
 
     @Test
@@ -109,10 +129,11 @@ public class CodenvyLicenseActionHandlerTest {
 
         ArgumentCaptor<CodenvyLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(CodenvyLicenseActionImpl.class);
         verify(dao).upsert(actionCaptor.capture());
-        CodenvyLicenseActionImpl expireAction = actionCaptor.getValue();
-        assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
-        assertEquals(expireAction.getActionType(), ACCEPTED);
-        assertEquals(expireAction.getLicenseQualifier(), LICENSE_ID);
+        CodenvyLicenseActionImpl acceptAction = actionCaptor.getValue();
+        assertEquals(acceptAction.getLicenseType(), PRODUCT_LICENSE);
+        assertEquals(acceptAction.getActionType(), ACCEPTED);
+        assertEquals(acceptAction.getLicenseQualifier(), LICENSE_ID);
+        assertEquals(acceptAction.getAttributes().get("email"), "test@user");
     }
 
     @Test

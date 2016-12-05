@@ -15,6 +15,8 @@
 package com.codenvy.api.audit.server;
 
 import com.codenvy.api.license.CodenvyLicense;
+import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
+import com.codenvy.api.license.shared.model.CodenvyLicenseAction;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
 import org.eclipse.che.api.core.ServerException;
@@ -35,6 +37,7 @@ import java.util.Map;
 
 import static com.google.common.collect.ComparisonChain.start;
 import static com.google.common.io.Files.append;
+import static java.lang.String.format;
 import static java.util.Collections.sort;
 
 /**
@@ -154,4 +157,50 @@ class AuditReportPrinter {
             throw new ServerException("Failed to generate audit report. " + e.getMessage(), e);
         }
     }
+
+    /**
+     * @param codenvyLicenseAction
+     *      acceptance action
+     */
+    protected void printFairSourceLicenseAcceptanceInfo(CodenvyLicenseAction codenvyLicenseAction,
+                                                        Path auditReport) throws ServerException {
+        FairSourceLicenseAcceptanceImpl sourceLicenseAcceptance =
+                new FairSourceLicenseAcceptanceImpl(codenvyLicenseAction.getAttributes());
+        String acceptanceTime = timestampToString(codenvyLicenseAction);
+
+        printRow(format("%s accepted Fair Source license agreement at %s",
+                        sourceLicenseAcceptance.getEmail(), acceptanceTime), auditReport);
+        printRow("\n", auditReport);
+    }
+
+    /**
+     * @param codenvyLicenseAction
+     *      acceptance action
+     */
+    protected void printProductLicenseAcceptanceInfo(CodenvyLicenseAction codenvyLicenseAction, Path auditReport) throws ServerException {
+        String email = codenvyLicenseAction.getAttributes().get("email");
+        String acceptanceTime = timestampToString(codenvyLicenseAction);
+
+        printRow(format("%s accepted Codenvy license agreement %s at %s",
+                        email, codenvyLicenseAction.getLicenseQualifier(), acceptanceTime), auditReport);
+        printRow("\n", auditReport);
+    }
+
+    /**
+     * @param codenvyLicenseAction
+     *      expiration action
+     */
+    protected void printProductLicenseExpirationInfo(CodenvyLicenseAction codenvyLicenseAction, Path auditReport) throws ServerException {
+        String acceptanceTime = timestampToString(codenvyLicenseAction);
+
+        printRow(format("Paid license %s expired on %s. System returned to previously accepted Fair Source license.",
+                        codenvyLicenseAction.getLicenseQualifier(), acceptanceTime), auditReport);
+        printRow("\n", auditReport);
+    }
+
+    private String timestampToString(CodenvyLicenseAction codenvyLicenseAction) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy MMMM dd HH:mm:ss", Locale.ENGLISH);
+        return df.format(codenvyLicenseAction.getActionTimestamp());
+    }
+
 }
