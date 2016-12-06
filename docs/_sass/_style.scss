@@ -442,13 +442,14 @@ article {
 
 aside {
   padding-top: 30px;
+  line-height: 1.2em;
 
   h4 {
     text-transform: uppercase;
     font-size: 14px;
     color: #fbb84d;
-    font-weight: 700;
-    padding: 0 0 10px 30px;
+    font-weight: 400;
+    padding: 0 0 2px 30px;
     margin-left: -30px;
     display: inline-block;
     border-bottom: 1px solid #fbb84d;
@@ -465,7 +466,8 @@ aside {
 
     a {
       font-size: 12px;
-      position: relative
+      position: relative;
+      color: #ffffff;
     }
 
     &.current a:before {
@@ -473,6 +475,7 @@ aside {
       border-color: transparent transparent transparent #4A90E2;
       border-style: solid;
       border-width: 10px;
+      color: #4A90E2;
       width: 0;
       height: 0;
       position: absolute;
@@ -660,7 +663,7 @@ code {
   margin: 0;
   font: 14px/1.8em Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;
   padding: 0 0.5em;
-  border: 1px solid #cacaca;
+  //border: 1px solid #cacaca;
 }
 
 @media (min-width: 768px) {
@@ -707,6 +710,9 @@ h5 > code,
   @extend .highlight;
   margin: 0;
   padding: 10px 0.5em;
+  color: #fff;
+  background-color: #444;
+  border-style: none;
 }
 
 /* HTML Elements */
@@ -719,6 +725,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
+  font-size: 1.7em;
   color: #4A90E2;
   border-bottom-width: 1px;
   border-bottom-style: solid;
