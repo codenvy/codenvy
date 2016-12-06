@@ -1,9 +1,9 @@
 ---
 title: Android in Che
 excerpt: "Developing Android apps in Che"
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/android/
+permalink: /tutorials/android/
 ---
 # 1. Select Android Stack and Sample  
 When in User Dashboard, create a project with Android stack. There are two sample applications to get started with. Both are Maven projects.

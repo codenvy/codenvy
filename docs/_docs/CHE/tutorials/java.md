@@ -1,9 +1,9 @@
 ---
 title: Java Console Apps in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/java/
+permalink: /tutorials/java/
 ---
 # 1. Start any Java stack  
 Go to Workspaces tab in User Dashboard, pick any Java stack, create a workspace and run it.

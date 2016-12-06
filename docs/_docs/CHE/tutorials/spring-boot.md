@@ -1,9 +1,9 @@
 ---
 title: Spring Boot in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/spring-boot/
+permalink: /tutorials/spring-boot/
 ---
 Spring Boot is Spring's convention-over-configuration solution for creating stand-alone, production-grade Spring based Applications that you can "just run". This page provides a quick configuration guide to get started with Spring Boot within Che.
 ```text  
