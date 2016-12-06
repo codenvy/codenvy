@@ -38,6 +38,7 @@
         <module>cli</module>
         <module>cdec</module>
         <module>assembly</module>
+        <module>docs</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/codenvy.git</connection>
