@@ -1,9 +1,9 @@
 ---
 title: Subversion Repos in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/subversion/
+permalink: /tutorials/subversion/
 ---
 Apache Subversion (often abbreviated SVN, after the command name svn) is a software versioning and revision control system distributed as free software under the Apache License. 
 

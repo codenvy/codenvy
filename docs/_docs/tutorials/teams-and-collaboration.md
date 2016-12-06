@@ -1,7 +1,7 @@
 ---
 title: Teams and Collaboration
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/teams-and-collaboration/
+permalink: /tutorials/teams-and-collaboration/
 ---

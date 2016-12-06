@@ -1,9 +1,9 @@
 ---
 title: Che in Che
 excerpt: "There is nothing like a little Che inception to brighten your day."
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/che-in-che/
+permalink: /tutorials/che-in-che/
 ---
 You can build and run Che using Che!  Since Che runs within a Docker container and its workspaces are generated as Docker containers, there is extra configuration that is needed to enable the Che that you build in Che to generate its own workspaces!
 # Concepts  

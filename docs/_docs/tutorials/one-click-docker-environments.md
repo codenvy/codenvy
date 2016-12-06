@@ -1,9 +1,9 @@
 ---
 title: One-Click Docker Environments
 excerpt: "Create workspaces with production runtimes containing your source code and dev tools. Choose any architecture - microservices, multi-tier, multi-container, or shared server. We excel at complex topologies."
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/one-click-docker-environments/
+permalink: /tutorials/one-click-docker-environments/
 ---
 # Integrate Your Repo  
 You need to generate SSH key to be able to clone private repositories. 

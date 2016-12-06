@@ -41,7 +41,7 @@ jekyll.sh [<port>]
        UNISON=/tmp/.unison/ ${PWD}/unison ${UNISON_SYNC_PATH} ssh://\${UNISON_SSH_USER}@\${SSH_IP}:\${UNISON_SSH_PORT}//srv/jekyll 
        \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
       
-    JEKYLL_COMMAND="docker exec -d ${CONTAINER_NAME} jekyll serve "
+    JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --incremental"
   }
   
 check_status() {
@@ -50,7 +50,7 @@ check_status() {
 	if [ $status -ne 0 ]; then
 	  if [ $status -ne 3 ]; then
 	    error "ERROR: Fatal error occurred ($status)"
-	    exit 1
+	    stop_sync
 	  else
 	    warn "Fatal error occurred ($status)"
 	  fi
@@ -101,7 +101,24 @@ error() {
 stop_sync() {
   echo ""
   info "Received interrupt signal. Exiting."
+    
+  # Trapping SIGINTs so we can send them back to $bg_pid.
+  kill -9 $bg_pid
+    
+  # In the meantime, wait for $bg_pid to end.
+  wait $bg_pid
+  
   exit 1
+}
+
+sync_folders() {
+    UNISON_REPEAT="-repeat 2"
+    while [ 1 ]
+    do
+        sleep 2
+        eval ${UNISON_AGENT_COMMAND}
+        check_status
+    done
 }
 
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
@@ -142,15 +159,10 @@ check_status
 ELAPSED_TIME=$(expr $(date +%s) - $START_TIME)
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Initial sync to Jekyll docker container took $ELAPSED_TIME seconds."
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Starting Jekyll server at http://<host ip>:${JEKYLL_PORT}/."
-eval ${JEKYLL_COMMAND}
-check_status
+sync_folders &
+bg_pid=$!
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Background sync continues every 2 seconds."
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): This terminal will block while the synchronization continues."
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): To stop, issue a SIGTERM or SIGINT, usually CTRL-C."
-UNISON_REPEAT="-repeat 2"
-while [ 1 ]
-do
-    sleep 2
-    eval ${UNISON_AGENT_COMMAND}
-    check_status
-done
+eval ${JEKYLL_COMMAND}
+check_status

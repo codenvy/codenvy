@@ -2,7 +2,15 @@
   docs:
   - introduction
   - getting-started
-  - architecture
+  - architecture  
+  - workspace-admin-intro
+  - stacks
+  - recipes
+  - samples
+  - machines
+  - volume-mounts
+  - environments
+  - workspace-agents
 - title: User Guide
   docs:
   - workspace-admin-intro
@@ -18,40 +26,6 @@
   - debug
   - sharing
   - using-desktop-ides
-- title: Workspace Guide
-  docs:
-  - workspace-admin-intro
-  - stacks
-  - recipes
-  - samples
-  - machines
-  - volume-mounts
-  - environments
-  - workspace-agents
-- title: Tutorials
-  docs:
-  - android
-  - che-in-che
-  - cuba
-  - ftpsftp
-  - gae
-  - gradle
-  - java
-  - laravel
-  - maven
-  - meteor
-  - multi-machine
-  - nodejs
-  - php
-  - platformio
-  - rails
-  - sourcegraph
-  - spring-boot
-  - subversion
-  - swing
-  - tomee
-  - vaadin
-  - wordpress
 - title: Admin Guide
   docs:
   - api
@@ -78,7 +52,7 @@
   - smtp
   - upgrading
   - user
-- title: Admin Guide
+- title: Integration Guide
   docs:
   - workspace-automation
   - issue-management

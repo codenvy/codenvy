@@ -1,9 +1,9 @@
 ---
 title: FTP/SFTP and Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/ftpsftp/
+permalink: /tutorials/ftpsftp/
 ---
 ##Add FTP / SFTP into a workspace
 Che has Midnight Commander installed in the Terminal, so it's possible to use it to connect to a remote FTP server. 

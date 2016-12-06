@@ -9,14 +9,14 @@ Che natively supports Git and SVN, which is installed in all pre-defined Che ima
 # Using Private Repositories  
 Private repositories will require a secure SSH connection, so an SSH key pair needs to be generated. SSH keys are saved in user preferences, so you need to generate the SSH key only once and it will be used in all workspaces.
 
-##Generate New SSH Keys
+## Generate New SSH Keys
 SSH keys can be generated at `Profile > Preferences > SSH > VCS`. Use the `Generate Key` button and manually save the resulting key to your Git hosting provider account. When prompted to provide the hostname for your repo, make sure it is a bare hostname (no www or http/https) as in the example below.
 
 ![Clipboard3.jpg](/images/Clipboard3.jpg)
 After the key has been generated, you can view and copy it, and save to your repository hosting account.
 
 ![Clipboard4.jpg](/images/Clipboard4.jpg)
-##Use Existing SSH Keys
+## Use Existing SSH Keys
 You can upload an existing public key instead of creating a new SSH key. When uploading a key add the hostname (using no www or http/https - as in the example below). Note that the `public key > view` button will not be available with this option as the public file should be generated already.
 ![Clipboard7.jpg](/images/Clipboard7.jpg)
 ## Adding SSH Public Key to Repository Account

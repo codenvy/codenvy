@@ -1,7 +1,7 @@
 ---
 title: Workspace Administration
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/workspace-administration/
+permalink: /tutorials/workspace-administration/
 ---

@@ -1,9 +1,9 @@
 ---
 title: Node.js in Che
 excerpt: "Create a new Node project, install additional NPM modules, and save as a snapshot"
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/nodejs/
+permalink: /tutorials/nodejs/
 ---
 # 1. Start Che  
 Use your SaaS account for the following, or if you have [installed Che](https://eclipse-che.readme.io/v5.0/docs/che-getting-started), open a terminal and use the Che startup script:

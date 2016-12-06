@@ -636,9 +636,13 @@ article h2:first-child { margin-top: 0; }
 
 /* Code Highlighting */
 
+code{
+  white-space: pre-wrap;
+}
 
 pre,
 code {
+  white-space: pre-wrap;
   display: inline-block;
   margin: 0;
   font: 14px/1.8em Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;

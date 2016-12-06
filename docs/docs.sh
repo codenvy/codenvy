@@ -31,7 +31,7 @@ if [ "$BUILD_OR_RUN" = "--build" ]; then
 	echo "Outputting site contents into /_site"
   echo ""
 elif [ "$BUILD_OR_RUN" = "--run" ]; then
-	COMMAND="jekyll serve -w --force_polling"	
+	COMMAND="jekyll serve -w --force_polling --incremental"	
 
   echo ""
 	echo "Connect to local server at http://localhost:9080"

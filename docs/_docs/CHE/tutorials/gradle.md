@@ -1,9 +1,9 @@
 ---
 title: Java+Gradle in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/gradle/
+permalink: /tutorials/gradle/
 ---
 Gradle is an open source build automation system that builds upon the concepts of Apache Ant and Apache Maven and introduces a Groovy-based domain-specific language (DSL) instead of the XML form used by Apache Maven of declaring the project configuration.
 ```text  

@@ -1,9 +1,9 @@
 ---
 title: Multi-Machine Workspaces in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/multi-machine/
+permalink: /tutorials/multi-machine/
 ---
 A multi-machine recipe allows multiple runtimes to communicate/share data. In this tutorial we will be looking at an existing Java and MySQL application called Pet Clinic. The tutorial will help show how to create a multi-machine from an existing [runtime stack](doc:stacks) called "Java-MySQL", execute commands on different target runtimes, startup the Pet Clinic Tomcat server, view/interact with the Pet Clinic web page, and take a closer look at the "Java-MySQL" [runtime stack](doc:stacks) /[runtime recipe](doc:recipes) to get a better understanding of how multi-machine runtimes are created.
 
@@ -48,7 +48,8 @@ Read this section to understand more about the multi-machine "Java-MySQL" [runti
 Click on the "Java-MySQL" menu item which will bring up the stack's configuration page. There is various useful configuration information provided on this page as well as the [Runtime Stacks](doc:stacks) and [Runtime Recipes](doc:recipes) documentation pages. For this tutorial, we will be focusing on the recipe configuration and the "codenvy/mysql" dockerfile provided in the "Java-MySQL" stack.
 
 The recipe uses docker compose syntax. Due to the limitation of the JSON syntax the compose recipe is written as a single line with `\n` indicating carriage return. The following is the recipe in expanded form to make reading easier.
-```yaml  
+
+```yaml    
 services:
   db:
     image: codenvy/mysql
@@ -63,6 +64,7 @@ services:
     depends_on:
       - db\
 ```
+
 Examining the code above you will see our two runtime machines "db" and "dev-machine". Every workspace requires a [machine](doc:machines) named "dev-machine". 
 
 In the recipe the `depends_on` parameter of the "dev-machine" allows it to connect to the "db" machine MySQL process' port 3306. The "dev-machine" configures it's MySQL client connection in the projects source code at `src/main/resources/spring/data-access.properties`. The url is defined by `jdbc.url=jdbc:mysql://db:3306/petclinic` which uses the database machine's name "db" and the MySQL server default port 3306. 
@@ -72,6 +74,7 @@ Port 3306 is exposed in the "db" machines Dockerfile during build but is not req
 Exposing port 3306 is done to provide an option for an external administrator to log into the "db" machine MySQL server through a MySQL client on the ephemeral port assigned. The operations perspective interface provides the external ephemeral ports assigned by docker for all machines' exposed ports. Image below indicates only external ephemeral port 32800 assigned to "db" machine's exposed port 3306. 
 ![che-mysql-tutorial1.jpg](/images/che-mysql-tutorial1.jpg)
 The "db" machine contains a MySQL database created by the Docker image "codenvy/mysql". Taking a closer look at the "codenvy/mysql" image Dockerfile's entry point script will show how the "db" machine configures the MySQL server at the workspace startup. 
+
 ```text  
 FROM alpine:3.4
 EXPOSE 3306/tcp
