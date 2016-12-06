@@ -14,11 +14,11 @@
  */
 package com.codenvy.im.managers;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.CodenvyLicenseFactory;
-import com.codenvy.api.license.exception.InvalidLicenseException;
-import com.codenvy.api.license.exception.LicenseException;
-import com.codenvy.api.license.exception.LicenseNotFoundException;
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.SystemLicenseFactory;
+import com.codenvy.api.license.exception.InvalidSystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -38,11 +38,11 @@ import static com.google.api.client.repackaged.com.google.common.base.Strings.is
 public class Codenvy4xLicenseManager {
     protected static final String CODENVY_LICENSE_KEY = "codenvy-license-key";
 
-    private final StorageManager        storageManager;
-    private final CodenvyLicenseFactory licenseFactory;
+    private final StorageManager       storageManager;
+    private final SystemLicenseFactory licenseFactory;
 
     @Inject
-    public Codenvy4xLicenseManager(StorageManager storageManager, CodenvyLicenseFactory licenseFactory) {
+    public Codenvy4xLicenseManager(StorageManager storageManager, SystemLicenseFactory licenseFactory) {
         this.storageManager = storageManager;
         this.licenseFactory = licenseFactory;
     }
@@ -50,26 +50,26 @@ public class Codenvy4xLicenseManager {
     /**
      * Loads Codenvy license out of underlying storage.
      *
-     * @throws LicenseNotFoundException
+     * @throws SystemLicenseNotFoundException
      *         if license not found
-     * @throws InvalidLicenseException
+     * @throws InvalidSystemLicenseException
      *         if license not valid
-     * @throws LicenseException
+     * @throws SystemLicenseException
      *         if error occurred while loading license
      */
     @Nullable
-    public CodenvyLicense load() throws LicenseException {
+    public SystemLicense load() throws SystemLicenseException {
         String licenseText;
         try {
             licenseText = storageManager.loadProperty(CODENVY_LICENSE_KEY);
         } catch (StorageNotFoundException | PropertyNotFoundException e) {
-            throw new LicenseNotFoundException("Codenvy license not found");
+            throw new SystemLicenseNotFoundException("Codenvy license not found");
         } catch (IOException e) {
-            throw new LicenseException(e.getMessage(), e);
+            throw new SystemLicenseException(e.getMessage(), e);
         }
 
         if (isNullOrEmpty(licenseText)) {
-            throw new LicenseNotFoundException("Codenvy license not found");
+            throw new SystemLicenseNotFoundException("Codenvy license not found");
         }
 
         return licenseFactory.create(licenseText);

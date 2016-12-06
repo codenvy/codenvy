@@ -14,7 +14,7 @@
  */
 package com.codenvy.auth.sso.server;
 
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.server.SystemLicenseManager;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static com.codenvy.api.license.server.CodenvyLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -67,7 +67,7 @@ public class OrgServiceUserCreatorTest {
     User createdUser;
 
     @Mock
-    CodenvyLicenseManager licenseManager;
+    SystemLicenseManager licenseManager;
 
     OrgServiceUserCreator creator;
 

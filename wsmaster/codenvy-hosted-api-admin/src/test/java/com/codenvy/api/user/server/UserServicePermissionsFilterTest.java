@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.user.server;
 
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import static com.codenvy.api.license.server.CodenvyLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_USERS_ACTION;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
@@ -77,11 +77,11 @@ public class UserServicePermissionsFilterTest {
     public static final String USER_ID = "userok";
 
     @Mock
-    WorkspaceManager workspaceManager;
+    WorkspaceManager     workspaceManager;
     @Mock
-    UserManager      userManager;
+    UserManager          userManager;
     @Mock
-    CodenvyLicenseManager licenseManager;
+    SystemLicenseManager licenseManager;
 
     UserServicePermissionsFilter permissionsFilter;
 

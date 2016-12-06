@@ -60,20 +60,20 @@ export class CodenvyLicense {
     this.$q = $q;
 
     // remote call
-    this.remoteLicenseAPI = <ICodenvyLicenseResource<any>>this.$resource('/api/license', {}, {
+    this.remoteLicenseAPI = <ICodenvyLicenseResource<any>>this.$resource('/api/license/system', {}, {
       getLicense: {
-        method: 'GET', url: '/api/license', responseType: 'text', transformResponse: (data: Object) => {
+        method: 'GET', url: '/api/license/system', responseType: 'text', transformResponse: (data: Object) => {
           return {key: data};
         }
       },
       setLicense: {
-        method: 'POST', url: '/api/license', isArray: false,
+        method: 'POST', url: '/api/license/system', isArray: false,
         headers: {
           'Content-Type': 'text/plain'
         }
       },
-      getProperties: {method: 'GET', url: '/api/license/properties'},
-      getLegality: {method: 'GET', url: '/api/license/legality'}
+      getProperties: {method: 'GET', url: '/api/license/system/properties'},
+      getLegality: {method: 'GET', url: '/api/license/system/legality'}
     });
 
     // default number of free users

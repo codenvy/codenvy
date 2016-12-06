@@ -14,11 +14,11 @@
  */
 package com.codenvy.api.audit.server;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.exception.LicenseException;
-import com.codenvy.api.license.server.CodenvyLicenseActionHandler;
-import com.codenvy.api.license.server.CodenvyLicenseManager;
-import com.codenvy.api.license.shared.model.CodenvyLicenseAction;
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.server.SystemLicenseActionHandler;
+import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
@@ -66,12 +66,12 @@ public class AuditManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuditManager.class);
 
-    private final WorkspaceManager            workspaceManager;
-    private final PermissionsManager          permissionsManager;
-    private final CodenvyLicenseManager       licenseManager;
-    private final CodenvyLicenseActionHandler codenvyLicenseActionHandler;
-    private final AuditReportPrinter          reportPrinter;
-    private final UserManager                 userManager;
+    private final WorkspaceManager           workspaceManager;
+    private final PermissionsManager         permissionsManager;
+    private final SystemLicenseManager       licenseManager;
+    private final SystemLicenseActionHandler systemLicenseActionHandler;
+    private final AuditReportPrinter         reportPrinter;
+    private final UserManager                userManager;
 
     private AtomicBoolean inProgress = new AtomicBoolean(false);
 
@@ -79,14 +79,14 @@ public class AuditManager {
     public AuditManager(UserManager userManager,
                         WorkspaceManager workspaceManager,
                         PermissionsManager permissionsManager,
-                        CodenvyLicenseManager licenseManager,
-                        CodenvyLicenseActionHandler codenvyLicenseActionHandler,
+                        SystemLicenseManager licenseManager,
+                        SystemLicenseActionHandler systemLicenseActionHandler,
                         AuditReportPrinter reportPrinter) {
         this.userManager = userManager;
         this.workspaceManager = workspaceManager;
         this.permissionsManager = permissionsManager;
         this.licenseManager = licenseManager;
-        this.codenvyLicenseActionHandler = codenvyLicenseActionHandler;
+        this.systemLicenseActionHandler = systemLicenseActionHandler;
         this.reportPrinter = reportPrinter;
     }
 
@@ -111,10 +111,10 @@ public class AuditManager {
             auditReport = createTempDirectory(null).resolve("report_" + dateTime + ".txt");
             Files.createFile(auditReport);
 
-            CodenvyLicense license = null;
+            SystemLicense license = null;
             try {
                 license = licenseManager.load();
-            } catch (LicenseException ignored) {
+            } catch (SystemLicenseException ignored) {
                 //Continue printing report without license info
             }
 
@@ -139,8 +139,8 @@ public class AuditManager {
 
     private void processProductLicenseExpirationInfo(Path auditReport) throws ServerException {
         try {
-            CodenvyLicenseAction codenvyLicenseAction = codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
-            reportPrinter.printProductLicenseExpirationInfo(codenvyLicenseAction, auditReport);
+            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
+            reportPrinter.printProductLicenseExpirationInfo(systemLicenseAction, auditReport);
         } catch (NotFoundException ignored) {
         } catch (ServerException e) {
             LOG.error(e.getMessage(), e);
@@ -150,8 +150,8 @@ public class AuditManager {
 
     private void processProductLicenseAcceptanceInfo(Path auditReport) throws ServerException {
         try {
-            CodenvyLicenseAction codenvyLicenseAction = codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED);
-            reportPrinter.printProductLicenseAcceptanceInfo(codenvyLicenseAction, auditReport);
+            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED);
+            reportPrinter.printProductLicenseAcceptanceInfo(systemLicenseAction, auditReport);
         } catch (NotFoundException ignored) {
         } catch (ServerException e) {
             LOG.error(e.getMessage(), e);
@@ -161,8 +161,8 @@ public class AuditManager {
 
     private void processFairSourceLicenseAcceptanceInfo(Path auditReport) throws ServerException {
         try {
-            CodenvyLicenseAction codenvyLicenseAction = codenvyLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
-            reportPrinter.printFairSourceLicenseAcceptanceInfo(codenvyLicenseAction, auditReport);
+            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+            reportPrinter.printFairSourceLicenseAcceptanceInfo(systemLicenseAction, auditReport);
         } catch (NotFoundException ignored) {
         } catch (ServerException e) {
             LOG.error(e.getMessage(), e);

@@ -38,7 +38,6 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
-import com.codenvy.machine.HostedDockerInstance;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -307,7 +306,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                 new RegexpRequestFilter("^/api/permissions$"),
                                 new RequestMethodFilter("GET")
                         ),
-                        new UriStartFromRequestFilter("/api/license/legality")
+                        new UriStartFromRequestFilter("/api/license/system/legality")
                 ));
 
 

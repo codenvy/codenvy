@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.user.server;
 
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.permission.server.SystemDomain;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Path;
 
-import static com.codenvy.api.license.server.CodenvyLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static java.lang.String.format;
 import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALLOWED;
 
@@ -43,12 +43,12 @@ import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALL
 public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
     public static final String MANAGE_USERS_ACTION = "manageUsers";
 
-    private final boolean               userSelfCreationAllowed;
-    private final CodenvyLicenseManager licenseManager;
+    private final boolean              userSelfCreationAllowed;
+    private final SystemLicenseManager licenseManager;
 
     @Inject
     public UserServicePermissionsFilter(@Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed,
-                                        CodenvyLicenseManager licenseManager) {
+                                        SystemLicenseManager licenseManager) {
         this.userSelfCreationAllowed = userSelfCreationAllowed;
         this.licenseManager = licenseManager;
     }

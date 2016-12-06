@@ -14,8 +14,8 @@
  */
 package com.codenvy.report;
 
-import com.codenvy.api.license.exception.LicenseException;
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.mail.MailSenderClient;
 import com.codenvy.report.shared.dto.Ip;
 
@@ -75,7 +75,7 @@ public class ReportSenderTest {
     @Mock
     private UserManager            userManager;
     @Mock
-    private CodenvyLicenseManager  mockLicenseManager;
+    private SystemLicenseManager   mockLicenseManager;
 
     @BeforeMethod
     public void setup() throws Exception {
@@ -115,7 +115,7 @@ public class ReportSenderTest {
 
     @Test
     public void shouldSendWeeklyReportBecauseOfLicenseException() throws IOException, JsonParseException, MessagingException, ApiException {
-        doThrow(LicenseException.class).when(mockLicenseManager).isSystemUsageLegal();
+        doThrow(SystemLicenseException.class).when(mockLicenseManager).isSystemUsageLegal();
 
         spyReportSender.sendWeeklyReports();
 

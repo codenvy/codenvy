@@ -14,11 +14,11 @@
  */
 package com.codenvy.api.audit.server;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.exception.LicenseException;
-import com.codenvy.api.license.server.CodenvyLicenseActionHandler;
-import com.codenvy.api.license.server.CodenvyLicenseManager;
-import com.codenvy.api.license.shared.model.CodenvyLicenseAction;
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.server.SystemLicenseActionHandler;
+import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 
@@ -116,48 +116,48 @@ public class AuditManagerTest {
     private Path auditReport;
 
     @Mock
-    private UserManager                 userManager;
+    private UserManager                userManager;
     @Mock
-    private WorkspaceManager            workspaceManager;
+    private WorkspaceManager           workspaceManager;
     @Mock
-    private PermissionsManager          permissionsManager;
+    private PermissionsManager         permissionsManager;
     @Mock
-    private CodenvyLicenseManager       licenseManager;
+    private SystemLicenseManager       licenseManager;
     @Mock
-    private CodenvyLicenseActionHandler codenvyLicenseActionHandler;
+    private SystemLicenseActionHandler systemLicenseActionHandler;
     @Mock
-    private WorkspaceImpl               workspace1;
+    private WorkspaceImpl              workspace1;
     @Mock
-    private WorkspaceImpl               workspace2;
+    private WorkspaceImpl              workspace2;
 
     private AuditManager auditManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
         //License
-        CodenvyLicense license = mock(CodenvyLicense.class);
+        SystemLicense license = mock(SystemLicense.class);
         when(license.getNumberOfUsers()).thenReturn(15);
         when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
         when(licenseManager.load()).thenReturn(license);
 
-        CodenvyLicenseAction acceptFairSourceLicenseAction = mock(CodenvyLicenseAction.class);
+        SystemLicenseAction acceptFairSourceLicenseAction = mock(SystemLicenseAction.class);
         when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
         when(acceptFairSourceLicenseAction.getActionTimestamp())
                 .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
-        when(codenvyLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
+        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
 
-        CodenvyLicenseAction acceptProductLicenseAction = mock(CodenvyLicenseAction.class);
+        SystemLicenseAction acceptProductLicenseAction = mock(SystemLicenseAction.class);
         when(acceptProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
         when(acceptProductLicenseAction.getLicenseQualifier()).thenReturn("1234");
         when(acceptProductLicenseAction.getActionTimestamp())
                 .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(acceptProductLicenseAction);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(acceptProductLicenseAction);
 
-        CodenvyLicenseAction expireProductLicenseAction = mock(CodenvyLicenseAction.class);
+        SystemLicenseAction expireProductLicenseAction = mock(SystemLicenseAction.class);
         when(expireProductLicenseAction.getLicenseQualifier()).thenReturn("1234");
         when(expireProductLicenseAction.getActionTimestamp())
                 .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
-        when(codenvyLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(expireProductLicenseAction);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(expireProductLicenseAction);
         //User
         UserImpl user1 = mock(UserImpl.class);
         UserImpl user2 = mock(UserImpl.class);
@@ -207,7 +207,7 @@ public class AuditManagerTest {
         when(userManager.getTotalCount()).thenReturn(2L);
 
         auditManager =
-                new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, codenvyLicenseActionHandler,
+                new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, systemLicenseActionHandler,
                                  new AuditReportPrinter());
         auditReport = createTempFile("report", ".txt");
     }
@@ -246,7 +246,7 @@ public class AuditManagerTest {
     @Test
     public void shouldReturnAuditReportWithoutLicenseInfoIfFailedToRetrieveLicense() throws Exception {
         //given
-        when(licenseManager.load()).thenThrow(new LicenseException("Failed to retrieve license info"));
+        when(licenseManager.load()).thenThrow(new SystemLicenseException("Failed to retrieve license info"));
 
         //when
         auditReport = auditManager.generateAuditReport();

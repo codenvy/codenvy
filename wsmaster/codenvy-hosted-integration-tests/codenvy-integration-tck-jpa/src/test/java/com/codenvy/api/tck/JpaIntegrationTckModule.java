@@ -14,9 +14,9 @@
  */
 package com.codenvy.api.tck;
 
-import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
-import com.codenvy.api.license.server.model.impl.CodenvyLicenseActionImpl;
+import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
+import com.codenvy.api.license.server.jpa.JpaSystemLicenseActionDao;
+import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.machine.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.spi.tck.RecipePermissionsDaoTest;
@@ -197,8 +197,8 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {}).toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
         //api-license
-        bind(new TypeLiteral<TckRepository<CodenvyLicenseActionImpl>>() {})
-                .toInstance(new JpaTckRepository<>(CodenvyLicenseActionImpl.class));
+        bind(new TypeLiteral<TckRepository<SystemLicenseActionImpl>>() {})
+                .toInstance(new JpaTckRepository<>(SystemLicenseActionImpl.class));
 
         //dao
         //api-account
@@ -224,7 +224,7 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
         //api-license
-        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
+        bind(SystemLicenseActionDao.class).to(JpaSystemLicenseActionDao.class);
         //api-resource
         bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
 

@@ -28,11 +28,11 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-license</artifactId>
+            <artifactId>codenvy-hosted-api-permission</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-permission</artifactId>
+            <artifactId>codenvy-hosted-api-system-license</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
