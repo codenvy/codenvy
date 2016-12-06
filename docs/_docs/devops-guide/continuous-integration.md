@@ -13,7 +13,7 @@ If you'd like to speak to us about custom integrations between Codenvy and CI sy
 
 # 1. Set up plugins  
 Go to **Manage Jenkins - Manage Plugins** and install GitHub and Email Extension Template Plugins.
-![plugins.png](/images/plugins.png)
+![plugins.png](/docs/images/plugins.png)
 
 # 2. Create a Jenkins job  
 Set up Jenkins Job as per your project reqs (JDK, Maven, Node.js etc). You may need to install additional plugins that your project requires.
@@ -26,7 +26,7 @@ You need to make sure that a message is sent out when job succeeds or fails. You
 In your Jenkins job configuration, define message content as:
 
 `${JELLY_SCRIPT,template="html-factory"}`
-![postbuild.png](/images/postbuild.png)
+![postbuild.png](/docs/images/postbuild.png)
 
 # 4. Create a Codenvy Factory  
 You need to create a Codenvy Factory that uses your target project as source. This Factory will be modified by the plugin and injected into Jenkins job description. See: [Factories](doc:factories).
@@ -57,4 +57,4 @@ In your GitHub repo settings, configure the following webhook:
 Either make a mistake in your code and push changes to a remote repository or configure Jenkins job to purposely fail. You should receive a message from Jenkins with a Factory URL in its body.
 
 Also, your Jenkins job should we updated as follows, i.e. its description will have a Factory URL:
-![jenkinsjob.png](/images/jenkinsjob.png)
+![jenkinsjob.png](/docs/images/jenkinsjob.png)

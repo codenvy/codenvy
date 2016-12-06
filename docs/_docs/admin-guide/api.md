@@ -12,4 +12,4 @@ http://<hostname>/im-api-docs-ui/
 ```
 
 After Codenvy is installed, you can access this URL to display the list of available APIs. You must be logged in as an admin to gain access to these URLs.
-![Installation-Manager-API.png](/images/Installation-Manager-API.png)
+![Installation-Manager-API.png](/docs/images/Installation-Manager-API.png)

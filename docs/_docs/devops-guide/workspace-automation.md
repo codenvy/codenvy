@@ -410,7 +410,7 @@ When you hit the "Next" button a Factory is created and you can begin configurin
 
 ### Configure A Workspace Runtime
 4. In the "Configure Stacks" section you can choose: one of several common stacks; from a broader set of stacks in the Stack Library; to [add your own Dockerfile](https://eclipse-che.readme.io/docs/stacks#custom-workspace-recipes) for a custom stack.
-![selectjava.png](/images/selectjava.png)
+![selectjava.png](/docs/images/selectjava.png)
 
 ##### Built-In Terminal and SSH
 For custom runtimes, we suggest using a Codenvy workspace recipe as a base. This ensures users have access to a terminal with full root access and can connect over SSH from their favorite desktop editor or IDE.  

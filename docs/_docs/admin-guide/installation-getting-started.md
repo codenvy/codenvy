@@ -68,7 +68,7 @@ It's easiest to start with a template:
 6. Hit the Create Project button.
 
 The project will load in a Docker-based workspace in the IDE. You can edit files then build / run using the command toolbar.
-![ScreenShot2016-04-28at10.52.51AM.png](/images/ScreenShot2016-04-28at10.52.51AM.png)
+![ScreenShot2016-04-28at10.52.51AM.png](/docs/images/ScreenShot2016-04-28at10.52.51AM.png)
 Eclipse Che (which is embedded inside Codenvy) provides [step-by-step-by-step tutorials](https://eclipse-che.readme.io/docs/get-started-with-java-and-che) for getting started with using different technologies such as Java, Wordpress, Node.js, Subversion, and many more.
 # 4. Setup Workspace Automation  
 Factories provide workspace automation for various developer bootstrapping and agile development workflows. Start using them by [creating a Factory](http://codenvy.readme.io/docs/factories#create) from an existing workspace. You can also [author Factories](http://codenvy.readme.io/docs/factories) to perform a range of functions related to branching, post-load actions, guided tours, and project setup. 

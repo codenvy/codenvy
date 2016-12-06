@@ -40,9 +40,9 @@ Users/Administrators can use a private/public repository url to [import a projec
 After importing repository, you can perform most common Git and SVN operations using interactive menus or as console commands. 
 
 **Note use of git menu remote push command will not work prior setting up SSH or oAuth authentication.**
-![git-menu.png](/images/git-menu.png)
+![git-menu.png](/docs/images/git-menu.png)
 
-![svn-menu.png](/images/svn-menu.png)
+![svn-menu.png](/docs/images/svn-menu.png)
 # In-IDE Pull Request Panel
 Within the IDE there is a pull request panel to simplify the creation of pull requests for GitHub, BitBucket or Microsoft VSTS (with git) repositories.
  

@@ -116,7 +116,7 @@ There are many aspects of ARTIK IDE like port and hostname that can be configure
 The ARTIK IDE provides a step-by-step wizard for creating your first workspace. It provides stacks for ARTIK and Android, as well as many other languages through the "Stack Library."  Stacks will populate the workspace with a runtime, SDK, and libraries needed for building new projects that will run on an ARTIK board.
 
 A workspace can have one or more projects. Each project can have a different type that supports different kinds of programming languages and build frameworks. When you create your first workspace, you can provide the project from a Git repository or using one of the included templates.
-![createwsandproject.jpg](/images/createwsandproject.jpg)
+![createwsandproject.jpg](/docs/images/createwsandproject.jpg)
 Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](doc:tutorial-artik-blink-led) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
 # 5. Setup an ARTIK Device  
 Review Samsung ARTIK getting started docs at [https://developer.artik.io/documentation/getting-started-beta/powering-up.html](https://developer.artik.io/documentation/getting-started-beta/powering-up.html) and [https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html](https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html). This will help understand how to power up the ARTIK device(connect power and press SW3 switch) and how to setup communication with the ARTIK device.
@@ -164,11 +164,11 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 3. Specify replication path on the device. This is the directory where project files will be backed up on the device. It can be both existing or a non existing directory (in the latter case it will be created). Project source files (including binaries) are automatically `scp`'ed into all connected targets when changes in a workspace file system are caught. It means that when a binary is rebuilt, it's readily available on the device in about a 2-3 seconds.
 4. `Save` then `Connect`.
 5. Once connected, ARTIK device tree will be created in processes area. Selecting the terminal icon will give access to the terminal console inside of ARTIK device. Also, the target environment will automatically change to ARTIK. This is important to note as all workspace commands will be ran inside the ARTIK device. Usually, building/compiling code is done inside workspace by setting target to `default` and executing/running commands are done inside the ARTIK device by setting target to `artik_device_<#>`.
-![artikmanager.jpg](/images/artikmanager.jpg)
+![artikmanager.jpg](/docs/images/artikmanager.jpg)
 
-![artikmanageradddevice.jpg](/images/artikmanageradddevice.jpg)
+![artikmanageradddevice.jpg](/docs/images/artikmanageradddevice.jpg)
 
-![artikIDEafterconnection.jpg](/images/artikIDEafterconnection.jpg)
+![artikIDEafterconnection.jpg](/docs/images/artikIDEafterconnection.jpg)
 
 # 8. Build  
 
@@ -176,7 +176,7 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 We recommend only building in the IDE workspace, not on the device itself because this is simpler and the IDE is smart enough to cross-compile the binary and push it to the device so it can be instantly run there.  
 
 1. Select source file in the project explorer, click **Compile**.
-![compile.png](/images/compile.png)
+![compile.png](/docs/images/compile.png)
 Once built the binaries are automatically synced to the device and ready to run or debug and will show up in project explorer.
 #### Compilation Options
 The default compilation command looks like this:\n\n`$CC -lartik-sdk-base $(for i in $(ls $CPATH)\ndo artik_sdk=-I$CPATH/$i\necho $artik_sdk\ndone) -lpthread -g`\n\nIt is possible to change this command at Project > Compilation Options. This command is saved in project attributes and can be customized for each project. A user can also define the output binary name, which is **a.out** by default.  
@@ -196,7 +196,7 @@ Debugging requires `gdbserver` to be installed on the device.  Older devices may
 To debug your application, choose the project (it can be source file as well), and click Debug (there will be dropdown with the list of connected devices).
 
 When debug is initiated, gdbserver is started on the device, on port 1234, and the IDE debugger automatically connects to it.
-![debug_.png](/images/debug_.png)
+![debug_.png](/docs/images/debug_.png)
 **Deploy (optional)**
 Because all files in the project are auto-synced to the device it's not necessary to deploy anything to the device. However, if you want to push files to specific locations on the device (not the project replication folder) you can right-click on the artifact and choose `Push to Device` then `Choose Target...`.
 # 10. Production and Development Profiles  

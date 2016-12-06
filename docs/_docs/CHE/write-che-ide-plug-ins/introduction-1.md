@@ -13,7 +13,7 @@ In general, Che can be extended in its three different components, the IDE runni
   * Second, the Che Server can be extended by new plugins. Those extensions will also affect the IDE, e.g. defining a new project type in a plugin, which is done on the server, will create a menu entry in the “New” dialog of the IDE. Server plugins might provide new APIs to be consumed by IDE plugins, e.g. to provide new IntelliSense features. Finally, server plugins can also access the current workspace, e.g. to access files, projects or even the current target machine. Again, there is existing API provided by the workspace agent to be used. 
 
   * Third, the Workspace can also be extended to provide new API to be consumed by the Che server. 
-![image05.png](/images/image05.png)
+![image05.png](/docs/images/image05.png)
 Therefore, typical extensions of Che are deployed to up to three different components, depending on the use case. However, as many extensions include plugin parts for the IDE, the server and even the Workspace, the extension documentation is not organized by Che components, but by extension use cases (e.g. adding a new file type or implementing a client server communication accessing the workspace).
 
 Technically, client and server extensions are different components, however, as they conceptually belong together, they are organized in one plugin containing several sub-components.
@@ -41,21 +41,21 @@ The example includes the following parts, which can be found in the respective p
 ###File Type and Code Editor
 
 The example provides [a custom file type](code-editors#section-file-types) for JSON including a custom icon. For this file type it includes [a custom code editor ](code-editors) for JSON files. The code editor provides [syntax highlighting](code-editors#section-syntax-highlighting) for JSON files.
-![image08.png](/images/image08.png)
+![image08.png](/docs/images/image08.png)
 Additionally, the example implements [code completion](code-editors) based on a list of suggestions. There are two sources for the list of suggestions, the first and simple one is [directly calculated on the client,](code-editors) it can therefore only operate on information available in the context (e.g. the current file opened). The second one is [calculated on the server](serverworkspace-access#section-server-services) and can therefore access the complete workspace to calculate the suggestions.
 
 
-![image13.png](/images/image13.png)
+![image13.png](/docs/images/image13.png)
 ###Project Type
 
 There is a [custom project type](project-types) for working with JSON files. The example provides[ a custom project creation wizard](project-types#section-project-creation-wizard) which allows to enter project specific data. In case of the JSON example, it allows to specify a URL pointing to a JSON schema, which is later used to validate the JSON files within the project. The project wizard is available in the standard “Create New Project” dialog of Che:
 
 
-![image03.png](/images/image03.png)
+![image03.png](/docs/images/image03.png)
 The JSON example wizard will initialize a new project with two existing JSON files and a directory to contain custom ones:
-![image08.png](/images/image08.png)
+![image08.png](/docs/images/image08.png)
 ###Actions
 
 The JSON example register two [project-specific actions](docs:section-project-perspective-specific-actions-json-example-) for the custom project type. The first one implements [a simple “Hello World”](docs:section-project-perspective-specific-actions-json-example-).[ The second one ](serverworkspace-access#section-workspace-services)calls a custom service on the server which will access the workspace and count the number of lines of all JSON files within the project. It thereby also includes a template for client/server communication and for accessing source files (e.g. for validation or compilation).
 
-![image00.png](/images/image00.png)
+![image00.png](/docs/images/image00.png)

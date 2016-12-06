@@ -9,7 +9,7 @@ permalink: /tutorials/one-click-docker-environments/
 You need to generate SSH key to be able to clone private repositories. 
 
 For GitHub SSH keys are generated and uploaded automatically at Profile > Preferences > SSH > VCS. 
-![github-button.png](/images/github-button.png)
+![github-button.png](/docs/images/github-button.png)
 For other Git hosting providers SSH key should be generated and manually saved to profile settings of git hosting settings. Find more details on how to do that in the [Eclipse Che Git docs](https://eclipse-che.readme.io/docs/git#section-other-git-hosting-providers).
 # Integrate Your Registry  
 Eclipse Che workspaces are based upon a Docker image. You can either pull that image from a public registry, like Docker Hub, or a private registry which is managed by yourself. Images in a registry can be publicly visible or private, which require user credentials to access. You can also set up a private registry to act as a mirror to Docker Hub.  And, if you are running Eclipse Che behind a proxy, you can configure the Docker daemon registry to operate behind a proxy.

@@ -85,7 +85,7 @@ There are many aspects of ARTIK IDE like port and hostname that can be configure
 The ARTIK IDE provides a step-by-step wizard for creating your first workspace. It provides stacks for ARTIK and Android, as well as many other languages through the "Stack Library."  Stacks will populate the workspace with a runtime, SDK, and libraries needed for building new projects that will run on an ARTIK board.
 
 A workspace can have one or more projects. Each project can have a different type that supports different kinds of programming languages and build frameworks. When you create your first workspace, you can provide the project from a Git repository or using one of the included templates.
-![createwsandproject.jpg](/images/createwsandproject.jpg)
+![createwsandproject.jpg](/docs/images/createwsandproject.jpg)
 Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](doc:tutorial-artik-blink-led) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
 # 4. Setup an ARTIK Device  
 Review Samsung ARTIK getting started docs at [https://developer.artik.io/documentation/getting-started-beta/powering-up.html](https://developer.artik.io/documentation/getting-started-beta/powering-up.html) and [https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html](https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html). This will help understand how to power up the ARTIK device(connect power and press SW3 switch) and how to setup communication with the ARTIK device.
@@ -133,9 +133,9 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 3. Specify replication path on the device. This is the directory where project files will be backed up on the device. It can be both existing or a non existing directory (in the latter case it will be created). Project source files (including binaries) are automatically `scp`'ed into all connected targets when changes in a workspace file system are caught. It means that when a binary is rebuilt, it's readily available on the device in about a 2-3 seconds.
 4. `Save` then `Connect`.
 5. Once connected, ARTIK device tree will be created in processes area. Selecting the terminal icon will give access to the terminal console inside of ARTIK device. Also, the target environment will automatically change to ARTIK. This is important to note as all workspace commands will be ran inside the ARTIK device. Usually, building/compiling code is done inside workspace by setting target to `default` and executing/running commands are done inside the ARTIK device by setting target to `artik_device_<#>`.
-![artikmanager.jpg](/images/artikmanager.jpg)
+![artikmanager.jpg](/docs/images/artikmanager.jpg)
 
-![artikmanageradddevice.jpg](/images/artikmanageradddevice.jpg)
+![artikmanageradddevice.jpg](/docs/images/artikmanageradddevice.jpg)
 
 # 7. Build, Run and Debug  
 See: [Getting Started - Windows](doc:samsung-artik-ide-getting-started#8-build)] 

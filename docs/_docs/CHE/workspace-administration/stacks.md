@@ -17,7 +17,7 @@ To create a new workspace in the user dashboard:
 - Click `Dashboard` > `Create Workspace`
 - Click `Workspaces` > `Add Workspace`
 - Hit the “+” next to `Recent Workspaces`
-![che-stacks1.jpg](/images/che-stacks1.jpg)
+![che-stacks1.jpg](/docs/images/che-stacks1.jpg)
 The stack selection form is available in the “Select Workspace” section, it allows you to choose stacks provided with Che or create and edit your own stack.
 
 ## Ready-To-Go Stacks
@@ -25,7 +25,7 @@ Che provides ready-to-go stacks for various technologies. These stacks provide a
 
 ## Stack Library
 Che provides a wider range of stacks which you can browse from the “Stack library” tab. This list contains advanced stacks which can also be used as runtime configuration for your workspaces.
-![che-stacks2.jpg](/images/che-stacks2.jpg)
+![che-stacks2.jpg](/docs/images/che-stacks2.jpg)
 ## Custom Stack
 User can create their own stack from the "Custom stack" tab. Using Che's interface the user can provide a [runtime recipe](doc:recipes) from an existing external recipe file or by writing a recipe directly. 
 
@@ -101,16 +101,16 @@ In the user dashboard, click the `Stacks` to view all the available stacks. New 
 A stack can be created from scratch using a skeleton template or duplicated from an existing stack. 
 
 To create a stack from scratch click the `Add Stacks` button at the top left of the page. This will load a skeleton template that can be edited. After editing the template configuration and changing the stack name, clicking the save button to add the new stack to the available stacks.
-![che-add-stack.gif](/images/che-add-stack.gif)
+![che-add-stack.gif](/docs/images/che-add-stack.gif)
 ## Duplicate a Stack
 Duplicating an existing stack is often a good way to create your own. Click the duplicate icon on the right of the stack item you want. This will create a new stack name `<original name> - Copy` which can then be renamed and configuration edited.
-![Che-Stack-Duplicate.jpg](/images/Che-Stack-Duplicate.jpg)
+![Che-Stack-Duplicate.jpg](/docs/images/Che-Stack-Duplicate.jpg)
 ## Edit a Stack
 Stacks name and configuration can be edited by clicking on the stack item name which will bring up the stack editing interface. The stack can be renamed at the top of the stack editing interface. The stack configuration can be changed using the provided forms. After editing is complete, the stack can be saved by clicking the save button.
-![che-edit-stack.gif](/images/che-edit-stack.gif)
+![che-edit-stack.gif](/docs/images/che-edit-stack.gif)
 ## Delete a Stack
 Stacks can be deleted by clicking the checkbox on the left then the delete button that appear on the top right of the page or by clicking the trash bin icon on the right side of the stack item.
-![Che-Stack-Delete.jpg](/images/Che-Stack-Delete.jpg)
+![Che-Stack-Delete.jpg](/docs/images/Che-Stack-Delete.jpg)
 ## Register a Custom Stack
 Che has a stack API that you can call to manage your custom stacks. See the [Stacks](https://eclipse-che.readme.io/docs/stacks-1) page in section _Use Che as a workspace server_ section.
 # Adding Stacks to the Che Default Assembly  

@@ -12,10 +12,10 @@ In order to ensure you have the most up-to-date version available you must first
 2. We suggest using SSH public key authentication and deploying into a new resource group.
 # Configure Azure VM  
 1. From your [Azure homepage](https://portal.azure.com/) select "Resource groups" in the left-hand menu.
-![ScreenShot2016-03-01at10.16.46AM.png](/images/ScreenShot2016-03-01at10.16.46AM.png)
+![ScreenShot2016-03-01at10.16.46AM.png](/docs/images/ScreenShot2016-03-01at10.16.46AM.png)
 2. Choose the resource group into which you deployed the Codenvy VM.
 3. In the Resources list click on the network security group.
-![ScreenShot2016-02-29at2.31.25PM.png](/images/ScreenShot2016-02-29at2.31.25PM.png)
+![ScreenShot2016-02-29at2.31.25PM.png](/docs/images/ScreenShot2016-02-29at2.31.25PM.png)
 4. Select "Inbound security rules" from the list.
 5. Click on the "Docker" entry.
 6. Change the "Destination port range" from `32768 TCP` to `	

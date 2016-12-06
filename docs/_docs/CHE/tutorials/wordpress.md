@@ -30,7 +30,7 @@ Give your workspace a nice name and configure RAM, i.e. apply the memory limit t
 
 ### Create the Project
 Select `Create Project`.  The project construction process goes through a number of steps including creating a new workspace, downloading an image to use for the workspace environment, instantiating that environment, installing Che services into the workspace, and then creating your project.
-![Capture.PNG](/images/Capture.PNG)
+![Capture.PNG](/docs/images/Capture.PNG)
 Click the `Open in IDE` button to open your project in the IDE.
 # 3. Start MySQL Server  
 After the project is successfully created, you can start MySQL server either in the terminal (you can find it on the Consoles panel and open it by clicking `+` button) or using a command widget (CMD) - `sudo service mysql start`
@@ -58,9 +58,9 @@ Here are some commands that you may use:
 Preview URL is another important object. It will be `http://${server.port.80}/${current.project.relpath}`.
 
 `${server.port.80}` returns host and port, while `${current.project.relpath}` will be interpreted as a relative path to your project (relative to `/projects` which is DocumentRoot for Apache in this environment).
-![Screenshot2.png](/images/Screenshot2.png)
+![Screenshot2.png](/docs/images/Screenshot2.png)
 Run Apache, click the preview URL and find your WordPress project started there. Follow the WordPress guide to start your first site.
-![Screenshot3.png](/images/Screenshot3.png)
+![Screenshot3.png](/docs/images/Screenshot3.png)
 You will be prompted to connect your MySQL database (see details above). You can also connect an external database.
 
 A few steps to install WP and voilà, it’s done.

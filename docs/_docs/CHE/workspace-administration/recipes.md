@@ -19,7 +19,7 @@ A recipe references either a Dockerfile or compose definition that need to be bu
 You can author your own recipe as a way to make your workspace runtime shareable. You can provide a URL to a custom recipe (Dockerfile or Docker compose file) or write a new custom recipe (Dockerfile or Docker compose file) from the dashboard. 
 
 Please note, Eclipse Che only [supports certain compose syntax](https://eclipse-che.readme.io/docs/recipes#section-compose-syntax-support).
-![che-recipe-write.jpg](/images/che-recipe-write.jpg)
+![che-recipe-write.jpg](/docs/images/che-recipe-write.jpg)
 There are two ways for you to create a custom recipe that can be used within Che:
 1. Inherit from an Eclipse Che base Docker image and then add your dependencies (easiest).
 2. Inherit from a non-Eclipse Che base Docker image, then add both your dependencies, and Che's dependencies (most flexible).
@@ -103,7 +103,7 @@ expose:
 - You can also get the published port automatically by using a macro in a [command](https://eclipse-che.readme.io/docs/commands). When authoring a command, set its preview URL to `${server.port.<your-apps-port>}` where `<your-apps-port>` is the port in your recipe's expose command. When the command is executed, this macro is translated into a `host:port` URL.
 
 There is no way to expose a port once the workspace is running. To expose an additional ports, the ports need to be added to the runtime recipe or added directly to the runtime instance via the dashboard `Workspaces>(click workspace name)>Runtime Tab`. 
-![Che-recipe-expose-ports.jpg](/images/Che-recipe-expose-ports.jpg)
+![Che-recipe-expose-ports.jpg](/docs/images/Che-recipe-expose-ports.jpg)
 ## Issue a Pull Request To Improve Recipes
 We really love pull requests. We are always looking to increase the set of stacks that are available for development. Please suggest a fix or add a new base image recipe.  To do so, issue [pull requests](https://github.com/codenvy/dockerfiles). If you add a new Dockerfile, it will be added as a source for a new automated build at DockerHub.  Please sign the [Eclipse contributor agreement](https://eclipse.org/legal/ECA.php) before making a contribution. Your contribution will be licensed as [EPL 1.0](https://www.eclipse.org/legal/epl-v10.html).
 # Multi-Container Recipes  

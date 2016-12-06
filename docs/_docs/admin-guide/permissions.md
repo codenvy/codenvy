@@ -58,4 +58,4 @@ A machine token is generated in 2 cases:
 
 * when a user starts a workspace (the system checks if a user has RUN permissions and then generates a token)
 * when an invited user accesses a workspace (a system checks if a user has sufficient permissions to access a workspace and then generates a token)
-![tokens.png](/images/tokens.png)
+![tokens.png](/docs/images/tokens.png)
