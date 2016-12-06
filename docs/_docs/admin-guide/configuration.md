@@ -5,79 +5,145 @@ layout: docs
 overview: true
 permalink: /docs/configuration/
 ---
-Codenvy is governed by Puppet. We install agents that will take a Puppet configuration and apply to the system. Codenvy's system configuration is stored within Puppet files. Updating these files means that you can alter the behavior of Codenvy itself.
-# Before Installation  
-You can instruct the installer to use a base configuration. The installer will download the configuration file from either our servers or a remote location you provide. After Puppet is installed, we inject your downloaded configuration into the Puppet configuration and then activate the system. You can download templates for the Codenvy configuration from various locations. We keep a different template for each released version and also differ configuration for single and multi-server.
-```text  
-# Single server template for 4.2.0
-https://codenvy.com/update/repository/public/download/codenvy-single-server-properties/4.2.0
+Configuration is done with environment variables in `codenvy.env` placed into the root of the folder you volume mounted to `:/codenvy`. Environment variables are stored in `codenvy.env`, a file that is generated during the `codenvy init` phase. If you rerun `codenvy init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`.
 
-# Multi server template for 4.2.2
-https://codenvy.com/update/repository/public/download/codenvy-multi-server-properties/4.2.2\
+Each variable is documented with an explanation and usually commented out. If you need to set a variable, uncomment it and configure it with your value. You can then run `codenvy config` to apply this configuration to your system. `codenvy start` also reapplies the latest configuration.
+
+You can run `codenvy init` to install a new configuration into an empty directory. This command uses the `codenvy/init:<version>` Docker container to deliver a version-specific set of puppet templates into the folder.
+
+If you run `codenvy config`, Codenvy runs puppet to transform your puppet templates into a Codenvy instance configuration, placing the results into `/codenvy/instance` if you volume mounted that, or into a `instance` subdirectory of the path you mounted to `/codenvy`.  Each time you start Codenvy, `codenvy config` is run to ensure instance configuration files are properly generated and consistent with the configuration you have specified in `codenvy.env`.
+
+## Saving Configuration in Version Control
+Administration teams that want to version control your Codenvy configuration should save `codenvy.env`. This is the only file that should be saved with version control. It is not necessary, and even discouraged, to save the other files. If you were to perform a `codenvy upgrade` we may replace these files with templates that are specific to the version that is being upgraded. The `codenvy.env` file maintains fidelity between versions and we can generate instance configurations from that.
+
+The version control sequence would be:
+1. `codenvy init` to get an initial configuration for a particular version.
+2. Edit `codenvy.env` with your environment-specific configuration.
+3. Save `codenvy.env` to version control.
+4. When pulling from version control, copy `codenvy.env` into the root of the folder you volume mount to `:/codenvy`.
+5. You can then run `codenvy config` or `codenvy start` and the instance configuration will be generated from this file.
+
+## Logs and User Data
+When Codenvy initializes itself, it stores logs, user data, database data, and instance-specific configuration in the folder mounted to `/codenvy/instance` or an `instance` subfolder of what you mounted to `/codenvy`.  
+
+Codenvy's containers save their logs in the same location:
 ```
-You can host configuration files on your own servers. When doing your installation you can pass `--config=<path-to-config>` to the bootstrap script to pass along a custom configuration as a file. The `<path-to-config>` can also be a URL to a remote file.  If you do not provide a `--config`, the bootstrap script will look for ~/codenvy.properties file, and if it does not find that it will download a template from Codenvy's servers.
-# After Installation  
-## Using Codenvy
-After the installation is complete, you can use the Codenvy CLI to view and configure properties. When a property is changed, we automatically trigger a Puppet update to have the property applied to the system.
-```text  
-# List all Codenvy properties
-codenvy config
-
-# List a single property
-codenvy config <property>
-
-# Update a single property and activate puppet update
-codenvy config <property> <value>\
+/logs/codenvy/2016                 # Server logs
+/logs/codenvy/che-machine-logs     # Workspace logs
+/logs/nginx                        # nginx access and error logs
+/logs/haproxy                      # HAproxy logs
 ```
-## Change Hostname
-If you install Codenvy with the defaults, Codenvy is reachable at `http://codenvy.onprem`. You can change the hostname by using the CLI with `codenvy config --hostname=hostname`. [See more](http://codenvy.readme.io/docs/cli#im-config).
 
-## Configure Networking
-Codenvy deploys multiple services that communicate within one another. Those services need a valid DNS entry for them to communicate together. 
-
-We recommend adding a network-wide DNS entry for the Codenvy master server.
-
-If you don't plan to scale the system beyond one or two nodes, you can use the local hostname provided with Codenvy by default and update `machine_extra_hosts` with the hostname and IP address of Codenvy. This property contains the information that workspaces generated by Codenvy will need to communicate back to the master node. While in many situations we can auto-set this property, in advanced networks, this may need to be overridden with an IP address specified by your administrator. 
-```ruby  
-# Configuration entry that lets Codenvy nodes find each other
-# Update entry with Codenvy's hostname and IP
-machine_extra_hosts="hostname:ip"
-
-# Examples of how to configure
-codenvy config machine_extra_hosts "codenvy:192.168.56.99"
-codenvy config machine_extra_hosts "dev.box.com:192.168.45.110"
+User data is stored in:
 ```
-## Activate CLI
-The installer adds a CLI with commands for managing your installation. The CLI is located at `~/codenvy-im/codenvy-cli/bin/codenvy` and added to your `PATH`. We provide [docs for all CLI commands](doc:cli).
-
-You can test the CLI with:
-```shell  
-codenvy version
-
-# The CLI is not immediately loaded after a first install. Add it to your path by
-source ~/.bashrc\
+/data/codenvy                      # Project backups (we synchronize projs from remote ws here)
+/data/postgres                     # Postgres data folder (users, workspaces, stacks etc)
+/data/registry                     # Workspace snapshots
 ```
-## Activate HTTPS
-Our security page outlines [how to switch from HTTP to HTTPS](http://codenvy.readme.io/docs/security) for your Codenvy install.
 
-If you want to install Codenvy in HTTPS mode rather than reconfigure an existing installation, download  [the single server](https://codenvy.com/update/repository/public/download/codenvy-single-server-properties) properties template or [the multi-server](https://codenvy.com/update/repositor/public/download/codenvy-multi-server-properties) properties template, change `$host_protocol = "https"  copy `.pem` file to `/etc/haproxy/cert.pem` and proceed with installation.
+Instance configuration is generated by Codenvy and is updated by our internal configuration utilities. These 'generated' configuration files should not be modified and stored in:
+```
+/codenvy.ver                       # Version of Codenvy installed
+/docker-compose-container.yml      # Docker compose to launch internal services
+/docker-compose.yml                # Docker compose to launch Codenvy from the host without contianer
+/config                            # Configuration files which are input mounted into the containers
+```
 
-## Add oAuth
-By default, users create accounts using a set of self-service forms within Codenvy. User provide information over a form. You can enable single-click login and account creation with oAuth. [Instructions.](doc:authentication) 
+## oAuth
+You can configure Google, GitHub, Microsoft, BitBucket, or WSO2 oAuth for use when users login or create an account.
 
-## Access a Private Repo
-Our [Version Control docs](http://codenvy.readme.io/docs/version-control) discuss how to interact with public and private repos.
+Codenvy is shipped with a preconfigured GitHub oAuth application for the `codenvy.onprem` hostname. To enable GitHub oAuth, add `CODENVY_HOST=codenvy.onprem` to `codenvy.env` and restart. If you have a custom DNS, you need to register a GitHub oAuth application with GitHub's oAuth registration service. You will be asked for the callback URL, which is `http://<your_hostname>/api/oauth/callback`. You will receive from GitHub a client ID and secret, which must be added to `codenvy.env`:
+```
+CODENVY_GITHUB_CLIENT_ID=yourID
+CODENVY_GITHUB_SECRET=yourSecret
+```
 
-## Configure an SMTP Server
-Codenvy will send emails when users create accounts, invitations are sent to new users, and other lifecycle events. You can configure Codenvy to use your SMTP server or the embedded one. [Instructions.](doc:smtp)
-
-## Add Additional Workspace Servers
-The default installation has workspaces deployed as Docker containers on the same server where Codenvy is running. You can add additional servers that will distribute workspace activity.  [Instructions.](doc:scaling) 
+Google oAuth (and others) are configured the same:
+```
+CODENVY_GOOGLE_CLIENT_ID=yourID
+CODENVY_GOOGLE_SECRET=yourSecret
+```
 
 ## LDAP
-Codenvy is compatible with an `InetOrgPerson.schema`. For other schemas please contact us at info@codenvy.com.
+Refer to [LDAP section](docs:ldap-integration) for additional information.
 
-## Docker
-There are a lot of configuration changes that can be made to the Docker engine inside Codenvy to handle private registries, images, mirrors and proxies. Our [Docker Configuration](http://codenvy.readme.io/docs/configuration-docker) docs cover this.
+## Development Mode
+For Codenvy developers that are building and customizing Codenvy from its source repository, you can run Codenvy in development mode where your local assembly is used instead of the one that is provided in the default containers downloaded from DockerHub. This allows for a rapid edit / build / run cycle.
 
-## Going Direct To Puppet
+Dev mode is activated by volume mounting the Codenvy git repository to `:/repo` in your Docker run command.
+```
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v <local-path>:/codenvy \
+                    -v <local-repo>:/repo \
+                       codenvy/cli:<version> [COMMAND]
+```
+Dev mode will use files from your host repository in three ways:
+
+1. During the `codenvy config` phase, the source repository's `/dockerfiles/init/modules` and `/dockerfiles/init/manifests` will be used instead of the ones that are included in the `codenvy/init` container.
+2. During the CLI bootstrap phase, the source repository's `/dockerfiles/cli/cli.sh` file will be used instead of the one with in the `codenvy/cli` container. This allows CLI developers to iterate without having to rebuild `codenvy/cli` container after each change.
+3. During the `codenvy start` phase, a local assembly from `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone` is mounted into the `codenvy/codenvy` runtime container. You must `mvn clean install` the `assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/` folder prior to activated development mode.
+
+To activate jpda suspend mode for debugging codenvy server initialization, in the `codenvy.env`:
+```
+CODENVY_DEBUG_SUSPEND=true
+```
+To change codenvy debug port, in the `codenvy.env`:
+```
+CODENVY_DEBUG_PORT=8000
+```
+
+## Licensing
+Codenvy starts with a Fair Source 3 license, which gives you up to three users and full functionality of the system with limited liabilities and warranties. You can request a trial license from Codenvy for more than 3 users or purchase one from our friendly sales team (your mother would approve). Once you gain the license, start Codenvy and then apply the license in the admin dashboard that is accessible with your login credentials.
+
+## Hostname
+The IP address or DNS name of where the Codenvy endpoint will service your users. If you are running this on a local system, we auto-detect this value as the IP address of your Docker daemon. On many systems, especially those from cloud hosters like DigitalOcean, you may have to explicitly set this to the external IP address or DNS entry provided by the provider. You can edit this in `codenvy.env`, or you can pass it during initialization to the docker command:
+
+```
+docker run <other-syntax-here> -e CODENVY_HOST=<ip address or dns entry> codenvy/cli:<version> start
+```
+
+## HTTP/S
+By default Codenvy runs over HTTP as this is simplest to install. There are two requirements for configuring HTTP/S:  
+1. You must bind Codenvy to a valid DNS name. The HTTP mode of Codenvy allows us to operate over IP addresses. HTTP/S requires certificates that are bound to a DNS entries that you purchase from a DNS provider.  
+2. A valid SSL certificate.  
+
+To configure HTTP/S, in `codenvy.env`:
+```
+CODENVY_HOST_PROTOCOL=https
+CODENVY_PATH_TO_HAPROXY_SSL_CERTIFICATE=<path-to-certificate>
+```
+
+## SMTP
+By default, Codenvy is configured to use a dummy mail server which makes registration with user email not possible, although admin can still create users or configure oAuth. To configure Codenvy to use SMTP server of choice, provide values for the following environment variables in `codenvy.env` (below is an example for GMAIL):
+
+```
+CODENVY_MAIL_HOST=smtp.gmail.com
+CODENVY_MAIL_HOST_PORT=465
+CODENVY_MAIL_SMTP_AUTH=true
+СODENVY_MAIL_TRANSPORT_PROTOCOL=smtp
+CODENVY_MAIL_SMTP_AUTH_USERNAME=example@gmail.com
+CODENVY_MAIL_SMTP_AUTH_PASSWORD=password
+CODENVY_MAIL_SMTP_SOCKETFACTORY_PORT=465
+CODENVY_MAIL_SMTP_SOCKETFACTORY_CLASS=javax.net.ssl.SSLSocketFactory
+CODENVY_MAIL_SMTP_SOCKETFACTORY_FALLBACK=false
+```
+
+## Workspace Limits
+You can place limits on how users interact with the system to control overall system resource usage. You can define how many workspaces created, RAM consumed, idle timeout, and a variety of other parameters. See "Workspace Limits" in `codenvy.env`.
+
+## Private Docker Registries
+Some enterprises use a trusted Docker registry to store their Docker images. If you want your workspace stacks and machines to be powered by these images, then you need to configure each registry and the credentialed access. Once these registries are configured, then you can have users or team leaders create stacks that use recipes with Dockerfiles or images using the `FROM <your-registry>/<your-repo>` syntax.
+
+There are different configurations for AWS EC2 and the Docker regsitry. You can define as many different registries as you'd like, using the numerical indicator in the environment variable. In case of adding several registries just copy set of properties and append `REGISTRY[n]` for each variable.
+
+In `codenvy.env` file:
+```
+CODENVY_DOCKER_REGISTRY_AUTH_REGISTRY1_URL=url1
+CODENVY_DOCKER_REGISTRY_AUTH_REGISTRY1_USERNAME=username1
+CODENVY_DOCKER_REGISTRY_AUTH_REGISTRY1_PASSWORD=password1
+
+CODENVY_DOCKER_REGISTRY_AWS_REGISTRY1_ID=id1
+CODENVY_DOCKER_REGISTRY_AWS_REGISTRY1_REGION=region1
+CODENVY_DOCKER_REGISTRY_AWS_REGISTRY1_ACCESS__KEY__ID=key_id1
+CODENVY_DOCKER_REGISTRY_AWS_REGISTRY1_SECRET__ACCESS__KEY=secret1
+```
