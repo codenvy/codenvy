@@ -48,17 +48,5 @@ exclude:
   - .gitignore
   - docs.sh
   - assembly/*
-  - target/*
+  - _site/*
   - pom.xml
-
-syntax_highlighter_opts:
-  # Rouge Options › https://github.com/jneen/rouge#full-options
-  css_class: 'highlight'
-  line_format: '%i'
-  start_line: 1
-  span:
-    line_format: '%i'
-    start_line: 1
-  block:
-    line_format: '%i'
-    start_line: 1
