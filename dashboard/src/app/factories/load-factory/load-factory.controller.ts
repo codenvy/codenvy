@@ -393,7 +393,7 @@ export class LoadFactoryCtrl {
   importProject(workspaceId, project, bus) {
     var promise;
     // websocket channel
-    var channel = 'importProject:output:' + workspaceId + ':' + project.name;
+    var channel = 'importProject:output';
 
     // on import
     bus.subscribe(channel, (message) => {
