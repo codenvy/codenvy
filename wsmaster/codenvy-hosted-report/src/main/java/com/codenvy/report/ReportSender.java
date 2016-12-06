@@ -89,7 +89,7 @@ public class ReportSender {
                 return;
             }
         } catch (Exception e) {
-            LOG.error("There is a problem with Codenvy License.", e);
+            LOG.error("There is a problem with system License.", e);
             // send report if there is a problem with license
         }
 

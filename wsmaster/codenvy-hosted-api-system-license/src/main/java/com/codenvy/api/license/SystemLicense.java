@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Represents valid Codenvy license.
+ * Represents valid system license.
  *
  * @author Anatoliy Bazko
  */
@@ -52,7 +52,7 @@ public class SystemLicense {
     }
 
     /**
-     * @return unmodifiable list of Codenvy license features
+     * @return unmodifiable list of system license features
      */
     public Map<SystemLicenseFeature, String> getFeatures() {
         return Collections.unmodifiableMap(features);
@@ -132,14 +132,14 @@ public class SystemLicense {
     }
 
     /**
-     * Indicates if Codenvy license required activation.
+     * Indicates if system license required activation.
      */
     public boolean isActivationRequired() {
         return license4j.isActivationRequired();
     }
 
     /**
-     * Returns the origin of Codenvy license.
+     * Returns the origin of system license.
      * @see License
      */
     public License getOrigin() {
@@ -161,7 +161,7 @@ public class SystemLicense {
 
 
     /**
-     * Codenvy license type.
+     * Ssytem license type.
      */
     public enum LicenseType {
         PRODUCT_KEY,

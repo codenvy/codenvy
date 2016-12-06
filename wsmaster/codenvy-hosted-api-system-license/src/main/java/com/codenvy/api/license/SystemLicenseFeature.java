@@ -24,7 +24,7 @@ import static com.codenvy.api.license.SystemLicense.EXPIRATION_DATE_FORMAT;
 import static java.lang.String.format;
 
 /**
- * Codenvy license custom features.
+ * System license custom features.
  */
 public enum SystemLicenseFeature {
     TYPE {
@@ -33,7 +33,7 @@ public enum SystemLicenseFeature {
             try {
                 return LicenseType.valueOf(value.toUpperCase().replace(" ", "_"));
             } catch (IllegalFormatException e) {
-                throw new IllegalSystemLicenseFormatException(format("Unrecognizable Codenvy license. Unknown license type: '%s'", value));
+                throw new IllegalSystemLicenseFormatException(format("Unrecognizable system license. Unknown license type: '%s'", value));
             }
         }
     },
@@ -44,7 +44,7 @@ public enum SystemLicenseFeature {
                 return EXPIRATION_DATE_FORMAT.parse(value);
             } catch (ParseException e) {
                 throw new IllegalSystemLicenseFormatException(
-                        format("Unrecognizable Codenvy license. Invalid expiration date format: '%s'", value));
+                        format("Unrecognizable system license. Invalid expiration date format: '%s'", value));
             }
         }
     },
@@ -55,7 +55,7 @@ public enum SystemLicenseFeature {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
                 throw new IllegalSystemLicenseFormatException(
-                        format("Unrecognizable Codenvy license. Invalid number of users format: '%s'", value));
+                        format("Unrecognizable system license. Invalid number of users format: '%s'", value));
             }
         }
     };

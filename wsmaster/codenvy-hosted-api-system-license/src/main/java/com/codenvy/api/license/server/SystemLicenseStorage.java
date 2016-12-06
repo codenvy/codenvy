@@ -30,7 +30,7 @@ import java.util.Objects;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
- * Persists / loads / deletes Codenvy license in the storage.
+ * Persists / loads / deletes system license in the storage.
  *
  * @author Anatolii Bazko
  */
@@ -46,18 +46,18 @@ public class SystemLicenseStorage {
     }
 
     /**
-     * Persists Codenvy license text.
+     * Persists system license text.
      * Initialize storage if needed.
      *
      * @param licenseText
-     *      the codenvy license text to persist
+     *      the system license text to persist
      * @throws NullPointerException
      *      if licenseText is null
      * @throws SystemLicenseException
      *      if unexpected error occurred
      */
     public void persistLicense(String licenseText) throws SystemLicenseException {
-        Objects.requireNonNull(licenseText, "Codenvy license text can't be null");
+        Objects.requireNonNull(licenseText, "System license text can't be null");
         doPersist(licenseText, licenseFile);
     }
 
@@ -66,14 +66,14 @@ public class SystemLicenseStorage {
      * Initialize storage if needed.
      *
      * @param activatedLicenseText
-     *      the codenvy license text to persist
+     *      the system license text to persist
      * @throws NullPointerException
      *      if licenseText is null
      * @throws SystemLicenseException
      *      if unexpected error occurred
      */
     public void persistActivatedLicense(String activatedLicenseText) {
-        Objects.requireNonNull(activatedLicenseText, "Codenvy license text can't be null");
+        Objects.requireNonNull(activatedLicenseText, "System license text can't be null");
         doPersist(activatedLicenseText, activatedLicenseFile);
     }
 
@@ -88,12 +88,12 @@ public class SystemLicenseStorage {
             Files.delete(licenseFile);
             Files.delete(activatedLicenseFile);
         } catch (IOException e) {
-            throw new SystemLicenseException("Unexpected error. Codenvy license can't be removed.", e);
+            throw new SystemLicenseException("Unexpected error. System license can't be removed.", e);
         }
     }
 
     /**
-     * Returns Codenvy license text.
+     * Returns system license text.
      *
      * @throws SystemLicenseException
      *      if unexpected error occurred
@@ -120,7 +120,7 @@ public class SystemLicenseStorage {
         try {
             return new String(Files.readAllBytes(licenseFile), UTF_8);
         } catch (NoSuchFileException e) {
-            throw new SystemLicenseNotFoundException("Codenvy license not found");
+            throw new SystemLicenseNotFoundException("System license not found");
         } catch (IOException e) {
             throw new SystemLicenseException(e.getMessage(), e);
         }
@@ -134,7 +134,7 @@ public class SystemLicenseStorage {
 
             Files.write(licenseFile, licenseText.getBytes(UTF_8));
         } catch (IOException e) {
-            throw new SystemLicenseException("Unexpected error. Codenvy license can't be persisted.", e);
+            throw new SystemLicenseException("Unexpected error. System license can't be persisted.", e);
         }
     }
 

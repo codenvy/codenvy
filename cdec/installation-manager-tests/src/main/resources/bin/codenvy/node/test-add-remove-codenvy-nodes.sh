@@ -38,7 +38,7 @@ executeIMCommand "--valid-exit-code=1" "add-node" "node1.${HOST_URL}"
 validateExpectedString ".*Use.the.following.syntax\:.add-node.--codenvy-ip.<CODENVY_IP_ADDRESS>.<NODE_DNS>.*"
 
 # add node1.${HOST_URL}
-# Codenvy license error shouldn't be thrown
+# System license error shouldn't be thrown
 executeIMCommand "add-node" "--codenvy-ip 192.168.56.110" "node1.${HOST_URL}"
 validateExpectedString ".*\"type\".\:.\"MACHINE_NODE\".*\"host\".\:.\"node1.${HOST_URL}\".*"
 

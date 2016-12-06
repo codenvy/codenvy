@@ -43,12 +43,12 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
 
     @Override
     public void insert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
-        requireNonNull(codenvyLicenseAction, "Required non-null codenvy license action");
+        requireNonNull(codenvyLicenseAction, "Required non-null system license action");
 
         try {
             doInsert(codenvyLicenseAction);
         } catch (DuplicateKeyException e) {
-            throw new ConflictException("Codenvy license action already exists");
+            throw new ConflictException("System license action already exists");
         } catch (RuntimeException e) {
             throw new ServerException(e);
         }
@@ -56,7 +56,7 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
 
     @Override
     public void upsert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
-        requireNonNull(codenvyLicenseAction, "Required non-null codenvy license action");
+        requireNonNull(codenvyLicenseAction, "Required non-null system license action");
 
         try {
             doUpsert(codenvyLicenseAction);
@@ -85,7 +85,7 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
                                   .setParameter("action_type", actionType)
                                   .getSingleResult();
         } catch (NoResultException e) {
-            throw new NotFoundException("Codenvy license action not found");
+            throw new NotFoundException("System license action not found");
         } catch (RuntimeException e) {
             throw new ServerException(e);
         }

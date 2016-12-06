@@ -41,7 +41,7 @@ import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE
 import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
 
 /**
- * Handles Codenvy license actions.
+ * Handles system license actions.
  *
  * @author Anatolii Bazko
  */

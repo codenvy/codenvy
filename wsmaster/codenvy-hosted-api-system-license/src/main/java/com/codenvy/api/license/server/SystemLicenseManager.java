@@ -83,7 +83,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     /**
-     * Stores valid Codenvy license into the storage.
+     * Stores valid system license into the storage.
      *
      * @throws NullPointerException
      *         if {@code licenseText} is null
@@ -106,7 +106,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     /**
-     * Loads Codenvy license out of underlying storage.
+     * Loads system license out of underlying storage.
      *
      * @throws SystemLicenseNotFoundException
      *         if license not found
@@ -124,10 +124,10 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     /**
-     * Deletes Codenvy license from the storage.
+     * Deletes system license from the storage.
      *
      * @throws SystemLicenseNotFoundException
-     *      if Codenvy license not found
+     *      if system license not found
      * @throws SystemLicenseException
      *       if error occurred while deleting license
      */

@@ -141,7 +141,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testIfFairSourceLicenseNotAccepted() throws Exception {
         when(systemLicenseActionDao.getByLicenseAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-                .thenThrow(new NotFoundException("Codenvy license not found"));
+                .thenThrow(new NotFoundException("System license not found"));
 
         assertFalse(systemLicenseManager.hasAcceptedFairSourceLicense());
     }

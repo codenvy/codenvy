@@ -29,7 +29,7 @@ import java.io.IOException;
 import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * Codenvy license manager for 4xx.
+ * System license manager for 4xx.
  *
  * @author Anatoliy Bazko
  * @author Alexander Andrienko
@@ -48,7 +48,7 @@ public class Codenvy4xLicenseManager {
     }
 
     /**
-     * Loads Codenvy license out of underlying storage.
+     * Loads system license out of underlying storage.
      *
      * @throws SystemLicenseNotFoundException
      *         if license not found
@@ -63,13 +63,13 @@ public class Codenvy4xLicenseManager {
         try {
             licenseText = storageManager.loadProperty(CODENVY_LICENSE_KEY);
         } catch (StorageNotFoundException | PropertyNotFoundException e) {
-            throw new SystemLicenseNotFoundException("Codenvy license not found");
+            throw new SystemLicenseNotFoundException("System license not found");
         } catch (IOException e) {
             throw new SystemLicenseException(e.getMessage(), e);
         }
 
         if (isNullOrEmpty(licenseText)) {
-            throw new SystemLicenseNotFoundException("Codenvy license not found");
+            throw new SystemLicenseNotFoundException("System license not found");
         }
 
         return licenseFactory.create(licenseText);

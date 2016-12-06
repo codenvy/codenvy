@@ -78,7 +78,7 @@ public class SystemLicenseService {
     }
 
     @DELETE
-    @ApiOperation(value = "Deletes Codenvy license")
+    @ApiOperation(value = "Deletes system license")
     @ApiResponses(value = {@ApiResponse(code = 204, message = "The license successfully removed"),
                            @ApiResponse(code = 500, message = "Server error"),
                            @ApiResponse(code = 404, message = "License not found")})
@@ -95,7 +95,7 @@ public class SystemLicenseService {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Gets Codenvy license")
+    @ApiOperation(value = "Gets system license")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 409, message = "Invalid license"),
                            @ApiResponse(code = 404, message = "License not found"),
@@ -116,7 +116,7 @@ public class SystemLicenseService {
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Stores valid Codenvy license in the system")
+    @ApiOperation(value = "Stores valid system license in the system")
     @ApiResponses(value = {@ApiResponse(code = 201, message = "OK"),
                            @ApiResponse(code = 409, message = "Invalid license"),
                            @ApiResponse(code = 500, message = "Server error")})
@@ -135,7 +135,7 @@ public class SystemLicenseService {
     @GET
     @Path("/properties")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Loads Codenvy license properties")
+    @ApiOperation(value = "Loads system license properties")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 404, message = "License not found"),
                            @ApiResponse(code = 409, message = "Invalid license"),
@@ -167,7 +167,7 @@ public class SystemLicenseService {
     @GET
     @Path("/legality")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if Codenvy usage matches Codenvy License constraints, or free usage rules.")
+    @ApiOperation(value = "Checks if Codenvy usage matches system License constraints, or free usage rules.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 500, message = "Server error")})
     public LegalityDto isSystemUsageLegal() throws ApiException {
@@ -176,14 +176,14 @@ public class SystemLicenseService {
                                             .withIssues(licenseManager.getLicenseIssues());
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new ServerException("Failed to check if Codenvy usage matches Codenvy License constraints.", e);
+            throw new ServerException("Failed to check if Codenvy usage matches system License constraints.", e);
         }
     }
 
     @GET
     @Path("/legality/node")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if Codenvy machine node usage matches Codenvy License constraints, or free usage rules.",
+    @ApiOperation(value = "Checks if Codenvy machine node usage matches system License constraints, or free usage rules.",
                   notes = "If nodeNumber parameter is absent then actual number of machine nodes will be validated")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
                            @ApiResponse(code = 500, message = "Server error")})
@@ -194,7 +194,7 @@ public class SystemLicenseService {
             return newDto(LegalityDto.class).withIsLegal(licenseManager.isSystemNodesUsageLegal(nodeNumber));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new ServerException("Failed to check if Codenvy nodes usage matches Codenvy License constraints. ", e);
+            throw new ServerException("Failed to check if Codenvy nodes usage matches system License constraints. ", e);
         }
     }
 

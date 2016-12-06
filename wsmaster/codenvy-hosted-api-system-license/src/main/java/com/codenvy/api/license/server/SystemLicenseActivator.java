@@ -60,7 +60,7 @@ public class SystemLicenseActivator {
     /**
      * Activates license if it requires.
      *
-     * @return Codenvy license activation text or {@code null} if license doesn't require activation
+     * @return activation text or {@code null} if license doesn't require activation
      */
     @Nullable
     public String activateIfRequired(SystemLicense systemLicense) {
@@ -82,15 +82,15 @@ public class SystemLicenseActivator {
             case ACTIVATION_COMPLETED:
                 return license.getLicenseString();
             default:
-                throw new SystemLicenseNotActivatedException("Codenvy license activation failed. Error code: " + license.getActivationStatus());
+                throw new SystemLicenseNotActivatedException("System license activation failed. Error code: " + license.getActivationStatus());
         }
     }
 
     /**
-     * Checks if Codenvy license requires activation.
+     * Checks if system license requires activation.
      *
      * @param systemLicense
-     *      Codenvy license to check
+     *      system license to check
      * @throws SystemLicenseNotActivatedException
      *      if activation is required
      */
@@ -116,10 +116,10 @@ public class SystemLicenseActivator {
                     return;
                 default:
                     throw new SystemLicenseNotActivatedException(
-                            "Codenvy license is not activated. Error code: " + license.getActivationStatus());
+                            "System license is not activated. Error code: " + license.getActivationStatus());
             }
         } catch (SystemLicenseNotFoundException e) {
-            throw new SystemLicenseNotActivatedException("Codenvy license is not activated.");
+            throw new SystemLicenseNotActivatedException("System license is not activated.");
         }
     }
 }

@@ -43,7 +43,7 @@ public interface SystemLicenseActionDao {
     void upsert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
 
     /**
-     * Removes codenvy license action record.
+     * Removes system license action record.
      *
      * @param licenseType
      *          the type of the license

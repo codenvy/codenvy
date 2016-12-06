@@ -352,7 +352,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                 throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
             }
         }  catch (JsonParseException | IOException e) {
-            throw new IllegalStateException("Codenvy License can't be validated.", e);
+            throw new IllegalStateException("System License can't be validated.", e);
         }
     }
 
@@ -383,9 +383,9 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         } catch (SystemLicenseNotFoundException e) {
             throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
         } catch (InvalidSystemLicenseException e) {
-            throw new IllegalStateException("Codenvy License is invalid or has unappropriated format.");
+            throw new IllegalStateException("System License is invalid or has unappropriated format.");
         } catch (SystemLicenseException e) {
-            throw new IllegalStateException("Codenvy License can't be validated.", e);
+            throw new IllegalStateException("System License can't be validated.", e);
         }
     }
 

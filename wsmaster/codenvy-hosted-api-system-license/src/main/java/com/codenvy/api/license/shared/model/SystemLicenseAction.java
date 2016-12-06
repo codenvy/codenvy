@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public interface SystemLicenseAction {
     /**
-     * Returns Codenvy license type.
+     * Returns system license type.
      */
     Constants.License getLicenseType();
 

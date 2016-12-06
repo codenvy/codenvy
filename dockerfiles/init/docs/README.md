@@ -227,7 +227,7 @@ Usage: docker run -it --rm
           --pull                             Checks for newer images from DockerHub  
           --force                            Removes all images and re-pulls all images from DockerHub
           --offline                          Uses images saved to disk from the offline command
-          --accept-license                   Auto accepts the Codenvy license during installation
+          --accept-license                   Auto accepts the system license during installation
           --reinit]                          Reinstalls using existing $CHE_MINI_PRODUCT_NAME.env configuration
     start [--pull | --force | --offline] Starts ${CHE_MINI_PRODUCT_NAME} services
     stop                                 Stops ${CHE_MINI_PRODUCT_NAME} services

@@ -22,7 +22,7 @@ public class Constants {
     public static final char[] PRODUCT_ID = "OPL-STN-SM".toCharArray();
 
     /**
-     * Codenvy license actions.
+     * System license actions.
      */
     public enum Action {
         ACCEPTED,
@@ -30,7 +30,7 @@ public class Constants {
     }
 
     /**
-     * Codenvy license types.
+     * System license types.
      */
     public enum License {
         FAIR_SOURCE_LICENSE,

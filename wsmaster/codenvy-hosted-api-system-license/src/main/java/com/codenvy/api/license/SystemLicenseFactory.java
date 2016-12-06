@@ -53,7 +53,7 @@ public class SystemLicenseFactory {
     }
 
     /**
-     * Creates valid Codenvy license.
+     * Creates valid system license.
      *
      * @param licenseText
      *         the license text
@@ -64,7 +64,7 @@ public class SystemLicenseFactory {
         License license = LicenseValidator.validate(licenseText, publicKey, String.valueOf(productId), null, null, null, null);
         ValidationStatus licenseValidationStatus = license.getValidationStatus();
         if (licenseValidationStatus != ValidationStatus.LICENSE_VALID) {
-            throw new InvalidSystemLicenseException("Codenvy license is not valid");
+            throw new InvalidSystemLicenseException("System license is not valid");
         }
 
         HashMap<String, String> customSignedFeatures = license.getLicenseText().getCustomSignedFeatures();
