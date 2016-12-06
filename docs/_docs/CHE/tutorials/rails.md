@@ -1,9 +1,9 @@
 ---
 title: Rails in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/rails/
+permalink: /tutorials/rails/
 ---
 Ruby on Rails, or simply Rails, is a web application framework written in Ruby under MIT License. Rails is a model–view–controller (MVC) framework, providing default structures for a database, a web service, and web pages. 
 ```text  

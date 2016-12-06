@@ -1,9 +1,9 @@
 ---
 title: Cuba Platform in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/cuba/
+permalink: /tutorials/cuba/
 ---
 CUBA Platform is a high level Java framework for faster enterprise software development.
 ```text  

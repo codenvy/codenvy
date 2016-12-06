@@ -1,9 +1,9 @@
 ---
 title: TomEE in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/tomee/
+permalink: /tutorials/tomee/
 ---
 TomEE is a JavaEE application server. (Learn more about TomEE) This page provides a quick configuration guide to get started with TomEE within Che.  
 ```text  

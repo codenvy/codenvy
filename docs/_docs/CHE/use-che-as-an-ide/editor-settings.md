@@ -29,3 +29,4 @@ Preview an HTML file by right-clicking it in the project explorer and selecting 
 ![che-previewHTML.jpg](/images/che-previewHTML.jpg)
 
 # Alternative: Use a Desktop IDE  
+You can use a desktop IDE or editor with an Eclipse Che workspace by following the instructions in our [Local IDE Sync](docs:desktop-ide-mounting) docs.

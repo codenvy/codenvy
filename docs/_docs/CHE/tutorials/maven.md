@@ -1,9 +1,9 @@
 ---
 title: Java+Maven in Che
 excerpt: "Che was written in Java. Experience the rich Intellisense and Java tools in this tutorial."
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/maven/
+permalink: /tutorials/maven/
 ---
 # 1. Start Che  
 Use your SaaS account for the following, or if you have [installed Che](https://eclipse-che.readme.io/v5.0/docs/che-getting-started), open a terminal and use the Che startup script:

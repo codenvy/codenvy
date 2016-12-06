@@ -1,9 +1,9 @@
 ---
 title: Java Swing in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/swing/
+permalink: /tutorials/swing/
 ---
 Swing is a GUI widget toolkit for Java. It is part of Oracle's Java Foundation Classes (JFC) – an API for providing a graphical user interface (GUI) for Java programs.
 ```text  

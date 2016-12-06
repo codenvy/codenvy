@@ -1,9 +1,12 @@
 <ul>
   <li class="{% if page.overview %}current{% endif %}">
-    <a href="/">Home</a>
+    <a href="/docs/">Home</a>
   </li>
   <li class="{% if page.url contains '/docs/' %}current{% endif %}">
-    <a href="/docs/admin/">Docs</a>
+    <a href="/docs/introduction/">Docs</a>
+  </li>
+  <li class="{% if page.url contains '/tutorials/' %}current{% endif %}">
+    <a href="/tutorials/multi-machine/">Tutorials</a>
   </li>
   <li>
     <a href="{{ site.repository }}/docs"><span class="hide-on-mobiles">View on </span>GitHub</a>

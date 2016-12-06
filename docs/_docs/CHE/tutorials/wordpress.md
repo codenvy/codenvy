@@ -1,9 +1,9 @@
 ---
 title: Wordpress in Che
 excerpt: "Create a new Wordpress project with a dedicated database"
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/wordpress/
+permalink: /tutorials/wordpress/
 ---
 # 1. Start Che  
 

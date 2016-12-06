@@ -1,4 +1,5 @@
 {% for item in include.items %}
+  {% assign layout_type = page.layout | prepend:"/" | append:"/" %}
   {% assign item_url = item | prepend:"/docs/" | append:"/" %}
   {% assign doc = site.docs | where: "url", item_url | first %}
   <option value="{{ doc.url }}">{{ doc.title }}</option>

@@ -5,7 +5,6 @@ layout: docs
 overview: true
 permalink: /docs/getting-started/
 ---
-## Quick Start
 With Docker 1.11+ on Windows, Mac, or Linux:
 ```
 $ docker run codenvy/cli start

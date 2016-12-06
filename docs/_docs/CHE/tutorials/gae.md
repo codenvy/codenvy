@@ -1,9 +1,9 @@
 ---
 title: Google App Engine and Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/gae/
+permalink: /tutorials/gae/
 ---
 ```text  
 # When on the Dashboard create a new project with PHP GAE or Python GAE stack from the Stack Library and a sample PHP or Python project. \

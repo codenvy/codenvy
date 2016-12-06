@@ -1,9 +1,9 @@
 ---
 title: PHP in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/php/
+permalink: /tutorials/php/
 ---
 # 1. Create a PHP Project  
 Start Che, create a PHP project using a sample app:

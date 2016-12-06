@@ -1,5 +1,5 @@
 ---
-title: Factories, Badged Repos and Guided Tours
+title: Factories
 excerpt: "Automation for generating workspaces using URLs, simplify contributions for your project with an on-demand developer workspace ready in seconds, and launch walk-me style guided tours in workspaces created by Factories"
 layout: docs
 overview: true

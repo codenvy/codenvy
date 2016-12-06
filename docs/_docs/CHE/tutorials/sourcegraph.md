@@ -1,9 +1,9 @@
 ---
 title: Sourcegraph in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/sourcegraph/
+permalink: /tutorials/sourcegraph/
 ---
 Sourcegraph is a version-control platform built with Code Intelligence.
 ```shell  

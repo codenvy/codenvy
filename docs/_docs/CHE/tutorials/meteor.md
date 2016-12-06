@@ -1,9 +1,9 @@
 ---
 title: Meteor in Che
 excerpt: ""
-layout: docs
+layout: tutorials
 overview: true
-permalink: /docs/meteor/
+permalink: /tutorials/meteor/
 ---
 # 1. Start Che  
 Run `docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che start` and open your browser at `http://<your-che-host>:8080`
