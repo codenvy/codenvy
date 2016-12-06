@@ -63,7 +63,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
     public static final String YUM_CONF_FILE = "/etc/yum.conf";
     public static final String WGETRC_FILE   = "/etc/wgetrc";
 
-    protected static final String LEGALITY_NODE_LICENSE_SERVICE = "/system/license/legality/node";
+    protected static final String LEGALITY_NODE_LICENSE_SERVICE = "/license/system/legality/node";
     protected static final String NODE_NUMBER_PARAM             = "nodeNumber";
 
     private final HttpTransport transport;
