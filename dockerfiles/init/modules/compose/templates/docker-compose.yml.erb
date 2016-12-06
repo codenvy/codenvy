@@ -137,7 +137,11 @@ services:
   postgres:
     image: <%= ENV["IMAGE_POSTGRES"] %>
     env_file:
+<% if @compose_file_for_containers == true -%>
+      - '/codenvy/instance/config/postgres/postgres.env'
+<% else -%>
       - '<%= ENV["POSTGRES_ENV_FILE"] %>'
+<% end -%>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
@@ -162,7 +166,11 @@ services:
       - haproxy
       - postgres
     env_file:
+<% if @compose_file_for_containers == true -%>
+      - '/codenvy/instance/config/codenvy/codenvy.env'
+<% else -%>
       - '<%= ENV["CODENVY_ENV_FILE"] %>'
+<% end -%>
     volumes:
        - '<%= scope.lookupvar('compose::puppet_src_folder') -%>:/puppet-configuration'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/:/opt/codenvy-data/logs/'
@@ -178,7 +186,7 @@ services:
     links:
       - 'postgres:codenvy-postgres'
       - 'swarm:codenvy-swarm'
-<% if scope.lookupvar('codenvy::env') != 'production' -%>
+<% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '8000:8000'
 <% end -%>
