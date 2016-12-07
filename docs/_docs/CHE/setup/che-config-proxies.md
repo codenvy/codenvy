@@ -2,7 +2,6 @@
 title: Config&#58 Proxies
 excerpt: "Configure Che workspaces to operate over a proxy."
 layout: docs
-overview: true
 permalink: /docs/che-config-proxies/
 ---
 Your users may need their workspaces to operate over a proxy to the Internet. Che has three dependencies to the Internet:

@@ -2,7 +2,6 @@
 title: REST API
 excerpt: "APIs for the workspace master and agent using Swagger"
 layout: docs
-overview: true
 permalink: /docs/rest-api/
 ---
 Codenvy has activated Swagger annotations for its embedded APIs. There are APIs that are hosted within the Che server, which we call workspace master APIs for managing workspaces. And there are APIs that are hosted within each workspace, launched and hosted by a workspace agent that is injected into each workspace machine when it boots.  
@@ -17,12 +16,12 @@ Each workspace has its own set of APIs. The workspace agent advertises its swagg
 ```text  
 http://{workspace-master-host}/swagger/?url=http://{workspace-agent-host}/ide/ext/docs/swagger.json
 
-# Example 
+# Example
 http://codenvy/swagger/?url=http://192.168.99.100:32773/ide/ext/docs/swagger.json\
 ```
 ## Authentication
 
-There are certain APIs within Codenvy that may require authenticated access. While Codenvy implements a single user profile, other Codenvy implementations may implement an authentication provider that will require having a valid token before making use of the API. 
+There are certain APIs within Codenvy that may require authenticated access. While Codenvy implements a single user profile, other Codenvy implementations may implement an authentication provider that will require having a valid token before making use of the API.
 
 You can use the `auth` REST API to login to a Codenvy system, which will return a token. You then append the token to the end of any REST invocation that you then make.
 ```text  

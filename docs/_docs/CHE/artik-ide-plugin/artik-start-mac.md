@@ -2,7 +2,6 @@
 title: Getting Started - Mac & Linux
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/artik-start-mac/
 ---
 The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linux.
@@ -104,7 +103,7 @@ docker run -ti --rm artik-tools jdrummond/artik-tools -q -i %HOST_IP% -t 5
 #When above results in multiple ip addresses
 docker run -ti --rm artik-tools jdrummond/artik-tools -i %HOST_IP% -t 20
 
-#SSH in ARTIK device using ip address from above to test ip address validity. 
+#SSH in ARTIK device using ip address from above to test ip address validity.
 #ARTIK device default username/password root/root.
 ssh root@<ip-address>
 ```
@@ -119,7 +118,7 @@ docker run -i --rm -t artik-tools jdrummond/artik-tools -q -i %HOST_IP% -t 5
 #When above results in multiple ip addresses
 docker run -i --rm -t artik-tools jdrummond/artik-tools -i %HOST_IP% -t 20
 
-#SSH in ARTIK device using ip address from above to test ip address validity. 
+#SSH in ARTIK device using ip address from above to test ip address validity.
 #ARTIK device default username/password root/root.
 bash
 >ssh root@<ip-address>
@@ -138,7 +137,7 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 ![artikmanageradddevice.jpg](/docs/images/artikmanageradddevice.jpg)
 
 # 7. Build, Run and Debug  
-See: [Getting Started - Windows](doc:samsung-artik-ide-getting-started#8-build)] 
+See: [Getting Started - Windows](doc:samsung-artik-ide-getting-started#8-build)]
 # 9. Production and Development Profiles  
 Your Artik device needs certain software to make it possible for Artik IDE to debug apps, sync project files, make use of C/C++ and Node SDKs.
 
@@ -151,4 +150,3 @@ Profiles are available at **Artik > Profiles** or by right clicking the device i
 If you experience problems, please file an issue on the [Eclipse Che GitHub page](https://github.com/eclipse/che/issues) where Che and ARTIK engineers can help you.
 # 11. Contribute to the ARTIK IDE  
 * **Build From Source**: We love that idea. Che is a multi-module project, so you can build all of it, or just some of it. Start in the /assembly/assembly-main/ repository for the fastest build. We maintain build instructions on the [ARTIK IDE GitHub repository](https://github.com/codenvy/artik-ide).
-

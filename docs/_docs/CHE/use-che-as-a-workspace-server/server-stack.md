@@ -2,16 +2,15 @@
 title: Stacks
 excerpt: "Manage stacks using Che REST API"
 layout: docs
-overview: true
 permalink: /docs/server-stack/
 ---
-## List All Stacks 
+## List All Stacks
 ```curl  
 curl --header 'Accept: application/json' http://localhost:8080/api/stack?tags=Node.JS\
 ```
-Query parameter `tags` is optional and used to narrow down search results. 
+Query parameter `tags` is optional and used to narrow down search results.
 
-It's possible to use multiple query parameters, e.g. `http://localhost:8080/api/stack?tags=Java&tags=Ubuntu` 
+It's possible to use multiple query parameters, e.g. `http://localhost:8080/api/stack?tags=Java&tags=Ubuntu`
 
 Swagger: http://localhost:8080/swagger/#!/stack/searchStacks
 

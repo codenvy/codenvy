@@ -2,7 +2,6 @@
 title: Managing
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/managing/
 ---
 ## Scaling

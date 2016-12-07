@@ -2,7 +2,6 @@
 title: Volume Mounts
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/volume-mounts/
 ---
 Volume mounts are used by Eclipse Che to mount remote external files and directories into the workspaces. Users can mount volumes external to docker and between other containers.

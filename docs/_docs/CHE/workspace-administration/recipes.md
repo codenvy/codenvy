@@ -2,21 +2,20 @@
 title: Runtime Recipes
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/recipes/
 ---
 A recipe defines part of the runtime of a workspace. A recipe is included in a [stack](https://eclipse-che.readme.io/docs/stacks) along with meta information that defines how the workspace runtime should be created. When creating custom workspace runtime it's often best to create a custom [stack](https://eclipse-che.readme.io/docs/stacks) with a custom recipe.
 
 Workspaces can have a single runtime or multiple runtimes.  Che uses Docker, though Che could handle runtimes other than Docker, to create runtime(s) from [Dockerfiles](https://docs.docker.com/engine/reference/builder/) for a single-container runtime, or [compose files](https://docs.docker.com/compose/overview/) to create single-container/multi-container runtime(s).
 
-Che provides recipes for all of the ["Ready-to-go" stacks](https://eclipse-che.readme.io/docs/stacks#section-ready-to-go-stacks) for things like Java, PHP, Node, ASP.NET, and C++. 
+Che provides recipes for all of the ["Ready-to-go" stacks](https://eclipse-che.readme.io/docs/stacks#section-ready-to-go-stacks) for things like Java, PHP, Node, ASP.NET, and C++.
 
 A recipe references either a Dockerfile or compose definition that need to be built into image(s) or reference already-built image(s). When a workspace is created from a particular stack, Che will take a recipe, create or use existing Docker image(s) from it, and then create runtime Docker container(s) from that/those image(s). That/Those runtime Docker container(s) will be your workspace runtime(s).
 
 [Workspace agents](https://eclipse-che.readme.io/docs/workspace-agents) include the additional libraries that you may need, such as yum or npm, along with the runtime services that Che needs, such as Java and Tomcat, a SSH daemon. [Workspace agents](https://eclipse-che.readme.io/docs/workspace-agents) are then injected into runtime Docker container(s) from Docker images such as certified minimal versions of Linux operating systems like Alpine, Debian or Ubuntu with added [Che dependencies](https://eclipse-che.readme.io/docs/recipes#section-che-runtime-dependencies).
 # Single-Container Recipes  
 ## Defining
-You can author your own recipe as a way to make your workspace runtime shareable. You can provide a URL to a custom recipe (Dockerfile or Docker compose file) or write a new custom recipe (Dockerfile or Docker compose file) from the dashboard. 
+You can author your own recipe as a way to make your workspace runtime shareable. You can provide a URL to a custom recipe (Dockerfile or Docker compose file) or write a new custom recipe (Dockerfile or Docker compose file) from the dashboard.
 
 Please note, Eclipse Che only [supports certain compose syntax](https://eclipse-che.readme.io/docs/recipes#section-compose-syntax-support).
 ![che-recipe-write.jpg](/docs/images/che-recipe-write.jpg)
@@ -25,7 +24,7 @@ There are two ways for you to create a custom recipe that can be used within Che
 2. Inherit from a non-Eclipse Che base Docker image, then add both your dependencies, and Che's dependencies (most flexible).
 
 ### Inherit From an Eclipse Che Base Image
-This is the easiest way to build a workspace from a custom recipe.  Eclipse Che base images are authored by Codenvy and hosted on DockerHub. These base images have all of the dependencies necessary for a Che workspace to operate normally.  These base images may have unnecessary dependencies for your project, like subversion. So if size and performance are essential, you can look to author your own. The Dockerfiles for Che's base images are located in [Codenvy's GitHub repository](https://github.com/eclipse/che-dockerfiles/tree/master/recipes). 
+This is the easiest way to build a workspace from a custom recipe.  Eclipse Che base images are authored by Codenvy and hosted on DockerHub. These base images have all of the dependencies necessary for a Che workspace to operate normally.  These base images may have unnecessary dependencies for your project, like subversion. So if size and performance are essential, you can look to author your own. The Dockerfiles for Che's base images are located in [Codenvy's GitHub repository](https://github.com/eclipse/che-dockerfiles/tree/master/recipes).
 
 To reference Codenvy's Docker images in your Dockerfile or Docker compose recipe:
 ```shell  
@@ -45,7 +44,7 @@ This will create the best performing workspace image by only installing the mini
 ### Che Runtime Required Dependencies
 
 | Dependency   | Why?   | How? (Ubuntu/Debian)   
-| --- | --- | --- 
+| --- | --- | ---
 | `RUN apt-get install bash -y`   | `bash`   | Execs are performed as bash commands. It is uncommon that base Docker images do not have bash. However, some distributions as Alpine or Busybox only provide `sh`.   
 | User with `root` privileges   | To install our developer tools agents (like terminal access and intellisense) we need root access or a user who has sudo rights.   | `USER root`\n\nor grant your preferred user sudo rights.   
 | Dockerfile\n`CMD tail -f /dev/null`\n\nCompose\n`command: [tail, -f, /dev/null]`   | To keep a container running   | Non-terminating CMD   
@@ -62,14 +61,14 @@ command: [sudo, service, apache2, start, &&, tail, -f, /dev/null]\
 If you want to use Che with the maven plug-in, then you need to add these additional dependencies.
 
 | Dependency   | Why?   | How?   
-| --- | --- | --- 
+| --- | --- | ---
 | `mvn`   | Maven plugin needs Maven 3.3.9 or higher.   | `wget -qO- \http://apache.ip-connect.vn.ua/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-3.3.9-bin.tar.gz\ | tar -zx --strip-components=1 -C /home/user/apache-maven-3.3.9/`   
 | `M2_HOME` environment variable exported   | Maven plugin uses this variable to detect if Maven is installed.   | Dockerfile\n`ENV M2_HOME /home/user/apache-maven-3.3.9`\n\nCompose\n```\nenvironment:\n  - M2_HOME=/home/user/apache-maven-3.3.9\n```   
 
 ### Other Optional Dependencies
 
 | Dependency   | Why?   | How? (Ubuntu/Debian)   
-| --- | --- | --- 
+| --- | --- | ---
 | Java 1.8 (OpenJDK)   | Required to compile and run Java code.   | `apt-get install openjdk-8-jdk`   
 | Required to import projects stored in git repositories. Git is the default importer in Che (all sample apps are imported as git repositories).   | `apt-get install git -y`   | `git`   
 | Required to import projects stored in subversion repositories.   | `svn`   | `apt-get install subversion -y`   
@@ -102,7 +101,7 @@ expose:
 - Go to Operations perspective (icon in the top right corner) and click the Servers tab. You will see a table with all the ports exposed in the recipe and their corresponding externally published ports.
 - You can also get the published port automatically by using a macro in a [command](https://eclipse-che.readme.io/docs/commands). When authoring a command, set its preview URL to `${server.port.<your-apps-port>}` where `<your-apps-port>` is the port in your recipe's expose command. When the command is executed, this macro is translated into a `host:port` URL.
 
-There is no way to expose a port once the workspace is running. To expose an additional ports, the ports need to be added to the runtime recipe or added directly to the runtime instance via the dashboard `Workspaces>(click workspace name)>Runtime Tab`. 
+There is no way to expose a port once the workspace is running. To expose an additional ports, the ports need to be added to the runtime recipe or added directly to the runtime instance via the dashboard `Workspaces>(click workspace name)>Runtime Tab`.
 ![Che-recipe-expose-ports.jpg](/docs/images/Che-recipe-expose-ports.jpg)
 ## Issue a Pull Request To Improve Recipes
 We really love pull requests. We are always looking to increase the set of stacks that are available for development. Please suggest a fix or add a new base image recipe.  To do so, issue [pull requests](https://github.com/codenvy/dockerfiles). If you add a new Dockerfile, it will be added as a source for a new automated build at DockerHub.  Please sign the [Eclipse contributor agreement](https://eclipse.org/legal/ECA.php) before making a contribution. Your contribution will be licensed as [EPL 1.0](https://www.eclipse.org/legal/epl-v10.html).
@@ -119,14 +118,14 @@ If the Dockerfile or build context requires other files to be `ADD` or `COPY` in
 build:
   ## remote context will work
   context: https://github.com/eclipse/che-dockerfiles.git#master:recipes/ubuntu_jre
-          
+
   ## local context will not work
   context: ./my/local/filesystem\
 ```
 ##### Using Private Repositories
-If your `build.context` or `build.Dockerfile` accesses a private remote registry, you need to provide additional configuration.  First, the SSH private key needs to be located in your host machine's home directory `~/.ssh/id_rsa` for Mac/Linux and `C:\Users\<username>\.ssh\id_rsa` for Windows with `0600` permissions for the user that starts Che.  Second, add the hostname of the private repository to the known hosts of the host machine using `ssh -o StrictHostKeyChecking=no -T git@<hostname>`.  Third, add the public key to the git [repository host](https://eclipse-che.readme.io/v5.0/docs/git#section-adding-ssh-public-key-to-git-account). Finally, you can use an SSH git URL in the `build.context` of your compose syntax. 
+If your `build.context` or `build.Dockerfile` accesses a private remote registry, you need to provide additional configuration.  First, the SSH private key needs to be located in your host machine's home directory `~/.ssh/id_rsa` for Mac/Linux and `C:\Users\<username>\.ssh\id_rsa` for Windows with `0600` permissions for the user that starts Che.  Second, add the hostname of the private repository to the known hosts of the host machine using `ssh -o StrictHostKeyChecking=no -T git@<hostname>`.  Third, add the public key to the git [repository host](https://eclipse-che.readme.io/v5.0/docs/git#section-adding-ssh-public-key-to-git-account). Finally, you can use an SSH git URL in the `build.context` of your compose syntax.
 ```shell  
-## On Linux/Mac host machine 
+## On Linux/Mac host machine
 ## To new create ssh keypair
 ssh-keygen
 
@@ -168,7 +167,7 @@ In the event that a Compose file includes both build instructions and a build im
 container_name: my_container\
 ```
 `container_name` is skipped during execution. Instead, Che generates container names based on its own internal patterns. Because many developers could be running the same Compose file on the same Che workspace node at the same time naming conflicts need to be avoided.
-       
+
 ### Volumes
 Volumes are not supported in the Che system. Instead we suggest using `volumes_from` to gain access to [volume mount](https://eclipse-che.readme.io/docs/recipes#section-multiple-machines-shared-volumes) of the `dev-machine`.
 
@@ -178,7 +177,7 @@ Volumes are not supported in the Che system. Instead we suggest using `volumes_f
 networks:
   internal:
   aliases: ['my.alias’]
-## Not supported 
+## Not supported
 networks:
   internal:
   driver: bridge\
@@ -191,8 +190,8 @@ Hostname is not supported and the machine's name will be used for the hostname. 
 ### Ports
 Binding ports to the host system is not supported. This is done to ensure that each container does not used already assigned host ports because many developers could be running the same compose file on the same Che server host at the same time. Users can expose ports and provide a [command macro](https://eclipse-che.readme.io/docs/commands#macros) `${server.port.<port>}` in the IDE to determine the ephemeral port assigned.  
 
-### Privileged 
-To secure the underlying host system `privileged` compose command is not supported. 
+### Privileged
+To secure the underlying host system `privileged` compose command is not supported.
 
 The Che server can be configured to give all containers privileged access by setting the environment variable `CHE_PROPERTY_machine_docker_privilege__mode=true`. However, this makes the host system vulnerable and gives all containers access to the host system.
 
@@ -202,6 +201,5 @@ The `env_file` compose command is not supported. Environment variables can be ma
 ### Known Bugs
 
 | Syntax   | Bug   
-| --- | --- 
+| --- | ---
 | command:   | Space separated `command` syntax is not working. Suggested work around is to use bracket syntax.\n[https://github.com/eclipse/che/issues/2365](https://github.com/eclipse/che/issues/2365)\n```\n## Not working\ncommand: tail -f /dev/null\n\n## Working\ncommand: [tail, -f, /dev/null]\n```   
-

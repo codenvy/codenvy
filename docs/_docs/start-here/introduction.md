@@ -2,7 +2,6 @@
 title: Introduction
 excerpt: "Welcome to Codenvy!"
 layout: docs
-overview: true
 permalink: /docs/introduction/
 ---
 Codenvy makes on-demand workspaces to give you a better agile experience. Codenvy SaaS is available for self-service at codenvy.com. You can also install Codenvy on your own infrastructure with Codenvy On-Prem.
@@ -16,4 +15,3 @@ Codenvy has added enterprise features to Eclipse Che including:
 * User authentication, single-sign on, and LDAP
 * Self-service user registration
 * Factories - which add actions and a simple URL execution option to the portable workspaces of Eclipse Che
-

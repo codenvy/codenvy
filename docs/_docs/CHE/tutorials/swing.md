@@ -2,7 +2,6 @@
 title: Java Swing in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/swing/
 ---
 Swing is a GUI widget toolkit for Java. It is part of Oracle's Java Foundation Classes (JFC) – an API for providing a graphical user interface (GUI) for Java programs.
@@ -15,7 +14,7 @@ FROM codenvy/ubuntu_jdk8_x11\
 ```
 
 ```text  
-#In the IDE create a Maven command with the following syntax to build your project: 
+#In the IDE create a Maven command with the following syntax to build your project:
 Title:    build
 Working directory: ${current.project.path}
 Command:  clean install
@@ -30,7 +29,7 @@ java -jar {your-artifact-name}.jar\
 
 ```text  
 # Test your application
-1. Click Get Greeting tab to call the info box. 
+1. Click Get Greeting tab to call the info box.
 2. Exit.
 3. Go to the IDE and make some changes to the app.
 4. Rerun `build` command.

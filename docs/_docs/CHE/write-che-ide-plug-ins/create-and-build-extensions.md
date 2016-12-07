@@ -2,7 +2,6 @@
 title: Building Extensions
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/create-and-build-extensions/
 ---
 This section describes, how to create, build and run a new extension to Che. It is focused on the infrastructural part only. To set-up a workspace, you should first refer to the [Contributor Setup: Che Workspace](doc:setup-che-workspace)
@@ -10,15 +9,15 @@ This section describes, how to create, build and run a new extension to Che. It 
 # Build and Run Che  
 We document how to build and run Che from source in the [GitHub repository wiki](https://github.com/eclipse/che/wiki/Development-Workflow). You should get familiar with this development workflow and be able to compile and run Che before you start to build an extension.
 
-In order to build Che, you need to properly set the dependencies, they are listed in the [GitHub repository wiki](https://github.com/eclipse/che/wiki/Development-Workflow#dependencies). 
+In order to build Che, you need to properly set the dependencies, they are listed in the [GitHub repository wiki](https://github.com/eclipse/che/wiki/Development-Workflow#dependencies).
 Similarly, to build the Dashboard submodule, you'll find the dependencies and instructions in the following wiki `readme.md` of the [GitHub repository](https://github.com/eclipse/che/tree/master/dashboard).
 
 To simplify this we build a Docker image with all the dependencies needed to build Che and all its submodules. Please follow theses instructions build [Che using the Docker image](https://github.com/eclipse/che/wiki/Development-Workflow#build-che-using-docker).
 
 
-If you want to work with an IDE, please follow this guideline: [IDE Setup](doc:setup-che-workspace). 
+If you want to work with an IDE, please follow this guideline: [IDE Setup](doc:setup-che-workspace).
 # Sample Extensions  
-There are a set of sample extensions that are included in the Che source code. They are in the `/samples` directory. The examples below reference once of those samples, named `sample-plugin-embedjs`. 
+There are a set of sample extensions that are included in the Che source code. They are in the `/samples` directory. The examples below reference once of those samples, named `sample-plugin-embedjs`.
 
 The Che sample plugins are not packaged with Che. You need to add each one to Che to test its capabilities. Most of the documentation provides instructions on how to create, build and link extensions manually.
 
@@ -27,13 +26,13 @@ Usually, most developers will copy an existing extension into a new directory an
 The typical structure of a Che extension is composed of the following:
 
 | `/extension/pom.xml`\n`/extension/src/`\n`/extension/target/`   | File   
-| --- | --- 
+| --- | ---
 | Details   | Your extension source and build files. The `pom.xml` is a build file that compiles your extension and creates a JAR packaging of it. Your JAR is placed in the `/target` directory and installed into your local maven repository.   
 
 Depending on the complexity of your extension, you might build the structure of your plugin with multiple modules. Each module is independently buildable, and they each would have their own `pom.xml`, `src`, and `target` entries.
 
 | File   | Details   
-| --- | --- 
+| --- | ---
 | `/extension/extension-ide`   | Your extension module for the IDE client.   
 | `/extension/extension-server`   | Your extension module for the server part.   
 | `/extension/extension-shared`   | Your extension module for the shared code between the server and the client.   
@@ -163,7 +162,7 @@ After you compile your extension, they will be packaged as JAR files. Those JAR 
 ## Che Files For Linking
 
 | File   | Details   
-| --- | --- 
+| --- | ---
 | `/che/assembly/pom.xml`   | **Both server-side and client-side extensions.** Due to a temporary limitation in version management, your dependency must also be added to the root Che build artifact.   
 | `/che/assembly/assembly-ide-war/pom.xml`   | **Client-side (IDE) extensions. ** Build file for main Che assembly.client side components, extension dependency should be added to this `pom.xml`.   
 | `/che/assembly/assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml`   | **Client-side (IDE) extensions.** Client-side extensions are authored in GWT. Add your extension GWT module as an inheritance to this IDE GWT module.   
@@ -205,7 +204,7 @@ In order to allow your extension to be visible from the root level of Che, add y
 You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the `pom.xml` for you.
 
 #### Optional: Skip Enforcement
-By default, Che has the Maven enforcer plug-in activated. When this plugin is activated, your dependency must be declared in the root `pom.xml`. You can skip enforcement, which will not require your extension to be in the root `pom.xml`. You skip enforcement by building `-Denforcer.skip=true`. 
+By default, Che has the Maven enforcer plug-in activated. When this plugin is activated, your dependency must be declared in the root `pom.xml`. You can skip enforcement, which will not require your extension to be in the root `pom.xml`. You skip enforcement by building `-Denforcer.skip=true`.
 
 ## IDE Extension: Link To Assembly
 To include your jar files within the Che assemblies you have to introduce your extension as a dependency in `/che/assembly/assembly-ide-war/pom.xml` and also have it added as a dependency to the GWT application.  First add the dependency:
@@ -328,7 +327,7 @@ CHE RUNTIME
 
 \
 ```
-The Che assembly is the root Che project that builds a number of assemblies from a set of system plug-ins together with your custom plug-in. The Che assembly has a master configuration file, `/assembly/assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml` which defines the modules to compile into the application. 
+The Che assembly is the root Che project that builds a number of assemblies from a set of system plug-ins together with your custom plug-in. The Che assembly has a master configuration file, `/assembly/assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml` which defines the modules to compile into the application.
 
 To manually add your plug-in to the Che assembly, you update the `IDE.gwt.xml` file and the assembly `pom.xml` with information about your plug-in. When the Che assembly is built, it will download your extension as a dependency and compile it into the Che IDE application. The Che IDE application will use dependency injection to load any Gin modules.  When you boot Che within tomcat or another application server, Che uses Guice to load any server-side modules for dependency injection.
 
@@ -351,4 +350,3 @@ mvn clean install -DskipTests -Dskip-validate-sources -Dgwt.compiler.localWorker
 <!-- See https://code.google.com/p/google-web-toolkit/wiki/SoftPermutations. -->
 <collapse-all-properties />
 ```
-

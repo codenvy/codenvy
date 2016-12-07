@@ -2,7 +2,6 @@
 title: Events
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/server-events/
 ---
 Events are defined in Che in order to circulate information between processes in a publish/subscribe model. Event notifications are provided on Websocket channels. Clients can subscribe to these channels.

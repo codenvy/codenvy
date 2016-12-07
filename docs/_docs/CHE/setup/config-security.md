@@ -2,7 +2,6 @@
 title: Config&#58 Security
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/config-security/
 ---
 Eclipse Che is designed as a single identity system to be used by an individual or small team working in a trusted environment. The following outlines some of the security capabilities and known gaps in Che.

@@ -2,7 +2,6 @@
 title: Editors
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/code-editors/
 ---
 This part of the tutorial describes how to extend the Eclipse Che code editor to support a new language. It starts with defining a custom file type and associating it with the specific editor to be opened. Subsequently, we describe how to adapt and enhance the syntax highlighting as well as the code completion of the code editor.
@@ -13,8 +12,8 @@ In this part of the tutorial, we describe, how new file types can be defined in 
 Defining a new file type consists of three basic steps:
   1. Define the file type itself, including specifying a name, a file extension and an icon
   2. Register the new file type in the file type registry
-  3. Optional: Register the file type in the editor registry and thereby associate it with a specific editor to be opened with 
- 
+  3. Optional: Register the file type in the editor registry and thereby associate it with a specific editor to be opened with
+
 A simplified version of a registration of a new file type with the extension `.my` covering exactly these three necessary steps in correct order looks like this:
 ```java  
 FileType myFileType = new FileType("My FileType\ anIcon, "my");
@@ -28,7 +27,7 @@ The following diagram shows all components of a typical file type registration. 
 The class `MyGinModule` is responsible for creating the new file type. The icon for the new file type will go to a GWT resource class (`MyRessources`). Finally, the class `MyExtension` creates a `FileTypeRegistration` in Che's `FileTypeRegistry`.
 
 ![image11.png](/docs/images/image11.png)
-If you haven’t used Gin or dependency injection before, we recommend you have a look at our brief [dependency injection introduction](introduction-1#section-dependency-injection). 
+If you haven’t used Gin or dependency injection before, we recommend you have a look at our brief [dependency injection introduction](introduction-1#section-dependency-injection).
 
 First, we define a new class `GinModule` for the instantiation of the custom `FileType`. It enables other classes to access the new file type using dependency injection. When adding more extensions later, the `GinModule` class can also create other components and mappings. So we will not call it `FileTypeGinModule`, but more generically `MyGinModule`. For now, the `GinModule` just provides the custom file type using the ID `MyFileType`. This makes the custom file type available for injection for other components using the annotation `@Named(“MyFileType”)`.
 
@@ -56,7 +55,7 @@ The custom file type consumes an icon, which is retrieved from a GWT resource:
 org.eclipse.che.plugin.myextension.ide.MyResources
 public interface MyResources extends ClientBundle {
 	 MyResources INSTANCE = GWT.create(MyResources.class);
-  
+
 	 @Source("icons/my.svg")
    SVGResource icon();
 }
@@ -85,7 +84,7 @@ After registering the file type, Che can map the extension to the definition of 
 
 
 ![image.png](/docs/images/image.png)
-As you can see in the screenshot above, Che will open any new file type in the default editor. This even works without defining any editor extension. You might want to contribute another editor type for the new file type later. This is done by adding an editor extension and associating the file type with an editor provider. We will cover this more in detail in the section [Code Completion](code-editors#section-code-completion). As we do not have a custom editor provider, yet, the following example code associates the example file type with the default text editor. Please note, this step is redundant in this example, as Che will associate any unknown file type with the default editor anyways. 
+As you can see in the screenshot above, Che will open any new file type in the default editor. This even works without defining any editor extension. You might want to contribute another editor type for the new file type later. This is done by adding an editor extension and associating the file type with an editor provider. We will cover this more in detail in the section [Code Completion](code-editors#section-code-completion). As we do not have a custom editor provider, yet, the following example code associates the example file type with the default text editor. Please note, this step is redundant in this example, as Che will associate any unknown file type with the default editor anyways.
 
 Since we might want to add more extensions to the editor, again, we use a more generic name for the extension class. As we extend the Che default editor, written in JavaScript and internally referred to a “JSEditor”, we follow the convention of other existing plugins and call the extension `MyJsEditorExtension`. The following extension class gets the `EditorRegistry`, the file type and the `DefaultTextEditorProvider` injected and creates the editor registration. As mentioned, this will have no visible effect in the example. However, if we would replace the Default Text Editor Provider with our own provider (`CustomEditorProvider`), we could extend or replace the editor used for our new file type.
 
@@ -234,8 +233,8 @@ A `CodeAssistProcessor` is responsible for calculating `CompletionProposals`. Th
 public  class JsonExampleCodeAssistProcessor implements CodeAssistProcessor {
 
   @Override
-  public void computeCompletionProposals(TextEditor editor, 
-      																	 int offset, 
+  public void computeCompletionProposals(TextEditor editor,
+      																	 int offset,
       																	 CodeAssistCallback callback) {
 
       List<CompletionProposal> proposals = new ArrayList<>();
@@ -252,7 +251,7 @@ public  class JsonExampleCodeAssistProcessor implements CodeAssistProcessor {
     @Override
     public String getErrorMessage() {
        return null;
-    } 
+    }
 }
 ```
 A `CompletionProposal` represents a completion option to be displayed when the users trigger auto-completion in the editor. Therefore, it shows all necessary information for the user and allows to select the right proposal to be applied. The following example shows a code proposal based on a static String, which is retrieved as a parameter in the constructor. This String is used as the displayed name and, along with the defined icon, will be shown to the user in the proposal list. Finally, once the user has selected a proposal which should be applied, the `CompletionProposal` returns the `Completion` (using a callback) in the `#getCompletion` method.
@@ -348,7 +347,7 @@ Add extension with mime type to [File Extension Registry](https://github.com/ecl
 this.mappings.put("ino\ makeList("text/x-c++src"));
 ...//
 ```
-- You can configure arbitrary new contentTypes and corresponding highlight configuration. 
+- You can configure arbitrary new contentTypes and corresponding highlight configuration.
 Usage example:
 ```java  
 @Inject
@@ -367,22 +366,22 @@ Usage example:
         config.setId("testlang.highlighting");
         config.setContentTypes(contentTypeId);
         config.setPatterns(
-                "[\n" + 
-                        "  {include: \"orion.lib#string_doubleQuote\"},\n" + 
-                        "  {include: \"orion.lib#string_singleQuote\"},\n" + 
-                        "  {include: \"orion.lib#brace_open\"},\n" + 
-                        "  {include: \"orion.lib#brace_close\"},\n" + 
-                        "  {include: \"orion.lib#bracket_open\"},\n" + 
-                        "  {include: \"orion.lib#bracket_close\"},\n" + 
-                        "  {include: \"orion.lib#parenthesis_open\"},\n" + 
-                        "  {include: \"orion.lib#parenthesis_close\"},\n" + 
-                        "  {include: \"orion.lib#number_decimal\"},\n" + 
-                        "  {include: \"orion.lib#number_hex\"},\n" + 
-                        "  {\n" + 
+                "[\n" +
+                        "  {include: \"orion.lib#string_doubleQuote\"},\n" +
+                        "  {include: \"orion.lib#string_singleQuote\"},\n" +
+                        "  {include: \"orion.lib#brace_open\"},\n" +
+                        "  {include: \"orion.lib#brace_close\"},\n" +
+                        "  {include: \"orion.lib#bracket_open\"},\n" +
+                        "  {include: \"orion.lib#bracket_close\"},\n" +
+                        "  {include: \"orion.lib#parenthesis_open\"},\n" +
+                        "  {include: \"orion.lib#parenthesis_close\"},\n" +
+                        "  {include: \"orion.lib#number_decimal\"},\n" +
+                        "  {include: \"orion.lib#number_hex\"},\n" +
+                        "  {\n" +
                         "    match: \"\\\\b(?:false|true)\\\\b\\
-" + 
-                        "    name: \"keyword.json\"\n" + 
-                        "  }\n" + 
+" +
+                        "    name: \"keyword.json\"\n" +
+                        "  }\n" +
                 "]");
 
         contentTypeRegistrant.registerFileType(contentType, config);

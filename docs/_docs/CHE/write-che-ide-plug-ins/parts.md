@@ -2,7 +2,6 @@
 title: Parts
 excerpt: "Part API"
 layout: docs
-overview: true
 permalink: /docs/parts/
 ---
 Parts represent the content of the Che workbench, i.e. views and editors within the IDE. Che already provides various parts such as the project explorer, the output console, the build result view, file outline and the code editor. In this part of the tutorial, we describe how to implement a custom view and embed it into the Che IDE. Furthermore, we demonstrate how to open and hide views.
@@ -10,7 +9,7 @@ Parts represent the content of the Che workbench, i.e. views and editors within 
 ## Create a custom Part
 Creating a part in Che consists of two four components, which are marked in grey in the diagram below. In this section, we provide a general overview, in the following sections, we describe the concrete implementation more in detail.
 The central component is the implementation of the view itself (`MyViewImpl`). It will create all the UI widgets, which are shown within a part. `MyViewImpl` inherits from `BaseView`, a base implementation of common functionality for all views provided by Che. If the view needs to be accessed by other components, e.g. to set a selection, public methods should be extracted to an interface (`MyView`). To allow other components to get an instance of `MyView`, the interface is bound to the implementation within `MyGinModule`. See the section [Dependency Injection Basics](doc:dependency-injection-basics) for more details about this.
-As mentioned before, the view implementation is responsible for the content of a view. The integration into the Che IDE, including configuring the tab (title, icon, etc.) is done by a part presenter (`MyPartPresenter`), which inherits from `BasePresenter`. Part presenter are called by Che or a custom action to interact with a part, e.g. to open it or to fill it with content. The part presenter forwards relevant calls to the implementation of a view (encapsulated by the interface). 
+As mentioned before, the view implementation is responsible for the content of a view. The integration into the Che IDE, including configuring the tab (title, icon, etc.) is done by a part presenter (`MyPartPresenter`), which inherits from `BasePresenter`. Part presenter are called by Che or a custom action to interact with a part, e.g. to open it or to fill it with content. The part presenter forwards relevant calls to the implementation of a view (encapsulated by the interface).
 
 
 ![Selection_005.png](/docs/images/Selection_005.png)
@@ -111,12 +110,12 @@ public class HelloWorldPresenter extends BasePresenter {
     public String getTitle() {
         return "Hello World View";
     }
-  
+
  		@Override
     public SVGResource getTitleImage() {
         return (SamplePartsResources.INSTANCE.icon());
     }
-  
+
   	@Override
     public String getTitleToolTip() {
         return "Hello World Tooltip";
@@ -142,10 +141,10 @@ public class HelloWorldPresenter extends BasePresenter {
 ###Interacting from within a view
 To trigger any behavior from with views, the `ActionDelegate` is used as a receiver of events following the GWT MVP pattern. Therefore, you extend the interface by the required methods, in the following listing a method `#onButtonClicked`.
 ```java  
-/** Required for delegating functions in view. */ 
-public interface ActionDelegate extends BaseActionDelegate { 
-  /** Performs some actions in response to a user's clicking on Button */ 
-  void onButtonClicked(); 
+/** Required for delegating functions in view. */
+public interface ActionDelegate extends BaseActionDelegate {
+  /** Performs some actions in response to a user's clicking on Button */
+  void onButtonClicked();
 }\
 ```
 The `ActionDelegate` interface has to be implemented and provided to the view. For a part, the part presenter is a good component to do both, especially, if the relevant operations to be triggered are related to the Che workbench or to Che services. Therefore, the part presenter implements the interface `MyView.ActionDelegate`, implements the defined method and sets itself as a delegate (see listing below).
@@ -160,7 +159,7 @@ public class MyPartPresenter extends BasePresenter implements MyView.ActionDeleg
         this.view = view;
         view.setDelegate(this);
     }
-  
+
   	public void onButtonClicked(){
     	//Do sth.
     }\
@@ -171,8 +170,8 @@ public class MyViewImpl extends BaseView<HelloWorldView.ActionDelegate> implemen
 
 /...
 
-public void onButtonClicked(ClickEvent event) { 
-    delegate.onButtonClicked(); 
+public void onButtonClicked(ClickEvent event) {
+    delegate.onButtonClicked();
 }\
 ```
 ##Opening Parts

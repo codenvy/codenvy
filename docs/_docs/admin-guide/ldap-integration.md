@@ -2,7 +2,6 @@
 title: LDAP Integration
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/ldap-integration/
 ---
 

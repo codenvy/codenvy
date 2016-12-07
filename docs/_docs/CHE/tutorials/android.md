@@ -2,7 +2,6 @@
 title: Android in Che
 excerpt: "Developing Android apps in Che"
 layout: tutorials
-overview: true
 permalink: /tutorials/android/
 ---
 # 1. Select Android Stack and Sample  
@@ -33,7 +32,7 @@ There are a few pre-requisites:
 * in `/conf/che.properties`:
 add `machine.server.extra.volume=/dev/bus/usb:/dev/bus/usb`
 set `machine.docker.privilege_mode` to `true`
- 
+
 Vagrant users and those running Che natively on Windows and Mac (i.e. where Virtual Box is involved) need to make sure that the VM can see USB devices connected to the host machine.
 
 There are two pre-reqs here:
@@ -50,4 +49,3 @@ When a workspace starts, you may check if adb can see your phone:
 If the phone is there, you may install `apk` right into it:
 
 `adb install -r /path/to/your.apk`
-

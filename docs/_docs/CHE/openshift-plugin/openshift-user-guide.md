@@ -2,7 +2,6 @@
 title: OpenShift Use
 excerpt: "How to use the OpenShift plug-in."
 layout: docs
-overview: true
 permalink: /docs/openshift-user-guide/
 ---
 # Run Che  

@@ -2,12 +2,11 @@
 title: Cuba Platform in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/cuba/
 ---
 CUBA Platform is a high level Java framework for faster enterprise software development.
 ```text  
-#When on the User Dashboard, create a new project from existing sources: 
+#When on the User Dashboard, create a new project from existing sources:
 https://github.com/Haulmont/platform-sample-sales
 
 #Choose a Custom Stack and add the following recipe:

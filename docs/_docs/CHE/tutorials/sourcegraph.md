@@ -2,7 +2,6 @@
 title: Sourcegraph in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/sourcegraph/
 ---
 Sourcegraph is a version-control platform built with Code Intelligence.

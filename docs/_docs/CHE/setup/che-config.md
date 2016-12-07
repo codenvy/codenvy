@@ -2,7 +2,6 @@
 title: Configuration
 excerpt: "Configure Che to bend to your will."
 layout: docs
-overview: true
 permalink: /docs/che-config/
 ---
 There is a lot you can do with Eclipse Che by changing its configuration. You can do this in three ways depending on how you interact with Che:
@@ -23,7 +22,7 @@ You can set environment variables that will affect the behavior of the CLI. Thes
 
 
 | Variable   | Description   | Defaults>>>>>>>>>>>   
-| --- | --- | --- 
+| --- | --- | ---
 | `CHE_PORT`   | External port of Che server.   | `8080`   
 | `CHE_HOSTNAME`   | `CHE_CONF_FOLDER`   | `CHE_RESTART_POLICY`   
 | `CHE_USER`   | External hostname of Che server. Only need to set if admin is managing over hostname. Changing this should be rare.   | Varies by OS, but is typically `localhost`.   
@@ -47,7 +46,7 @@ You can set environment variables that will affect the behavior of the CLI. Thes
 | `CHE_UTILITY_VERSION`   | `null`   | The version of the che utility to use.   
 
 ## One Time Use Properties
-There are a number of internal properties that define how the Che server will operate. These are typically provided in a `che.properties` file.  If you are using the CLI, you can provide a one-time use `che.properties` file by defining additional environment variables. The CLI will create this file and pass it along to the launcher and server. 
+There are a number of internal properties that define how the Che server will operate. These are typically provided in a `che.properties` file.  If you are using the CLI, you can provide a one-time use `che.properties` file by defining additional environment variables. The CLI will create this file and pass it along to the launcher and server.
 
 Any variable with the format `CHE_PROPERTY_<name>=<value>` will be configured into property value. A single underscore `_` will be converted into a period `.`.  A double underscore `__` will be converted into a single underscore `_`.  For example:
 ```
@@ -59,7 +58,7 @@ machine.ws_agent.max_start_time_ms=1000
 ```
 
 ## Custom Properties File
-Eclipse Che has an embedded `che.properties` file [which provides a set of defaults](https://github.com/eclipse/che/blob/08344fe62ebedfaa199e3258279b29acec7c88f8/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy/che.properties). 
+Eclipse Che has an embedded `che.properties` file [which provides a set of defaults](https://github.com/eclipse/che/blob/08344fe62ebedfaa199e3258279b29acec7c88f8/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy/che.properties).
 
 If you set the `CHE_LOCAL_CONF` environment variable, it will point to a directory name that can have any number of `*.properties` files. The values in these files will be passed along to the server instead of any values passed as environment variables.
 
@@ -80,7 +79,7 @@ Each workspace is a separate runtime, and has at least one development agent tha
 
 Properties saved in `CHE_CONF_FOLDER\plugin-conf\` folder will be mounted into the runtime for each workspace created by Che. The Che development agent that runs within the workspace will load these properties when it boots.
 # System Properties  
-Whether you are using the CLI, Che launcher, or Che server, most internal Che configuration is done with a property, usually loaded by the server as a `che.properties` file. Che has an embedded `che.properties` file [which provides a set of defaults](https://github.com/eclipse/che/blob/08344fe62ebedfaa199e3258279b29acec7c88f8/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy/che.properties). 
+Whether you are using the CLI, Che launcher, or Che server, most internal Che configuration is done with a property, usually loaded by the server as a `che.properties` file. Che has an embedded `che.properties` file [which provides a set of defaults](https://github.com/eclipse/che/blob/08344fe62ebedfaa199e3258279b29acec7c88f8/assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy/che.properties).
 
 You can customize the properties by:
 1: If using the Che CLI, by providing a custom `che.properties` by setting the `CHE_CONF_FOLDER` variable or by providing individual environment variables in the form of `CHE_PROPERTY_<name>=<value>`. [See more](https://eclipse-che.readme.io/docs/configuration#section-one-use-properties).
@@ -89,7 +88,7 @@ You can customize the properties by:
 
 ## Server Configuration
 
-Che stores internal configuration and metadata in storage. You can change the default location where this information is saved. Note that if you are using our Docker launcher, the Che server is running in a container, and this storage is within that container. 
+Che stores internal configuration and metadata in storage. You can change the default location where this information is saved. Note that if you are using our Docker launcher, the Che server is running in a container, and this storage is within that container.
 ```json  
 # Folder where Che will store internal data objects
 che.conf.storage=${che.home}/storage\
@@ -99,12 +98,12 @@ If you are using the Che CLI or Che launcher, setting `CHE_DATA_FOLDER` or `CHE_
 ## Workspace Configuration
 
 ### Storage
-Che stores each workspace as a separate directory on a file system. 
+Che stores each workspace as a separate directory on a file system.
 ```json  
 # Path to workspace and project storage.
 che.user.workspaces.storage=${che.home}/workspaces \
 ```
-If you are using the Che CLI or Che launcher, setting `CHE_DATA_FOLDER` or `CHE_PROPERTY_che_user_workspaces_storage` will also update this property. 
+If you are using the Che CLI or Che launcher, setting `CHE_DATA_FOLDER` or `CHE_PROPERTY_che_user_workspaces_storage` will also update this property.
 
 ### Other Workspace Options
 ```json  
@@ -179,7 +178,7 @@ workspace.runtime.auto_restore=true\
 ```
 
 ### Start A Docker Registry
-You can launch a private Docker registry with Docker. 
+You can launch a private Docker registry with Docker.
 ```shell  
 # Launches a docker registry instance on port 5000
 docker run -d -p 5000:5000 --restart=always --name registry registry:2\
@@ -200,7 +199,7 @@ docker.registry.auth.username=user1
 docker.registry.auth.password=pass
 docker.registry.auth.email=user1@email.com
 
-# Or, save your snapshots to Docker Hub: 
+# Or, save your snapshots to Docker Hub:
 machine.docker.registry={namespace/repository}  
 docker.registry.auth.url=https://index.docker.io/v1
 docker.registry.auth.username={username}

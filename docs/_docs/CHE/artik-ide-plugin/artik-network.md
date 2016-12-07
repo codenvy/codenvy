@@ -2,7 +2,6 @@
 title: Setup&#58 Networking
 excerpt: "Setting up networking for the ARTIK IDE."
 layout: docs
-overview: true
 permalink: /docs/artik-network/
 ---
 The ARTIK IDE makes connections between three entities: the browser, the Che server (which runs the ARTIK IDE) running in a Docker container, and a workspace running in a Docker container.

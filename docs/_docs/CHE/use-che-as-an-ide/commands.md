@@ -2,12 +2,11 @@
 title: Commands
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/commands/
 ---
-Commands are script-like instructions that are injected into the workspace machine for execution. Commands are executed at by selecting a command from the IDE toolbar `CMD` drop down. You can add or edit commands at `Run > Edit Commands` or `CMD > Edit Commands` drop down. 
+Commands are script-like instructions that are injected into the workspace machine for execution. Commands are executed at by selecting a command from the IDE toolbar `CMD` drop down. You can add or edit commands at `Run > Edit Commands` or `CMD > Edit Commands` drop down.
 
-Commands are saved in the configuration storage of your workspace and will be part of any workspace export. 
+Commands are saved in the configuration storage of your workspace and will be part of any workspace export.
 
 Commands have type like projects. Plug-in authors can register different command types that will inject additional behaviors into the command when it is executed. For example, Che provides a Maven command type for any project that has the maven project type. Maven commands have knowledge of how maven works and will auto-set certain flags and simplify the configuration.
 # Authoring  
@@ -20,7 +19,7 @@ mvn clean install
 # a succession of several commands where `;` stands for a new line
 cd /projects/spring; mvn clean install
 
-# a succession of several commands where execution of a subsequent command depends on execution of a preceeding one - if there's no /projects/spring directory, `mvn clean install` won't be executed 
+# a succession of several commands where execution of a subsequent command depends on execution of a preceeding one - if there's no /projects/spring directory, `mvn clean install` won't be executed
 cd /projects/spring && mvn clean install\
 ```
 It is possible to check for conditions, use for loops and other bash syntax:
@@ -36,10 +35,10 @@ fi
 ```
 
 # Macros  
-Che provides macros that can be used within a command or preview URL to reference workspace objects. 
+Che provides macros that can be used within a command or preview URL to reference workspace objects.
 
 | Macro   | Details   
-| --- | --- 
+| --- | ---
 | Currently selected file in editor   | Absolute path to the selected file in editor   
 | Path relative to the `/projects` folder to the selected file in editor   | Project name of the file currently selected in editor   
 | Project type of the file currently selected in editor   | Currently selected file in project tree   
@@ -59,7 +58,7 @@ Che provides macros that can be used within a command or preview URL to referenc
 
 
 | Che 4.6 Macros   | Details   
-| --- | --- 
+| --- | ---
 | Absolute path to the project or module currently selected in the project explorer tree.   | The fully qualified package.class name of the Java class currently active in the editor panel.   
 | The path to the currently selected project relative to `/projects`. Effectively removes the `/projects` path from any project reference.   | Project name of the file currently selected in editor   
 | Project type of the file currently selected in editor   | Currently selected file in project tree   

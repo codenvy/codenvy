@@ -2,7 +2,6 @@
 title: Properties
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/che-properties/
 ---
 # Referencing Properties in Extensions  
@@ -48,4 +47,3 @@ Any value can be converted into a `java.lang.String` Java type. You can also dir
   * `String[]` (value is a comma separated string)
 # Workspace Extension Properties  
 Each workspace is a separate runtime, and has at least one development agent that runs as a miniaturized Che server within the workspace. That agent has its own properties that can be configured as well. If you are authoring custom workspace extensions that are deployed within Che's agent in the workspace, you can customize.
-

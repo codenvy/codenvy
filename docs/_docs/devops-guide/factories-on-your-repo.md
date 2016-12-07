@@ -2,7 +2,6 @@
 title: Factories - Badged Repos
 excerpt: "Simplify contributions for your project with an on-demand developer workspace ready in seconds."
 layout: docs
-overview: true
 permalink: /docs/factories-on-your-repo/
 ---
 A Codenvy Factory can be added to any git repository to provide an on-demand developer workspace ready in seconds. Anyone can get access to the project's code to edit, build, debug and contribute without installing software.

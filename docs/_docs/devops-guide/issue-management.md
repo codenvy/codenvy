@@ -2,7 +2,6 @@
 title: Issue Management
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/issue-management/
 ---
 [Codenvy Factories](http://codenvy.readme.io/docs/factories) can be integrated with nearly any issue mangement system. However, we have developed two plug-ins that allow completely automated Factory creation and update based on changes to JIRA or Microsoft VSTS issue management.
@@ -80,7 +79,7 @@ At this point Codenvy will automatically generate custom develop and review work
 
 Log into JIRA and choose one of the project types that you have Factory-enabled.  Create a new issue. There will be two new labels "Develop" and "Review" each with a link that will load a Codenvy workspace.
 # Using the Plug-In for JIRA  
-When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors. 
+When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors.
 ![JIRAplugin-DevelopandReviewinIDE(1).svg](/docs/images/JIRAplugin-DevelopandReviewinIDE(1).svg)
 The git webhooks ensure that as the repository changes the JIRA issue Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
 # Plug-In for JIRA User Data Usage and Privacy  
@@ -135,7 +134,7 @@ webhook1=work-item-created,visualstudio,myaccount,DefaultCollection,2.2-preview.
 }  
 
 ##Defining the Parent Factory
-Each project in JIRA that you want to be [Factory-enabled](http://codenvy.readme.io/docs/factories) must have a "Parent Factory" configured in Codenvy. 
+Each project in JIRA that you want to be [Factory-enabled](http://codenvy.readme.io/docs/factories) must have a "Parent Factory" configured in Codenvy.
 1. Create the Parent Factory with the Codenvy VSTS user created [above](http://codenvy.readme.io/docs/issue-management#section-creating-the-codenvy-user-for-vsts).
 2. Name the Parent Factory identically to the Team Project in VSTS that it will be associated with.
 
@@ -144,5 +143,5 @@ Test that Codenvy automatically generates custom develop and review workspaces f
 
 Log into Microsoft VSTS and choose one of the project types that you have Factory-enabled.  Create a new work item and open its detail card. There will be a new section called "Codenvy" with a link for Developer Workspace and one for Review Workspace.
 # Using the Codenvy Extension for Microsoft VSTS  
-When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors. 
+When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors.
 ![VSTSextension-DevelopandReviewinIDE.png](/docs/images/VSTSextension-DevelopandReviewinIDE.png)

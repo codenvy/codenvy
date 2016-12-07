@@ -2,7 +2,6 @@
 title: Introduction
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/che-intro/
 ---
 Eclipse Che provides:
@@ -14,9 +13,9 @@ Eclipse Che provides:
 * An SDK for creating plug-ins and assemblies
 # Getting Started  
 You can get started with Che by:
-- [Installing it locally](doc:che-getting-started) 
-- [Creating a hosted SaaS account](doc:getting-started-saas-cloud) 
-- [Installing it in a cloud instance you control](doc:usage-bitnami) 
+- [Installing it locally](doc:che-getting-started)
+- [Creating a hosted SaaS account](doc:getting-started-saas-cloud)
+- [Installing it in a cloud instance you control](doc:usage-bitnami)
 # Workspace Model  
 
 ![Docker--CodenvyMeeting.png](/docs/images/Docker--CodenvyMeeting.png)
@@ -47,13 +46,13 @@ Che has three types of users:
 
   * **Plug-in Providers**. Che provides a SDK to create and package plug-ins that modify the browser IDE, workspaces, or the Che server. ISVs and tool providers can add new project types, programming languages, tooling extensions, or applications. Che plug-ins can be authored for the client-side IDE or the server-side.  
 
-Che is supported by engineers from Bitnami, Codenvy, SAP, IBM, Serli, Red Hat, Tomitribe,and WSO2.  [Codenvy](http://codenvy.com) provides a multi-tenant, multi-user infrastructure for Che with enhanced security and deployable on any public or private cloud. 
+Che is supported by engineers from Bitnami, Codenvy, SAP, IBM, Serli, Red Hat, Tomitribe,and WSO2.  [Codenvy](http://codenvy.com) provides a multi-tenant, multi-user infrastructure for Che with enhanced security and deployable on any public or private cloud.
 # Logical Architecture  
 
 ![Capture_.PNG](/docs/images/Capture_.PNG)
 Che is a workspace server that runs on top of an application server like Tomcat. When the Che server is launched, the IDE is loaded as a Web application accessible via a browser at `http://localhost:8080/`. The browser downloads the IDE as a single page web app from the Che server.  The Web application provides UI components such as wizards, panels, editors, menus, toolbars, and dialog boxes.
 
-As a user interacts with the Web application, they will create workspaces, projects, environments, machines, and other artifacts necessary to code and debug a project. The IDE communicates with Che over RESTful APIs that manage and interact with a Workspace Master. 
+As a user interacts with the Web application, they will create workspaces, projects, environments, machines, and other artifacts necessary to code and debug a project. The IDE communicates with Che over RESTful APIs that manage and interact with a Workspace Master.
 
 The Che server controls the lifecycle of workspaces. Workspaces are isolated spaces where developers can work. Che injects various services into each workspace, including the projects, source code, Che plug-ins, SSH daemon, and language services such as JDT core Intellisense to provide refactoring for Java language projects. The workspace also contains a synchronizer which, depending upon whether the workspace is running locally or remotely, is responsible for synchronizing project files from within the machine with Che long term storage.
 ![Capture2_.PNG](/docs/images/Capture2_.PNG)
@@ -66,17 +65,17 @@ Che provides an SDK for authoring new extensions, packaging extensions into plug
 There are a number of aspects that can be modified within Che.
 
 | Type   | Description   
-| --- | --- 
+| --- | ---
 | IDE Extension   | Modify the look-and-feel, panels, editors, wizards, menus, toolbars, and pop-up boxes of the client. IDE extensions are authored in Java and transpiled into a JavaScript Web application that is hosted on the Che server as a WAR file.   
 | Che Server Extension\n(aka, Worskspace Master)   | Add or modify the core APIs that run within the Che server for managing workspaces, environments and machines. Workspace extensions are authored in Java and packaged as JAR files.   
 | Workspace Extension\n(aka, Workspace Agent)   | Create or modify project-specific extensions that run within a workspace machine and have local access to project files. Define machine behaviors, code templates, command instructions, scaffolding commands, and intellisense. The Che Java extension is authored as a workspace agent extension, deployed into the machine, and runs JDT core services from Eclipse to do local intellisense operations against the remote workspace.   
 
-Each extension type is packaged separately because they are deployed differently into the assembly. IDE extensions are transpiled using GWT to generate a cross-browser JavaScript. This application is packaged as a WAR file and hosted on the Che server. 
+Each extension type is packaged separately because they are deployed differently into the assembly. IDE extensions are transpiled using GWT to generate a cross-browser JavaScript. This application is packaged as a WAR file and hosted on the Che server.
 
 Workspace master extensions are deployed as services within the Che server. Once deployed, they activate new management services that can control users, identity and workspaces.
 
-Workspace agent extensions are compiled with Che core libraries and also deployed within an embedded Che server that runs inside of each workspace machine. The Che server is injected into machines created and controlled by the central workspace master Che server. This embedded server hosts your workspace agent extensions and provides a communication bridge between the services hosted within Che and the machines that are hosting the project. 
-  
+Workspace agent extensions are compiled with Che core libraries and also deployed within an embedded Che server that runs inside of each workspace machine. The Che server is injected into machines created and controlled by the central workspace master Che server. This embedded server hosts your workspace agent extensions and provides a communication bridge between the services hosted within Che and the machines that are hosting the project.
+
 **About Machines**. When you develop with a desktop IDE, the workspace uses localhost as the execution environment for processes like build, run and debug. In a cloud IDE, localhost is not available, so the workspace server must generate the environments that it needs. These environments must be isolated from one another and scalable. We use Docker to generate containers that contain the software needed for each environment. Each workspace is given at least one environment, but users may create additional environments for each workspace if they want. Each container can have different software installed. Che installs different software into the machine based upon the project type. For example, a Java project will have the JDK, Git, and Maven installed.  When a user is working within their Workspace, this container is booted by Che and the source code of the project is mounted within it. Developer actions like auto-complete and `mvn clean install` are processes that are executed within the container. Users can provide their own Dockerfiles that Che will build into images and extension developers can register Dockerfile templates associated with a project type.  This allows Che to manage a potentially infinite number of environments while still giving users customization flexibility.
 # What's Included  
 Che ships with a large number of plug-ins for many programming languages, build systems, source code tools, and infrastructure including Java, Maven, Ant, Git, Subversion, JavaScript, and Angular.JS. The community is developing their own and many are merged into the main Che repository. Che can be installed on any operating system that supports Docker 1.8+ or Java 1.8 – desktop, server or cloud and has been tested on Linux, MacOS and Windows. It is licensed as EPL 1.0.

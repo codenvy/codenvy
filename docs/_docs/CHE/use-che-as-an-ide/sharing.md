@@ -2,7 +2,6 @@
 title: Share
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/sharing/
 ---
 Eclipse Che helps teams collaborate in reproducible workspace environments. Team members can contribute to a project using the same environment (on any OS), knowing that all behaviors will match on every developer's machine.
@@ -62,11 +61,10 @@ docker push <repository>/<image-name>\
 ## Share with Codenvy Factories
 Codenvy, which is based on Eclipse Che, includes "Factories" - templates used to generate new or open existing workspaces with a URL. Factories can be used to clone existing workspaces or repeatedly generate consistent workspaces for teams. For additional information see Codenvy's documentation on [Factories](https://codenvy.readme.io/docs/factories).
 # Pair Programming  
-The Che community has been working on pair programming technology that will allow multiple users to work in the same workspace instance. This could be done through multiple Che editors, or with a mix of Che and desktop IDEs. 
+The Che community has been working on pair programming technology that will allow multiple users to work in the same workspace instance. This could be done through multiple Che editors, or with a mix of Che and desktop IDEs.
 
 Demonstrations have shown that two developer will not only see changes made to by each other in real time but also will be able to see each others identifiable cursor positions. Currently, two team members should not work on the same file at the same time. Check the PR status at [https://github.com/eclipse/che/pull/2131](https://github.com/eclipse/che/pull/2131).
 # Multi-Identity  
 Eclipse Che is a single identity system meaning that although multiple users can access the same server they share the same profile, including any keys and tokens.
 
-Codenvy has built an enterprise offering on top of Eclipse Che that adds multi-tenancy and multi-user with distributed access and permissions controls for teams. Each user has a different login which enables access controls, workspace collaboration, and other forms of sharing. 
-
+Codenvy has built an enterprise offering on top of Eclipse Che that adds multi-tenancy and multi-user with distributed access and permissions controls for teams. Each user has a different login which enables access controls, workspace collaboration, and other forms of sharing.

@@ -2,7 +2,6 @@
 title: Java Console Apps in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/java/
 ---
 # 1. Start any Java stack  
@@ -17,4 +16,3 @@ To compile and run the project, go to `Edit Commands`, choose Java type command,
 By default, `Main.java` is a main class and the command syntax uses this name. However, it is possible to choose another main class and the command will adjust itself accordingly.
 # 4. Add a library to classpath  
 If your project uses 3rd party libraries, they should be added to classpath at `Project > Configure Classpath`. Before adding a jar to project classpath, it should be uploaded to the project at `Project > Upload File`.
-

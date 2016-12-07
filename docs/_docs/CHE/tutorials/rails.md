@@ -2,16 +2,15 @@
 title: Rails in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/rails/
 ---
-Ruby on Rails, or simply Rails, is a web application framework written in Ruby under MIT License. Rails is a model–view–controller (MVC) framework, providing default structures for a database, a web service, and web pages. 
+Ruby on Rails, or simply Rails, is a web application framework written in Ruby under MIT License. Rails is a model–view–controller (MVC) framework, providing default structures for a database, a web service, and web pages.
 ```text  
 # When on the User Dashboard, create a new project using a Ruby_Rails stack and a Rails web app sample.\
 ```
 
 ```text  
-# Alternatively, you may skip importing a project and generate one by yourself (so, create an empty workspace in a Dashboard). When in the IDE, go to Consoles panel and create a new Terminal. In the Terminal go to the /projects directory and execute `rails new {your-app-name}` command. 
+# Alternatively, you may skip importing a project and generate one by yourself (so, create an empty workspace in a Dashboard). When in the IDE, go to Consoles panel and create a new Terminal. In the Terminal go to the /projects directory and execute `rails new {your-app-name}` command.
 
 # Refresh project tree to see new Rails app created.\
 ```

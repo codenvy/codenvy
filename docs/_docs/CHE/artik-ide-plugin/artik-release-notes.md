@@ -2,7 +2,6 @@
 title: Release Notes
 excerpt: "Notes on features and bugs fixed in ARTIK IDE releases."
 layout: docs
-overview: true
 permalink: /docs/artik-release-notes/
 ---
 # ARTIK IDE 1.1.0  

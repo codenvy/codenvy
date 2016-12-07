@@ -2,7 +2,6 @@
 title: Custom Guided Tours
 excerpt: "Launch walk-me style guided tours in workspaces created by Factories"
 layout: docs
-overview: true
 permalink: /docs/tour/
 ---
 You can create a custom step by step walk through with popup windows that overlay the IDE in workspaces generated from your Factory.  You can define the style, structure, and placement of the steps and associate each step with an IDE action.  You can also structure the steps so that each is mandatory or whether users can early-terminate the tour.
@@ -37,8 +36,8 @@ tour.steps : [{
   content          : STRING,           // (MANDATORY) Body text of the step. HTML allowed.
   element          : STRING,           // (MANDATORY) DOM element where step box is attached for display.
   placement        : [BOTTOM |         // Placement of the tooltip relative to the DOM element.
-                      TOP    | 
-                      LEFT   | 
+                      TOP    |
+                      LEFT   |
                       RIGHT],  
   nextButtonLabel  : STRING,            // Label that goes onto 'next' button in this step.
   skipButton       : [true | false],    // Allow the skip button to display?
@@ -62,7 +61,7 @@ The string values for labels and content accept some limited HTML.  You can use 
 You can trigger IDE actions as part of a step.  The `actions` parameter is an array of key:value pairs where each key is `action`.
 
 | Syntax   | Example   
-| --- | --- 
+| --- | ---
 | Example   | Trigger an IDE action.\n`trigger <ide-action>`   
 | `trigger runApp`   |    
 | Opens a workspace file in the editor.\n`openfile <file>`   | Opens one of the panels to be displayed. This first property is the location of the panel and the second is the panel title.\n`openpanel LEFT.<panel>`\n`openpanel BOTTOM.<panel>`\n`openpanel RIGHT.<panel>`\n`openpanel EDIT.<panel>`   

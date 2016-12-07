@@ -2,7 +2,6 @@
 title: Factories
 excerpt: "Automation for generating workspaces using URLs, simplify contributions for your project with an on-demand developer workspace ready in seconds, and launch walk-me style guided tours in workspaces created by Factories"
 layout: docs
-overview: true
 permalink: /docs/workspace-automation/
 ---
 # Factories  
@@ -12,7 +11,7 @@ A Factory is a template used to generate new or open existing workspaces with a 
 
 
 | Description   | Factory URL   | Configuration   
-| --- | --- | --- 
+| --- | --- | ---
 | Clone a public Codenvy workspace   | https://codenvy.com/f?id=s38eam174ji42vty   | [View](https://codenvy.readme.io/v4.0/docs/factories?#section-clone-a-public-codenvy-workspace)   
 
 
@@ -20,7 +19,7 @@ A Factory is a template used to generate new or open existing workspaces with a 
 
 
 | Term   | Definition   
-| --- | --- 
+| --- | ---
 | **Factory**   | A URL that, when clicked, generates a new or loads an existing workspace, and then onboards the user into that workspace.   
 | **Factory Configuration**   | A JSON object that defines the rules and behavior for how the Factory should work.   
 | **Workspace Configuration**   | A JSON object that defines the contents and structure of a workspace. A workspace configuration is used within a Factory Configuration to define the workspace to be generated.   
@@ -34,7 +33,7 @@ A Factory is a template used to generate new or open existing workspaces with a 
 Factories can be invoked in mutliple ways. You can replace the `codenvy.com` domain with the hostname of any Codenvy on premises installation..
 
 | Approach   | Example   
-| --- | --- 
+| --- | ---
 | https://codenvy.com/f?id=s38eam174ji42vty\nhttps://codenvy.com/factory?id=s38eam174ji42vty   | Example   
 |    | https://codenvy.com/f?user=tylerjewell&name=starwars\nhttps://codenvy.com/factory?user=tylerjewell&name=starwars\nhttps://codenvy.com/factory/tylerjewell/starwars   
 |    | http://beta.codenvy.com/f?url=https://github.com/eclipse/che\nhttp://beta.codenvy.com/f?url=https://github.com/eclipse/che/commits/language-server\nhttp://beta.codenvy.com/f?url=https://gitlab.com/benoitf/simple-project   
@@ -43,17 +42,17 @@ Factories can be invoked in mutliple ways. You can replace the `codenvy.com` dom
 Once the Factory is executed, it either loads an existing workspace or generates a new one, depending upon the Factory configuration.  The name of the workspace is determined within the Factory configuration and its name becomes part of the URL access.
 
 | Generated Workspace   | Example   
-| --- | --- 
+| --- | ---
 | https://codenvy.com/ws/car   | https://codenvy.com/ws/car/tylerjewell   
 | https://codenvy.com/ws/car-1/tylerjewell   | https://codenvy.com/f?user=tylerjewell&name=starwars\nhttps://codenvy.com/factory?user=tylerjewell&name=starwars\nhttps://codenvy.com/factory/tylerjewell/starwars   
 |    | http://beta.codenvy.com/f?url=https://github.com/eclipse/che\nhttp://beta.codenvy.com/f?url=https://github.com/eclipse/che/commits/language-server\nhttp://beta.codenvy.com/f?url=https://gitlab.com/benoitf/simple-project   
 
 
 ### Create  
-You can create Factories that are saved with a unique hash code in the dashboard. Navigate to the `Factories` page and hit the `+` button in the top-right. You can create a Factory with a pretty name in the dashboard or by invoking a URL within your workspace.  If you generate a Factory template using your workspace URL, your Factory inherits the existing definition of your workspace. 
+You can create Factories that are saved with a unique hash code in the dashboard. Navigate to the `Factories` page and hit the `+` button in the top-right. You can create a Factory with a pretty name in the dashboard or by invoking a URL within your workspace.  If you generate a Factory template using your workspace URL, your Factory inherits the existing definition of your workspace.
 
 | Create New Factory   | Example   
-| --- | --- 
+| --- | ---
 | https://codenvy.com/ws/eclipseche/tylerjewell/factory/starwars?save   | Create a new Factory from the dashboard\n`Dashboard > Factories > Create`   
 | https://codenvy.com/f?id=s38eam174ji42vty   | Create on-demand URL Factory by specifying the remote URL In that case the configuration may be stored inside the repository.   
 | http://beta.codenvy.com/f?url=https://github.com/eclipse/che   | http://beta.codenvy.com/f?url=https://github.com/eclipse/che\nhttp://beta.codenvy.com/f?url=https://github.com/eclipse/che/commits/language-server\nhttp://beta.codenvy.com/f?url=https://gitlab.com/benoitf/simple-project   
@@ -62,7 +61,7 @@ You can also author a Factory from scratch using a `factory.json` file and then 
 ### URL Factories  
 URL factories are working with github and gitlab repositories. By using URL factories, the project referenced by the URL is imported.
 
-URL can include a branch or a subfolder. Here is an example of url parameters: 
+URL can include a branch or a subfolder. Here is an example of url parameters:
 - ?url=https://github.com/eclipse/che che will be imported with master branch
 - ?url=https://github.com/eclipse/che/tree/4.2.x che is imported by using 4.2.x branch
 - ?url=https://github.com/eclipse/che/tree/4.2.x/dashboard subfolder dashboard is imported by using 4.2.x branch
@@ -101,7 +100,7 @@ factory : {
 ```
 The `factory.workspace` is identical to the `workspace:{}` object for Eclipse Che and contains the structure of the workspace. Learn more about [the workspace JSON object](https://eclipse-che.readme.io/docs/workspace).
 
-Codenvy maintains object compatibility with the workspace definition from Eclipse Che. You can export Eclipse Che workspaces and then reuse the workspace definition within a Factory. Codenvy workspaces are composed of 0..n projects, 0..n environments which contain machine stacks to run the code, 0..n commands to perform against the code, and a type. 
+Codenvy maintains object compatibility with the workspace definition from Eclipse Che. You can export Eclipse Che workspaces and then reuse the workspace definition within a Factory. Codenvy workspaces are composed of 0..n projects, 0..n environments which contain machine stacks to run the code, 0..n commands to perform against the code, and a type.
 
 The `factory.policies`, `factory.ide`, `factory.creator`, and `factory.button` objects are unique to Factories. They provide meta information to the automation engine that alter the presentation of the Factory URL or the behavior of the provisioning.
 
@@ -109,7 +108,7 @@ A mixin adds additional behaviors to a project as a set of new project type attr
 
 
 | Mixin ID   | Description   
-| --- | --- 
+| --- | ---
 | `pullrequest`   | Enables pull request workflow where Codenvy handles local & remote branching, forking, and pull request issuance. Pull requests generated from within Codenvy have another Factory placed into the comments of pull requests that a PR reviewer can consume. Adds contribution panel to the IDE. If this mixin is set, then it uses attribute values for `project.attributes.local_branch` and `project.attributes.contribute_to_branch`.   
 
 The `pullrequest` mixin requires additional configuration from the `attributes` object of the project.  If present, Codenvy will use the project attributes as defined in the Factory. If not provided, Codenvy will set defaults for the attributes.
@@ -122,7 +121,7 @@ Project attributes alter the behavior of the IDE or workspace.
 Different Eclipse Che and Codenvy plug-ins can add their own attributes to affect the behavior for the system.  Attribute configuration is always optional and if not provided within a Factory definition, the system will set itself.
 
 | Known Attribute   | Description   
-| --- | --- 
+| --- | ---
 | `local_branch`   | `contribute_to_branch`   
 | Used in conjunction with the `pullrequest` mixin. If provided, the local branch for the project is set with this value. If not provided, then the local branch is set with the value of `project.source.parameters.branch` (the name of the branch from the remote).  If `local_branch` and `project.source.parameters.branch` are both not provided, then the local branch is set to the name of the checked out branch.   | Name of the branch that a pull request will be contributed to. Default is the value of `project.source.parameters.branch`, which is the name of the branch this project was cloned from.   
 
@@ -130,12 +129,12 @@ Different Eclipse Che and Codenvy plug-ins can add their own attributes to affec
 ```json  
 factory.workspace.project : {
   "mixins"     : [ "pullrequest" ],
-  
+
   "attributes" : {
     "local_branch"         : [ "timing" ],
     "contribute_to_branch" : [ "master" ]
   },
-  
+
   "source" : {
     "type"       : "git\n    "location"   : "https://github.com/codenvy/che.git\n    "parameters" : {
       "keepVcs" : "true"
@@ -154,13 +153,13 @@ factory.policies : {
   referer   : STRING,          // Works only for clients from referer
   since     : EPOCHTIME,       // Factory works only after this date
   until     : EPOCHTIME,       // Factory works only before this date
-  create     : [perClick |      // Create one workpace per click, user or account 
+  create     : [perClick |      // Create one workpace per click, user or account
                perUser]     
 }\
 ```
 
 ```json  
-factory.policies.resources : { 
+factory.policies.resources : {
   ram : INTEGER                // RAM in MB for workspace default environment
 }\
 ```
@@ -170,7 +169,7 @@ factory.policies.resources : {
 ##### Location and Chargeback
 `factory.policies.location` determines the user that will be charged the resources consumed by any workspace created by this Factory.  If `acceptor`, the person who clicks on the Factory will be charged for resource consumption in any chargeback model. If `owner` the person who authors the Factory will be charged for any resource consumption.
 
-It is important to note that all workspaces are internally assigned to the user who clicked on the Factory that generated the workspace.  The workspace is not physically owned by the `owner`.  Codenvy just allocates the resource billing to the `owner`. The user that represents `owner` in this configuration can disable resources and effectively, disable the workspace for the user that originally clicked on the Factory. 
+It is important to note that all workspaces are internally assigned to the user who clicked on the Factory that generated the workspace.  The workspace is not physically owned by the `owner`.  Codenvy just allocates the resource billing to the `owner`. The user that represents `owner` in this configuration can disable resources and effectively, disable the workspace for the user that originally clicked on the Factory.
 
 ##### Authentication
 Any user that clicks on a Factory URL must have a Codenvy account and be authenticated if the Factory configuration has `type : named` or `location : acceptor`. Both of these properties require Codenvy to understand either a permanent location or a user name in order to generate the workspace. Any user that is not authenticated will be presented a login screen after they click on the Factory URL.  Users without an account can create one using the same dialog.  
@@ -188,7 +187,7 @@ How many workspaces should be created?  If `count : perClick` then every click o
 ```json  
 factory.ide.{event} : {        // {event}: onAppLoaded, onProjectsLoaded, onAppClosed
   actions : [{}]               // List of IDE actions to execute when event triggered
-} 
+}
 
 factory.ide.{event}.actions : [{
   id         : String,         // Action for IDE to perform when event triggered
@@ -224,7 +223,7 @@ This is an example that associates a variety of actions with all of the events.
       }
     }
   ]},
-  
+
   "onAppLoaded" : {                 // Actions to be triggered after IDE is loaded
     "actions" : [{  
       "id" : "openWelcomePage\     // Show a custom welcome panel and message
@@ -233,7 +232,7 @@ This is an example that associates a variety of actions with all of the events.
       }
     }
   ]},
-  
+
   "onAppClosed" : {                 // Actions to be triggered when IDE is closed
     "actions" : [{  
       "id" : "warnOnClose\         // Show warning when closing browser tab
@@ -246,7 +245,7 @@ Each event type has a set of actions that can be triggered. There is no ordering
 ##### onProjectsLoaded Event
 
 | Action   | Properties?   | Description   
-| --- | --- | --- 
+| --- | --- | ---
 | `runCommand`   | Yes   | Specify the name of the command to invoke after the IDE is loaded. Specify the commands in the `factory.workspace.commands : []` array.   
 | `openFile`   | Yes   | Open project files as a tab in the editor.   
 | `findReplace`   | Yes   | Find and replace text in source files with regex.   
@@ -254,13 +253,13 @@ Each event type has a set of actions that can be triggered. There is no ordering
 ##### onAppLoaded Event
 
 | Action   | Properties?   | Description   
-| --- | --- | --- 
+| --- | --- | ---
 | `openWelcomePage`   | Yes   | Customize the content of the welcome panel when the workspace is loaded.   
 
 ##### onAppClosed Event
 
 | Action   | Properties?   | Description   
-| --- | --- | --- 
+| --- | --- | ---
 | `warnOnClose`   | No   | Opens a warning popup when the user closes the browser tab wtih a project that has uncommitted changes. Requires `project.parameters.keepVcs` to be `true`.   
 
 ###### Action: Open File
@@ -307,15 +306,15 @@ This object has meta information that you can embed within the Factory. These at
 factory.creator : {
   name      : STRING,          // Name of author of this configuration file
   email     : STRING,          // Email address of author
-  created   : EPOCHTIME,       // Set by the system 
-  userId    : STRING           // Set by the system 
+  created   : EPOCHTIME,       // Set by the system
+  userId    : STRING           // Set by the system
 }\
 ```
 #### factory.button Object
 ```json  
 ### Defines a visual button or logo that can front the Factory URL
 factory.button : {
-  type       : [logo |         // Sets whether button contains user's logo 
+  type       : [logo |         // Sets whether button contains user's logo
                 nologo],
   attributes : {}              // Properties of the button
 }
@@ -330,10 +329,10 @@ factory.button.attributes : {
 ```
 We provide three button types with animations that execute when you hover over them.  You can save the button configuration with the Factory by filling in the `factory.button` object with the Factory configuration.  You can also use our button formats directly within Markdown and HTML using a JavaScript snippet.
 
-We have three types of buttons. 
+We have three types of buttons.
 
 | Button Type   | Sample   
-| --- | --- 
+| --- | ---
 | White: 76 x 20 pixels   | Dark: 76 x 20 pixels   
 | Logo: 104 x 104 image of your logo with our hover animation layered on top   | [![alt](https://codenvy.com/factory/resources/factory-white.png)]()   
 | [![alt](https://codenvy.com/factory/resources/factory-dark.png)]()   | [![alt](https://files.readme.io/zolQfjkhT4KKn3P1xBdc_logo.PNG)]()   
@@ -345,7 +344,7 @@ Button animations do not work withing Markdown documents, unfortunately.  Our do
 ##### JavaScript Button: Configuration From Factory
 You can save your button configuration within Codenvy when you generate the Factory configuration. You do this by filling in the `factory.button` fields as part of your `factory.json`. Your button configuration is saved within Codenvy and any logo image is uploaded and hosted on our servers. You can then reference this Factory button directly using JavaScript.
 ```html  
-<script 
+<script
     type="text/javascript"
     src="https://codenvy.com/factory/resources/factory.js?FACTORY_HASH_CODE"
         >
@@ -354,13 +353,13 @@ You can save your button configuration within Codenvy when you generate the Fact
 ##### JavaScript Button: Configuration Within JavaScript
 You can reuse our buttons and animations without first having created a Factory.  
 ```html  
-<script 
+<script
     type    = "text/javascript"
     src     = "https://codenvy.com/factory/resources/factory.js"
     style   = ["gray" | "white" | "advanced"]
     counter = ["horizontal" | "vertical"]
     url     = URL_TO_ACTIVATE_WHEN_BUTTON_CLICKED
-    logo    = URL_TO_YOUR_LOGO 
+    logo    = URL_TO_YOUR_LOGO
         >
 </script>
 ```
@@ -470,8 +469,8 @@ tour.steps : [{
   content          : STRING,           // (MANDATORY) Body text of the step. HTML allowed.
   element          : STRING,           // (MANDATORY) DOM element where step box is attached for display.
   placement        : [BOTTOM |         // Placement of the tooltip relative to the DOM element.
-                      TOP    | 
-                      LEFT   | 
+                      TOP    |
+                      LEFT   |
                       RIGHT],  
   nextButtonLabel  : STRING,            // Label that goes onto 'next' button in this step.
   skipButton       : [true | false],    // Allow the skip button to display?
@@ -495,7 +494,7 @@ The string values for labels and content accept some limited HTML.  You can use 
 You can trigger IDE actions as part of a step.  The `actions` parameter is an array of key:value pairs where each key is `action`.
 
 | Syntax   | Example   
-| --- | --- 
+| --- | ---
 | Example   | Trigger an IDE action.\n`trigger <ide-action>`   
 | `trigger runApp`   |    
 | Opens a workspace file in the editor.\n`openfile <file>`   | Opens one of the panels to be displayed. This first property is the location of the panel and the second is the panel title.\n`openpanel LEFT.<panel>`\n`openpanel BOTTOM.<panel>`\n`openpanel RIGHT.<panel>`\n`openpanel EDIT.<panel>`   
@@ -611,4 +610,3 @@ This example has a single step. The step has a message from Pivotal and displays
   ]
 }
 ```
-

@@ -2,7 +2,6 @@
 title: CLI Reference
 excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
-overview: true
 permalink: /docs/cli/
 ---
 The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:

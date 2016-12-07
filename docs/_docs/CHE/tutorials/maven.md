@@ -2,7 +2,6 @@
 title: Java+Maven in Che
 excerpt: "Che was written in Java. Experience the rich Intellisense and Java tools in this tutorial."
 layout: tutorials
-overview: true
 permalink: /tutorials/maven/
 ---
 # 1. Start Che  
@@ -76,13 +75,13 @@ If you have error in your files, the editor will display error and warning marks
 ![editor-errors.png](/docs/images/editor-errors.png)
 You can use your keyboard to navigate in the file content, but also between files. You can get the complete list of all keyboard shortcut by going into the menu `Assistant` > `Key Bindings` and scrolling to the category `Editor`
 ![keybindings.png](/docs/images/keybindings.png)
-### Java Intellisense 
+### Java Intellisense
 There is an Assistant menu that includes language specific capabilities. You can perform auto-complete by hitting `ctrl-space`.
 
 ### Jump to Definition
 While you are editing your Java code, you may want a documentation lookup for a particular symbol (class, attribute or method). Get quick documentation by `Assistant` > `Quick Documentation` or `^j`.
 ![quick-documentation.png](/docs/images/quick-documentation.png)
-If you need more information about the symbol, you can also navigate to its definition with `Assistant` > `Open Declaration` or `F4`.  The `String` class will open in a new editor. 
+If you need more information about the symbol, you can also navigate to its definition with `Assistant` > `Open Declaration` or `F4`.  The `String` class will open in a new editor.
 ![open-declaration.png](/docs/images/open-declaration.png)
 ### Search
 Che editor provides various ways to search your projects and workspace.
@@ -97,7 +96,7 @@ This will find all references of a particular class, method, field or attribute 
 ![find-usages.png](/docs/images/find-usages.png)
 
 ### Refactoring
-Che provides the ability to refactor your source code. 
+Che provides the ability to refactor your source code.
 
 #### Rename
 Put cursor on method, variable or field that you want to rename, and hit Shift + F6. If this hotkey is pressed once, the selected keyword will be highlighted which means it's ready for refactoring. You can type a new name and press Enter.
@@ -107,13 +106,13 @@ If you press Shift + F6 twice, an advanced Rename mode is called out:
 Preview button will open a side by side comparison window that will show changes that you are about to apply.
 
 #### Move
-Choose any Java class you want to move and hit F6. It will call a Move item menu. Choose destination for your class and click OK. 
+Choose any Java class you want to move and hit F6. It will call a Move item menu. Choose destination for your class and click OK.
 
 ![move-item.png](/docs/images/move-item.png)
-It's also possible to preview changes. Choose destination for your class and click Preview. It will show all Java classes and non-Java files (optional), that the replaced class is referenced in. 
+It's also possible to preview changes. Choose destination for your class and click Preview. It will show all Java classes and non-Java files (optional), that the replaced class is referenced in.
 ![preview.png](/docs/images/preview.png)
 ###Manage Maven Modules
-Maven Plugin provides the ability to manage Maven modules in multi-module projects entirely through `pom.xml`. 
+Maven Plugin provides the ability to manage Maven modules in multi-module projects entirely through `pom.xml`.
 
 Open any Java multi-module project and create a new folder with a simple Maven project in it. It will be seen as folder in the project tree first. Open your parent project POM and add your newly imported module there:
 `<module>new-module</module>`
@@ -121,7 +120,7 @@ Open any Java multi-module project and create a new folder with a simple Maven p
  As a result, it will be automatically configured as a Maven module in your project tree. Maven plugin watches changes in `pom.xml` and automatically imports changes (dependencies, configuration etc).
 
 ###Dependency Management
-If you make changes to dependencies in POM, they will be automatically updated. You can also manually reimport the project: right click on your Maven project, choose `Maven > Reimport`. 
+If you make changes to dependencies in POM, they will be automatically updated. You can also manually reimport the project: right click on your Maven project, choose `Maven > Reimport`.
 
 If you have errors in your POM or add some nonexistent dependency to your POM, the following error will be displayed in the editor:
 ![nonexistent-dependency.png](/docs/images/nonexistent-dependency.png)
@@ -131,5 +130,4 @@ It's possible to view project dependencies at `Project > Configure Classpath`. D
 - MAVEN2_CLASSPATH_CONFIGURATION - project dependencies.
 ![configure-classpath.png](/docs/images/configure-classpath.png)
 ###Generate Effective POM
-There is also a possibility to display POM that results from the application of interpolation, inheritance and active profiles. Just open your Maven project and go to `Assistant > Generate Effective Pom`. 
-
+There is also a possibility to display POM that results from the application of interpolation, inheritance and active profiles. Just open your Maven project and go to `Assistant > Generate Effective Pom`.

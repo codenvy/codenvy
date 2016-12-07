@@ -2,7 +2,6 @@
 title: Config&#58 Networking
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/che-networking/
 ---
 Eclipse Che makes connections between three entities: the browser, the Che server running in a Docker container, and a workspace running in a Docker container.

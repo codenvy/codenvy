@@ -2,7 +2,6 @@
 title: Usage&#58 Docker Server
 excerpt: "Run the Che server inside a Docker image with workspaces mounted on your host."
 layout: docs
-overview: true
 permalink: /docs/usage-docker-server/
 ---
 #### Requires Eclipse Che 5.0.0-M6+

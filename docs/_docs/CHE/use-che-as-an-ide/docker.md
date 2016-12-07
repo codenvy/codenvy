@@ -2,7 +2,6 @@
 title: Docker
 excerpt: "Best practices for using Docker with Che"
 layout: docs
-overview: true
 permalink: /docs/docker/
 ---
 Eclipse Che is intimately tied to Docker. The Che server runs as a Docker container and each workspace has a set of environments which may be powered by containers.  Also, our utilities for launching Che, mounting local IDEs, running smoke tests, and compiling Che are also built in Docker.
@@ -46,9 +45,9 @@ Once the keypair is created run this command from your docker host.
 
 `$ docker exec [CONTAINER ID] cat /home/user/.ssh/id_rsa.pub`
 # Mount Host Volumes Into Workspaces  
-You can have folders on your host system mounted and available for access within your workspaces. In `che.properties`, add `machine.server.extra.volume=<host-mount-path>:<ws-mount-path>`. You can have multiple volumes mounted by seaparting them with semicolons. 
+You can have folders on your host system mounted and available for access within your workspaces. In `che.properties`, add `machine.server.extra.volume=<host-mount-path>:<ws-mount-path>`. You can have multiple volumes mounted by seaparting them with semicolons.
 
-When your workspace containers are created, they will volume mount this location from the host. 
+When your workspace containers are created, they will volume mount this location from the host.
 
 You can also set this using the Che CLI with an environment variable.
 `CHE_PROPERTY_machine_server_extra_volume=/var/run/docker.sock:/var/run/docker.sock` to achieve the same behavior.  You may need to set up permissions for `/var/run/docker.sock` on the host with `sudo chmod 777 /var/run/docker.sock`.

@@ -2,7 +2,6 @@
 title: Projects
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/projects/
 ---
 You can place any number of projects into a workspace.
@@ -21,5 +20,5 @@ Plug-in developers can define their own project types. Since project types trigg
 4. **The attributes for a project type can come from multiple locations.** They can be stored within the server’s repository for the project, or sourced from different locations such as source files, build files (pom.xml), or meta-tags. Attribute value providers are abstractions for sourcing these type attributes from different locations.
 5. **Attribute value providers allow auto-detection of project type.** They are used during any import to attempt project type auto-detection based upon analysis of the contents of incoming source code. If the filter provided by an Attribute Value Provider generates attributes from source files that match a registered project type, then that type will automatically be assigned to the incoming project.
 6. **Project types support multiple inheritance.** A child project type may extend the attribute set of a parent type.
-7. **Projects may have parent-child relationships with other projects** in a workspace. Child projects are called modules. 
+7. **Projects may have parent-child relationships with other projects** in a workspace. Child projects are called modules.
 8. **Modules may have different project types than their parents.** Modules may physically exist within the tree structure of the parent (as its subfolders) or outside (the parent is a soft link to the module project).

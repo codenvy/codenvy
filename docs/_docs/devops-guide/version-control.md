@@ -2,7 +2,6 @@
 title: Version Control
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/version-control/
 ---
 Users/Administrators use private/public repository URLs to import projects into workspaces, to use the Git / Subversion menus, and to use/create a [Factory](https://codenvy.readme.io/docs/factories). Some repository tasks such as git push and access to private repositories require setting up SSH or oAuth authentication mentioned below.
@@ -31,13 +30,13 @@ oauth.github.redirecturis=http://$hostname/wsmaster/api/oauth/callback\
 After the above steps, execute `puppet agent -t`.
 
 ### Using oAuth
-Users/Administrators can use a private/public repository url to [import a project](https://eclipse-che.readme.io/docs/git#section-using-oauth-in-workspace) into a workspace, use the git menu remote push command in workspace, and to create/use a [factory](https://codenvy.readme.io/docs/factories). 
+Users/Administrators can use a private/public repository url to [import a project](https://eclipse-che.readme.io/docs/git#section-using-oauth-in-workspace) into a workspace, use the git menu remote push command in workspace, and to create/use a [factory](https://codenvy.readme.io/docs/factories).
 
 **Note setting up oAuth must be done prior to being able to do commits and pushes.**
 
 
 # Git and Subversion Workspace Clients
-After importing repository, you can perform most common Git and SVN operations using interactive menus or as console commands. 
+After importing repository, you can perform most common Git and SVN operations using interactive menus or as console commands.
 
 **Note use of git menu remote push command will not work prior setting up SSH or oAuth authentication.**
 ![git-menu.png](/docs/images/git-menu.png)
@@ -45,5 +44,5 @@ After importing repository, you can perform most common Git and SVN operations u
 ![svn-menu.png](/docs/images/svn-menu.png)
 # In-IDE Pull Request Panel
 Within the IDE there is a pull request panel to simplify the creation of pull requests for GitHub, BitBucket or Microsoft VSTS (with git) repositories.
- 
+
 # Customizing How Factories Import Source Code

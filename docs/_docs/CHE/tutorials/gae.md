@@ -2,7 +2,6 @@
 title: Google App Engine and Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/gae/
 ---
 ```text  

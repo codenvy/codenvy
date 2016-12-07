@@ -2,7 +2,6 @@
 title: Templates
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/templates/
 ---
 A code template can be used to instantiate a set of files into the project tree. The code template will appear in the user dashboard when a user attempts to create a new project. Different templates will be shown to the user depending upon the stack that they select using embedded filters. The template lets the initial code tree to be instantiated from a git / subversion URL or from a ZIP file stored on the same computer.

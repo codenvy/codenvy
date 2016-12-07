@@ -2,7 +2,6 @@
 title: Runtime Stacks
 excerpt: "Stacks define the workspace runtime, commands, and configuration."
 layout: docs
-overview: true
 permalink: /docs/stacks/
 ---
 A stack is a runtime configuration for a workspace. It contains a [runtime recipe](doc:recipes), meta information like tags, description, environment name, and security policies. Since Che supports different kinds of runtimes, there are different stack recipe formats.
@@ -27,7 +26,7 @@ Che provides ready-to-go stacks for various technologies. These stacks provide a
 Che provides a wider range of stacks which you can browse from the “Stack library” tab. This list contains advanced stacks which can also be used as runtime configuration for your workspaces.
 ![che-stacks2.jpg](/docs/images/che-stacks2.jpg)
 ## Custom Stack
-User can create their own stack from the "Custom stack" tab. Using Che's interface the user can provide a [runtime recipe](doc:recipes) from an existing external recipe file or by writing a recipe directly. 
+User can create their own stack from the "Custom stack" tab. Using Che's interface the user can provide a [runtime recipe](doc:recipes) from an existing external recipe file or by writing a recipe directly.
 
 Che provides a form that can be used to write a recipe directly or copied/pasted from an existing location. A recipe can be written directly as a Dockerfile or a Docker compose file and Che will detect which one it is automatically based on syntax. Refer to [Runtime Recipes](doc:recipes) documentation for additional information.
 # Stack Administration  
@@ -98,7 +97,7 @@ In the user dashboard, click the `Stacks` to view all the available stacks. New 
 }
 ```
 ## Create a Stack
-A stack can be created from scratch using a skeleton template or duplicated from an existing stack. 
+A stack can be created from scratch using a skeleton template or duplicated from an existing stack.
 
 To create a stack from scratch click the `Add Stacks` button at the top left of the page. This will load a skeleton template that can be edited. After editing the template configuration and changing the stack name, clicking the save button to add the new stack to the available stacks.
 ![che-add-stack.gif](/docs/images/che-add-stack.gif)
@@ -117,4 +116,3 @@ Che has a stack API that you can call to manage your custom stacks. See the [Sta
 
 #### Double check this - I think the location of stacks has changed in 5
 }  
-

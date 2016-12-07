@@ -2,14 +2,13 @@
 title: Workspace Agents
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/workspace-agents/
 ---
 Agents are scripts that are executed after a [runtime machines](https://eclipse-che.readme.io/docs/machines) is created. They add additional capabilities to the machines they're injected in - for example to allow terminal access or enhanced language services. Agents allow these services to be injected into machines built from stock Dockerfiles or Compose files.
 # Adding Agents to a Machine  
 Agents are added to [machines](https://eclipse-che.readme.io/docs/machines) through [runtime stack](https://eclipse-che.readme.io/docs/stacks) configuration. Eclipse Che's included stacks have been pre-configured to use certain agents. The agents needed for each pre-defined stack is determined by common tasks or file types found in [projects](https://eclipse-che.readme.io/docs/projects).
 
-Adding agents to your own machines can be done by editing [machine information in the user dashboard](https://eclipse-che.readme.io/docs/machines#section-dashboard-machine-information). 
+Adding agents to your own machines can be done by editing [machine information in the user dashboard](https://eclipse-che.readme.io/docs/machines#section-dashboard-machine-information).
 # Adding Agents to a Custom Stack  
 Stacks use JSON format for configuration. Agents are included in the machines definition. Each stack requires a machine named `dev-machine` which always requires the terminal, ws-agent, and SSH agents. Language server agents need to be added to the dev-machine if you want [intellisense](https://eclipse-che.readme.io/docs/intellisense) features when using the workspace IDE.
 ```json  
@@ -48,4 +47,3 @@ The scripts that you must provide with an agent have a large `if` block where yo
 
 To add a custom language server agent you have to accomplish two steps:
 * Implement a [language server launcher](https://github.com/eclipse/che/blob/master/wsagent/che-core-api-languageserver/src/main/java/org/eclipse/che/api/languageserver/launcher/LanguageServerLauncher.java). Have a look at [Json language server launcher](https://github.com/eclipse/che/blob/master/plugins/plugin-json/che-plugin-json-server/src/main/java/org/eclipse/che/plugin/json/languageserver/JsonLanguageServerLauncher.java)
-

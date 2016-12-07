@@ -2,7 +2,6 @@
 title: Project Setup
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/chedir-project-setup/
 ---
 The first step in configuring a Che workspace from your directory is to create a Chefile. The purpose of the Chefile is to:

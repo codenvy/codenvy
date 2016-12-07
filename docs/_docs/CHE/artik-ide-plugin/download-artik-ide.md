@@ -2,7 +2,6 @@
 title: Download
 excerpt: "Downloading"
 layout: docs
-overview: true
 permalink: /docs/download-artik-ide/
 ---
 The easiest way to get started with ARTIK is by following the instructions in our [Getting Started](doc:samsung-artik-ide-getting-started) page.

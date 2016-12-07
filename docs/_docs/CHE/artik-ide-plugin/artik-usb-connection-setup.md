@@ -2,7 +2,6 @@
 title: Setup&#58 ARTIK USB
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/artik-usb-connection-setup/
 ---
 After the workspace has been created, the first time that it is opened in the IDE, the ARTIK device discovery and management panel will appear. The workspace will manage your devices over SSH and configured by IP address.

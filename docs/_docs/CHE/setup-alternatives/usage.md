@@ -2,7 +2,6 @@
 title: Usage&#58 Native Server
 excerpt: "Running Che server natively provides the best performance"
 layout: docs
-overview: true
 permalink: /docs/usage/
 ---
 This is advanced syntax intended for developers that are building extensions for Che. The environmental setup requires Java and Docker - please see the pre-reqs for different operating systems at the end of this page.

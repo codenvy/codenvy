@@ -2,15 +2,14 @@
 title: Che in Che
 excerpt: "There is nothing like a little Che inception to brighten your day."
 layout: tutorials
-overview: true
 permalink: /tutorials/che-in-che/
 ---
 You can build and run Che using Che!  Since Che runs within a Docker container and its workspaces are generated as Docker containers, there is extra configuration that is needed to enable the Che that you build in Che to generate its own workspaces!
 # Concepts  
 We are going to setup Che to have the Che launcher, the Che server, your primary development workspace, and the new Che you will compile be Docker containers. All of these Docker containers will be launched and managed by a shared Docker daemon, which is running on your host system.
 ![Capture.PNG](/docs/images/Capture.PNG)
-* **Native**: The CLI that launches your main instance of Che with the `che-launcher`. 
-* **Che Launcher**: A Docker container, which provides cross-platform management of your Che server. 
+* **Native**: The CLI that launches your main instance of Che with the `che-launcher`.
+* **Che Launcher**: A Docker container, which provides cross-platform management of your Che server.
 * **Che Server**: A Docker container running your primary Che server.
 * **Che Workspace**: A Docker container which containers your development workspace. The Che source code is cloned into this workspace, compiled here, and acts as the launch point. It includes the CLI that launches the launcher (creating a type of recursive behavior). The new inner Che will be able to launch its own workspaces.
 
@@ -40,10 +39,10 @@ Now, all workspaces started in this Che server will have access to the host's Do
 
 4: Project > Set Configuration.  Set the project configuration to be `maven`. This will add Java intellisense and the maven plugin so that your dependencies are managed properly.
 
-5:  Compile Che by adding a maven command.  In the toolbar, choose "Edit Commands...".  Create a new maven command.  Set the working directory to be /che/assembly/assembly-main.  The command should be `clean install`. 
+5:  Compile Che by adding a maven command.  In the toolbar, choose "Edit Commands...".  Create a new maven command.  Set the working directory to be /che/assembly/assembly-main.  The command should be `clean install`.
 
 ### Run Che-in-Che
-Now that you have a compiled Che binary, you need to run it.  We will use the Che Launcher Docker container to run the binary. Your workspace project has all of its files mounted onto the host. So while you see the files inside your workspace, they are also running on the host - where the Docker daemon is. 
+Now that you have a compiled Che binary, you need to run it.  We will use the Che Launcher Docker container to run the binary. Your workspace project has all of its files mounted onto the host. So while you see the files inside your workspace, they are also running on the host - where the Docker daemon is.
 
 We will launch the Che Launcher from inside the workspace, but pass environment variables that allow the launcher to create a new Che server on the host, and that new Che server will be started with the binaries that you just compiled (also on the host).
 ```shell  
@@ -61,11 +60,11 @@ docker rename che-server che-primary-server
 mkdir /home/user/che-did
 
 # Inside your Che workspace, launch Che-in-Che with:
-sudo docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock 
-                --env CHE_LOCAL_BINARY=/home/user/che/workspaces/<ws-name>$MY_CHE_BINARY 
-                --env CHE_DATA_FOLDER=/home/user/che-did 
-                --env CHE_HOST_IP=$(curl -s https://4.ifcfg.me/) 
-                --env CHE_PORT=50000 
+sudo docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock
+                --env CHE_LOCAL_BINARY=/home/user/che/workspaces/<ws-name>$MY_CHE_BINARY
+                --env CHE_DATA_FOLDER=/home/user/che-did
+                --env CHE_HOST_IP=$(curl -s https://4.ifcfg.me/)
+                --env CHE_PORT=50000
                    eclipse/che start
 
 # NOTE: Set the CHE_PORT to any value >33,000
