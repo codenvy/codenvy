@@ -79,6 +79,7 @@ nav {
   h1 {
     color: #3c4146;
     font-weight: 400;
+    font-size: 1.8em;
   }
 }
 
@@ -97,6 +98,7 @@ nav {
     margin-right: 10px;
 
     a {
+      color: #fff;
       font-size: 16px;
       padding: 0.3em 1em;
       @include transition(all .25s);
@@ -112,7 +114,7 @@ nav {
     &.current {
 
       a {
-        color: #fff;
+        color: #4A90E2;
       }
     }
   }
@@ -725,7 +727,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 1.7em;
+  font-size: 1.6em;
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: #eee;
@@ -760,7 +762,7 @@ p {
 
 article {
 
-  h2, h3, h4, h5, h6 { margin: 1em 0; }
+  h2, h3, h4, h5, h6 { margin: 0.5em 0; }
 
   h4 { color: #949AA2; }
 
