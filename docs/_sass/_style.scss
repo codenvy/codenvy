@@ -463,6 +463,16 @@ aside {
     &:first-child { margin-top: 0; }
   }
 
+  li.current {
+    list-style-type: none;
+
+    a {
+      font-size: 12px;
+      position: relative;
+      color: #4A90E2;
+    }
+  }
+
   li {
     list-style-type: none;
 
