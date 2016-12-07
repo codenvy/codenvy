@@ -14,7 +14,7 @@ Che uses the existing dependency injection framework [Guice](https://www.google.
 In general, there are two use cases for dependency injection: consuming objects and providing objects.
 
 
-![image07.png](/images/image07.png)
+![image07.png](/docs/images/image07.png)
 Please note that when extending Che, DI consumer and provider can be either in your custom extension or within the Che framework. As an example, if you want to provide a new wizard to be used in the IDE, you will create an object provider, which provides the wizard. Che implements an object consumer, which picks up the wizard class and uses it. In turn, if you want to access a service provided by Che, your extension will be the object consumer.
 
 The main goal of using dependency injection is to decouple object provider and object consumer. Both parties just need to know about the object they consume/provide. The object is identified by its type (typically a Java interface) and optionally an additional key.

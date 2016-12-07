@@ -1,6 +1,6 @@
 # Arguments
 batch = true
-fat = true
+fat = false
 auto = true
 prefer = newer
 log = false

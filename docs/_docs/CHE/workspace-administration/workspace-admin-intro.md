@@ -6,7 +6,7 @@ overview: true
 permalink: /docs/workspace-agents-intro/
 ---
 A Che workspace is composed of projects (source files) and environments (runtimes). A workspace can contain one or more environments (e.g. hack environment, populated database environment, etc...) but only one environment at a time can be running in the workspace. An environment is composed of one or more machines. The default machine in an environment is called the "dev-machine" and your projects are mounted or synchronized into that machine so that the software running in the machine can gain access to the source code.  
-![WorksapceBasicArchitecture.png](/images/WorksapceBasicArchitecture.png)
+![WorksapceBasicArchitecture.png](/docs/images/WorksapceBasicArchitecture.png)
 
 # Machines  
 Environments contain one or more machines. A machine is an abstraction for a single run time, defined by a [recipe](docs:recipes) or [stack](docs:stacks). These docs use the terms "machine" and "workspace runtime" interchangeably.
@@ -34,7 +34,7 @@ Che builds a Docker image from the recipe, if an image is not already available.
 After the image is downloaded, Che runs a container from that image. This running container represents a machine. If it is a workspace dev-machine, a workspace agent (packaged as a Tomcat server) is injected and started.
 
 When a machine is started, Che volume mounts the projects folder on the host, specified by the `CHE_DATA_FOLDER `(default `/home/user/che`) environment variable, into the machine located at `CHE_PROPERTY_che_machine_projects_internal_storage`(default `/projects`). Your workspace projects will be in both the machine and host.
-![machine.png](/images/machine.png)
+![machine.png](/docs/images/machine.png)
 
 # Where To Go From Here  
 Che provides a lot of flexibility to administrators and users. You can start by choosing from our stack library that is within the user dashboard.

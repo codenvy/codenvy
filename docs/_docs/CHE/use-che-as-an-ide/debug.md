@@ -9,9 +9,9 @@ permalink: /docs/debug/
 Java debugger is deployed with the workspace agent, i.e. runs in the workspace. It can connect to local processes (those running in a workspace) or remote ones.
 
 Breakpoints are set with a single click on a line number in the editor. You can set breakpoints before attaching a debugger:
-![breakpoint.png](/images/breakpoint.png)
+![breakpoint.png](/docs/images/breakpoint.png)
 In a Debug Dialog (**Run > Edit Debug Configurations...**), choose if you want to attach to a process in a local workspace or a remote machine. If localhost is chosen, a drop down menu will show all ports that are exposed in a container. You may either choose an existing port or provide your own.
-![debug-configurations.png](/images/debug-configurations.png)
+![debug-configurations.png](/docs/images/debug-configurations.png)
 ## Java Console Apps
 
 To debug console apps, pass debug arguments to JVM:
@@ -29,7 +29,7 @@ You can add debug commands to CMD widget to permanently save them with the works
 ## Debugging Local Binary
 
 Compile your app with `-g` argument, go to `Run > Edit Debug Configurations > GDB`. Create a new configuration, check `Debug local binary` box. By default, binary path is `${current.project.path/a.out}`. When the debugger attaches, this macro is translated into an absolute path to a currently selected project. `a.out` is the default binary name. If you have compiled binary with a different name, change it:
-![debug.png](/images/debug.png)
+![debug.png](/docs/images/debug.png)
 Set a breakpoint in code, go to `Run > Debug > YourDebugConfiguration`. Once a debugger attaches, there's a notification in the top right corner. A debugger panel will open.
 
 ## Remote Debugging with GDB server

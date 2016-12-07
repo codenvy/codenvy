@@ -28,30 +28,15 @@
   - using-desktop-ides
 - title: Admin Guide
   docs:
-  - api
-  - architecture
-  - authentication
-  - backup
-  - cli
-  - configuration-docker
-  - configuration
-  - disaster-recovery
-  - installation-azure-marketplace
-  - installation-getting-started
+  - get-help
+  - system-requirements
   - installation
-  - installation-multi-server
-  - installation-troubleshooting
+  - usage
+  - configuration
   - ldap-integration
-  - licensing
-  - monitoring
-  - networking
-  - permissions
-  - runbook
-  - scaling
-  - security
-  - smtp
-  - upgrading
-  - user
+  - managing
+  - cli
+  - team
 - title: Integration Guide
   docs:
   - workspace-automation

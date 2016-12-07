@@ -5,168 +5,103 @@ layout: docs
 overview: true
 permalink: /docs/installation/
 ---
-# Installation Types  
-There are four ways to install Codenvy:
-* [Standard installation](doc:installation) on a single server
-* With [Vagrant](http://codenvy.readme.io/v4.0/docs/installation-other#vagrant)
-* A [multi-node configuration](http://codenvy.readme.io/v4.0/docs/installation-other#multi-node)
-* From the [Microsoft Azure Marketplace](http://codenvy.readme.io/v4.0/docs/installation-other#microsoft-azure-marketplace)
-# Pre-Install Checklist  
-To ensure a smooth install the following must be checked before installing.
+The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
 
-## Operating System
-Core Codenvy requires an unmodified CentOS 7.1+ or RHEL 7.1+ operating system with access to the internet. If you are using RHEL, you must enable some additional repositories (which requires a subscription):
-```shell  
-subscription-manager register --username <LOGIN> --password <PASS> --auto-attach
-subscription-manager repos --enable=rhel-7-server-optional-rpms
-subscription-manager repos --enable=rhel-7-server-extras-rpms\
+## Nightly and Latest
+Each version of Codenvy is available as a Docker image tagged with a label that matches the version, such as `codenvy/cli:5.0.0-M7`. You can see all versions available by running `docker run codenvy/cli version` or by [browsing DockerHub](https://hub.docker.com/r/codenvy/cli/tags/).
+
+We maintain "redirection" labels which reference special versions of Codenvy:
+
+| Variable | Description |
+|----------|-------------|
+| `latest` | The most recent stable release of Codenvy. |
+| `5.0.0-latest` | The most recent stable release of Codenvy on the 5.x branch. |
+| `nightly` | The nightly build of Codenvy. |
+
+The software referenced by these labels can change over time. Since Docker will cache images locally, the `codenvy/cli:<version>` image that you are running locally may not be current with the one cached on DockerHub. Additionally, the `codenvy/cli:<version>` image that you are running references a manifest of Docker images that Codenvy depends upon, which can also change if you are using these special redirection tags.
+
+In the case of 'latest' images, when you initialize an installation using the CLI, we encode your `/instance/codenvy.ver` file with the numbered version that latest references. If you begin using a CLI version that mismatches what was installed, you will be presented with an error.
+
+To avoid issues that can appear from using 'nightly' or 'latest' redirectoins, you may:
+1. Verify that you have the most recent version with `docker pull eclipse/cli:<version>`.
+2. When running the CLI, commands that use other Docker images have an optional `--pull` and `--force` command line option [which will instruct the CLI to check DockerHub](https://github.com/codenvy/codenvy/tree/master/docs#codenvy-init) for a newer version and pull it down. Using these flags will slow down performance, but ensures that your local cache is current.
+
+If you are running Codenvy using a tagged version that is a not a redirection label, such as `5.0.0-M7`, then these caching issues will not happen, as the software installed is tagged and specific to that particular version, never changing over time.
+
+## Linux:
+There is nothing additional you need to install other than Docker.
+
+## Mac:
+There is nothing additional you need to install other than Docker.
+
+## Windows:
+There is nothing additional you need to install other than Docker.
+
+## Verification:
+You can verify that the CLI is working:
 ```
-## Install User and Sudoer Rights
-The Linux user that runs the installation command must have sudo rights that permits running services without a password entry. We also need write permissions for the install directory. The user shouldn't be called `codenvy`  - we create a `codenvy` and `codenvy-im` user as part of the install.
-
-To check this:
-```shell  
-# Check if user has sudo rights
-sudo -k -n true
-
-# Check if user is in the sudoers file
-sudo grep "^#includedir.*/etc/sudoers.d" /etc/sudoers```
-# There should be "#includedir ... /etc/sudoers.d" row listed
+docker run codenvy/cli
 ```
-## Password Authenticated VMs
-For authenticated VMs, like those hosted on EC2 and Microsoft Azure, you may need to configure passwordless sudo rights for the user account that you have created. Do not use `codenvy` as this user account - we create a `codenvy` and `codenvy-im` user as part of the install.
-```shell  
-# Add the following to /etc/sudoers.d/waagen immediately after the existing entry
-ALL=(ALL) NOPASSWD:ALL
-
-# Change permissions
-chown -R user:user /home/user
-
-# Close SSH session and re-login\
-```
-## Resources
-You will need at least 8GB RAM and 16GB storage to run Codenvy. See the [sizing guide](https://codenvy.readme.io/docs/installation#sizing) before you install to ensure you’ll have sufficient resources for the number of developers and size of workspaces you’ll use.
-
-## Hostnames
-Codenvy must be accessed over DNS hostnames. You must configure your clients with a [hosts rule or setup a network-wide DNS entry](http://codenvy.readme.io/docs/networking). The default installation configures Codenvy with `http://codenvy.onprem/` as the initial hostname. You can [change Codenvy's hostname](http://codenvy.readme.io/docs/networking#change-hostname) at any time.
-
-## Ports
-Check that the [ports required for Codenvy](http://codenvy.readme.io/docs/architecture#single-node-installation) are opened.
+The CLI is bound inside of Docker images that are tagged with different versions. If you were to run `codenvy/cli:5.0.0-latest` this will run the latest shipping release of Codenvy and the CLI. This list of all versions available can be seen by running `codenvy version` or browsing the list of [tags available in Docker Hub](https://hub.docker.com/r/codenvy/cli/tags/).
 
 ## Proxies
-You will need the HTTP and HTTPS proxy information in order to install Codenvy. This information is used in multiple places. First, to access our initial bootstrap script, which is hosted on Codenvy's servers.  Second, our installation manager configures itself with a proxy to be able to download Codenvy binaries and patches. Third, the system has to download Codenvy dependencies like Puppet and will use the proxy information for this. Fourth, Codenvy's internal Docker configuration will use a proxy to reach DockerHub. Fifth, the workspaces created by users need to have proxy information.
+You can install and operate behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
+1. Configuring Docker proxy access so that Codenvy can download images from DockerHub.
+2. Configuring Codenvy's system containers so that internal services can proxy to the Internet.
+3. Optionally, configuring workspace proxy settings to allow users within a workspace to proxy to the Internet.
 
-For Codenvy to work with a proxy you need to:
-1. Add your proxy information to the [install CURL command](http://codenvy.readme.io/docs/installation#install).
-2. [Configure Codenvy](http://codenvy.readme.io/docs/installation#section-use-codenvy-behind-a-proxy) so workspaces can be loaded properly.
+Before starting Codenvy, configure [Docker's daemon for proxy access](https://docs.docker.com/engine/admin/systemd/#/http-proxy). If you plan to scale Codenvy with multiple host nodes, each host node must have its Docker daemon configured for proxy access.
 
-Post-installation the administrator can alter the configuration to disallow workspaces from using a proxy.
-
-## Internet Connection
-The installer requires Internet connection to download packages and their dependencies that both installer and Codenvy use.
-# Sizing  
-## Minimum Installation
-The Codenvy services running on a server require 2 GB storage and 4 GB RAM for their internal overhead. This applies to both single server, single server with multiple machine servers, and distributed server implementations. The RAM, CPU and storage resources to support your users are additive.
-
-## Concurrent Workspaces
-You need to have machine RAM to support the number of concurrent workspaces open by users within your system. A single user may have multiple workspaces open, but generally use a single workspace. The default workspace size is 1GB RAM, but this can be changed by users.  Also, within a single workspace, a user is able to launch additional environments for their projects, which consume additional RAM, though this is uncommon.
-
-For example, at Codenvy, we regularly have 75 concurrently running workspaces, each sized at 16 GB RAM, for a total expectation of 1200 GB of RAM.  Our machine nodes have  128 GB RAM per node and we routinely run 10-14 machine nodes to support everyone.
-
-Note that compilation events are usually CPU-heavy and most compilation activities initiated by developers are sent to a single CPU.  With quad-core machine nodes, we end up with capacity to support 40-52 concurrent builds in workspaces so that there is no thrashing or blocking.  Your team may need more.
-
-## Project Storage
-You will need to gauge how much storage you need for projects. A good measuring stick to use is the size of your version control system, as you can expect that Codenvy over time will track similar consumption. Codenvy makes it easy for users to create new workspaces or clone existing ones, so Codenvy will be responsible for managing clones of source trees.
-
-| Resource   | Where to Mount Additional Disk Space   
-| --- | --- 
-| Project Storage   | User Profile Storage   
-| User Account & LDAP Storage   | `/home`\n`/var/lib/docker`   
-| `/var/lib/mongo`   | `/var/lib/ldap`   
-
-Most of your storage will be allocated for projects. In the production environment that manages Codenvy.com with >250K users, we have 1 GB for LDAP and 4 GB for user profiles.  Project storage is in the terabytes.
-# Install  
-
-```shell  
-# Run the following commands as root
-bash <(curl -L -s https://start.codenvy.com/install-codenvy) [OPTIONS]
-
-# If behind a proxy
-bash <(curl -L -s --proxy <proxy> https://start.codenvy.com/install-codenvy) [OPTIONS]
-
-OPTIONS:
---hostname=<hostname>
---suppress
---silent
---im-cli
---version=<version>
---multi
---license=accept
---config=<path-to-config-file>
-
-# This option controls where artifacts downloaded during install are stored.
-# During runtime all processes and storage are run under /home/codenvy
---install-directory=<directory>
-
-# This option is used by the docker for networking.
---advertise-network-interface=<interface>
-
-# The '-proxy' curl option allows the 'install-codenvy' script to download.
-# These options are passed to the 'install-codenvy' script to let it use a proxy.
---http-proxy-for-installation=http://<user>:<password>@<host>:<port>
---https-proxy-for-installation=https://<user>:<password>@<host>:<port>
-
-# You can provide a semi-colon separated list of domains that should not be proxied
---no-proxy-for-installation=<host>
-
-# If not provided, inherits from -for-installation.
-# Sets the proxy information for the Codenvy servers.
---http-proxy-for-codenvy=http://<user>:<password>@<host>:<port>
---https-proxy-for-codenvy=https://<user>:<password>@<host>:<port>
---no-proxy-for-codenvy=<host>
-
-# If not provided, inherits from '-for-installation'.
-# These options will be passed into Codenvy configuration to tell Codenvy workspaces
-# how they should use a proxy. 
---http-proxy-for-codenvy-workspaces=http://<user>:<password>@<host>:<port>
---https-proxy-for-codenvy-workspaces=https://<user>:<password>@<host>:<port>
---no-proxy-for-codenvy-workspaces=<host>
-
-# If not provided, inherits from '-for-installation'.
-# These options will be passed into Codenvy configuration to tell Codenvy 
-# how its Docker daemon should be configured with a proxy. 
---http-proxy-for-docker-daemon=http://<user>:<password>@<host>:<port>
---https-proxy-for-docker-daemon=https://<user>:<password>@<host>:<port>
---no-proxy-for-docker-daemon=<host>
-
-# If you have an internal Docker registry which is mirroring and caching Docker Hub
-# you can have the Codenvy Docker daemon use this local mirror for grabbing global
-# Docker repository images.
---docker-registry-mirror=<url-to-registry>\
+Codenvy's system runs on Java, and the JVM requires proxy environment variables in our `JAVA_OPTS`. We use the JVM for the core Codenvy server and the workspace agents that run within each workspace. You must set the proxy parameters for these system properties from `codenvy.env`. Please be mindful of the proxy URL formatting. Proxies are unforgiving if do not enter the URL perfectly, inclduing the protocol, port and whether they allow a trailing slash/.
 ```
-Codenvy will be installed with the configuration contained in `codenvy.properties`. If you do not have a `codenvy.properties` file locally, a default will be downloaded and used by the installer. You can download a [properties template for your version](https://github.com/codenvy/codenvy/tree/master/cdec/installation-manager-resources/src/main/resources/codenvy-properties) to customize the configuration before running the installer. 
+CODENVY_HTTP_PROXY_FOR_CODENVY=http://myproxy.com:8001/
+CODENVY_HTTPS_PROXY_FOR_CODENVY=http://myproxy.com:8001/
+CODENVY_NO_PROXY_FOR_CODENVY=<ip-or-domains-that-do-not-require-proxy-access>
+```
 
-The single server version of Codenvy is installed unless `--multi` is specified.
+If you would like your users to have proxified access to the Internet from within their workspace, those workspace runtimes need to have proxy settings applied to their environment variables in their .bashrc or equivalent. Configuring these parameters will have Codenvy automatically configure new workspaces with the proper environment variables.
+```
+# CODENVY_HTTP_PROXY_FOR_CODENVY_WORKSPACES=http://myproxy.com:8001/
+# CODENVY_HTTPS_PROXY_FOR_CODENVY_WORKSPACES=http://myproxy.com:8001/
+# CODENVY_NO_PROXY_FOR_CODENVY_WORKSPACES=<ip-or-domains-that-do-not-require-proxy-access>
+```
 
-| Option>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   | Description   
-| --- | --- 
-| `--hostname`   | Sets the access URL to be `http://hostname`. Default is `http://codenvy.onprem`.   
-| `--suppress`   | `--systemAdminName`   
-| `--systemAdminPassword`   | `--version=<version>`   
-| `--multi`   | Suppresses interactive prompts and configures Codenvy using the values in  `codenvy.properties` file. Downloads this file from Codenvy servers if not locally available. This option does not accept the Codenvy license agreement.  Use `--license=accept` for that.   
-| Sets the default user name for the admin account. Default is `admin`.   | Sets the defaut password for the admin account. Default is `password`. This can be changed after installation.   
-| Installs a specific version of Codenvy. If not provided, the installer will install the latest stable version available at Codenvy.com. You can get a list of available versions that we host before doing an installation using `curl https://codenvy.com/update/repository/updates/codenvy`.   | Installs Codenvy with internal services distributed across different nodes each with their own hostname. This configuration is only for systems that need redundancy on all services, which is not common. Please see [Installation - Other](doc:installation-other) for specifics on how this is configured.   
-| `--im-cli`   | Only installs the installation manager service and the accompanying CLI. Takes about 3 minutes. You can then use the CLI to schedule installations or install a specific version from a previously downloaded binary.   
-| `--http-proxy-for-installation=`\n`<proto>://<user>:<password>@<host>:<port>`\n\n`--https-proxy-for-installation=`\n`<proto>://<user>:<password>@<host>:<port>`\n\n`--no-proxy-for-installation=<host>`   | These parameters specify the proxy configuration that will allow Codenvy to install itself behind a proxy. There are multiple configuration files for yum, curl, and Puppet that are updated to allow Codenvy's bootstrap script, installation manager, and Puppet to reach external repositories. The `--no-proxy` option is available as a way to list domains that should not be proxied.\n\nThese values act as defaults for all of the other proxy settings if they are not provided. Providing the values for other properties will act as overrides to these settings.   
-| `--silent`   | Performs an installation with minimal output. Output includes basic pre-flight checks and major installation status.   
-| `--license=accept`   | Accepts the Codenvy terms of service license agreement available at `http://codenvy.com/legal`. When used with `--suppress`, you can perform a completely automated installation.   
-| `--http-proxy-for-codenvy-workspaces=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--https-proxy-for-codenvy-workspaces=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--no-proxy-for-codenvy-workspaces=<host>`   | Specify how Codenvy workspaces created by Codenvy will use a proxy. Each Codenvy workspace is its own runtime. Setting these values will set the following inside the workspace:\n1. export http_proxy.\n2. export https_proxy.\n3. export no_proxy.   
-| `--http-proxy-for-docker-daemon=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--https-proxy-for-docker-daemon=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--no-proxy-for-docker-daemon=<host>`   | Configures the Docker daemon running on each node managed by Codenvy to use a proxy. The Docker daemon is used to download Docker images from DockerHub. We configure `systemd` to set Docker proxy. [See more](https://docs.docker.com/engine/admin/systemd/).   
-| `--docker-registry-mirror=<url>`   | If you have a private Docker registry configured to cache images from Docker Hub, it is setup as a registry mirror. This parameter tells Codenvy's Docker daemon to use your mirror instead of routing to DockerHub directly.   
-| `--config=<path-to-config-file>`   | Passes in a `codenvy.properties` file which contains a configuration that the installer will use when installing Codenvy. The file can be hosted on a server and provided with a URL. The file will be retrieved using curl and honor any system proxy.   
-| `--install-directory=<directory>`   | Select the directory where Codenvy properties templates, Codenvy installation manager, and any Codenvy binaries are deployed. During installation, we create `/home/codenvy` and `/home/codenvy-im` user accounts and directories which will house certain assets.   
-| `--http-proxy-for-codenvy=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--https-proxy-for-codenvy=` \n`<proto>://<user>:<password>@<host>:<port>`\n\n`--no-proxy-for-codenvy=<host>`   | Specifies how the various Codenvy servers will use proxies while Codenvy is running. The properties set include:\n1. export http_proxy for `codenvy` and `codenvy-im` user.\n2. export https_proxy for `codenvy` and `codenvy-im` user.\n3. export no_proxy for `codenvy` and `codenvy-im` user.\n4. Add proxy configuration settings to the `JAVA_OPTS` environment variable so Codenvy's Tomcats inherit the values during boot.   
-| `--advertise-network-interface`   | Network interface used by the docker for networking.   
+A `NO_PROXY` variable is required if you use a fake local DNS. Java and other internal utilities will avoid accessing a proxy for internal communications when this value is set.
 
-Your installation should be smooth and error free. But if something were to go wrong, please walk through the [Installation - Troubleshooting](doc:installation-troubleshooting) for tips and tactics that can help you (and us) diagnose the problem.
-# Configure  
+## Offline Installation
+We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations.
+
+### Save Docker Images
+While connected to the Internet, download Codenvy's Docker images:
+```
+docker run codenvy/cli offline
+```
+The CLI will download images and save them to `/codenvy/backup/*.tar` with each image saved as its own file. The `/backup` folder will be created as a subdirectory of the folder you volume mounted to `:/codenvy`. You can optionally save these files to a differnet location by volume mounting that folder to `:/backup`. The version tag of the CLI Docker image will be used to determine which versions of dependent images to download. There is about 1GB of data that will be saved.
+
+### Save Codenvy CLI
+```
+docker save codenvy/cli:<version>
+```
+
+### Save Codenvy Stacks
+Out of the box, Codenvy has configured a few dozen stacks for popular programming languages and frameworks. These stacks use "recipes" which contain links to Docker images that are needed to create workspaces from these stacks. These workspace runtime images are not saved as part of `codenvy offline`. There are many of these images and they consume a lot of disk space. Most users do not require all of these stacks and most replace default stacks with custom stacks using their own Docker images. If you'd like to get the images that are associated with Codenvy's stacks:
+```
+docker save <codenvy-stack-image-name> > backup/<base-image-name>.tar
+```
+The list of images that Codenvy manages is sourced from Eclipse Che's [Dockerfiles repository](https://github.com/eclipse/che-dockerfiles/tree/master/recipes). Each folder is named the same way that our images are stored.  The `alpine_jdk8` folder represents the `codenvy/alpine_jdk8` Docker image, which you would save with `docker save codenvy/alpine_jdk8 > backup/alpine_jdk8.tar`.
+
+### Start Offline
+Extract your files to an offline computer with Docker already configured. Install the CLI files to a directory on your path and ensure that they have execution permissions. Execute the CLI in the directory that has the `offline` sub-folder which contains your tar files. Then start Codenvy in `--offline` mode:
+```
+docker run codenvy/cli:<version> start --offline
+```
+When invoked with the `--offline` parameter, the Codenvy CLI performs a preboot sequence, which loads all saved `backup/*.tar` images including any Codenvy stack images you saved. The preboot sequence takes place before any CLI configuration, which itself depends upon Docker. The `codenvy start`, `codenvy download`, and `codenvy init` commands support `--offline` mode which triggers this preboot seequence.
+
+## Uninstall
+```
+# Remove your Codevy configuration and destroy user projects and database
+docker run codenvy/cli destroy
+
+# Deletes Codenvy's images from your Docker registry
+docker run codenvy/cli rmi
+```

@@ -13,7 +13,7 @@ The central component is the implementation of the view itself (`MyViewImpl`). I
 As mentioned before, the view implementation is responsible for the content of a view. The integration into the Che IDE, including configuring the tab (title, icon, etc.) is done by a part presenter (`MyPartPresenter`), which inherits from `BasePresenter`. Part presenter are called by Che or a custom action to interact with a part, e.g. to open it or to fill it with content. The part presenter forwards relevant calls to the implementation of a view (encapsulated by the interface). 
 
 
-![Selection_005.png](/images/Selection_005.png)
+![Selection_005.png](/docs/images/Selection_005.png)
 In the following sections, we describe the implementation of the mentioned components more in detail. As an example, we create a part displaying "Hello World" and define an action to open it.
 
 ###Implementing a View

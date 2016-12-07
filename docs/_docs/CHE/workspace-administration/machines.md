@@ -11,7 +11,7 @@ A machine is created from a [runtime stack](doc:stacks). Che supports both singl
 
 ## Add / Remove Libraries and Tools To Runtime Machines
 You can use the terminal and command line to install additional libraries and tools. After you have created a workspace, open a terminal in the IDE.  You can then perform commands like `npm` or `yum install` to add software into your workspace.  These changes will only exist for the lifespan of this single workspace. You can capture these changes permanently by creating a snapshot (which can then be used as a [recipe](https://eclipse-che.readme.io/docs/recipes)), or writing a custom stack that includes these commands in a Dockerfile (this method will make your workspace shareable with others).
-![install-jetty8.png](/images/install-jetty8.png)
+![install-jetty8.png](/docs/images/install-jetty8.png)
 The following example takes a Java ready-to-go stack and adds Jetty8 in the workspace runtime configuration.
 ```shell  
 # apt-get update
@@ -33,7 +33,7 @@ Snapshots are important to preserve the internal state of a machine that is not 
 Snapshots image a machine and then it is committed, tagged, and optionally pushed into a Docker registry. You can use a local Docker registry or a remote one. See [Configuration](https://eclipse-che.readme.io/docs/configuration#section-workspace-snapshots) for information on how to setup a docker registry.
 
 To snapshot a machine go to the Operations Perspective by clicking the button on the far right of the menu bar. Choose Machines > Snapshot from the top menu bar. See our other docs [for details on setting up a local or remote Docker Registry](https://eclipse-che.readme.io/docs/configuration#section-workspace-snapshots).
-![che-create-snapshot.jpg](/images/che-create-snapshot.jpg)
+![che-create-snapshot.jpg](/docs/images/che-create-snapshot.jpg)
 By default, Che does not need a local/remote Docker registry to create snapshots. If no registry is used, a container is committed into an image which is then tagged, so that next time a workspace is started with this image. The behavior is regulated with the following environment variables:
 ```shell  
 # Windows use `set` in lieu of `export`
@@ -52,8 +52,8 @@ Information on each machine is provided by Eclipse Che server.
 Information on each machine can be viewed in the operations perspective in the IDE. You can toggle between the code perspective and operations perspective by clicking the pair of buttons in the top-right of the menu bar.
 
 The operations perspective provides general meta information such as name, status, id, etc. Also, there is externally exposed machine port information in the server tab section. Exposed ports are used in in various ways such as [priview urls](https://eclipse-che.readme.io/docs/run#section-preview-url), allowing SSH into a machine, debug server ports, and various ports used by Eclipse Che server to interact with the machine.
-![Che-machine-information.jpg](/images/Che-machine-information.jpg)
+![Che-machine-information.jpg](/docs/images/Che-machine-information.jpg)
 ### Dashboard Machine Information
 
 Information on each machine can be viewed in the in the `Dashboard`. Information on each machine in a workspace can be viewed after clicking on the workspace name, selecting the `Runtime` tab, and clicking the expand button located next to each machine. Machine information includes source, ram, [agents](doc:workspace-agents), exposed ports, and environment variables. All of these configuration items can be changed on a stopped workspace/machine. If the workspace/machine is running, the workspace will be stopped automatically. The saved configuration items will be used the next time the work space is started and will supersede any values given in the original workspace stack. Changes made to the runtime configuration will only effect the workspace and will not be saved to original stack to be create other workspaces from.
-![Che-machine-information-edit.jpg](/images/Che-machine-information-edit.jpg)
+![Che-machine-information-edit.jpg](/docs/images/Che-machine-information-edit.jpg)

@@ -42,6 +42,7 @@ jekyll.sh [<port>]
        \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
       
     JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --incremental"
+    DEBUG=false
   }
   
 check_status() {
@@ -60,17 +61,23 @@ check_status() {
 
 parse_command_line () {
   if [ $# -ne 0 ]; then
-    if [ "$1" = "--help" ]; then
-      usage
-      return 1
+    if [ "$1" = "-d" ]; then
+    DEBUG=false
+    if [ $2 -ne 0 ]; then
+      export JEKYLL_BIND_PORT="${2}:"
+    fi
     else
-      #must be port
-      export JEKYLL_BIND_PORT="${1}:"
+        if [ "$1" = "--help" ]; then
+          usage
+          return 1
+        else
+          #must be port
+          export JEKYLL_BIND_PORT="${1}:"
+        fi
     fi
   else
     export JEKYLL_BIND_PORT=""
   fi
-
 }
 
 usage () {

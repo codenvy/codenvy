@@ -8,7 +8,7 @@ permalink: /docs/che-usage-bitnami/
 Bitnami provides provides a [one-click install](https://bitnami.com/stack/eclipse-che) solution for deploying Eclipse Che to your own cloud account.
 # 1. Install Che  
 Bitnami will automatically install Che to your cloud account, just select your provider and then choose "Add Account" from the menu:
-![ScreenShot2016-06-23at9.40.42AM.png](/images/ScreenShot2016-06-23at9.40.42AM.png)
+![ScreenShot2016-06-23at9.40.42AM.png](/docs/images/ScreenShot2016-06-23at9.40.42AM.png)
 Once your account is connected select the instance size. You should ensure that Che has at least 4GB RAM and 10GB of storage (the Che server itself will need ~2GB RAM). If you plan on running larger or more workspaces, increase your RAM and storage.
 #### Azure Ports
 }  
@@ -16,7 +16,7 @@ Once your account is connected select the instance size. You should ensure that 
 
 # 2. Usage  
 When your private Che cloud server is ready you will see a page like the following:
-![ScreenShot2016-11-30at12.40.15PM.png](/images/ScreenShot2016-11-30at12.40.15PM.png)
+![ScreenShot2016-11-30at12.40.15PM.png](/docs/images/ScreenShot2016-11-30at12.40.15PM.png)
 In the Credentials section you'll find your username and password. Show the password and copy it to the clipboard.  When you click on the IP address for the Che server on this page you will be brought to a welcome page from Bitnami. When you select the login link you will be asked for a username and password. Type the username and paste the password into the form.
 
 You should now have access to the Che user dashboard.

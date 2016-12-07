@@ -1,147 +1,114 @@
 ---
-title: CLI
+title: CLI Reference
 excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
 overview: true
 permalink: /docs/cli/
 ---
-The CLI is located at `~/codenvy/codenvy-cli/bin`. It is added to your `PATH` when Codenvy is installed.  You may need to start a new terminal session after the installation of Codenvy for the CLI PATH to be picked up.
-# codenvy add-node  
+The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
 
-```shell  
-codenvy add-node --codenvy-ip $IP node[n].<hostname>\
 ```
-Adds a new machine node to the Codenvy cluster. Machines provide resources to workspaces. You can add up to 1000 machine nodes.
-
-`$IP` (optional) stands for the IP of the Codenvy master host (do not use the IP of the node you are adding). It is only needed if the workspace master does not have a DNS name that a workspace agent can resolve.
-
-`[n]` is replaced with a unique number for the node you're adding - your first additional node should begin at 1 and then increment from there. The new node name must start with `node`.
-
-`<hostname>` is the fully qualified DNS hostname of your Codenvy installation.
-#### Codenvy Master DNS Hostname
-Before adding nodes your Codenvy master node must be accessible with a fully qualified DNS name. The DNS domain for your master node will be used in the DNS names for all additional nodes (it's how we find the additional nodes and ensure that they're added to the cluster).  
-
-*Steps to Add Node*
-1. Create a new machine node running CentOS / RHEL.
-2. Create a new entry in your DNS for the machine node's IP that looks like “node1.{my-codenvy-master-domain.com}”. This must be a fully qualified DNS name (FQDN).
-3. Open the [appropriate ports](http://codenvy.readme.io/docs/architecture#section-machine-nodes-1-n-) on the machine node.
-4. Check that the master node's DNS hostname is reachable from the machine node.
-5. Check that the machine node's DNS hostname is reachable from the master node.
-6. Check that the master node has an SSH private key placed at `/root/.ssh/id_rsa`.
-7. Place the public key that matches your master node's private key into `/root/.ssh/authorized_keys` on the machine node.
-8. Check you can SSH between the nodes.
-9. Execute the `add-node` command from the master node.
-
-The IM will connect to the node, install puppet, activate itself, and then register itself into the Codenvy routers.
-
-*Troubleshooting*
-If the node does not appear to connect then it's likely that it is a DNS issue. Ensure that the DNS entries for the master node and machine node are correct and that each node can see the other using that DNS entry. Once they're correct restart the system (from the master node) execute the following:
-`service nginx restart`
-`service dnsmasq restart`
-`service codenvy restart`
-#### Changing DNS of Machine Nodes
-}  
-
-
-# codenvy backup  
-
-```shell  
-codenvy backup [directory]\
-```
-Creates an archive of the user and project data. If you do not specify a directory, the backup will be saved in `~/.codenvy/backups/`.  Backing up data will trigger a maintenance window.
-# codenvy config  
-
-```shell  
-codenvy config [options] [property] [value]
-
-Arguments:
-property - Codenvy property name
-value    - Codenvy property value
-
-Options:
---hostname=<hostname>
---help\
-```
-Displays the properties of the system. that can be used to configure the Codenvy system. Run `codenvy config` with no options to display all known properties. You can provide a `[property]` to display the value of a single property. If you also provide `[value]` the property will be updated and puppet will be instructed to apply that change system-wide.
-#### Changing DNS of Machine Nodes
-When DNS of a Codenvy installation is changed, a system administrator must manually update DNS names of machine nodes, if any, un-register these nodes, and then register again with new DNS names:\n\n`remove-node node<number>.<old_codenvy_url>`\n`add-node node<number>.<new_codenvy_url>`  
-
-
-# codenvy download  
-
-```shell  
-codenvy download [options] [<artifact>] [<version>]
-
-Options:
---list-local
---list-remote\
-```
-Downloads new Codenvy binaries and patches from Codenvy.com. Running the command with no parameters will download the latest stable version of Codenvy.  `[artifact]` and `[version]` let you specify a specific asset and version. The `--list-local` flag shows which artifacts have already been downloaded.  The `--list-remote` flag shows the versions that are currently available for download from Codenvy's repos.
-```shell  
-# See what you have installed locally
-codenvy download --list-local
-
-# See what is available on Codenvy's servers for all artifacts
-codenvy download --list-remote
-
-# Download new binary for Codenvy 4.3.0-RC1-SNAPSHOT'
-codenvy download codenvy 4.3.0-RC1-SNAPSHOT\
+docker run --rm -it
+           -v /var/run/docker.sock:/var/run/docker.sock
+           -v /c/codenvy:/codenvy
+           -v /c/codenvy/cli:/cli codenvy/cli:nightly [COMMAND]
 ```
 
-# codenvy install  
+## `codenvy init`
+Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `:/codenvy/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `:/codenvy/backup`.  After initialization, a `codenvy.env` file is placed into the root of the path that you mounted to `:/codenvy`.
 
-```shell  
-codenvy install [options]
+These variables can be set in your local environment shell before running and they will be respected during initialization:
 
-Options:
---binaries=path/to/zip <artifact> <version>
---list\
+| Variable | Description |
+|----------|-------------|
+| `CODENVY_HOST` | The IP address or DNS name of the Codenvy service. We use `eclipse/che-ip` to attempt discovery if not set. |
+
+Codenvy depends upon Docker images. We use Docker images in three ways:
+1. As cross-platform utilites within the CLI. For example, in scenarios where we need to perform a `curl` operation, we use a small Docker image to perform this function. We do this as a precaution as many operating systems (like Windows) do not have curl installed.
+2. To look up the master version and upgrade manifest, which is stored as a singleton Docker image called `codenvy/version`.
+3. To perform initialization and configuration of Codenvy such as with `codenvy/init`. This image contains templates that are delivered as a payload and installed onto your computer. These payload images can have different files based upon the image's version.
+4. To run Codenvy and its dependent services, which include Codenvy, HAproxy, nginx, Postgres, socat, and Docker Swarm.
+
+You can control the nature of how Codenvy downloads these images with command line options. All image downloads are performed with `docker pull`.
+
+| Mode>>>> | Description |
+|------|-------------|
+| `--no-force` | Default behavior. Will download an image if not found locally. A local check of the image will see if an image of a matching name is in your local registry and then skip the pull if it is found. This mode does not check DockerHub for a newer version of the same image. |
+| `--pull` | Will always perform a `docker pull` when an image is requested. If there is a newer version of the same tagged image at DockerHub, it will pull it, or use the one in local cache. This keeps your images up to date, but execution is slower. |
+| `--force` | Performs a forced removal of the local image using `docker rmi` and then pulls it again (anew) from DockerHub. You can use this as a way to clean your local cache and ensure that all images are new. |
+| `--offline` | Loads Docker images from `backup/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
+
+The initialization of a Codenvy installation requires the acceptance of our default Fair Source 3 license agreement, which allows for some access to the source code and [usage for up to three people](http://codenvy.com/legal). You can auto-accept the license agreement without prompting for a response for silent installation by passing the `--accept-license` command line option.
+
+You can reinstall Codenvy on a folder that is already initialized and preserve your `/codenvy/codenvy.env` values by passing the `--reinit` flag.
+
+## `codenvy config`
+Generates a Codenvy instance configuration thta is placed in `/codenvy/instance`. This command uses puppet to generate configuration files for Codenvy, haproxy, swarm, socat, nginx, and postgres which are mounted when Codenvy services are started. This command is executed on every `start` or `restart`.
+
+If you are using a `codenvy/cli:<version>` image and it does not match the version that is in `/instance/codenvy.ver`, then the configuration will abort to prevent you from running a configuration for a different version than what is currently installed.
+
+This command respects `--no-force`, `--pull`, `--force`, and `--offline`.
+
+## `codenvy start`
+Starts Codenvy and its services using `docker-compose`. If the system cannot find a valid configuration it will perform a `codenvy init`. Every `start` and `restart` will run a `codenvy config` to generate a new configuration set using the latest configuration. The starting sequence will perform pre-flight testing to see if any ports required by Codenvy are currently used by other services and post-flight checks to verify access to key APIs.  
+
+## `codenvy stop`
+Stops all of the Codenvy service containers and removes them.
+
+## `codenvy restart`
+Performs a `codenvy stop` followed by a `codenvy start`, respecting `--pull`, `--force`, and `--offline`.
+
+## `codenvy destroy`
+Deletes `/docs`, `codenvy.env` and `/codenvy/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped.
+
+If you have mounted the `:/cli` path, then we write the `cli.log` to your host directory. By default, this log is not destroyed in a `codenvy destroy` command so that you can maintain a record of all CLI executions. You can also have this file removed from your host by mounting `:/cli` and passing the `--cli` parameter to this command.
+
+## `codenvy offline`
+Saves all of the Docker images that Codenvy requires into `/backup/*.tar` files. Each image is saved as its own file. If the `backup` folder is available on a machine that is disconnected from the Internet and you start Codenvy with `--offline`, the CLI pre-boot sequence will load all of the Docker images in the `/backup/` folder.
+
+## `codenvy rmi`
+Deletes the Docker images from the local registry that Codenvy has downloaded for this version.
+
+## `codenvy download`
+Used to download Docker images that will be stored in your Docker images repository. This command downloads images that are used by the CLI as utilities, for Codenvy to do initialization and configuration, and for the runtime images that Codenvy needs when it starts.  This command respects `--offline`, `--pull`, `--force`, and `--no-force` (default).  This command is invoked by `codenvy init`, `codenvy config`, and `codenvy start`.
+
+This command is invoked by `codenvy init` before initialization to download the images for the version specified by `codenvy/cli:<version>`.
+
+## `codenvy version`
+Provides information on the current version and the available versions that are hosted in Codenvy's repositories. `codenvy upgrade` enforces upgrade sequences and will prevent you from upgrading one version to another version where data migrations cannot be guaranteed.
+
+## `codenvy upgrade`
+Manages the sequence of upgrading Codenvy from one version to another. Run `codenvy version` to get a list of available versions that you can upgrade to.
+
+Upgrading Codenvy is done by using a `codenvy/cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M7, then:
 ```
-Installs a new Codenvy binary, plug-in or patch that has been downloaded and saved locally. Use `--list` to display the artifacts that have already been installed.  The `--binaries` option lets you set an absolute path to the artifact to install.  For example:
-```shell  
-codenvy install --binaries=/home/user/tomcat_aio.zip codenvy 3.10.3.2\
+# Get the new version of Codenvy
+docker pull codenvy/cli:5.0.0-M7
+
+# You now have two codenvy/cli images (one for each version)
+# Perform an upgrade - use the new image to upgrade old installation
+docker run <volume-mounts> codenvy/cli:5.0.0-M7 upgrade
 ```
 
-# codenvy login  
+The upgrade command has numerous checks to prevent you from upgrading Codenvy if the new image and the old version are not compatiable. In order for the upgrade procedure to proceed, the CLI image must be newer than the value of '/instance/codenvy.ver'.
 
-```text  
-codenvy login [options] [username] [password]
+The upgrade process: a) performs a version compatibility check, b) downloads new Docker images that are needed to run the new version of Codenvy, c) stops Codenvy if it is currently running triggering a maintenance window, d) backs up your installation, e) initializes the new version, and f) starts Codenvy.
 
-OPTIONS:
---url=http://your.hostname
---help - displays this help message\
-```
+You can run `codenvy version` to see the list of available versions that you can upgrade to.
 
-# codenvy password  
+## `codenvy info`
+Displays system state and debugging information. `--network` runs a test to take your `CODENVY_HOST` value to test for networking connectivity simulating browser > Codenvy and Codenvy > workspace connectivity.
 
-```shell  
-codenvy password <current> <new>\
-```
-Modifies the current system administration password.
-# codenvy remove-node  
+## `codenvy backup`
+Tars your `/instance` into files and places them into `/backup`. These files are restoration-ready.
 
-```shell  
-codenvy remove-node node[n].<hostname>\
-```
-Removes a machine node from the Codenvy cluster. If you have active machines on the node, those machines will be migrated off to another node.
-# codenvy restore  
+## `codenvy restore`
+Restores `/instance` to its previous state. You do not need to worry about having the right Docker images. The normal start / stop / restart cycle ensures that the proper Docker images are available or downloaded, if not found.
 
-```shell  
-codenvy restore <backup-file>\
-```
-Restores Codenvy with the projects and user data saved from a backup. The archive must be restored into a Codenvy that had the same version as the backup. Restoring data will trigger a maintenance window.
+This command will destroy your existing `/instance` folder, so use with caution, or set these values to different folders when performing a restore.
 
-# codenvy version  
+## `codenvy add-node`
+Adds a new physical node into the Codenvy cluster. That node must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
 
-```shell  
-codenvy version\
-```
-Tells you the currently installed versions of all installed artifacts and also displays the latest stable and beta versions available for download.
-```json  
-{
-  "artifact" : "codenvy\n  "version" : "3.13.1-SNAPSHOT\n  "availableVersion" : {
-    "stable" : "3.13.3\n    "unstable" : "3.13.7"
- },
- "status" : "There is a new stable version of Codenvy available. Run im-download 3.13.3."
-}
-```
+## `codenvy remove-node`
+Takes a single parameter, `ip`, which is the external IP address of the remote physical node to be removed from the Codenvy cluster. This utility does not remove any software from the remote node, but it does ensure that workspace runtimes are not executing on that node.

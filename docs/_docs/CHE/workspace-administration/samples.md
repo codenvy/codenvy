@@ -10,12 +10,12 @@ A template is a packaged set of sample code that is launched in the workspace wh
 Che provides stacks with project templates (code samples).  It is possible to have a single stack with a variety of different project templates, which provide sample code to get started with or wizard-driven templates.
 
 In the user dashboard and after a stack is selected, Che propose a list of project templates that you can import in your workspace. You can either start with the ready-to-run project samples or use the wizard-driven templates.
-![templates.png](/images/templates.png)
+![templates.png](/docs/images/templates.png)
 Each ready-to-run project sample registers their set of commands in the workspace which allow the code to build and run without additional configuration.
 
 ### Wizard-driven templates
 Wizard-driven templates allow the user to create a project and configure the code it uses within the IDE. The project structure will be created in the workspace, then a wizard will be displayed in the IDE for configuring project metadata.
-![maven.png](/images/maven.png)
+![maven.png](/docs/images/maven.png)
 
 # Register New Project Templates  
 
