@@ -15,9 +15,9 @@
 package com.codenvy.im.managers.helper;
 
 import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import com.codenvy.im.commands.Command;

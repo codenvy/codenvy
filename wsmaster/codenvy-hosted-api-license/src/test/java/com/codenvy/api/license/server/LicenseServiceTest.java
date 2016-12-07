@@ -14,17 +14,21 @@
  */
 package com.codenvy.api.license.server;
 
+import com.codenvy.api.license.shared.dto.IssueDto;
+import com.codenvy.api.license.shared.dto.LegalityDto;
+import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.CodenvyLicenseFactory;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
 import com.codenvy.api.license.LicenseFeature;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
-
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.assured.JettyHttpServer;
 import org.mockito.InjectMocks;
@@ -43,6 +47,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -57,6 +62,9 @@ import static org.testng.Assert.assertEquals;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class LicenseServiceTest {
 
+    public final static IssueDto issue = newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
+                                           .withMessage("error message");
+
     @SuppressWarnings("unused")
     protected static ApiExceptionMapper MAPPER = new ApiExceptionMapper();
     @Mock
@@ -65,6 +73,8 @@ public class LicenseServiceTest {
     private CodenvyLicense        mockCodenvyLicense;
     @Mock
     private CodenvyLicenseFactory mockLicenseFactory;
+    @Mock
+    private FairSourceLicenseAcceptanceValidator licenseAcceptanceValidator;
 
     @InjectMocks
     LicenseService licenseService;
@@ -115,7 +125,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testDeleteLicensShouldNotFindLicenseToDelete() {
+    public void testDeleteLicensShouldNotFindLicenseToDelete() throws Exception {
         doThrow(new LicenseNotFoundException("error")).when(licenseManager).delete();
 
         Response response = given()
@@ -206,27 +216,33 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testIsCodenvyUsageLegal() throws IOException, ServerException {
-        doReturn(true).when(licenseManager).isCodenvyUsageLegal();
+    public void testisSystemUsageLegal() throws IOException, ServerException {
+        doReturn(true).when(licenseManager).isSystemUsageLegal();
+        doReturn(ImmutableList.of()).when(licenseManager).getLicenseIssues();
+
         Response response = given().when().get("/license/legality");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
-        assertEquals(response.asString(), "{\"value\":\"true\"}");
+        assertEquals(getLegalityDtoFromJson(response),
+                     newDto(LegalityDto.class).withIsLegal(true));
     }
 
     @Test
     public void testIsCodenvyUsageNotLegal() throws IOException, ServerException {
-        doReturn(false).when(licenseManager).isCodenvyUsageLegal();
+        doReturn(false).when(licenseManager).isSystemUsageLegal();
+        doReturn(ImmutableList.of(issue)).when(licenseManager).getLicenseIssues();
 
         Response response = given().when().get("/license/legality");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
-        assertEquals(response.asString(), "{\"value\":\"false\"}");
+        assertEquals(getLegalityDtoFromJson(response),
+                     newDto(LegalityDto.class).withIsLegal(false)
+                                              .withIssues(ImmutableList.of(issue)));
     }
 
     @Test
     public void testIsCodenvyUsageIOException() throws IOException, ServerException {
-        doThrow(IOException.class).when(licenseManager).isCodenvyUsageLegal();
+        doThrow(IOException.class).when(licenseManager).isSystemUsageLegal();
 
         Response response = given().when().get("/license/legality");
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
@@ -234,37 +250,44 @@ public class LicenseServiceTest {
 
     @Test
     public void testIsCodenvyActualNodesUsageLegal() throws IOException, ServerException {
-        doReturn(true).when(licenseManager).isCodenvyNodesUsageLegal(null);
+        doReturn(true).when(licenseManager).isSystemNodesUsageLegal(null);
         Response response = given().when().get("/license/legality/node");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
-        assertEquals(response.asString(), "{\"value\":\"true\"}");
+        assertEquals(getLegalityDtoFromJson(response),
+                     newDto(LegalityDto.class).withIsLegal(true));
     }
 
     @Test
     public void testIsCodenvyGivenNodesUsageLegal() throws IOException, ServerException {
-        doReturn(true).when(licenseManager).isCodenvyNodesUsageLegal(2);
+        doReturn(true).when(licenseManager).isSystemNodesUsageLegal(2);
         Response response = given().when().get("/license/legality/node?nodeNumber=2");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
-        assertEquals(response.asString(), "{\"value\":\"true\"}");
+        assertEquals(getLegalityDtoFromJson(response),
+                     newDto(LegalityDto.class).withIsLegal(true));
     }
 
     @Test
     public void testIsCodenvyNodesUsageNotLegal() throws IOException, ServerException {
-        doReturn(false).when(licenseManager).isCodenvyNodesUsageLegal(2);
+        doReturn(false).when(licenseManager).isSystemNodesUsageLegal(2);
         Response response = given().when().get("/license/legality/node?nodeNumber=2");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
-        assertEquals(response.asString(), "{\"value\":\"false\"}");
+        assertEquals(getLegalityDtoFromJson(response),
+                     newDto(LegalityDto.class).withIsLegal(false));
     }
 
     @Test
     public void testIsCodenvyNodesUsageIOException() throws IOException, ServerException {
-        doThrow(IOException.class).when(licenseManager).isCodenvyNodesUsageLegal(null);
+        doThrow(IOException.class).when(licenseManager).isSystemNodesUsageLegal(null);
 
         Response response = given().when().get("/license/legality/node");
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    private LegalityDto getLegalityDtoFromJson(Response response) {
+        return DtoFactory.getInstance().createDtoFromJson(response.asString(), LegalityDto.class);
     }
 
 }

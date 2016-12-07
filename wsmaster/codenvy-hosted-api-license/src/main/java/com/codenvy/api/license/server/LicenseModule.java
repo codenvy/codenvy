@@ -14,7 +14,10 @@
  */
 package com.codenvy.api.license.server;
 
+import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
+import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
 import com.google.inject.AbstractModule;
+
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -26,5 +29,6 @@ public class LicenseModule extends AbstractModule {
     protected void configure() {
         bind(LicenseService.class);
         bind(LicenseServicePermissionsFilter.class);
+        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
     }
 }

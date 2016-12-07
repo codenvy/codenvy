@@ -23,7 +23,8 @@ define(["jquery","config",
         "views/create_ws_add_member",
         "views/onpremises-login",
         "views/factory-usage-notification",
-        "views/login"
+        "views/login",
+        "views/accept-fair-source-licence"
         ],
 
     function($,Config,
@@ -33,7 +34,8 @@ define(["jquery","config",
         CreateWsAdd_Member,
         OnPremisesLogin,
         FactoryUsageNotification,
-        MainPage){
+        MainPage,
+        AcceptLicencePage){
 
         function modernize(){
             Modernizr.load({
@@ -62,7 +64,22 @@ define(["jquery","config",
                         creatWsAddMember = $(".create-ws-add-memeber"),
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
-                        mainpage = $(".main-page");
+                        mainpage = $(".main-page"),
+                        acceptLicencePage = $(".accept-licence-form");
+
+                    if(acceptLicencePage.length !== 0){
+                        (function(){
+                            var form = AcceptLicencePage.get(acceptLicencePage);
+                            errorReport = ErrorReport.get(errorContainer);
+                            form.on("invalid", function(field,message){
+                                errorReport.show(message);
+                            });
+                            form.on("submitting", function(){
+                                errorReport.hide();
+                            });
+                        }());
+                        
+                    }
 
                     if(factoryUsageNotification.length !== 0){
                         (function(){

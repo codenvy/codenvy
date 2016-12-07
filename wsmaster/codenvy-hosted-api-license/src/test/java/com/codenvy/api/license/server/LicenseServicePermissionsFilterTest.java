@@ -75,7 +75,7 @@ public class LicenseServicePermissionsFilterTest {
                                          .get(SECURE_PATH + "/license/legality");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(licenseService).isCodenvyUsageLegal();
+        verify(licenseService).isSystemUsageLegal();
         verifyZeroInteractions(subject);
     }
 
@@ -87,7 +87,7 @@ public class LicenseServicePermissionsFilterTest {
                                          .get(SECURE_PATH + "/license/legality/node?nodeNumber=1");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(licenseService).isCodenvyNodesUsageLegal(1);
+        verify(licenseService).isMachineNodesUsageLegal(1);
         verifyZeroInteractions(subject);
     }
 
@@ -103,8 +103,8 @@ public class LicenseServicePermissionsFilterTest {
         for (Method imMethod : imMethods) {
             String methodName = imMethod.getName();
             if (Modifier.isPublic(imMethod.getModifiers()) &&
-                !"isCodenvyUsageLegal".equals(methodName) &&
-                !"isCodenvyNodesUsageLegal".equals(methodName)) {
+                !"isSystemUsageLegal".equals(methodName) &&
+                !"isMachineNodesUsageLegal".equals(methodName)) {
                 when(GenericResourceMethod.getMethod()).thenReturn(imMethod);
                 permissionsFilter.filter(GenericResourceMethod, new Object[] {});
                 publicMethods++;

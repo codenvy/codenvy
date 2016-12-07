@@ -149,7 +149,7 @@
                         validDomain : this.settings.invalidDomainNameErrorMessage
                     },
                     email: {
-                        required : this.settings.noEmailErrorMessage,
+                        required : this.settings.noUserNameErrorMessage,
                         checkEmail : this.settings.invalidEmailErrorMessage
                     },
                     password: {

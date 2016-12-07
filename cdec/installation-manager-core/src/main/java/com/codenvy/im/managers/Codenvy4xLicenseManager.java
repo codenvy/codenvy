@@ -16,9 +16,9 @@ package com.codenvy.im.managers;
 
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.CodenvyLicenseFactory;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.exception.InvalidLicenseException;
+import com.codenvy.api.license.exception.LicenseException;
+import com.codenvy.api.license.exception.LicenseNotFoundException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 

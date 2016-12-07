@@ -14,18 +14,43 @@
  */
 'use strict';
 
+interface ICodenvyPermissionsResource<T> extends ng.resource.IResourceClass<T> {
+  store: any;
+  remove: any;
+  getSystemPermissions: any;
+  getPermissionsByInstance: any;
+}
+
+interface IUserServices {
+  hasUserService: boolean;
+  hasUserProfileService: boolean;
+  hasAdminUserService: boolean;
+  hasInstallationManagerService: boolean;
+  hasLicenseService: boolean;
+}
+
+interface ISystemPermissions {
+  actions: any;
+}
+
 /**
  * This class is handling the permissions API
  * @author Ann Shumilova
  * @author Oleksii Orel
  */
 export class CodenvyPermissions {
+  $q: ng.IQService;
+  $resource: ng.resource.IResourceService;
+  remotePermissionsAPI: ICodenvyPermissionsResource<any>;
+  userServices: IUserServices;
+  workspacePermissions: Map<string, string>;
+  systemPermissions: ISystemPermissions;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $resource) {
+  constructor($q: ng.IQService, $resource: ng.resource.IResourceService) {
     this.$q = $q;
     this.$resource = $resource;
 
@@ -41,7 +66,7 @@ export class CodenvyPermissions {
     };
 
     // remote call
-    this.remotePermissionsAPI = this.$resource('/api/permissions', {}, {
+    this.remotePermissionsAPI = <ICodenvyPermissionsResource<any>>this.$resource('/api/permissions', {}, {
       store: {method: 'POST', url: '/api/permissions'},
       remove: {method: 'DELETE', url: '/api/permissions/:domain?instance=:instance&user=:user'},
       getSystemPermissions: {method: 'GET', url: '/api/permissions/system'},
@@ -53,73 +78,74 @@ export class CodenvyPermissions {
    * Stores permissions data.
    *
    * @param data - permissions data
-   * @returns {*}
+   * @returns {ng.IPromise<any>}
    */
-  storePermissions(data) {
-    let promise = this.remotePermissionsAPI.store(data).$promise;
-    return promise;
+  storePermissions(data: any): ng.IPromise<any> {
+    return this.remotePermissionsAPI.store(data).$promise;
   }
 
   /**
    * Fetch workspace permissions
    *
-   * @param workspaceId workspace id
-   * @returns {*}
+   * @param workspaceId {string} workspace id
+   * @returns {ng.IPromise<any>}
    */
-  fetchWorkspacePermissions(workspaceId) {
-    let promise = this.remotePermissionsAPI.getPermissionsByInstance({domain: 'workspace', instance: workspaceId}).$promise;
-    let resultPromise = promise.then((permissions) => {
-        this.workspacePermissions.set(workspaceId, permissions);
-      });
+  fetchWorkspacePermissions(workspaceId: string): ng.IPromise<any> {
+    let promise: ng.IPromise<any> = this.remotePermissionsAPI.getPermissionsByInstance({
+      domain: 'workspace',
+      instance: workspaceId
+    }).$promise;
+    promise.then((permissions: any) => {
+      this.workspacePermissions.set(workspaceId, permissions);
+    });
 
-    return resultPromise;
+    return promise;
   }
 
   /**
    * Returns permissions data by workspace id
    *
    * @param workspaceId workspace id
-   * @returns {*} list of workspace permissions
+   * @returns {any} list of workspace permissions
    */
-  getWorkspacePermissions(workspaceId) {
+  getWorkspacePermissions(workspaceId: string): any {
     return this.workspacePermissions.get(workspaceId);
   }
 
   /**
    * Remove permission for pointed user in pointed workspace.
    *
-   * @param workspaceId workspace id
-   * @param userId user id
-   * @returns {$promise} request promise
+   * @param workspaceId {string} workspace id
+   * @param userId {string} user id
+   * @returns {ng.IPromise<any>} request promise
    */
-  removeWorkspacePermissions(workspaceId, userId) {
+  removeWorkspacePermissions(workspaceId: string, userId: string): ng.IPromise<any> {
     let promise = this.remotePermissionsAPI.remove({domain: 'workspace', instance: workspaceId, user: userId}).$promise;
-    return promise;
-    let resultPromise = promise.then(() => {
-        this.fetchWorkspacePermissions(workspaceId);
+    promise.then(() => {
+      this.fetchWorkspacePermissions(workspaceId);
     });
 
-    return resultPromise;
+    return promise;
   }
 
   /**
    * Fetch system permissions
-   * 
-   * @returns {*}
+   *
+   * @returns {ng.IPromise<any>}
    */
-  fetchSystemPermissions() {
-    let promise = this.remotePermissionsAPI.getSystemPermissions().$promise;
-    let resultPromise = promise.then((systemPermissions) => {
+  fetchSystemPermissions(): ng.IPromise<any> {
+    let promise: ng.IPromise<any> = this.remotePermissionsAPI.getSystemPermissions().$promise;
+    promise.then((systemPermissions: ISystemPermissions) => {
       this._updateUserServices(systemPermissions);
       this.systemPermissions = systemPermissions;
     });
 
-    return resultPromise;
+    return promise;
   }
 
-  _updateUserServices(systemPermissions) {
-    let isManageUsers = systemPermissions && systemPermissions.actions.includes('manageUsers');
-    let isManageCodenvy = systemPermissions && systemPermissions.actions.includes('manageCodenvy');
+  _updateUserServices(systemPermissions: ISystemPermissions): void {
+    let isManageUsers: boolean = systemPermissions && systemPermissions.actions.includes('manageUsers');
+    let isManageCodenvy: boolean = systemPermissions && systemPermissions.actions.includes('manageCodenvy');
 
     this.userServices.hasUserService = isManageUsers;
     this.userServices.hasUserProfileService = isManageUsers;
@@ -128,11 +154,11 @@ export class CodenvyPermissions {
     this.userServices.hasLicenseService = isManageCodenvy;
   }
 
-  getSystemPermissions() {
+  getSystemPermissions(): ISystemPermissions {
     return this.systemPermissions;
   }
 
-  getUserServices() {
+  getUserServices(): IUserServices {
     return this.userServices;
   }
 }
