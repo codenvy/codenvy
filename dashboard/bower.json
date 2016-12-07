@@ -7,7 +7,7 @@
     "angular-bootstrap": "0.13.0",
     "angular-card": "0.1.0",
     "angular-charts": "0.2.6",
-    "che-dashboard": "https://github.com/eclipse/che.git#master",
+    "che-dashboard": "https://github.com/eclipse/che.git#5.0.0-M8",
     "angular-cookies": "1.4.8",
     "angular-dropdowns": "1.0.0",
     "angular-filter": "0.5.4",
