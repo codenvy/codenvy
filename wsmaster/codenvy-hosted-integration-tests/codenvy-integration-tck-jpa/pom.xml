@@ -227,12 +227,6 @@
                                     <includeScope>test</includeScope>
                                 </configuration>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
                             <execution>
                                 <id>resource-dependencies</id>
                                 <phase>process-test-resources</phase>

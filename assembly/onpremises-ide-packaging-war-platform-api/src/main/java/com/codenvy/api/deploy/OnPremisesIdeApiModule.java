@@ -38,7 +38,6 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
-import com.codenvy.machine.HostedDockerInstance;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -164,6 +163,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(EverrestDownloadFileResponseFilter.class);
         bind(WSocketEventBusServer.class);
 
+        bind(WsMasterAnalyticsAddresser.class);
+
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
 
@@ -225,6 +226,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bind(WorkspaceValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
         bind(WorkspaceManager.class).to(com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.class);
+        bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
         bind(WorkspaceMessenger.class).asEagerSingleton();
 
 

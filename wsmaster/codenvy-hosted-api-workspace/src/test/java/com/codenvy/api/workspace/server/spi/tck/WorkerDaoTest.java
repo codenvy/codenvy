@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -83,7 +85,9 @@ public class WorkerDaoTest {
                               new WorkspaceImpl("ws1", users[1].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null)),
                               new WorkspaceImpl("ws2", users[2].getAccount(), new WorkspaceConfigImpl("", "", "cfg2", null, null, null))));
 
-        workerRepository.createAll(Arrays.asList(workers));
+        workerRepository.createAll(Stream.of(workers)
+                                         .map(WorkerImpl::new)
+                                         .collect(Collectors.toList()));
 
     }
 
@@ -99,7 +103,7 @@ public class WorkerDaoTest {
     public void shouldStoreWorker() throws Exception {
         WorkerImpl worker = new WorkerImpl("ws0", "user0", Arrays.asList("read", "use", "run"));
         workerDao.store(worker);
-        Assert.assertEquals(workerDao.getWorker("ws0", "user0"), worker);
+        Assert.assertEquals(workerDao.getWorker("ws0", "user0"), new WorkerImpl(worker));
     }
 
     @Test

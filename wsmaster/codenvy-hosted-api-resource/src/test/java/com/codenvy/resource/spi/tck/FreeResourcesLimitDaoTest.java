@@ -31,6 +31,8 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
@@ -73,7 +75,9 @@ public class FreeResourcesLimitDaoTest {
                                                                                   "test")));
         }
         accountRepository.createAll(Arrays.asList(accounts));
-        limitRepository.createAll(Arrays.asList(limits));
+        limitRepository.createAll(Stream.of(limits)
+                                        .map(FreeResourcesLimitImpl::new)
+                                        .collect(Collectors.toList()));
     }
 
     @AfterMethod
@@ -92,7 +96,7 @@ public class FreeResourcesLimitDaoTest {
         limitDao.store(toStore);
 
         //then
-        assertEquals(limitDao.get(toStore.getAccountId()), toStore);
+        assertEquals(limitDao.get(toStore.getAccountId()), new FreeResourcesLimitImpl(toStore));
     }
 
     @Test
@@ -107,7 +111,7 @@ public class FreeResourcesLimitDaoTest {
         limitDao.store(toStore);
 
         //then
-        assertEquals(limitDao.get(toStore.getAccountId()), toStore);
+        assertEquals(limitDao.get(toStore.getAccountId()), new FreeResourcesLimitImpl(toStore));
     }
 
     @Test(expectedExceptions = NullPointerException.class)

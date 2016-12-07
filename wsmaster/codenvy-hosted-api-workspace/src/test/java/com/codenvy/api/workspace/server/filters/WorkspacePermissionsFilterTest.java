@@ -193,6 +193,19 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
+    public void shouldNotCheckPermissionsOnGettingSettings() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/settings");
+
+        assertEquals(response.getStatusCode(), 200);
+        verify(workspaceService).getSettings();
+        verifyZeroInteractions(subject);
+    }
+
+    @Test
     public void shouldNotCheckPermissionsOnWorkspacesGetting() throws Exception {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)

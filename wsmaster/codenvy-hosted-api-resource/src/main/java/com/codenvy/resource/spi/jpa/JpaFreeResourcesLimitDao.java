@@ -14,6 +14,7 @@
  */
 package com.codenvy.resource.spi.jpa;
 
+import com.codenvy.resource.model.FreeResourcesLimit;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.google.inject.persist.Transactional;
@@ -37,6 +38,7 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -68,10 +70,7 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
     public FreeResourcesLimitImpl get(String accountId) throws NotFoundException, ServerException {
         requireNonNull(accountId, "Required non-null account id");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("FreeResourcesLimit.get", FreeResourcesLimitImpl.class)
-                                  .setParameter("accountId", accountId)
-                                  .getSingleResult();
+            return new FreeResourcesLimitImpl(doGet(accountId));
         } catch (NoResultException e) {
             throw new NotFoundException("Free resources limit for account '" + accountId + "' was not found");
         } catch (RuntimeException e) {
@@ -88,7 +87,10 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
                                                                                        FreeResourcesLimitImpl.class)
                                                                      .setMaxResults(maxItems)
                                                                      .setFirstResult(skipCount)
-                                                                     .getResultList();
+                                                                     .getResultList()
+                                                                     .stream()
+                                                                     .map(FreeResourcesLimitImpl::new)
+                                                                     .collect(Collectors.toList());
             return new Page<>(list, skipCount, maxItems, getTotalCount());
         } catch (RuntimeException e) {
             throw new ServerException(e.getMessage(), e);
@@ -118,11 +120,19 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
     protected void doStore(FreeResourcesLimitImpl resourcesLimit) throws ServerException {
         EntityManager manager = managerProvider.get();
         try {
-            final FreeResourcesLimitImpl existedLimit = get(resourcesLimit.getAccountId());
+            final FreeResourcesLimitImpl existedLimit = doGet(resourcesLimit.getAccountId());
             existedLimit.setResources(resourcesLimit.getResources());
-        } catch (NotFoundException n) {
+        } catch (NoResultException n) {
             manager.persist(resourcesLimit);
         }
+    }
+
+    @Transactional
+    protected FreeResourcesLimitImpl doGet(String accountId) {
+        return managerProvider.get()
+                              .createNamedQuery("FreeResourcesLimit.get", FreeResourcesLimitImpl.class)
+                              .setParameter("accountId", accountId)
+                              .getSingleResult();
     }
 
     private long getTotalCount() throws ServerException {
@@ -134,7 +144,7 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
     @Singleton
     public static class RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber implements EventSubscriber<BeforeAccountRemovedEvent> {
         @Inject
-        private EventService eventService;
+        private EventService          eventService;
         @Inject
         private FreeResourcesLimitDao limitDao;
 

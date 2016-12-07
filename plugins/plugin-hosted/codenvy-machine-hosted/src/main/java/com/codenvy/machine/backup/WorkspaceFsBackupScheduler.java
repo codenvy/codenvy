@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -69,7 +70,9 @@ public class WorkspaceFsBackupScheduler {
         this.syncPort = syncPort == null || syncPort == 0 ? null : syncPort;
 
         this.executor = Executors.newCachedThreadPool(
-                new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s").build());
+                new ThreadFactoryBuilder().setNameFormat("MachineFsBackupScheduler-%s")
+                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                          .build());
         this.lastMachineSynchronizationTime = new ConcurrentHashMap<>();
         this.devMachinesBackupsInProgress = new ConcurrentHashMap<>();
     }

@@ -45,15 +45,6 @@
                                     <arg value="install" />
                                 </exec>
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="prod" />
-                                </exec>
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="stage" />
-                                </exec>
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
-                                    <arg value="enterprise" />
-                                </exec>
-                                <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="onprem_se" />
                                 </exec>
                             </target>
@@ -75,59 +66,6 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
-                    <!--<execution>
-                        <id>gh</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <descriptors>
-                                <descriptor>${basedir}/assembly/assembly-gh.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    -->
-                    <execution>
-                        <id>stage</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <descriptors>
-                                <descriptor>${basedir}/assembly/assembly-stage.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>prod</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <descriptors>
-                                <descriptor>${basedir}/assembly/assembly-prod.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>enterprise</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <descriptors>
-                                <descriptor>${basedir}/assembly/assembly-enterprise.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>onprem-se</id>
                         <phase>package</phase>

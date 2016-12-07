@@ -78,7 +78,9 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         String key;
 
         switch (methodName) {
-            case "getWorkspaces": //method accessible to every user
+            case "getSettings":
+            case "getWorkspaces":
+                //methods accessible to every user
                 return;
 
             case "getByNamespace": {
