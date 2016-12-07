@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.node.server;
 
+import com.codenvy.api.node.server.filters.NodeServicePermissionFilter;
 import com.google.inject.AbstractModule;
 
 /**
@@ -23,5 +24,6 @@ public class NodeModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(NodeService.class);
+        bind(NodeServicePermissionFilter.class);
     }
 }

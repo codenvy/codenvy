@@ -94,6 +94,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                                                                  "/ssh/*",
                                                                  "/ssh",
                                                                  "/nodes",
+                                                                 "/nodes/*",
                                                                  "/permissions",
                                                                  "/permissions/*",
                                                                  "/preferences",

@@ -35,6 +35,10 @@
             <version>5.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-permission</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -71,6 +75,10 @@
             <artifactId>che-core-commons-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -78,6 +86,26 @@
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-persist</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockitong</groupId>
+            <artifactId>mockitong</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -184,6 +212,20 @@
                             <includes>
                                 <include>**/spi/tck/*.*</include>
                             </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>com.codenvy.onpremises.wsmaster:codenvy-hosted-api-permission</ignoreDependenvy>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>
