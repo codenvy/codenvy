@@ -221,6 +221,26 @@ node default {
   $machine_server_extra_volume = getValue("CODENVY_MACHINE_SERVER_EXTRA_VOLUME","")
 # Docker network driver for machines.
   $che_machine_docker_network_driver = getValue("CODENVY_MACHINE_DOCKER_NETWORK_DRIVER","bridge")
+# Next 2 values set limits on CPU consumption by containers of started workspaces.
+# Period sets amount of units per CPU core.
+# Quota sets amount of units available for container per whole CPU.
+# Max value of quota could be period * number of CPU cores in a system.
+# Example:
+# period = 5000
+# quota = 10000
+  $machine_docker_cpu_period = getValue("CODENVY_DOCKER_CPU_PERIOD","0")
+  $machine_docker_cpu_quota = getValue("CODENVY_DOCKER_CPU_QUOTA","0")
+# Sets set of CPUs that can be used by each container of started workspace.
+# Example:
+# 0-3
+# 1,4
+$machine_docker_cpuset_cpus = getValue("CODENVY_DOCKER_CPUSET_CPUS","NULL")
+# Sets parent cgroup for cgroups of containers created by workspaces.
+# This allows an admin to set custom cgroup limitations to all containers of workspaces by configuring cgroups.
+# Example:
+# /my_group
+# my_another_group
+$machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 
 ###############################
 # Http proxy configuration
