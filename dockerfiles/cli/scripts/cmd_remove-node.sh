@@ -17,7 +17,7 @@ cmd_remove-node() {
   fi
 
   NODE_IP=${1}
-  NODES=$(grep "^CODENVY_SWARM_NODES=" "${CODENVY_CONFIG}/codenvy.env" | sed "s/.*=//")
+  NODES=$(grep "^CODENVY_SWARM_NODES=" "${CHE_CONFIG}/${CHE_MINI_PRODUCT_NAME}.env" | sed "s/.*=//")
   NODES_ARRAY=(${NODES//,/ })
   REMOVE_NODE="CODENVY_SWARM_NODES="
   for NODE in "${NODES_ARRAY[@]}"; do
@@ -30,7 +30,7 @@ cmd_remove-node() {
   REMOVE_NODE=$(echo "${REMOVE_NODE}" | sed 's/\(.*\),/\1/g')
 
   ## TODO added "" for OSX - find portable solution
-  sed -i'.bak' -e "s|^CODENVY_SWARM_NODES=.*|${REMOVE_NODE}|" "${CODENVY_CONFIG}/codenvy.env"
+  sed -i'.bak' -e "s|^CODENVY_SWARM_NODES=.*|${REMOVE_NODE}|" "${CHE_CONFIG}/${CHE_MINI_PRODUCT_NAME}.env"
 
   # TODO: Restart should not be needed.  Find way to deregister nodes.
   cmd_restart

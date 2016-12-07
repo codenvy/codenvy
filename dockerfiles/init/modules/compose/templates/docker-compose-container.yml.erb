@@ -11,7 +11,13 @@ services:
   rsyslog:
     image: <%= ENV["IMAGE_RSYSLOG"] %>
     volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/rsyslog.conf:/etc/rsyslog.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/haproxy.conf:/etc/rsyslog.d/haproxy.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/swarm.conf:/etc/rsyslog.d/swarm.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
+    ports:
+      - '5140:514'
     ulimits:
       nproc: 163840
       nofile:
@@ -91,6 +97,11 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:5140"
+        syslog-facility: "local3"
 
 ########################
 # DOCKER REGISTRY

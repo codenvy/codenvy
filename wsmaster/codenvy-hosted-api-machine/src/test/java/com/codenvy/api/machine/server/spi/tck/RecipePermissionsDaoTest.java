@@ -33,6 +33,8 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -80,7 +82,9 @@ public class RecipePermissionsDaoTest {
                        new RecipeImpl("recipe2", "rc2", null, null, null, null, null)
                 ));
 
-        permissionsRepository.createAll(asList(permissions));
+        permissionsRepository.createAll(Stream.of(permissions)
+                                              .map(RecipePermissionsImpl::new)
+                                              .collect(Collectors.toList()));
     }
 
     @AfterMethod

@@ -37,6 +37,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of system permissions DAO.
@@ -53,7 +54,12 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
 
     @Override
     public SystemPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
-        return doGet(userId);
+        requireNonNull(userId, "Required non-null user id");
+        try {
+            return new SystemPermissionsImpl(getEntity(wildcardToNull(userId), instanceId));
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
     }
 
     @Override
@@ -67,7 +73,10 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
                                                                                            SystemPermissionsImpl.class)
                                                                          .setMaxResults(maxItems)
                                                                          .setFirstResult((int)skipCount)
-                                                                         .getResultList();
+                                                                         .getResultList()
+                                                                         .stream()
+                                                                         .map(SystemPermissionsImpl::new)
+                                                                         .collect(toList());
             final Long totalCount = entityManager.createNamedQuery("SystemPermissions.getTotalCount", Long.class)
                                                  .getSingleResult();
             return new Page<>(permissions, skipCount, maxItems, totalCount);
@@ -77,32 +86,32 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
     }
 
     @Override
-    public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
-        requireNonNull(userId, "User identifier required");
-        doRemove(userId, instanceId);
-    }
-
-    @Override
-    @Transactional
     public List<SystemPermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("SystemPermissions.getByUserId", SystemPermissionsImpl.class)
-                                  .setParameter("userId", userId)
-                                  .getResultList();
+            return doGetByUser(userId).stream()
+                                      .map(SystemPermissionsImpl::new)
+                                      .collect(toList());
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
 
-    @Transactional
-    protected SystemPermissionsImpl doGet(String userId) throws ServerException, NotFoundException {
-        List<SystemPermissionsImpl> existent = getByUser(userId);
+    @Override
+    protected SystemPermissionsImpl getEntity(String userId, String instanceId) throws NotFoundException {
+        final List<SystemPermissionsImpl> existent = doGetByUser(userId);
         if (existent.isEmpty()) {
             throw new NotFoundException(format("System permissions for user '%s' not found", userId));
         }
         return existent.get(0);
+    }
+
+    @Transactional
+    protected List<SystemPermissionsImpl> doGetByUser(String userId) {
+        return managerProvider.get()
+                              .createNamedQuery("SystemPermissions.getByUserId", SystemPermissionsImpl.class)
+                              .setParameter("userId", userId)
+                              .getResultList();
     }
 
     @Singleton

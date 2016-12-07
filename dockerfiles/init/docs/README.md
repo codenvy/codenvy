@@ -1,4 +1,4 @@
-dock# Codenvy Installation and Operation
+# Codenvy Installation and Operation
 Codenvy makes cloud workspaces for develoment teams. Install, run, and manage Codenvy with Docker.
 
 ### Quick Start
@@ -115,7 +115,7 @@ Compilation is CPU-heavy and most compilation events are queued to a single CPU.
 
 The default configuration of workspaces is to auto-snapshot the workspace runtime to disk whenever it is stopped, whether by the user or through idle timeout. Many stack base images can grow to be >1GB, especially if you are installing complicated software inside of them, and thus their snapshots can be sizable as well. If you allow users to have many workspaces, even if they are stopped, each of those workspaces will have a snapshot on disk. You can apply a workspace cap on the total number of workspaces that can exist, which prevents users from having too many snapshots. The monitoring system also has parameters you can set to perform routine cleanup of old workspaces, where their snapshots are destroyed or removed from the user's system.
 
-We have experitmented with adding 1000 physical nodes into a single physical cluster. You can use the `codenvy add-node` command which generates a utility for you to run on each node that should be added to the cluster. You can also run `codenvy remove-node` to automate the removal of the node from the cluster and the movement of any remaining workspaces onto another node. 
+We have experimented with adding 1000 physical nodes into a single physical cluster. You can use the `codenvy add-node` command which generates a utility for you to run on each node that should be added to the cluster. You can also run `codenvy remove-node` to automate the removal of the node from the cluster and the movement of any remaining workspaces onto another node. 
 
 The additional physical nodes must have Docker pre-configured similar to how you have Docker configured on the master node, including any configurations that you add for proxies or an alternative key-value store like Consul. Codenvy generates an automated script that can be run on each new node which prepares the node by installing some dependencies, adding the Codenvy SSH key, and registering itself within the Codenvy cluster.
 
@@ -137,8 +137,8 @@ The software referenced by these labels can change over time. Since Docker will 
 
 In the case of 'latest' images, when you initialize an installation using the CLI, we encode your `/instance/codenvy.ver` file with the numbered version that latest references. If you begin using a CLI version that mismatches what was installed, you will be presented with an error.
 
-To avoid issues that can appear from using 'nightly' or 'latest' redirectoins, you may:
-1. Verify that you have the most recent version with `docker pull eclipse/cli:<version>`.
+To avoid issues that can appear from using 'nightly' or 'latest' redirections, you may:
+1. Verify that you have the most recent version with `docker pull codenvy/cli:<version>`.
 2. When running the CLI, commands that use other Docker images have an optional `--pull` and `--force` command line option [which will instruct the CLI to check DockerHub](https://github.com/codenvy/codenvy/tree/master/docs#codenvy-init) for a newer version and pull it down. Using these flags will slow down performance, but ensures that your local cache is current.
 
 If you are running Codenvy using a tagged version that is a not a redirection label, such as `5.0.0-M7`, then these caching issues will not happen, as the software installed is tagged and specific to that particular version, never changing over time.

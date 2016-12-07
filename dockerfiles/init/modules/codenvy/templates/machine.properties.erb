@@ -7,7 +7,7 @@ machine.project.location=/opt/codenvy-data/che-machines
 che.workspace.logs=/opt/codenvy-data/che-machines-logs
 
 # docker registry for snapshots
-che.docker.registry=<%= scope.lookupvar('codenvy::host_url') %>:5000
+che.docker.registry=<%= scope.lookupvar('codenvy::docker_registry_for_workspace_snapshots') %>
 # namespace for snapshots
 che.docker.namespace=NULL
 che.docker.unused_containers_cleanup_min=60
@@ -59,7 +59,7 @@ local.recipe.path=
 # extra hosts which will be used in machines
 che.workspace.hosts=<%= scope.lookupvar('codenvy::machine_extra_hosts') %>
 che.docker.tcp_connection_timeout_ms=600000
-docker.connection.tcp.read_timeout_ms=600000
+che.docker.tcp_connection_read_timeout_ms=600000
 che.docker.always_pull_image=true
 che.docker.api=1.20
 

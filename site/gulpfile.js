@@ -145,6 +145,15 @@ gulp.task('onprem_se',
 
 })
 
+// Cleans gulp's folders
+gulp.task('clean',function(){
+  return gulp.src([paths.temp,paths.onpremSE,paths.dist],{ read: false }) // much faster
+    .pipe(print(function(filepath) {
+      return "Delete: " + filepath;
+    }))
+    .pipe(rimraf());
+})
+
 // Copy onprem custom pages
 gulp.task('onprem_copy_templates', ['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se','clean_templates_se'], function(){
   return   gulp.src(paths.onpremSE + 'site/custom_pages/onprem-se/templates/*.html')
@@ -347,14 +356,18 @@ function notifyLiveReload(event) {
 }
 
 gulp.task('__watch', function() {
-  gulp.watch(''+paths.src+'site/styles/*.scss', ['css_gh']);
-  gulp.watch(''+paths.src+'site/**/*.html', ['jekyll_gh']);
-  gulp.watch(''+paths.gh+'**/*.html', notifyLiveReload);
-  gulp.watch(''+paths.gh+'site/styles/*.css', notifyLiveReload);
-});
-
-gulp.task('lr', ['css_gh', 'express', 'livereload', 'watch'], function() {
+  gulp.watch(''+paths.src+'site/styles/*.css', ['clean','onprem_se']);
+  gulp.watch(''+paths.src+'site/**/*.html', ['clean','onprem_se']);
 
 });
 
+gulp.task('lr', ['css_onprem_se', 'express', 'livereload', '__watch'], function() {
+
+});
+
+gulp.task('stream', function () {
+    // Endless stream mode 
+    return watch('css/**/*.css', { ignoreInitial: false })
+        .pipe(gulp.dest('build'));
+});
 // -------------------- Utils ------------------------

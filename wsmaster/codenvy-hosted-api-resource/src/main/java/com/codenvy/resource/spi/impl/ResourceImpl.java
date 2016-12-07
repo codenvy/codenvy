@@ -17,7 +17,6 @@ package com.codenvy.resource.spi.impl;
 import com.codenvy.resource.model.Resource;
 import com.google.common.base.Objects;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -78,14 +77,15 @@ public class ResourceImpl implements Resource {
         if (this == o) return true;
         if (!(o instanceof ResourceImpl)) return false;
         ResourceImpl resource = (ResourceImpl)o;
-        return Objects.equal(amount, resource.amount) &&
-               Objects.equal(getType(), resource.getType()) &&
-               Objects.equal(getUnit(), resource.getUnit());
+        return Objects.equal(id, resource.id) &&
+               Objects.equal(amount, resource.amount) &&
+               Objects.equal(type, resource.type) &&
+               Objects.equal(unit, resource.unit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getType(), amount);
+        return Objects.hashCode(id, amount, type, unit);
     }
 
     @Override

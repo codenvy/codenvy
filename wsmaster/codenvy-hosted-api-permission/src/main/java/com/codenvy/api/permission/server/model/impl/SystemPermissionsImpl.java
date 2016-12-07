@@ -55,6 +55,10 @@ public class SystemPermissionsImpl extends AbstractPermissions {
         super(userId, actions);
     }
 
+    public SystemPermissionsImpl(SystemPermissionsImpl permissions) {
+        this(permissions.getUserId(), permissions.getActions());
+    }
+
     @Override
     public String getInstanceId() {
         return null;

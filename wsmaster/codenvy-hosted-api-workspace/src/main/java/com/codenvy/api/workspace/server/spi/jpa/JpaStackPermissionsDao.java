@@ -39,6 +39,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of stack permissions DAO.
@@ -57,13 +58,19 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     public StackPermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Stack identifier required");
         requireNonNull(userId, "User identifier required");
-        return doGet(wildcardToNull(userId), instanceId);
+        try {
+            return new StackPermissionsImpl(getEntity(wildcardToNull(userId), instanceId));
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
     }
 
     @Override
     public List<StackPermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
-        return doGetByUser(wildcardToNull(userId));
+        return doGetByUser(wildcardToNull(userId)).stream()
+                                                  .map(StackPermissionsImpl::new)
+                                                  .collect(toList());
     }
 
     @Override
@@ -79,7 +86,10 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
                                                                    .setFirstResult((int)skipCount)
                                                                    .setMaxResults(maxItems)
                                                                    .setParameter("stackId", instanceId)
-                                                                   .getResultList();
+                                                                   .getResultList()
+                                                                   .stream()
+                                                                   .map(StackPermissionsImpl::new)
+                                                                   .collect(toList());
             final Long permissionsCount = entityManager.createNamedQuery("StackPermissions.getCountByStackId", Long.class)
                                                        .setParameter("stackId", instanceId)
                                                        .getSingleResult();
@@ -90,25 +100,28 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
         }
     }
 
-    @Transactional
-    protected StackPermissionsImpl doGet(@Nullable String userId, String instanceId) throws ServerException, NotFoundException {
+    @Override
+    protected StackPermissionsImpl getEntity(String userId, String instanceId) throws NotFoundException {
         try {
-            if (userId == null) {
-                return managerProvider.get()
-                                      .createNamedQuery("StackPermissions.getByStackIdPublic", StackPermissionsImpl.class)
-                                      .setParameter("stackId", instanceId)
-                                      .getSingleResult();
-            } else {
-                return managerProvider.get()
-                                      .createNamedQuery("StackPermissions.getByUserAndStackId", StackPermissionsImpl.class)
-                                      .setParameter("stackId", instanceId)
-                                      .setParameter("userId", userId)
-                                      .getSingleResult();
-            }
+            return doGet(userId, instanceId);
         } catch (NoResultException e) {
             throw new NotFoundException(format("Permissions on stack '%s' of user '%s' was not found.", instanceId, userId));
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Transactional
+    protected StackPermissionsImpl doGet(String userId, String instanceId) {
+        if (userId == null) {
+            return managerProvider.get()
+                                  .createNamedQuery("StackPermissions.getByStackIdPublic", StackPermissionsImpl.class)
+                                  .setParameter("stackId", instanceId)
+                                  .getSingleResult();
+        } else {
+            return managerProvider.get()
+                                  .createNamedQuery("StackPermissions.getByUserAndStackId", StackPermissionsImpl.class)
+                                  .setParameter("stackId", instanceId)
+                                  .setParameter("userId", userId)
+                                  .getSingleResult();
         }
     }
 

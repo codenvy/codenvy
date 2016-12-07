@@ -15,6 +15,7 @@
 package com.codenvy.api.workspace.server.spi.tck;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
+import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
@@ -33,6 +34,8 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -77,7 +80,9 @@ public class StackPermissionsDaoTest {
         stackRepository.createAll(asList(new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
                                          new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)));
 
-        permissionsRepository.createAll(asList(permissions));
+        permissionsRepository.createAll(Stream.of(permissions)
+                                              .map(StackPermissionsImpl::new)
+                                              .collect(Collectors.toList()));
     }
 
     @AfterMethod
@@ -95,7 +100,7 @@ public class StackPermissionsDaoTest {
         dao.store(permissions);
 
         final Permissions result = dao.get(permissions.getUserId(), permissions.getInstanceId());
-        assertEquals(permissions, result);
+        assertEquals(result, new StackPermissionsImpl(permissions));
     }
 
     @Test(expectedExceptions = NullPointerException.class)

@@ -80,7 +80,11 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
     public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Instance identifier required");
         requireNonNull(userId, "User identifier required");
-        doRemove(userId, instanceId);
+        try {
+            doRemove(userId, instanceId);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
     }
 
     @Override
@@ -92,11 +96,18 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
     @Override
     public abstract Page<T> getByInstance(String instanceId, int maxItems, long skipCount) throws ServerException;
 
+    /**
+     * Must return jpa managed entity or throw {@link NotFoundException}
+     * when there is no such entity. Parameters {@code userId} and {@code instanceId}
+     * are the same to {@link #get(String, String)} method parameters.
+     */
+    protected abstract T getEntity(String userId, String instanceId) throws NotFoundException;
+
     @Transactional
     protected void doCreate(T permissions) throws ServerException {
         EntityManager manager = managerProvider.get();
         try {
-            final T result = get(permissions.getUserId(), permissions.getInstanceId());
+            final T result = getEntity(wildcardToNull(permissions.getUserId()), permissions.getInstanceId());
             result.getActions().clear();
             result.getActions().addAll(permissions.getActions());
         } catch (NotFoundException n) {
@@ -106,12 +117,8 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
 
     @Transactional
     protected void doRemove(String userId, String instanceId) throws ServerException, NotFoundException {
-        try {
-            final T entity = get(userId, instanceId);
-            managerProvider.get().remove(entity);
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
+        final T entity = getEntity(wildcardToNull(userId), instanceId);
+        managerProvider.get().remove(entity);
     }
 
     /**

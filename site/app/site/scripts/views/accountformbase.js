@@ -43,7 +43,10 @@ define(["jquery","models/account","views/form","validation"],
                 noConfirmPasswordErrorMessage : "Please type your new password again. Both passwords must match.",
                 invalidEmailErrorMessage : "Emails with '+' and '/' are not allowed",
                 invalidDomainNameErrorMessage : "Your workspace name should start with a Latin letter or a digit, and must only contain Latin letters, digits, underscores, dots or dashes. You are allowed to use from 3 to 20 characters in a workspace name.",
-                notSecuredPassword : "Password should contain between 8-100 characters, both letters and digits"
+                notSecuredPassword : "Password should contain between 8-100 characters, both letters and digits",
+                invalidUserName : "Please enter no more than 35 characters.",
+                noFirstNameErrorMessage : "Please enter your first name",
+                noLastNameErrorMessage : "Please enter your last name",
             },
 
             __validationRules : function(){
@@ -58,7 +61,7 @@ define(["jquery","models/account","views/form","validation"],
             __validationMessages : function(){
                 return {
                     email: {
-                        required : this.settings.noEmailErrorMessage,
+                        required : this.settings.noUserNameErrorMessage,
                         checkEmail : this.settings.invalidEmailErrorMessage
                     },
                     password: {
@@ -68,6 +71,14 @@ define(["jquery","models/account","views/form","validation"],
                     password1: {
                         required: this.settings.noConfirmPasswordErrorMessage,
                         equalTo: this.settings.noConfirmPasswordErrorMessage
+                    },
+                    firstName: {
+                        required: this.settings.noFirstNameErrorMessage,
+                        maxlength: this.settings.invalidUserName,
+                    },
+                    lastName: {
+                        required: this.settings.noLastNameErrorMessage,
+                        maxlength: this.settings.invalidUserName,
                     }
                 };
             },
@@ -113,6 +124,18 @@ define(["jquery","models/account","views/form","validation"],
                     refocus(this.$("input[name='confirm_password']"));
                     return;
                 }
+
+                if(typeof errorMap.firstName !== 'undefined'){
+                    this.trigger("invalid","firstName",errorMap.firstName);
+                    refocus(this.$("input[name='firstName']"));
+                    return;
+                }
+
+                if(typeof errorMap.lastName !== 'undefined'){
+                    this.trigger("invalid","lastName",errorMap.lastName);
+                    refocus(this.$("input[name='lastName']"));
+                    return;
+                }                
 
             },
 
