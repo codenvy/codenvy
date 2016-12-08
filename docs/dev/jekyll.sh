@@ -33,13 +33,13 @@ jekyll.sh [<port>]
         docker volume rm $(docker volume ls -qf dangling=true) > /dev/null 2>&1 "
     
     COPY_SSHKEY_COMMAND="docker cp ${CONTAINER_NAME}:/home/jekyll/.ssh/id_rsa ${HOME}/.ssh/jekyll_id_rsa && \
-      chown -R root:root ${HOME}/.ssh/jekyll_id_rsa && chmod -R 600 ${HOME}/.ssh/jekyll_id_rsa"
+      chown -R root:root ${HOME}/.ssh/jekyll_id_rsa && chmod 600 ${HOME}/.ssh/jekyll_id_rsa"
     
     export UNISON_SYNC_PATH="$(cd ../ && pwd )"
     UNISON_REPEAT=""
     UNISON_AGENT_COMMAND="mkdir -p /tmp && mkdir -p /tmp/.unison && cp -f ${PWD}/default.prf /tmp/.unison/ &&
        UNISON=/tmp/.unison/ ${PWD}/unison ${UNISON_SYNC_PATH} ssh://\${UNISON_SSH_USER}@\${SSH_IP}:\${UNISON_SSH_PORT}//srv/jekyll 
-       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
+       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
       
     JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --incremental"
     DEBUG=false
@@ -134,6 +134,7 @@ trap 'stop_sync' 1 15 2
 init_logging
 init_global_variables
 parse_command_line "$@"
+mkdir -p /root/.ssh
 
 if [ ! -e /var/run/docker.sock ]; then
     error "(${CHE_MINI_PRODUCT_NAME} Jekyll): File /var/run/docker.sock does not exist. Add to server extra volume mounts and restart server."
@@ -158,6 +159,7 @@ export JEKYLL_PORT=$(docker inspect --format='{{(index (index .NetworkSettings.P
 export UNISON_SSH_USER=$(docker inspect --format='{{.Config.User}}' $(docker ps -aq --filter "name=${CONTAINER_NAME}") )
 
 # ssh -Tv -i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_IP} unison -version
+
 
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Starting Initial sync to Jekyll docker container... Please wait."
 START_TIME=$(date +%s)
