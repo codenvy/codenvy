@@ -318,11 +318,6 @@ public class ContributePartPresenter extends BasePresenter implements Contribute
     }
 
     @Override
-    public void setVisible(boolean visible) {
-
-    }
-
-    @Override
     public IsWidget getView() {
         return view;
     }

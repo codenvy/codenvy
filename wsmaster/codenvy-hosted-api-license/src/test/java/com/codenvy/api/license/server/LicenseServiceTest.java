@@ -76,7 +76,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "license");
@@ -88,7 +88,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), NOT_FOUND.getStatusCode());
     }
@@ -99,7 +99,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -109,7 +109,7 @@ public class LicenseServiceTest {
     public void testDeleteLicenseShouldReturnOk() throws Exception {
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .delete(JettyHttpServer.SECURE_PATH + "/license");
+                .delete(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), NO_CONTENT.getStatusCode());
     }
@@ -120,7 +120,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .delete(JettyHttpServer.SECURE_PATH + "/license");
+                .delete(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), NOT_FOUND.getStatusCode());
     }
@@ -131,7 +131,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .delete(JettyHttpServer.SECURE_PATH + "/license");
+                .delete(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -142,7 +142,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when().body("license")
-                .post(JettyHttpServer.SECURE_PATH + "/license");
+                .post(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), CREATED.getStatusCode());
         verify(licenseManager).store(anyString());
@@ -154,7 +154,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when().body("license")
-                .post(JettyHttpServer.SECURE_PATH + "/license");
+                .post(JettyHttpServer.SECURE_PATH + "/license/system");
 
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -169,7 +169,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license/properties");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system/properties");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
 
@@ -189,7 +189,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license/properties");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system/properties");
 
         assertEquals(response.statusCode(), NOT_FOUND.getStatusCode());
     }
@@ -200,7 +200,7 @@ public class LicenseServiceTest {
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
-                .get(JettyHttpServer.SECURE_PATH + "/license/properties");
+                .get(JettyHttpServer.SECURE_PATH + "/license/system/properties");
 
         assertEquals(response.statusCode(), CONFLICT.getStatusCode());
     }
@@ -208,7 +208,7 @@ public class LicenseServiceTest {
     @Test
     public void testIsCodenvyUsageLegal() throws IOException, ServerException {
         doReturn(true).when(licenseManager).isCodenvyUsageLegal();
-        Response response = given().when().get("/license/legality");
+        Response response = given().when().get("/license/system/legality");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "{\"value\":\"true\"}");
@@ -218,7 +218,7 @@ public class LicenseServiceTest {
     public void testIsCodenvyUsageNotLegal() throws IOException, ServerException {
         doReturn(false).when(licenseManager).isCodenvyUsageLegal();
 
-        Response response = given().when().get("/license/legality");
+        Response response = given().when().get("/license/system/legality");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "{\"value\":\"false\"}");
@@ -228,14 +228,14 @@ public class LicenseServiceTest {
     public void testIsCodenvyUsageIOException() throws IOException, ServerException {
         doThrow(IOException.class).when(licenseManager).isCodenvyUsageLegal();
 
-        Response response = given().when().get("/license/legality");
+        Response response = given().when().get("/license/system/legality");
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     @Test
     public void testIsCodenvyActualNodesUsageLegal() throws IOException, ServerException {
         doReturn(true).when(licenseManager).isCodenvyNodesUsageLegal(null);
-        Response response = given().when().get("/license/legality/node");
+        Response response = given().when().get("/license/system/legality/node");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "{\"value\":\"true\"}");
@@ -244,7 +244,7 @@ public class LicenseServiceTest {
     @Test
     public void testIsCodenvyGivenNodesUsageLegal() throws IOException, ServerException {
         doReturn(true).when(licenseManager).isCodenvyNodesUsageLegal(2);
-        Response response = given().when().get("/license/legality/node?nodeNumber=2");
+        Response response = given().when().get("/license/system/legality/node?nodeNumber=2");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "{\"value\":\"true\"}");
@@ -253,7 +253,7 @@ public class LicenseServiceTest {
     @Test
     public void testIsCodenvyNodesUsageNotLegal() throws IOException, ServerException {
         doReturn(false).when(licenseManager).isCodenvyNodesUsageLegal(2);
-        Response response = given().when().get("/license/legality/node?nodeNumber=2");
+        Response response = given().when().get("/license/system/legality/node?nodeNumber=2");
 
         assertEquals(response.statusCode(), OK.getStatusCode());
         assertEquals(response.asString(), "{\"value\":\"false\"}");
@@ -263,7 +263,7 @@ public class LicenseServiceTest {
     public void testIsCodenvyNodesUsageIOException() throws IOException, ServerException {
         doThrow(IOException.class).when(licenseManager).isCodenvyNodesUsageLegal(null);
 
-        Response response = given().when().get("/license/legality/node");
+        Response response = given().when().get("/license/system/legality/node");
         assertEquals(response.statusCode(), INTERNAL_SERVER_ERROR.getStatusCode());
     }
 

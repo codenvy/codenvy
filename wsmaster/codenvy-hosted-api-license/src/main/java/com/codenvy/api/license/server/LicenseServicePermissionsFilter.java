@@ -33,7 +33,7 @@ import static com.codenvy.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTIO
  * @author Alexander Andrienko
  */
 @Filter
-@Path("/license{path:.*}")
+@Path("/license/system{path:.*}")
 public class LicenseServicePermissionsFilter extends CheMethodInvokerFilter {
     @Override
     protected void filter(GenericResourceMethod GenericResourceMethod, Object[] arguments) throws ApiException {

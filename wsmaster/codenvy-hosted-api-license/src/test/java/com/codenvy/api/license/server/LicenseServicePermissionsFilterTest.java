@@ -72,7 +72,7 @@ public class LicenseServicePermissionsFilterTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
-                                         .get(SECURE_PATH + "/license/legality");
+                                         .get(SECURE_PATH + "/license/system/legality");
 
         assertEquals(response.getStatusCode(), 204);
         verify(licenseService).isCodenvyUsageLegal();
@@ -84,7 +84,7 @@ public class LicenseServicePermissionsFilterTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
-                                         .get(SECURE_PATH + "/license/legality/node?nodeNumber=1");
+                                         .get(SECURE_PATH + "/license/system/legality/node?nodeNumber=1");
 
         assertEquals(response.getStatusCode(), 204);
         verify(licenseService).isCodenvyNodesUsageLegal(1);
