@@ -17,11 +17,11 @@ When you execute this command, you'll see the URL for the Che server.
 This URL can be used to open Che server's dashboard. It is where you manage your projects and workspaces.
 # 2. Create Workspace  
 Click the "Dasboard" menu item in the dashboard. Click the "New Workspace" button if there are existing workspaces or make sure "Select Source" category is set to "New from blank, template, or sample project" if one or more workspace exists.
-![che-multimachine-tutorial3.jpg](/docs/images/che-multimachine-tutorial3.jpg)
+![che-multimachine-tutorial3.jpg](../../docs/imgs/che-multimachine-tutorial3.jpg)
 Select "Java-MySQL" from the list of available stacks.
-![che-multimachine-tutorial1.jpg](/docs/images/che-multimachine-tutorial1.jpg)
+![che-multimachine-tutorial1.jpg](../../docs/imgs/che-multimachine-tutorial1.jpg)
 The other workspace information can remain as it is. Click the "create" button at the bottom to create the workspace.
-![che-multimachine-tutorial2.jpg](/docs/images/che-multimachine-tutorial2.jpg)
+![che-multimachine-tutorial2.jpg](../../docs/imgs/che-multimachine-tutorial2.jpg)
 
 # 3. Using IDE  
 Once the workspace is created, the IDE will be loaded in the browser.
@@ -29,13 +29,13 @@ Once the workspace is created, the IDE will be loaded in the browser.
 Each runtime can be identified in the processes section of the IDE. It will list the runtimes of "dev-machine" and "db" of our multi-machine workspace. The "db" runtime for this tutorial provides the database for the Java Spring application to use.
 
 To make sure that the database is running we will issue the "show database" command to the "db" runtime. Select the "db" runtime item from the target drop down menu. Then make sure that "show databases" is selected in the command drop down menu and hit the play button.
-![che-multimachine-tutorial4.jpg](/docs/images/che-multimachine-tutorial4.jpg)
+![che-multimachine-tutorial4.jpg](../../docs/imgs/che-multimachine-tutorial4.jpg)
 This will run the "show databases" command in the "db" runtime and display the available database. Note that it is not required to know the database listed for this tutorial. This step merely shows how to successfully target different runtimes.
 
 Switch the target back to "dev-machine", select the "web-java-petclinic: build and deploy" command, and click the play button. The Pet Clinic Java code will be compiled and the tomcat server started. Give the server ample amount of time to start as the server output may stay on `INFO  Version - HCANN000001: Hibernate Commons Annotations {4.0.5.Final}` for awhile. The tomcat server when it is ready will output `Server startup in <time> ms`. Click on the preview url link after the tomcat server is started to open the Pet Clinic web page.
-![che-multimachine-tutorial6.jpg](/docs/images/che-multimachine-tutorial6.jpg)
+![che-multimachine-tutorial6.jpg](../../docs/imgs/che-multimachine-tutorial6.jpg)
 The web page can interact in various ways with the database. Data can be added to the data by clicking the "Find owner" link, clicking the "Add owner" link, and filing in the form.
-![che-multimachine-tutorial7.jpg](/docs/images/che-multimachine-tutorial7.jpg)
+![che-multimachine-tutorial7.jpg](../../docs/imgs/che-multimachine-tutorial7.jpg)
 
 # 4. Editing, Building and Debugging  
 Che is a fully featured IDE that just happens to be in the browser. You can explore the [editor](https://eclipse-che.readme.io/docs/editor-settings) which includes [intellisense](https://eclipse-che.readme.io/docs/intellisense) for some languages and [refactoring](https://eclipse-che.readme.io/docs/intellisense#section-refactoring).  It also includes [git and svn](https://eclipse-che.readme.io/docs/git) support built-in.
@@ -43,7 +43,7 @@ Che is a fully featured IDE that just happens to be in the browser. You can expl
 The example app has built in commands for [building](https://eclipse-che.readme.io/docs/build) and [running](https://eclipse-che.readme.io/docs/run#web-apps) the app.  You can also [debug](https://eclipse-che.readme.io/docs/debug) right inside Che.
 # 5. About Docker and Compose  
 Read this section to understand more about the multi-machine "Java-MySQL" [runtime stack](doc:stacks) used and it's [runtime recipe](doc:recipes). The "Java-MySQL" stack configuration is located in the "stacks" section in the dashboard. This stack can be found easier by typing "java" in the filter form.
-![che-multimachine-tutorial8.jpg](/docs/images/che-multimachine-tutorial8.jpg)
+![che-multimachine-tutorial8.jpg](../../docs/imgs/che-multimachine-tutorial8.jpg)
 Click on the "Java-MySQL" menu item which will bring up the stack's configuration page. There is various useful configuration information provided on this page as well as the [Runtime Stacks](doc:stacks) and [Runtime Recipes](doc:recipes) documentation pages. For this tutorial, we will be focusing on the recipe configuration and the "codenvy/mysql" dockerfile provided in the "Java-MySQL" stack.
 
 The recipe uses docker compose syntax. Due to the limitation of the JSON syntax the compose recipe is written as a single line with `\n` indicating carriage return. The following is the recipe in expanded form to make reading easier.
@@ -71,7 +71,7 @@ In the recipe the `depends_on` parameter of the "dev-machine" allows it to conne
 Port 3306 is exposed in the "db" machines Dockerfile during build but is not required for "dev-machine" to connect to it. Exposing port 3306 is done to provide access to database that is external to "db" machine network via a random ephemeral port assigned by docker. The "dev-machine" by setting `depends_on: - db` creates a private network that allows it use of "db" machine's name as hostname and port 3306 without having to determine the ephemeral port docker assigned.
 
 Exposing port 3306 is done to provide an option for an external administrator to log into the "db" machine MySQL server through a MySQL client on the ephemeral port assigned. The operations perspective interface provides the external ephemeral ports assigned by docker for all machines' exposed ports. Image below indicates only external ephemeral port 32800 assigned to "db" machine's exposed port 3306.
-![che-mysql-tutorial1.jpg](/docs/images/che-mysql-tutorial1.jpg)
+![che-mysql-tutorial1.jpg](../../docs/imgs/che-mysql-tutorial1.jpg)
 The "db" machine contains a MySQL database created by the Docker image "codenvy/mysql". Taking a closer look at the "codenvy/mysql" image Dockerfile's entry point script will show how the "db" machine configures the MySQL server at the workspace startup.
 
 ```text  

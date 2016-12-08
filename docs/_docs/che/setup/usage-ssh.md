@@ -58,7 +58,7 @@ che ssh <ws-id> [machine-name]
 The CLI is aware of the locally running Che server based upon the configuration that you have provided it within your environment variables. If your Che server only has a single workspace, it will connect to that workspace. If your Che server does not have any workspaces, it will present an error. If your Che server has two or more running workspaces, it will display a list of available workspaces that you can connect to.
 
 The same is true for the machines - if there is a single machine, it will choose a single one. If there are multiple machines, it will present for you a list of different machines that you can connect to.
-![8f99a700-a696-11e6-8d8a-414e38ec26b2.gif](/docs/images/8f99a700-a696-11e6-8d8a-414e38ec26b2.gif)
+![8f99a700-a696-11e6-8d8a-414e38ec26b2.gif](../../docs/imgs/8f99a700-a696-11e6-8d8a-414e38ec26b2.gif)
 ### SSH With Containers
 We provide a utiltiy `eclipse/che-action` which performs various actions against a Che server. One of the actions is to SSH. In Eclipse Che, this utility auto-discovers the right key to use by querying the Che server. In Codenvy, you will need to provide the key or authenticate in advance.
 ```shell  

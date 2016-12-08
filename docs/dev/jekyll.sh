@@ -119,13 +119,34 @@ stop_sync() {
 }
 
 sync_folders() {
-    UNISON_REPEAT="-repeat 2"
+    # UNISON_REPEAT="-repeat 2"
+    printf  "INFO:Syncing..."
     while [ 1 ]
     do
         sleep 2
         eval ${UNISON_AGENT_COMMAND}
         check_status
+        printf  " "
     done
+}
+
+docker_installed() {
+    DOCKER_BIN="/usr/bin/docker"
+    
+    if [ ! -e $DOCKER_BIN ]; then
+        info Docker does NOT exists. Installing...
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get update
+        sudo apt-get -y install apt-transport-https ca-certificates
+        sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+        sudo apt-get update
+        apt-cache policy docker-engine
+        sudo apt-get update
+        sudo apt-get -y install docker-engine
+        sudo apt-get -y install python-pip
+        sudo pip install docker-compose        
+    fi
 }
 
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
@@ -134,7 +155,9 @@ trap 'stop_sync' 1 15 2
 init_logging
 init_global_variables
 parse_command_line "$@"
+docker_installed
 mkdir -p /root/.ssh
+rm -rf ../_site
 
 if [ ! -e /var/run/docker.sock ]; then
     error "(${CHE_MINI_PRODUCT_NAME} Jekyll): File /var/run/docker.sock does not exist. Add to server extra volume mounts and restart server."

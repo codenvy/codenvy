@@ -43,7 +43,7 @@ che mount <ws-name> (or che mount <ws-id>)
 ```
 
 This will make a secure connection to the workspace and unison-sync the contents to the local host directory. You will be asked for the password that you retrieved from the SSH configuration. The synchronization will run continuously and the command will not return until you press CTRL-C, at which point the synchronization will be terminated.
-![fef09b90-a696-11e6-9a37-70f827677830.gif](/docs/images/fef09b90-a696-11e6-9a37-70f827677830.gif)
+![fef09b90-a696-11e6-9a37-70f827677830.gif](../../docs/imgs/fef09b90-a696-11e6-9a37-70f827677830.gif)
 ## Optimize
 The utility is designed to synchronize everything in your `/projects` folder that is within the workspace. Synchronization is impacted by the size and nature of files that are contained within the directory. If you have libraries such as with an NPM or maven repository, it may be unnecessary and taxing to synchronization all of those files.
 

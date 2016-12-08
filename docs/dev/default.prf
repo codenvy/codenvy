@@ -13,6 +13,8 @@ dontchmod = true
 # Some regexps specifying names and paths to ignore
 #ignore = Path _site/*
 #ignore = Path _site
+ignore = Path docs/images/*
+ignore = Path docs/images
 ignore = Path dev/*
 ignore = Path dev
 #ignore = Name temp.*

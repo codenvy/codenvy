@@ -15,7 +15,7 @@ Server and Workspace services need to be deployed differently, please refer to t
 ##Server Services
 The following diagram shows all components of server services. The classes highlighted in dark grey are to be implemented for the extension. The `ServerService` offers a REST service to be consumed.
 The IDE plugin implements a client class (`MyClient`), which calls the REST service using Che helper classes. The result is made available by a Java API, which is to be defined based on the result type. By calling the client class, different components of the IDE, such as `Actions` or `CodeCompletionProcessors`, can consume the `ServerService` without having to deal with the REST API itself.
-![image15.png](/docs/images/image15.png)
+![image15.png](../../docs/imgs/image15.png)
 In the following, we will describe how to build a simple example server service that accepts a String {name} and responds with "Hello {name} !".
 Further, we will demonstrate how this service can be consumed from within the client IDE.
 

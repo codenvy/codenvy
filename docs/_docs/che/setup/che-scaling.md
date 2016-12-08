@@ -29,7 +29,7 @@ Generally, workspace images start at 180MB. If you permit workspace snapshots, t
 Workspaces are both portable and shared. Multiple browser clients (and humans!) can connect to a single Che server running multiple workspaces, or if you prefer, to a single workspace. Users within a single workspace can make use of the runtime and project files. Che implements a last-write-wins policy when multiple users modify the same file.
 # Scaling Che Using a Che Farm  
 
-![Capture_.PNG](/docs/images/Capture_.PNG)
+![Capture_.PNG](../../docs/imgs/Capture_.PNG)
 To scale out Che, you can either attempt to separate some Che services onto different nodes, or run a Che farm.
 
 1.  (Coming Soon). Your workspace runtimes are Docker containers that do not have to reside on the same machine as the Che server, which is the workspace master. You can optionally deploy Docker onto a different physical node apart from the Che server. You can then size the Docker node based upon the number of concurrent workspaces that you want to have active and / or snapshot. Since Che has a single embedded identity in its default configuration, SSH keys and IDE preferences will be shared across all users accessing workspaces on a single server.
@@ -42,5 +42,5 @@ Your Eclipse Che workspaces and plug-ins will work within [Codenvy](http://coden
 * Team management, permissions and resource policy management tools
 * User authentication, single-sign on, and LDAP
 * Self-service user registration
-![ScaleCodenvy.PNG](/docs/images/ScaleCodenvy.PNG)
+![ScaleCodenvy.PNG](../../docs/imgs/ScaleCodenvy.PNG)
 Codenvy uses Puppet to install, configure, and update various internal services. This creates a simple management interface for administrators with flexibility on how many physical nodes to allocate along with the resource policy management that is applied to users and accounts.

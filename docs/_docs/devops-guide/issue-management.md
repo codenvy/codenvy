@@ -21,7 +21,7 @@ The Codenvy agile workflow with Atlassian JIRA requires:
 - Atlassian JIRA issue management system.
 - Codenvy Plug-in for Atlassian JIRA
 - GitHub or other git-based repo with webhooks for push and pull requests.
-![ProductInteractionFlowswithContinousDevelopment(1).svg](/docs/images/ProductInteractionFlowswithContinousDevelopment(1).svg)
+![ProductInteractionFlowswithContinousDevelopment(1).svg](../../docs/imgs/ProductInteractionFlowswithContinousDevelopment(1).svg)
 The VCS Factory Plug-In updates Codenvy Factories in response to GitHub webhooks for push events and pull request events.
 
 Read more about [the agile workflow we recommend](https://codenvy.com/solutions/workflow/) on our website.
@@ -80,7 +80,7 @@ At this point Codenvy will automatically generate custom develop and review work
 Log into JIRA and choose one of the project types that you have Factory-enabled.  Create a new issue. There will be two new labels "Develop" and "Review" each with a link that will load a Codenvy workspace.
 # Using the Plug-In for JIRA  
 When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors.
-![JIRAplugin-DevelopandReviewinIDE(1).svg](/docs/images/JIRAplugin-DevelopandReviewinIDE(1).svg)
+![JIRAplugin-DevelopandReviewinIDE(1).svg](../../docs/imgs/JIRAplugin-DevelopandReviewinIDE(1).svg)
 The git webhooks ensure that as the repository changes the JIRA issue Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
 # Plug-In for JIRA User Data Usage and Privacy  
 The plug-in requires the URL of Codenvy as well as a Codenvy user's username and password. The plug-in acts exclusively on the "Issue" object in JIRA. No data from that object is stored.
@@ -97,7 +97,7 @@ The Codenvy agile workflow with Microsoft Visual Studio Team Services requires:
 - A Codenvy installation with the VCS Factory Plug-In installed.
 - A Microsoft Visual Studio Team Services installation with a git-based repo.
 - The Codenvy Agile Plugin for VSTS
-![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png](/docs/images/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
+![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png](../../docs/imgs/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
 Read more about [the agile workflow we recommend](https://codenvy.com/solutions/workflow/) on our website.
 # Installing the Extension for VSTS  
 The Codenvy extension for Microsoft VSTS is available from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=codenvy.codenvy-extension)
@@ -144,4 +144,4 @@ Test that Codenvy automatically generates custom develop and review workspaces f
 Log into Microsoft VSTS and choose one of the project types that you have Factory-enabled.  Create a new work item and open its detail card. There will be a new section called "Codenvy" with a link for Developer Workspace and one for Review Workspace.
 # Using the Codenvy Extension for Microsoft VSTS  
 When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](http://codenvy.readme.io/docs/factories) defines pre- and post-load behaviors.
-![VSTSextension-DevelopandReviewinIDE.png](/docs/images/VSTSextension-DevelopandReviewinIDE.png)
+![VSTSextension-DevelopandReviewinIDE.png](../../docs/imgs/VSTSextension-DevelopandReviewinIDE.png)

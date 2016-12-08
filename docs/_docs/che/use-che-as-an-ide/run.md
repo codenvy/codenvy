@@ -54,5 +54,5 @@ Use startup scripts (usually in `/bin` directory of a webserver). You can start 
 ## Preview URL
 
 When sources/build artifacts are deployed to a webserver and the server is up, get application preview URL in **Servers** tab (Machine perspective icon in the top right corner - ![Machine perspective](https://files.readme.io/5gHpdHAMSNig96lwduwf_machine-perspective.png) :
-![server.png](/docs/images/server.png)
+![server.png](../../docs/imgs/server.png)
 If you use pre-built Che images, preview URLs are marked with Labels, like `tomcat8`, `apache2`, `asp.net.server` etc.
