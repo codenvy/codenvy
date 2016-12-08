@@ -106,6 +106,12 @@
                 <version>${com.codahale.metrics.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.codenvy</groupId>
+                <artifactId>docs</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.cli</groupId>
                 <artifactId>cli-assembly</artifactId>
                 <version>${project.version}</version>
