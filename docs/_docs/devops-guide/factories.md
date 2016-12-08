@@ -10,7 +10,7 @@ A Factory is a template used to generate new or open existing workspaces with a 
 
 | Description   | Factory URL   | Configuration   
 | --- | --- | ---
-| Clone a public Codenvy workspace   | https://codenvy.com/f?id=s38eam174ji42vty   | [View](https://codenvy.readme.io/v4.0/docs/factories?#section-clone-a-public-codenvy-workspace)   
+| Clone a public Codenvy workspace   |  [https://codenvy.com/f?id=s38eam174ji42vty](https://codenvy.com/f?id=s38eam174ji42vty)   | [View](/docs/factories?#section-clone-a-public-codenvy-workspace)   
 
 
 # Definitions  
