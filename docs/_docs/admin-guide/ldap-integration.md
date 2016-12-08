@@ -44,32 +44,32 @@ There are several types of configuration covered in the tables below:
 
 | Configuration Item   | Description   
 | --- | ---
-|    | ldap.auth.authentication_type   
-| Type of authentication to use:<br/><br/> AD - Active Directory. Users authenticate with `sAMAccountName`. Requires the `ldap.auth.dn_format` property to be correctly configured. <br/><br/> AUTHENTICATED - Authenticated Search.  Manager bind/search followed by user simple bind. Properties:<br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `dap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`<br/>- `ldap.auth.user_password_attribute`<br/><br/> ANONYMOUS -  Anonymous search followed by user simple bind. Properties:<br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `dap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`<br/>- `ldap.auth.user_password_attribute` <br/><br/> DIRECT -  Direct Bind. Compute user DN from format string and perform simple bind. Requires `ldap.base_dn` property to be correctly configured.<br/><br/>SASL - SASL bind search. Properties: <br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `ldap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`   | ldap.auth.dn_format   
-| Resolves an entry DN by using String#format. This resolver is typically used when an entry DN can be formatted directly from the user identifier. For instance, entry DNs of the form  uid=dfisher,ou=people,dc=ldaptive,dc=org could be formatted from uid=%s,ou=people,dc=ldaptive,dc=org. <br/><br/>Example:  <br/>* `CN=%1$s,CN=Users,DC=ad,DC=codenvy-dev,DC=com`<br/><br/>Parameters:<br/>* First parameter - user name provided for password validation.   | ldap.auth.subtree_search   
-| Indicates whether subtree search will be used (boolean). When set to true, allows to search authenticating DN out of the `base_dn` tree.   | ldap.auth.allow_multiple_dns   
-| Indicates whether DN resolution should fail if multiple DNs are found (boolean). When false, exception will be thrown if multiple DNs is found during search. When true, the first entry will be used for authentication attempt.   | ldap.auth.user.filter   
+| ldap.auth.authentication_type | Type of authentication to use:  <br/><br/>AD - Active Directory. Users authenticate with `sAMAccountName`. Requires the `ldap.auth.dn_format` property to be correctly configured. <br/><br/> AUTHENTICATED - Authenticated Search.  Manager bind/search followed by user simple bind. Properties:<br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `dap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`<br/>- `ldap.auth.user_password_attribute`<br/><br/> ANONYMOUS -  Anonymous search followed by user simple bind. Properties:<br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `dap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`<br/>- `ldap.auth.user_password_attribute` <br/><br/> DIRECT -  Direct Bind. Compute user DN from format string and perform simple bind. Requires `ldap.base_dn` property to be correctly configured.<br/><br/>SASL - SASL bind search. Properties: <br/>- `ldap.base_dn`<br/>- `ldap.auth.subtree_search`<br/>- `ldap.auth.allow_multiple_dns`<br/>- `ldap.auth.user.filter`   
+| ldap.auth.dn_format | Resolves an entry DN by using String#format. This resolver is typically used when an entry DN can be formatted directly from the user identifier. For instance, entry DNs of the form  uid=dfisher,ou=people,dc=ldaptive,dc=org could be formatted from uid=%s,ou=people,dc=ldaptive,dc=org. <br/><br/>Example:  <br/>-`CN=%1$s,CN=Users,DC=ad,DC=codenvy-dev,DC=com`<br/><br/>Parameters:<br/>- First parameter - user name provided for password validation.   
+| ldap.auth.subtree_search   | Indicates whether subtree search will be used (boolean). When set to true, allows to search authenticating DN out of the `base_dn` tree.   
+| ldap.auth.allow_multiple_dns   | Indicates whether DN resolution should fail if multiple DNs are found (boolean). When false, exception will be thrown if multiple DNs is found during search. When true, the first entry will be used for authentication attempt.   
+| ldap.auth.user.filter   |  Defines the LDAP search filter parameters applied during search for the user (string).<br><br>It must contain an `{user}` variable and, unlike similar property from synchronization, cannot contain wildcard ('*') values (because it is supposed to search for single entity).<br><br>Examples:<br> - OpenLDAP: `cn={user}`<br> - ActiveDirectory: `(&(objectCategory=Person)(sAMAccountName={user}))`<br><br>Variables:<br>- user - user name provided for password validation.   
 | ldap.auth.user_password_attribute   | Defines the LDAP attribute name, which value will be interpreted as the password during authentication (string).   
 
 ### Connection Configuration
 
 | Configuration Item   | Description   
 | --- | ---
-| Example   | ldap.url   
-| URL of the directory server (URL).<br/><br/>Example: `ldap://codenvy.com:389`   |    
+| ldap.url | URL of the directory server (URL).<br/><br/>Example: `ldap://codenvy.com:389`   |    
 | ldap.connection.connect_timeout_ms   | Time to wait for a connection to be established (milliseconds).<br/><br/>Example: `30000`   
-|    | ldap.connection.response_timeout_ms   
-| Restricts all the connection to wait for a response not more than specified value (milliseconds).<br/><br/>Example: `60000`   |    
-| ldap.connection.pool.min_size   | Size of minimum available connections in the pool (integer).   
-| 3   | ldap.connection.pool.max_size   
-| Size of maximum available connections in<br/>the pool (integer).<br/><br/>Example: `10`   | 10   
+| ldap.connection.response_timeout_ms  | Restricts all the connection to wait for a response not more than specified value (milliseconds).<br/><br/>Example: `60000`  
+| ldap.connection.pool.min_size  | Size of minimum available connections in the pool (integer).<br/><br/>Example: `3`   
+| ldap.connection.pool.max_size  | Size of maximum available connections in<br/>the pool (integer).<br/><br/>Example: `10`
 | ldap.connection.pool.validate.on_checkout   | Indicates whether connections will be validated before being picked from the pool (boolean). Connections that fail validation are evicted from the pool.   
 | ldap.connection.pool.validate.on_checkin   | Indicates whether connections will be validated before being returned to the pool (boolean). Connections that fail validation are evicted from the pool.   
 | ldap.connection.pool.validate.periodically   | Indicates whether connections should be validated periodically when the pool is idle (boolean). Connections that fail validation are evicted from the pool.   
 | ldap.connection.pool.validate.period_ms   | Period at which pool should be validated (milliseconds). Default value is 30 min.   
-| 1800000   | ldap.connection.pool.idle_ms   
-| Time at which a connection should be considered idle and become a candidate for removal from the pool (milliseconds).   | ldap.connection.pool.prune_ms   
-| Period between connection pool prunes - when idle connections are removed (milliseconds).   | ldap.connection.pool.fail_fast   
+| ldap.connection.pool.idle_ms   | Time at which a connection should be considered idle and become a candidate for removal from the pool (milliseconds).   
+| ldap.connection.pool.prune_ms   | Period between connection pool prunes - when idle connections are removed (milliseconds).   
+| ldap.connection.pool.fail_fast   | Indicates whether an exception should be thrown during pool initialization when the pool does not contain at least one connection and it's minimum size is greater than zero (boolean).
+| ldap.connection.pool.block_wait_ms   | Time during which a pool which has reached maximum size will block new requests - during this time a `BlockingTimeoutException` will be thrown (milliseconds). Default time is `infinite`.
+| ldap.connection.bind.dn  | Since connections are initialized by performing a bind operation, this property indicates the DN to make this bind with (string).<br><br>Example: `userX`<br><br>On Active Directory, a special mode called FastBind.aspx) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
+| ldap.connection.bind.password | Credential for the initial connection bind (string).<br><br>Example: `password`<br><br>On Active Directory, a special mode called FastBind.aspx) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
 
 
 ### SSL Configuration
@@ -83,8 +83,8 @@ Self-signed certificates must be imported into the Java keystore or used separat
 | --- | ---
 | ldap.connection.use_ssl   | Indicates whether the secured protocol will be used for connections (boolean).   
 | ldap.connection.use_start_tls   | Indicates whether TLS (Transport Layer Security) should be established on connections (boolean).   
-| ldap.connection.ssl.trust_certificates   | Path to the certificates file (string). Example: `file:///etc/ssl/mycertificate.cer`   
-| ldap.connection.ssl.keystore.name   | Defines name of the keystore to use (string). Example: `file:///usr/local/jdk/jre/lib/security/mycerts`   
+| ldap.connection.ssl.trust_certificates   | Path to the certificates file (string). <br><br>Example: `file:///etc/ssl/mycertificate.cer`   
+| ldap.connection.ssl.keystore.name   | Defines name of the keystore to use (string). <br><br>Example: `file:///usr/local/jdk/jre/lib/security/mycerts`   
 | ldap.connection.ssl.keystore.password   | Defines keystore password (string).   
 | ldap.connection.ssl.keystore.type   | Defines keystore type (string).   
 
@@ -98,7 +98,7 @@ As an example, if the client and server both uses TLS, and have trusted certific
 | ldap.connection.sasl.mechanism   | Defines SASL mechanism. Supported values are `DIGEST_MD5`, `CRAM_MD5`, `GSSAPI` and `EXTERNAL`.<br/><br/>See [AD explanation](https://msdn.microsoft.com/en-us/library/cc223371.aspx)<br/>See [OpenLDAP explanation](http://www.openldap.org/doc/admin24/sasl.html)   
 | ldap.connection.sasl.realm   | SASL realm value (string). <br/><br/>Example: `example.com`   
 | ldap.connection.sasl.authorization_id   | Defines the SASL authorization ID.   
-| ldap.connection.sasl.security_strength   | Specifies the client's preferred privacy protection strength (ciphers and key lengths used for encryption). <br/><br/>The value of this property is a comma-separated list of strength values, the order of which specifies the preference order. The three possible strength values are \low\ \medium\ and \high\. Defaults is `high,medium,low`.   
+| ldap.connection.sasl.security_strength   | Specifies the client's preferred privacy protection strength (ciphers and key lengths used for encryption). <br/><br/>The value of this property is a comma-separated list of strength values, the order of which specifies the preference order. The three possible strength values are "low" "medium" and "high". Defaults is `high,medium,low`.   
 | ldap.connection.sasl.mutual_auth   | SASL mutual authentication on supported mechanisms (boolean). For some applications, it is equally important that the LDAP server's identity be verified. The process by which both parties participating in the exchange authenticate each other is referred to as mutual authentication. Defaults to `false`.   
 | ldap.connection.sasl.quality_of_protection   | Defines integrity and privacy protection of the communication channel. It is negotiated during the authentication phase of the SASL exchange.<br/><br/>Possible values are `auth` (default),`auth-inf` and `auth-conf`.   
 
@@ -161,10 +161,12 @@ This won't change the execution of a periodical synchronization, but it is guara
 
 | Configuration Item   | Description   
 | --- | ---
-| ldap.sync.user.attr.id   | ldap.sync.user.attr.name   
-| LDAP attribute name which defines unique<br/>user name, this attribute will be used as Condevy User name (string).<br/><br/>Common values for this property: `cn`.   | ldap.sync.profile.attrs (optional)   
-| Comma-separated application-to-LDAP<br/>attribute mapping pairs. Available application attributes:<br/>- firstName<br/>- phone<br/>- lastName<br/>- employer<br/>- country<br/>- jobtitle<br/><br/>Common values for the attributes above in the described format:<br/><code>firstName=givenName,phone=telephoneNumber,<br/>lastName=sn,employer=o,country=st,jobtitle=title</code>.   | ldap.sync.user.attr.email   
-| LDAP attribute name which defines unique user email,<br/> the value of this attribute will be used as Codenvy<br/> User email. If there is no such analogue you can simply<br/> use the same attribute used for name (string).<br/><br/>Common values for this property: `mail`.   | Number of LDAP entries per-page,<br/>if set to <= 0 then `1000` is used by default (integer).   
+| ldap.sync.user.attr.id   |  LDAP attribute name which defines unique mandatory user identifier, the value of this attribute will be used as Codenvy User/Profile identifier (string). <br><br> All the characters which are not in `a-zA-Z0-9-_` will be removed from user identifier during synchronization, for instance if the ID of the user is `{0-1-2-3-4-5}` he will be synchronized as a user with ID `0-1-2-3-4-5`.<br><br>Common values for this property: `cn, uid, objectGUID`.  
+| ldap.sync.user.attr.name   | LDAP attribute name which defines unique user name, this attribute will be used as Condevy User name (string).<br/><br/>Common values for this property: `cn`.    
+| ldap.sync.profile.attrs (optional)   | Comma-separated application-to-LDAP<br/>attribute mapping pairs. Available application attributes:<br/>- firstName<br/>- phone<br/>- lastName<br/>- employer<br/>- country<br/>- jobtitle<br/><br/>Common values for the attributes above in the described format:<br/><code>firstName=givenName,phone=telephoneNumber,<br/>lastName=sn,employer=o,country=st,jobtitle=title</code>.
+| ldap.sync.user.attr.email   | LDAP attribute name which defines unique user email,<br/> the value of this attribute will be used as Codenvy<br/> User email. If there is no such analogue you can simply<br/> use the same attribute used for name (string).<br/><br/>Common values for this property: `mail`.   
+| ldap.sync.page.size (optional)  | Number of LDAP entries per-page,<br/>if set to <= 0 then `1000` is used by default (integer).   
+| ldap.sync.page.read_timeout_ms (optional)  | Time to wait for a page (milliseconds) <br/>Default: `30000`  
 
 ### Active Directory Example
 
