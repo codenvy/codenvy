@@ -4,7 +4,7 @@ excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
 permalink: /docs/installation/
 ---
-The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
+The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>`. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
 
 ## Nightly and Latest
 Each version of Codenvy is available as a Docker image tagged with a label that matches the version, such as `codenvy/cli:5.0.0-M7`. You can see all versions available by running `docker run codenvy/cli version` or by [browsing DockerHub](https://hub.docker.com/r/codenvy/cli/tags/).
@@ -44,28 +44,27 @@ docker run codenvy/cli
 The CLI is bound inside of Docker images that are tagged with different versions. If you were to run `codenvy/cli:5.0.0-latest` this will run the latest shipping release of Codenvy and the CLI. This list of all versions available can be seen by running `codenvy version` or browsing the list of [tags available in Docker Hub](https://hub.docker.com/r/codenvy/cli/tags/).
 
 ## Proxies
-You can install and operate behind a proxy. You will be operating a clustered system that is managed by Docker, and itself is managing a cluster of workspaces each with their own runtime(s). There are three proxy configurations:
-1. Configuring Docker proxy access so that Codenvy can download images from DockerHub.
-2. Configuring Codenvy's system containers so that internal services can proxy to the Internet.
-3. Optionally, configuring workspace proxy settings to allow users within a workspace to proxy to the Internet.
+You can install and operate Codenvy behind a proxy:
+1. Configure each physical node's Docker daemon with proxy access.
+2. Optionally, override the default workspace proxy settings for users if you want to restrict their Internet access.
 
-Before starting Codenvy, configure [Docker's daemon for proxy access](https://docs.docker.com/engine/admin/systemd/#/http-proxy). If you plan to scale Codenvy with multiple host nodes, each host node must have its Docker daemon configured for proxy access.
+Before starting Codenvy, configure [Docker's daemon for proxy access](https://docs.docker.com/engine/admin/systemd/#/http-proxy). If you plan to scale Codenvy with multiple host nodes, each host node must have its Docker daemon configured for proxy access. If you have Docker for Windows or Docker for Mac installed on your desktop and installing Codenvy, these utilities have a GUI in their settings which let you set the proxy settings directly.
 
-Codenvy's system runs on Java, and the JVM requires proxy environment variables in our `JAVA_OPTS`. We use the JVM for the core Codenvy server and the workspace agents that run within each workspace. You must set the proxy parameters for these system properties from `codenvy.env`. Please be mindful of the proxy URL formatting. Proxies are unforgiving if do not enter the URL perfectly, inclduing the protocol, port and whether they allow a trailing slash/.
+Please be mindful that your `HTTP_PROXY` and/or `HTTPS_PROXY` that you set in the Docker daemon must have a protocol and port number. Proxy configuration is quite finnicky, so please be mindful of providing a fully qualified proxy location.
+
+If you setup `HTTP_PROXY` or `HTTPS_PROXY` in your Docker daemon, we will also automatially set up a `NO_PROXY` configuration that includes `localhost,127.0.0.1,CODENVY_HOST` where `CODENVY_HOST` is the DNS or IP address that you provided or auto-detected by Codenvy. We recommend that you always add a `NO_PROXY` entry which includes the external IP address of your node and if you are using DNS both the long and short form of the DNS name.
+
+In the initialization phase, we will set our container's environment variables with your proxy settings and also update `codenvy.env` with:
 ```
-CODENVY_HTTP_PROXY_FOR_CODENVY=http://myproxy.com:8001/
-CODENVY_HTTPS_PROXY_FOR_CODENVY=http://myproxy.com:8001/
-CODENVY_NO_PROXY_FOR_CODENVY=<ip-or-domains-that-do-not-require-proxy-access>
+CODENVY_HTTP_PROXY_FOR_CODENVY=<YOUR_PROXY_FROM_DOCKER>
+CODENVY_HTTPS_PROXY_FOR_CODENVY=<YOUR_PROXY_FROM_DOCKER>
+CODENVY_NO_PROXY_FOR_CODENVY=localhost,127.0.0.1,codenvy-swarm,<YOUR_CODENVY_HOST>
+CODENVY_HTTP_PROXY_FOR_CODENVY_WORKSPACES=<YOUR_PROXY_FROM_DOCKER>
+CODENVY_HTTPS_PROXY_FOR_CODENVY_WORKSPACES=<YOUR_PROXY_FROM_DOCKER>
+CODENVY_NO_PROXY_FOR_CODENVY_WORKSPACES=localhost,127.0.0.1,<YOUR_CODENVY_HOST>
 ```
 
-If you would like your users to have proxified access to the Internet from within their workspace, those workspace runtimes need to have proxy settings applied to their environment variables in their .bashrc or equivalent. Configuring these parameters will have Codenvy automatically configure new workspaces with the proper environment variables.
-```
-# CODENVY_HTTP_PROXY_FOR_CODENVY_WORKSPACES=http://myproxy.com:8001/
-# CODENVY_HTTPS_PROXY_FOR_CODENVY_WORKSPACES=http://myproxy.com:8001/
-# CODENVY_NO_PROXY_FOR_CODENVY_WORKSPACES=<ip-or-domains-that-do-not-require-proxy-access>
-```
-
-A `NO_PROXY` variable is required if you use a fake local DNS. Java and other internal utilities will avoid accessing a proxy for internal communications when this value is set.
+The last three entries are proxy configuration that will be automatically injected into workspaces created by your users. This gives your users access to the Internet from within their workspaces. You can comment out these entries to disable that access. However, if that access is turned off, then the default templates with source code will fail to be created in workspaces as those projects are cloned from GitHub.com. Your workspaces are still functional, we just prevent the template cloning.
 
 ## Offline Installation
 We support the ability to install and run Codenvy while disconnected from the Internet. This is helpful for certain restricted environments, regulated datacenters, or offshore installations.
