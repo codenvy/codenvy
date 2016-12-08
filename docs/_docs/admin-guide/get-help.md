@@ -2,7 +2,6 @@
 title: Getting Help
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/get-help/
 ---
 If you are Codenvy customer, file a ticket through email support for a quicker response.

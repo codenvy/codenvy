@@ -2,7 +2,6 @@
 title: Configuration
 excerpt: "Techniques for configuring Codenvy"
 layout: docs
-overview: true
 permalink: /docs/configuration/
 ---
 Configuration is done with environment variables in `codenvy.env` placed into the root of the folder you volume mounted to `:/codenvy`. Environment variables are stored in `codenvy.env`, a file that is generated during the `codenvy init` phase. If you rerun `codenvy init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`.

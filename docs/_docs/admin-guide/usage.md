@@ -2,7 +2,6 @@
 title: Usage
 excerpt: "Codenvy uses docker to run on Linux, Mac and Windows."
 layout: docs
-overview: true
 permalink: /docs/usage/
 ---
 ## Syntax

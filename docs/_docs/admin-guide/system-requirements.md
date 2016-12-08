@@ -2,7 +2,6 @@
 title: System Requirements
 excerpt: "Codenvy installs on Linux, Mac and Windows with Docker."
 layout: docs
-overview: true
 permalink: /docs/system-requirements/
 ---
 Codenvy installs on Linux, Mac and Windows.

@@ -2,7 +2,6 @@
 title: Installation
 excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
-overview: true
 permalink: /docs/installation/
 ---
 The Codenvy CLI (a Docker image) is downloaded when you first execute `docker run codenvy/cli:<version>` command. The CLI downloads other images that run Codenvy and its supporting utilities. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.

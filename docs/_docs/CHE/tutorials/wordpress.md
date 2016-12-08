@@ -2,7 +2,6 @@
 title: Wordpress in Che
 excerpt: "Create a new Wordpress project with a dedicated database"
 layout: tutorials
-overview: true
 permalink: /tutorials/wordpress/
 ---
 # 1. Start Che  
@@ -11,7 +10,7 @@ permalink: /tutorials/wordpress/
 # Launch Che
 docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che start
 
-# Che will be available at: 
+# Che will be available at:
 http://<your-che-host>:8080\
 ```
 If you do not have any projects in Che, you'll be redirected to a startup page to create a new project.
@@ -19,11 +18,11 @@ If you do not have any projects in Che, you'll be redirected to a startup page t
 Click `New Project` and import a Wordpress repository and set up the right environment for it.
 
 ### Select Source
-Let's import WP from an [official WordPress GitHub repo](https://github.com/WordPress/WordPress.git). 
-	
+Let's import WP from an [official WordPress GitHub repo](https://github.com/WordPress/WordPress.git).
+
 ###Select Stack
 Che offers a certified PHP image with Apache2, MySQL, git, curl and a number of popular PHP extensions.
-[Dockerfile](https://github.com/eclipse/che-dockerfiles/blob/master/php/ubuntu/Dockerfile). 
+[Dockerfile](https://github.com/eclipse/che-dockerfiles/blob/master/php/ubuntu/Dockerfile).
 
 ### Configure Workspace
 Give your workspace a nice name and configure RAM, i.e. apply the memory limit to a workspace machine.
@@ -43,15 +42,15 @@ ENV CHE_MYSQL_USER=che\
 ```
 You may verify that the db is there and MYSQL is running: `mysql -u che -p che`
 # 4. Run Your Project  
-Let's start Apache server. You can do that in the terminal, however, using a Commands Widget is a better option. Go to `CMD > Edit Commands…` menu, click `+` button at Custom section and paste your command name, command itself here. 
+Let's start Apache server. You can do that in the terminal, however, using a Commands Widget is a better option. Go to `CMD > Edit Commands…` menu, click `+` button at Custom section and paste your command name, command itself here.
 Here are some commands that you may use:  
 ```shell  
 # Apache start
   sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log
-  
+
 # Apache restart
   sudo service apache2 restart
-  
+
 # Apache stop
   sudo service apache2 stop \
 ```
@@ -68,4 +67,3 @@ A few steps to install WP and voilà, it’s done.
 The last step is to save your workspace.
 
 Go to Machine Perspective, choose `Machine > Create Snapshot`. It will create a new image which will be used to load the workspace, based upon the current contents of the environment.
-

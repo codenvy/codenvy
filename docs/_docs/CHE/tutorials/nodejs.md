@@ -2,7 +2,6 @@
 title: Node.js in Che
 excerpt: "Create a new Node project, install additional NPM modules, and save as a snapshot"
 layout: tutorials
-overview: true
 permalink: /tutorials/nodejs/
 ---
 # 1. Start Che  
@@ -22,7 +21,7 @@ There are several options which you can choose to start your Node.js project:
 This informs Che where the source code for your project is going to come from. It is possible to start a new blank, template, sample project or import one from another location. Choosing the first option will present you with a set of samples that are preconfigured. If you already have a project at a valid URL, choose the second option.  Che gives you choices on how to source the project from Git, GitHub, ZIP, etc..
 
 We will create a project from a provided template.
-	
+
 ###Select Stack
 ![ScreenShot2016-09-30at6.13.02PM.png](/docs/images/ScreenShot2016-09-30at6.13.02PM.png)
 Your project will be inserted into a workspace, which has a provided Docker runtime. Stacks are the recipes or images used to define the runtime environment for the workspace where your project will be placed. There are three ways to choose a stack:
@@ -38,7 +37,7 @@ Choose the `Ready-To-Go Node` stack.
 ![ScreenShot2016-09-30at5.55.07PM.png](/docs/images/ScreenShot2016-09-30at5.55.07PM.png)
 Paste your workspace name and configure its RAM. RAM will be the memory limit applied to the machines running your workspace environment. Create a new workspace with any name and set its RAM to 1GB.
 
-### Select Template. 
+### Select Template.
 ![ScreenShot2016-09-30at6.15.03PM.png](/docs/images/ScreenShot2016-09-30at6.15.03PM.png)
 A template is a Che-provided set of code, configuration, and commands that can be imported to operate within Che. There are two types of templates:
 1. Ready-to-run project samples. These samples have a compilable source tree and embedded commands. The list of templates available are filtered based upon the stack chosen.
@@ -61,7 +60,7 @@ This project has two custom commands (located in the `CMD` drop-down selector in
 
 Go ahead and run your project. The output will be displayed in the `Consoles` panel. If you run the project, the commands have an embedded `Preview URL` that will be displayed for your application. It will look something like: `http://192.168.99.100:32768/`. After the grunt server has started, your application will load in another browser tab when you click on that link.
 ![Capture.PNG](/docs/images/Capture.PNG)
-You can change the content of any command by editing it. The option to modify commands is available from the `CMD` drop-down in the toolbar. 
+You can change the content of any command by editing it. The option to modify commands is available from the `CMD` drop-down in the toolbar.
 # 4. Install New NPM Modules  
 Now let’s install some new NPM modules, such as [Express](https://www.npmjs.com/package/express).
 
@@ -102,4 +101,3 @@ Che synchronizes your projects in and out of your workspace in between execution
 A snapshot creates a new image that will be used to load the workspace, based upon the current contents of the environment.
 
 To snapshot the workspace right-click on the workspace in the left nav bar and choose "Snapshot."  The workspace will be stopped and snapshotted.
-

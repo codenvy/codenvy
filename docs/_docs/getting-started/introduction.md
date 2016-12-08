@@ -2,7 +2,6 @@
 title: Introduction
 excerpt: "Welcome to Codenvy!"
 layout: docs
-overview: true
 permalink: /docs/introduction/
 ---
 Codenvy makes on-demand workspaces to give you a better agile experience. Codenvy SaaS is available for self-service at codenvy.com. You can also install Codenvy on your own infrastructure with Codenvy On-Prem.

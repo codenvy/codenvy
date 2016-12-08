@@ -2,7 +2,6 @@
 title: PlatformIO in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/platformio/
 ---
 This example uses the EmonTX connected to a RaspberryPi3 with the PlatformIO remote agent and Eclipse Che's PlatformIO stack.

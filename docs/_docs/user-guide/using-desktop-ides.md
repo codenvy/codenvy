@@ -2,13 +2,12 @@
 title: Using Desktop IDEs
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/using-desktop-ides/
 ---
 # Standard SSH Connection  
 It's possible to establish SSH connection between your desktop IDE and a remote Codenvy workspace.
 
-In Codenvy create a new workspace, open it in the IDE and import any project in there. On the Consoles panel click `Connect via SSH`, you will see the following instructions: 
+In Codenvy create a new workspace, open it in the IDE and import any project in there. On the Consoles panel click `Connect via SSH`, you will see the following instructions:
 ```shell  
 You can connect your SSH client to 'default' with:
 
@@ -38,13 +37,13 @@ Follow the below steps to connect to a remote Codenvy workspace from the local I
 
 1. When in the Codenvy IDE, go to `Profile > Preferences > Machine > SSH` and upload your local **public** key there. Restart a workspace.
 
-2. Open your local Terminal and execute `sshfs user@${hostname}:/projects /your/local/directory/ -p ${port}`, where ${port} is a random port from the ephemeral port range, to which 22 port is mapped (you can find it on the Consoles panel > SSH or at the Operations Perspective > Servers tab). This command will mount `/projects` folder to your local directory. 
+2. Open your local Terminal and execute `sshfs user@${hostname}:/projects /your/local/directory/ -p ${port}`, where ${port} is a random port from the ephemeral port range, to which 22 port is mapped (you can find it on the Consoles panel > SSH or at the Operations Perspective > Servers tab). This command will mount `/projects` folder to your local directory.
 
 3. Check the local directory to verify if your Codenvy projects are there.
-   
-4. Open your favorite local IDE and import your Codenvy project. 
 
-5. Make some edits in the project. 
+4. Open your favorite local IDE and import your Codenvy project.
+
+5. Make some edits in the project.
 
 6. Go to a Codenvy workspace to verify changes are there.
 [block:embed]
@@ -83,7 +82,7 @@ docker run --rm -it \
            --name codenvy-mount \
            -v /c/Users/%USERNAME%/mount:/mnthost \
            codenvy/che-mount <codenvy-server-ip> <codenvy-server-ssh-port>
-           
+
 # Verify directories in Docker container
 docker exec -ti che-mount sh
 >ls /mnthost
@@ -95,7 +94,7 @@ bash
 > ls /c/Users/%USERNAME%/mount
 
 # where <your-docker-host-ip> is the IP address your Docker daemon is bound to.
-# You can determine this IP by 
+# You can determine this IP by
 docker run - -rm - -net host \
             alpine sh -c \
             “ip a show <network-if>"

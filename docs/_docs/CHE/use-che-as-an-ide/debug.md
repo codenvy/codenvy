@@ -2,7 +2,6 @@
 title: Debug
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/debug/
 ---
 # Java  

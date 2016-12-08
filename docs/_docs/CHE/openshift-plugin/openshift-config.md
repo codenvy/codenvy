@@ -2,7 +2,6 @@
 title: Openshift Install
 excerpt: "How to install the OpenShift Plug-in."
 layout: docs
-overview: true
 permalink: /docs/openshift-config/
 ---
 # Download  

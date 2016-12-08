@@ -2,7 +2,6 @@
 title: Multi-Machine Workspaces in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/multi-machine/
 ---
 A multi-machine recipe allows multiple runtimes to communicate/share data. In this tutorial we will be looking at an existing Java and MySQL application called Pet Clinic. The tutorial will help show how to create a multi-machine from an existing [runtime stack](doc:stacks) called "Java-MySQL", execute commands on different target runtimes, startup the Pet Clinic Tomcat server, view/interact with the Pet Clinic web page, and take a closer look at the "Java-MySQL" [runtime stack](doc:stacks) /[runtime recipe](doc:recipes) to get a better understanding of how multi-machine runtimes are created.
@@ -15,7 +14,7 @@ che start\
 ```
 When you execute this command, you'll see the URL for the Che server.
 
-This URL can be used to open Che server's dashboard. It is where you manage your projects and workspaces. 
+This URL can be used to open Che server's dashboard. It is where you manage your projects and workspaces.
 # 2. Create Workspace  
 Click the "Dasboard" menu item in the dashboard. Click the "New Workspace" button if there are existing workspaces or make sure "Select Source" category is set to "New from blank, template, or sample project" if one or more workspace exists.
 ![che-multimachine-tutorial3.jpg](/docs/images/che-multimachine-tutorial3.jpg)
@@ -25,9 +24,9 @@ The other workspace information can remain as it is. Click the "create" button a
 ![che-multimachine-tutorial2.jpg](/docs/images/che-multimachine-tutorial2.jpg)
 
 # 3. Using IDE  
-Once the workspace is created, the IDE will be loaded in the browser. 
+Once the workspace is created, the IDE will be loaded in the browser.
 
-Each runtime can be identified in the processes section of the IDE. It will list the runtimes of "dev-machine" and "db" of our multi-machine workspace. The "db" runtime for this tutorial provides the database for the Java Spring application to use. 
+Each runtime can be identified in the processes section of the IDE. It will list the runtimes of "dev-machine" and "db" of our multi-machine workspace. The "db" runtime for this tutorial provides the database for the Java Spring application to use.
 
 To make sure that the database is running we will issue the "show database" command to the "db" runtime. Select the "db" runtime item from the target drop down menu. Then make sure that "show databases" is selected in the command drop down menu and hit the play button.
 ![che-multimachine-tutorial4.jpg](/docs/images/che-multimachine-tutorial4.jpg)
@@ -65,15 +64,15 @@ services:
       - db\
 ```
 
-Examining the code above you will see our two runtime machines "db" and "dev-machine". Every workspace requires a [machine](doc:machines) named "dev-machine". 
+Examining the code above you will see our two runtime machines "db" and "dev-machine". Every workspace requires a [machine](doc:machines) named "dev-machine".
 
-In the recipe the `depends_on` parameter of the "dev-machine" allows it to connect to the "db" machine MySQL process' port 3306. The "dev-machine" configures it's MySQL client connection in the projects source code at `src/main/resources/spring/data-access.properties`. The url is defined by `jdbc.url=jdbc:mysql://db:3306/petclinic` which uses the database machine's name "db" and the MySQL server default port 3306. 
+In the recipe the `depends_on` parameter of the "dev-machine" allows it to connect to the "db" machine MySQL process' port 3306. The "dev-machine" configures it's MySQL client connection in the projects source code at `src/main/resources/spring/data-access.properties`. The url is defined by `jdbc.url=jdbc:mysql://db:3306/petclinic` which uses the database machine's name "db" and the MySQL server default port 3306.
 
 Port 3306 is exposed in the "db" machines Dockerfile during build but is not required for "dev-machine" to connect to it. Exposing port 3306 is done to provide access to database that is external to "db" machine network via a random ephemeral port assigned by docker. The "dev-machine" by setting `depends_on: - db` creates a private network that allows it use of "db" machine's name as hostname and port 3306 without having to determine the ephemeral port docker assigned.
 
-Exposing port 3306 is done to provide an option for an external administrator to log into the "db" machine MySQL server through a MySQL client on the ephemeral port assigned. The operations perspective interface provides the external ephemeral ports assigned by docker for all machines' exposed ports. Image below indicates only external ephemeral port 32800 assigned to "db" machine's exposed port 3306. 
+Exposing port 3306 is done to provide an option for an external administrator to log into the "db" machine MySQL server through a MySQL client on the ephemeral port assigned. The operations perspective interface provides the external ephemeral ports assigned by docker for all machines' exposed ports. Image below indicates only external ephemeral port 32800 assigned to "db" machine's exposed port 3306.
 ![che-mysql-tutorial1.jpg](/docs/images/che-mysql-tutorial1.jpg)
-The "db" machine contains a MySQL database created by the Docker image "codenvy/mysql". Taking a closer look at the "codenvy/mysql" image Dockerfile's entry point script will show how the "db" machine configures the MySQL server at the workspace startup. 
+The "db" machine contains a MySQL database created by the Docker image "codenvy/mysql". Taking a closer look at the "codenvy/mysql" image Dockerfile's entry point script will show how the "db" machine configures the MySQL server at the workspace startup.
 
 ```text  
 FROM alpine:3.4
@@ -93,7 +92,7 @@ CMD ["mysqld"]
 VOLUME /var/lib/mysql
 ENTRYPOINT ["docker-entrypoint.sh"]
 ```
-The "docker-entrypoint.sh" script shown partly below uses environment variables to configure the MySQL server. In this stack's compose recipe, shown above, environment variables set the MySQL database's name and user/password information that is referenced in the "db" machine's entry point script (`$MYSQL_DATABASE`, `$MYSQL_USER`, and `$MYSQL_PASSWORD`). 
+The "docker-entrypoint.sh" script shown partly below uses environment variables to configure the MySQL server. In this stack's compose recipe, shown above, environment variables set the MySQL database's name and user/password information that is referenced in the "db" machine's entry point script (`$MYSQL_DATABASE`, `$MYSQL_USER`, and `$MYSQL_PASSWORD`).
 ```shell  
 #!/bin/bash
 

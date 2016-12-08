@@ -2,8 +2,7 @@
 title: Introduction
 excerpt: ""
 layout: docs
-overview: true
-permalink: /docs/workspace-agents-intro/
+permalink: /docs/workspace-admin-intro/
 ---
 A Che workspace is composed of projects (source files) and environments (runtimes). A workspace can contain one or more environments (e.g. hack environment, populated database environment, etc...) but only one environment at a time can be running in the workspace. An environment is composed of one or more machines. The default machine in an environment is called the "dev-machine" and your projects are mounted or synchronized into that machine so that the software running in the machine can gain access to the source code.  
 ![WorksapceBasicArchitecture.png](/docs/images/WorksapceBasicArchitecture.png)
@@ -25,7 +24,7 @@ There are two types of machines:
 A workspace always has one workspace machine, and it can have zero or more ancillary machines.
 
 ### Agents for Machine Superpowers
-Additionally, Che can inject additional software into a machine through [workspace agents](doc:workspace-agents). Agents can provide machines with special services for the source code. For example, a Java agent runs JDT intellisense inside the machine against the project files and then makes the results available to browsers through REST and websocket communications. 
+Additionally, Che can inject additional software into a machine through [workspace agents](doc:workspace-agents). Agents can provide machines with special services for the source code. For example, a Java agent runs JDT intellisense inside the machine against the project files and then makes the results available to browsers through REST and websocket communications.
 # How It Works  
 Docker is the default machine implementation in Che. Each machine is created from a [runtime recipe](doc:recipes) that defines a [runtime stack](doc:stacks). Che provides a variety of ready-to-go stacks that contain common combinations of frameworks needed to develop software projects of various languages. However, the user can create their own [runtime stack](doc:stacks) by defining a Dockerfile or Docker Compose file when creating a new workspace or editing the Che server `stacks.json`.
 
@@ -41,5 +40,4 @@ Che provides a lot of flexibility to administrators and users. You can start by 
 
 Or, if you want to distribute your own workspace configuration, study how to add a [Runtime Stack](doc:stacks) or a [Project Sample](doc:templates).
 
-In the [Stacks](doc:stacks) section, we also provide instructions for how to write custom Dockerfiles or Docker Compose files that will act as a workspace recipes. 
-
+In the [Stacks](doc:stacks) section, we also provide instructions for how to write custom Dockerfiles or Docker Compose files that will act as a workspace recipes.

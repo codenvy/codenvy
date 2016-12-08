@@ -2,15 +2,14 @@
 title: Intellisense
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/intellisense/
 ---
-Eclipse Che uses a language server protocol to provide intellisense for various languages. Each language server protocol is an [agent](https://eclipse-che.readme.io/docs/workspace-agents) that is injected into the [runtime machine dev-machine](https://eclipse-che.readme.io/docs/machines) by adding it to a [runtime stack](https://eclipse-che.readme.io/docs/stacks) configuration or an existing [workspace](https://eclipse-che.readme.io/docs/machines#section-dashboard-machine-information) in the dashboard. 
+Eclipse Che uses a language server protocol to provide intellisense for various languages. Each language server protocol is an [agent](https://eclipse-che.readme.io/docs/workspace-agents) that is injected into the [runtime machine dev-machine](https://eclipse-che.readme.io/docs/machines) by adding it to a [runtime stack](https://eclipse-che.readme.io/docs/stacks) configuration or an existing [workspace](https://eclipse-che.readme.io/docs/machines#section-dashboard-machine-information) in the dashboard.
 # Language Intellisense  
 We currently support the following intellisense languages.
 
 | Language   | Agent Name   
-| --- | --- 
+| --- | ---
 | Java   | org.eclipse.che.ws-agent   
 | C#   | org.eclipse.che.ls.csharp   
 | PHP   | org.eclipse.che.ls.php   
@@ -33,4 +32,3 @@ A language server has two phases of management within Che: installation and init
 The installation of a language server must happen within the definition of a workspace, or as part of a stack. Language servers are packaged within "agents" which are scripts that install the language server and its dependencies into a workspace. The agent installation can happen either as part of a stack (when the workspace is first started), or dynamically when a file of an associated type is first opened in the editor. It's recommended, for performance, to always include the associated agent within a workspace / stack definition.
 
 Once a language server is included in the workspace as an agent, then there needs to be a launcher that controls when the language server is started and stopped. Technically, agents can be start / stopped for any number of reasons. For language servers, those agents will be typically start / stopped when the editor opens a file of a certain extension or when a plugin of a certain type is created. Right now, launchers need to be authored as Che extensions that are packaged with Che itself. We will also look to make these dynamic in the future.
-

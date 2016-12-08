@@ -2,7 +2,6 @@
 title: IDE Setup
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/setup-che-workspace/
 ---
 This page explains how to setup a developer workspace for Che using various IDEs. This includes checking out the sources. If you want to build an extension for Che, you should also follow these instructions.
@@ -10,11 +9,11 @@ This page explains how to setup a developer workspace for Che using various IDEs
 Setting up your environment consist of three steps, (1) Getting the source code, (2), setting up your IDE for development, (3) and configuring the maven build.
 ![Selection_009.png](/docs/images/Selection_009.png)
 Che is IDE agnostic. We provide configuration instructions for:
-* [Eclipse (using the Eclipse Installer)](doc:setup-che-workspace#setup-the-eclipse-ide) 
-* [IntelliJ](doc:setup-che-workspace#setup-the-intellij-ide) 
-* [Che IDE (coming soon) ](doc:setup-che-workspace#setup-the-che-ide) 
+* [Eclipse (using the Eclipse Installer)](doc:setup-che-workspace#setup-the-eclipse-ide)
+* [IntelliJ](doc:setup-che-workspace#setup-the-intellij-ide)
+* [Che IDE (coming soon) ](doc:setup-che-workspace#setup-the-che-ide)
 
-After setting up a workspace, you find documentation about how to setup your build and run environment for Che in the following guide: [Developing Extensions](doc:create-and-build-extensions). 
+After setting up a workspace, you find documentation about how to setup your build and run environment for Che in the following guide: [Developing Extensions](doc:create-and-build-extensions).
 
 
 
@@ -50,16 +49,16 @@ In this situation, we recommend to build Che sources using the "che-dev" Docker 
 # For Windows, replace $HOME with maven repo directory.
 # For Windows, replace $PWD with Che source code directory.
 
-docker run -it --rm --name build-che 
-           -v "$HOME/.m2:/home/user/.m2" 
-           -v "$PWD":/home/user/che-build 
-           -w /home/user/che-build 
-           eclipse/che-dev 
-           mvn -DskipTests=true 
+docker run -it --rm --name build-che
+           -v "$HOME/.m2:/home/user/.m2"
+           -v "$PWD":/home/user/che-build
+           -w /home/user/che-build
+           eclipse/che-dev
+           mvn -DskipTests=true
                -Dfindbugs.skip=true
-               -Dgwt.compiler.localWorkers=2 -T 1C 
-               -Dskip-validate-sources 
-               -Dmdep.analyze.skip=true 
+               -Dgwt.compiler.localWorkers=2 -T 1C
+               -Dskip-validate-sources
+               -Dmdep.analyze.skip=true
                -Dlicense.skip=true
                clean install
 
@@ -87,7 +86,7 @@ You can consider to deactivate automatic builds in eclipse as this will run mave
 
 If you plan to update files outside the workbench, then you can add a [native update hook refresh](http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-52.htm).
 # Eclipse IDE - Neon Installer  
-If you install Eclipse manually, you will need to use the Eclipse Installer. Please get the Eclipse IDE for Java configured with the maven plugin. 
+If you install Eclipse manually, you will need to use the Eclipse Installer. Please get the Eclipse IDE for Java configured with the maven plugin.
 
 1. Download Eclipse Neon from https://www.eclipse.org/downloads/eclipse-packages/ and select Eclipse IDE for Java EE Developers
 ![ScreenShot2016-10-21at15.15.16.png](/docs/images/ScreenShot2016-10-21at15.15.16.png)
@@ -97,7 +96,7 @@ If you install Eclipse manually, you will need to use the Eclipse Installer. Ple
 ![import-existing-maven-projects.png](/docs/images/import-existing-maven-projects.png)
 You will then be asked to select the existing projects to imported. Select them all.
 
-The projects will be imported and you will see them in the explorer. 
+The projects will be imported and you will see them in the explorer.
 
 4. While the workspace will be built for the first time, you'll be asked to install the missing Eclipse plugins corresponding to the maven goals:
 ![install-plugin1.png](/docs/images/install-plugin1.png)
@@ -107,7 +106,7 @@ The projects will be imported and you will see them in the explorer.
 ![install-plugin3.png](/docs/images/install-plugin3.png)
 
 ![install-plugin4.png](/docs/images/install-plugin4.png)
-5.  Define the Maven command to build Che. Create a new "Run Configuration" 
+5.  Define the Maven command to build Che. Create a new "Run Configuration"
 ![ScreenShot2016-09-29at16.14.16.png](/docs/images/ScreenShot2016-09-29at16.14.16.png)
 Double click on "Maven Build"
 
@@ -120,16 +119,16 @@ Check the checkmark for skipping tests:
 ![ScreenShot2016-10-21at11.14.24.png](/docs/images/ScreenShot2016-10-21at11.14.24.png)
 6. Build the workspace by executing the command you defined:
 ![ScreenShot2016-09-29at16.21.10.png](/docs/images/ScreenShot2016-09-29at16.21.10.png)
-This will create an assembly in `{workspace-path}\che\assembly\assembly-main\target\eclipse-che-<version>\eclipse-che-<version>` 
+This will create an assembly in `{workspace-path}\che\assembly\assembly-main\target\eclipse-che-<version>\eclipse-che-<version>`
 #### Tips
 1. You might have Eclipse not discovering properly your environment variables. In this case, configure your environment variables with the custom command.\n\n\n2. It happens sometimes, that 'npm' is not having the right permissions to complete the build. In this case, remove your npm repository (.npm folder)  
 
-7. Fixing the error marks 
+7. Fixing the error marks
 
-There are certains Maven goals that are not completed by Eclipse at once. 
+There are certains Maven goals that are not completed by Eclipse at once.
 The idea is to require Eclipse to rebuild the workspace and update the project's dependencies. You can do that by doing right click on the projects (probably all the first time you are setupping the workspace).
 ![Screen_Shot_2016-10-06_at_14_46_36.png](/docs/images/Screen_Shot_2016-10-06_at_14_46_36.png)
-8. To start Che from the custom assembly you just built, you can refer to this [Usage: Docker Launcher](doc:usage-docker#local-eclipse-che-binaries). Remind your custom assembly is located in `{workspace-path}\che\assembly\assembly-main\target\eclipse-che-<version>\eclipse-che-<version>` 
+8. To start Che from the custom assembly you just built, you can refer to this [Usage: Docker Launcher](doc:usage-docker#local-eclipse-che-binaries). Remind your custom assembly is located in `{workspace-path}\che\assembly\assembly-main\target\eclipse-che-<version>\eclipse-che-<version>`
 
 
 
@@ -160,7 +159,7 @@ In the same panel, select the `Arguments` tab. We will add some content to `Prog
 
 ![ScreenShot2016-10-06at15.06.23.png](/docs/images/ScreenShot2016-10-06at15.06.23.png)
 In the `Classpath` tab, go to `User Entries > Add External Jars`. Add:
-1. `gwt-codeserver.jar` (in the directory where you unzipped GWT zip), 
+1. `gwt-codeserver.jar` (in the directory where you unzipped GWT zip),
 2. `gwt-dev.jar`, (also in the same directory)
 3. The JAR file for any extensions or plugins that you have built. You can find this JAR file in two locations. First, you can find it in the `/target` folder where you compiled the plugin. Second, you can also find it in your maven's local repository, typically in its `.m2` folder.
 ![ScreenShot2016-10-06at15.07.45.png](/docs/images/ScreenShot2016-10-06at15.07.45.png)
@@ -175,8 +174,8 @@ In the Eclipse console output, you will see a special URL - `http://localhost:98
 ![ScreenShot2016-10-06at15.14.00.png](/docs/images/ScreenShot2016-10-06at15.14.00.png)
 ## Launch Che with Super Dev Mode
 Run Che normally. You can use the CLI, the Che launcher, or Eclipse. Within your browser create a workspace and then identify the workspace name.  Open the workspace with the workspace name or ID that you captured, so this would be http://<che-url>/che/<ws-name>`.
- 
-Click the `Dev Mode On` bookmark on your booksmark bar. A message will appear asking you to recompile the application.  Select the `_app` and compile it. 
+
+Click the `Dev Mode On` bookmark on your booksmark bar. A message will appear asking you to recompile the application.  Select the `_app` and compile it.
 ![ScreenShot2016-10-06at15.22.26.png](/docs/images/ScreenShot2016-10-06at15.22.26.png)
 The compilation will likely take 5 to 10 Minutes:
 ![ScreenShot2016-10-06at15.23.13.png](/docs/images/ScreenShot2016-10-06at15.23.13.png)
@@ -185,9 +184,9 @@ Che is now running in Super Dev Mode. You can now make incremental Java source f
 
 
 ## Debugging GWT Apps in the Chrome Browser
-Google Chrome has an ability where you can set breakpoints for your Java GWT apps from within the Chrome browser itself, even though Chrome has loaded your GWT app as JavaScript! 
+Google Chrome has an ability where you can set breakpoints for your Java GWT apps from within the Chrome browser itself, even though Chrome has loaded your GWT app as JavaScript!
 
-For this to work, you will need to enable source maps in the Chrome developer console. Open the developer console and navigate to the `Sources` tab. 
+For this to work, you will need to enable source maps in the Chrome developer console. Open the developer console and navigate to the `Sources` tab.
 ![debug_chrome.png](/docs/images/debug_chrome.png)
 You will see the Java classes that make up your IDE plugin. You can open individual classes to set breakpoints. To set a breakpoint, right click on the line of code.
 ![debugger_chrome.png](/docs/images/debugger_chrome.png)
@@ -225,7 +224,7 @@ Follow the remaining steps for running a configuration to launch Super Dev Mode,
 #### Building Che Extensions in Che Coming Soon
 }  
 
-You can create, build and run client-side Che extensions using the Che IDE. 
+You can create, build and run client-side Che extensions using the Che IDE.
 
 1. Start Che.
 2. Select `File > New > Project`.
@@ -233,4 +232,3 @@ You can create, build and run client-side Che extensions using the Che IDE.
 4. Enter a name for the project and click `Create`.
 5. `Run` the extension to compile it and package into the existing assembly.
 6. Che will launch another Che instance with your assembly.
-

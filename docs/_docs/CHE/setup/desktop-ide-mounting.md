@@ -2,7 +2,6 @@
 title: Usage&#58 Local IDE Sync
 excerpt: "Using your desktop IDE with an Eclipse Che workspace."
 layout: docs
-overview: true
 permalink: /docs/config-security/
 ---
 #### Requires 5.0.0-M7

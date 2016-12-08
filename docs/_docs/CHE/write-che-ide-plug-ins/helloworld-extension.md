@@ -2,7 +2,6 @@
 title: HelloWorld Extension
 excerpt: "Create your first extension"
 layout: docs
-overview: true
 permalink: /docs/helloworld-extension/
 ---
 This documentation is a step-by-step guide to build your first HelloWorld extension for Eclipse Che.
@@ -22,14 +21,14 @@ Provide asked information (we will update them in the next step)
 
 ## 2- Add dependencies and parent definition to the pom.xml
 
-In order to be properly defined, we will rely on `che-parent` for the hello world extension. We will inherit from the global che definition. 
+In order to be properly defined, we will rely on `che-parent` for the hello world extension. We will inherit from the global che definition.
 
 We add the dependencies for:
 - Guice
 - Che Core IDE API
 - GWT
 
-We also add the Maven repository used to retrieve artifacts and the Build configuration (refer to [https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions#section-pom-xml](https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions#section-pom-xml))  . 
+We also add the Maven repository used to retrieve artifacts and the Build configuration (refer to [https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions#section-pom-xml](https://eclipse-che.readme.io/v5.0/docs/create-and-build-extensions#section-pom-xml))  .
 ```xml  
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
@@ -116,7 +115,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 ...\
 ```
-We add the following annotations: 
+We add the following annotations:
 ```java  
 /**
  * @Singleton is required in case the instance is triggered several times this extension will be initialized several times as well.
@@ -195,7 +194,7 @@ Inherits from the GWT modules: User, Inject. We will also inherits from the IDE 
     http://www.eclipse.org/legal/epl-v10.html
     Contributors:
       Codenvy, S.A. - initial API and implementation
-      
+
 -->
 <module>
     <inherits name="com.google.gwt.user.User"/>
@@ -206,7 +205,7 @@ Inherits from the GWT modules: User, Inject. We will also inherits from the IDE 
 ```
 ## 5- Build the Extension
 
-Create the following `Run Configuration`: 
+Create the following `Run Configuration`:
 ![ScreenShot2016-10-13at15.05.00.png](/docs/images/ScreenShot2016-10-13at15.05.00.png)
 Or you can also open a terminal where you create your HelloWorld Extension and run a `mvn clean install`.
 
@@ -246,9 +245,9 @@ You can insert the dependency anywhere in the list. After you have inserted it, 
 ![ScreenShot2016-10-13at15.34.00.png](/docs/images/ScreenShot2016-10-13at15.34.00.png)
 ## 7- Link to IDE Assembly
 
-The HelloWorld extension is only a client-side (IDE) extension. You have to introduce your extension as a dependency in /che/assembly/assembly-ide-war/pom.xml and also have it added as a dependency to the GWT application. 
+The HelloWorld extension is only a client-side (IDE) extension. You have to introduce your extension as a dependency in /che/assembly/assembly-ide-war/pom.xml and also have it added as a dependency to the GWT application.
 
-First add the dependency: 
+First add the dependency:
 ```xml  
 ...
 <dependencies>

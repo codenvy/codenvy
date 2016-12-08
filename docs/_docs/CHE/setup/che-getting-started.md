@@ -2,7 +2,6 @@
 title: Getting Started&#58 Local
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/che-getting-started/
 ---
 # How to Get Help  

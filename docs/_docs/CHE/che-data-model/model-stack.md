@@ -2,7 +2,6 @@
 title: Stack
 excerpt: "Sample code that can be used to bootstrap the content of a new project."
 layout: docs
-overview: true
 permalink: /docs/model-stack/
 ---
 JSON workspace object defines the contents and structure of a workspace. A workspace configuration is used to define the workspace to be generated.
@@ -58,7 +57,7 @@ workspaceConfig : {
 ```
 Every workspace can have one or more environments which are used to run the code against a stack of technology. Every workspace has exactly one environment which acts as a special "development environment", for which projects are synchronized into and developer services are injected, such as intellisense, workspace agents, SSH, and plug-ins.  
 
-Set `defaultEnv` to the name of the environment that should act as the Docker-powered environment that powers the workspace when it boots. This name must match the name given to an object in the `environments` array. Che will create a container off of this environment when the workspace is launched. 
+Set `defaultEnv` to the name of the environment that should act as the Docker-powered environment that powers the workspace when it boots. This name must match the name given to an object in the `environments` array. Che will create a container off of this environment when the workspace is launched.
 
 ## Environments
 Each environments are constructed of one or more machines, each one is an individual container. An environment can be comprised of multiple machines that are linked together, such as when you want a database running on a different machine than your debugger.
@@ -66,7 +65,7 @@ Each environments are constructed of one or more machines, each one is an indivi
 environment : {
   name           : STRING,     // Identifier and pretty name for environment
   recipe         : STRING,     // Define engine for composing machines network runtimes (compose, kubernetes pod)
-  machineConfigs : [{}],       // Instructions for how Che builds a runtime 
+  machineConfigs : [{}],       // Instructions for how Che builds a runtime
 }\
 ```
 ### MachineConfigs Object
@@ -123,7 +122,7 @@ project.mixins : [
 A mixin adds additional behaviors to a project as a set of new project type attributes.  Mixins are reusable across any project type. You define the mixins to add to a project by specifying an array of strings, with each string containing the identifier for the mixin.  For example, `"mixins" : [ "git", "tour", "pullrequest" ]`.
 
 | Mixin ID   | Description   
-| --- | --- 
+| --- | ---
 | `git`   | `tour`   
 | Initiates the project with a git repository. Adds git menu functionality to the IDE. If a user in the IDE creates a new project and then initializes a git repository, then this mixin is added to that project.   | Enables walk-me style guided tour functionality. You can author custom step by step tours that execute when users create a new workspace.  See [Tour](doc:tour) for specification and examples.   
 | `pullrequest`   | Enables pull request workflow where Codenvy handles local & remote branching, forking, and pull request issuance. Pull requests generated from within Codenvy have another Factory placed into the comments of pull requests that a PR reviewer can consume. Adds contribution panel to the IDE. If this mixin is set, then it uses attribute values for `project.attributes.local_branch` and `project.attributes.contribute_to_branch`.   
@@ -142,7 +141,7 @@ Different Eclipse Che plug-ins can add their own attributes to affect the behavi
 #### Pull Request Attributes
 
 | Known Attribute   | Description   
-| --- | --- 
+| --- | ---
 | Used in conjunction with the `pullrequest` mixin. If provided, the local branch for the project is set with this value. If not provided, then the local branch is set with the value of `project.source.parameters.branch` (the name of the branch from the remote).  If `local_branch` and `project.source.parameters.branch` are both not provided, then the local branch is set to the name of the checked out branch.   | Name of the branch that a pull request will be contributed to. Default is the value of `project.source.parameters.branch`, which is the name of the branch this project was cloned from.   
 | `contribute_to_branch`   | `local_branch`   
 
@@ -150,12 +149,12 @@ Here is a snippet that demonstrates full configuration of the contribution mixin
 ```json  
 factory.workspace.project : {
   "mixins"     : [ "pullrequest" ],
-  
+
   "attributes" : {
     "local_branch"         : [ "timing" ],
     "contribute_to_branch" : [ "master" ]
   },
-  
+
   "source" : {
     "type"       : "git\n    "location"   : "https://github.com/codenvy/che.git\n    "parameters" : {
       "keepVcs" : "true"
@@ -195,7 +194,7 @@ When using `source.type` with `git` or `svn`, the `source.location` should be UR
     "description": "A blank project example.\n    "problems": [],
     "links": [],
     "mixins": [],
-    "name": "blank-project\n    "type": "blank\ 
+    "name": "blank-project\n    "type": "blank\
     "path": "/blank-project\n    "attributes": {}
   }
 ]
@@ -223,7 +222,7 @@ project : {
 A project has a type which causes special services to be added to the IDE and the default environment that is powering the workspace. Additionally, each project type has a specialized set of additional attributes that can alter the behavior of the project.  The icon next to your project name in the IDE explorer changes based upon the project type that it has.  You can also change project type in `Project > Configuration` in the IDE.
 
 | Project Type   | `blank`   
-| --- | --- 
+| --- | ---
 | Description   | `maven`   
 | A no-op project type. Inherits basic IDE functionality.   | Installs a number of plug-ins including maven, Java, and ant. The maven project type provides a wizard for configuring projects, special editors for `pom.xml`, dozens of types of Java intellisense, and maven command types, which help developers write maven processes.   
 | `node-js`   | Installs a number of plug-ins for JavaScript. Code completion for HTML, JavaScript and CSS actived.   
@@ -232,7 +231,7 @@ A project has a type which causes special services to be added to the IDE and th
 | `c`   | Inherits basic IDE functionality for C and GDB debugger.   
 | `cpp`   | Inherits basic IDE functionality for C and GDB debugger.   
 
-Set `project.path` to the relative location from the repository that contains the root of your project. Your workspace will have a root directory named `/projects` and this field is a relative path from that directory. 
+Set `project.path` to the relative location from the repository that contains the root of your project. Your workspace will have a root directory named `/projects` and this field is a relative path from that directory.
 
 For example, let's take an example to create a workspace with three projects from three repositories: `project1`, `project2`, and `project3`.  These projects will be stored in `/projects/project1`, `/projects/project2`, and `/projects/project3`. The `path` attribute would be set to `/project1`, `/project2`, and `/project3`.
 
@@ -243,13 +242,13 @@ project.source : {
   location   : URL,            // Repo location
   parameters : {}              // (OPTIONAL) Attributes for version control
 }
- 
+
 project.source.parameters : {      
   branch     : STRING,         // Clone from this branch
   startPoint : STRING,         // Branch to start at if value of 'branch' param isn't a valid branch
   keepVcs    : [true | false], // Keep the .git folder after clone.
   commitId   : STRING,         // Clone from a commit point. Branch precedes this property
-  keepDir    : STRING,         // Clone all, but display only this subdir of repo 
+  keepDir    : STRING,         // Clone all, but display only this subdir of repo
   fetch      : REF-SPEC        // Clone from patch set of provided ref-spec
 }
 \
@@ -294,7 +293,7 @@ In the IDE, you can set a module with the "context root". When a module has the 
   },
 
   "path"        : "/che-core\n  "description" : "test project description\n  "mixins"      : [],
-  
+
   "modules"     : [{  
     "name"       : "platform-api\n    "type"       : "maven\n    "path"       : "/che-core/platform-api"
   }]
@@ -319,7 +318,7 @@ command : {
   commandLine : STRING,       // Process to execute in the workspace
   workingDir  : STRING        // (Optional) Location in workpace to execute command
   attributes  : {
-    previewUrl: STRING        // (Optional) Refer preview URL 
+    previewUrl: STRING        // (Optional) Refer preview URL
   }
 }
 ```
@@ -347,7 +346,7 @@ Tags are used for stacks and sample objects. Those values are used to determine 
 ```json  
 "tags" : {        
   "tag1\                             //list of strings representing tags
-  "tag2\n  "..." 
+  "tag2\n  "..."
 }
 ```
 ## Sample Reference

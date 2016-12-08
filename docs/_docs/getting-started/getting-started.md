@@ -2,7 +2,6 @@
 title: Getting Started
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/getting-started/
 ---
 With Docker 1.11+ on Windows, Mac, or Linux:

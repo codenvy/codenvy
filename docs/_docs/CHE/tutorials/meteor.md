@@ -2,7 +2,6 @@
 title: Meteor in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/meteor/
 ---
 # 1. Start Che  
@@ -12,8 +11,8 @@ Run `docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che
 When in User Dashboard, go to `Workspaces` tab and click `(+)` button. It will take you to a Wizard with all the steps to create a new workspace.
 
 ### Select Source
-We’ll create a new workspace using recipe, so choose an appropriate option in the menu. 
-	
+We’ll create a new workspace using recipe, so choose an appropriate option in the menu.
+
 ###Select Stack
 Our workspace will be created from a **Custom Stack** (tab on the far right). We’ll use a certified Debian based Codenvy image with NodeJS 5.6.0 and Meteor installed ([Recipe](https://raw.githubusercontent.com/eclispe/che-dockerfiles/master/meteor/latest/Dockerfile)).
 
@@ -65,4 +64,3 @@ FROM eclipse/meteor
 RUN sudo npm install -g gulp bower grunt ionic\
 ```
 ## Can I override the default CMD?
-

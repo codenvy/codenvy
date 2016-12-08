@@ -2,7 +2,6 @@
 title: Project Samples
 excerpt: "Sample code that can be used to bootstrap the content of a new project."
 layout: docs
-overview: true
 permalink: /docs/samples/
 ---
 A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are filtered based upon the type of stack selected. You can add your own templates to Che.
@@ -23,7 +22,7 @@ Wizard-driven templates allow the user to create a project and configure the cod
 To register your a new project template to Che, you first need to create the corresponding Template Object. Please read the following documentation for the [Template Object](https://dash.readme.io/project/eclipse-che/docs/code-template).  
 
 A code template can be used to instantiate a set of files into the project tree. The code template will appear in the user dashboard when a user attempts to create a new project.
-Those projects templates can be registered for existing Che stacks, or it can be for a [custom stack that you author](https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che). 
+Those projects templates can be registered for existing Che stacks, or it can be for a [custom stack that you author](https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che).
 Different templates will be shown to the user depending upon the stack that they select using embedded filters. The template lets the initial code tree to be instantiated from a git / URL or from a hosted ZIP archive.
 ```shell  
 # Location of Che template definitions

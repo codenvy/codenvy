@@ -2,7 +2,6 @@
 title: Vaadin in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/vaadin/
 ---
 Vaadin is a set of user interface components for Web applications. Vaadin projects work within Che. This page provides a quick configuration guide to get started.

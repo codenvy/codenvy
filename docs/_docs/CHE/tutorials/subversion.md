@@ -2,10 +2,9 @@
 title: Subversion Repos in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/subversion/
 ---
-Apache Subversion (often abbreviated SVN, after the command name svn) is a software versioning and revision control system distributed as free software under the Apache License. 
+Apache Subversion (often abbreviated SVN, after the command name svn) is a software versioning and revision control system distributed as free software under the Apache License.
 
 Che supports SVN through the commands line.
 ```text  
@@ -34,7 +33,7 @@ svn update\
 
 ```text  
 # Commit changes to the remote hosting.
-1. In the Terminal run `svn add . --force` command to schedule files, directories, or symbolic links in your project for addition to the repository. 
+1. In the Terminal run `svn add . --force` command to schedule files, directories, or symbolic links in your project for addition to the repository.
 
 2. Commit changes with `svn commit -m “your-commit-message”` command.\
 ```

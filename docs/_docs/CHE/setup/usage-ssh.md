@@ -2,7 +2,6 @@
 title: Usage&#58 SSH
 excerpt: "Connect to your workspace runtimes"
 layout: docs
-overview: true
 permalink: /docs/usage-ssh/
 ---
 #### Requires 5.0.0-M7

@@ -2,7 +2,6 @@
 title: Native HTML/JS
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/embed-htmljs/
 ---
 The Che IDE is developed based on GWT. If you want to extend the Che UI with new UI components, the default is to develop those custom components using GWT, too. Please refer to [this tutorial](doc:parts) to learn how to extend Che with new parts (view or editors).

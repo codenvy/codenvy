@@ -2,10 +2,9 @@
 title: Samples
 excerpt: "Sample object defines code sample and commands that can be used to bootstrap the content of a new project."
 layout: docs
-overview: true
 permalink: /docs/model-samples/
 ---
-Samples object defines code sample and commands that can be used to bootstrap the content of a new project. 
+Samples object defines code sample and commands that can be used to bootstrap the content of a new project.
 (Learn more on [Samples](doc:samples) )
 
 ## Samples Object
@@ -18,7 +17,7 @@ samples : {
   path        : STRING,  // Path to the project in a workspace  behaviors
   description : STRING,  // Description of the project to appear on the dashboard
   projectType : STRING,  // Project type.  Different types have different attributes. Find all the projects types descriptions in the Factory docs
-  mixins      : {},      // Mixins add sets of behavior attributes to a project. 
+  mixins      : {},      // Mixins add sets of behavior attributes to a project.
   attributes  : {},      // List of project type attributes. List varies by type selected
   modules     : {},      // (Optional) Project components. Set by server
   problems    : {},      // (Optional) Errors occurred in the project. Set by server
@@ -32,9 +31,9 @@ samples : {
 ### Source
 ```json  
 samples.source : {                    
-  type       : [git | svn | zip],           // Version control system 
+  type       : [git | svn | zip],           // Version control system
   location   : URL,                         // Location of source code in version control system or location of a remote zip archive
-  parameters : {}                           // (Optional) Parameter list to configure access. Parameter variables vary by type 
+  parameters : {}                           // (Optional) Parameter list to configure access. Parameter variables vary by type
     }\
 ```
 When using `source.type` with `git` or `svn`, the `source.location` should be URL of a publicly available repo. Referencing private repos over HTTPS will result in clone failure unless credentials are provided in the URL itself. Using SSH URLs is possible, however, a user will need ssh key to complete this operation, therefore, it is recommended to use HTTPS URLs to public repos.
@@ -75,7 +74,7 @@ Tags are used for stacks and samples objects. Those values are used to determine
 ```json  
 samples.tags : [{        
   "tag1\                             //list of strings representing tags
-  "tag2\n  "..." 
+  "tag2\n  "..."
 }]
 ```
 ## Samples Reference
@@ -83,13 +82,13 @@ samples.tags : [{
 [  
   {  
     "name":"web-javaee-jaxrs\        
-    "displayName":"web-javaee-jaxrs\ 
+    "displayName":"web-javaee-jaxrs\
     "path":"/web-javaee-jaxrs\       
-    "description":"A basic example demonstrating JAXRS running on Apache TomEE\ 
+    "description":"A basic example demonstrating JAXRS running on Apache TomEE\
     "projectType":"maven\           
     "mixins":[],                      
     "attributes":{                    
-      "language":[ 
+      "language":[
         "java"
       ]
     },
@@ -130,7 +129,7 @@ samples.tags : [{
         }
       }
     ],
-    "links":[], 
+    "links":[],
     "category":"Samples\              
     "tags":[                           
       "maven\n      "java\n      "javaee\n      "jaxrs"

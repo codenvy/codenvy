@@ -2,19 +2,18 @@
 title: Actions
 excerpt: "Action API"
 layout: docs
-overview: true
 permalink: /docs/actions/
 ---
 Actions allow you to add custom behavior to the Che IDE. They can be placed in menus, toolbars or context menus. An Action is a Java class, which implements the behavior to be executed. Additionally, it defines a text to be shown, a tooltip and an icon. In the following section, we describe the implementation of Actions more in detail.
 To make Actions available in the Che IDE, they need to be registered and placed into ActionGroups. Thereby, you specify the location (e.g. a menu or toolbar), where the actions is shown. The registration of actions is described in the subsequent section [Registering Actions](actions#section-registering-actions).
- 
+
 ## Authoring Actions
 Simple `Actions` directly inherit from `org.eclipse.che.ide.api.action.Action`. In the constructor, we use the super class to configure our action with the following parameters:
 * **text** (String): The name of the action shown in the UI, in our case defined by concrete Actions (sub classes).
 * Optional: **description** (String): The description of the action shown in the UI, in our case defined by concrete Actions (sub classes).
 
 In the example action below, the constructor also gets the `NotificationManager` injected, which is used to display a "Hello World" message.
-A custom `Action` need to implement the `#actionPerformed` method, which is called when it is invoked. Actions can be associated with a variety of triggers within the system such as buttons, menu item selections, or user input (see following section). 
+A custom `Action` need to implement the `#actionPerformed` method, which is called when it is invoked. Actions can be associated with a variety of triggers within the system such as buttons, menu item selections, or user input (see following section).
 
 ```java  
 @Singleton
@@ -61,28 +60,28 @@ Once we have implemented a custom action, we must register it. This is done in t
 
 As a first step, we register the `HelloWorldAction` itself at the `ActionManager`. Thereby, Che is aware of the action to be executed. Along with the registration, an action must be associated with a unique ID, which allows to reference the `Action`.
 
-Second, to define a place in the IDE where the Action is visible to the user, we  place the Action in an existing `ActionGroup`. Actions are organized into groups, which, in turn, can contain other groups. A group of actions can form a toolbar or a menu. Subgroups of the group can form submenus of the menu. You can  directly place an `Action` into an existing group. Alternatively, you can create a custom group containing your action and add this group into Che. 
+Second, to define a place in the IDE where the Action is visible to the user, we  place the Action in an existing `ActionGroup`. Actions are organized into groups, which, in turn, can contain other groups. A group of actions can form a toolbar or a menu. Subgroups of the group can form submenus of the menu. You can  directly place an `Action` into an existing group. Alternatively, you can create a custom group containing your action and add this group into Che.
 In the following example, a custom group is created (`SampleGroup`), the `HelloWorldAction` is added to it and the Group is placed in the main menu of Che.
 Additionally, the `HelloWorldActionWithIcon` is directly placed into the main menu.
 Please see the following section on more details about existing action locations (i.e. groups) in Che and how to specify the order of actions within those groups.
 ```java  
 @Extension(title = "Sample Actions Extension\ version = "1.0.0")
-public class SampleActionsExtensions { 
-    @Inject 
-    public SampleActionsExtensions(HelloWorldAction helloWorldAction, ActionManager actionManager) { 
-    	
+public class SampleActionsExtensions {
+    @Inject
+    public SampleActionsExtensions(HelloWorldAction helloWorldAction, ActionManager actionManager) {
+
       actionManager.registerAction("helloWorldAction\ helloWorldAction);
       actionManager.registerAction("helloWorldActionWithIcon\ helloWorldActionWithIcon);
       /...
-        
+
     	DefaultActionGroup sampleGroup = new DefaultActionGroup("Sample actions\ true, actionManager);
 
       sampleGroup.add(helloWorldAction);
-      
+
       // add sample group after help menu entry
       DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
         mainMenu.add(sampleGroup);
-      
+
       // add the sample group to the beginning of the toolbar as well
       DefaultActionGroup toolbar = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_TOOLBAR);
       toolbar.add(helloWorldActionWithIcon);
@@ -95,7 +94,7 @@ public class SampleActionsExtensions {
 In this section, we describe more in detail, how actions can be placed at specific locations within Che and how the order within toolbars and menus can be specified. Both, the location and the order is specified along with the registration of an action.
 
 Every action and action group in Che has a unique identifier. This allows to reference existing groups and actions when registering a new element and thereby specify its location. In the example registration in the previous section, we have used the ID of the Che main menu to place our custom action group and action in it. All existing identifiers for existing che action groups can be found in  [org.eclipse.che.ide.api.action.IdeActions](https://github.com/eclipse/che/blob/master/core/ide/che-core-ide-api/src/main/java/org/eclipse/che/ide/api/action/IdeActions.java).
-Additionally, you can find a collection of examples within the example extension for actions (che/samples/sample-plugin-actions/che-sample-plugin-actions-ide). 
+Additionally, you can find a collection of examples within the example extension for actions (che/samples/sample-plugin-actions/che-sample-plugin-actions-ide).
 
 In addition to placing actions in groups, you can define a relative order for actions and groups within their parent container. Therefore, a constraint needs to be specified when adding an element to a group. The constraint defines an anchor (ID of an existing element) and a relation to it (`BEFORE` or `AFTER`). Alternatively, you can use `Constraints.FIRST` and `Constraints.LAST` (default) to add an element at the beginning or at the end, respectively.
 
@@ -164,7 +163,7 @@ For common operations such as creating files, Che provides reusable default acti
 ###Create File Actions
 Che provides a template implementation for actions to create new resources (i.e. files). When using the template, you only need to specify the name of the action as well as the file extension to be created (as shown in the following code example).
 ```java  
-org.eclipse.che.plugin.myextension.ide.action.CreateMyFileAction 
+org.eclipse.che.plugin.myextension.ide.action.CreateMyFileAction
 public class CreateMyFileAction extends AbstractNewResourceAction {
 
 	@Inject
@@ -181,7 +180,7 @@ public class CreateMyFileAction extends AbstractNewResourceAction {
 ##Project/Perspective-specific Actions (JSON Example)
 In this part of the tutorial, as part of the [JSON example](docs:introduction-1#section-the-json-example) we describe how to add project- and perspective-specific actions, meaning  actions that are only available for a specific project type and within specific perspectives. As we want to define several actions of this type, we will create a template implementation and then inherit from it for the implementation of several actions.
 
-These example actions will be placed in the context menu on the specific [JSON project type](doc:custom-project-types)  defined before. The following diagram shows all components of a project type registration. The classes highlighted in dark grey are to be implemented for the extension. 
+These example actions will be placed in the context menu on the specific [JSON project type](doc:custom-project-types)  defined before. The following diagram shows all components of a project type registration. The classes highlighted in dark grey are to be implemented for the extension.
 
 First, our actions must determine whether they are available based on the current app context, in our case, based on the current project type. As we want to add several project specific actions, it makes sense to extract this behavior into an abstract class, in our case `MyAbstractProjectSpecificAction`. By inheriting from this abstract base class, we can now easily add project specific actions implementing the actual behavior to be executed.
 
@@ -203,7 +202,7 @@ public abstract class JsonExampleProjectAction extends AbstractPerspectiveAction
                                 	@NotNull String text,
                                 	@NotNull String description,
                                 	@Nullable SVGResource svgResource) {
-    
+
 		super(Collections.singletonList(ProjectPerspective.PROJECT_PERSPECTIVE_ID),
             	text,
             	description,
@@ -226,15 +225,15 @@ public abstract class JsonExampleProjectAction extends AbstractPerspectiveAction
     return Constants.JSON_EXAMPLE_PROJECT_TYPE_ID.equals(
             	currentProject.getProjectConfig().getType());
 	}
-  
+
 }
 
 \
 ```
-The `#updateInPerspective` method is responsible for updating the enablement and the visibility of the action. In this example, we only want to show the action, if the current project is a JSON project. Therefore, we retrieve the current project from the `AppContext`, check whether there is a current project and if so, whether it has the expected project type. 
+The `#updateInPerspective` method is responsible for updating the enablement and the visibility of the action. In this example, we only want to show the action, if the current project is a JSON project. Therefore, we retrieve the current project from the `AppContext`, check whether there is a current project and if so, whether it has the expected project type.
 Calling `event.getPresentation().setEnabledAndVisible(true/false)` will set the enablement and the visibility accordingly.
 
-After defining a project specific action, we can now define an arbitrary number of concrete implementations to add custom behavior. The example below inherits from our `JsonExampleProjectAction` and uses the super constructor to configure the specificity of the action. Further, the constructor gets the `NotificationManager` injected, which is used in the implementation of the action below. The method `#actionPerformed` will be called once the user has clicked on an action. 
+After defining a project specific action, we can now define an arbitrary number of concrete implementations to add custom behavior. The example below inherits from our `JsonExampleProjectAction` and uses the super constructor to configure the specificity of the action. Further, the constructor gets the `NotificationManager` injected, which is used in the implementation of the action below. The method `#actionPerformed` will be called once the user has clicked on an action.
 
 In the example, we trigger a simple notification. However, this simple behavior could be replaced with any custom operation.
 ```java  
@@ -267,7 +266,7 @@ Once we have implemented a custom action, we must register it. This is done in t
 
 To keep all JSON example related actions together, we define a new `ActionGroup` called “JSON Example”. The second parameter defines that the group is displayed as a popup. After registering the new group at the `ActionManager`, we add our custom `HelloWorldAction` to it.
 
-To define a place in the IDE where the Action is visible to the user, we further place the Action in an existing `ActionGroup`, in our case, the context menu of a project. 
+To define a place in the IDE where the Action is visible to the user, we further place the Action in an existing `ActionGroup`, in our case, the context menu of a project.
 ```java  
 org.eclipse.che.plugin.jsonexample.ide.JsonExampleExtension
 @Extension(title = "JSON Example Extension\ version = "0.0.1")
@@ -281,14 +280,14 @@ public class JsonExampleExtension {
 
 		actionManager.registerAction("helloWorldAction\ helloWorldAction);
 
-    DefaultActionGroup jsonGroup = new DefaultActionGroup("JSON Example\ 
+    DefaultActionGroup jsonGroup = new DefaultActionGroup("JSON Example\
          true, actionManager);
     actionManager.registerAction("jsonExample\ jsonGroup);
     jsonGroup.add(helloWorldAction);
 
     DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup) actionManager.getAction("resourceOperation");
     mainContextMenuGroup.add(jsonGroup);
-    	
+
   }
 }
 
@@ -318,8 +317,8 @@ public class RedirectToDashboardWorkspacesAction extends Action {
     @Inject
     public RedirectToDashboardWorkspacesAction(CoreLocalizationConstant localization) {
         super(localization.actionRedirectToDashboardWorkspacesTitle(),
-              localization.actionRedirectToDashboardWorkspacesDescription(), 
-              null, 
+              localization.actionRedirectToDashboardWorkspacesDescription(),
+              null,
               null);
     }
 
@@ -379,7 +378,7 @@ this.appContext.getCurrentProject().getRootProject().getPath();
 
   	  asyncRequestFactory.createGetRequest(url, false).send(
         new AsyncRequestCallback<Map<String, String>>(unmarshaller) {
-          
+
     		@Override
       	protected void onSuccess(Map<String, String> linesPerFile) {
       		for (Map.Entry<String, String> entry : linesPerFile.entrySet()) {
@@ -397,7 +396,7 @@ this.appContext.getCurrentProject().getRootProject().getPath();
     }
 }
 ```
- 
+
 
 The following example shows how Che registers all of the actions for the Git menu.
 ```java  

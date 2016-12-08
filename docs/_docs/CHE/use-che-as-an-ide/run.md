@@ -2,7 +2,6 @@
 title: Run
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/run/
 ---
 There are two ways to run your application in Che:
@@ -57,4 +56,3 @@ Use startup scripts (usually in `/bin` directory of a webserver). You can start 
 When sources/build artifacts are deployed to a webserver and the server is up, get application preview URL in **Servers** tab (Machine perspective icon in the top right corner - ![Machine perspective](https://files.readme.io/5gHpdHAMSNig96lwduwf_machine-perspective.png) :
 ![server.png](/docs/images/server.png)
 If you use pre-built Che images, preview URLs are marked with Labels, like `tomcat8`, `apache2`, `asp.net.server` etc.
-

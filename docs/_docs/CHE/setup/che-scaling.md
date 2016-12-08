@@ -2,7 +2,6 @@
 title: Config&#58 Scaling
 excerpt: "Sizing guide and approaches for scaling Che to millions of concurrent developers"
 layout: docs
-overview: true
 permalink: /docs/che-scaling/
 ---
 Eclipse Che is a workspace server. It supports the provisioning and management of numerous workspaces for users. The default configuration of Che has a single identity per server, where the identity manages IDE preferences and SSH keys for workspaces and GitHub.

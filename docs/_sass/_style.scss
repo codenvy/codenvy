@@ -66,15 +66,30 @@ nav {
   li { display: inline-block; }
 }
 
-.doc-title {
-    color: #3c4146;
-    font-weight: 400;
-    line-height: 1em;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: #eee;
+.header-logo {
+  h1 {
+    margin: 0;
+    padding-top: 15px;
+    line-height: 1.5em;
+    border-bottom-style: none;
+  }
 }
 
+.doc-title {
+  h1 {
+    color: #3c4146;
+    font-weight: 400;
+    font-size: 1.8em;
+  }
+}
+
+.doc-title-content {
+  border: 0;
+  height: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 20px;
+}
 
 
 .main-nav {
@@ -84,21 +99,24 @@ nav {
     margin-right: 10px;
 
     a {
+      @include border-radius(5px);
+      color: #fff;
       font-size: 16px;
       padding: 0.3em 1em;
       @include transition(all .25s);
 
       &:hover {
-        background-color: #252525;
+        background-color: rgba(74,144,226,.5);
         border-color: #4A90E2;
         border-width: 1px;
-        text-shadow: 0 1px 3px rgba(0,0,0,.5);
       }
     }
 
     &.current {
 
       a {
+        background-color: #4A90E2;
+        @include box-shadow(inset 0 1px 0 rgba(255,255,255,.2), 0 1px 5px rgba(0,0,0,.3));
         color: #fff;
       }
     }
@@ -116,12 +134,9 @@ nav {
   a {
     float: left;
     width: 100%;
-    background-color: #333;
-    color: #fc0;
+    color: #fff;
     text-align: center;
-    text-transform: uppercase;
     font-size: 14px;
-    font-weight: 900;
     padding: 5px;
     @include border-radius(5px);
   }
@@ -135,10 +150,9 @@ nav {
   .current {
 
     a {
-      background-color: #fc0;
-      color: #222;
-      @include box-shadow(inset 0 1px 0 rgba(255,255,255,.5), 0 1px 5px rgba(0,0,0,.5));
-      text-shadow: 0 1px 0 rgba(255,255,255,.3);
+      background-color: #4A90E2;
+      color: #fff;
+      @include box-shadow(inset 0 1px 0 rgba(255,255,255,.2), 0 1px 5px rgba(0,0,0,.3));
     }
   }
 }
@@ -429,13 +443,14 @@ article {
 
 aside {
   padding-top: 30px;
+  line-height: 1.2em;
 
   h4 {
     text-transform: uppercase;
     font-size: 14px;
     color: #fbb84d;
-    font-weight: 700;
-    padding: 0 0 10px 30px;
+    font-weight: 400;
+    padding: 0 0 2px 30px;
     margin-left: -30px;
     display: inline-block;
     border-bottom: 1px solid #fbb84d;
@@ -447,12 +462,23 @@ aside {
     &:first-child { margin-top: 0; }
   }
 
+  li.current {
+    list-style-type: none;
+
+    a {
+      font-size: 12px;
+      position: relative;
+      color: #4A90E2;
+    }
+  }
+
   li {
     list-style-type: none;
 
     a {
       font-size: 12px;
-      position: relative
+      position: relative;
+      color: #ffffff;
     }
 
     &.current a:before {
@@ -460,6 +486,7 @@ aside {
       border-color: transparent transparent transparent #4A90E2;
       border-style: solid;
       border-width: 10px;
+      color: #4A90E2;
       width: 0;
       height: 0;
       position: absolute;
@@ -480,9 +507,9 @@ aside {
 
 .section-nav {
   text-align: center;
-  padding-top: 30px;
+  padding-top: 40px;
   position: relative;
-  /*  background: url(../img/article-footer.png) top center no-repeat; */
+  background: url(../img/article-footer.png) top center no-repeat;
   margin: 30px -20px 10px;
 
   > div { width: 49.5%; }
@@ -647,7 +674,7 @@ code {
   margin: 0;
   font: 14px/1.8em Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;
   padding: 0 0.5em;
-  border: 1px solid #cacaca;
+  //border: 1px solid #cacaca;
 }
 
 @media (min-width: 768px) {
@@ -694,6 +721,9 @@ h5 > code,
   @extend .highlight;
   margin: 0;
   padding: 10px 0.5em;
+  color: #fff;
+  background-color: #444;
+  border-style: none;
 }
 
 /* HTML Elements */
@@ -702,13 +732,18 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     padding-top: 15px;
     line-height: 1.5em;
+    font-weight: normal;
 }
 
-h1, h2 {
-  color: #3c4146;
+h1 {
+  font-size: 1.6em;
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: #eee;
+}
+
+h2 {
+  color: #3c4146;
 }
 
 a {
@@ -736,7 +771,7 @@ p {
 
 article {
 
-  h2, h3, h4, h5, h6 { margin: 1em 0; }
+  h2, h3, h4, h5, h6 { margin: 0.5em 0; }
 
   h4 { color: #949AA2; }
 

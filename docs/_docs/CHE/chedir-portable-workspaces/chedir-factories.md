@@ -2,7 +2,6 @@
 title: Factories
 excerpt: "Convert Chefiles for execution by factories"
 layout: docs
-overview: true
 permalink: /docs/chedir-factories/
 ---
 A factory is a Codenvy concept that automates the generation or loading of a workspace using URLs. Codenvy is a hosted version of Eclipse Che that you can deploy onto your own servers or make use of at Codenvy's systems at codenvy.com.

@@ -2,7 +2,6 @@
 title: Setup&#58 Proxies
 excerpt: "Setting up the ARTIK IDE behind a proxy."
 layout: docs
-overview: true
 permalink: /docs/artik-proxies/
 ---
 Your users may need their workspaces to operate over a proxy to the Internet. The ARTIK IDE has three dependencies to the Internet:

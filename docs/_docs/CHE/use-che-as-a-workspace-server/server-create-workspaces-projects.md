@@ -2,7 +2,6 @@
 title: Workspaces
 excerpt: "cURL code that shows how to create a workspace with Che REST API"
 layout: docs
-overview: true
 permalink: /docs/server-create-workspaces-and-projects/
 ---
 Sample cURL code that creates a workspace named `workspace-debian` and displays resulting data in console:

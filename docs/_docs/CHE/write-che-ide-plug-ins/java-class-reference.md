@@ -2,7 +2,6 @@
 title: Java Class Reference
 excerpt: "JavaDoc for the Che & GWT classes available to developers"
 layout: docs
-overview: true
 permalink: /docs/java-class-reference/
 ---
 You can generate the JavaDoc for your installation from source.

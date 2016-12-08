@@ -2,7 +2,6 @@
 title: Usage&#58 Docker Launcher
 excerpt: "Run Che inside a Docker container with workspaces saved on your host."
 layout: docs
-overview: true
 permalink: /docs/usage-docker/
 ---
 This syntax is the preferred way to start and stop Eclipse Che. It follows the principles of 12 factor apps and has a format that works consistently on every operating system. This technique uses a Docker "launcher" - a Docker container that starts the Che server launched in a second container. This creates a simpler syntax reusable on different operating systems.

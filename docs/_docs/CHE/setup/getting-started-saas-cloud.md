@@ -2,7 +2,6 @@
 title: Getting Started&#58 SaaS Cloud
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/getting-started-saas-cloud/
 ---
 You can use Eclipse Che workspaces hosted at http://codenvy.com by signing up for a free account and accepting Codenvy's terms of service.

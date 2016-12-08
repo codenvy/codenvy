@@ -24,7 +24,7 @@
 }
 
 /* This ensures the outer gutters are equal to the (doubled) inner gutters. */
-.grid .unit:first-child { padding-left: 20px; }
+.grid .unit:first-child { padding-left: 20px; padding-top: 52px;}
 .grid .unit:last-child { padding-right: 20px; }
 
 /* Nested grids already have padding though, so let's nuke it */
@@ -42,7 +42,7 @@
 /* Wrapping at a maximum width is optional */
 .wrap .grid,
 .grid.wrap {
-  max-width: 1020px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 

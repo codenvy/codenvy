@@ -2,7 +2,6 @@
 title: PHP in Che
 excerpt: ""
 layout: tutorials
-overview: true
 permalink: /tutorials/php/
 ---
 # 1. Create a PHP Project  

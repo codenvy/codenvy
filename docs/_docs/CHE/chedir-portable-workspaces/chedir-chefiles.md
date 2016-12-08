@@ -2,7 +2,6 @@
 title: Chefile
 excerpt: "Customize how the Che server, workspace, and project are generated from your project"
 layout: docs
-overview: true
 permalink: /docs/chedir-chefile/
 ---
 You can create a Chefile and place it into the root of your repository. The Chefile contains the configuration that will be used to setup the Che server and Che workspace. You can run `che dir init` in a directory to provide a template Chefile.
@@ -80,8 +79,8 @@ workspace.projects[1].type = "maven"
 
 # Sample Chefile  
 We maintain a [Chefile in the root of the Eclipse Che repository](https://github.com/eclipse/che/blob/master/Chefile). It is used to build and run Che using Eclipse Che!
- 
-```javascript 
+
+```javascript
 
 # Runtime image to use for booting and compiling Eclipse Che
 # workspace.runtime.docker.image="florentbenoit/che-in-che"

@@ -2,7 +2,6 @@
 title: Git and SVN
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/git/
 ---
 Che natively supports Git and SVN, which is installed in all pre-defined Che images. Versioning functionality is available in the IDE and in the terminal. When using the Git and SVN menu, commands are injected into the workspace runtime and all output is streamed into the consoles panels. The following sections are in reference to Che's IDE Git and SVN Menu.
@@ -20,7 +19,7 @@ After the key has been generated, you can view and copy it, and save to your rep
 You can upload an existing public key instead of creating a new SSH key. When uploading a key add the hostname (using no www or http/https - as in the example below). Note that the `public key > view` button will not be available with this option as the public file should be generated already.
 ![Clipboard7.jpg](/docs/images/Clipboard7.jpg)
 ## Adding SSH Public Key to Repository Account
-Each repository provider has their own specific way to upload SSH public keys. This is required to use features such as `push` from the Git or Subversion menu in the workspace. 
+Each repository provider has their own specific way to upload SSH public keys. This is required to use features such as `push` from the Git or Subversion menu in the workspace.
 
 ## Git SSH Examples
 The following example is specific to GitHub and GitLab but can be used with all git or SVN repository providers that use SSH authentication. Please refer to documentation provided by other providers for additional assistance.
@@ -38,7 +37,7 @@ Import project from the IDE `Workspace > Import Project > GIT/SUBVERSION` menu.
 ![Clipboard12.jpg](/docs/images/Clipboard12.jpg)
 Importing a project can also be done from the dashboard menu.
 ![ImportProjectDashboard.jpg](/docs/images/ImportProjectDashboard.jpg)
-Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when importing a project from a git repository using ssh key authorization. **Note: HTTPS git url can only be used for oauth authentication described in [Git Using oAuth](https://eclipse-che.readme.io/docs/git#github-using-oauth)**. 
+Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when importing a project from a git repository using ssh key authorization. **Note: HTTPS git url can only be used for oauth authentication described in [Git Using oAuth](https://eclipse-che.readme.io/docs/git#github-using-oauth)**.
 # Git Using oAuth  
 ## GitLab oAuth
 Currently it's not possible for Che to use oAuth integration with GitLab. Although GitLab supports oAuth for clone operations, pushes are not supported. You can track [this GitLab issue](https://gitlab.com/gitlab-org/gitlab-ce/issues/18106) in their issue management system.
@@ -66,11 +65,11 @@ che start\
 Once the oauth is setup, SSH keys are generated and uploaded automatically for GitHub at `Profile > Preferences > SSH > VCS` by clicking the 'Octocat' icon.
 ![Clipboard.jpg](/docs/images/Clipboard.jpg)
 ### Import Existing Project
-Import project from the IDE `Workspace > Import Project > GITHUB` menu. When importing a project from GitHub using oauth key authorization you can use the https url like `https://github.com/<account>/<project>.git`. 
+Import project from the IDE `Workspace > Import Project > GITHUB` menu. When importing a project from GitHub using oauth key authorization you can use the https url like `https://github.com/<account>/<project>.git`.
 ![Clipboard13.jpg](/docs/images/Clipboard13.jpg)
 Importing a project can also be done from the dashboard menu.
 # SVN Using Username/Password  
-Import project from the IDE `Workspace > Import Project > SUBVERSION` menu. When importing a project from you can use the https url like `https://<hostname>/<repo-name>`. 
+Import project from the IDE `Workspace > Import Project > SUBVERSION` menu. When importing a project from you can use the https url like `https://<hostname>/<repo-name>`.
 ![che-svn-username-password.jpg](/docs/images/che-svn-username-password.jpg)
 
 # Set Git Committer Name and Email  

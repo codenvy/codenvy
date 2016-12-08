@@ -2,7 +2,6 @@
 title: Version Control
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/version-control/
 ---
 Users/Administrators use private/public repository URLs to import projects into workspaces, to use the Git / Subversion menus, and to use/create a [Factory](https://codenvy.readme.io/docs/factories). Some repository tasks such as git push and access to private repositories require setting up SSH or oAuth authentication mentioned below.

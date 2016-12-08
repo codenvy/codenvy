@@ -2,7 +2,6 @@
 title: Introduction
 excerpt: "White labeling is for embedding, distributing, or hosting Codenvy as part of another brand."
 layout: docs
-overview: true
 permalink: /docs/introduction-white-labels/
 ---
 A Codenvy white lable embeds it as part of another brand or within another product. They may add plugins with custom functionality, remove some of the default plugins which aren't needed by their customer base, modify the user interface and wire it up to their own product systems.

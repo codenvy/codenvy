@@ -2,7 +2,6 @@
 title: Environments
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/environments/
 ---
 A workspace is composed of projects (source files) and environments (runtimes). Every workspace has at least one environment that it is bound to. The default environment of a workspace is called the development environment and your workspace projects are mounted or synchronized into that environment.

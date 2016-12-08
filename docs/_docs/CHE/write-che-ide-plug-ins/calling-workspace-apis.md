@@ -2,22 +2,21 @@
 title: REST APIs
 excerpt: ""
 layout: docs
-overview: true
 permalink: /docs/calling-workspace-apis/
 ---
 Many of the IDE components that you build into your extension will need to communicate directly with the Che server or to the workspace the IDE is currently bound to. Che provides helper utilities to make REST calls simpler. Che's REST library is built on top of Google's HTTP Java client libraries.
 
 In your extension code, you can create an AsyncRequestFactory object, which has helper methods for creating requests that will have responses.
 ```java  
-private void getProjectType(@NotNull String workspaceId, 
-                            @NotNull String id, 
+private void getProjectType(@NotNull String workspaceId,
+                            @NotNull String id,
                             @NotNull AsyncCallback<ProjectTypeDto> callback) {
-  
+
     final String url = extPath + "/project-type/" + workspaceId + '/' + id;
     asyncRequestFactory.createGetRequest(url)
                        .header(ACCEPT, APPLICATION_JSON)
                        .loader(loaderFactory.newLoader("Getting info about project type..."))
-                       .send(newCallback(callback, 
+                       .send(newCallback(callback,
                                          dtoUnmarshallerFactory.newUnmarshaller(ProjectTypeDto.class)));
 
 }
@@ -42,7 +41,7 @@ public void deleteRepository() {
     final CurrentProject project = appContext.getCurrentProject();
     final GitOutputConsole console = gitOutputConsoleFactory.create(DELETE_REPO_COMMAND_NAME);
 
-     service.deleteRepository(workspaceId, project.getRootProject(), 
+     service.deleteRepository(workspaceId, project.getRootProject(),
                               new AsyncRequestCallback<Void>() {
         @Override
         protected void onSuccess(Void result) {
