@@ -23,7 +23,7 @@ In the case of 'latest' images, when you initialize an installation using the CL
 
 To avoid issues that can appear from using 'nightly' or 'latest' redirectoins, you may:
 1. Verify that you have the most recent version with `docker pull eclipse/cli:<version>`.
-2. When running the CLI, commands that use other Docker images have an optional `--pull` and `--force` command line option [which will instruct the CLI to check DockerHub](https://github.com/codenvy/codenvy/tree/master/docs#codenvy-init) for a newer version and pull it down. Using these flags will slow down performance, but ensures that your local cache is current.
+2. When running the CLI, commands that use other Docker images have an optional `--pull` and `--force` command line option [which will instruct the CLI to check DockerHub](/docs/cli#codenvy-init) for a newer version and pull it down. Using these flags will slow down performance, but ensures that your local cache is current.
 
 If you are running Codenvy using a tagged version that is a not a redirection label, such as `5.0.0-M7`, then these caching issues will not happen, as the software installed is tagged and specific to that particular version, never changing over time.
 
