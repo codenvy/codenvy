@@ -500,7 +500,19 @@ aside {
 
 .docs {
 
-  article { min-height: 800px; }
+  article {
+    min-height: 800px;
+
+    img {
+      width: 80%;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+  }
 
   .content { padding: 0; }
 }
