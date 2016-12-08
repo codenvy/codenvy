@@ -4,17 +4,10 @@ excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
 permalink: /docs/cli/
 ---
-The CLI is configured to hide most error conditions from the output screen. The CLI prints internal stack traces and error output to `cli.log`. To see the output of this log, you will need to volume mount a local path to `:/cli`. For example:
-
-```
-docker run --rm -it
-           -v /var/run/docker.sock:/var/run/docker.sock
-           -v /c/codenvy:/codenvy
-           -v /c/codenvy/cli:/cli codenvy/cli:nightly [COMMAND]
-```
+The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
 
 ## codenvy init  
-Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/codenvy` volume mount, then Codenvy creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `:/codenvy/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `:/codenvy/backup`.  After initialization, a `codenvy.env` file is placed into the root of the path that you mounted to `:/codenvy`.
+Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Codenvy creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `/data/backup`.  After initialization, a `codenvy.env` file is placed into the root of the path that you mounted to `/data`.
 
 These variables can be set in your local environment shell before running and they will be respected during initialization:
 
@@ -39,10 +32,10 @@ You can control the nature of how Codenvy downloads these images with command li
 
 The initialization of a Codenvy installation requires the acceptance of our default Fair Source 3 license agreement, which allows for some access to the source code and [usage for up to three people](http://codenvy.com/legal). You can auto-accept the license agreement without prompting for a response for silent installation by passing the `--accept-license` command line option.
 
-You can reinstall Codenvy on a folder that is already initialized and preserve your `/codenvy/codenvy.env` values by passing the `--reinit` flag.
+You can reinstall Codenvy on a folder that is already initialized and preserve your `/data/codenvy.env` values by passing the `--reinit` flag.
 
 ## codenvy config
-Generates a Codenvy instance configuration thta is placed in `/codenvy/instance`. This command uses puppet to generate configuration files for Codenvy, haproxy, swarm, socat, nginx, and postgres which are mounted when Codenvy services are started. This command is executed on every `start` or `restart`.
+Generates a Codenvy instance configuration thta is placed in `/data/instance`. This command uses puppet to generate configuration files for Codenvy, haproxy, swarm, socat, nginx, and postgres which are mounted when Codenvy services are started. This command is executed on every `start` or `restart`.
 
 If you are using a `codenvy/cli:<version>` image and it does not match the version that is in `/instance/codenvy.ver`, then the configuration will abort to prevent you from running a configuration for a different version than what is currently installed.
 
@@ -58,9 +51,7 @@ Stops all of the Codenvy service containers and removes them.
 Performs a `codenvy stop` followed by a `codenvy start`, respecting `--pull`, `--force`, and `--offline`.
 
 ## codenvy destroy
-Deletes `/docs`, `codenvy.env` and `/codenvy/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped.
-
-If you have mounted the `:/cli` path, then we write the `cli.log` to your host directory. By default, this log is not destroyed in a `codenvy destroy` command so that you can maintain a record of all CLI executions. You can also have this file removed from your host by mounting `:/cli` and passing the `--cli` parameter to this command.
+Deletes `/docs`, `codenvy.env` and `/instance`, including destroying all user workspaces, projects, data, and user database. If you pass `--quiet` then the confirmation warning will be skipped. Passing `--cli` will also destroy the `cli.log`. By default this is left behind for traceability.
 
 ## codenvy offline
 Saves all of the Docker images that Codenvy requires into `/backup/*.tar` files. Each image is saved as its own file. If the `backup` folder is available on a machine that is disconnected from the Internet and you start Codenvy with `--offline`, the CLI pre-boot sequence will load all of the Docker images in the `/backup/` folder.
