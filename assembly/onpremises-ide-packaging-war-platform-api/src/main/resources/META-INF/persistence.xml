@@ -65,6 +65,7 @@
 
         <class>com.codenvy.resource.spi.impl.ResourceImpl</class>
         <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>
+        <class>com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="eclipselink.exception-handler" value="org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler"/>

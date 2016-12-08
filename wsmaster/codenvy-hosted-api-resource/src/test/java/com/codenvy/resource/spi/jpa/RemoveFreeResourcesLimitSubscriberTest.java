@@ -15,7 +15,7 @@
 package com.codenvy.resource.spi.jpa;
 
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
-import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber;
+import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber;
 
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -30,19 +30,19 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber}
+ * Tests for {@link RemoveFreeResourcesLimitSubscriber}
  *
  * @author Sergii Leschenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriberTest {
+public class RemoveFreeResourcesLimitSubscriberTest {
     @Mock
     private EventService          eventService;
     @Mock
     private FreeResourcesLimitDao limitDao;
 
     @InjectMocks
-    RemoveFreeResourcesLimitBeforeAccountRemovedEventSubscriber subscriber;
+    RemoveFreeResourcesLimitSubscriber subscriber;
 
     @Test
     public void shouldSubscribeItself() {

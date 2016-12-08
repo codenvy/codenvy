@@ -39,7 +39,7 @@ public interface Permissions {
     /**
      * Returns instance id. It is optional and can be null if domain supports it
      *
-     * @see {@link PermissionsDomain#isInstanceRequired()}
+     * @see PermissionsDomain#isInstanceRequired()
      */
     @Nullable
     String getInstanceId();

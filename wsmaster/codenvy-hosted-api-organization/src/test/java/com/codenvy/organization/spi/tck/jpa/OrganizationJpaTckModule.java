@@ -18,20 +18,19 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
+import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
-import com.codenvy.organization.spi.tck.MemberDaoTest;
-import com.codenvy.organization.spi.tck.OrganizationDaoTest;
+import com.codenvy.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
+import com.codenvy.organization.spi.jpa.JpaOrganizationImplTckRepository;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
-import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
@@ -56,11 +55,15 @@ public class OrganizationJpaTckModule extends TckModule {
 
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
-        bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).toInstance(new JpaTckRepository<>(OrganizationImpl.class));
+        bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).to(JpaOrganizationImplTckRepository.class);
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).toInstance(new JpaTckRepository<>(UserImpl.class));
         bind(new TypeLiteral<TckRepository<MemberImpl>>() {}).toInstance(new JpaTckRepository<>(MemberImpl.class));
+        bind(new TypeLiteral<TckRepository<OrganizationDistributedResourcesImpl>>() {})
+                .toInstance(new JpaTckRepository<>(OrganizationDistributedResourcesImpl.class));
 
         bind(OrganizationDao.class).to(JpaOrganizationDao.class);
         bind(MemberDao.class).to(JpaMemberDao.class);
+
+        bind(OrganizationDistributedResourcesDao.class).to(JpaOrganizationDistributedResourcesDao.class);
     }
 }

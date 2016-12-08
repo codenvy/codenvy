@@ -34,6 +34,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
@@ -42,6 +43,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link RamResourceUsageTracker}
@@ -76,9 +79,13 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.RUNNING, 1000, 500, 500)));
 
-        ResourceImpl usedRam = ramUsageTracker.getUsedResource("account123");
+        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
+        assertTrue(usedRamOpt.isPresent());
+        ResourceImpl usedRam = usedRamOpt.get();
+        assertEquals(usedRam.getType(), RamResourceType.ID);
         assertEquals(usedRam.getAmount(), 2000L);
+        assertEquals(usedRam.getUnit(), RamResourceType.UNIT);
         verify(accountManager).getById(eq("account123"));
         verify(workspaceManager).getByNamespace(eq("testAccount"));
     }
@@ -91,11 +98,9 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
-        ResourceImpl usedRam = ramUsageTracker.getUsedResource("account123");
+        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
-        assertEquals(usedRam.getType(), RamResourceType.ID);
-        assertEquals(usedRam.getAmount(), 0L);
-        assertEquals(usedRam.getUnit(), RamResourceType.UNIT);
+        assertFalse(usedRamOpt.isPresent());
         verify(accountManager).getById(eq("account123"));
         verify(workspaceManager).getByNamespace(eq("testAccount"));
     }
@@ -119,6 +124,5 @@ public class RamResourceUsageTrackerTest {
                                                       .build())
                           .build();
     }
-
 
 }

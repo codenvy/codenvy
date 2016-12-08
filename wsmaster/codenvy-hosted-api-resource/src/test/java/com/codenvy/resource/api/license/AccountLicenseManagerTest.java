@@ -12,9 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.api.license;
 
-import com.codenvy.resource.spi.impl.LicenseImpl;
+import com.codenvy.resource.api.ResourceAggregator;
+import com.codenvy.resource.model.AccountLicense;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableMap;
@@ -35,22 +36,22 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Tests for {@link LicenseManager}
+ * Tests for {@link AccountLicenseManager}
  *
  * @author Sergii Leschenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class LicenseManagerTest {
+public class AccountLicenseManagerTest {
     @Mock
     private ResourcesProvider  resourcesProvider;
     @Mock
     private ResourceAggregator resourceAggregator;
 
-    private LicenseManager licenseManager;
+    private AccountLicenseManager accountLicenseManager;
 
     @BeforeMethod
     public void setUp() {
-        licenseManager = new LicenseManager(singleton(resourcesProvider), resourceAggregator);
+        accountLicenseManager = new AccountLicenseManager(singleton(resourcesProvider), resourceAggregator);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -59,7 +60,7 @@ public class LicenseManagerTest {
         when(resourcesProvider.getResources(eq("account123")))
                 .thenThrow(new NotFoundException("Account with specified id was not found"));
 
-        licenseManager.getByAccount("account123");
+        accountLicenseManager.getByAccount("account123");
     }
 
     @Test
@@ -76,7 +77,7 @@ public class LicenseManagerTest {
         when(resourcesProvider.getResources(eq("account123"))).thenReturn(singletonList(providedResource));
         when(resourceAggregator.aggregateByType(any())).thenReturn(ImmutableMap.of(reducedResource.getType(), reducedResource));
 
-        final LicenseImpl license = licenseManager.getByAccount("account123");
+        final AccountLicense license = accountLicenseManager.getByAccount("account123");
 
         verify(resourcesProvider).getResources(eq("account123"));
         verify(resourceAggregator).aggregateByType(eq(singletonList(testResource)));

@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Optional;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
@@ -47,7 +48,7 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
     }
 
     @Override
-    public ResourceImpl getUsedResource(String accountId) throws NotFoundException, ServerException {
+    public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
         final List<WorkspaceImpl> accountWorkspaces = workspaceManager.getByNamespace(account.getName());
         final long currentlyUsedRamMB = accountWorkspaces.stream()
@@ -58,6 +59,10 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
                                                                                      .getLimits()
                                                                                      .getRam())
                                                          .sum();
-        return new ResourceImpl(RamResourceType.ID, currentlyUsedRamMB, RamResourceType.UNIT);
+        if (currentlyUsedRamMB > 0) {
+            return Optional.of(new ResourceImpl(RamResourceType.ID, currentlyUsedRamMB, RamResourceType.UNIT));
+        } else {
+            return Optional.empty();
+        }
     }
 }

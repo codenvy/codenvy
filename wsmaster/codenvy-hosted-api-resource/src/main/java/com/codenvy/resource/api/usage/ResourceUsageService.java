@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.api.usage;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,9 +20,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import com.codenvy.organization.shared.dto.OrganizationDto;
+import com.codenvy.resource.api.DtoConverter;
 import com.codenvy.resource.shared.dto.ResourceDto;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
@@ -44,12 +45,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 @Api(value = "/resource", description = "Resource REST API")
 @Path("/resource")
-public class ResourceService extends Service {
-    private final ResourceManager resourceManager;
+public class ResourceUsageService extends Service {
+    private final ResourceUsageManager resourceUsageManager;
 
     @Inject
-    public ResourceService(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
+    public ResourceUsageService(ResourceUsageManager resourceUsageManager) {
+        this.resourceUsageManager = resourceUsageManager;
     }
 
     @GET
@@ -62,11 +63,13 @@ public class ResourceService extends Service {
                    @ApiResponse(code = 404, message = "Account with specified id was not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<ResourceDto> getTotalResources(@ApiParam("Account id")
-                                               @PathParam("accountId") String accountId) throws NotFoundException, ServerException {
-        return resourceManager.getTotalResources(accountId)
-                              .stream()
-                              .map(DtoConverter::asDto)
-                              .collect(Collectors.toList());
+                                               @PathParam("accountId") String accountId) throws NotFoundException,
+                                                                                                ServerException,
+                                                                                                ConflictException {
+        return resourceUsageManager.getTotalResources(accountId)
+                                   .stream()
+                                   .map(DtoConverter::asDto)
+                                   .collect(Collectors.toList());
     }
 
     @GET
@@ -80,10 +83,10 @@ public class ResourceService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<ResourceDto> getAvailableResources(@PathParam("accountId")
                                                    String accountId) throws NotFoundException, ServerException {
-        return resourceManager.getAvailableResources(accountId)
-                              .stream()
-                              .map(DtoConverter::asDto)
-                              .collect(Collectors.toList());
+        return resourceUsageManager.getAvailableResources(accountId)
+                                   .stream()
+                                   .map(DtoConverter::asDto)
+                                   .collect(Collectors.toList());
     }
 
     @GET
@@ -97,9 +100,9 @@ public class ResourceService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<ResourceDto> getUsedResources(@PathParam("accountId")
                                               String accountId) throws NotFoundException, ServerException {
-        return resourceManager.getUsedResources(accountId)
-                              .stream()
-                              .map(DtoConverter::asDto)
-                              .collect(Collectors.toList());
+        return resourceUsageManager.getUsedResources(accountId)
+                                   .stream()
+                                   .map(DtoConverter::asDto)
+                                   .collect(Collectors.toList());
     }
 }

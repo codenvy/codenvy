@@ -14,12 +14,12 @@
  */
 package com.codenvy.resource.api;
 
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableSet;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -80,8 +80,9 @@ public class ResourceAggregatorTest {
         final ResourceImpl aggregatedBResources = new ResourceImpl(B_RESOURCE_TYPE, 444, "unit");
         when(bResourceType.aggregate(any(), any())).thenReturn(aggregatedBResources);
 
-        final Map<String, ResourceImpl> aggregatedResources =
-                resourceAggregator.aggregateByType(asList(aResource, bResource, anotherBResource));
+        final Map<String, Resource> aggregatedResources = resourceAggregator.aggregateByType(asList(aResource,
+                                                                                                    bResource,
+                                                                                                    anotherBResource));
 
         verify(bResourceType).aggregate(eq(bResource), eq(anotherBResource));
         verify(aResourceType, never()).aggregate(any(), any());
@@ -114,18 +115,20 @@ public class ResourceAggregatorTest {
         assertTrue(deductedResources.contains(aggregatedBResources));
     }
 
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "No enough resources")
-    public void shouldThrowConflictExceptionWhenTotalResourcesDoNotHaveEnoughtAmoutToDeduct() throws Exception {
-        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
-        final ResourceImpl anotherAResource = new ResourceImpl(A_RESOURCE_TYPE, 321, "unit");
-        when(aResourceType.deduct(any(), any())).thenThrow(new ConflictException("No enough resources"));
+    @Test(expectedExceptions = NoEnoughResourcesException.class)
+    public void shouldThrowConflictExceptionWhenTotalResourcesDoNotHaveEnoughAmountToDeduct() throws Exception {
+        final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 111, "unit");
+        final ResourceImpl anotherAResource = new ResourceImpl(A_RESOURCE_TYPE, 333, "unit");
+        when(aResourceType.deduct(any(), any())).thenThrow(new NoEnoughResourcesException(singletonList(aResource),
+                                                                                          singletonList(anotherAResource),
+                                                                                          singletonList(new ResourceImpl(A_RESOURCE_TYPE,
+                                                                                                                         222,
+                                                                                                                         "unit"))));
 
         resourceAggregator.deduct(singletonList(aResource), singletonList(anotherAResource));
     }
 
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Your account doesn't have resourceB resource to use.")
+    @Test(expectedExceptions = NoEnoughResourcesException.class)
     public void shouldThrowConflictExceptionWhenTotalResourcesDoNotContainsRequiredResourcesAtAll() throws Exception {
         final ResourceImpl aResource = new ResourceImpl(A_RESOURCE_TYPE, 123, "unit");
         final ResourceImpl bResource = new ResourceImpl(B_RESOURCE_TYPE, 321, "unit");
@@ -133,16 +136,16 @@ public class ResourceAggregatorTest {
         resourceAggregator.deduct(singletonList(aResource), singletonList(bResource));
     }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenTryingToAggregateNotSupportedResource() throws Exception {
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionWhenTryingToAggregateNotSupportedResource() throws Exception {
         final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 
         resourceAggregator.aggregateByType(singletonList(dResource));
     }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenTryingToAggregateNotSupportedResources() throws Exception {
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionWhenTryingToAggregateNotSupportedResources() throws Exception {
         final ResourceImpl dResource = mock(ResourceImpl.class);
         final ResourceImpl anotherDResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
@@ -151,16 +154,16 @@ public class ResourceAggregatorTest {
         resourceAggregator.aggregateByType(asList(dResource, anotherDResource));
     }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenTotalResourcesListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionWhenTotalResourcesListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
         final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 
         resourceAggregator.deduct(emptyList(), singletonList(dResource));
     }
 
-    @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenResourcesToDeductListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionWhenResourcesToDeductListContainsNotSupportedResourceOnResourcesDeduction() throws Exception {
         final ResourceImpl dResource = mock(ResourceImpl.class);
         when(dResource.getType()).thenReturn("resourceD");
 

@@ -33,10 +33,13 @@ import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
+import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 import com.codenvy.organization.spi.jpa.JpaOrganizationDao;
+import com.codenvy.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
@@ -45,6 +48,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.spi.AccountDao;
@@ -99,13 +103,16 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -188,8 +195,10 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {}).to(SystemPermissionsDaoTest.TestDomain.class);
 
         //api-organization
-        bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).toInstance(new JpaTckRepository<>(OrganizationImpl.class));
+        bind(new TypeLiteral<TckRepository<OrganizationImpl>>() {}).to(JpaOrganizationImplTckRepository.class);
         bind(new TypeLiteral<TckRepository<MemberImpl>>() {}).toInstance(new JpaTckRepository<>(MemberImpl.class));
+        bind(new TypeLiteral<TckRepository<OrganizationDistributedResourcesImpl>>() {})
+                .toInstance(new JpaTckRepository<>(OrganizationDistributedResourcesImpl.class));
 
         //api-resource
         bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {}).toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
@@ -215,6 +224,7 @@ public class JpaIntegrationTckModule extends TckModule {
         //api-organization
         bind(OrganizationDao.class).to(JpaOrganizationDao.class);
         bind(MemberDao.class).to(JpaMemberDao.class);
+        bind(OrganizationDistributedResourcesDao.class).to(JpaOrganizationDistributedResourcesDao.class);
         bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
@@ -358,6 +368,71 @@ public class JpaIntegrationTckModule extends TckModule {
                 factory.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
             }
             super.createAll(factories);
+        }
+    }
+
+    /**
+     * Organizations require to have own repository because it is important
+     * to delete organization in reverse order that they were stored. It allows
+     * to resolve problems with removing suborganization before parent organization removing.
+     *
+     * @author Sergii Leschenko
+     */
+    public static class JpaOrganizationImplTckRepository extends JpaTckRepository<OrganizationImpl> {
+        @Inject
+        protected Provider<EntityManager> managerProvider;
+
+        @Inject
+        protected UnitOfWork uow;
+
+        private final List<OrganizationImpl> createdOrganizations = new ArrayList<>();
+
+        public JpaOrganizationImplTckRepository() {
+            super(OrganizationImpl.class);
+        }
+
+        @Override
+        public void createAll(Collection<? extends OrganizationImpl> entities) throws TckRepositoryException {
+            super.createAll(entities);
+            //It's important to save organization to remove them in the reverse order
+            createdOrganizations.addAll(entities);
+        }
+
+        @Override
+        public void removeAll() throws TckRepositoryException {
+            uow.begin();
+            final EntityManager manager = managerProvider.get();
+            try {
+                manager.getTransaction().begin();
+
+                for (int i = createdOrganizations.size() - 1; i > -1; i--) {
+                    // The query 'DELETE FROM ....' won't be correct as it will ignore orphanRemoval
+                    // and may also ignore some configuration options, while EntityManager#remove won't
+                    try {
+                        final OrganizationImpl organizationToRemove = manager.createQuery("SELECT o FROM Organization o " +
+                                                                                          "WHERE o.id = :id",
+                                                                                          OrganizationImpl.class)
+                                                                             .setParameter("id", createdOrganizations.get(i).getId())
+                                                                             .getSingleResult();
+                        manager.remove(organizationToRemove);
+                    } catch (NoResultException ignored) {
+                        //it is already removed
+                    }
+                }
+                createdOrganizations.clear();
+
+                manager.getTransaction().commit();
+            } catch (RuntimeException x) {
+                if (manager.getTransaction().isActive()) {
+                    manager.getTransaction().rollback();
+                }
+                throw new TckRepositoryException(x.getLocalizedMessage(), x);
+            } finally {
+                uow.end();
+            }
+
+            //remove all objects that was created in tests
+            super.removeAll();
         }
     }
 }

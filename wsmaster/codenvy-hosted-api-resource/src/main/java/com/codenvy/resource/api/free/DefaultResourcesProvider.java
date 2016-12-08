@@ -12,9 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -22,21 +22,19 @@ import org.eclipse.che.api.core.ServerException;
 import java.util.List;
 
 /**
- * Bridge class that link license and resources granting mechanisms.
+ * Provides default resources which should be are available for usage by account
+ * when admin doesn't override limit by {@link FreeResourcesLimitService}.
  *
  * @author Sergii Leschenko
  */
-public interface ResourcesProvider {
+public interface DefaultResourcesProvider {
     /**
-     * Returns list of provided resources for given account.
-     *
-     * @param accountId
-     *         account id
-     * @return list of provided resources for given account or empty list if there are not any resources for given account
-     * @throws NotFoundException
-     *         when account with specified id was not found
-     * @throws ServerException
-     *         when some exception occurs
+     * Provides default resources are available for usage by account
      */
-    List<ProvidedResourcesImpl> getResources(String accountId) throws ServerException, NotFoundException;
+    List<ResourceImpl> getResources(String accountId) throws ServerException, NotFoundException;
+
+    /**
+     * Returns account type for which this class provides default resources.
+     */
+    String getAccountType();
 }

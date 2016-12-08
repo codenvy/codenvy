@@ -44,6 +44,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.codenvy.organization.api.permissions.OrganizationDomain.DELETE;
 import static com.codenvy.organization.api.permissions.OrganizationDomain.DOMAIN_ID;
@@ -65,6 +69,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link OrganizationPermissionsFilter}
@@ -98,6 +103,25 @@ public class OrganizationPermissionsFilterTest {
         when(subject.getUserId()).thenReturn(USER_ID);
 
         when(manager.getById(anyString())).thenReturn(new OrganizationImpl("organization123", "test", null));
+    }
+
+    @Test
+    public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
+        //given
+        final List<String> collect = Stream.of(OrganizationService.class.getDeclaredMethods())
+                                           .filter(method -> Modifier.isPublic(method.getModifiers()))
+                                           .map(Method::getName)
+                                           .collect(Collectors.toList());
+
+        //then
+        assertEquals(collect.size(), 7);
+        assertTrue(collect.contains(OrganizationPermissionsFilter.CREATE_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.UPDATE_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.REMOVE_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.GET_BY_PARENT_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.GET_ORGANIZATIONS_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.GET_BY_ID_METHOD));
+        assertTrue(collect.contains(OrganizationPermissionsFilter.FIND_METHOD));
     }
 
     @Test
@@ -444,6 +468,7 @@ public class OrganizationPermissionsFilterTest {
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
+        @Override
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext.getCurrent().setSubject(subject);
         }

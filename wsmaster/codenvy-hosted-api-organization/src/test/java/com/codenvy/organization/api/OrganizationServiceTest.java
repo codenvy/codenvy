@@ -62,7 +62,7 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Sergii Leschenko
  */
-@Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
+@Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class OrganizationServiceTest {
 
     private static final String CURRENT_USER_ID = "user123";
@@ -340,6 +340,7 @@ public class OrganizationServiceTest {
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
+        @Override
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext.getCurrent().setSubject(new SubjectImpl("userName", CURRENT_USER_ID, "token", false));
         }
