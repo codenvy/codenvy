@@ -12,23 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server;
-
-import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
-import com.google.inject.AbstractModule;
-
-import org.eclipse.che.inject.DynaModule;
+package com.codenvy.api.license.model;
 
 /**
- * @author Alexander Andrienko
+ * @author Anatolii Bazko
  */
-@DynaModule
-public class LicenseModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(LicenseService.class);
-        bind(LicenseServicePermissionsFilter.class);
-        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
+public class Constants {
+    /**
+     * Codenvy license actions.
+     */
+    public enum Action {
+        ACCEPTED,
+        EXPIRED
     }
+
+    /**
+     * Codenvy license types.
+     */
+    public enum License {
+        FAIR_SOURCE_LICENSE,
+        PRODUCT_LICENSE
+    }
+
+    private Constants() { }
 }

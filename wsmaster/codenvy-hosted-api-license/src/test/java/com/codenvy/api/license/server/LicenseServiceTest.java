@@ -115,7 +115,7 @@ public class LicenseServiceTest {
     }
 
     @Test
-    public void testDeleteLicensShouldNotFindLicenseToDelete() {
+    public void testDeleteLicensShouldNotFindLicenseToDelete() throws Exception {
         doThrow(new LicenseNotFoundException("error")).when(licenseManager).delete();
 
         Response response = given()

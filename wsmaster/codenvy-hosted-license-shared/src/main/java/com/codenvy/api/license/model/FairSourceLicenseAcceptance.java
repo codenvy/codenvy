@@ -12,23 +12,27 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server;
-
-import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaCodenvyLicenseActionDao;
-import com.google.inject.AbstractModule;
-
-import org.eclipse.che.inject.DynaModule;
+package com.codenvy.api.license.model;
 
 /**
- * @author Alexander Andrienko
+ * Request to accept Codenvy Fair Source License.
+ * It contains user identification fields.
+ *
+ * @author Anatolii Bazko
  */
-@DynaModule
-public class LicenseModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(LicenseService.class);
-        bind(LicenseServicePermissionsFilter.class);
-        bind(CodenvyLicenseActionDao.class).to(JpaCodenvyLicenseActionDao.class);
-    }
+public interface FairSourceLicenseAcceptance {
+    /**
+     * Returns the user's first name who accepted FSL.
+     */
+    String getFirstName();
+
+    /**
+     * Returns the user's last name who accepted FSL.
+     */
+    String getLastName();
+
+    /**
+     * Returns the user's email who accepted FSL.
+     */
+    String getEmail();
 }

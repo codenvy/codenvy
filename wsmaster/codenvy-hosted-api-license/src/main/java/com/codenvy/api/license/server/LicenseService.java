@@ -25,6 +25,7 @@ import com.codenvy.api.license.InvalidLicenseException;
 import com.codenvy.api.license.LicenseException;
 import com.codenvy.api.license.LicenseFeature;
 import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.dto.FairSourceLicenseAcceptanceDto;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ApiException;
@@ -197,4 +198,16 @@ public class LicenseService {
         }
     }
 
+    @POST
+    @Path("fair-source-license")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Acceptance of Codenvy Fair Source License")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
+                           @ApiResponse(code = 400, message = "Inappropriate accept request"),
+                           @ApiResponse(code = 409, message = "Fair Source License has been already accepted"),
+                           @ApiResponse(code = 500, message = "Server error")})
+    public Response acceptFairSourceLicense(FairSourceLicenseAcceptanceDto fairSourceLicenseAcceptanceDto) throws ApiException {
+        licenseManager.acceptFairSourceLicense(fairSourceLicenseAcceptanceDto);
+        return status(CREATED).build();
+    }
 }

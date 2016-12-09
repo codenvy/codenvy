@@ -81,6 +81,6 @@ public class CodenvyLicenseFactory {
     }
 
     private void validateFeaturesFormat(Map<LicenseFeature, String> features) throws IllegalLicenseFormatException {
-        features.entrySet().stream().forEach(entry -> entry.getKey().validateFormat(entry.getValue()));
+        features.entrySet().forEach(entry -> entry.getKey().validateFormat(entry.getValue()));
     }
 }

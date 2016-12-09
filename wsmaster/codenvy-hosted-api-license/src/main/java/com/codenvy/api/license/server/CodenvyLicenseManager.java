@@ -19,8 +19,16 @@ import com.codenvy.api.license.CodenvyLicenseFactory;
 import com.codenvy.api.license.InvalidLicenseException;
 import com.codenvy.api.license.LicenseException;
 import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.model.Constants;
+import com.codenvy.api.license.model.FairSourceLicenseAcceptance;
+import com.codenvy.api.license.server.dao.CodenvyLicenseActionDao;
+import com.codenvy.api.license.server.model.impl.CodenvyLicenseActionImpl;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -28,16 +36,28 @@ import org.eclipse.che.commons.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.codenvy.api.license.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.model.Constants.License.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.model.Constants.License.PRODUCT_LICENSE;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Anatoliy Bazko
@@ -47,20 +67,25 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Singleton
 public class CodenvyLicenseManager {
 
-    private final CodenvyLicenseFactory licenseFactory;
-    private final Path                  licenseFile;
-    private final UserManager           userManager;
-    private final SwarmDockerConnector  dockerConnector;
+    private static final Pattern LICENSE_ID = Pattern.compile(".*\\(id: ([0-9]+)\\)");
+
+    private final CodenvyLicenseFactory   licenseFactory;
+    private final Path                    licenseFile;
+    private final UserManager             userManager;
+    private final SwarmDockerConnector    dockerConnector;
+    private final CodenvyLicenseActionDao codenvyLicenseActionDao;
 
     @Inject
     public CodenvyLicenseManager(@Named("license-manager.license-file") String licenseFile,
                                  CodenvyLicenseFactory licenseFactory,
                                  UserManager userManager,
-                                 SwarmDockerConnector dockerConnector) {
+                                 SwarmDockerConnector dockerConnector,
+                                 CodenvyLicenseActionDao codenvyLicenseActionDao) {
         this.licenseFactory = licenseFactory;
         this.licenseFile = Paths.get(licenseFile);
         this.userManager = userManager;
         this.dockerConnector = dockerConnector;
+        this.codenvyLicenseActionDao = codenvyLicenseActionDao;
     }
 
     /**
@@ -71,14 +96,41 @@ public class CodenvyLicenseManager {
      * @throws LicenseException
      *         if error occurred while storing
      */
-    public void store(@NotNull String licenseText) throws LicenseException {
-        Objects.requireNonNull(licenseText, "Codenvy license must not be null");
-        CodenvyLicense codenvyLicense = licenseFactory.create(licenseText);
+    public void store(@NotNull String licenseText) throws LicenseException, ApiException {
+        requireNonNull(licenseText, "Codenvy license can't be null");
 
+        CodenvyLicense codenvyLicense = licenseFactory.create(licenseText);
         try {
             Files.write(licenseFile, codenvyLicense.getLicenseText().getBytes());
         } catch (IOException e) {
             throw new LicenseException(e.getMessage(), e);
+        }
+
+        String licenseQualifier = extractLicenseId(licenseText);
+
+        removeActionsOfExpiredLicense();
+        removeActionsOfDifferentLicenseAndStoreNew(licenseQualifier);
+    }
+
+    private void removeActionsOfDifferentLicenseAndStoreNew(String licenseQualifier) throws ApiException {
+        try {
+            CodenvyLicenseActionImpl licenseAction = codenvyLicenseActionDao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
+            if (!licenseAction.getLicenseQualifier().equals(licenseQualifier)) {
+                codenvyLicenseActionDao.remove(PRODUCT_LICENSE, ACCEPTED);
+                codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
+                addLicenseAction(PRODUCT_LICENSE, ACCEPTED, licenseQualifier);
+            }
+        } catch (NotFoundException e) {
+            addLicenseAction(PRODUCT_LICENSE, ACCEPTED, licenseQualifier);
+        }
+    }
+
+    private void removeActionsOfExpiredLicense() throws ServerException {
+        try {
+            codenvyLicenseActionDao.getByLicenseAndAction(PRODUCT_LICENSE, EXPIRED);
+            codenvyLicenseActionDao.remove(PRODUCT_LICENSE, ACCEPTED);
+            codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
+        } catch (NotFoundException ignored) {
         }
     }
 
@@ -94,15 +146,7 @@ public class CodenvyLicenseManager {
      */
     @Nullable
     public CodenvyLicense load() throws LicenseException {
-        String licenseText;
-        try {
-            licenseText = new String(Files.readAllBytes(licenseFile), UTF_8);
-        } catch (NoSuchFileException e) {
-            throw new LicenseNotFoundException("Codenvy license not found");
-        } catch (IOException e) {
-            throw new LicenseException(e.getMessage(), e);
-        }
-
+        String licenseText = readLicenseText();
         if (isNullOrEmpty(licenseText)) {
             throw new LicenseNotFoundException("Codenvy license not found");
         }
@@ -116,7 +160,10 @@ public class CodenvyLicenseManager {
      * @throws LicenseException
      *         if error occurred while deleting license
      */
-    public void delete() throws LicenseException {
+    public void delete() throws LicenseException, ApiException {
+        String licenseText = readLicenseText();
+        String licenseQualifier = extractLicenseId(licenseText);
+
         try {
             Files.delete(licenseFile);
         } catch (NoSuchFileException e) {
@@ -124,6 +171,9 @@ public class CodenvyLicenseManager {
         } catch (IOException e) {
             throw new LicenseException(e.getMessage(), e);
         }
+
+        codenvyLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
+        addLicenseAction(PRODUCT_LICENSE, EXPIRED, licenseQualifier);
     }
 
     /**
@@ -158,6 +208,107 @@ public class CodenvyLicenseManager {
             return codenvyLicense.isLicenseNodesUsageLegal(nodeNumber);
         } catch (LicenseException e) {
             return CodenvyLicense.isFreeUsageLegal(0, nodeNumber);  // user number doesn't matter
+        }
+    }
+
+    /**
+     * Accepts Codenvy Fair Source License
+     *
+     * @see CodenvyLicenseActionDao#store(CodenvyLicenseActionImpl)
+     *
+     * @param fairSourceLicenseAcceptance
+     *      acceptance request
+     * @throws ConflictException
+     *      if license already has been accepted
+     * @throws BadRequestException
+     *      if request is not complete
+     */
+    public void acceptFairSourceLicense(FairSourceLicenseAcceptance fairSourceLicenseAcceptance) throws ApiException {
+        try {
+            codenvyLicenseActionDao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+            throw new ConflictException("Codenvy Fair Source License has been already accepted");
+        } catch (NotFoundException e) {
+            // No Codenvy Fair Source License Accepted
+        }
+
+        validateAcceptFairSourceLicenseRequest(fairSourceLicenseAcceptance);
+
+        Map<String, String> attributes = new HashMap<>(3);
+        attributes.put("firstName", fairSourceLicenseAcceptance.getFirstName());
+        attributes.put("lastName", fairSourceLicenseAcceptance.getLastName());
+        attributes.put("email", fairSourceLicenseAcceptance.getEmail());
+        addLicenseAction(FAIR_SOURCE_LICENSE, ACCEPTED, null, attributes);
+    }
+
+    /**
+     * Indicates if Codenvy Fair Source License is accepted.
+     */
+    public boolean hasAcceptedFairSourceLicense() throws ServerException {
+        try {
+            codenvyLicenseActionDao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        } catch (NotFoundException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void addLicenseAction(Constants.License licenseType,
+                                  Constants.Action actionType,
+                                  @Nullable String licenseQualifier) throws ApiException {
+        addLicenseAction(licenseType, actionType, licenseQualifier, emptyMap());
+    }
+
+    private void addLicenseAction(Constants.License licenseType,
+                                  Constants.Action actionType,
+                                  @Nullable String licenseQualifier,
+                                  Map<String, String> attributes) throws ApiException {
+
+        CodenvyLicenseActionImpl codenvyLicenseAction
+                = new CodenvyLicenseActionImpl(licenseType,
+                                               actionType,
+                                               System.currentTimeMillis(),
+                                               licenseQualifier,
+                                               attributes);
+
+        codenvyLicenseActionDao.store(codenvyLicenseAction);
+    }
+
+    private void validateAcceptFairSourceLicenseRequest(FairSourceLicenseAcceptance fairSourceLicenseAcceptance)
+            throws BadRequestException {
+        String email = fairSourceLicenseAcceptance.getEmail();
+
+        if (isNullOrEmpty(email)
+            || isNullOrEmpty(fairSourceLicenseAcceptance.getFirstName())
+            || isNullOrEmpty(fairSourceLicenseAcceptance.getLastName())) {
+
+            throw new BadRequestException("Codenvy Fair Source License can't be accepted until all fields are filled.");
+        }
+
+        try {
+            InternetAddress internetAddress = new InternetAddress(email);
+            internetAddress.validate();
+        } catch (AddressException e) {
+            throw new BadRequestException(format("Codenvy Fair Source License can't be accepted. Email %s is not valid", email));
+        }
+    }
+
+    private String extractLicenseId(@NotNull String licenseText) throws BadRequestException {
+        Matcher matcher = LICENSE_ID.matcher(licenseText);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        throw new BadRequestException("License Id is absent");
+    }
+
+    private String readLicenseText() throws LicenseException {
+        try {
+            return new String(Files.readAllBytes(licenseFile), UTF_8);
+        } catch (NoSuchFileException e) {
+            throw new LicenseNotFoundException("Codenvy license not found");
+        } catch (IOException e) {
+            throw new LicenseException(e.getMessage(), e);
         }
     }
 }
