@@ -1,13 +1,13 @@
 #!/bin/bash
 
 SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
-SSH_USER=user
 
 SRC_FOLDER=${1}
 SRC_HOST=${2}
 SRC_PORT=${3}
 DST_FOLDER=${4}
 REMOVE_ON_SUCCESS=${5=false}
+SRC_USER_NAME=${6}
 
 # ensure existing trailing slash to overwrite permissions of destination folder too
 if [[ ${SRC_FOLDER} != */ ]]; then
@@ -28,6 +28,6 @@ fi
 rsync --quiet --delete --partial --links --safe-links --recursive --times --human-readable --bwlimit=7000 --executability \
               --include='.codenvy/' \
               --filter=':- .gitignore' \
-              --rsh="ssh -i /opt/rsync_key -l ${SSH_USER} -o StrictHostKeyChecking=no -p ${SRC_PORT}" \
+              --rsh="ssh -i /opt/rsync_key -l ${SRC_USER_NAME} -o StrictHostKeyChecking=no -p ${SRC_PORT}" \
               --rsync-path="sudo rsync" \
               ${SRC_HOST}:${SRC_FOLDER} ${DST_FOLDER}

@@ -14,9 +14,24 @@
  */
 package com.codenvy.machine.backup;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
+import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.Exec;
+import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
+import org.eclipse.che.plugin.docker.machine.DockerInstance;
+import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
@@ -26,14 +41,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
@@ -45,6 +58,7 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,58 +72,129 @@ import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
  * @author Mykola Morhun
  */
 @Listeners(value = {MockitoTestNGListener.class})
-public class MachineBackupManagerTest {
-    private static final Logger LOG = getLogger(MachineBackupManagerTest.class);
+public class DockerEnvironmentBackupManagerTest {
+    private static final Logger LOG = getLogger(DockerEnvironmentBackupManagerTest.class);
 
     private static final String WORKSPACE_ID                   = "workspaceId";
+    private static final String CONTAINER_ID                   = "containerId";
     private static final String BACKUP_SCRIPT                  = "/tmp/backup.sh";
     private static final String RESTORE_SCRIPT                 = "/tmp/restore.sh";
     private static final int    MAX_BACKUP_DURATION_SEC        = 10;
     private static final int    MAX_RESTORE_DURATION_SEC       = 10;
     private static final String BACKUPS_ROOT_PATH              = "/tmp/che/backups";
-    private static final String SRC_PATH                       = "srcPath";
-    private static final String SRC_ADDRESS                    = "srcAddress";
-    private static final String DEST_PATH                      = "/tmp/restore.sh";
-    private static final String DEST_ADDRESS                   = "/tmp/restore.sh";
-    private static final String USER_ID                        = "1000";
-    private static final String USER_GID                       = "1000";
+    private static final String SRC_PATH                       = "/some/path/on/docker/node";
+    private static final String USER_ID                        = "1234";
+    private static final String USER_GID                       = "12345";
     private static final String PATH_TO_WORKSPACE              = "00/00/00/";
     private static final String ABSOLUTE_PATH_TO_WORKSPACE_DIR = BACKUPS_ROOT_PATH + PATH_TO_WORKSPACE + WORKSPACE_ID;
-    private static final int    PORT                           = 22;
-    private static final String PORT_STRING                    = "22";
+    private static final String NODE_HOST                      = "192.19.20.78";
+    private static final String SYNC_STRATEGY                  = "rsync";
+    private static final String PROJECTS_PATH_IN_CONTAINER     = "/projects-folder";
+    private static final String USER_IN_CONTAINER              = "test-user";
 
-    private static final String[] BACKUP_WORKSPACE_COMMAND              =
-            {BACKUP_SCRIPT, SRC_PATH, SRC_ADDRESS, PORT_STRING, ABSOLUTE_PATH_TO_WORKSPACE_DIR, "false"};
-    private static final String[] BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND =
-            {BACKUP_SCRIPT, SRC_PATH, SRC_ADDRESS, PORT_STRING, ABSOLUTE_PATH_TO_WORKSPACE_DIR, "true"};
-    private static final String[] RESTORE_WORKSPACE_COMMAND             =
-            {RESTORE_SCRIPT, ABSOLUTE_PATH_TO_WORKSPACE_DIR, RESTORE_SCRIPT, RESTORE_SCRIPT, PORT_STRING, USER_ID, USER_GID};
+    private static final String[] BACKUP_WORKSPACE_COMMAND              = {BACKUP_SCRIPT,
+                                                                           SRC_PATH,
+                                                                           NODE_HOST,
+                                                                           "0",
+                                                                           ABSOLUTE_PATH_TO_WORKSPACE_DIR,
+                                                                           "false",
+                                                                           USER_IN_CONTAINER};
+    private static final String[] BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND = {BACKUP_SCRIPT,
+                                                                           SRC_PATH,
+                                                                           NODE_HOST,
+                                                                           "0",
+                                                                           ABSOLUTE_PATH_TO_WORKSPACE_DIR,
+                                                                           "true",
+                                                                           USER_IN_CONTAINER};
+    private static final String[] RESTORE_WORKSPACE_COMMAND             = {RESTORE_SCRIPT,
+                                                                           ABSOLUTE_PATH_TO_WORKSPACE_DIR,
+                                                                           SRC_PATH,
+                                                                           NODE_HOST,
+                                                                           "0",
+                                                                           USER_ID,
+                                                                           USER_GID,
+                                                                           USER_IN_CONTAINER};
 
     @Mock
-    private WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder;
+    private WorkspaceIdHashLocationFinder       workspaceIdHashLocationFinder;
+    @Mock
+    private WorkspaceFolderPathProvider         workspaceFolderPathProvider;
+    @Mock
+    private WorkspaceRuntimes                   workspaceRuntimes;
+    @Mock
+    private DockerConnector                     docker;
+    @Mock
+    private WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor;
+    @Mock
+    private WorkspaceRuntimeImpl                workspaceRuntime;
+    @Mock
+    private DockerInstance                      dockerInstance;
+    @Mock
+    private DockerNode                          dockerNode;
+    @Mock
+    private MachineRuntimeInfoImpl              machineRuntimeInfo;
 
     @Captor
     private ArgumentCaptor<String[]> cmdCaptor;
 
     private ExecutorService executor;
 
-    private MachineBackupManager backupManager;
+    private DockerEnvironmentBackupManager backupManager;
 
     @BeforeMethod
-    private void setup() throws ServerException, InterruptedException, IOException, TimeoutException {
-        backupManager = spy(new MachineBackupManager(BACKUP_SCRIPT,
-                                                     RESTORE_SCRIPT,
-                                                     MAX_BACKUP_DURATION_SEC,
-                                                     MAX_RESTORE_DURATION_SEC,
-                                                     new File(BACKUPS_ROOT_PATH),
-                                                     workspaceIdHashLocationFinder,
-                                                     "rsync",
-                                                     "/projects-folder"));
+    private void setup() throws Exception {
+        backupManager = spy(new DockerEnvironmentBackupManager(BACKUP_SCRIPT,
+                                                               RESTORE_SCRIPT,
+                                                               MAX_BACKUP_DURATION_SEC,
+                                                               MAX_RESTORE_DURATION_SEC,
+                                                               new File(BACKUPS_ROOT_PATH),
+                                                               workspaceIdHashLocationFinder,
+                                                               SYNC_STRATEGY,
+                                                               PROJECTS_PATH_IN_CONTAINER,
+                                                               workspaceRuntimes,
+                                                               workspaceFolderPathProvider,
+                                                               docker));
 
+        when(workspaceRuntimes.get(anyString())).thenReturn(runtimeDescriptor);
+        when(runtimeDescriptor.getRuntime()).thenReturn(workspaceRuntime);
+        when(workspaceRuntime.getDevMachine()).thenReturn(dockerInstance);
+        when(dockerInstance.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(dockerInstance.getNode()).thenReturn(dockerNode);
+        when(dockerNode.getHost()).thenReturn(NODE_HOST);
+        when(dockerInstance.getContainer()).thenReturn(CONTAINER_ID);
+        when(dockerInstance.getRuntime()).thenReturn(machineRuntimeInfo);
+        when(workspaceFolderPathProvider.getPath(WORKSPACE_ID)).thenReturn(SRC_PATH);
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
+        doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString());
+        Exec getUserIdsExecMock = mock(Exec.class);
+        when(getUserIdsExecMock.getId()).thenReturn("getUserIdsExecMockId");
+        Exec getUserNameExecMock = mock(Exec.class);
+        when(getUserNameExecMock.getId()).thenReturn("getUserNameExecMockId");
+        when(docker.createExec(
+                eq(CreateExecParams.create(CONTAINER_ID, new String[] {"sh", "-c", "id -u && id -g && id -u -n"})
+                                   .withDetach(false)))).thenReturn(getUserIdsExecMock);
+        when(docker.createExec(eq(CreateExecParams.create(CONTAINER_ID, new String[] {"sh", "-c", "id -u -n"})
+                                                  .withDetach(false)))).thenReturn(getUserNameExecMock);
+        doAnswer(invocation -> {
+            String execId = ((StartExecParams)invocation.getArguments()[0]).getExecId();
+            @SuppressWarnings("unchecked")
+            MessageProcessor<LogMessage> messageProcessor = (MessageProcessor<LogMessage>)invocation.getArguments()[1];
+            switch (execId) {
+                case "getUserIdsExecMockId":
+                    messageProcessor.process(new LogMessage(LogMessage.Type.STDOUT, USER_ID));
+                    messageProcessor.process(new LogMessage(LogMessage.Type.STDOUT, USER_GID));
+                    messageProcessor.process(new LogMessage(LogMessage.Type.STDOUT, USER_IN_CONTAINER));
+                    break;
+                case "getUserNameExecMockId":
+                    messageProcessor.process(new LogMessage(LogMessage.Type.STDOUT, USER_IN_CONTAINER));
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected exec id");
+            }
 
-        doNothing().when(backupManager).execute(anyObject(), anyInt(), anyString());
+            return null;
+        }).when(docker).startExec(any(StartExecParams.class), Matchers.any());
 
         executor = Executors.newFixedThreadPool(5);
     }
@@ -123,9 +208,9 @@ public class MachineBackupManagerTest {
     public void shouldBeAbleBackupWorkspace() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(SRC_ADDRESS));
+        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(NODE_HOST));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_COMMAND, command);
@@ -134,31 +219,37 @@ public class MachineBackupManagerTest {
     @Test
     public void shouldNotBackupWorkspaceAfterBackupWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                CONTAINER_ID,
+                                                NODE_HOST);
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager).execute(anyObject(), anyInt(), anyString());
+        verify(backupManager).executeCommand(anyObject(), anyInt(), anyString());
     }
 
     @Test
     public void shouldBeAbleBackupWorkspaceWithCleanup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                CONTAINER_ID,
+                                                NODE_HOST);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(SRC_ADDRESS));
+        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(NODE_HOST));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND, command);
     }
 
     @Test
-    public void shouldBeAbleRestoreWorkspace() throws ServerException, InterruptedException, IOException, TimeoutException {
-        doNothing().when(backupManager).execute(anyObject(), anyInt(), anyString());
+    public void shouldBeAbleRestoreWorkspace() throws Exception {
+        doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString());
 
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC), eq(DEST_ADDRESS));
+        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC), eq(NODE_HOST));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(RESTORE_WORKSPACE_COMMAND, command);
@@ -171,13 +262,13 @@ public class MachineBackupManagerTest {
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // when
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
 
         backupFreezer.unfreeze();
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString());
     }
 
     @Test
@@ -187,13 +278,13 @@ public class MachineBackupManagerTest {
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // when
-        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup, 5);
+        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup);
 
         backupFreezer.unfreeze();
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString());
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -206,13 +297,15 @@ public class MachineBackupManagerTest {
         // when
         try {
             // start another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
             fail("Second call of restore should throw an exception");
         } finally {
             // then
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
+            verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString());
         }
     }
 
@@ -228,7 +321,9 @@ public class MachineBackupManagerTest {
 
         try {
             // start another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
             fail("Second call of restore should throw an exception");
         } catch (ServerException e) {
             assertEquals(e.getLocalizedMessage(), "Restore of workspace " + WORKSPACE_ID +
@@ -236,13 +331,15 @@ public class MachineBackupManagerTest {
 
             // when
             // start yet another restore process
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
             fail("Third call of restore should throw an exception");
         } finally {
             // complete waiting answer
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
+            verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString());
         }
     }
 
@@ -251,13 +348,17 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionOnNewRestoreAfterSuccessfulFirstOne() throws Exception {
         // given
-        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString());
 
         // start restore process
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
 
         // when
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
     }
 
     /**
@@ -268,17 +369,23 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionAfterFailingRestoreThatFollowsSuccessfulOne() throws Exception {
         // given
-        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString());
 
         // start restore process
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
 
         try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
         } catch (ServerException ignore) {}
 
         // when
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
     }
 
     @Test
@@ -289,7 +396,9 @@ public class MachineBackupManagerTest {
 
         // when
         try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
             fail("Restore should not be performed while backup is in progress");
         } catch (ServerException ignore) {}
 
@@ -297,7 +406,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -321,7 +430,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -345,7 +454,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -355,13 +464,13 @@ public class MachineBackupManagerTest {
         ThreadFreezer restoreFreezer = startNewProcessAndFreeze(this::runRestore);
 
         // when
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
 
         restoreFreezer.unfreeze();
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -372,21 +481,23 @@ public class MachineBackupManagerTest {
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // when
-        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup, 5);
+        executeTaskNTimesSimultaneouslyWithBarrier(this::runBackup);
 
         backupFreezer.unfreeze();
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
     @Test
     public void shouldBackupWithCleanupAfterFinishOfCurrentBackup() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                CONTAINER_ID,
+                                                NODE_HOST);
     }
 
     @Test
@@ -397,39 +508,44 @@ public class MachineBackupManagerTest {
 
         // then
         executor.execute(this::runBackupWithCleanup);
-        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID);
 
         backupFreezer.unfreeze();
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
     @Test
     public void shouldBackupWithCleanupAfterFinishOfCurrentRestore() throws Exception {
-        backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
-        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
-        verify(backupManager, times(2)).execute(anyObject(), anyInt(), anyString());
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                CONTAINER_ID,
+                                                NODE_HOST);
+        verify(backupManager, times(2)).executeCommand(anyObject(), anyInt(), eq(NODE_HOST));
     }
 
     @Test
-    public void shouldBackupWithCleanupAfterFinishOfCurrentBackupButNotStartAnotherBackup() throws Exception {
+    public void shouldBackupWithCleanupAfterFinishOfCurrentBackupButNotStartAnotherBackup()
+            throws Exception {
         // given
         injectWorkspaceLock(WORKSPACE_ID);
         ThreadFreezer backupFreezer = startNewProcessAndFreeze(this::runBackup);
 
         // then
         executor.execute(this::runBackupWithCleanup);
-        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID);
 
         backupFreezer.unfreeze();
         awaitFinalization();
 
-        backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+        backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
 
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
@@ -442,7 +558,7 @@ public class MachineBackupManagerTest {
 
         // when
         executor.execute(this::runBackupWithCleanup);
-        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID, 1);
+        waitUntilWorkspaceLockLockedWithQueueLength(WORKSPACE_ID);
 
         // after
         executeTasksSimultaneouslyWithBarrier(this::runBackup,
@@ -458,7 +574,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -467,14 +583,12 @@ public class MachineBackupManagerTest {
      *
      * @param task
      *        specifies task which will be run
-     * @param times
-     *         number of parallel jobs with specified task
-     * @throws InterruptedException
+     * @throws InterruptedException if waiting in this method is interrupted
      */
-    private void executeTaskNTimesSimultaneouslyWithBarrier(Runnable task, int times) throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(times);
+    private void executeTaskNTimesSimultaneouslyWithBarrier(Runnable task) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(5);
 
-        for (int i = 0; i < times; i++) {
+        for (int i = 0; i < 5; i++) {
             executor.execute(() -> {
                 task.run();
                 latch.countDown();
@@ -489,7 +603,7 @@ public class MachineBackupManagerTest {
      *
      * @param tasks
      *        tasks to run
-     * @throws InterruptedException
+     * @throws InterruptedException if waiting in this method is interrupted
      */
     private void executeTasksSimultaneouslyWithBarrier(Runnable ... tasks) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(tasks.length);
@@ -506,15 +620,17 @@ public class MachineBackupManagerTest {
 
     private void runBackup() {
         try {
-            backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
-        } catch (ServerException e) {
+            backupManager.backupWorkspace(WORKSPACE_ID);
+        } catch (ServerException | NotFoundException e) {
             LOG.error(e.getMessage());
         }
     }
 
     private void runBackupWithCleanup() {
         try {
-            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
+            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                    CONTAINER_ID,
+                                                    NODE_HOST);
         } catch (ServerException e) {
             LOG.error(e.getMessage());
         }
@@ -522,7 +638,9 @@ public class MachineBackupManagerTest {
 
     private void runRestore() {
         try {
-            backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
+            backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                                 CONTAINER_ID,
+                                                 NODE_HOST);
         } catch (ServerException e) {
             LOG.error(e.getMessage());
         }
@@ -536,7 +654,7 @@ public class MachineBackupManagerTest {
     }
 
     /**
-     * Adds lock for specified workspace into concurrent hash map of {@link MachineBackupManager} class
+     * Adds lock for specified workspace into concurrent hash map of {@link DockerEnvironmentBackupManager} class
      * It allows emulate restore of workspace without invoking it explicit
      *
      * @param workspaceId
@@ -544,7 +662,7 @@ public class MachineBackupManagerTest {
      */
     private void injectWorkspaceLock(String workspaceId) {
         try {
-            Field locks = MachineBackupManager.class.getDeclaredField("workspacesBackupLocks");
+            Field locks = DockerEnvironmentBackupManager.class.getDeclaredField("workspacesBackupLocks");
             locks.setAccessible(true);
             @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
             ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
@@ -560,21 +678,19 @@ public class MachineBackupManagerTest {
      *
      * @param workspaceId
      *         workspace id to which loch belongs
-     * @param queueLength
-     *         length of queue for lock workspace's lock
      * @return true if lock is locked, false if lock doesn't exist
      */
-    private boolean waitUntilWorkspaceLockLockedWithQueueLength(String workspaceId, int queueLength) {
+    private boolean waitUntilWorkspaceLockLockedWithQueueLength(String workspaceId) {
         ReentrantLock lock;
         try {
-            Field locks = MachineBackupManager.class.getDeclaredField("workspacesBackupLocks");
+            Field locks = DockerEnvironmentBackupManager.class.getDeclaredField("workspacesBackupLocks");
             locks.setAccessible(true);
             @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
             ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
                     (ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager);
             lock = workspacesBackupLocks.get(workspaceId);
             if (lock != null) {
-                while (!lock.isLocked() || lock.getQueueLength() != queueLength) {
+                while (!lock.isLocked() || lock.getQueueLength() != 1) {
                     sleep(10);
                 }
                 return true;
@@ -597,12 +713,12 @@ public class MachineBackupManagerTest {
                 releaseProcessLatch.await();
             }
             return null;
-        }).when(backupManager).execute(anyVararg(), anyInt(), anyString());
+        }).when(backupManager).executeCommand(anyVararg(), anyInt(), anyString());
 
         executor.execute(backupType);
 
         invokeProcessLatch.await();
-        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString());
 
         return new ThreadFreezer(releaseProcessLatch);
     }
@@ -621,5 +737,4 @@ public class MachineBackupManagerTest {
             latch.countDown();
         }
     }
-
 }

@@ -15,7 +15,7 @@
 package com.codenvy.machine.agent.launcher;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.NoOpAgentLaunchingChecker;
+import org.eclipse.che.api.agent.server.launcher.AgentLaunchingChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -34,14 +34,14 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Alexander Garagatyi
  */
-@Singleton
+@Singleton // TODO internal should not extend external
 public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
     private static final Logger LOG = getLogger(ExternalRsyncAgentLauncherImpl.class);
 
     @Inject
     public ExternalRsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                                           @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new NoOpAgentLaunchingChecker());
+        super(agentMaxStartTimeMs, agentPingDelayMs, AgentLaunchingChecker.DEFAULT);
     }
 
     @Override

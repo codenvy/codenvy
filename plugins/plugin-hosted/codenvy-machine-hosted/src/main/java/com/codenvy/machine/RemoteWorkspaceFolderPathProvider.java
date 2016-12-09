@@ -39,6 +39,7 @@ public class RemoteWorkspaceFolderPathProvider implements WorkspaceFolderPathPro
     public RemoteWorkspaceFolderPathProvider(@Named("machine.project.location") String machineProjectsDir) throws IOException {
         Path folder = Paths.get(machineProjectsDir);
         if (Files.notExists(folder)) {
+            // TODO do not do that after moving to codenvy in docker
             Files.createDirectory(folder);
         }
         if (!Files.isDirectory(folder)) {
