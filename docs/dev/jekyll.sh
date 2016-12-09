@@ -33,13 +33,13 @@ jekyll.sh [<port>]
         docker volume rm $(docker volume ls -qf dangling=true) > /dev/null 2>&1 "
     
     COPY_SSHKEY_COMMAND="docker cp ${CONTAINER_NAME}:/home/jekyll/.ssh/id_rsa ${HOME}/.ssh/jekyll_id_rsa && \
-      chown -R root:root ${HOME}/.ssh/jekyll_id_rsa && chmod -R 600 ${HOME}/.ssh/jekyll_id_rsa"
+      chown -R root:root ${HOME}/.ssh/jekyll_id_rsa && chmod 600 ${HOME}/.ssh/jekyll_id_rsa"
     
     export UNISON_SYNC_PATH="$(cd ../ && pwd )"
     UNISON_REPEAT=""
     UNISON_AGENT_COMMAND="mkdir -p /tmp && mkdir -p /tmp/.unison && cp -f ${PWD}/default.prf /tmp/.unison/ &&
        UNISON=/tmp/.unison/ ${PWD}/unison ${UNISON_SYNC_PATH} ssh://\${UNISON_SSH_USER}@\${SSH_IP}:\${UNISON_SSH_PORT}//srv/jekyll 
-       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
+       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
       
     JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --incremental"
     DEBUG=false
@@ -119,13 +119,34 @@ stop_sync() {
 }
 
 sync_folders() {
-    UNISON_REPEAT="-repeat 2"
+    # UNISON_REPEAT="-repeat 2"
+    printf  "INFO:Syncing..."
     while [ 1 ]
     do
         sleep 2
         eval ${UNISON_AGENT_COMMAND}
         check_status
+        printf  " "
     done
+}
+
+docker_installed() {
+    DOCKER_BIN="/usr/bin/docker"
+    
+    if [ ! -e $DOCKER_BIN ]; then
+        info Docker does NOT exists. Installing...
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get update
+        sudo apt-get -y install apt-transport-https ca-certificates
+        sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+        echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+        sudo apt-get update
+        apt-cache policy docker-engine
+        sudo apt-get update
+        sudo apt-get -y install docker-engine
+        sudo apt-get -y install python-pip
+        sudo pip install docker-compose        
+    fi
 }
 
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
@@ -134,6 +155,9 @@ trap 'stop_sync' 1 15 2
 init_logging
 init_global_variables
 parse_command_line "$@"
+docker_installed
+mkdir -p /root/.ssh
+rm -rf ../_site
 
 if [ ! -e /var/run/docker.sock ]; then
     error "(${CHE_MINI_PRODUCT_NAME} Jekyll): File /var/run/docker.sock does not exist. Add to server extra volume mounts and restart server."
@@ -158,6 +182,7 @@ export JEKYLL_PORT=$(docker inspect --format='{{(index (index .NetworkSettings.P
 export UNISON_SSH_USER=$(docker inspect --format='{{.Config.User}}' $(docker ps -aq --filter "name=${CONTAINER_NAME}") )
 
 # ssh -Tv -i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_IP} unison -version
+
 
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Starting Initial sync to Jekyll docker container... Please wait."
 START_TIME=$(date +%s)
