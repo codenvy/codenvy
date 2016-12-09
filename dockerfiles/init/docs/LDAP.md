@@ -14,7 +14,7 @@ For a user to successfully login, they must first be synchronized with Codenvy. 
 - When a user enters their name and password, the system authenticates them against the remote LDAP.
 - If authentication is successful the user gains access to Codenvy.
 
-#### LDAP AUTHENTICATION
+##### LDAP AUTHENTICATION
 
 User authentication is implemented as follows:
 
@@ -24,7 +24,7 @@ a given DN format, or based on a user search query.
 3. If username and password match, the LDAP entry is taken and transformed to obtain UserID (this is where synchronization configuration mechanism is applied).
 4. Checks if the user with a given ID already exists in the Codenvy database. If it doesn't user is authenticated.
 
-#### CONFIGURATION
+##### CONFIGURATION
 There are several types of configuration covered in the tables below:
 
 - Authentication configuration
@@ -36,11 +36,11 @@ There are several types of configuration covered in the tables below:
 
 TODO: Add table
 
-#### Connection Configuration
+##### Connection Configuration
 
 TODO: Add table
 
-#### SSL Configuration
+##### SSL Configuration
 
 SSL can be configured in two ways - using trust certificate or using secure keystore.
 
@@ -50,14 +50,14 @@ Self-signed certificates must be imported into the Java keystore or used separat
 
 TODO: Add table
 
-#### SASL Configuration
+##### SASL Configuration
 The Simple Authentication and Security Layer (SASL) is a method for adding authentication support to connection-based protocols. To use this specification, a protocol includes a command for identifying and authenticating a user to a server and for optionally negotiating a security layer for subsequent protocol interactions.
 
 As an example, if the client and server both uses TLS, and have trusted certificates, they may use SASL / EXTERNAL, and for client requests the server can derive its identity from credentials provided at a lower (TLS) level.
 
 TODO: Add table
 
-#### LDAP SYNCHRONIZER
+##### LDAP SYNCHRONIZER
 This service synchronizes third party LDAP users with the Codenvy database.
 
 *Terminology*  
