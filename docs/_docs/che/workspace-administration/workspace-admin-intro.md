@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: Workspaces
 excerpt: ""
 layout: docs
 permalink: /docs/workspace-admin-intro/

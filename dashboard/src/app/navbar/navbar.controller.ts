@@ -73,7 +73,7 @@ export class CodenvyNavBarCtrl {
       factories: '#/factories',
       administration: '#/onprem/administration',
       usermanagement: '#/admin/usermanagement',
-
+      docs: '#/docs',
       // subsection
       plugins: '#/admin/plugins'
     };
