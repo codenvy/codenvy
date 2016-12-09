@@ -27,7 +27,7 @@
     <artifactId>docs</artifactId>
     <version>5.0.0-M8-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>Codenvy :: War :: Docs</name>
+    <name>Codenvy :: Docs :: War</name>
     <build>
         <plugins>
             <plugin>
@@ -41,9 +41,9 @@
                         <configuration>
                             <target>
                                 <exec dir="${project.basedir}" executable="jekyll" failonerror="true">
-                                    <arg value="build"/>
-                                    <arg value="--config"/>
-                                    <arg value="assembly/build_war.yml"/>
+                                    <arg value="build" />
+                                    <arg value="--config" />
+                                    <arg value="assembly/build_war.yml" />
                                 </exec>
                             </target>
                         </configuration>

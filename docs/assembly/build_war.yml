@@ -42,6 +42,7 @@ exclude:
   - assembly/*
   - target/*
   - pom.xml
+  - docs.iml
 
 syntax_highlighter_opts:
   css_class: 'highlight'
