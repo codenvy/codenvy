@@ -57,8 +57,7 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
-                            <directory>target/_site</directory>
-                            <targetPath>_site/</targetPath>
+                            <directory>target/_site/docs</directory>
                         </resource>
                     </webResources>
                 </configuration>
