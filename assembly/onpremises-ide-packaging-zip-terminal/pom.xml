@@ -20,15 +20,15 @@
     <parent>
         <artifactId>onpremises-ide-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M9-SNAPSHOT</version>
     </parent>
     <artifactId>onpremises-ide-packaging-zip-terminal</artifactId>
     <packaging>pom</packaging>
     <name>Onpremises IDE :: ZIP    :: Terminal</name>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.lib</groupId>
-            <artifactId>codenvy-websocket-terminal</artifactId>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
             <type>zip</type>
             <classifier>linux_amd64</classifier>
         </dependency>

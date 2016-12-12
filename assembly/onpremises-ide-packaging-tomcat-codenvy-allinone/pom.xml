@@ -20,7 +20,7 @@
     <parent>
         <artifactId>onpremises-ide-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M8-SNAPSHOT</version>
+        <version>5.0.0-M9-SNAPSHOT</version>
     </parent>
     <artifactId>onpremises-ide-packaging-tomcat-codenvy-allinone</artifactId>
     <packaging>pom</packaging>
@@ -30,18 +30,6 @@
             <groupId>com.codenvy</groupId>
             <artifactId>docs</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.lib</groupId>
-            <artifactId>codenvy-websocket-terminal</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.lib</groupId>
-            <artifactId>codenvy-websocket-terminal</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
@@ -67,6 +55,20 @@
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-mail-server</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+            <classifier>linux_amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>exec-agent</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+            <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

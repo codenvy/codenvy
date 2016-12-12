@@ -51,12 +51,6 @@ public class GreetingPartPresenter extends BasePresenter implements GreetingPart
         view.setDelegate(this);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
     @NotNull
     @Override
     public String getTitle() {

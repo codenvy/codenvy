@@ -5,6 +5,7 @@ layout: docs
 permalink: /docs/introduction/
 ---
 Codenvy makes on-demand workspaces to give you a better agile experience. Codenvy SaaS is available for self-service at codenvy.com. You can also install Codenvy on your own infrastructure with Codenvy On-Prem.
+
 # Codenvy and Eclipse Che  
 Codenvy is a commercial offering based on the [Eclipse Che](https://eclipse.org/che/) open source project, so Eclipse Che workspaces and plug-ins will work within Codenvy.
 

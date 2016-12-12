@@ -85,7 +85,11 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Named("che.docker.swap") double memorySwapMultiplier,
                                      MachineTokenRegistry tokenRegistry,
                                      @Named("machine.docker.networks") Set<Set<String>> additionalNetworks,
-                                     @Nullable @Named("che.docker.network_driver") String networkDriver)
+                                     @Nullable @Named("che.docker.network_driver") String networkDriver,
+                                     @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
+                                     @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
+                                     @Named("che.docker.cpu_period") long cpuPeriod,
+                                     @Named("che.docker.cpu_quota") long cpuQuota)
             throws IOException {
         super(docker,
               dockerConnectorConfiguration,
@@ -106,6 +110,10 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               memorySwapMultiplier,
               additionalNetworks,
               networkDriver,
+              parentCgroup,
+              cpusetCpus,
+              cpuPeriod,
+              cpuQuota,
               windowsPathEscaper);
 
         this.docker = docker;

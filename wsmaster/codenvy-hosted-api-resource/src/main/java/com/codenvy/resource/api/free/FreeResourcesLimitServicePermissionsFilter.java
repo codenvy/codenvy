@@ -50,7 +50,7 @@ public class FreeResourcesLimitServicePermissionsFilter extends CheMethodInvoker
             case GET_FREE_RESOURCES_LIMIT_METHOD:
             case REMOVE_FREE_RESOURCES_LIMIT_METHOD:
                 final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
                     return;
                 }
                 // fall through
