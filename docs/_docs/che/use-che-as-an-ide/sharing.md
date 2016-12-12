@@ -59,7 +59,7 @@ docker push <repository>/<image-name>\
 }  
 
 ## Share with Codenvy Factories
-Codenvy, which is based on Eclipse Che, includes "Factories" - templates used to generate new or open existing workspaces with a URL. Factories can be used to clone existing workspaces or repeatedly generate consistent workspaces for teams. For additional information see Codenvy's documentation on [Factories](https://codenvy.readme.io/docs/factories).
+Codenvy, which is based on Eclipse Che, includes "Factories" - templates used to generate new or open existing workspaces with a URL. Factories can be used to clone existing workspaces or repeatedly generate consistent workspaces for teams. For additional information see Codenvy's documentation on [Factories](../../docs/workspace-automation).
 # Pair Programming  
 The Che community has been working on pair programming technology that will allow multiple users to work in the same workspace instance. This could be done through multiple Che editors, or with a mix of Che and desktop IDEs.
 
