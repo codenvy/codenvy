@@ -13,11 +13,11 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/rsyslog.conf:/etc/rsyslog.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/haproxy.conf:/etc/rsyslog.d/haproxy.conf'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/postgres.conf:/etc/rsyslog.d/postgres.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/registry.conf:/etc/rsyslog.d/registry.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/swarm.conf:/etc/rsyslog.d/swarm.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/postgres/:/var/log/postgres'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/registry/:/var/log/registry'
     ports:
       - '5140:514'
     ulimits:
@@ -99,6 +99,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    depends_on:
+      - rsyslog
     logging:
       driver: syslog
       options:
@@ -121,6 +123,13 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+    depends_on:
+       - rsyslog
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:5140"
+        syslog-facility: "local0"
 
 ########################
 # POSTGRES
@@ -128,7 +137,11 @@ services:
   postgres:
     image: <%= ENV["IMAGE_POSTGRES"] %>
     env_file:
+<% if @compose_file_for_containers == true -%>
+      - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/postgres/postgres.env'
+<% else -%>
       - '<%= ENV["POSTGRES_ENV_FILE"] %>'
+<% end -%>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
@@ -143,11 +156,6 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:5140"
-        syslog-facility: "local0"
 
 ########################
 # CODENVY
@@ -158,7 +166,11 @@ services:
       - haproxy
       - postgres
     env_file:
+<% if @compose_file_for_containers == true -%>
+      - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/codenvy/codenvy.env'
+<% else -%>
       - '<%= ENV["CODENVY_ENV_FILE"] %>'
+<% end -%>
     volumes:
        - '<%= scope.lookupvar('compose::puppet_src_folder') -%>:/puppet-configuration'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/:/opt/codenvy-data/logs/'
@@ -174,7 +186,7 @@ services:
     links:
       - 'postgres:codenvy-postgres'
       - 'swarm:codenvy-swarm'
-<% if scope.lookupvar('codenvy::env') != 'production' -%>
+<% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '8000:8000'
 <% end -%>

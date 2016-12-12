@@ -101,7 +101,7 @@ public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelega
         if (!isFocused()) {
             setFocus(true);
             if (delegate != null) {
-                delegate.activatePart();
+                delegate.onActivate();
             }
         }
     }

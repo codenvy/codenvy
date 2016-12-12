@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static com.codenvy.api.permission.server.SystemDomain.MANAGE_CODENVY_ACTION;
+import static com.codenvy.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,9 +59,9 @@ public class InstallationManagerPermissionsFilterTest {
     InstallationManagerService installationManagerService;
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnRequestingAnyMethodsFromInstallationManagerService() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnRequestingAnyMethodsFromInstallationManagerService() throws Exception {
         EnvironmentContext.getCurrent().setSubject(subject);
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_CODENVY_ACTION)).thenReturn(true);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
         final GenericResourceMethod GenericResourceMethod = mock(GenericResourceMethod.class);
 
         final Method[] imMethods = InstallationManagerService.class.getDeclaredMethods();
@@ -76,7 +76,7 @@ public class InstallationManagerPermissionsFilterTest {
         }
 
         //all methods should be covered with permissions
-        verify(subject, times(publicMethods)).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_CODENVY_ACTION);
+        verify(subject, times(publicMethods)).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     }
 
     @Filter

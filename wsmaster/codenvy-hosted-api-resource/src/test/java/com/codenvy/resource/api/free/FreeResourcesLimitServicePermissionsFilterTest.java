@@ -100,7 +100,7 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
     }
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnGettingResourcesLimits() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnGettingResourcesLimits() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .expect()
@@ -109,11 +109,11 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
                .get(SECURE_PATH + "/resource/free");
 
         verify(service).getFreeResourcesLimits(anyInt(), anyInt());
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnGettingResourcesLimitForSpecifiedAccount() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnGettingResourcesLimitForSpecifiedAccount() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .expect()
@@ -122,11 +122,11 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
                .get(SECURE_PATH + "/resource/free/account123");
 
         verify(service).getFreeResourcesLimit("account123");
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnRemovingResourcesLimitForSpecifiedAccount() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnRemovingResourcesLimitForSpecifiedAccount() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .expect()
@@ -135,11 +135,11 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
                .delete(SECURE_PATH + "/resource/free/account123");
 
         verify(service).removeFreeResourcesLimit("account123");
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnStoringResourcesLimit() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnStoringResourcesLimit() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .contentType("application/json")
@@ -149,7 +149,7 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
                .post(SECURE_PATH + "/resource/free");
 
         verify(service).storeFreeResourcesLimit(any());
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
@@ -176,7 +176,7 @@ public class FreeResourcesLimitServicePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(unwrapError(response), "The user does not have permission to perform this operation");
 
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION);
+        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         verifyZeroInteractions(service);
     }
 

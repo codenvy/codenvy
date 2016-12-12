@@ -14,22 +14,23 @@
  */
 package com.codenvy.api.license.server;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import com.codenvy.api.license.CodenvyLicense;
 import com.codenvy.api.license.InvalidLicenseException;
 import com.codenvy.api.license.LicenseException;
 import com.codenvy.api.license.LicenseFeature;
 import com.codenvy.api.license.LicenseNotFoundException;
 import com.google.common.collect.ImmutableMap;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +59,8 @@ import static javax.ws.rs.core.Response.status;
  * @author Dmytro Nochevnov
  * @author Alexander Andrienko
  */
-@Path("/license")
-@Api(value = "license", description = "License manager")
+@Path("/license/system")
+@Api(value = "license-system", description = "System License manager")
 public class LicenseService {
     private static final Logger LOG                                 = LoggerFactory.getLogger(LicenseService.class);
     public static final  String CODENVY_LICENSE_PROPERTY_IS_EXPIRED = "isExpired";

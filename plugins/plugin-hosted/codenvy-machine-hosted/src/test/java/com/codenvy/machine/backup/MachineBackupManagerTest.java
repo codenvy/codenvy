@@ -40,6 +40,7 @@ import static java.lang.Thread.sleep;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -108,7 +109,7 @@ public class MachineBackupManagerTest {
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
 
-        doNothing().when(backupManager).execute(anyObject(), anyInt());
+        doNothing().when(backupManager).execute(anyObject(), anyInt(), anyString());
 
         executor = Executors.newFixedThreadPool(5);
     }
@@ -124,7 +125,7 @@ public class MachineBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC));
+        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(SRC_ADDRESS));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_COMMAND, command);
@@ -137,7 +138,7 @@ public class MachineBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
 
-        verify(backupManager).execute(anyObject(), anyInt());
+        verify(backupManager).execute(anyObject(), anyInt(), anyString());
     }
 
     @Test
@@ -145,7 +146,7 @@ public class MachineBackupManagerTest {
         injectWorkspaceLock(WORKSPACE_ID);
         backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC));
+        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(SRC_ADDRESS));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND, command);
@@ -153,11 +154,11 @@ public class MachineBackupManagerTest {
 
     @Test
     public void shouldBeAbleRestoreWorkspace() throws ServerException, InterruptedException, IOException, TimeoutException {
-        doNothing().when(backupManager).execute(anyObject(), anyInt());
+        doNothing().when(backupManager).execute(anyObject(), anyInt(), anyString());
 
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
 
-        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC));
+        verify(backupManager).execute(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC), eq(DEST_ADDRESS));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(RESTORE_WORKSPACE_COMMAND, command);
@@ -176,7 +177,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(anyObject(), anyInt());
+        verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
     }
 
     @Test
@@ -192,7 +193,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(anyObject(), anyInt());
+        verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -211,7 +212,7 @@ public class MachineBackupManagerTest {
             // then
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).execute(anyObject(), anyInt());
+            verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
         }
     }
 
@@ -241,7 +242,7 @@ public class MachineBackupManagerTest {
             // complete waiting answer
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).execute(anyObject(), anyInt());
+            verify(backupManager, times(1)).execute(anyObject(), anyInt(), anyString());
         }
     }
 
@@ -250,7 +251,7 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionOnNewRestoreAfterSuccessfulFirstOne() throws Exception {
         // given
-        doNothing().when(backupManager).execute(anyVararg(), anyInt());
+        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
 
         // start restore process
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
@@ -267,7 +268,7 @@ public class MachineBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionAfterFailingRestoreThatFollowsSuccessfulOne() throws Exception {
         // given
-        doNothing().when(backupManager).execute(anyVararg(), anyInt());
+        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
 
         // start restore process
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
@@ -296,7 +297,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -320,7 +321,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -344,7 +345,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -360,7 +361,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -377,7 +378,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(1)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -402,7 +403,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -410,7 +411,7 @@ public class MachineBackupManagerTest {
     public void shouldBackupWithCleanupAfterFinishOfCurrentRestore() throws Exception {
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID, DEST_PATH, USER_ID, USER_GID, DEST_ADDRESS, PORT);
         backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
-        verify(backupManager, times(2)).execute(anyObject(), anyInt());
+        verify(backupManager, times(2)).execute(anyObject(), anyInt(), anyString());
     }
 
     @Test
@@ -428,7 +429,7 @@ public class MachineBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID, SRC_PATH, SRC_ADDRESS, PORT);
 
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
 
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
@@ -457,7 +458,7 @@ public class MachineBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt());
+        verify(backupManager, times(2)).execute(cmdCaptor.capture(), anyInt(), anyString());
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -596,12 +597,12 @@ public class MachineBackupManagerTest {
                 releaseProcessLatch.await();
             }
             return null;
-        }).when(backupManager).execute(anyVararg(), anyInt());
+        }).when(backupManager).execute(anyVararg(), anyInt(), anyString());
 
         executor.execute(backupType);
 
         invokeProcessLatch.await();
-        doNothing().when(backupManager).execute(anyVararg(), anyInt());
+        doNothing().when(backupManager).execute(anyVararg(), anyInt(), anyString());
 
         return new ThreadFreezer(releaseProcessLatch);
     }
