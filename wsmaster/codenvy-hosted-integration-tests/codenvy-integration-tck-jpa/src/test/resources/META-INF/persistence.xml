@@ -61,6 +61,7 @@
 
         <class>com.codenvy.organization.spi.impl.OrganizationImpl</class>
         <class>com.codenvy.organization.spi.impl.MemberImpl</class>
+        <class>com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
         <class>com.codenvy.resource.spi.impl.ResourceImpl</class>
         <class>com.codenvy.resource.spi.impl.FreeResourcesLimitImpl</class>

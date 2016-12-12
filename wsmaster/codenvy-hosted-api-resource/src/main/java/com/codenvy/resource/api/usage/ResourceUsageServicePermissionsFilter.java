@@ -12,16 +12,14 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.api.usage;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.codenvy.api.permission.server.SystemDomain;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
@@ -30,31 +28,38 @@ import org.everrest.core.resource.GenericResourceMethod;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
-import static com.codenvy.organization.api.permissions.OrganizationDomain.CREATE_WORKSPACES;
-import static com.codenvy.organization.api.permissions.OrganizationDomain.DOMAIN_ID;
-import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE_RESOURCES;
-import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE_WORKSPACES;
-import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_ACCOUNT;
-import static org.eclipse.che.api.user.server.model.impl.UserImpl.PERSONAL_ACCOUNT;
+import static java.util.stream.Collectors.toMap;
 
 /**
- * Restricts access to methods of {@link ResourceService} by users' permissions.
+ * Restricts access to methods of {@link ResourceUsageService} by users' permissions.
  *
- * <p>Filter contains rules for protecting of all methods of {@link ResourceService}.<br>
+ * <p>Filter contains rules for protecting of all methods of {@link ResourceUsageService}.<br>
  * In case when requested method is unknown filter throws {@link ForbiddenException}
  *
  * @author Sergii Leschenko
  */
 @Filter
 @Path("/resource{path:(?!/free)(/.*)?}")
-public class ResourceServicePermissionsFilter extends CheMethodInvokerFilter {
+public class ResourceUsageServicePermissionsFilter extends CheMethodInvokerFilter {
     static final String GET_TOTAL_RESOURCES_METHOD     = "getTotalResources";
     static final String GET_AVAILABLE_RESOURCES_METHOD = "getAvailableResources";
     static final String GET_USED_RESOURCES_METHOD      = "getUsedResources";
 
+    private final AccountManager                           accountManager;
+    private final Map<String, ResourcesPermissionsChecker> permissionsCheckers;
+
     @Inject
-    private AccountManager accountManager;
+    public ResourceUsageServicePermissionsFilter(AccountManager accountManager,
+                                                 Set<ResourcesPermissionsChecker> permissionsCheckers) {
+        this.accountManager = accountManager;
+        this.permissionsCheckers = permissionsCheckers.stream()
+                                                      .collect(toMap(ResourcesPermissionsChecker::getAccountType,
+                                                                     Function.identity()));
+    }
 
     @Override
     protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException {
@@ -63,35 +68,25 @@ public class ResourceServicePermissionsFilter extends CheMethodInvokerFilter {
             case GET_TOTAL_RESOURCES_METHOD:
             case GET_AVAILABLE_RESOURCES_METHOD:
             case GET_USED_RESOURCES_METHOD:
+                Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
+                    // user is admin and he is able to see resources of all accounts
+                    return;
+                }
+
                 accountId = ((String)arguments[0]);
                 break;
 
             default:
                 throw new ForbiddenException("The user does not have permission to perform this operation");
         }
+        final Account account = accountManager.getById(accountId);
 
-        if (!canSeeResources(EnvironmentContext.getCurrent().getSubject(), accountId)) {
+        final ResourcesPermissionsChecker resourcesPermissionsChecker = permissionsCheckers.get(account.getType());
+        if (resourcesPermissionsChecker != null) {
+            resourcesPermissionsChecker.checkResourcesVisibility(accountId);
+        } else {
             throw new ForbiddenException("User is not authorized to perform given operation");
         }
-    }
-
-    @VisibleForTesting
-    boolean canSeeResources(Subject subject, String accountId) throws NotFoundException, ServerException {
-        final Account account = accountManager.getById(accountId);
-        if (ORGANIZATIONAL_ACCOUNT.equals(account.getType())) {
-            if (subject.hasPermission(DOMAIN_ID, accountId, CREATE_WORKSPACES)
-                || subject.hasPermission(DOMAIN_ID, accountId, MANAGE_RESOURCES)
-                || subject.hasPermission(DOMAIN_ID, accountId, MANAGE_WORKSPACES)) {
-                //user should be able to see resources of given account
-                return true;
-            }
-        } else if (PERSONAL_ACCOUNT.equals(account.getType())) {
-            if (subject.getUserId().equals(accountId)) {
-                //user should be able to see resources of his personal account
-                return true;
-            }
-        }
-
-        return false;
     }
 }

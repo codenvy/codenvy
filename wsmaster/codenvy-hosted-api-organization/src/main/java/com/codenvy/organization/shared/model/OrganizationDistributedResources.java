@@ -12,29 +12,25 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.model;
+package com.codenvy.organization.shared.model;
+
+import com.codenvy.resource.model.Resource;
 
 import java.util.List;
 
 /**
- * Permits account to use some resources.
+ * Defines resources which are distributed for suborganization by parent organization
  *
- * @author gazarenkov
  * @author Sergii Leschenko
  */
-public interface License {
+public interface OrganizationDistributedResources {
     /**
-     * Returns id of account that is owner of this license.
+     * Id of organization that owns these distributed resources
      */
-    String getAccountId();
+    String getOrganizationId();
 
     /**
-     * Returns detailed list of resources which can be used by owner.
+     * Returns resources that can be used.
      */
-    List<? extends ProvidedResources> getResourcesDetails();
-
-    /**
-     * Returns list of resources which can be used by owner.
-     */
-    List<? extends Resource> getTotalResources();
+    List<? extends Resource> getResources();
 }

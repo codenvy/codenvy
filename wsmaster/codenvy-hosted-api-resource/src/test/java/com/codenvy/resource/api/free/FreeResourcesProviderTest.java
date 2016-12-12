@@ -14,17 +14,15 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.organization.api.OrganizationManager;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.model.ProvidedResources;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -48,178 +46,99 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class FreeResourcesProviderTest {
-    private static final int RAM_PER_USER         = 2000;
-    private static final int RAM_PER_ORGANIZATION = 1000;
+    private static final String TEST_ACCOUNT_TYPE  = "test";
+    private static final String TEST_RESOURCE_TYPE = "testResource";
+    private static final String TEST_RESOURCE_UNIT = "testResourceUnit";
 
     @Mock
-    private AccountImpl      account;
-    @Mock
-    private OrganizationImpl organization;
-
+    private AccountImpl               account;
     @Mock
     private FreeResourcesLimitManager freeResourcesLimitManager;
     @Mock
     private AccountManager            accountManager;
     @Mock
-    private OrganizationManager       organizationManager;
+    private DefaultResourcesProvider  defaultResourcesProvider;
 
     private FreeResourcesProvider provider;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        when(account.getType()).thenReturn(TEST_ACCOUNT_TYPE);
+
+        when(defaultResourcesProvider.getAccountType()).thenReturn(TEST_ACCOUNT_TYPE);
+        when(defaultResourcesProvider.getResources(any())).thenReturn(singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                     1020,
+                                                                                                     TEST_RESOURCE_UNIT)));
+
         provider = new FreeResourcesProvider(freeResourcesLimitManager,
                                              accountManager,
-                                             organizationManager,
-                                             RAM_PER_USER + "mb",
-                                             RAM_PER_ORGANIZATION + "mb");
+                                             ImmutableSet.of(defaultResourcesProvider));
     }
 
     @Test
-    public void shouldProvideDefaultResourcesForPersonalAccount() throws Exception {
+    public void shouldProvideDefaultResourcesIfThereAreProviderForThisAccountType() throws Exception {
         //given
-        when(account.getType()).thenReturn(UserImpl.PERSONAL_ACCOUNT);
         when(accountManager.getById(any())).thenReturn(account);
         when(freeResourcesLimitManager.get(any())).thenThrow(new NotFoundException("not found"));
 
         //when
-        List<ProvidedResourcesImpl> result = provider.getResources("user123");
+        List<ProvidedResources> result = provider.getResources("user123");
 
         //then
         assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
+        ProvidedResources providedResources = result.get(0);
         assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
                                                                   null,
                                                                   "user123",
                                                                   -1L,
                                                                   -1L,
-                                                                  singletonList(new ResourceImpl(RamResourceType.ID, RAM_PER_USER,
-                                                                                                 RamResourceType.UNIT))));
+                                                                  singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                 1020,
+                                                                                                 TEST_RESOURCE_UNIT))));
         verify(freeResourcesLimitManager).get("user123");
     }
 
     @Test
-    public void shouldRewriteDefaultResourcesWithFreeResourcesLimitIfItExistsForPersonalAccount() throws Exception {
+    public void shouldRewriteDefaultResourcesWithFreeResourcesLimitIfItExists() throws Exception {
         //given
-        when(account.getType()).thenReturn(UserImpl.PERSONAL_ACCOUNT);
         when(accountManager.getById(any())).thenReturn(account);
         when(freeResourcesLimitManager.get(any())).thenReturn(new FreeResourcesLimitImpl("user123",
                                                                                          singletonList(
-                                                                                                 new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                                  RamResourceType.UNIT))));
+                                                                                                 new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                                  12345,
+                                                                                                                  TEST_RESOURCE_UNIT))));
 
         //when
-        List<ProvidedResourcesImpl> result = provider.getResources("user123");
+        List<ProvidedResources> result = provider.getResources("user123");
 
         //then
         assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
+        ProvidedResources providedResources = result.get(0);
         assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
                                                                   "user123",
                                                                   "user123",
                                                                   -1L,
                                                                   -1L,
-                                                                  singletonList(new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                 RamResourceType.UNIT))));
+                                                                  singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                 12345,
+                                                                                                 TEST_RESOURCE_UNIT))));
         verify(freeResourcesLimitManager).get("user123");
     }
 
     @Test
-    public void shouldProvideDefaultResourcesForOrganizationalAccountOfRootOrganization() throws Exception {
+    public void shouldNotProvideDefaultResourcesForAccountThatDoesNotHaveDefaultResourcesProvider() throws Exception {
         //given
-        when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
+        when(account.getType()).thenReturn("anotherTestType");
         when(accountManager.getById(any())).thenReturn(account);
         when(freeResourcesLimitManager.get(any())).thenThrow(new NotFoundException("not found"));
-
-        when(organization.getParent()).thenReturn(null);
-        when(organizationManager.getById(any())).thenReturn(organization);
-
-        //when
-        List<ProvidedResourcesImpl> result = provider.getResources("organization123");
-
-        //then
-        assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
-        assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
-                                                                  null,
-                                                                  "organization123",
-                                                                  -1L,
-                                                                  -1L,
-                                                                  singletonList(new ResourceImpl(RamResourceType.ID, RAM_PER_ORGANIZATION,
-                                                                                                 RamResourceType.UNIT))));
-        verify(freeResourcesLimitManager).get("organization123");
-        verify(organizationManager).getById("organization123");
-    }
-
-    @Test
-    public void shouldRewriteDefaultResourcesWithFreeResourcesLimitIfItExistsForOrganizationalAccount() throws Exception {
-        //given
-        when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
-        when(accountManager.getById(any())).thenReturn(account);
-        when(freeResourcesLimitManager.get(any())).thenReturn(new FreeResourcesLimitImpl("organization123",
-                                                                                         singletonList(
-                                                                                                 new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                                  RamResourceType.UNIT))));
-
-        when(organization.getParent()).thenReturn(null);
-        when(organizationManager.getById(any())).thenReturn(organization);
-
-        //when
-        List<ProvidedResourcesImpl> result = provider.getResources("organization123");
-
-        //then
-        assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
-        assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
-                                                                  "organization123",
-                                                                  "organization123",
-                                                                  -1L,
-                                                                  -1L,
-                                                                  singletonList(new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                 RamResourceType.UNIT))));
-        verify(freeResourcesLimitManager).get("organization123");
-        verify(organizationManager).getById("organization123");
-    }
-
-    @Test
-    public void shouldNotProvideDefaultResourcesForOrganizationalAccountOfSuborganization() throws Exception {
-        //given
-        when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
-        when(accountManager.getById(any())).thenReturn(account);
-        when(freeResourcesLimitManager.get(any())).thenThrow(new NotFoundException("not found"));
-
-        when(organization.getParent()).thenReturn("organization234");
-        when(organizationManager.getById(any())).thenReturn(organization);
-
-        //when
-        List<ProvidedResourcesImpl> result = provider.getResources("organization123");
-
-        //then
-        assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
-        assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
-                                                                  null,
-                                                                  "organization123",
-                                                                  -1L,
-                                                                  -1L,
-                                                                  emptyList()));
-        verify(freeResourcesLimitManager).get("organization123");
-        verify(organizationManager).getById("organization123");
-    }
-
-    @Test
-    public void shouldNotProvideDefaultResourcesForAccountWithUnlistedType() throws Exception {
-        //given
-        when(account.getType()).thenReturn("test");
-        when(accountManager.getById(any())).thenReturn(account);
-//        when(freeResourcesManager.get(any())).thenThrow(new NotFoundException("not found"));
         doThrow(new NotFoundException("not found")).when(freeResourcesLimitManager).get(any());
 
         //when
-        List<ProvidedResourcesImpl> result = provider.getResources("account123");
+        List<ProvidedResources> result = provider.getResources("account123");
 
         //then
         assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
+        ProvidedResources providedResources = result.get(0);
         assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
                                                                   null,
                                                                   "account123",
@@ -232,26 +151,27 @@ public class FreeResourcesProviderTest {
     @Test
     public void shouldProvideResourcesFromFreeResourcesLimitIfItExists() throws Exception {
         //given
-        when(account.getType()).thenReturn("test");
+        when(account.getType()).thenReturn("anotherTestType");
         when(accountManager.getById(any())).thenReturn(account);
         when(freeResourcesLimitManager.get(any())).thenReturn(new FreeResourcesLimitImpl("account123",
-                                                                                         singletonList(
-                                                                                                 new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                                  RamResourceType.UNIT))));
+                                                                                         singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                                        12345,
+                                                                                                                        TEST_RESOURCE_UNIT))));
 
         //when
-        List<ProvidedResourcesImpl> result = provider.getResources("account123");
+        List<ProvidedResources> result = provider.getResources("account123");
 
         //then
         assertEquals(result.size(), 1);
-        ProvidedResourcesImpl providedResources = result.get(0);
+        ProvidedResources providedResources = result.get(0);
         assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
                                                                   "account123",
                                                                   "account123",
                                                                   -1L,
                                                                   -1L,
-                                                                  singletonList(new ResourceImpl(RamResourceType.ID, 12345,
-                                                                                                 RamResourceType.UNIT))));
+                                                                  singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
+                                                                                                 12345,
+                                                                                                 TEST_RESOURCE_UNIT))));
         verify(freeResourcesLimitManager).get("account123");
     }
 }

@@ -14,11 +14,10 @@
  */
 package com.codenvy.resource.api;
 
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
-import com.codenvy.resource.spi.impl.ResourceImpl;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 
 import javax.inject.Inject;
@@ -52,15 +51,15 @@ public class ResourceAggregator {
      * @param resources
      *         resources list which can contain more that one instance for some type
      * @return map where key is resources type and value is aggregated resource
-     * @throws NotFoundException
+     * @throws IllegalStateException
      *         when resources list contains resource with not supported type
      */
-    public Map<String, ResourceImpl> aggregateByType(List<ResourceImpl> resources) throws NotFoundException {
+    public Map<String, Resource> aggregateByType(List<? extends Resource> resources) {
         checkSupporting(resources);
 
-        Map<String, ResourceImpl> type2Resource = new HashMap<>();
-        for (ResourceImpl resource : resources) {
-            final ResourceImpl resource1 = type2Resource.get(resource.getType());
+        Map<String, Resource> type2Resource = new HashMap<>();
+        for (Resource resource : resources) {
+            final Resource resource1 = type2Resource.get(resource.getType());
             if (resource1 != null) {
                 type2Resource.put(resource.getType(), aggregate(resource1, resource));
             } else {
@@ -77,28 +76,38 @@ public class ResourceAggregator {
      *         the total resources
      * @param resourcesToDeduct
      *         the resources which should be deducted from {@code totalResources}
-     * @throws ConflictException
+     * @throws NoEnoughResourcesException
      *         when {@code totalResources} list doesn't contain enough resources
-     * @throws NotFoundException
+     * @throws IllegalStateException
      *         when {@code totalResources} or {@code deduction} contain resource with not supported type
      */
-    public List<ResourceImpl> deduct(List<ResourceImpl> totalResources,
-                                     List<ResourceImpl> resourcesToDeduct) throws NotFoundException,
-                                                                                  ConflictException {
+    public List<? extends Resource> deduct(List<? extends Resource> totalResources,
+                                           List<? extends Resource> resourcesToDeduct) throws NoEnoughResourcesException {
         checkSupporting(totalResources);
         checkSupporting(resourcesToDeduct);
 
-        final Map<String, ResourceImpl> result = totalResources.stream()
-                                                               .collect(Collectors.toMap(Resource::getType,
-                                                                                         Function.identity()));
-        for (ResourceImpl toDeduct : resourcesToDeduct) {
-            final ResourceImpl resource1 = result.get(toDeduct.getType());
+        final Map<String, Resource> result = totalResources.stream()
+                                                           .collect(Collectors.toMap(Resource::getType,
+                                                                                     Function.identity()));
+        final List<Resource> missingResources = new ArrayList<>();
+
+        for (Resource toDeduct : resourcesToDeduct) {
+            final Resource resource1 = result.get(toDeduct.getType());
             if (resource1 != null) {
-                result.put(toDeduct.getType(), deduct(resource1, toDeduct));
+                try {
+                    result.put(toDeduct.getType(), deduct(resource1, toDeduct));
+                } catch (NoEnoughResourcesException e) {
+                    missingResources.addAll(e.getMissingResources());
+                }
             } else {
-                throw new ConflictException(String.format("Your account doesn't have %s resource to use.", toDeduct.getType()));
+                missingResources.add(toDeduct);
             }
         }
+
+        if (!missingResources.isEmpty()) {
+            throw new NoEnoughResourcesException(totalResources, resourcesToDeduct, missingResources);
+        }
+
         return new ArrayList<>(result.values());
     }
 
@@ -107,16 +116,16 @@ public class ResourceAggregator {
      *
      * @param resources
      *         resources to check types
-     * @throws NotFoundException
+     * @throws IllegalStateException
      *         when {@code resources} list contains resource with not supported type
      */
-    private void checkSupporting(List<ResourceImpl> resources) throws NotFoundException {
+    private void checkSupporting(List<? extends Resource> resources) {
         final Set<String> resourcesTypes = resources.stream()
                                                     .map(Resource::getType)
                                                     .collect(Collectors.toSet());
         for (String resourcesType : resourcesTypes) {
             if (!this.resourcesTypes.containsKey(resourcesType)) {
-                throw new NotFoundException(String.format("'%s' resource type is not supported", resourcesType));
+                throw new IllegalStateException(String.format("'%s' resource type is not supported", resourcesType));
             }
         }
     }
@@ -132,7 +141,7 @@ public class ResourceAggregator {
      * @throws NotFoundException
      *         when {@code T} is not supported type
      */
-    private ResourceImpl aggregate(ResourceImpl resourceA, ResourceImpl resourceB) throws NotFoundException {
+    public Resource aggregate(Resource resourceA, Resource resourceB) throws IllegalStateException {
         final String typeId = resourceA.getType();
         final ResourceType resourceType = getResourceType(typeId);
         return resourceType.aggregate(resourceA, resourceB);
@@ -146,12 +155,12 @@ public class ResourceAggregator {
      * @param deduction
      *         resources which should be deducted from {@code totalResource}
      * @return one resources with type {@code T} that is result of subtraction {@code totalResource} and {@code deduction}
-     * @throws ConflictException
+     * @throws NoEnoughResourcesException
      *         when {@code totalResource}'s amount is less than {@code deduction}'s amount
-     * @throws NotFoundException
+     * @throws IllegalStateException
      *         when {@code T} is not supported type
      */
-    private ResourceImpl deduct(ResourceImpl totalResource, ResourceImpl deduction) throws NotFoundException, ConflictException {
+    public Resource deduct(Resource totalResource, Resource deduction) throws NoEnoughResourcesException {
         final String typeId = totalResource.getType();
         final ResourceType resourceType = getResourceType(typeId);
         return resourceType.deduct(totalResource, deduction);
@@ -163,13 +172,13 @@ public class ResourceAggregator {
      * @param typeId
      *         id of resources type
      * @return resources type by given id
-     * @throws NotFoundException
+     * @throws IllegalStateException
      *         when type by given id is not supported type
      */
-    private ResourceType getResourceType(String typeId) throws NotFoundException {
+    private ResourceType getResourceType(String typeId) {
         final ResourceType resourceType = resourcesTypes.get(typeId);
         if (resourceType == null) {
-            throw new NotFoundException(String.format("'%s' resource type is not supported", typeId));
+            throw new IllegalStateException(String.format("'%s' resource type is not supported", typeId));
         }
         return resourceType;
     }

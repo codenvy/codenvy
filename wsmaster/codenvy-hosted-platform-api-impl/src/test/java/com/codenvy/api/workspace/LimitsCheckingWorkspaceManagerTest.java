@@ -22,9 +22,7 @@ import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.plugin.docker.compose.yaml.ComposeEnvironmentParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -41,7 +39,6 @@ import static com.codenvy.api.workspace.TestObjects.createConfig;
 import static com.codenvy.api.workspace.TestObjects.createRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.Size.parseSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -68,7 +65,9 @@ import static org.testng.Assert.assertNull;
 @Listeners(MockitoTestNGListener.class)
 public class LimitsCheckingWorkspaceManagerTest {
     @Mock
-    SystemRamInfoProvider systemRamInfoProvider;
+    private SystemRamInfoProvider    systemRamInfoProvider;
+    @Mock
+    private EnvironmentRamCalculator environmentRamCalculator;
 
     @Test(expectedExceptions = LimitExceededException.class,
           expectedExceptionsMessageRegExp = "You are only allowed to create 2 workspaces.")
@@ -143,8 +142,11 @@ public class LimitsCheckingWorkspaceManagerTest {
     @Test(expectedExceptions = LimitExceededException.class,
           expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
     public void shouldNotBeAbleToCreateWorkspaceWhichExceedsRamLimit() throws Exception {
+        when(environmentRamCalculator.calculate(any())).thenReturn(3072L);
         final WorkspaceConfig config = createConfig("3gb");
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb").build();
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb")
+                                                                       .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                       .build();
 
         manager.checkMaxEnvironmentRam(config);
     }
@@ -160,28 +162,24 @@ public class LimitsCheckingWorkspaceManagerTest {
     @Test(expectedExceptions = LimitExceededException.class,
           expectedExceptionsMessageRegExp = "You are only allowed to use 2048 mb. RAM per workspace.")
     public void shouldNotBeAbleToCreateWorkspaceWithMultipleMachinesWhichExceedsRamLimit() throws Exception {
+        when(environmentRamCalculator.calculate(any())).thenReturn(2304L);
         final WorkspaceConfig config = createConfig("1gb", "1gb", "256mb");
 
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb").build();
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("2gb")
+                                                                       .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                       .build();
 
         manager.checkMaxEnvironmentRam(config);
     }
 
     @Test
-    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesWhichDoesNotExceedRamLimit() throws Exception {
-        final WorkspaceConfig config = createConfig("1gb", "1gb", "256mb");
+    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesIncludingMachineWithoutLimitsWhichDoesNotExceedRamLimit() throws Exception {
+        when(environmentRamCalculator.calculate(any())).thenReturn(2560L);
+        final WorkspaceConfig config = createConfig("1gb", "1gb", null);
 
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("3gb").build();
-
-        manager.checkMaxEnvironmentRam(config);
-    }
-
-    @Test
-    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesIncludingMachineWithoutLimitsWhichDoesNotExceedRamLimit()
-            throws Exception {
-        final WorkspaceConfig config = createConfig("256mb", "256mb", null);
-
-        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("3gb").build();
+        final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxRamPerEnv("3gb")
+                                                                       .setEnvironmentRamCalculator(environmentRamCalculator)
+                                                                       .build();
 
         manager.checkMaxEnvironmentRam(config);
     }
@@ -338,15 +336,14 @@ public class LimitsCheckingWorkspaceManagerTest {
 
     private static class ManagerBuilder {
 
-        private SystemRamInfoProvider systemRamInfoProvider;
-        private EnvironmentParser     environmentParser;
-        private String                maxRamPerEnv;
-        private boolean               defaultAutoSnapshot;
-        private boolean               defaultAutoRestore;
-        private int                   workspacesPerUser;
-        private int                   startedWorkspacesLimit;
-        private int                   maxSameTimeStartWSRequests;
-        private int                   defaultMachineMemorySizeMB;
+        private EnvironmentRamCalculator environmentRamCalculator;
+        private SystemRamInfoProvider    systemRamInfoProvider;
+        private String                   maxRamPerEnv;
+        private boolean                  defaultAutoSnapshot;
+        private boolean                  defaultAutoRestore;
+        private int                      workspacesPerUser;
+        private int                      startedWorkspacesLimit;
+        private int                      maxSameTimeStartWSRequests;
 
         ManagerBuilder() throws ServerException {
             workspacesPerUser = 2;
@@ -355,12 +352,9 @@ public class LimitsCheckingWorkspaceManagerTest {
             maxSameTimeStartWSRequests = 0;
             defaultAutoSnapshot = false;
             defaultAutoRestore = false;
-            defaultMachineMemorySizeMB = 2000;
 
             systemRamInfoProvider = mock(SystemRamInfoProvider.class);
             when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
-
-            environmentParser = new EnvironmentParser(singletonMap("compose", new ComposeEnvironmentParser(null)));
         }
 
         public LimitsCheckingWorkspaceManager build() {
@@ -374,10 +368,9 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                           null,
                                                           null,
                                                           null,
-                                                          environmentParser,
                                                           defaultAutoSnapshot,
                                                           defaultAutoRestore,
-                                                          defaultMachineMemorySizeMB));
+                                                          environmentRamCalculator));
         }
 
         ManagerBuilder setWorkspacesPerUser(int workspacesPerUser) {
@@ -402,6 +395,11 @@ public class LimitsCheckingWorkspaceManagerTest {
 
         ManagerBuilder setSystemRamInfoProvider(SystemRamInfoProvider systemRamInfoProvider) {
             this.systemRamInfoProvider = systemRamInfoProvider;
+            return this;
+        }
+
+        ManagerBuilder setEnvironmentRamCalculator(EnvironmentRamCalculator environmentRamCalculator) {
+            this.environmentRamCalculator = environmentRamCalculator;
             return this;
         }
     }

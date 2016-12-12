@@ -32,6 +32,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sergii Leschenko
  */
+//TODO Add checking resources availability before limit changing and removing
 @Singleton
 public class FreeResourcesLimitManager {
     private final FreeResourcesLimitDao freeResourcesLimitDao;

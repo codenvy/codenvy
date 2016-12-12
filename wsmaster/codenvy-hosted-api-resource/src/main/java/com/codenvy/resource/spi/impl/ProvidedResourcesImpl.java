@@ -34,6 +34,15 @@ public class ProvidedResourcesImpl implements ProvidedResources {
     private Long               endTime;
     private List<ResourceImpl> resources;
 
+    public ProvidedResourcesImpl(ProvidedResources providedResources) {
+        this(providedResources.getProviderId(),
+             providedResources.getId(),
+             providedResources.getOwner(),
+             providedResources.getStartTime(),
+             providedResources.getEndTime(),
+             providedResources.getResources());
+    }
+
     public ProvidedResourcesImpl(String provider,
                                  String id,
                                  String owner,

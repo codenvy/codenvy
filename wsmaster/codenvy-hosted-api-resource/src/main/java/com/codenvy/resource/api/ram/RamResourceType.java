@@ -14,11 +14,11 @@
  */
 package com.codenvy.resource.api.ram;
 
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
+import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.model.ResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableSet;
-
-import org.eclipse.che.api.core.ConflictException;
 
 import java.util.Set;
 
@@ -51,7 +51,7 @@ public class RamResourceType implements ResourceType {
     }
 
     @Override
-    public ResourceImpl aggregate(ResourceImpl resourceA, ResourceImpl resourceB) {
+    public Resource aggregate(Resource resourceA, Resource resourceB) {
         checkResource(resourceA);
         checkResource(resourceB);
 
@@ -59,15 +59,13 @@ public class RamResourceType implements ResourceType {
     }
 
     @Override
-    public ResourceImpl deduct(ResourceImpl total, ResourceImpl deduction) throws ConflictException {
+    public Resource deduct(Resource total, Resource deduction) throws NoEnoughResourcesException {
         checkResource(total);
         checkResource(deduction);
 
         final long resultAmount = total.getAmount() - deduction.getAmount();
         if (resultAmount < 0) {
-            throw new ConflictException(String.format("Workspace needs %s RAM to start - your account has %s RAM available.",
-                                                      deduction.getAmount() + deduction.getUnit(),
-                                                      total.getAmount() + total.getUnit()));
+            throw new NoEnoughResourcesException(total, deduction, new ResourceImpl(ID, -resultAmount, UNIT));
         }
         return new ResourceImpl(ID, resultAmount, UNIT);
     }
@@ -80,7 +78,7 @@ public class RamResourceType implements ResourceType {
      * @throws IllegalArgumentException
      *         if given resources has unsupported type or unit
      */
-    private void checkResource(ResourceImpl resource) {
+    private void checkResource(Resource resource) {
         checkArgument(ID.equals(resource.getType()), "Resource should have '" + ID + "' type");
         checkArgument(SUPPORTED_UNITS.contains(resource.getUnit()), "Resource has unsupported unit '" + resource.getUnit() + "'");
     }

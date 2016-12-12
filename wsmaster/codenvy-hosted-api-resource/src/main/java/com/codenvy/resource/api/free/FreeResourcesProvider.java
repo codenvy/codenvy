@@ -14,12 +14,9 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.organization.api.OrganizationManager;
-import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.organization.spi.impl.OrganizationImpl;
-import com.codenvy.resource.api.ResourcesProvider;
-import com.codenvy.resource.api.ram.RamResourceType;
+import com.codenvy.resource.api.license.ResourcesProvider;
 import com.codenvy.resource.model.FreeResourcesLimit;
+import com.codenvy.resource.model.ProvidedResources;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 import com.codenvy.resource.spi.impl.ResourceImpl;
@@ -28,24 +25,27 @@ import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.lang.Size;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Provides free resources for account usage.
  *
- * Returns free resources limits if it is specified for given account
- * and default free resources limit in other case
+ * <p>Returns free resources limits if it is specified for given account
+ * or default free resources limit in other case
+ *
+ * <p>Default resources should be provided by {@link DefaultResourcesProvider}
+ * for different account types
  *
  * @author Sergii Leschenko
  */
@@ -53,27 +53,23 @@ import static java.util.Collections.singletonList;
 public class FreeResourcesProvider implements ResourcesProvider {
     public static final String FREE_RESOURCES_PROVIDER = "free";
 
-    private final FreeResourcesLimitManager freeResourcesLimitManager;
-    private final AccountManager            accountManager;
-    private final OrganizationManager       organizationManager;
-    private final long                      ramPerUser;
-    private final long                      ramPerOrganization;
+    private final FreeResourcesLimitManager             freeResourcesLimitManager;
+    private final AccountManager                        accountManager;
+    private final Map<String, DefaultResourcesProvider> defaultResourcesProviders;
 
     @Inject
     public FreeResourcesProvider(FreeResourcesLimitManager freeResourcesLimitManager,
                                  AccountManager accountManager,
-                                 OrganizationManager organizationManager,
-                                 @Named("limits.user.workspaces.ram") String ramPerUser,
-                                 @Named("limits.organization.workspaces.ram") String ramPerOrganization) {
+                                 Set<DefaultResourcesProvider> defaultResourcesProviders) {
         this.freeResourcesLimitManager = freeResourcesLimitManager;
         this.accountManager = accountManager;
-        this.organizationManager = organizationManager;
-        this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
-        this.ramPerOrganization = "-1".equals(ramPerOrganization) ? -1 : Size.parseSizeToMegabytes(ramPerOrganization);
+        this.defaultResourcesProviders = defaultResourcesProviders.stream()
+                                                                  .collect(toMap(DefaultResourcesProvider::getAccountType,
+                                                                                 Function.identity()));
     }
 
     @Override
-    public List<ProvidedResourcesImpl> getResources(String accountId) throws ServerException, NotFoundException {
+    public List<ProvidedResources> getResources(String accountId) throws ServerException, NotFoundException {
         Map<String, ResourceImpl> freeResources = new HashMap<>();
         String limitId = null;
         try {
@@ -102,16 +98,12 @@ public class FreeResourcesProvider implements ResourcesProvider {
     private List<ResourceImpl> getDefaultResources(String accountId) throws NotFoundException, ServerException {
         List<ResourceImpl> defaultResources = new ArrayList<>();
         final Account account = accountManager.getById(accountId);
-        if (UserImpl.PERSONAL_ACCOUNT.equals(account.getType())) {
-            defaultResources.add(new ResourceImpl(RamResourceType.ID, ramPerUser, RamResourceType.UNIT));
-        } else if (OrganizationImpl.ORGANIZATIONAL_ACCOUNT.equals(account.getType())) {
-            final Organization organization = organizationManager.getById(accountId);
-            // only root organizations should have own resources
-            // suborganization will use resources of its parent organization. Will be implemented soon
-            if (organization.getParent() == null) {
-                defaultResources.add(new ResourceImpl(RamResourceType.ID, ramPerOrganization, RamResourceType.UNIT));
-            }
+
+        final DefaultResourcesProvider defaultResourcesProvider = defaultResourcesProviders.get(account.getType());
+        if (defaultResourcesProvider != null) {
+            defaultResources.addAll(defaultResourcesProvider.getResources(accountId));
         }
+
         return defaultResources;
     }
 }

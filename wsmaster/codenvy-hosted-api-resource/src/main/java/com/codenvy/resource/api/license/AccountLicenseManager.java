@@ -12,11 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api;
+package com.codenvy.resource.api.license;
 
-import com.codenvy.resource.spi.impl.ResourceImpl;
-import com.codenvy.resource.spi.impl.LicenseImpl;
-import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
+import com.codenvy.resource.api.ResourceAggregator;
+import com.codenvy.resource.model.AccountLicense;
+import com.codenvy.resource.model.ProvidedResources;
+import com.codenvy.resource.model.Resource;
+import com.codenvy.resource.spi.impl.AccountLicenseImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -29,18 +31,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Facade for License related operations.
+ * Facade for Account License related operations.
  *
  * @author Sergii Leschenko
  */
 @Singleton
-public class LicenseManager {
+public class AccountLicenseManager {
     private final Set<ResourcesProvider> resourcesProviders;
     private final ResourceAggregator     resourceAggregator;
 
     @Inject
-    public LicenseManager(Set<ResourcesProvider> resourcesProviders,
-                          ResourceAggregator resourceAggregator) {
+    public AccountLicenseManager(Set<ResourcesProvider> resourcesProviders,
+                                 ResourceAggregator resourceAggregator) {
         this.resourcesProviders = resourcesProviders;
         this.resourceAggregator = resourceAggregator;
     }
@@ -56,18 +58,18 @@ public class LicenseManager {
      * @throws ServerException
      *         when some exception occurs
      */
-    public LicenseImpl getByAccount(String accountId) throws NotFoundException, ServerException {
-        final List<ProvidedResourcesImpl> resources = new ArrayList<>();
+    public AccountLicense getByAccount(String accountId) throws NotFoundException, ServerException {
+        final List<ProvidedResources> resources = new ArrayList<>();
         for (ResourcesProvider resourcesProvider : resourcesProviders) {
             resources.addAll(resourcesProvider.getResources(accountId));
         }
 
-        final List<ResourceImpl> allResources = resources.stream()
-                                                             .flatMap(providedResources -> providedResources.getResources().stream())
-                                                             .collect(Collectors.toList());
+        final List<Resource> allResources = resources.stream()
+                                                     .flatMap(providedResources -> providedResources.getResources().stream())
+                                                     .collect(Collectors.toList());
 
-        return new LicenseImpl(accountId,
-                               resources,
-                               new ArrayList<>(resourceAggregator.aggregateByType(allResources).values()));
+        return new AccountLicenseImpl(accountId,
+                                      resources,
+                                      new ArrayList<>(resourceAggregator.aggregateByType(allResources).values()));
     }
 }

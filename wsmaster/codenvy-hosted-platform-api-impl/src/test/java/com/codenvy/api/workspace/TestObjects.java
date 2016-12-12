@@ -57,10 +57,7 @@ public final class TestObjects {
     private static final String       DEFAULT_USER_NAME = "user123456";
     private static final ObjectMapper YAML_PARSER       = new ObjectMapper(new YAMLFactory());
 
-    /** Creates users workspace object based on the owner and machines RAM. */
-    public static WorkspaceImpl createWorkspace(String owner, String devMachineRam, String... machineRams)
-            throws Exception {
-
+    public static EnvironmentImpl createEnvironment(String devMachineRam, String... machineRams) throws Exception {
         Map<String, ExtendedMachineImpl> machines = new HashMap<>();
         machines.put("dev-machine", new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                             emptyMap(),
@@ -84,13 +81,19 @@ public final class TestObjects {
         EnvironmentRecipeImpl recipe = new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
 
 
+        return new EnvironmentImpl(recipe,
+                                   machines);
+    }
+
+    /** Creates users workspace object based on the owner and machines RAM. */
+    public static WorkspaceImpl createWorkspace(String owner, String devMachineRam, String... machineRams) throws Exception {
+
         return WorkspaceImpl.builder()
                             .generateId()
                             .setConfig(WorkspaceConfigImpl.builder()
                                                           .setName(NameGenerator.generate("workspace", 2))
                                                           .setEnvironments(singletonMap("dev-env",
-                                                                                        new EnvironmentImpl(recipe,
-                                                                                                            machines)))
+                                                                                        createEnvironment(devMachineRam, machineRams)))
                                                           .setDefaultEnv("dev-env")
                                                           .build())
                             .setAccount(new AccountImpl("accountId", owner, "test"))
@@ -112,21 +115,22 @@ public final class TestObjects {
         Map.Entry<String, ExtendedMachineImpl> devMachine = env.getMachines()
                                                                .entrySet()
                                                                .stream()
-                                                               .filter(entry -> entry.getValue() .getAgents() != null &&
-                                                                                entry.getValue().getAgents().contains("org.eclipse.che.ws-agent"))
+                                                               .filter(entry -> entry.getValue().getAgents() != null &&
+                                                                                entry.getValue().getAgents()
+                                                                                     .contains("org.eclipse.che.ws-agent"))
                                                                .findAny()
                                                                .get();
         final WorkspaceRuntimeImpl runtime =
                 new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(),
                                          null,
                                          env.getMachines().entrySet()
-                                                           .stream()
-                                                           .map(entry -> createMachine(workspace.getId(),
-                                                                                       envName,
-                                                                                       entry.getKey(),
-                                                                                       devMachine.getKey().equals(entry.getKey()),
-                                                                                       entry.getValue().getAttributes().get("memoryLimitBytes")))
-                                                           .collect(toList()),
+                                            .stream()
+                                            .map(entry -> createMachine(workspace.getId(),
+                                                                        envName,
+                                                                        entry.getKey(),
+                                                                        devMachine.getKey().equals(entry.getKey()),
+                                                                        entry.getValue().getAttributes().get("memoryLimitBytes")))
+                                            .collect(toList()),
                                          createMachine(workspace.getId(),
                                                        envName,
                                                        devMachine.getKey(),

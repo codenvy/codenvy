@@ -28,8 +28,6 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -60,18 +58,17 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 @Singleton
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
-    private static final Striped<Lock> CREATE_LOCKS               = Striped.lazyWeakLock(100);
-    private static final Striped<Lock> START_LOCKS                = Striped.lazyWeakLock(100);
-    private static final long          BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
+    private static final Striped<Lock> CREATE_LOCKS = Striped.lazyWeakLock(100);
+    private static final Striped<Lock> START_LOCKS  = Striped.lazyWeakLock(100);
 
-    private final EnvironmentParser     environmentParser;
-    private final SystemRamInfoProvider systemRamInfoProvider;
+    private final SystemRamInfoProvider    systemRamInfoProvider;
+    private final EnvironmentRamCalculator environmentRamCalculator;
 
     private final int workspacesPerUser;
     private final int startedWorkspacesLimit;
 
     private final long maxRamPerEnvMB;
-    private final long defaultMachineMemorySizeBytes;
+
 
     @VisibleForTesting
     Semaphore startSemaphore;
@@ -87,17 +84,16 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           EventService eventService,
                                           SnapshotDao snapshotDao,
                                           AccountManager accountManager,
-                                          EnvironmentParser environmentParser,
                                           @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-                                          @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB) {
+                                          EnvironmentRamCalculator environmentRamCalculator) {
         super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
         this.startedWorkspacesLimit = startedWorkspacesLimit;
         this.systemRamInfoProvider = systemRamInfoProvider;
         this.workspacesPerUser = workspacesPerUser;
+        this.environmentRamCalculator = environmentRamCalculator;
         this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
-        this.environmentParser = environmentParser;
-        this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
+
         if (maxSameTimeStartWSRequests > 0) {
             this.startSemaphore = new Semaphore(maxSameTimeStartWSRequests);
         }
@@ -269,7 +265,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         }
         for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
             Environment env = envEntry.getValue();
-            final long workspaceRam = sumRam(env);
+            final long workspaceRam = environmentRamCalculator.calculate(env);
             if (workspaceRam > maxRamPerEnvMB) {
                 throw new LimitExceededException(format("You are only allowed to use %d mb. RAM per workspace.", maxRamPerEnvMB),
                                                  ImmutableMap.of("environment_max_ram", Long.toString(maxRamPerEnvMB),
@@ -280,23 +276,5 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         }
     }
 
-    /**
-     * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in environment in megabytes.
-     */
-    private long sumRam(Environment environment) throws ServerException {
-        CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
 
-        long sumBytes = composeEnv.getServices()
-                                  .values()
-                                  .stream()
-                                  .mapToLong(value -> {
-                                      if (value.getMemLimit() == null || value.getMemLimit() == 0) {
-                                          return defaultMachineMemorySizeBytes;
-                                      } else {
-                                          return value.getMemLimit();
-                                      }
-                                  })
-                                  .sum();
-        return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
-    }
 }

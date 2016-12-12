@@ -14,23 +14,22 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.model.ResourceType;
 import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
 import com.codenvy.resource.shared.dto.ResourceDto;
-import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Set;
+import java.util.Arrays;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 
 /**
  * Test for {@link FreeResourcesLimitValidator}
@@ -39,54 +38,76 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class FreeResourcesLimitValidatorTest {
-    private static final String      RESOURCE_TYPE   = "test";
-    private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of("mb", "gb");
     @Mock
-    private ResourceType resourceType;
+    private ResourceValidator resourceValidator;
 
+    @InjectMocks
     private FreeResourcesLimitValidator validator;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        when(resourceType.getId()).thenReturn(RESOURCE_TYPE);
-        when(resourceType.getSupportedUnits()).thenReturn(SUPPORTED_UNITS);
-
-        validator = new FreeResourcesLimitValidator(ImmutableSet.of(resourceType));
-    }
-
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Missed resources limit description")
-    public void shouldThrowBadRequestExceptionWhenResourcesLimitIsNull() throws Exception {
+          expectedExceptionsMessageRegExp = "Missed free resources limit description.")
+    public void shouldThrowBadRequestExceptionWhenFreeResourcesIsNull() throws Exception {
         //when
         validator.check(null);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Specified resources type 'unsupported' is not supported")
-    public void shouldThrowBadRequestExceptionWhenResourcesLimitContainsResourceWithNonSupportedType() throws Exception {
+          expectedExceptionsMessageRegExp = "Missed account id.")
+    public void shouldThrowBadRequestExceptionWhenAccountIdIsMissed() throws Exception {
         //when
         validator.check(DtoFactory.newDto(FreeResourcesLimitDto.class)
                                   .withResources(singletonList(DtoFactory.newDto(ResourceDto.class)
-                                                                         .withType("unsupported")
-                                                                         .withUnit("mb"))));
+                                                                         .withType("test")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(1230))));
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Specified resources type 'test' support only following units: mb, gb")
-    public void shouldThrowBadRequestExceptionWhenResourcesLimitContainsResourceWithNonSupportedUnit() throws Exception {
+          expectedExceptionsMessageRegExp = "invalid resource")
+    public void shouldRethrowBadRequestExceptionWhenThereIsAnyInvalidResource() throws Exception {
+        //given
+        Mockito.doNothing()
+               .doThrow(new BadRequestException("invalid resource"))
+               .when(resourceValidator)
+               .check(any());
+
         //when
         validator.check(DtoFactory.newDto(FreeResourcesLimitDto.class)
-                                  .withResources(singletonList(DtoFactory.newDto(ResourceDto.class)
-                                                                         .withType(RESOURCE_TYPE)
-                                                                         .withUnit("kb"))));
+                                  .withAccountId("account123")
+                                  .withResources(Arrays.asList(DtoFactory.newDto(ResourceDto.class)
+                                                                         .withType("test")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(1230),
+                                                               DtoFactory.newDto(ResourceDto.class)
+                                                                         .withType("test2")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(3214))));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Free resources limit should contain only one resources with type 'test'.")
+    public void shouldThrowBadRequestExceptionWhenAccountResourcesLimitContainTwoResourcesWithTheSameType() throws Exception {
+        //when
+        validator.check(DtoFactory.newDto(FreeResourcesLimitDto.class)
+                                  .withAccountId("account123")
+                                  .withResources(Arrays.asList(DtoFactory.newDto(ResourceDto.class)
+                                                                         .withType("test")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(1230),
+                                                               DtoFactory.newDto(ResourceDto.class)
+                                                                         .withType("test")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(3))));
     }
 
     @Test
-    public void shouldNotThrowAnyExceptionsWhenResourcesLimitContainsOnlyResourceWithSupportedTypeAndUnit() throws Exception {
+    public void shouldNotThrowAnyExceptionWhenAccountResourcesLimitIsValid() throws Exception {
         //when
         validator.check(DtoFactory.newDto(FreeResourcesLimitDto.class)
+                                  .withAccountId("account123")
                                   .withResources(singletonList(DtoFactory.newDto(ResourceDto.class)
-                                                                         .withType(RESOURCE_TYPE)
-                                                                         .withUnit("mb"))));
+                                                                         .withType("test")
+                                                                         .withUnit("mb")
+                                                                         .withAmount(1230))));
     }
 }
