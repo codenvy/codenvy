@@ -19,7 +19,7 @@ import com.codenvy.api.dao.authentication.TicketManager;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.user.server.event.PostUserRemovedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -40,9 +40,9 @@ public class LogoutOnUserRemoveSubscriber {
 
     @PostConstruct
     public void start() {
-        eventService.subscribe(new EventSubscriber<PostUserRemovedEvent>() {
+        eventService.subscribe(new EventSubscriber<UserRemovedEvent>() {
             @Override
-            public void onEvent(PostUserRemovedEvent event) {
+            public void onEvent(UserRemovedEvent event) {
                 if (null != event && null != event.getUserId()) {
                     String id = event.getUserId();
 

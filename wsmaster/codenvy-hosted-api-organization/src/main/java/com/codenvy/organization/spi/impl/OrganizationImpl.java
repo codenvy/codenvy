@@ -15,14 +15,12 @@
 package com.codenvy.organization.spi.impl;
 
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.organization.spi.jpa.OrganizationEntityListener;
 
 import org.eclipse.che.account.spi.AccountImpl;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -38,7 +36,6 @@ import java.util.Objects;
  * @author Sergii Leschenko
  */
 @Entity(name = "Organization")
-@EntityListeners(OrganizationEntityListener.class)
 @NamedQueries(
         {
                 @NamedQuery(name = "Organization.getByName",

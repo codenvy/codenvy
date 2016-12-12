@@ -28,7 +28,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.event.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -156,7 +156,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
     @Singleton
     public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeWorkspaceRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -175,7 +175,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
 
         @Override
-        public void onRemovalEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
             removeWorkers(event.getWorkspace().getId(), PAGE_SIZE);
         }
 
@@ -194,7 +194,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
     @Singleton
     public static class RemoveWorkersBeforeUserRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -211,7 +211,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
 
         @Override
-        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
             for (WorkerImpl worker : dao.getWorkersByUser(event.getUser().getId())) {
                 dao.removeWorker(worker.getInstanceId(), worker.getUserId());
             }

@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.event.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
@@ -166,6 +166,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
+            eventService.publish(new BeforeOrganizationRemovedEvent(new OrganizationImpl(organization)));
             manager.remove(organization);
             manager.flush();
         }
@@ -173,7 +174,7 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Singleton
     public static class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -193,7 +194,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         }
 
         @Override
-        public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             removeSuborganizations(event.getOrganization().getId(), PAGE_SIZE);
         }
 

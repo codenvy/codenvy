@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
@@ -121,7 +120,7 @@ public class JpaStackPermissionsDaoTest {
     }
 
     @Test
-    public void shouldStackPermissionsWhenStackIsRemoved() throws Exception {
+    public void shouldRemoveStackPermissionsWhenStackIsRemoved() throws Exception {
         BeforeStackRemovedEvent event = new BeforeStackRemovedEvent(stacks[0]);
         removePermissionsBeforeStackRemovedEventSubscriber.onEvent(event);
         assertTrue(dao.getByInstance("stack1", 30, 0).isEmpty());
