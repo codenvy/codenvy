@@ -12,7 +12,7 @@ If you'd like to speak to us about custom integrations between Codenvy and CI sy
 
 # 1. Set up plugins  
 Go to **Manage Jenkins - Manage Plugins** and install GitHub and Email Extension Template Plugins.
-![plugins.png](../../docs/imgs/plugins.png)
+![plugins.png](../../../docs/imgs/plugins.png)
 
 # 2. Create a Jenkins job  
 Set up Jenkins Job as per your project reqs (JDK, Maven, Node.js etc). You may need to install additional plugins that your project requires.
@@ -25,35 +25,44 @@ You need to make sure that a message is sent out when job succeeds or fails. You
 In your Jenkins job configuration, define message content as:
 
 `${JELLY_SCRIPT,template="html-factory"}`
-![postbuild.png](../../docs/imgs/postbuild.png)
+![postbuild.png](../../../docs/imgs/postbuild.png)
 
 # 4. Create a Codenvy Factory  
-You need to create a Codenvy Factory that uses your target project as source. This Factory will be modified by the plugin and injected into Jenkins job description. See: [Factories](doc:factories).
+You need to create a Codenvy Factory that uses your target project as source. This Factory will be modified by the plugin and injected into Jenkins job description. See: [Factories](../../docs/workspace-automation).
 # 5. Configure connector, webhook and credentials props  
 SSH into your Codenvy instance, navigate to `/home/codenvy` and create 3 `.properties` files:
+
+- first file:  
+
 ```text  
 jenkins1=jenkins,factory7nfrelk0v8b77fek,http://userName:password@jenkins.codenvy-dev.com:8080,EvgenTestn
 
 [connector-name],[factory-ID],[$protocol://$userName:$password@$jenkinsURL],[jenkins-job-name]\
-```
+```   
+
+- second file:  
 
 ```text  
 username=yourCodenvyUsername
 password=yourCodenvyPassword
 # username and password should be for the user that created a base Factory\
-```
+```   
+
+- third file:  
 
 ```text  
 webhook1=github,https://github.com/orgName/web-java-spring,factory7nfrelk0v8b77fekn
 [webhook-name],[GitHub-URL],[Factory-id]\
-```
+```   
 
 # 6. Configure GitHub Webhooks  
 In your GitHub repo settings, configure the following webhook:
 
 `http(s)://$codenvyURL/api/github-webhook`
+
+
 # Test Integration  
 Either make a mistake in your code and push changes to a remote repository or configure Jenkins job to purposely fail. You should receive a message from Jenkins with a Factory URL in its body.
 
 Also, your Jenkins job should we updated as follows, i.e. its description will have a Factory URL:
-![jenkinsjob.png](../../docs/imgs/jenkinsjob.png)
+![jenkinsjob.png](../../../docs/imgs/jenkinsjob.png)
