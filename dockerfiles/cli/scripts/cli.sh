@@ -86,18 +86,65 @@ server_is_booted_extra_check() {
 }
 
 cmd_init_reinit_pre_action() {
-    sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
-    sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  sed -i'.bak' "s|#CODENVY_HOST=.*|CODENVY_HOST=${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  sed -i'.bak' "s|#CODENVY_SWARM_NODES=.*|CODENVY_SWARM_NODES=${CODENVY_HOST}:23750|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+
+  # For testing purposes only
+  #HTTP_PROXY=8.8.8.8
+  #HTTPS_PROXY=http://4.4.4.4:9090
+  #NO_PROXY="locahost,127.0.0.1"
+
+  if [[ ! ${HTTP_PROXY} = "" ]]; then
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=.*|${CHE_PRODUCT_NAME}_HTTP_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=${HTTP_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
+  if [[ ! ${HTTPS_PROXY} = "" ]]; then
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTPS_PROXY_FOR_${CHE_PRODUCT_NAME}=.*|${CHE_PRODUCT_NAME}_HTTPS_PROXY_FOR_${CHE_PRODUCT_NAME}=${HTTPS_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_HTTPS_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=.*|${CHE_PRODUCT_NAME}_HTTPS_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=${HTTPS_PROXY}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
+  if [[ ! ${HTTP_PROXY} = "" ]] ||
+     [[ ! ${HTTPS_PROXY} = "" ]]; then
+    #
+    # NOTE --- Notice that if no proxy is set, we must append 'codenvy-swarm' to this for docker networking
+    #
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY_FOR_${CHE_PRODUCT_NAME}=.*|${CHE_PRODUCT_NAME}_NO_PROXY_FOR_${CHE_PRODUCT_NAME}=127.0.0.1,localhost,${NO_PROXY},codenvy-swarm,${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+    sed -i'.bak' "s|#${CHE_PRODUCT_NAME}_NO_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=.*|${CHE_PRODUCT_NAME}_NO_PROXY_FOR_${CHE_PRODUCT_NAME}_WORKSPACES=127.0.0.1,localhost,${NO_PROXY},${CODENVY_HOST}|" "${REFERENCE_CONTAINER_ENVIRONMENT_FILE}"
+  fi
 }
 
 cmd_start_check_ports() {
+
+  # If dev mode is on, then we also need to check the debug port set by the user for availability
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" alpine sh -c 'echo $CODENVY_DEBUG_PORT')
+
+    if [[ "$USER_DEBUG_PORT" = "" ]]; then
+      # If the user has not set a debug port, then use the default
+      CODENVY_DEBUG_PORT=8000
+    else 
+      # Otherwise, this is the value set by the user
+      CODENVY_DEBUG_PORT=$USER_DEBUG_PORT
+    fi
+  fi
+
   text   "         port 80 (http):       $(port_open 80 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   text   "         port 443 (https):     $(port_open 443 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   text   "         port 5000 (registry): $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    text   "         port ${CODENVY_DEBUG_PORT} (debug):       $(port_open ${CODENVY_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  fi
+
   if ! $(port_open 80) || ! $(port_open 443) || ! $(port_open 5000); then
     echo ""
     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
     return 1;
+  fi
+  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+    if ! $(port_open ${CODENVY_DEBUG_PORT}); then
+      echo ""
+      error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+      return 1;
+    fi
   fi
 }
 
@@ -117,8 +164,6 @@ cmd_config_post_action() {
     log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
     docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
   fi
-
-
 }
 
 # Runs puppet image to generate ${CHE_FORMAL_PRODUCT_NAME} configuration
@@ -126,11 +171,9 @@ generate_configuration_with_puppet() {
   debug $FUNCNAME
 
   if is_docker_for_windows; then
-    REGISTRY_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/registry/registry.env")
     POSTGRES_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/postgres/postgres.env")
     CODENVY_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env")
   else
-    REGISTRY_ENV_FILE="${CHE_HOST_INSTANCE}/config/registry/registry.env"
     POSTGRES_ENV_FILE="${CHE_HOST_INSTANCE}/config/postgres/postgres.env"
     CODENVY_ENV_FILE="${CHE_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
   fi
@@ -140,11 +183,11 @@ generate_configuration_with_puppet() {
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CHE_HOST_INSTANCE}\":/opt${CHE_CONTAINER_ROOT}:rw \
+                  -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
                   -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
-                  -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
                   -e \"CHE_ENVIRONMENT=development\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
@@ -160,9 +203,9 @@ generate_configuration_with_puppet() {
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CHE_HOST_INSTANCE}\":/opt${CHE_CONTAINER_ROOT}:rw \
-                  -e \"REGISTRY_ENV_FILE=${REGISTRY_ENV_FILE}\" \
+                  -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
                   -e \"CHE_ENVIRONMENT=production\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \

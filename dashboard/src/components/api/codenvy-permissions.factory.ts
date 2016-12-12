@@ -119,13 +119,13 @@ export class CodenvyPermissions {
 
   _updateUserServices(systemPermissions) {
     let isManageUsers = systemPermissions && systemPermissions.actions.includes('manageUsers');
-    let isManageCodenvy = systemPermissions && systemPermissions.actions.includes('manageCodenvy');
+    let isManageSystem = systemPermissions && systemPermissions.actions.includes('manageSystem');
 
     this.userServices.hasUserService = isManageUsers;
     this.userServices.hasUserProfileService = isManageUsers;
     this.userServices.hasAdminUserService = isManageUsers;
-    this.userServices.hasInstallationManagerService = isManageCodenvy;
-    this.userServices.hasLicenseService = isManageCodenvy;
+    this.userServices.hasInstallationManagerService = isManageSystem;
+    this.userServices.hasLicenseService = isManageSystem;
   }
 
   getSystemPermissions() {

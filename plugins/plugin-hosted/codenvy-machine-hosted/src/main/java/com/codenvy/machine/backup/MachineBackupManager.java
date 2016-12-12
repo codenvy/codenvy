@@ -194,7 +194,7 @@ public class MachineBackupManager {
                                                   Boolean.toString(removeSourceOnSuccess));
 
         try {
-            execute(commandLine.asArray(), maxBackupDuration);
+            execute(commandLine.asArray(), maxBackupDuration, srcAddress);
         } catch (TimeoutException e) {
             throw new ServerException("Backup of workspace " + workspaceId + " filesystem terminated due to timeout on "
                                       + srcAddress + " node.");
@@ -258,7 +258,7 @@ public class MachineBackupManager {
                                                       userId,
                                                       groupId);
 
-            execute(commandLine.asArray(), restoreDuration);
+            execute(commandLine.asArray(), restoreDuration, destAddress);
             restored = true;
         } catch (TimeoutException e) {
             throw new ServerException("Restoring of workspace " + workspaceId + " filesystem terminated due to timeout on "
@@ -279,12 +279,12 @@ public class MachineBackupManager {
     }
 
     @VisibleForTesting
-    void execute(String[] commandLine, int timeout) throws TimeoutException, IOException, InterruptedException {
+    void execute(String[] commandLine, int timeout, String address) throws TimeoutException, IOException, InterruptedException {
         final ListLineConsumer outputConsumer = new ListLineConsumer();
         Process process = ProcessUtil.executeAndWait(commandLine, timeout, SECONDS, outputConsumer);
 
         if (process.exitValue() != 0) {
-            LOG.error(outputConsumer.getText());
+            LOG.error("Error occurred during backup/restore on '{}' : {}", address, outputConsumer.getText());
             throw new IOException("Process failed. Exit code " + process.exitValue());
         }
     }

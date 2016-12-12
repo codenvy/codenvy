@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static com.codenvy.api.permission.server.SystemDomain.MANAGE_CODENVY_ACTION;
+import static com.codenvy.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -72,7 +72,7 @@ public class LicenseServicePermissionsFilterTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
-                                         .get(SECURE_PATH + "/license/legality");
+                                         .get(SECURE_PATH + "/license/system/legality");
 
         assertEquals(response.getStatusCode(), 204);
         verify(licenseService).isCodenvyUsageLegal();
@@ -84,7 +84,7 @@ public class LicenseServicePermissionsFilterTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .when()
-                                         .get(SECURE_PATH + "/license/legality/node?nodeNumber=1");
+                                         .get(SECURE_PATH + "/license/system/legality/node?nodeNumber=1");
 
         assertEquals(response.getStatusCode(), 204);
         verify(licenseService).isCodenvyNodesUsageLegal(1);
@@ -92,9 +92,9 @@ public class LicenseServicePermissionsFilterTest {
     }
 
     @Test
-    public void shouldCheckManageCodenvyPermissionsOnRequestingAnyMethodsFromLicenseServiceExceptLicenseChecking() throws Exception {
+    public void shouldCheckManageSystemPermissionsOnRequestingAnyMethodsFromLicenseServiceExceptLicenseChecking() throws Exception {
         EnvironmentContext.getCurrent().setSubject(subject);
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_CODENVY_ACTION)).thenReturn(true);
+        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(true);
         final GenericResourceMethod GenericResourceMethod = mock(GenericResourceMethod.class);
 
         final Method[] imMethods = LicenseService.class.getDeclaredMethods();
@@ -112,7 +112,7 @@ public class LicenseServicePermissionsFilterTest {
         }
 
         //all methods should be covered with permissions
-        verify(subject, times(publicMethods)).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_CODENVY_ACTION);
+        verify(subject, times(publicMethods)).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     }
 
     @Filter

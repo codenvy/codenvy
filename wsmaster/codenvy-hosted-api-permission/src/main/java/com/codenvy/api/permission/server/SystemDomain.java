@@ -37,13 +37,13 @@ import java.util.stream.Stream;
 public class SystemDomain extends AbstractPermissionsDomain<SystemPermissionsImpl> {
     public static final String SYSTEM_DOMAIN_ACTIONS = "system.domain.actions";
     public static final String DOMAIN_ID             = "system";
-    public static final String MANAGE_CODENVY_ACTION = "manageCodenvy";
+    public static final String MANAGE_SYSTEM_ACTION = "manageSystem";
 
     @Inject
     public SystemDomain(@Named(SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) {
         super(DOMAIN_ID,
               Stream.concat(allowedActions.stream(),
-                            Stream.of(MANAGE_CODENVY_ACTION))
+                            Stream.of(MANAGE_SYSTEM_ACTION))
                     .collect(Collectors.toList()),
               false);
     }

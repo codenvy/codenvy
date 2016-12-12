@@ -78,11 +78,13 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         String key;
 
         switch (methodName) {
-            case "getWorkspaces": //method accessible to every user
+            case "getSettings":
+            case "getWorkspaces":
+                //methods accessible to every user
                 return;
 
             case "getByNamespace": {
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
                     return;
                 }
                 checkManageNamespaceAccess(currentSubject, ((String)arguments[1]));
@@ -105,7 +107,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "stop":
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
                     return;
                 }
             case "startById":
@@ -120,7 +122,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "getByKey":
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_CODENVY_ACTION)) {
+                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
                     return;
                 }
             case "checkAgentHealth":
