@@ -46,14 +46,9 @@ Follow the below steps to connect to a remote Codenvy workspace from the local I
 5. Make some edits in the project.
 
 6. Go to a Codenvy workspace to verify changes are there.
-[block:embed]
-{
-  "html": "<iframe class="embedly-embed" src="//cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fwww.youtube.com%2Fembed%2FoWCPczMK-_8%3Ffeature%3Doembed&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DoWCPczMK-_8&image=https%3A%2F%2Fi.ytimg.com%2Fvi%2FoWCPczMK-_8%2Fhqdefault.jpg&key=02466f963b9b4bb8845a05b53d3235d7&type=text%2Fhtml&schema=youtube" width="854" height="480" scrolling="no" frameborder="0" allowfullscreen></iframe>",
-  "url": "https://www.youtube.com/watch?v=oWCPczMK-_8&feature=youtu.be",
-  "title": "SSH Export Eclipse IDE",
-  "favicon": "https://s.ytimg.com/yts/img/favicon-vflz7uhzw.ico",
-  "image": "https://i.ytimg.com/vi/oWCPczMK-_8/hqdefault.jpg"
-}
+
+[Video - SSH Export Eclipse IDE](https://www.youtube.com/watch?v=oWCPczMK-_8&feature=youtu.be)
+
 
 # Mount and Sync  
 
@@ -104,14 +99,9 @@ docker run - -rm - -net host \
 Once started the container will ask for the username and password.
 
 Once started you can connect your IDE to the mounted directory on your local filesystem.
-[block:embed]
-{
-  "html": "<iframe class="embedly-embed" src="//cdn.embedly.com/widgets/media.html?src=https%3A%2F%2Fwww.youtube.com%2Fembed%2FWmBYF7xNLR8%3Ffeature%3Doembed&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DWmBYF7xNLR8&image=https%3A%2F%2Fi.ytimg.com%2Fvi%2FWmBYF7xNLR8%2Fhqdefault.jpg&key=02466f963b9b4bb8845a05b53d3235d7&type=text%2Fhtml&schema=youtube" width="854" height="480" scrolling="no" frameborder="0" allowfullscreen></iframe>",
-  "url": "https://www.youtube.com/watch?v=WmBYF7xNLR8&feature=youtu.be",
-  "title": "Mount Local Desktop Directory to Codenvy IDE",
-  "favicon": "https://www.youtube.com/favicon.ico",
-  "image": "https://i.ytimg.com/vi/WmBYF7xNLR8/hqdefault.jpg"
-}
+
+[Video - Mount Local Desktop Directory to Codenvy IDE](https://www.youtube.com/watch?v=WmBYF7xNLR8&feature=youtu.be)
+
 
 # Mount Without Sync  
 If you just want to mount the remote workspace to a local directory, you can do so with sshfs. Mounting will allow all file system writes to take place immediately. However, all changes are sent over the network. If the workspace and desktop IDE are both on the same machine or local network, then this method may be preferred. However, the greater the network latency, the slower the sync will be.

@@ -57,5 +57,7 @@ To remove the "Make a Wish" widget in the footer, remove the `che-support-email`
 #remove this section
 <che-footer id="codenvyfooter" che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Codenvy" ng-show="waitingLoaded && !showIDE"></che-footer>
 ```
-Alternatively you can leave the widget but change the link to point to your own organization's email by changing the `helpPath` and `supportEmail` attributes in the [product.json](dashboard/src/assets/branding/product.json) file. 
+Alternatively you can leave the widget but change the link to point to your own organization's email by changing the `helpPath` and `supportEmail` attributes in the [product.json](dashboard/src/assets/branding/product.json) file.
+
 # Creating Custom Assemblies  
+See dedicated [documentation](../../docs/custom-assemblies/) other section here.

@@ -32,7 +32,7 @@ cd onpremises-ide-packaging-tomcat-codenvy-allinone\target\
 onpremises-ide-packaging-tomcat-codenvy-allinone-${version}.zip\
 ```
 #### Update Codenvy
-Copy the generated ZIP file onto the Codenvy server. 
+Copy the generated ZIP file onto the Codenvy server.
 ```shell  
 # On the Codenvy, replace the existing ZIP with the one you created:
 cd /etc/puppet/files/servers/prod/aio/
@@ -60,7 +60,7 @@ Otherwise, you must add your extension as a dependency to Codenvy.  First, add t
 ```
 After adding a dependency, you need to sort maven with `mvn sortpom:sort`.
 
-You do not have to provide the `<version>` tag. Maven will pull the version of your extension that matches the version of Codenvy. 
+You do not have to provide the `<version>` tag. Maven will pull the version of your extension that matches the version of Codenvy.
 
 Second, if your extension is an IDE extension, add your extension as a dependency to the IDE:
 ```xml  

@@ -30,5 +30,7 @@ If starting in the IDE make sure the workspace you're in is compatible with the 
 * Fill in the parameters on the right
 
 Once your code is imported you'll have to configure your project.
+
+
 # Project Configuration  
 Codenvy will perform a project "estimation" when a project is being imported in an attempt for it to estimate the project type. The project type will cause the IDE and workspace to inherit special behaviors, such as Java intellisense for maven, or Bower plug-in for JavaScript. You can manually set the project type in `Project > Configuration`.
