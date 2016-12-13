@@ -2,7 +2,7 @@
 title: Configuration
 excerpt: "Techniques for configuring Codenvy"
 layout: docs
-permalink: /docs/configuration/
+permalink: /docs/admin-guide/configuration/
 ---
 Configuration is handledy by modifying `codenvy.env` placed in the host folder volume mounted to `:/data`. This configuration file is generated during the `codenvy init` phase. If you rerun `codenvy init` in an already initialized folder, the process will abort unless you pass `--force`, `--pull`, or `--reinit`.
 

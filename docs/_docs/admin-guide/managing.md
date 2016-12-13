@@ -2,7 +2,7 @@
 title: Managing
 excerpt: ""
 layout: docs
-permalink: /docs/managing/
+permalink: /docs/admin-guide/managing/
 ---
 ## Scaling
 Codenvy workspaces can run on different physical nodes that are part of a Codenvy cluster managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power when they have a compilation that they want done. So you will want to allocate enough physical nodes to smartly handle the right number of concurrently *running* workspaces, each of which will have a RAM block.
@@ -12,14 +12,14 @@ Each Codenvy instance generates a configuration on how to add nodes into the clu
 You can remove nodes with `codenvy remove-node <ip>`.
 
 ## Upgrading
-Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M7, then:
+Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M8, then:
 ```
 # Get the new version of Codenvy
-docker pull codenvy/cli:5.0.0-M7
+docker pull codenvy/cli:5.0.0-M8
 
 # You now have two codenvy/cli images (one for each version)
 # Perform an upgrade - use the new image to upgrade old installation
-docker run <volume-mounts> codenvy/cli:5.0.0-M7 upgrade
+docker run <volume-mounts> codenvy/cli:5.0.0-M8 upgrade
 ```
 
 The upgrade command has numerous checks to prevent you from upgrading Codenvy if the new image and the old version are not compatible. In order for the upgrade procedure to advance, the CLI image must be newer that the version in `/instance/codenvy.ver`.
