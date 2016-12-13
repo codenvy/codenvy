@@ -108,6 +108,9 @@ export class CodenvyNavBarCtrl {
         name: 'Profile & Account',
         url: '#/account'
       }, {
+        name: 'Billing',
+        url: '#/billing'
+      }, {
         name: 'Administration',
         url: '#/administration'
       }, {

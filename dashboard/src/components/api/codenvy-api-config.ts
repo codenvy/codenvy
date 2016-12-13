@@ -22,15 +22,15 @@ import {CodenvyPermissions} from './codenvy-permissions.factory';
 import {CodenvySystem} from './codenvy-system.factory';
 import {CodenvyFactoryTemplate} from './codenvy-factory-template.factory';
 import {CodenvyAPIBuilder} from './builder/codenvy-api-builder.factory';
-import {CodenvyHttpBackend} from './test/codenvy-http-backend';
 import {CodenvyHttpBackendFactory} from './test/codenvy-http-backend.factory';
 import {CodenvyHttpBackendProviderFactory} from './test/codenvy-http-backend-provider.factory'
+import {CodenvyPayment} from './codenvy-payment.factory';
 
 export class CodenvyApiConfig {
 
   constructor(register) {
     register.factory('codenvyUser', CodenvyUser);
-    register.app.constant('clientTokenPath', '/');//is necessary for Braintree
+    register.app.constant('clientTokenPath', '/'); // is necessary for Braintree
     register.factory('codenvyFactory', CodenvyFactory);
     register.factory('codenvyPermissions', CodenvyPermissions);
     register.factory('codenvyLicense', CodenvyLicense);
@@ -40,5 +40,6 @@ export class CodenvyApiConfig {
     register.factory('codenvyAPIBuilder', CodenvyAPIBuilder);
     register.factory('codenvyHttpBackend', CodenvyHttpBackendFactory);
     register.factory('codenvyHttpBackendProvider', CodenvyHttpBackendProviderFactory);
+    register.factory('codenvyPayment', CodenvyPayment);
   }
 }

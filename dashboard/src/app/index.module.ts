@@ -14,6 +14,7 @@
  */
 'use strict';
 
+import {BillingConfig} from './billing/billing-config';
 import {CodenvyNavbarConfig} from './navbar/navbar-config';
 import {Register} from './utils/register';
 import {CodenvyComponentsConfig} from '../components/components-config';
@@ -241,6 +242,7 @@ angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServic
 
 
 var instanceRegister = new Register(initModule);
+new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
 new FactoryConfig(instanceRegister);

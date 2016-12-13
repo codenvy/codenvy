@@ -1,0 +1,22 @@
+.add-credit-card
+
+  .card-wrapper
+    margin-right 200px
+    margin-bottom 20px
+
+  .add-credit-card-form
+    min-width 350px
+    max-width 650px
+    margin-top -12px
+
+    .che-input
+      min-height 38px
+
+      // avoid validation messages flickering
+      [ng-message]:not(:first-child)
+        display none
+
+    .che-input-desktop-label
+      white-space nowrap
+      min-width 120px
+      font-size 12px

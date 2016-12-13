@@ -1,0 +1,76 @@
+<div layout="row" layout-align="stretch center"
+     flex
+     class="add-credit-card">
+  <div class="card-wrapper" hide-xs hide-sm show-gt-md></div>
+  <div class="add-credit-card-form" flex>
+    <ng-form id="addCreditCardForm" name="addCreditCardForm">
+      <!-- card number -->
+      <che-input che-form="addCreditCardForm"
+                 che-label-name="Card Number"
+                 id="cardNumber"
+                 che-name="cardNumber"
+                 che-place-holder="**** **** **** ****"
+                 aria-label="Card Number"
+                 ng-model="addCreditCardController.creditCard.number"
+                 required
+                 ng-pattern="/^\d{4}(\s?)\d{4}\1\d{4}\1\d{3}/">
+        <div ng-message="required">A credit card number is required.</div>
+        <div ng-message="pattern">A valid credit card number is required.</div>
+      </che-input>
+      <!-- cardholder -->
+      <che-input che-form="addCreditCardForm"
+                 che-label-name="Cardholder"
+                 che-name="cardholder"
+                 che-place-holder=""
+                 aria-label="Cardholder"
+                 ng-model="addCreditCardController.creditCard.cardholder"
+                 required
+                 ng-maxlength="128">
+        <div ng-message="required">A cardholder name is required.</div>
+        <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+      </che-input>
+      <!-- expirationDate -->
+      <che-input che-form="addCreditCardForm"
+                 che-label-name="Expiration"
+                 che-name="expires"
+                 che-place-holder="**/**"
+                 aria-label="Expiration"
+                 ng-model="addCreditCardController.creditCard.expirationDate"
+                 required
+                 ng-pattern="/^\d{2}\s?\/\s?(?:\d{2}|\d{4})$/">
+        <div ng-message="required">An expiration date is required.</div>
+        <div ng-message="pattern">A valid expiration date is required.</div>
+      </che-input>
+      <!-- CVV -->
+      <che-input che-form="addCreditCardForm"
+                 che-label-name="CVV"
+                 che-name="cvv"
+                 che-place-holder="***"
+                 aria-label="CVV"
+                 ng-model="addCreditCardController.creditCard.cvv"
+                 required
+                 ng-minlength="3"
+                 ng-maxlength="4"
+                 ng-pattern="/^\d{3,4}$/">
+        <div ng-message="required">A CVV code is required.</div>
+        <div ng-message="maxlength">The CVV code has to be less than 4 digits long.</div>
+        <div ng-message="minlength">The CVV code has to be more than 3 digits long.</div>
+        <div ng-message="pattern">A valid CVV code is required.</div>
+      </che-input>
+      <!-- post code -->
+      <che-input che-form="addCreditCardForm"
+                 che-label-name="Postal Code"
+                 che-name="postcode"
+                 che-place-holder="***"
+                 aria-label="Postal code"
+                 ng-model="addCreditCardController.creditCard.postcode"
+                 required
+                 ng-minlength="3"
+                 ng-maxlength="10">
+        <div ng-message="required">A postal code is required.</div>
+        <div ng-message="maxlength">The postal code has to be less than 10 symbols long.</div>
+        <div ng-message="minlength">The postal code has to be more than 3 symbols long.</div>
+      </che-input>
+    </ng-form>
+  </div>
+</div>

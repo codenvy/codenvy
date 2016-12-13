@@ -1,0 +1,69 @@
+<che-toolbar che-title="Billing">
+  <div class="billing-save-button-placeholder">
+    <che-button-save-flat ng-show="billingController.isSaveButtonVisible()"
+                          ng-disabled="billingController.isSaveButtonDisabled()"
+                          che-button-title="Save" name="saveButton"
+                          ng-click="billingController.saveCard()"></che-button-save-flat>
+  </div>
+</che-toolbar>
+
+<md-content md-scroll-y flex
+            class="workspace-details-content" md-theme="default">
+
+  <md-progress-linear md-mode="indeterminate" ng-show="billingController.loading"></md-progress-linear>
+
+  <md-content ng-hide="billingController.loading"
+              md-scroll-y flex
+              class="workspace-details-content" md-theme="default">
+    <md-tabs md-dynamic-height md-stretch-tabs="auto"
+             md-selected="billingController.selectedTabIndex"
+             md-center-tabs="">
+
+      <!-- Summary tab -->
+      <md-tab>
+        <md-tab-label>
+          <md-icon md-font-icon="fa-ticket" class="fa che-tab-label-icon"></md-icon>
+          <span class="che-tab-label-title">Summary</span>
+        </md-tab-label>
+        <md-tab-body>
+          Summary tab
+        </md-tab-body>
+      </md-tab>
+
+      <!-- Card tab -->
+      <md-tab>
+        <md-tab-label>
+          <md-icon md-font-icon="fa-cc-mastercard" class="fa che-tab-label-icon"></md-icon>
+          <span class="che-tab-label-title">Card</span>
+        </md-tab-label>
+        <md-tab-body>
+          <ng-form name="cardInfoForm">
+            <card-info ng-init="billingController.setInfoForm(cardInfoForm)"
+                          credit-card="billingController.creditCard"
+                          credit-card-on-change="billingController.creditCardChanged(creditCard)"
+                          credit-card-on-delete="billingController.creditCardDeleted()"></card-info>
+          </ng-form>
+        </md-tab-body>
+      </md-tab>
+
+      <!-- Invoices tab -->
+      <md-tab>
+        <md-tab-label>
+          <md-icon md-font-icon="fa-file-text-o" class="fa che-tab-label-icon"></md-icon>
+          <span class="che-tab-label-title">Invoices</span>
+        </md-tab-label>
+        <md-tab-body>
+          Invoices tab
+        </md-tab-body>
+      </md-tab>
+
+    </md-tabs>
+  </md-content>
+</md-content>
+
+<workspace-edit-mode-overlay ng-if="billingController.isSaveButtonVisible()"
+                             workspace-edit-disable-save-button="billingController.isSaveButtonDisabled()"
+                             workspace-edit-mode-on-save="billingController.saveCard()"
+                             workspace-edit-mode-on-cancel="billingController.cancelCard()"></workspace-edit-mode-overlay>
+
+

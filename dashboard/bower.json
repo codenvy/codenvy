@@ -24,7 +24,7 @@
     "angular-websocket": "1.0.9",
     "bootstrap-stylus": "4.0.2",
     "braintree-angular": "1.2.6",
-    "card": "1.0.0",
+    "card": "2.0.4",
     "font-awesome": "4.5.0",
     "google-material-color": "1.2.0",
     "jsonlint": "1.6.0",
@@ -43,7 +43,7 @@
   },
   "overrides": {
     "card": {
-      "main": "lib/js/jquery.card.js"
+      "main": "dist/jquery.card.js"
     },
     "font-awesome": {
       "main": [
