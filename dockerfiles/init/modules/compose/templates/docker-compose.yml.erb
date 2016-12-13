@@ -158,6 +158,23 @@ services:
     restart: always
 
 ########################
+# AGENTS
+########################
+  agents:
+    image: <%= ENV["IMAGE_AGENTS"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
+    ports:
+      - '9000:9000'
+    ulimits:
+      nproc: 163840
+      nofile:
+        soft: 163840
+        hard: 163840
+    restart: always
+
+########################
 # CODENVY
 ########################
   codenvy:
@@ -165,6 +182,7 @@ services:
     depends_on:
       - haproxy
       - postgres
+      - agents
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/codenvy/codenvy.env'
@@ -186,6 +204,7 @@ services:
     links:
       - 'postgres:codenvy-postgres'
       - 'swarm:codenvy-swarm'
+      - 'agents:codenvy-agents'
 <% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '8000:8000'
