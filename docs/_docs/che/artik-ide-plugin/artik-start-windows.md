@@ -9,6 +9,7 @@ The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linu
 **Windows** users follow the instructions below.
 
 **Mac and Linux** users [use this page](../../docs/artik-start-mac/).
+
 # How to Get Help  
 **Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).
 
@@ -71,6 +72,7 @@ exit\
 If you are behind a proxy, you need to [configure your proxy settings](../../docs/che-config-proxies/) for Docker and the ARTIK IDE.  
 
 
+
 # 3. Start ARTIK IDE  
 From the directory where you downloaded the `artik-ide.bat` set the `CHE_DATA_FOLDER` environment variable. This is persisted for each session. To persist it across sessions set it as a [system variable](http://www.computerhope.com/issues/ch000549.htm).
 ```shell  
@@ -110,6 +112,7 @@ artik-ide help\
 
 #### Advanced Configuration
 There are many aspects of ARTIK IDE like port and hostname that can be configured by [setting Eclipse Che properties](../../docs/usage-docker#environment-variables).  
+
 
 
 # 4. Create Workspaces and Projects  
@@ -154,7 +157,7 @@ docker run -i --rm -t artik-tools jdrummond/artik-tools -i %HOST_IP% -t 20
 
 #SSH in ARTIK device using ip address from above to test ip address validity.
 #ARTIK device default username/password root/root.
-bash
+```bash
 >ssh root@<ip-address>
 ```
 **Note: When the ARTIK device is powered up, it will request a new ip address each time. Be sure to determine the new ipaddress each time or give your ARTIK device a static ip address.**
@@ -180,7 +183,6 @@ We recommend only building in the IDE workspace, not on the device itself becaus
 1. Select source file in the project explorer, click **Compile**.
 ![compile.png](../../docs/imgs/compile.png)
 Once built the binaries are automatically synced to the device and ready to run or debug and will show up in project explorer.
-
 
 #### Compilation Options
 The default compilation command looks like this:`$CC -lartik-sdk-base $(for i in $(ls $CPATH)\ndo artik_sdk=-I$CPATH/$i\necho $artik_sdk\ndone) -lpthread -g` It is possible to change this command at `Project` > `Compilation Options`. This command is saved in project attributes and can be customized for each project. A user can also define the output binary name, which is **a.out** by default.  

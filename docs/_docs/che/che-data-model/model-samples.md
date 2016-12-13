@@ -26,7 +26,7 @@ samples : {
   links       : {},      // List of the method links
   category    : STRING,  // Category to be displayed in the IDE Create Project wizard
   tags        : ARRAY    // Values used to filter samples
-}\
+}
 ```
 ### Source
 ```json  
@@ -34,24 +34,27 @@ samples.source : {
   type       : [git | svn | zip],           // Version control system
   location   : URL,                         // Location of source code in version control system or location of a remote zip archive
   parameters : {}                           // (Optional) Parameter list to configure access. Parameter variables vary by type
-    }\
+    }
 ```
 When using `source.type` with `git` or `svn`, the `source.location` should be URL of a publicly available repo. Referencing private repos over HTTPS will result in clone failure unless credentials are provided in the URL itself. Using SSH URLs is possible, however, a user will need ssh key to complete this operation, therefore, it is recommended to use HTTPS URLs to public repos.
 ```json  
 "source":{                        
-      "type":"git"                 
-      "location":"https://github.com/tomitribe/tomee-jaxrs-angular-starter-project.git"
+      "type":"git",                 
+      "location":"https://github.com/tomitribe/tomee-jaxrs-angular-starter-project.git",
       "parameters":{}                 
     },
 ```
+
 `zip` archives are referenced as URLs to remotely hosted archives that are publicly available i.e. require no login/password to be downloaded. It is not possible to reference local URLs unless you run a local server to host them (in this case a local IP is used e.g. `http://192.168.0.10/projecs/myproject.zip`).  
+
 ```json  
 "source":{                        
-      "type":"zip"                  
-      "location":"http://192.168.0.10/projecs/myproject.zip"
-      "parameters":{}                 
+      "type":"zip",                  
+      "location":"http://192.168.0.10/projecs/myproject.zip",
+      "parameters":{}
     },
 ```
+
 #### Parameters
 ```json  
 samples.source.parameters : {      
@@ -62,21 +65,23 @@ samples.source.parameters : {
   fetch    : REF-SPEC          // Clone from patch set of provided ref-spec
 }
 ```
+
 ### Commands
-When authoring a project sample we recommend to predefine commands to register build and run actions. [Learn more about commands.](../../docs/commands)
+When authoring a project sample we recommend to predefine commands to register build and run actions. [Learn more about commands.](https://eclipse-che.readme.io/docs/commands)
 ```json  
 samples.commands : [{  
   // List of pre-defined commands
 }]
 ```
-See [Command](../../docs/workspace#section-command-object) reference.
+See [Command](https://eclipse-che.readme.io/docs/workspace#section-command-object) reference.
+
 
 ### Tags
 Tags are used for stacks and samples objects. Those values are used to determine if a sample is compatible with a stack.
 ```json  
 samples.tags : [{        
-  "tag1                             //list of strings representing tags
-  "tag2  
+  "tag1"                             //list of strings representing tags
+  "tag2"  
   "..."
 }]
 ```
@@ -84,11 +89,11 @@ samples.tags : [{
 ```json  
 [  
   {  
-    "name":"web-javaee-jaxrs        
-    "displayName":"web-javaee-jaxrs"
-    "path":"/web-javaee-jaxrs"       
-    "description":"A basic example demonstrating JAXRS running on Apache TomEE"
-    "projectType":"maven"         
+    "name":"web-javaee-jaxrs",        
+    "displayName":"web-javaee-jaxrs",
+    "path":"/web-javaee-jaxrs",       
+    "description":"A basic example demonstrating JAXRS running on Apache TomEE",
+    "projectType":"maven",         
     "mixins":[],                      
     "attributes":{                    
       "language":[
@@ -98,47 +103,47 @@ samples.tags : [{
     "modules":[],                     
     "problems":[],                   
     "source":{                        
-      "type":"git"                  
-      "location":"https://github.com/tomitribe/tomee-jaxrs-angular-starter-project.git"                         
+      "type":"git",                  
+      "location":"https://github.com/tomitribe/tomee-jaxrs-angular-starter-project.git",                         
       "parameters":{}                 
     },
     "commands":[                      
       {  
-        "name":"build"               
-        "type":"mvn"                 
-        "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war"   
+        "name":"build",               
+        "type":"mvn",                 
+        "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war",   
         "attributes":{                
           "previewUrl":""             
         }
       },
       {  
-        "name":"run tomee"        
-               "type":"custom"        
-               "commandLine":"$TOMEE_HOME/bin/catalina.sh run"
-               "attributes":{  
-                 "previewUrl":"http://${server.port.8080}"
-               }
+        "name":"run tomee",       
+        "type":"custom",        
+        "commandLine":"$TOMEE_HOME/bin/catalina.sh run",
+        "attributes":{  
+          "previewUrl":"http://${server.port.8080}"
+        }
       },
       {  
-        "name":"stop tomee"        
-        "type":"custom"        
-        "commandLine":"$TOMEE_HOME/bin/catalina.sh stop"
+        "name":"stop tomee",       
+        "type":"custom",      
+        "commandLine":"$TOMEE_HOME/bin/catalina.sh stop",
         "attributes":{  
           "previewUrl":""
         }
       },
       {  
-        "name":"build and run"
-                "type":"mvn"
-                "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run"
-                "attributes":{  
-                  "previewUrl":"http://${server.port.8080}"
-                }
+        "name":"build and run",
+        "type":"mvn",
+        "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run",
+        "attributes":{  
+           "previewUrl":"http://${server.port.8080}"
+        }
       },
       {  
-        "name":"debug"        
-        "type":"mvn"        
-        "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run"        
+        "name":"debug",        
+        "type":"mvn",        
+        "commandLine":"mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run",        
         "attributes":{  
           "previewUrl":"http://${server.port.8080}"
         }

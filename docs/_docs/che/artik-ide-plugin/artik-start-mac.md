@@ -8,6 +8,7 @@ The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linu
 
 Mac and Linux users follow the instructions below.
 Windows users use the instructions on [this page](../../docs/artik/).
+
 # How to Get Help  
 **Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).
 
@@ -28,9 +29,8 @@ docker run hello-world
 # Should open a bash shell
 bash
 ```  
-
 If using Docker for Mac, add the following to your `~/.bash_profile`.
-
+```
 
 # 1. Get ARTIK IDE CLI  
 On Linux / Mac, from in a bash shell execute:
@@ -41,7 +41,6 @@ sudo chmod +x /usr/local/bin/artik-ide\
 
 #### Installing Behind a Proxy
 If you are behind a proxy, you need to [configure your proxy settings](../../docs/che-config-proxies) for Docker and the ARTIK IDE.  
-
 
 # 2. Start ARTIK IDE  
 
@@ -135,6 +134,7 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 
 1. Click ARTIK icon on the toolbar in workspace.
 2. Name your device, provide ARTIK device [IP address](../../docs/artik#5-discover-artik-device-ip-address) and port(default 22) and username/password(default root/root).
+
 3. Specify replication path on the device. This is the directory where project files will be backed up on the device. It can be both existing or a non existing directory (in the latter case it will be created). Project source files (including binaries) are automatically `scp`'ed into all connected targets when changes in a workspace file system are caught. It means that when a binary is rebuilt, it's readily available on the device in about a 2-3 seconds.
 4. `Save` then `Connect`.
 5. Once connected, ARTIK device tree will be created in processes area. Selecting the terminal icon will give access to the terminal console inside of ARTIK device. Also, the target environment will automatically change to ARTIK. This is important to note as all workspace commands will be ran inside the ARTIK device. Usually, building/compiling code is done inside workspace by setting target to `default` and executing/running commands are done inside the ARTIK device by setting target to `artik_device_<#>`.
@@ -144,6 +144,7 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 
 # 7. Build, Run and Debug  
 See: [Getting Started - Windows](../../docs/artik#8-build)
+
 # 9. Production and Development Profiles  
 Your Artik device needs certain software to make it possible for Artik IDE to debug apps, sync project files, make use of C/C++ and Node SDKs.
 

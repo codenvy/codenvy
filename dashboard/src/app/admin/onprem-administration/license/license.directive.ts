@@ -15,9 +15,14 @@
 'use strict';
 
 /**
- * Defines a directive for creating "your license" section.
+ * Defines a directive for creating for 'license' section.
  */
-export class YourLicensePanel {
+export class License {
+  replace: boolean;
+  restrict: string;
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
 
   /**
    * Default constructor that is using resource
@@ -26,9 +31,8 @@ export class YourLicensePanel {
   constructor () {
     this.restrict = 'E';
     this.replace = false;
-    this.templateUrl = 'app/admin/onprem-administration/yourlicense/yourlicense.html';
-    this.controller = 'OnPremisesAdminYourLicenseCtrl';
-    this.controllerAs = 'onPremisesAdminYourLicenseCtrl';
+    this.templateUrl = 'app/admin/onprem-administration/license/license.html';
+    this.controller = 'OnPremisesAdminLicenseController';
+    this.controllerAs = 'onPremisesAdminLicenseController';
   }
-
 }

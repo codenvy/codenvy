@@ -15,18 +15,18 @@
 'use strict';
 
 import {AdminsUserManagementConfig} from './user-management/user-management-config';
-import {OnPremisesAdminYourLicenseCtrl} from './onprem-administration/yourlicense/yourlicense.controller';
-import {YourLicensePanel} from './onprem-administration/yourlicense/yourlicense.directive';
+import {OnPremisesAdminLicenseController} from './onprem-administration/license/license.controller';
+import {License} from './onprem-administration/license/license.directive';
 
 export class AdminConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
 
-    register.directive('cdvyYourLicense', YourLicensePanel);
-    register.controller('OnPremisesAdminYourLicenseCtrl', OnPremisesAdminYourLicenseCtrl);
+    register.directive('cdvyLicense', License);
+    register.controller('OnPremisesAdminLicenseController', OnPremisesAdminLicenseController);
 
     // configure routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider: ng.route.IRouteProvider) => {
       $routeProvider.accessWhen('/onprem/administration', {
         title: 'Administration',
         templateUrl: 'app/admin/onprem-administration/onprem-administration.html'

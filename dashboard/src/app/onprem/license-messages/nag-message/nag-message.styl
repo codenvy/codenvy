@@ -19,8 +19,8 @@
 .license-message a:hover
   che-brightness(90%)
 
-.license-message-indent
-  padding-top 30px
+.show-ide > .license-message
+  display none
 
-.license-message-indent .left-sidebar-container
-  height calc(100vh - 30px)
+.license-message-indent:not(*.show-ide)
+  padding-top 30px

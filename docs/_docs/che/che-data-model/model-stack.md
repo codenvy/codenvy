@@ -45,7 +45,12 @@ Stacks are referenced in JSON format:
 }
 
 ```
+
+
 ## WorkspaceConfig Object
+
+WorkspaceConfig JSON:
+
 ```json  
 workspaceConfig : {
   name           : STRING,    // The name of this workspace
@@ -68,7 +73,11 @@ environment : {
   machineConfigs : [{}],       // Instructions for how Che builds a runtime
 }
 ```
+
 ### MachineConfigs Object
+
+MachineConfigs JSON:
+
 ```json  
 environment.machineConfigs : [{
   name   : STRING,             // Name of the machine
@@ -80,6 +89,7 @@ environment.machineConfigs : [{
   source : {}                  // configure workspace agent runtime        
 }
 ```
+
 The source of a machine configuration object is supporting several types when using `docker` as machine configuration type, here are the supported source options
 
 #### dockerfile type
@@ -117,9 +127,10 @@ location can include the dockerhub image name
 ```
 
 
-
-
 ### Mixins
+
+Mixins:
+
 ```json  
 project.mixins : [
   STRING, ...
@@ -145,6 +156,7 @@ project.attributes : {
 Different Eclipse Che plug-ins can add their own attributes to affect the behavior for the system.  Attribute configuration is always optional and if not provided within a workspace definition, the system will set itself.
 
 #### Pull Request Attributes
+
 
 | Known Attribute   | Description   
 | --- | ---
@@ -172,55 +184,9 @@ factory.workspace.project : {
 ```
 
 ## Projects
-```json  
-"projects": [
-  {
-    "source": {
-      "location": URL,               // Location of source code in version
-      "type": "git" | "svn" | "zip   // Version control system
-      "parameters": {}               // (Optional) Parameter list to configure access.
-    },
-    "description": STRING,           // Description of the stack to appear on dashboard
-    "problems": ARRAY,
-    "links": ARRAY,
-    "mixins": ARRAY,
-    "name": STRING,                  // Name of project
-    "type": "blank"|"maven"|"java"|"php"|"python"|"node-js"|"c"|"cpp"|"csharp\      
-                                     // Activates certain agent features
-    "path": STRING,                  // Path from root project folder to use
-    "attributes": {}              
-  }
-]
-```
-When using `source.type` with `git` or `svn`, the `source.location` should be URL of a publicly available repo. Referencing private repos over HTTPS will result in clone failure unless credentials are provided in the URL itself. Using SSH URLs is possible, however, a user will need ssh key to complete this operation, therefore, it is recommended to use HTTPS URLs to public repos.
-```json  
-"projects": [
-  {
-    "source": {
-      "location": "https://github.com/che-samples/blank
-      "type": "git",
-      "parameters": {}
-    },
-    "description": "A blank project example.",
-    "problems": [],
-    "links": [],
-    "mixins": [],
-    "name": "blank-project",
-    "type": "blank",
-    "path": "/blank-project",
-    "attributes": {}
-  }
-]
-```
-`zip` archives are referenced as URLs to remotely hosted archives that are publicly available i.e. require no login/password to be downloaded. It is not possible to reference local URLs unless you run a local server to host them (in this case a local IP is used e.g. `http://192.168.0.10/projecs/myproject.zip`).  
-```json  
-"source":{                        
-      "type":"zip",                  
-      "location":"http://192.168.0.10/projecs/myproject.zip",
-      "parameters":{}                 
-    },
-```
-## Projects Object
+
+Project object:
+
 ```json  
 project : {
   name        : STRING,       // The name of the project
@@ -233,6 +199,7 @@ project : {
   modules     : [{}]          // Modules are project sub-units with type that can build & run
 }\
 ```
+
 A project has a type which causes special services to be added to the IDE and the default environment that is powering the workspace. Additionally, each project type has a specialized set of additional attributes that can alter the behavior of the project.  The icon next to your project name in the IDE explorer changes based upon the project type that it has.  You can also change project type in `Project > Configuration` in the IDE.
 
 | Project Type | Description
@@ -284,7 +251,7 @@ This example clones a git repository hosted by Codenvy with a specific commit ID
   "project" : {  
     "location" : "http://codenvy.com/git/31/eb/be/workspace3u0vri1qaptw0vmr/spring",
     "type" : "git",
-    "parameters" : {  
+    "parameters" : {
       "commitId" : "db97e186e07ba881f23651d6238479cb2b1c3fcb"
     }
   }
@@ -302,6 +269,7 @@ project.modules : [{
   attributes  : {},         // (OPTIONAL) Same as workspace.projects.attributes
   mixins      : [STRING]    // (OPTIONAL) Same as workspace.projects.mixins
 }]
+
 ```
 In the IDE, you can set a module with the "context root". When a module has the context root, the project tree is redrawn with the module at the root node. You can step into or step out of a module.  Each module can have its own project type, attributes and mixins. If you create a project with a set of modules, the entire repository will be cloned into the workspace even if you choose to only display a single module.
 ```json  
@@ -331,14 +299,15 @@ In the IDE, you can set a module with the "context root". When a module has the 
 When authoring a project template we recommend to predefine commands to register build and run actions. [Learn more about commands.](../../docs/commands)
 ```json  
 "commands" : {  
-  "commandLine": ""                                     // Command to run on target machine
-  "name": ""                                            // Unique Command name displayed in IDE
-  "type": "custom"|"maven"|"java"|"gwt"|"gwt_sdm_che"    // Type will filter and provide different interface in IDE
+  "commandLine": "",                                     // Command to run on target machine
+  "name": "",                                            // Unique Command name displayed in IDE
+  "type": "custom"|"maven"|"java"|"gwt"|"gwt_sdm_che",    // Type will filter and provide different interface in IDE
   "attributes": {
     "previewUrl": "http://${server.port.8080}/${current.project.relpath}"
   }
 }
 ```
+
 ```json  
 command : {
   name        : STRING,       // Identifier and pretty name for command
@@ -354,14 +323,20 @@ Each commands have a type and get translated into a process that is executed on 
 
 The command line can use [Macros](../../docs/commands#macros).
 See [Command](https://eclipse-che.readme.io/docs/workspace#section-command-object) reference.
+
+
 ### PreviewURL
 
 Preview objects are stored as part of command. Che will generate the preview URL during the command execution and present the URL to the user as part of the command output. You can add a preview URL of any format within the command editor.
+
 
 The previewURL can use [Macros](../../docs/commands#macros).
 
 
 ### Command Sample
+
+Sample:
+
 ```json  
 "command": {
   "commandLine" : "mvn clean install -f ${project.current.path} -Dmaven.test.skip=true",
@@ -380,7 +355,11 @@ Tags are used for stacks and sample objects. Those values are used to determine 
   "..."
 }
 ```
+
 ## Sample Reference
+
+JSON:
+
 ```json  
 {
   "description": "Default Java Stack with JDK 8, Maven and Tomcat.",

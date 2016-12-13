@@ -14,16 +14,14 @@
  */
 'use strict';
 
-import {NagMessageCtrl} from './license-nag-message-management/nag-message.controller';
-import {NagMessageService} from './license-nag-message-management/nag-message.service';
-import {NagMessage} from './license-nag-message-management/nag-message.directive';
+import {NagMessage} from './license-messages/nag-message/nag-message.directive';
+import {LicenseMessagesService} from './license-messages/license-messages.service';
+
 
 export class CodenvyOnpremConfig {
 
-  constructor(register) {
-    register.controller('NagMessageCtrl', NagMessageCtrl);
-    register.service('nagMessageService', NagMessageService);
+  constructor(register: che.IRegisterService) {
     register.directive('cdvyNagMessage', NagMessage);
-
+    register.service('licenseMessagesService', LicenseMessagesService);
   }
 }
