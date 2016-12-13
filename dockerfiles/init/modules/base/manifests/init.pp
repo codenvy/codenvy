@@ -15,4 +15,5 @@ class base {
   include registry
   include codenvy
   include compose
+  include rsyslog
 }

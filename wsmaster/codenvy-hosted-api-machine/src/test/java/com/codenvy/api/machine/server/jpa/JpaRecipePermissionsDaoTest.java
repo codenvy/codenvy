@@ -154,7 +154,7 @@ public class JpaRecipePermissionsDaoTest {
         //then
         assertTrue(dao.getByInstance(publicPermission.getInstanceId(), 3, 0)
                       .getItems()
-                      .contains(publicPermission));
+                      .contains(new RecipePermissionsImpl(publicPermission)));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class JpaRecipePermissionsDaoTest {
 
         final List<RecipePermissionsImpl> storedPermissions = dao.getByInstance(publicPermission.getInstanceId(), 30, 0)
                                                                  .getItems();
-        assertTrue(storedPermissions.contains(publicPermission));
+        assertTrue(storedPermissions.contains(new RecipePermissionsImpl(publicPermission)));
         assertTrue(storedPermissions.stream().filter(p -> "*".equals(p.getUserId())).count() == 1);
     }
 

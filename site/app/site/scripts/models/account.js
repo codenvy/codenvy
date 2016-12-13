@@ -253,6 +253,21 @@
             }
         };
 
+        var acceptLicense = function(firstName,lastName,email,error){
+                var acceptLicenseUrl = "/api/license/fair-source-license";
+                var data = {
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
+                };
+                return $.ajax({
+                    url: acceptLicenseUrl,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                });
+        };
+
         var redirectToUrl = function(url) {
             window.location = url;
         };
@@ -322,6 +337,7 @@
             getOAuthproviders: getOAuthproviders,
             loginWithOauthProvider: loginWithOauthProvider,
             getUserSettings: getUserSettings,
+            acceptLicense: acceptLicense,
             isValidDomain: function(domain) {
                 return (/^[a-z0-9][a-z0-9_.-]{2,19}$/).exec(domain) !== null;
             },

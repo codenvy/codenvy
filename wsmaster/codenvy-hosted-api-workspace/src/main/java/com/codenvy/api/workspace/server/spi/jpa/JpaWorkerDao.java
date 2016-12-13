@@ -41,6 +41,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of worker DAO.
@@ -57,7 +58,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
 
     @Override
     public WorkerImpl getWorker(String workspaceId, String userId) throws ServerException, NotFoundException {
-        return get(userId, workspaceId);
+        return new WorkerImpl(get(userId, workspaceId));
     }
 
     @Override
@@ -83,13 +84,19 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     public WorkerImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Workspace identifier required");
         requireNonNull(userId, "User identifier required");
-        return doGet(wildcardToNull(userId), instanceId);
+        try {
+            return new WorkerImpl(getEntity(wildcardToNull(userId), instanceId));
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
     }
 
     @Override
     public List<WorkerImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
-        return doGetByUser(wildcardToNull(userId));
+        return doGetByUser(wildcardToNull(userId)).stream()
+                                                  .map(WorkerImpl::new)
+                                                  .collect(toList());
     }
 
     @Override
@@ -104,7 +111,10 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
                                                           .setParameter("workspaceId", instanceId)
                                                           .setMaxResults(maxItems)
                                                           .setFirstResult((int)skipCount)
-                                                          .getResultList();
+                                                          .getResultList()
+                                                          .stream()
+                                                          .map(WorkerImpl::new)
+                                                          .collect(toList());
             final Long workersCount = entityManager.createNamedQuery("Worker.getCountByWorkspaceId", Long.class)
                                                    .setParameter("workspaceId", instanceId)
                                                    .getSingleResult();
@@ -114,19 +124,22 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
     }
 
-    @Transactional
-    protected WorkerImpl doGet(@Nullable String userId, String instanceId) throws ServerException, NotFoundException {
+    @Override
+    protected WorkerImpl getEntity(String userId, String instanceId) throws NotFoundException {
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("Worker.getByUserAndWorkspaceId", WorkerImpl.class)
-                                  .setParameter("workspaceId", instanceId)
-                                  .setParameter("userId", userId)
-                                  .getSingleResult();
+            return doGet(userId, instanceId);
         } catch (NoResultException e) {
             throw new NotFoundException(format("Worker of workspace '%s' with id '%s' was not found.", instanceId, userId));
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
         }
+    }
+
+    @Transactional
+    protected WorkerImpl doGet(String userId, String instanceId) {
+        return managerProvider.get()
+                              .createNamedQuery("Worker.getByUserAndWorkspaceId", WorkerImpl.class)
+                              .setParameter("workspaceId", instanceId)
+                              .setParameter("userId", userId)
+                              .getSingleResult();
     }
 
     @Transactional

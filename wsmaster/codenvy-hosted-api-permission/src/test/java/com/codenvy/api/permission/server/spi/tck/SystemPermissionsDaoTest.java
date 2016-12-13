@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.testng.AssertJUnit.assertEquals;
@@ -66,8 +68,9 @@ public class SystemPermissionsDaoTest {
 
 
         userRepository.createAll(asList(users));
-
-        systemRepository.createAll(asList(systemPermissions));
+        systemRepository.createAll(Stream.of(systemPermissions)
+                                         .map(SystemPermissionsImpl::new)
+                                         .collect(Collectors.toList()));
     }
 
     @AfterMethod

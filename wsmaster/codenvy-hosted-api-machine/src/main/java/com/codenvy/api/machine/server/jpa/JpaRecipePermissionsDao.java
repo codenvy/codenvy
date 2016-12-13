@@ -39,6 +39,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * JPA based implementation of recipe permissions DAO.
@@ -57,13 +58,19 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
     public RecipePermissionsImpl get(String userId, String instanceId) throws ServerException, NotFoundException {
         requireNonNull(instanceId, "Recipe identifier required");
         requireNonNull(userId, "User identifier required");
-        return doGet(wildcardToNull(userId), instanceId);
+        try {
+            return new RecipePermissionsImpl(getEntity(wildcardToNull(userId), instanceId));
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
     }
 
     @Override
     public List<RecipePermissionsImpl> getByUser(String userId) throws ServerException {
         requireNonNull(userId, "User identifier required");
-        return doGetByUser(wildcardToNull(userId));
+        return doGetByUser(wildcardToNull(userId)).stream()
+                                                  .map(RecipePermissionsImpl::new)
+                                                  .collect(toList());
     }
 
     @Override
@@ -78,7 +85,10 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
                                                                                    .setParameter("recipeId", instanceId)
                                                                                    .setMaxResults(maxItems)
                                                                                    .setFirstResult((int)skipCount)
-                                                                                   .getResultList();
+                                                                                   .getResultList()
+                                                                                   .stream()
+                                                                                   .map(RecipePermissionsImpl::new)
+                                                                                   .collect(toList());
             final Long permissionsCount = entityManager.createNamedQuery("RecipePermissions.getCountByRecipeId", Long.class)
                                                        .setParameter("recipeId", instanceId)
                                                        .getSingleResult();
@@ -89,6 +99,32 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
         }
     }
 
+    @Override
+    protected RecipePermissionsImpl getEntity(String userId, String instanceId) throws NotFoundException {
+        try {
+            return doGet(userId, instanceId);
+        } catch (NoResultException e) {
+            throw new NotFoundException(format("Permissions on recipe '%s' of user '%s' was not found.", instanceId, userId));
+        }
+    }
+
+    @Transactional
+    protected RecipePermissionsImpl doGet(String userId, String instanceId) {
+        userId = wildcardToNull(userId);
+        if (userId == null) {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByRecipeIdPublic", RecipePermissionsImpl.class)
+                                  .setParameter("recipeId", instanceId)
+                                  .getSingleResult();
+        } else {
+            return managerProvider.get()
+                                  .createNamedQuery("RecipePermissions.getByUserAndRecipeId", RecipePermissionsImpl.class)
+                                  .setParameter("recipeId", instanceId)
+                                  .setParameter("userId", userId)
+                                  .getSingleResult();
+        }
+    }
+
     @Transactional
     protected List<RecipePermissionsImpl> doGetByUser(@Nullable String userId) throws ServerException {
         try {
@@ -96,28 +132,6 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
                                   .createNamedQuery("RecipePermissions.getByUserId", RecipePermissionsImpl.class)
                                   .setParameter("userId", userId)
                                   .getResultList();
-        } catch (RuntimeException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    @Transactional
-    protected RecipePermissionsImpl doGet(@Nullable String userId, String instanceId) throws ServerException, NotFoundException {
-        try {
-            if (userId == null) {
-                return managerProvider.get()
-                                      .createNamedQuery("RecipePermissions.getByRecipeIdPublic", RecipePermissionsImpl.class)
-                                      .setParameter("recipeId", instanceId)
-                                      .getSingleResult();
-            } else {
-                return managerProvider.get()
-                                      .createNamedQuery("RecipePermissions.getByUserAndRecipeId", RecipePermissionsImpl.class)
-                                      .setParameter("recipeId", instanceId)
-                                      .setParameter("userId", userId)
-                                      .getSingleResult();
-            }
-        } catch (NoResultException e) {
-            throw new NotFoundException(format("Permissions on recipe '%s' of user '%s' was not found.", instanceId, userId));
         } catch (RuntimeException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }

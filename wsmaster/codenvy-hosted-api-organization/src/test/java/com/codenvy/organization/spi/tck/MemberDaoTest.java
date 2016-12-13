@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -89,7 +91,9 @@ public class MemberDaoTest {
         members[3] = new MemberImpl(users[1].getId(), orgs[1].getId(), asList("read", "update"));
         members[4] = new MemberImpl(users[1].getId(), orgs[2].getId(), asList("read", "update"));
 
-        memberRepo.createAll(asList(members));
+        memberRepo.createAll(Stream.of(members)
+                                   .map(MemberImpl::new)
+                                   .collect(Collectors.toList()));
     }
 
     @AfterMethod
@@ -102,11 +106,11 @@ public class MemberDaoTest {
     @Test(dependsOnMethods = {"shouldGetMember", "shouldRemoveMember"})
     public void shouldCreateNewMemberOnMemberStoring() throws Exception {
         final MemberImpl member = members[0];
-        memberDao.remove(member.getOrganizationId(), member.getUserId());
+        memberDao.remove(member.getUserId(), member.getOrganizationId());
 
         memberDao.store(member);
 
-        assertEquals(member, memberDao.getMember(member.getOrganizationId(), member.getUserId()));
+        assertEquals(memberDao.getMember(member.getOrganizationId(), member.getUserId()), new MemberImpl(member));
     }
 
     @Test(dependsOnMethods = {"shouldGetMember"})
