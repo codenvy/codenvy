@@ -7,7 +7,7 @@ permalink: /docs/artik-start-mac/
 The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linux.
 
 Mac and Linux users follow the instructions below.
-Windows users use the instructions on [this page](https://dash.readme.io/project/eclipse-che/v5.0/docs/samsung-artik-ide-getting-started).
+Windows users use the instructions on [this page](../../docs/artik/).
 # How to Get Help  
 **Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).
 
@@ -19,6 +19,7 @@ Before installing the ARTIK IDE you will need:
   - Docker for [Linux](https://docs.docker.com/engine/installation/).
 2. A bash shell
 3. A Chrome or FireFox browser.
+
 ```shell  
 # Verify Docker is properly installed
 # Should print "Hello from Docker!" otherwise check Docker install docs
@@ -26,8 +27,11 @@ docker run hello-world
 
 # Should open a bash shell
 bash
-```
+```  
+
 If using Docker for Mac, add the following to your `~/.bash_profile`.
+
+
 # 1. Get ARTIK IDE CLI  
 On Linux / Mac, from in a bash shell execute:
 ```text  
@@ -36,7 +40,7 @@ sudo chmod +x /usr/local/bin/artik-ide\
 ```
 
 #### Installing Behind a Proxy
-If you are behind a proxy, you need to [configure your proxy settings](https://eclipse-che.readme.io/docs/configuration-proxies) for Docker and the ARTIK IDE.  
+If you are behind a proxy, you need to [configure your proxy settings](../../docs/che-config-proxies) for Docker and the ARTIK IDE.  
 
 
 # 2. Start ARTIK IDE  
@@ -77,7 +81,7 @@ artik-ide help
 ```
 
 #### Advanced Configuration
-There are many aspects of ARTIK IDE like port and hostname that can be configured by [setting Eclipse Che properties](https://eclipse-che.readme.io/docs/usage-docker#environment-variables).  
+There are many aspects of ARTIK IDE like port and hostname that can be configured by [setting Eclipse Che properties](../../docs/usage-docker#environment-variables).  
 
 
 # 3. Create Workspaces and Projects  
@@ -85,11 +89,13 @@ The ARTIK IDE provides a step-by-step wizard for creating your first workspace. 
 
 A workspace can have one or more projects. Each project can have a different type that supports different kinds of programming languages and build frameworks. When you create your first workspace, you can provide the project from a Git repository or using one of the included templates.
 ![createwsandproject.jpg](../../docs/imgs/createwsandproject.jpg)
-Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](doc:tutorial-artik-blink-led) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
+Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](../../docs/tutorial-artik-blink-led) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
+
 # 4. Setup an ARTIK Device  
 Review Samsung ARTIK getting started docs at [https://developer.artik.io/documentation/getting-started-beta/powering-up.html](https://developer.artik.io/documentation/getting-started-beta/powering-up.html) and [https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html](https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html). This will help understand how to power up the ARTIK device(connect power and press SW3 switch) and how to setup communication with the ARTIK device.
+
 # 5. Discover ARTIK Device IP Address  
-The quickest way to get started is to connect your ARTIK device to the computer running the ARTIK IDE with a male USB to male USB cable: [quick connection over USB discovery](https://eclipse-che.readme.io/docs/artik-usb-connection-setup).However, this cable doesn't ship with the ARTIK device and connecting over the network is often required in the long-term.
+The quickest way to get started is to connect your ARTIK device to the computer running the ARTIK IDE with a male USB to male USB cable: [quick connection over USB discovery](../../docs/artik-usb-connection-setup). However, this cable doesn't ship with the ARTIK device and connecting over the network is often required in the long-term.
 
 Connect your ARTIK board to your network router/switch via network cable. The ARTIK device will then obtain an IP address automatically using DHCP. To discover your ARTIK IP address log into your router and search the table of clients for the name "localhost". Also, you can discover your artik board IP address with the following utility.
 ```shell  
@@ -128,7 +134,7 @@ bash
 Use the ARTIK device manager in a workspace to connect an ARTIK device to the ARTIK IDE.
 
 1. Click ARTIK icon on the toolbar in workspace.
-2. Name your device, provide ARTIK device [IP address](https://eclipse-che.readme.io/docs/samsung-artik-ide-getting-started#5-discover-artik-device-ip-address) and port(default 22) and username/password(default root/root).
+2. Name your device, provide ARTIK device [IP address](../../docs/artik#5-discover-artik-device-ip-address) and port(default 22) and username/password(default root/root).
 3. Specify replication path on the device. This is the directory where project files will be backed up on the device. It can be both existing or a non existing directory (in the latter case it will be created). Project source files (including binaries) are automatically `scp`'ed into all connected targets when changes in a workspace file system are caught. It means that when a binary is rebuilt, it's readily available on the device in about a 2-3 seconds.
 4. `Save` then `Connect`.
 5. Once connected, ARTIK device tree will be created in processes area. Selecting the terminal icon will give access to the terminal console inside of ARTIK device. Also, the target environment will automatically change to ARTIK. This is important to note as all workspace commands will be ran inside the ARTIK device. Usually, building/compiling code is done inside workspace by setting target to `default` and executing/running commands are done inside the ARTIK device by setting target to `artik_device_<#>`.
@@ -137,7 +143,7 @@ Use the ARTIK device manager in a workspace to connect an ARTIK device to the AR
 ![artikmanageradddevice.jpg](../../docs/imgs/artikmanageradddevice.jpg)
 
 # 7. Build, Run and Debug  
-See: [Getting Started - Windows](doc:samsung-artik-ide-getting-started#8-build)]
+See: [Getting Started - Windows](../../docs/artik#8-build)
 # 9. Production and Development Profiles  
 Your Artik device needs certain software to make it possible for Artik IDE to debug apps, sync project files, make use of C/C++ and Node SDKs.
 

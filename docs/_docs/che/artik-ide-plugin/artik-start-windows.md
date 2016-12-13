@@ -8,7 +8,7 @@ The Samsung ARTIK IDE is based upon Eclipse Che and runs on Windows, Mac or Linu
 
 **Windows** users follow the instructions below.
 
-**Mac and Linux** users [use this page](https://dash.readme.io/project/eclipse-che/v5.0/docs/samsung-artik-ide-getting-started-mac-linux).
+**Mac and Linux** users [use this page](../../docs/artik-start-mac/).
 # How to Get Help  
 **Support:** If the unthinkable happens, or you have a question, you can post [issues on our GitHub page](https://github.com/eclipse/che/issues). Please follow the [guidelines on issue reporting](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md).
 
@@ -23,6 +23,7 @@ Before installing the ARTIK IDE you will need:
   1. Install [Docker Toolbox](https://docs.docker.com/toolbox/toolbox_install_windows/).
   2. Install [git for Windows](https://git-scm.com/download/win) to get a bash shell.
   3. Use a Chrome or FireFox browser.
+
 # 1. Verify Docker  
 Add Git Bash to the system path by setting `PATH=<path-to-git>;%PATH%`:
 ```shell  
@@ -42,7 +43,7 @@ You should see a bash prompt. Keep the bash session open for the next step.
 # 2. Get ARTIK IDE CLI  
 You will need to set the directory where you would like to keep ARTIK IDE executables. In the example below we use `/c/Users/$USERNAME/artik-ide` but this can be changed.
 #### Directories for Docker
-}  
+Docker and bash are case sensitive and require forward slashes without colons for directory and path names. Errors can occur if directories have spaces in them.
 
 From the bash prompt:
 ```shell  
@@ -67,7 +68,7 @@ exit\
 ```
 
 #### Installing Behind a Proxy
-If you are behind a proxy, you need to [configure your proxy settings](https://eclipse-che.readme.io/docs/configuration-proxies) for Docker and the ARTIK IDE.  
+If you are behind a proxy, you need to [configure your proxy settings](../../docs/che-config-proxies/) for Docker and the ARTIK IDE.  
 
 
 # 3. Start ARTIK IDE  
@@ -108,7 +109,7 @@ artik-ide help\
 ```
 
 #### Advanced Configuration
-There are many aspects of ARTIK IDE like port and hostname that can be configured by [setting Eclipse Che properties](https://eclipse-che.readme.io/docs/usage-docker#environment-variables).  
+There are many aspects of ARTIK IDE like port and hostname that can be configured by [setting Eclipse Che properties](../../docs/usage-docker#environment-variables).  
 
 
 # 4. Create Workspaces and Projects  
@@ -116,11 +117,13 @@ The ARTIK IDE provides a step-by-step wizard for creating your first workspace. 
 
 A workspace can have one or more projects. Each project can have a different type that supports different kinds of programming languages and build frameworks. When you create your first workspace, you can provide the project from a Git repository or using one of the included templates.
 ![createwsandproject.jpg](../../docs/imgs/createwsandproject.jpg)
-Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](doc:tutorial-artik-blink-led) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
+Choose the ARTIK stack and then select from one of the many sample projects. [Tutorial: Artik Blink LED](../../docs/artik-tutorial-blink-led/) is a good starter tutorial that uses the Ready-to-run project template `artik-blink-led`.
+
 # 5. Setup an ARTIK Device  
 Review Samsung ARTIK getting started docs at [https://developer.artik.io/documentation/getting-started-beta/powering-up.html](https://developer.artik.io/documentation/getting-started-beta/powering-up.html) and [https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html](https://developer.artik.io/documentation/getting-started-beta/communicating-pc.html). This will help understand how to power up the ARTIK device(connect power and press SW3 switch) and how to setup communication with the ARTIK device.
+
 # 6. Discover ARTIK Device IP Address  
-The quickest way to get started is to connect your ARTIK device to the computer running the ARTIK IDE with a male USB to male USB cable: [quick connection over USB discovery](https://eclipse-che.readme.io/docs/artik-usb-connection-setup).However, this cable doesn't ship with the ARTIK device and connecting over the network is often required in the long-term.
+The quickest way to get started is to connect your ARTIK device to the computer running the ARTIK IDE with a male USB to male USB cable: [quick connection over USB discovery](../../docs/artik-usb-connection-setup/).However, this cable doesn't ship with the ARTIK device and connecting over the network is often required in the long-term.
 
 Connect your ARTIK board to your network router/switch via network cable. The ARTIK device will then obtain an IP address automatically using DHCP. To discover your ARTIK IP address log into your router and search the table of clients for the name "localhost". Also, you can discover your artik board IP address with the following utility.
 ```shell  
@@ -159,7 +162,7 @@ bash
 Use the ARTIK device manager in a workspace to connect an ARTIK device to the ARTIK IDE.
 
 1. Click ARTIK icon on the toolbar in workspace.
-2. Name your device, provide ARTIK device [IP address](https://eclipse-che.readme.io/docs/samsung-artik-ide-getting-started#5-discover-artik-device-ip-address) and port(default 22) and username/password(default root/root).
+2. Name your device, provide ARTIK device [IP address](#5-discover-artik-device-ip-address) and port(default 22) and username/password(default root/root).
 3. Specify replication path on the device. This is the directory where project files will be backed up on the device. It can be both existing or a non existing directory (in the latter case it will be created). Project source files (including binaries) are automatically `scp`'ed into all connected targets when changes in a workspace file system are caught. It means that when a binary is rebuilt, it's readily available on the device in about a 2-3 seconds.
 4. `Save` then `Connect`.
 5. Once connected, ARTIK device tree will be created in processes area. Selecting the terminal icon will give access to the terminal console inside of ARTIK device. Also, the target environment will automatically change to ARTIK. This is important to note as all workspace commands will be ran inside the ARTIK device. Usually, building/compiling code is done inside workspace by setting target to `default` and executing/running commands are done inside the ARTIK device by setting target to `artik_device_<#>`.
@@ -177,12 +180,14 @@ We recommend only building in the IDE workspace, not on the device itself becaus
 1. Select source file in the project explorer, click **Compile**.
 ![compile.png](../../docs/imgs/compile.png)
 Once built the binaries are automatically synced to the device and ready to run or debug and will show up in project explorer.
+
+
 #### Compilation Options
-The default compilation command looks like this:\n\n`$CC -lartik-sdk-base $(for i in $(ls $CPATH)\ndo artik_sdk=-I$CPATH/$i\necho $artik_sdk\ndone) -lpthread -g`\n\nIt is possible to change this command at Project > Compilation Options. This command is saved in project attributes and can be customized for each project. A user can also define the output binary name, which is **a.out** by default.  
+The default compilation command looks like this:`$CC -lartik-sdk-base $(for i in $(ls $CPATH)\ndo artik_sdk=-I$CPATH/$i\necho $artik_sdk\ndone) -lpthread -g` It is possible to change this command at `Project` > `Compilation Options`. This command is saved in project attributes and can be customized for each project. A user can also define the output binary name, which is **a.out** by default.  
 
 
 #### Project Replication
-The project files (including both source and binaries) are automatically synced into the `project replication folder` on the device. You can set the project replication folder when adding or editing a device in the Device Manager dialog box (press the ARTIK IDE button on the menu bar).\n\nRead more about [connecting devices](https://eclipse-che.readme.io/docs/samsung-artik-ide-getting-started#6-connect-artik-device-with-artik-ide).  
+The project files (including both source and binaries) are automatically synced into the `project replication folder` on the device. You can set the project replication folder when adding or editing a device in the Device Manager dialog box (press the ARTIK IDE button on the menu bar). Read more about [connecting devices](#6-connect-artik-device-with-artik-ide).  
 
 
 # 9. Deploy, Run and Debug  
@@ -198,6 +203,7 @@ When debug is initiated, gdbserver is started on the device, on port 1234, and t
 ![debug_.png](../../docs/imgs/debug_.png)
 **Deploy (optional)**
 Because all files in the project are auto-synced to the device it's not necessary to deploy anything to the device. However, if you want to push files to specific locations on the device (not the project replication folder) you can right-click on the artifact and choose `Push to Device` then `Choose Target...`.
+
 # 10. Production and Development Profiles  
 Your Artik device needs certain software to make it possible for Artik IDE to debug apps, sync project files, make use of C/C++ and Node SDKs.
 

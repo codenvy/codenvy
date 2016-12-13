@@ -6,14 +6,14 @@ permalink: /docs/artik-tutorial-blink-led/
 ---
 The ARTIK device and many other other embedded device have their own equivalents to the standard printed "Hello World!" program. To show that a device can interact with digital devices in the physical world a device blinks an LED to say "Hello".
 
-This tutorial assumes that the user has already gone thru the ARTIK [Getting Started](doc:samsung-artik-ide-getting-started) documentation.
+This tutorial assumes that the user has already gone thru the ARTIK [Getting Started](../../docs/artik/) documentation.
 
 Open the ARTIK IDE in your web browser after issuing `artik-ide start`. Select `Dashboard` from the menu on the left. The will bring up the workspace and project creation interface to the right. Select `New from blank, template, or sample project`, select `Ready-to-go Stacks`, select `Artik`, name the workspace `artik`(could pick anything), change the ram to 2 GB, select the `Ready-to-run project samples` with our tutorial project `artik-blink-led`, and finally select the `Create` button either at the top right or located at the bottom.
 
 ![artik-blink-led-1.jpg](../../docs/imgs/artik-blink-led-1.jpg)
 ARTIK IDE will then start creating the workspace.
 ![artik-blink-led-2.jpg](../../docs/imgs/artik-blink-led-2.jpg)
-The ARTIK workspace once started will look like the following and bring up the `Manage Artik Devices` window. You will need to enter your ARTIK board ipaddress. The [Getting Started](https://eclipse-che.readme.io/docs/samsung-artik-ide-getting-started#5-discover-artik-device-ip-address) page has information on how to get your ARTIK device ipaddress. A quick way though is to use the following docker CLI `docker run jdrummond/artik-tools -q -t 5 -i <ip-address-on-network>`. If more than one ipaddress is found, remove `-q` and try again. If a ipaddress is not found, make sure your ARTIK device is on with 3 leds on next to ANT3, connected to a network via wired/wireless and make sure you <ip-address-on-network> used is on the same network as your ARTIK device.
+The ARTIK workspace once started will look like the following and bring up the `Manage Artik Devices` window. You will need to enter your ARTIK board ipaddress. The [Getting Started](../../docs/artik/#5-discover-artik-device-ip-address) page has information on how to get your ARTIK device ipaddress. A quick way though is to use the following docker CLI `docker run jdrummond/artik-tools -q -t 5 -i <ip-address-on-network>`. If more than one ipaddress is found, remove `-q` and try again. If a ipaddress is not found, make sure your ARTIK device is on with 3 leds on next to ANT3, connected to a network via wired/wireless and make sure you <ip-address-on-network> used is on the same network as your ARTIK device.
 ![artik-blink-led-3.jpg](../../docs/imgs/artik-blink-led-3.jpg)
 
 ![artik-blink-led-4.jpg](../../docs/imgs/artik-blink-led-4.jpg)

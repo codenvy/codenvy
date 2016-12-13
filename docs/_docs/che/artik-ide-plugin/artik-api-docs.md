@@ -4,7 +4,10 @@ excerpt: ""
 layout: docs
 permalink: /docs/artik-api-docs/
 ---
-Artik IDE provides API docs for a particular SDK version installed in a developer workspace. Included in these documents are many useful code examples which are provide in ARTIK sample project **Workspace > Create Project > artik-samples** . Docs are available in the right side tab or at **Artik > Show API Documentation** in the menu bar.
+Artik IDE provides API docs for a particular SDK version installed in a developer workspace. Included in these documents are many useful code examples which are provide in ARTIK sample project **Workspace > Create Project > artik-samples** .
+
+
+Docs are available in the right side tab or at **Artik > Show API Documentation** in the menu bar.
 ![artikapi.jpg](../../docs/imgs/artikapi.jpg)
 
 # Context Sensitive Help  
