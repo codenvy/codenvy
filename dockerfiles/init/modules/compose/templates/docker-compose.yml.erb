@@ -162,9 +162,6 @@ services:
 ########################
   agents:
     image: <%= ENV["IMAGE_AGENTS"] %>
-    volumes:
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/postgres:/var/lib/postgresql/data'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/postgres/postgresql.conf:/etc/postgresql.conf'
     ports:
       - '9000:9000'
     ulimits:
