@@ -53,7 +53,7 @@ workspaceConfig : {
   environments   : [{}],      // Array of runtime envs this workspace uses
   projects       : [{}],      // List of projects included in the workspace
   commands       : [{}]       // Array of commands that build & run projects
-}\
+}
 ```
 Every workspace can have one or more environments which are used to run the code against a stack of technology. Every workspace has exactly one environment which acts as a special "development environment", for which projects are synchronized into and developer services are injected, such as intellisense, workspace agents, SSH, and plug-ins.  
 
@@ -66,7 +66,7 @@ environment : {
   name           : STRING,     // Identifier and pretty name for environment
   recipe         : STRING,     // Define engine for composing machines network runtimes (compose, kubernetes pod)
   machineConfigs : [{}],       // Instructions for how Che builds a runtime
-}\
+}
 ```
 ### MachineConfigs Object
 ```json  
@@ -74,11 +74,11 @@ environment.machineConfigs : [{
   name   : STRING,             // Name of the machine
   type   : STRING,             // What kind of machine - set to `docker` for containers
   limits : {                   // Limits for the machine
-  	 ram : INT                 // Memory in MB this machine will be allocated
+  	 ram : INT              // Memory in MB this machine will be allocated
   },
   dev    : [true | false],     // If true, injects dev services into machine
   source : {}                  // configure workspace agent runtime        
-}\
+}
 ```
 The source of a machine configuration object is supporting several types when using `docker` as machine configuration type, here are the supported source options
 
@@ -86,13 +86,17 @@ The source of a machine configuration object is supporting several types when us
 It provides a docker runtime. Link to the Dockerfile recipe can be provided by a link, using `location` field or by providing directly the content of the Dockerfile, using `content `field
 ```json  
 "source": {
-  "type": "dockerfile\n  "location": "http://beta.codenvy.com/api/recipe/recipec0v4ta2uz6jok0bn/script"
+  "type": "dockerfile",
+  "location": "http://beta.codenvy.com/api/recipe/recipec0v4ta2uz6jok0bn/script"
 }
 ```
 
 ```json  
 "source": {
-  "type": "dockerfile\n  "content": "FROM codenvy/ubuntu_jdk8\nRUN echo hello world\nENV MYCUSTOM=VALUE"
+  "type": "dockerfile",
+  "content": "FROM codenvy/ubuntu_jdk8
+              RUN echo hello world
+              ENV MYCUSTOM=VALUE"
 }
 ```
 #### image type
@@ -100,13 +104,15 @@ It provides a docker runtime. Link to the Dockerfile recipe can be provided by a
 location can include the dockerhub image name
 ```json  
 "source": {
-  "type": "image\n  "location": "codenvy/ubuntu_jdk8"
+  "type": "image",
+  "location": "codenvy/ubuntu_jdk8"
 }
 ```
  or for example include a registry url with a custom tag or a custom digest
 ```text  
 "source": {
-  "type": "image\n  "location": "myregistry:5000/codenvy/ubuntu_jdk8:myCustomTag"
+  "type": "image",
+  "location": "myregistry:5000/codenvy/ubuntu_jdk8:myCustomTag"
 }
 ```
 
@@ -117,14 +123,14 @@ location can include the dockerhub image name
 ```json  
 project.mixins : [
   STRING, ...
-]\
+]
 ```
 A mixin adds additional behaviors to a project as a set of new project type attributes.  Mixins are reusable across any project type. You define the mixins to add to a project by specifying an array of strings, with each string containing the identifier for the mixin.  For example, `"mixins" : [ "git", "tour", "pullrequest" ]`.
 
 | Mixin ID   | Description   
 | --- | ---
-| `git`   | `tour`   
-| Initiates the project with a git repository. Adds git menu functionality to the IDE. If a user in the IDE creates a new project and then initializes a git repository, then this mixin is added to that project.   | Enables walk-me style guided tour functionality. You can author custom step by step tours that execute when users create a new workspace.  See [Tour](doc:tour) for specification and examples.   
+| `git`   | Initiates the project with a git repository. Adds git menu functionality to the IDE. If a user in the IDE creates a new project and then initializes a git repository, then this mixin is added to that project.   
+| `tour`  | Enables walk-me style guided tour functionality. You can author custom step by step tours that execute when users create a new workspace.  See [Tour](../../docs/tour) for specification and examples.   
 | `pullrequest`   | Enables pull request workflow where Codenvy handles local & remote branching, forking, and pull request issuance. Pull requests generated from within Codenvy have another Factory placed into the comments of pull requests that a PR reviewer can consume. Adds contribution panel to the IDE. If this mixin is set, then it uses attribute values for `project.attributes.local_branch` and `project.attributes.contribute_to_branch`.   
 
 The `pullrequest` mixin requires additional configuration from the `attributes` object of the project.  
@@ -134,7 +140,7 @@ Project attributes alter the behavior of the IDE or workspace.
 ```json  
 project.attributes : {
   KEY : [VALUES], ...          // Each attribute and value is a String.
-}\
+}
 ```
 Different Eclipse Che plug-ins can add their own attributes to affect the behavior for the system.  Attribute configuration is always optional and if not provided within a workspace definition, the system will set itself.
 
@@ -142,8 +148,8 @@ Different Eclipse Che plug-ins can add their own attributes to affect the behavi
 
 | Known Attribute   | Description   
 | --- | ---
-| Used in conjunction with the `pullrequest` mixin. If provided, the local branch for the project is set with this value. If not provided, then the local branch is set with the value of `project.source.parameters.branch` (the name of the branch from the remote).  If `local_branch` and `project.source.parameters.branch` are both not provided, then the local branch is set to the name of the checked out branch.   | Name of the branch that a pull request will be contributed to. Default is the value of `project.source.parameters.branch`, which is the name of the branch this project was cloned from.   
-| `contribute_to_branch`   | `local_branch`   
+| `local_branch` | Used in conjunction with the `pullrequest` mixin. If provided, the local branch for the project is set with this value. If not provided, then the local branch is set with the value of `project.source.parameters.branch` (the name of the branch from the remote).  If `local_branch` and `project.source.parameters.branch` are both not provided, then the local branch is set to the name of the checked out branch.   
+| `contribute_to_branch` | Name of the branch that a pull request will be contributed to. Default is the value of `project.source.parameters.branch`, which is the name of the branch this project was cloned from.        
 
 Here is a snippet that demonstrates full configuration of the contribution mixin.
 ```json  
@@ -156,7 +162,9 @@ factory.workspace.project : {
   },
 
   "source" : {
-    "type"       : "git\n    "location"   : "https://github.com/codenvy/che.git\n    "parameters" : {
+    "type"       : "git",
+    "location"   : "https://github.com/codenvy/che.git",
+    "parameters" : {
       "keepVcs" : "true"
     }
   }
@@ -169,7 +177,7 @@ factory.workspace.project : {
   {
     "source": {
       "location": URL,               // Location of source code in version
-      "type": "git" | "svn" | "zip\ // Version control system
+      "type": "git" | "svn" | "zip   // Version control system
       "parameters": {}               // (Optional) Parameter list to configure access.
     },
     "description": STRING,           // Description of the stack to appear on dashboard
@@ -189,21 +197,27 @@ When using `source.type` with `git` or `svn`, the `source.location` should be UR
 "projects": [
   {
     "source": {
-      "location": "https://github.com/che-samples/blank\n      "type": "git\n      "parameters": {}
+      "location": "https://github.com/che-samples/blank
+      "type": "git",
+      "parameters": {}
     },
-    "description": "A blank project example.\n    "problems": [],
+    "description": "A blank project example.",
+    "problems": [],
     "links": [],
     "mixins": [],
-    "name": "blank-project\n    "type": "blank\
-    "path": "/blank-project\n    "attributes": {}
+    "name": "blank-project",
+    "type": "blank",
+    "path": "/blank-project",
+    "attributes": {}
   }
 ]
 ```
 `zip` archives are referenced as URLs to remotely hosted archives that are publicly available i.e. require no login/password to be downloaded. It is not possible to reference local URLs unless you run a local server to host them (in this case a local IP is used e.g. `http://192.168.0.10/projecs/myproject.zip`).  
 ```json  
 "source":{                        
-      "type":"zip\                  
-      "location":"http://192.168.0.10/projecs/myproject.zip\n      "parameters":{}                 
+      "type":"zip",                  
+      "location":"http://192.168.0.10/projecs/myproject.zip",
+      "parameters":{}                 
     },
 ```
 ## Projects Object
@@ -221,10 +235,10 @@ project : {
 ```
 A project has a type which causes special services to be added to the IDE and the default environment that is powering the workspace. Additionally, each project type has a specialized set of additional attributes that can alter the behavior of the project.  The icon next to your project name in the IDE explorer changes based upon the project type that it has.  You can also change project type in `Project > Configuration` in the IDE.
 
-| Project Type   | `blank`   
-| --- | ---
-| Description   | `maven`   
-| A no-op project type. Inherits basic IDE functionality.   | Installs a number of plug-ins including maven, Java, and ant. The maven project type provides a wizard for configuring projects, special editors for `pom.xml`, dozens of types of Java intellisense, and maven command types, which help developers write maven processes.   
+| Project Type | Description
+| --- | ---  
+| `blank`  |  A no-op project type. Inherits basic IDE functionality.   
+| `maven`  | Installs a number of plug-ins including maven, Java, and ant. The maven project type provides a wizard for configuring projects, special editors for `pom.xml`, dozens of types of Java intellisense, and maven command types, which help developers write maven processes.   
 | `node-js`   | Installs a number of plug-ins for JavaScript. Code completion for HTML, JavaScript and CSS actived.   
 | `python`   | Inherits basic IDE functionality for Python.   
 | `javac`   | Installs a number of plug-ins for Java. Enable classpath configuration, and Java Intellisense features.   
@@ -236,6 +250,7 @@ Set `project.path` to the relative location from the repository that contains th
 For example, let's take an example to create a workspace with three projects from three repositories: `project1`, `project2`, and `project3`.  These projects will be stored in `/projects/project1`, `/projects/project2`, and `/projects/project3`. The `path` attribute would be set to `/project1`, `/project2`, and `/project3`.
 
 Every project belongs to a single version control repository. If you want the project within the workspace to have its code populated as a clone from a remote repository, then fill in the `projects.source` object with configuration information.
+
 ```json  
 project.source : {
   type       : [git | svn | dockerfile],   
@@ -251,14 +266,15 @@ project.source.parameters : {
   keepDir    : STRING,         // Clone all, but display only this subdir of repo
   fetch      : REF-SPEC        // Clone from patch set of provided ref-spec
 }
-\
+
 ```
 Depending upon the type of version control system selected, you can configure the recipe to clone different repositories, branches, ref-specs. The `dockerfile` option is used by environments to reference a Dockerfile that will be used to build an image dynamically when the workspace is being constructed. The `git` and `svn` options are for cloning and synchronizing with Git and Subversion repositories.
 
 Here is a simple example:
 ```json  
 "source" : {  
-  "location"   : "https://github.com/eclise/che.git\n  "type"       : "git"
+  "location"   : "https://github.com/eclise/che.git",
+  "type"       : "git"
 }
 ```
 This example clones a git repository hosted by Codenvy with a specific commit ID.
@@ -266,12 +282,15 @@ This example clones a git repository hosted by Codenvy with a specific commit ID
 ```json  
 "source" : {  
   "project" : {  
-    "location" : "http://codenvy.com/git/31/eb/be/workspace3u0vri1qaptw0vmr/spring\n    "type" : "git\n    "parameters" : {  
+    "location" : "http://codenvy.com/git/31/eb/be/workspace3u0vri1qaptw0vmr/spring",
+    "type" : "git",
+    "parameters" : {  
       "commitId" : "db97e186e07ba881f23651d6238479cb2b1c3fcb"
     }
   }
 }
 ```
+
 ### Modules
 A module is a directory in a project that can be independently built and run.  Modules have their own project type and attributes, which can affect how the command behavior works for that directory apart from others or the project as a whole. Modules can be nested.
 ```json  
@@ -282,30 +301,39 @@ project.modules : [{
   type        : STRING,     // Same as workspace.projects.type
   attributes  : {},         // (OPTIONAL) Same as workspace.projects.attributes
   mixins      : [STRING]    // (OPTIONAL) Same as workspace.projects.mixins
-}]\
+}]
 ```
 In the IDE, you can set a module with the "context root". When a module has the context root, the project tree is redrawn with the module at the root node. You can step into or step out of a module.  Each module can have its own project type, attributes and mixins. If you create a project with a set of modules, the entire repository will be cloned into the workspace even if you choose to only display a single module.
 ```json  
 "projects" : [{  
-  "name"        : "che-core\n  "attributes"  : {},
-  "type"        : "maven\n  "source":{  
-    "location"   : "https://github.com/codenvy/che-core.git\n    "type"       : "git\n    "parameters" : {}
+  "name"        : "che-core",
+  "attributes"  : {},
+  "type"        : "maven",
+    "source":{  
+    "location"   : "https://github.com/codenvy/che-core.git",
+    "type"       : "git",
+    "parameters" : {}
   },
 
-  "path"        : "/che-core\n  "description" : "test project description\n  "mixins"      : [],
+  "path"        : "/che-core";
+  "description" : "test project description",
+  "mixins"      : [],
 
   "modules"     : [{  
-    "name"       : "platform-api\n    "type"       : "maven\n    "path"       : "/che-core/platform-api"
+    "name"       : "platform-api",
+    "type"       : "maven",
+    "path"       : "/che-core/platform-api"
   }]
 }]
+
 ```
 ## Commands
-When authoring a project template we recommend to predefine commands to register build and run actions. [Learn more about commands.](https://eclipse-che.readme.io/docs/commands)
+When authoring a project template we recommend to predefine commands to register build and run actions. [Learn more about commands.](../../docs/commands)
 ```json  
 "commands" : {  
-  "commandLine": "\ // Command to run on target machine
-  "name": "\        // Unique Command name displayed in IDE
-  "type": "custom"|"maven"|"java"|"gwt"|"gwt_sdm_che\n                     // Type will filter and provide different interface in IDE
+  "commandLine": ""                                     // Command to run on target machine
+  "name": ""                                            // Unique Command name displayed in IDE
+  "type": "custom"|"maven"|"java"|"gwt"|"gwt_sdm_che"    // Type will filter and provide different interface in IDE
   "attributes": {
     "previewUrl": "http://${server.port.8080}/${current.project.relpath}"
   }
@@ -324,19 +352,21 @@ command : {
 ```
 Each commands have a type and get translated into a process that is executed on the command line within the machine's environment. Some commands can be derived, such as `maven` commands where Che will apply the location and necessary flags for execution. Other commands can be custom, where the command line is executed within the environment as you have specified it.
 
-The command line can use [Macros](doc:commands#macros).
+The command line can use [Macros](../../docs/commands#macros).
 See [Command](https://eclipse-che.readme.io/docs/workspace#section-command-object) reference.
 ### PreviewURL
 
 Preview objects are stored as part of command. Che will generate the preview URL during the command execution and present the URL to the user as part of the command output. You can add a preview URL of any format within the command editor.
 
-The previewURL can use [Macros](doc:commands#macros).
+The previewURL can use [Macros](../../docs/commands#macros).
 
 
 ### Command Sample
 ```json  
 "command": {
-  "commandLine" : "mvn clean install -f ${project.current.path} -Dmaven.test.skip=true\n  "name"        : "MCI\n  "type"        : "mvn"
+  "commandLine" : "mvn clean install -f ${project.current.path} -Dmaven.test.skip=true",
+  "name"        : "MCI",
+  "type"        : "mvn"
 }
 ```
 This example will create an entry into the `CMD` drop down named `MCI` that will perform a `mvn clean install` command against the project or module that is selected in the project tree.
@@ -345,29 +375,42 @@ This example will create an entry into the `CMD` drop down named `MCI` that will
 Tags are used for stacks and sample objects. Those values are used to determine if a sample is compatible with a stack.
 ```json  
 "tags" : {        
-  "tag1\                             //list of strings representing tags
-  "tag2\n  "..."
+  "tag1",                             //list of strings representing tags
+  "tag2",  
+  "..."
 }
 ```
 ## Sample Reference
 ```json  
 {
-  "description": "Default Java Stack with JDK 8, Maven and Tomcat.\n  "scope": "general\n  "source": {
-    "origin": "codenvy/ubuntu_jdk8\n    "type": "image"
+  "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
+  "scope": "general",
+  "source": {
+    "origin": "codenvy/ubuntu_jdk8",
+    "type": "image"
   },
   "tags": [
-    "Java\n    "JDK\n    "Maven\n    "Tomcat\n    "Subversion\n    "Ubuntu\n    "Git"
+    "Java",
+    "JDK",
+    "Maven",
+    "Tomcat",
+    "Subversion",
+    "Ubuntu",
+    "Git"
   ],
   "workspaceConfig": {
     "environments": {
       "default": {
         "recipe": {
-          "location": "codenvy/ubuntu_jdk8\n          "type": "dockerimage"
+          "location": "codenvy/ubuntu_jdk8",
+          "type": "dockerimage"
         },
         "machines": {
           "dev-machine": {
             "agents": [
-              "org.eclipse.che.terminal\n              "org.eclipse.che.ws-agent\n              "org.eclipse.che.ssh"
+              "org.eclipse.che.terminal",
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.ssh"
             ],
             "servers": {},
             "attributes": {
@@ -379,15 +422,24 @@ Tags are used for stacks and sample objects. Those values are used to determine 
     },
     "commands": [
       {
-        "commandLine": "mvn clean install -f ${current.project.path}\n        "name": "build\n        "type": "mvn\n        "attributes": {}
+        "commandLine": "mvn clean install -f ${current.project.path}",
+        "name": "build",
+        "type": "mvn",
+        "attributes": {}
       },
       {
-        "commandLine": "mvn -f /projects/console-java-simple clean install\n        "name": "console-java-simple: build\n        "type": "mvn\n        "attributes": {
+        "commandLine": "mvn -f /projects/console-java-simple clean install",
+        "name": "console-java-simple: build",
+        "type": "mvn",
+        "attributes": {
           "previewUrl": ""
         }
       },
       {
-        "commandLine": "mvn -f /projects/console-java-simple clean install && java -jar /projects/console-java-simple/target/*.jar\n        "name": "console-java-simple: run\n        "type": "mvn\n        "attributes": {
+        "commandLine": "mvn -f /projects/console-java-simple clean install && java -jar /projects/console-java-simple/target/*.jar"
+        "name": "console-java-simple: run",        
+        "type": "mvn",
+        "attributes": {
           "previewUrl": ""
         }
       }
@@ -395,27 +447,39 @@ Tags are used for stacks and sample objects. Those values are used to determine 
     "projects": [
       {
         "source": {
-          "location": "https://github.com/che-samples/console-java-simple.git\n          "type": "git\n          "parameters": {}
+          "location": "https://github.com/che-samples/console-java-simple.git",
+          "type": "git",
+            "parameters": {}
         },
         "problems": [],
         "links": [],
         "mixins": [],
-        "name": "console-java-simple\n        "type": "maven\n        "path": "/console-java-simple\n        "attributes": {}
+        "name": "console-java-simple",
+        "type": "maven",
+        "path": "/console-java-simple",
+        "attributes": {}
       }
     ],
-    "defaultEnv": "default\n    "name": "default\n    "links": []
+    "defaultEnv": "default",
+    "name": "default",
+    "links": []
   },
   "components": [
     {
-      "version": "1.8.0_45\n      "name": "JDK"
+      "version": "1.8.0_45",
+      "name": "JDK"
     },
     {
-      "version": "3.2.2\n      "name": "Maven"
+      "version": "3.2.2",
+      "name": "Maven"
     },
     {
-      "version": "8.0.24\n      "name": "Tomcat"
+      "version": "8.0.24",
+      "name": "Tomcat"
     }
   ],
-  "creator": "ide\n  "name": "Java\n  "id": "java-default"
+  "creator": "ide",
+  "name": "Java",
+  "id": "java-default"
 }
 ```
