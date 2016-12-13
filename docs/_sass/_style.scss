@@ -79,7 +79,7 @@ nav {
   h1 {
     color: #3c4146;
     font-weight: 400;
-    font-size: 1.8em;
+    font-size: 2.3em;
   }
 }
 
@@ -101,7 +101,7 @@ nav {
     a {
       @include border-radius(5px);
       color: #fff;
-      font-size: 16px;
+      font-size: 18px;
       padding: 0.3em 1em;
       @include transition(all .25s);
 
@@ -422,10 +422,14 @@ article {
   @include box-shadow(0 3px 10px rgba(0,0,0,.1));
   font-size: 16px;
   line-height: 1.5em;
+
+  p + ul {
+    margin-top: -10px;
+  }
 }
 
 @media (max-width: 480px) {
-  article ul { padding-left: 20px; }
+  article ul {}
 }
 
 @media (max-width: 568px) {
@@ -435,7 +439,7 @@ article {
 @media (min-width: 768px) {
   article {
     padding: 40px 40px 30px;
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
@@ -478,7 +482,7 @@ aside {
     a {
       font-size: 12px;
       position: relative;
-      color: #ffffff;
+      color: rgba(255,255,255,0.92);
     }
 
     &.current a:before {
@@ -684,13 +688,13 @@ code {
   white-space: pre-wrap;
   display: inline-block;
   margin: 0;
-  font: 14px/1.8em Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;
+  font: 14px Consolas, Menlo, "Courier New", Courier, "Liberation Mono", monospace;
   padding: 0 0.5em;
   //border: 1px solid #cacaca;
 }
 
 @media (min-width: 768px) {
-  pre, code { font-size: 12px; }
+  pre, code { font-size: 14px; }
 }
 
 .highlight,
@@ -770,7 +774,6 @@ strong { font-weight: 700; }
 
 p {
   line-height: 1.5em;
-  padding-bottom: 10px;
 }
 
 .left { float: left; }
@@ -783,7 +786,12 @@ p {
 
 article {
 
-  h2, h3, h4, h5, h6 { margin: 0.5em 0; }
+  h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: -10px;
+    margin-left: 0;
+    margin-right: 0;
+  }
 
   h4 { color: #949AA2; }
 
@@ -797,7 +805,7 @@ article {
   ul li,
   ol li {
     line-height: 1.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.2em;
   }
 
 }
@@ -823,7 +831,11 @@ table {
   background-color: #fff;
   margin: .5em 0;
   border-collapse: collapse;
-  border-spacing: 0;
+  //border-spacing: 0;
+}
+
+table, th, td {
+  border: 1px solid rgba(230,230,230,1);
 }
 
 thead {
@@ -847,20 +859,18 @@ td p { margin: 0; }
 
 th {
   text-transform: capitalize;
-  font-size: 14px;
+  font-size: 16px;
   padding: .5em .75em;
   color: #888;
   text-align: left;
 }
 
 tbody td {
-  border-top: 1px solid rgba(0,0,0,.1);
-  //@include box-shadow(inset 0 1px 0 rgba(255,255,255,.1));
 
   p {
-    font-size: 16px;
+    font-size: 18px;
 
-    code { font-size: 14px; }
+    code { font-size: 16px; }
   }
 }
 
