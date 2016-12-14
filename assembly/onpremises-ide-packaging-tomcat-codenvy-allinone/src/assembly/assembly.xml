@@ -24,33 +24,6 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>agents</outputDirectory>
-            <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-tomcat-ext-server</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>agents/linux_amd64/terminal</outputDirectory>
-            <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>agents/linux_arm7/terminal</outputDirectory>
-            <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:exec-agent:tar.gz:linux_arm7</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <unpack>true</unpack>
             <outputDirectory></outputDirectory>
             <includes>
