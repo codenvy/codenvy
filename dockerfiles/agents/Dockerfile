@@ -14,12 +14,9 @@ FROM alpine:3.4
 
 RUN apk update \
     && apk add lighttpd \
-    && echo "server.port = 9000" >> /etc/lighttpd/lighttpd.conf \
-    && ln -s /home/user/che /var/www/localhost/htdocs/agent-binaries
+    && ln -s /data /var/www/localhost/htdocs/agent-binaries
 
-RUN addgroup -S user && adduser -S -g user user
-
-COPY dependency /home/user/che/
+COPY dependency /data
 
 EXPOSE 9000
 

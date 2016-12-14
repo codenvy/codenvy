@@ -163,6 +163,8 @@ services:
 ########################
   agents:
     image: <%= ENV["IMAGE_AGENTS"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/lighttpd/lighttpd.conf:/etc/lighttpd/lighttpd.conf'
 <% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '9000:9000'
