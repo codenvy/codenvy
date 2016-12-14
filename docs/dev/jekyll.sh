@@ -24,7 +24,6 @@ jekyll.sh [<port>]
 
     CHE_MINI_PRODUCT_NAME=codenvy
     
-    JEKYLL_ARGS="serve"
     REFERENCE_CONTAINER_COMPOSE_FILE=$(echo $(pwd)/docker-compose.yml) 
     export CONTAINER_NAME="codenvy_docs_x"
     export IMAGE_NAME="codenvy/docs:dev"
@@ -37,11 +36,14 @@ jekyll.sh [<port>]
     
     export UNISON_SYNC_PATH="$(cd ../ && pwd )"
     UNISON_REPEAT=""
-    UNISON_AGENT_COMMAND="mkdir -p /tmp && mkdir -p /tmp/.unison && cp -f ${PWD}/default.prf /tmp/.unison/ &&
-       UNISON=/tmp/.unison/ ${PWD}/unison ${UNISON_SYNC_PATH} ssh://\${UNISON_SSH_USER}@\${SSH_IP}:\${UNISON_SSH_PORT}//srv/jekyll 
-       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  > /dev/null 2>&1" 
+    UNISON_GET_CUSTOM_BINARY="mkdir -p /tmp && mkdir -p /tmp/.unison && cp -f ${PWD}/default.prf /tmp/.unison/ &&
+       wget https://github.com/JamesDrummond/dev-files/blob/master/bin/unison?raw=true -O /tmp/.unison/unison &&
+       chmod u+x /tmp/.unison/unison > /dev/null 2>&1"
+    UNISON_AGENT_COMMAND="UNISON=/tmp/.unison/ /tmp/.unison/unison ${UNISON_SYNC_PATH} ssh://\${UNISON_SSH_USER}@\${SSH_IP}:\${UNISON_SSH_PORT}//srv/jekyll 
+       \${UNISON_REPEAT} -sshargs '-i ${HOME}/.ssh/jekyll_id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' > /dev/null 2>&1" 
       
-    JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --incremental"
+    export JEKYLL_SERVE_COMPLETE=false
+    JEKYLL_COMMAND="docker exec ${CONTAINER_NAME} jekyll serve --force_polling --watch --incremental"
     DEBUG=false
   }
   
@@ -53,7 +55,21 @@ check_status() {
 	    error "ERROR: Fatal error occurred ($status)"
 	    stop_sync
 	  else
-	    warn "Fatal error occurred ($status)"
+	    warn "Error occurred ($status)"
+	  fi
+	fi
+        
+}
+
+check_status_unison() {
+    status=$?
+    
+	if [ $status -ne 0 ]; then
+	  if [ $status -ne 1 ]; then
+	    error "ERROR: Fatal error occurred ($status)"
+	    stop_sync
+	  else
+	    warn "Error occurred ($status)."
 	  fi
 	fi
         
@@ -120,12 +136,12 @@ stop_sync() {
 
 sync_folders() {
     # UNISON_REPEAT="-repeat 2"
-    printf  "INFO:Syncing..."
+    info  "Syncing..."
     while [ 1 ]
     do
         sleep 2
         eval ${UNISON_AGENT_COMMAND}
-        check_status
+        check_status_unison
         printf  " "
     done
 }
@@ -163,10 +179,12 @@ if [ ! -e /var/run/docker.sock ]; then
     error "(${CHE_MINI_PRODUCT_NAME} Jekyll): File /var/run/docker.sock does not exist. Add to server extra volume mounts and restart server."
     exit 1
 fi
-
+if [ ! -e /tmp/.unison/unison ]; then
+    eval ${UNISON_GET_CUSTOM_BINARY}
+fi
 eval ${DOCKER_CLEAN_OLD_COMMAND} 
-# docker-compose had error when put into eval. Maybe due to losing current directory value of build.
 
+# docker-compose had error when put into eval. Maybe due to losing current directory value of build.
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Starting Jekyll container. Jekyll server will start after initial unison sync of /srv/jekyll folder."
 docker-compose --file "${REFERENCE_CONTAINER_COMPOSE_FILE}" -p "${CHE_MINI_PRODUCT_NAME}" up -d --build --no-recreate > /dev/null 2>&1
 check_status
@@ -181,9 +199,6 @@ export UNISON_SSH_PORT=$(docker inspect --format='{{(index (index .NetworkSettin
 export JEKYLL_PORT=$(docker inspect --format='{{(index (index .NetworkSettings.Ports "4000/tcp") 0).HostPort}}' $(docker ps -aq --filter "name=${CONTAINER_NAME}") )
 export UNISON_SSH_USER=$(docker inspect --format='{{.Config.User}}' $(docker ps -aq --filter "name=${CONTAINER_NAME}") )
 
-# ssh -Tv -i ${HOME}/.ssh/jekyll_id_rsa/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${SSH_PORT} ${SSH_USER}@${SSH_IP} unison -version
-
-
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Starting Initial sync to Jekyll docker container... Please wait."
 START_TIME=$(date +%s)
 eval ${UNISON_AGENT_COMMAND}
@@ -196,5 +211,6 @@ bg_pid=$!
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): Background sync continues every 2 seconds."
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): This terminal will block while the synchronization continues."
 info "(${CHE_MINI_PRODUCT_NAME} Jekyll): To stop, issue a SIGTERM or SIGINT, usually CTRL-C."
+
 eval ${JEKYLL_COMMAND}
 check_status

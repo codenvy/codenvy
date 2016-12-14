@@ -2,7 +2,7 @@
 title: Usage&#58 Docker Server
 excerpt: "Run the Che server inside a Docker image with workspaces mounted on your host."
 layout: docs
-permalink: /docs/usage-docker-server/
+permalink: /docs/che-usage-docker-server/
 ---
 #### Requires Eclipse Che 5.0.0-M6+
 Starting in Eclipse Che M6 release, we altered the structure of the Che container. The launching syntax is simplified to consolidate data into a single folder and to use environment variables more. This syntax will not work with the eclipse/che-server:latest and you may have to use eclipse/che-server:nightly or eclipse/che-server:5.0.0-M6 or eclipse/che-server:5.0.0-latest to get the right version.  
