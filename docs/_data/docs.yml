@@ -28,15 +28,11 @@
   - using-desktop-ides 
 - title: Admin Guide
   docs:
-  - get-help
-  - system-requirements
   - installation
-  - usage
   - configuration
-  - ldap-integration
+  - ldap
   - managing
   - cli
-  - team
 - title: Integration Guide
   docs:
   - workspace-automation
