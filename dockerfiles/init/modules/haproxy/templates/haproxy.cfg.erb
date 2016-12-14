@@ -37,6 +37,10 @@ backend nginx_bk
     mode http
     server nginx_bk codenvy-nginx:81 check
 
+backend agents_bk
+    mode http
+    server agents_bk codenvy-agents:9000 check
+
 frontend http-in
     bind *:80
     capture request header Host len 45
@@ -61,7 +65,7 @@ frontend https-in
     acl url_login path_beg -i /site/login
     acl url_factory url_sub -i factory
     acl use_nginx path_reg ^/[0-9]+_.+$
-    acl agent_binaries path_beg -i /agent-binaries
+    acl use_agents path_beg -i /agent-binaries
 
     # forward requests from /f to /factory
     reqrep ^([^\ :]*)\ /f(?!actory)(.*)     \1\ /factory\2 if { path /f /f/ }
@@ -74,4 +78,5 @@ frontend https-in
     redirect prefix <%= scope.lookupvar('haproxy::host_protocol') %>://<%= scope.lookupvar('haproxy::host_url') %> code 301 if is_www
 
     use_backend nginx_bk if use_nginx
+    use_backend agents_bk if use_agents
     default_backend tomcat_bk

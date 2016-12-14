@@ -8,14 +8,14 @@
 #   docker build -t codenvy/agents .
 #
 # use:
-#    docker run -p 8000:8000 codenvy/agents
+#    docker run -p 9000:9000 codenvy/agents
 
 FROM alpine:3.4
 
 RUN apk update \
     && apk add lighttpd \
     && echo "server.port = 9000" >> /etc/lighttpd/lighttpd.conf \
-    && ln -s /home/user/che /var/www/localhost/htdocs/agents
+    && ln -s /home/user/che /var/www/localhost/htdocs/agent-binaries
 
 RUN addgroup -S user && adduser -S -g user user
 

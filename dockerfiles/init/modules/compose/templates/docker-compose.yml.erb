@@ -44,6 +44,7 @@ services:
     links:
       - 'nginx:codenvy-nginx'
       - 'rsyslog:codenvy-rsyslog'
+      - 'agents:codenvy-agents'
     ulimits:
       nproc: 163840
       nofile:
@@ -162,8 +163,10 @@ services:
 ########################
   agents:
     image: <%= ENV["IMAGE_AGENTS"] %>
+<% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '9000:9000'
+<% end -%>
     ulimits:
       nproc: 163840
       nofile:
@@ -201,7 +204,6 @@ services:
     links:
       - 'postgres:codenvy-postgres'
       - 'swarm:codenvy-swarm'
-      - 'agents:codenvy-agents'
 <% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
       - '8000:8000'
