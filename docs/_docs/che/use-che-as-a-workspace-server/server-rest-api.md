@@ -7,7 +7,7 @@ permalink: /docs/server-rest-api/
 Eclipse Che has activated Swagger annotations for its embedded APIs. There are APIs that are hosted within the Che server, which we call workspace master APIs for managing workspaces. And there are APIs that are hosted within each workspace, launched and hosted by a workspace agent that is injected into each workspace machine when it boots.  
 # Workspace Master APIs  
 
-![Swagger.PNG](../../docs/imgs/Swagger.PNG)
+![Swagger.PNG](../../assets/imgs/Swagger.PNG)
 
 ```http  
 http://localhost:8080/swagger/\

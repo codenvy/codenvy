@@ -11,6 +11,8 @@ permalink: /docs/artik-release-notes/
 * [Delete ARTIK device on "Manage Artik Devices" page without disconnect](https://github.com/codenvy/artik-ide/issues/106)
 * [The status (CPU, MEM, DISK) of ARTIK board can not show, after open the terminal](https://github.com/codenvy/artik-ide/issues/107)
 * [Cannot open the terminal of ARTIK board, after connect multiple boards](https://github.com/codenvy/artik-ide/issues/108)
+
+
 # ARTIK IDE 1.0  
 ### Features Added
 * Show online documentation in the ARTIK IDE
@@ -41,4 +43,4 @@ permalink: /docs/artik-release-notes/
 * Discovery of ARTIK devices plugged into USB via ADB bridge
 * Code formatting and coloring for ARTIK supported languages
 * Access to ARTIK example applications from inside the ARTIK IDE
-* Creation of default ARTIK and Android [Stacks](doc:stacks) to the ARTIK IDE
+* Creation of default ARTIK and Android [Stacks](../../docs/stacks) to the ARTIK IDE

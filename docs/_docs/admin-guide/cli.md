@@ -2,7 +2,7 @@
 title: CLI Reference
 excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
-permalink: /docs/cli/
+permalink: /docs/admin-guide/cli/
 ---
 The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
 

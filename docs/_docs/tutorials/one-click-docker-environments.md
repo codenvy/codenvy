@@ -10,7 +10,7 @@ You need to generate SSH key to be able to clone private repositories.
 
 For GitHub SSH keys are generated and uploaded automatically at Profile > Preferences > SSH > VCS.
 
-![github-button.png](../../docs/imgs/github-button.png)
+![github-button.png](../../assets/imgs/github-button.png)
 
 For other Git hosting providers SSH key should be generated and manually saved to profile settings of git hosting settings. Find more details on how to do that in the [Eclipse Che Git docs](https://eclipse-che.readme.io/docs/git#section-other-git-hosting-providers).
 # Integrate Your Registry  
