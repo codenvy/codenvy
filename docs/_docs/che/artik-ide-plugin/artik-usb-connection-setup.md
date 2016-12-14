@@ -27,4 +27,4 @@ On Windows machines using Boot2Docker and Virtualbox the USB controller must be 
 - Stop the Boot2Docker machine.
 - Select `USB 2.0 (EHCI) controller` in the Virtualbox UI and then hit the plus sign on the right.
 - Make sure your ARTIK device is plugged in with a full size male to male USB cable and search for a USB device called `Android` and add it to the filter.
-![Virtualboxaddusb.jpg](../../docs/imgs/Virtualboxaddusb.jpg)
+![Virtualboxaddusb.jpg](../../assets/imgs/Virtualboxaddusb.jpg)

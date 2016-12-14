@@ -11,13 +11,13 @@ Private repositories will require a secure SSH connection, so an SSH key pair ne
 ## Generate New SSH Keys
 SSH keys can be generated at `Profile > Preferences > SSH > VCS`. Use the `Generate Key` button and manually save the resulting key to your Git hosting provider account. When prompted to provide the hostname for your repo, make sure it is a bare hostname (no www or http/https) as in the example below.
 
-![Clipboard3.jpg](../../docs/imgs/Clipboard3.jpg)
+![Clipboard3.jpg](../../assets/imgs/Clipboard3.jpg)
 After the key has been generated, you can view and copy it, and save to your repository hosting account.
 
-![Clipboard4.jpg](../../docs/imgs/Clipboard4.jpg)
+![Clipboard4.jpg](../../assets/imgs/Clipboard4.jpg)
 ## Use Existing SSH Keys
 You can upload an existing public key instead of creating a new SSH key. When uploading a key add the hostname (using no www or http/https - as in the example below). Note that the `public key > view` button will not be available with this option as the public file should be generated already.
-![Clipboard7.jpg](../../docs/imgs/Clipboard7.jpg)
+![Clipboard7.jpg](../../assets/imgs/Clipboard7.jpg)
 ## Adding SSH Public Key to Repository Account
 Each repository provider has their own specific way to upload SSH public keys. This is required to use features such as `push` from the Git or Subversion menu in the workspace.
 
@@ -26,17 +26,17 @@ The following example is specific to GitHub and GitLab but can be used with all 
 
 ### GitHub Example
 To add the associated public key to a repository/account  using **github.com** click your user icon(top right) then `settings > ssh and gpg keys > new ssh key`. Give a title to your liking and paste the public key copied from Che into form.
-![Clipboard5.jpg](../../docs/imgs/Clipboard5.jpg)
+![Clipboard5.jpg](../../assets/imgs/Clipboard5.jpg)
 
-![Clipboard6.jpg](../../docs/imgs/Clipboard6.jpg)
+![Clipboard6.jpg](../../assets/imgs/Clipboard6.jpg)
 ### GitLab Example
 To add the associated public key to a git repository/account  using **gitlab.com** click your user icon(top right) then `Profile Settings > SSH Keys`. Give a title to your liking and paste the public key copied from Che into form.
-![GitLabSSH.jpg](../../docs/imgs/GitLabSSH.jpg)
+![GitLabSSH.jpg](../../assets/imgs/GitLabSSH.jpg)
 ## Import Project from Repository Using SSH
 Import project from the IDE `Workspace > Import Project > GIT/SUBVERSION` menu.
-![Clipboard12.jpg](../../docs/imgs/Clipboard12.jpg)
+![Clipboard12.jpg](../../assets/imgs/Clipboard12.jpg)
 Importing a project can also be done from the dashboard menu.
-![ImportProjectDashboard.jpg](../../docs/imgs/ImportProjectDashboard.jpg)
+![ImportProjectDashboard.jpg](../../assets/imgs/ImportProjectDashboard.jpg)
 Be sure to use the ssh url like `git@<git url>:<account>/<project>.git` when importing a project from a git repository using ssh key authorization. **Note: HTTPS git url can only be used for oauth authentication described in [Git Using oAuth](https://eclipse-che.readme.io/docs/git#github-using-oauth)**.
 # Git Using oAuth  
 ## GitLab oAuth
@@ -45,9 +45,9 @@ Currently it's not possible for Che to use oAuth integration with GitLab. Althou
 ## GitHub oAuth
 ### Setup oAuth at GitHub
 To enable automatic key upload to GitHub, register an application in your GitHub account `Setting > oAuth Applications > Developer Applications` with the callback `http://<HOST_IP>:<SERVER_PORT>/wsmaster/api/oauth/callback`:
-![Clipboard8.jpg](../../docs/imgs/Clipboard8.jpg)
+![Clipboard8.jpg](../../assets/imgs/Clipboard8.jpg)
 
-![Clipboard9.jpg](../../docs/imgs/Clipboard9.jpg)
+![Clipboard9.jpg](../../assets/imgs/Clipboard9.jpg)
 ### Setup environment variables.
 Set the following to environment variables then start/restart the Eclipse Che server. Optionally you can use [CLI profiles](https://eclipse-che.readme.io/docs/che-cli#profiles) to save these environment variables.
 ```shell  
@@ -63,20 +63,20 @@ che start\
 ```
 ### Using OAuth in Workspace
 Once the oauth is setup, SSH keys are generated and uploaded automatically for GitHub at `Profile > Preferences > SSH > VCS` by clicking the 'Octocat' icon.
-![Clipboard.jpg](../../docs/imgs/Clipboard.jpg)
+![Clipboard.jpg](../../assets/imgs/Clipboard.jpg)
 ### Import Existing Project
 Import project from the IDE `Workspace > Import Project > GITHUB` menu. When importing a project from GitHub using oauth key authorization you can use the https url like `https://github.com/<account>/<project>.git`.
-![Clipboard13.jpg](../../docs/imgs/Clipboard13.jpg)
+![Clipboard13.jpg](../../assets/imgs/Clipboard13.jpg)
 Importing a project can also be done from the dashboard menu.
 # SVN Using Username/Password  
 Import project from the IDE `Workspace > Import Project > SUBVERSION` menu. When importing a project from you can use the https url like `https://<hostname>/<repo-name>`.
-![che-svn-username-password.jpg](../../docs/imgs/che-svn-username-password.jpg)
+![che-svn-username-password.jpg](../../assets/imgs/che-svn-username-password.jpg)
 
 # Set Git Committer Name and Email  
 Committer name and email are set in `Profile > Preferences > Git > Committer`. Once set each commit will include this information.
-![Clipboard2.jpg](../../docs/imgs/Clipboard2.jpg)
+![Clipboard2.jpg](../../assets/imgs/Clipboard2.jpg)
 
 # Git Workspace Clients  
 After importing repository, you can perform the most common Git operations using interactive menus or as console commands.
 
-![git-menu.png](../../docs/imgs/git-menu.png)
+![git-menu.png](../../assets/imgs/git-menu.png)

@@ -186,7 +186,7 @@ First, our actions must determine whether they are available based on the curren
 
 As described before, to make an action available in Che, it needs to be registered at the `ActionManager`. This is done in an `Extension`.
 
-![image04.png](../../docs/imgs/image04.png)
+![image04.png](../../assets/imgs/image04.png)
 In the following example, we first define the perspective- and project specific template action. Then, we define a simple action for the JSON example and register it in the context menu of the JSON project type. The action itself will trigger a simple notification once executed. However, the action could be adapted to execute any kind of behavior.
 
 To make our abstract template action perspective-specific, we inherit from a reusable action implementation `AbstractPerspectiveAction` provided by Che. Compared to the basic `Action` its constructor allows the definition of a list of perspectives, in which the action is visible, referenced by ID. Null or empty list means the action is enabled everywhere. In the example, the project perspective, only.
@@ -295,7 +295,7 @@ public class JsonExampleExtension {
 ```
 Finally, we can open the context menu on our custom project type and trigger the example action, the screenshot show the `HelloWorldAction`, as well as another project specific action defined in the section [Server/Workspace Access](doc:serverworkspace-access).
 
-![image00.png](../../docs/imgs/image00.png)
+![image00.png](../../assets/imgs/image00.png)
 ##Further Example Actions
 In this section, we provide a collection of existing example actions to demonstrate the variety of possible locations and behavior to be executed.
 

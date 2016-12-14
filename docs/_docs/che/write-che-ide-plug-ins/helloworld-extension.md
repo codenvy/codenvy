@@ -12,11 +12,11 @@ In order to follow this guide, we consider you have successfully configured Ecli
 ## 1- Create a new maven project
 
 Create a new maven project.
-![ScreenShot2016-10-13at16.28.28.png](../../docs/imgs/ScreenShot2016-10-13at16.28.28.png)
+![ScreenShot2016-10-13at16.28.28.png](../../assets/imgs/ScreenShot2016-10-13at16.28.28.png)
 Skip the archetype selection.
-![ScreenShot2016-10-13at14.15.20.png](../../docs/imgs/ScreenShot2016-10-13at14.15.20.png)
+![ScreenShot2016-10-13at14.15.20.png](../../assets/imgs/ScreenShot2016-10-13at14.15.20.png)
 Provide basic information about the Maven project.
-![ScreenShot2016-10-13at14.13.02.png](../../docs/imgs/ScreenShot2016-10-13at14.13.02.png)
+![ScreenShot2016-10-13at14.13.02.png](../../assets/imgs/ScreenShot2016-10-13at14.13.02.png)
 Provide asked information (we will update them in the next step)
 
 ## 2- Add dependencies and parent definition to the pom.xml
@@ -100,13 +100,13 @@ We also add the Maven repository used to retrieve artifacts and the Build config
 ```
 Once your pom.xml file is edited, save it.
 You will see that Eclipse is displaying an error on the `che-helloworld-extension` module. Fix this error by doing an "Update Project" with the Eclipse's Maven plugin:
-![Screen_Shot_2016-10-13_at_14_17_47.png](../../docs/imgs/Screen_Shot_2016-10-13_at_14_17_47.png)
+![Screen_Shot_2016-10-13_at_14_17_47.png](../../assets/imgs/Screen_Shot_2016-10-13_at_14_17_47.png)
 ## 3- Create HelloWorldExtension class
 
 Create the package `org.eclipse.che.ide.ext.helloworld` in `src/main/java`:
-![ScreenShot2016-10-13at14.24.09.png](../../docs/imgs/ScreenShot2016-10-13at14.24.09.png)
+![ScreenShot2016-10-13at14.24.09.png](../../assets/imgs/ScreenShot2016-10-13at14.24.09.png)
 Add `HelloWorldExtension` java class in the package `org.eclipse.che.ide.ext.helloworld`:
-![ScreenShot2016-10-13at14.27.40.png](../../docs/imgs/ScreenShot2016-10-13at14.27.40.png)
+![ScreenShot2016-10-13at14.27.40.png](../../assets/imgs/ScreenShot2016-10-13at14.27.40.png)
 In this extension we'll need to talk to Parts and Action API. Gin and Singleton imports are obligatory as well for any extension. Add the following import:
 ```java  
 ...
@@ -180,9 +180,9 @@ public class HelloWorldExtension
 ## 4- Create HelloWorldExtension GWT module
 
 Create the package `org.eclipse.che.ide.ext.helloworld` in `src/main/resources`:
-![ScreenShot2016-10-13at14.57.02.png](../../docs/imgs/ScreenShot2016-10-13at14.57.02.png)
+![ScreenShot2016-10-13at14.57.02.png](../../assets/imgs/ScreenShot2016-10-13at14.57.02.png)
 Add `HelloWorldExtension` GWT module by creating the file `HelloWorldExtension.gwt.xml`:
-![ScreenShot2016-10-13at14.59.27.png](../../docs/imgs/ScreenShot2016-10-13at14.59.27.png)
+![ScreenShot2016-10-13at14.59.27.png](../../assets/imgs/ScreenShot2016-10-13at14.59.27.png)
 Inherits from the GWT modules: User, Inject. We will also inherits from the IDE GWT API.
 ```xml  
 <!--
@@ -206,7 +206,7 @@ Inherits from the GWT modules: User, Inject. We will also inherits from the IDE 
 ## 5- Build the Extension
 
 Create the following `Run Configuration`:
-![ScreenShot2016-10-13at15.05.00.png](../../docs/imgs/ScreenShot2016-10-13at15.05.00.png)
+![ScreenShot2016-10-13at15.05.00.png](../../assets/imgs/ScreenShot2016-10-13at15.05.00.png)
 Or you can also open a terminal where you create your HelloWorld Extension and run a `mvn clean install`.
 
 
@@ -240,9 +240,9 @@ In order to allow your extension to be visible from the root level of Che, add y
 ...\
 ```
 
-![ScreenShot2016-10-13at15.30.00.png](../../docs/imgs/ScreenShot2016-10-13at15.30.00.png)
+![ScreenShot2016-10-13at15.30.00.png](../../assets/imgs/ScreenShot2016-10-13at15.30.00.png)
 You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the pom.xml for you.
-![ScreenShot2016-10-13at15.34.00.png](../../docs/imgs/ScreenShot2016-10-13at15.34.00.png)
+![ScreenShot2016-10-13at15.34.00.png](../../assets/imgs/ScreenShot2016-10-13at15.34.00.png)
 ## 7- Link to IDE Assembly
 
 The HelloWorld extension is only a client-side (IDE) extension. You have to introduce your extension as a dependency in /che/assembly/assembly-ide-war/pom.xml and also have it added as a dependency to the GWT application.
@@ -260,7 +260,7 @@ First add the dependency:
 </dependencies>\
 ```
 You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the pom.xml for you.
-![ScreenShot2016-10-13at16.35.54.png](../../docs/imgs/ScreenShot2016-10-13at16.35.54.png)
+![ScreenShot2016-10-13at16.35.54.png](../../assets/imgs/ScreenShot2016-10-13at16.35.54.png)
 Second, link your GUI extension into the GWT app. You will add an `<inherits>` tag to the module definition. The name of the GWT extension is derived from the direction + package structure given to the GWT module defined in our HelloWorld extension.
 
 In `assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml` add:
@@ -271,13 +271,13 @@ In `assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml` add:
 ```
 This means that in our embed sample, there is a file with a *.gwt.xml extension in a folder structure identical to the name above.
 
-![ScreenShot2016-10-13at16.35.54.png](../../docs/imgs/ScreenShot2016-10-13at16.35.54.png)
+![ScreenShot2016-10-13at16.35.54.png](../../assets/imgs/ScreenShot2016-10-13at16.35.54.png)
 
-![ScreenShot2016-10-13at16.34.24.png](../../docs/imgs/ScreenShot2016-10-13at16.34.24.png)
+![ScreenShot2016-10-13at16.34.24.png](../../assets/imgs/ScreenShot2016-10-13at16.34.24.png)
 ## 8- Build Che with your extension.
 
 First, we need to rebuild the assembly-ide-war:
-![ScreenShot2016-10-13at16.40.08.png](../../docs/imgs/ScreenShot2016-10-13at16.40.08.png)
+![ScreenShot2016-10-13at16.40.08.png](../../assets/imgs/ScreenShot2016-10-13at16.40.08.png)
 Or you can also do it in a terminal:
 ```shell  
 # Build a new IDE.war
@@ -302,4 +302,4 @@ To start Che from the custom assembly you just built, you can refer to this [Usa
 First create a new workspace and open it in the IDE.
 Second open the "Events" panel.
 You'll see the "Hello World" notification displayed in the list of events.
-![ScreenShot2016-10-13at16.55.05.png](../../docs/imgs/ScreenShot2016-10-13at16.55.05.png)
+![ScreenShot2016-10-13at16.55.05.png](../../assets/imgs/ScreenShot2016-10-13at16.55.05.png)

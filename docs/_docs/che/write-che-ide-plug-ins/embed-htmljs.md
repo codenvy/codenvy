@@ -18,13 +18,13 @@ artifactId:   che-sample-plugin-embedjs-ide\
 
 # Steps  
 In this tutorial, we demonstrate, how to embed a minimal HTML/JavaScript component into Che. We will create a custom part, which shows a "Hello World" produced by a simple JavaScript snippet (see screenshot below). You can extend this example, to embed any HTML/JavaScript component you like.
-![che_helloworld.png](../../docs/imgs/che_helloworld.png)
+![che_helloworld.png](../../assets/imgs/che_helloworld.png)
 The following example is based on a simple part, which is opened by a sample action. Therefore, we recommend to get familiar with the implementation of [Parts](doc:parts) and [Actions](doc:actions) first.
 
 The `HelloWorldView` is a default view, in this example, the `HelloWorldView` just creates an empty Panel. The panel will finally be represented by a HTML element in the running browser application.
 
 In the `HelloWorldPresenter` we use the GWT `ScriptInjector` library to inject a custom script (helloWorld.js) into the main window of the browser application. Finally, we use `HelloWorldOverlay` to call the custom JavaScript from within our GWT application. In our example, it will modify the HTML element, which represents the Panel, and will add the "Hello World from JavaScript" text to it.
-![Selection_017.png](../../docs/imgs/Selection_017.png)
+![Selection_017.png](../../assets/imgs/Selection_017.png)
 The `HelloWorld.js` contains a simple function, which replaces the text content of an arbitrary element in the DOM. It could also add new elements and therefore embed an arbitrary sub component to running the browser application.
 
 ```javascript  
@@ -109,4 +109,4 @@ public class HelloWorldViewOverlay extends JavaScriptObject {
 
 # Use  
 This particular extension adds an action to the main context menu group. This is the group that appears when you right click on the project tree. To verify that your plugin is installed, you can also check the Profile > Preferences > Plugins > List to verify that the "Hello world from JavaScript example" plugin has been installed.
-![Capture_embed.PNG](../../docs/imgs/Capture_embed.PNG)
+![Capture_embed.PNG](../../assets/imgs/Capture_embed.PNG)
