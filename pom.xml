@@ -37,6 +37,7 @@
         <module>cli</module>
         <module>cdec</module>
         <module>assembly</module>
+        <module>dockerfiles/agents</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/codenvy.git</connection>
@@ -134,6 +135,12 @@
                 <artifactId>dashboard-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.dockerfiles</groupId>
+                <artifactId>dockerfiles-agents</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.factory</groupId>

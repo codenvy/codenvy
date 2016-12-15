@@ -132,6 +132,7 @@ cmd_start_check_ports() {
   text   "         port 5000 (registry): $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
     text   "         port ${CODENVY_DEBUG_PORT} (debug):       $(port_open ${CODENVY_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+    text   "         port 9000 (lighttpd): $(port_open 9000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   fi
 
   if ! $(port_open 80) || ! $(port_open 443) || ! $(port_open 5000); then

@@ -14,9 +14,10 @@ FROM alpine:3.4
 
 RUN apk update \
     && apk add lighttpd \
-    && ln -s /data /var/www/localhost/htdocs/agent-binaries
+    && ln -s /data /var/www/localhost/htdocs/agent-binaries \
+    && rm -rf /var/cache/apk/* /tmp/*
 
-COPY dependency /data
+COPY target/dockerfiles-agents-*/agents /data
 
 EXPOSE 9000
 

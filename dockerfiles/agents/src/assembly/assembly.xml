@@ -1,0 +1,53 @@
+<!--
+
+     [2012] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>agents</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy.onpremises:onpremises-ide-packaging-tomcat-ext-server</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents/linux_amd64/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents/linux_arm7/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:exec-agent:tar.gz:linux_arm7</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
