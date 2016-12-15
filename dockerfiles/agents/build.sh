@@ -11,5 +11,5 @@ IMAGE_NAME="codenvy/agents"
 mvn clean install
 
 # build
-init
-build
+init "$@"
+build "$@"
