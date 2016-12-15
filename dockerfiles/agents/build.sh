@@ -6,9 +6,10 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 IMAGE_NAME="codenvy/agents"
-. $(cd "$(dirname "$0")"; pwd)/../build.include
+DIR=$(cd "$(dirname "$0")"; pwd)
+. ${DIR}/../build.include
 
-mvn clean install
+mvn clean install -f ${DIR}/pom.xml
 
 # build
 init "$@"
