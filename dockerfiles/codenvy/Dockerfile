@@ -87,7 +87,7 @@ RUN apk upgrade --update && \
             /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
             /opt/codenvy-data/license && \
-     url -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
+    curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
      > /usr/bin/docker; chmod +x /usr/bin/docker
 
 CMD [ "postfix", "-c", "/etc/postfix", "start" ]
