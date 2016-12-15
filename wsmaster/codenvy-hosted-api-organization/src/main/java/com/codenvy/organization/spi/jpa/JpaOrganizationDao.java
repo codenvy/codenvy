@@ -149,7 +149,9 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Transactional
     protected void doCreate(OrganizationImpl organization) {
-        managerProvider.get().persist(organization);
+        EntityManager manager = managerProvider.get();
+        manager.persist(organization);
+        manager.flush();
     }
 
     @Transactional
@@ -159,6 +161,7 @@ public class JpaOrganizationDao implements OrganizationDao {
             throw new NotFoundException(format("Couldn't update organization with id '%s' because it doesn't exist", update.getId()));
         }
         manager.merge(update);
+        manager.flush();
     }
 
     @Transactional

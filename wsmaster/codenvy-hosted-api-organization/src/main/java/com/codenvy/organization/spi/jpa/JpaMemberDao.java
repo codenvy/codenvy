@@ -163,6 +163,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
                                           .getResultList();
         if (!members.isEmpty()) {
             manager.remove(members.get(0));
+            manager.flush();
         }
     }
 
