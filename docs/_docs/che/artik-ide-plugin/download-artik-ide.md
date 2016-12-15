@@ -4,7 +4,8 @@ excerpt: "Downloading"
 layout: docs
 permalink: /docs/download-artik-ide/
 ---
-The easiest way to get started with ARTIK is by following the instructions in our [Getting Started](doc:samsung-artik-ide-getting-started) page.
+The easiest way to get started with ARTIK is by following the instructions in our [Getting Started](../../docs/artik/) page.
+
 
 The instructions below are for experienced developers who wish to install Che as a native server.
 # Packages  
@@ -22,7 +23,8 @@ Installs Che in any directory.
 
 Need help getting the ARTIK IDE to run? Please check the oodles of Eclipse Che installation and usage docs.
 # Prerequisities  
-The ARTIK IDE has the same prerequisites as Eclipse Che. The [prerequisites](doc:install-pre-reqs) page in our docs itemizes the list of dependencies and how they are used.
+The ARTIK IDE has the same prerequisites as Eclipse Che. The [prerequisites](../../docs/usage/) page in our docs itemizes the list of dependencies and how they are used.
+
 # Build Assembly from Source  
 You will need Maven, Java, and Git to build the ARTIK IDE from source. [Our GitHub repository has build and contribution instructions](https://github.com/codenvy/artik-ide).
 # Older Releases  

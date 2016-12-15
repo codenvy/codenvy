@@ -125,7 +125,7 @@ export PATH=$JAVA_HOME/bin:$PATH\
 This page provides a how-to and important configuration properties that you must review to successfully set up Eclipse Che as a hosted server for remote clients.
 
 This page is a companion to the [Configuration: Networking](doc:configuration-networking) page which specifies all of the properties and workflow that Che provides related to networking.  
-![che_networking.png](../../docs/imgs/che_networking.png)
+![che_networking.png](../../assets/imgs/che_networking.png)
 This graphic provides a logical framework of the various components that have to be configured to be reachable to one another in a server scenarios. This document reviews the connection points between each component.
 
 ## DNS

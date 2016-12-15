@@ -67,7 +67,7 @@ In the IDE, open the “Consoles” panel and press “SSH”. Here you will fin
 - The ephemeral port for SSH = `<codenvy-server-ssh-port>` in the Docker command below
 
 Capture all three of these items.
-![ScreenShot2016-08-02at8.18.23AM.png](../../docs/imgs/ScreenShot2016-08-02at8.18.23AM.png)
+![ScreenShot2016-08-02at8.18.23AM.png](../../assets/imgs/ScreenShot2016-08-02at8.18.23AM.png)
 Using Docker launch the `che-mount` container, pass in the information you captured from the SSH screen:
 ```shell  
 # Launch the Che mount container with your Codenvy instance
