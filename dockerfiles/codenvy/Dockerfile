@@ -86,15 +86,14 @@ RUN apk upgrade --update && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
             /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
-            /opt/codenvy-data/license
-
-CMD [ "postfix", "-c", "/etc/postfix", "start" ]
+            /opt/codenvy-data/license \
+     postfix -c /etc/postfix start
 
 RUN set -x \
     && curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
     > /usr/bin/docker; chmod +x /usr/bin/docker
-ADD assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip /
-RUN unzip -q onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip -d /opt/codenvy-tomcat && rm onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip
 COPY dockerfiles/codenvy/entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+ADD assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip /
+RUN unzip -q onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip -d /opt/codenvy-tomcat && rm onpremises-ide-packaging-tomcat-codenvy-allinone-*.zip
