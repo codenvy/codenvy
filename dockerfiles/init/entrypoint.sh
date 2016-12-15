@@ -6,8 +6,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-cp -rf /files/docs /copy
-
 # do not copy codenvy.env if exist
 if [ ! -f  /copy/codenvy.env ]; then
     cp /etc/puppet/manifests/codenvy.env /copy
