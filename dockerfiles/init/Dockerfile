@@ -24,12 +24,10 @@ RUN apk --update add openssh \
 
 RUN mkdir -p /files \
     && mkdir -p /etc/puppet/modules \
-    && mkdir -p /etc/puppet/manifests \
-    && mkdir -p /files/docs 
+    && mkdir -p /etc/puppet/manifests
 
 COPY manifests /etc/puppet/manifests
 COPY modules /etc/puppet/modules
-COPY docs /files/docs
 COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
