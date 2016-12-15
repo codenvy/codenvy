@@ -27,6 +27,11 @@
     <name>Onpremises IDE :: Tomcat :: IDE :: All-in-One</name>
     <dependencies>
         <dependency>
+            <groupId>com.codenvy</groupId>
+            <artifactId>docs</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>com.codenvy.onpremises</groupId>
             <artifactId>onpremises-ide-packaging-tomcat-site</artifactId>
             <type>zip</type>

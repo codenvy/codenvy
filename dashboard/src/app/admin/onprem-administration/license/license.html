@@ -1,0 +1,126 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-panel che-title="License">
+  <div class="onprem-license-loader">
+    <md-progress-linear md-mode="indeterminate" ng-if="onPremisesAdminLicenseController.isLoading"></md-progress-linear>
+  </div>
+  <div class="onprem-license" ng-if="!onPremisesAdminLicenseController.isLoading || onPremisesAdminLicenseController.licenseState">
+    <div ng-switch on="onPremisesAdminLicenseController.licenseState">
+      <div ng-switch on="onPremisesAdminLicenseController.licenseState">
+        <div ng-switch-when="NO_LICENSE">
+          <che-label-container che-label-name="License">
+            <span class="onprem-license-info-row">
+              <che-link ng-href="http://codenvy.com/legal/fair-source"
+                        che-link-text="Codenvy Fair Source {{onPremisesAdminLicenseController.numberOfFreeUsers}}"
+                        che-no-padding="true" che-new-window></che-link> - {{onPremisesAdminLicenseController.numberOfFreeUsers}} users, single server
+            </span>
+          </che-label-container>
+          <che-label-container che-label-name="Expiration">
+            <span class="onprem-license-info-row">
+              N/A
+            </span>
+          </che-label-container>
+          <che-label-container che-label-name="Support">
+            <span class="onprem-license-info-row">
+              You can get&nbsp;
+              <che-link ng-href="http://codenvy.com/support"
+                        che-link-text="support in public forums"
+                        che-no-padding="true" che-new-window></che-link>
+            </span>
+          </che-label-container>
+        </div>
+        <div ng-switch-when="LICENSE">
+          <div ng-if="!onPremisesAdminLicenseController.isLicenseExpired">
+            <che-label-container che-label-name="License">
+            <span class="onprem-license-info-row">
+              Codenvy Enterprise - {{onPremisesAdminLicenseController.maxUsers}} users, unlimited servers
+            </span>
+            </che-label-container>
+            <che-label-container che-label-name="Expiration">
+            <span class="onprem-license-info-row valid-color">
+              {{onPremisesAdminLicenseController.expirationDate}}
+            </span>
+            </che-label-container>
+            <che-label-container che-label-name="Support">
+            <span class="onprem-license-info-row">
+              You can get premium support by emailing&nbsp;
+              <che-link ng-href="mailto:premiumsupport@codenvy.com"
+                        che-link-text="premiumsupport@codenvy.com"
+                        che-no-padding="true"></che-link>
+            </span>
+            </che-label-container>
+          </div>
+          <div ng-if="onPremisesAdminLicenseController.isLicenseExpired">
+            <che-label-container che-label-name="License">
+            <span class="onprem-license-info-row">
+              <che-link ng-href="https://codenvy.com/legal/fair-source/"
+                        che-link-text="Codenvy Fair Source {{onPremisesAdminLicenseController.numberOfFreeUsers}}"
+                        che-no-padding="true" che-new-window></che-link> - {{onPremisesAdminLicenseController.numberOfFreeUsers}} users, single server
+            </span>
+            </che-label-container>
+            <che-label-container che-label-name="Expiration">
+            <span class="onprem-license-info-row error-color">
+              {{onPremisesAdminLicenseController.expirationDate}} -- expired
+            </span>
+            </che-label-container>
+            <che-label-container che-label-name="Support">
+            <span class="onprem-license-info-row">
+              You can get&nbsp;
+              <che-link ng-href="http://codenvy.com/support"
+                        che-link-text="support in public forums"
+                        che-no-padding="true" che-new-window></che-link>
+            </span>
+            </che-label-container>
+          </div>
+        </div>
+        <div ng-switch-default></div>
+        <ng-form name="licenseForm" flex class="license-form">
+          <div flex="90" layout="column" layout-align="center start" class="input-part">
+            <label class="che-label-container-label">License Key:</label>
+            <textarea type="text" class="license-input" name="licenseKey" ng-maxlength="3072"
+                      required="required" placeholder="Enter your license key"
+                      ng-readonly="onPremisesAdminLicenseController.licenseState==='LICENSE'"
+                      ng-model="onPremisesAdminLicenseController.newLicense"
+                      ng-change="onPremisesAdminLicenseController.isLicenseInvalid = false"></textarea>
+
+            <div class="license-state-info">
+              <span ng-if="onPremisesAdminLicenseController.licenseState==='LICENSE'" class="valid-color">Valid key</span>
+              <span ng-if="onPremisesAdminLicenseController.isLicenseInvalid && licenseForm.$valid"
+                    class="error-color">Invalid license key.</span>
+
+              <div ng-messages="licenseForm.licenseKey.$error" class="error-color">
+                <span ng-message="maxlength">The license has to be less than 3072 characters long.</span>
+              </div>
+            </div>
+          </div>
+          <div flex="10" layout="column" layout-align="center start" class="buttons-part">
+            <che-button-primary ng-if="onPremisesAdminLicenseController.licenseState==='NO_LICENSE'"
+                                ng-click="onPremisesAdminLicenseController.addLicense()"
+                                ng-disabled="licenseForm.$invalid"
+                                che-button-title="Apply"></che-button-primary>
+            <che-button-primary ng-if="onPremisesAdminLicenseController.licenseState==='LICENSE'"
+                                ng-click="onPremisesAdminLicenseController.deleteLicense()"
+                                che-button-title="Remove"></che-button-primary>
+          </div>
+        </ng-form>
+      </div>
+    </div>
+  </div>
+</che-panel>

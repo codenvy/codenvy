@@ -91,6 +91,15 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>docs.war</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy:docs</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>

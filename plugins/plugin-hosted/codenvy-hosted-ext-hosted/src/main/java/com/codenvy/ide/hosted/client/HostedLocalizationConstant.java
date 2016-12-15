@@ -83,4 +83,13 @@ public interface HostedLocalizationConstant extends Messages {
 
     @Key("workspace.not.running.title")
     String workspaceNotRunningTitle();
+
+    @Key("action.openDocs.title")
+    String actionOpenDocsTitle();
+
+    @Key("action.openDocs.description")
+    String actionOpenDocsDescription();
+
+    @Key("action.openDocs.url")
+    String actionOpenDocsUrl();
 }

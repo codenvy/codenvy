@@ -23,7 +23,7 @@
                che-name="login"
                che-label-name="User Login"
                che-place-holder="login"
-               ng-model="adminsAddUserCtrl.newUserName"
+               ng-model="adminsAddUserController.newUserName"
                required
                ng-maxlength="100">
       <div ng-message="required">User Login is required.</div>
@@ -37,7 +37,7 @@
                type="email"
                focusable
                required
-               ng-model="adminsAddUserCtrl.newUserEmail">
+               ng-model="adminsAddUserController.newUserEmail">
 
       <div ng-message="required">Email is required.</div>
       <div ng-message="email">Enter a valid email address.</div>
@@ -52,7 +52,7 @@
                ng-minlength="8"
                type="password"
                required
-               ng-model="adminsAddUserCtrl.newUserPassword">
+               ng-model="adminsAddUserController.newUserPassword">
 
       <div ng-message="required">User Password is required.</div>
       <div ng-message="pattern">User Password should contain both letters and digits</div>
@@ -66,7 +66,7 @@
         <span>Minimum 8 characters, both letters and digits.</span>
       </div>
       <div flex="50" flex-gt-md="25" layout="column" layout-align="center center">
-        <div class="pass-strength" ng-password-strength="adminsAddUserCtrl.newUserPassword" strength="passStrength" inner-class="password-meter" class="ng-isolate-scope"></div>
+        <div class="pass-strength" ng-password-strength="adminsAddUserController.newUserPassword" strength="passStrength" inner-class="password-meter" class="ng-isolate-scope"></div>
       </div>
     </div>
     <che-input che-form="createUserForm"
@@ -81,16 +81,16 @@
       <div ng-message="required">Confirm Password is required.</div>
       <div ng-message="maxlength">Confirm Password has to be less than 100 characters long.</div>
       <div
-        ng-show="confirmNewUserPassword && (confirmNewUserPassword !== adminsAddUserCtrl.newUserPassword)">
+        ng-show="confirmNewUserPassword && (confirmNewUserPassword !== adminsAddUserController.newUserPassword)">
         Passwords do not match.
       </div>
     </che-input>
   </div>
   <che-button-primary che-button-title="Create"
-                      ng-click="adminsAddUserCtrl.createUser()"
-                      ng-disabled="createUserForm.$invalid || confirmNewUserPassword !== adminsAddUserCtrl.newUserPassword">
+                      ng-click="adminsAddUserController.createUser()"
+                      ng-disabled="createUserForm.$invalid || confirmNewUserPassword !== adminsAddUserController.newUserPassword">
   </che-button-primary>
   <che-button-notice che-button-title="Cancel"
-                     ng-click="adminsAddUserCtrl.abort()">
+                     ng-click="adminsAddUserController.abort()">
   </che-button-notice>
 </ng-form>

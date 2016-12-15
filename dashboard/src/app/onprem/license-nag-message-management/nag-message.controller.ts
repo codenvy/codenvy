@@ -41,7 +41,7 @@ export class NagMessageCtrl {
     });
 
     this.$scope.$watch(()=> {
-      return licenseLegality.value;
+      return licenseLegality.isLegal;
     }, ()=> {
       this.checkLegality(licenseLegality);
     });
@@ -52,7 +52,7 @@ export class NagMessageCtrl {
    * @param licenseLegality
    */
   checkLegality(licenseLegality) {
-    if (licenseLegality && licenseLegality.value) {
+    if (licenseLegality && licenseLegality.isLegal) {
       this.nagMessageService.hideLicenseMessage();
     } else {
       this.nagMessageService.showLicenseMessage();

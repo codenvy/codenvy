@@ -1,0 +1,14 @@
+<ul>
+  <li class="{% if page.overview == true %}current{% endif %}">
+    <a href="{{ base }}/docs/index.html">Home</a>
+  </li>
+  <li class="{% if page.url contains '/docs/' and page.overview == null %}current{% endif %}">
+    <a href="{{ base }}/docs/introduction/index.html">Docs</a>
+  </li>
+  <li class="{% if page.url contains '/tutorials/' %}current{% endif %}">
+    <a href="{{ base }}/tutorials/multi-machine/index.html">Tutorials</a>
+  </li>
+  <li>
+    <a href="{{ site.repository }}/docs"><span class="hide-on-mobiles">View on </span>GitHub</a>
+  </li>
+</ul>

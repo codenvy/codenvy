@@ -14,25 +14,53 @@
  */
 'use strict';
 
+interface ICodenvyLicenseResource<T> extends ng.resource.IResourceClass<T> {
+  getLicense: any;
+  setLicense: any;
+  getLegality: any;
+  getProperties: any;
+}
+
+interface ICodenvyLicenseIssue {
+  message: string;
+  status: string;
+}
+
+interface ILicenseLegality {
+  isLegal: boolean;
+  issues?: Array<ICodenvyLicenseIssue>;
+}
+
 /**
  * This class is handling the license API retrieval
  * @author Oleksii Orel
  */
 export class CodenvyLicense {
+  $q: ng.IQService;
+  $compile: ng.ICompileService;
+  $document: ng.IDocumentService;
+  $resource: ng.resource.IResourceService;
+  numberOfFreeUsers: number;
+  remoteLicenseAPI: ICodenvyLicenseResource<any>;
+  currentLicense: {
+    key: string,
+    properties: any
+  };
+  licenseLegality: ILicenseLegality;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource, $q, $document, $compile) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $document: ng.IDocumentService, $compile: ng.ICompileService) {
     // keep resource
-    this.$resource = $resource;
-    this.$q = $q;
     this.$document = $document;
+    this.$resource = $resource;
     this.$compile = $compile;
+    this.$q = $q;
 
     // remote call
-    this.remoteLicenseAPI = this.$resource('/api/license/system', {}, {
+    this.remoteLicenseAPI = <ICodenvyLicenseResource<any>>this.$resource('/api/license/system', {}, {
       getLicense: {
         method: 'GET', url: '/api/license/system', responseType: 'text', transformResponse: (data) => {
           return {key: data};
@@ -48,24 +76,27 @@ export class CodenvyLicense {
       getLegality: {method: 'GET', url: '/api/license/system/legality'}
     });
 
-    // current license
+    // default number of free users
+    this.numberOfFreeUsers = 5;
+
+    // default license
     this.currentLicense = {
       key: null,
       properties: null
     };
 
-    // default number of free users
-    this.numberOfFreeUsers = 5;
-
     // default license legality
-    this.licenseLegality = {value: true};
+    this.licenseLegality = {
+      isLegal: true,
+      issues: []
+    };
   }
 
   /**
    * Gets the number of free users
    * @returns {Number}
    */
-  getNumberOfFreeUsers() {
+  getNumberOfFreeUsers(): number {
     return this.numberOfFreeUsers;
   }
 
@@ -73,20 +104,20 @@ export class CodenvyLicense {
    * Gets the number of allowed users
    * @returns {Number}
    */
-  getNumberOfAllowedUsers() {
-    //if no license
+  getNumberOfAllowedUsers(): number {
+    // if no license
     if (!this.currentLicense.properties) {
       return this.numberOfFreeUsers;
     }
-    //if valid license
+    // if valid license
     return parseInt(this.currentLicense.properties.USERS, 10) | 0;
   }
 
   /**
    * Gets the current license properties
-   * @returns {}
+   * @returns {{key: string, properties: any}}
    */
-  getLicense() {
+  getLicense(): {key: string, properties: any} {
     return this.currentLicense;
   }
 
@@ -94,15 +125,14 @@ export class CodenvyLicense {
    * Delete current license.
    * @returns {*} the promise
    */
-  deleteLicense() {
-    let promise = this.remoteLicenseAPI.delete().$promise;
+  deleteLicense(): ng.IPromise<any> {
+    let promise: ng.IPromise<any> = this.remoteLicenseAPI.delete().$promise;
 
     // check if was OK or not
     promise.then(() => {
-      //update current license
-      this.currentLicense.key = null;//remove license key
-      this.currentLicense.properties = null;//remove license properties
-      this.fetchLicenseLegality();//fetch license legality
+      this.currentLicense.key = null;
+      this.currentLicense.properties = null;
+      this.fetchLicenseLegality();
     });
 
     return promise;
@@ -112,16 +142,16 @@ export class CodenvyLicense {
    * Ask for loading the users license (key and properties)
    * @returns {*} the promise
    */
-  fetchLicense() {
+  fetchLicense(): ng.IPromise<any> {
     let deferred = this.$q.defer();
 
-    this.fetchLicenseKey().then(()=> {
-      this.fetchLicenseProperties().then(()=> {
+    this.fetchLicenseKey().then(() => {
+      this.fetchLicenseProperties().then(() => {
         deferred.resolve(this.currentLicense);
-      }, (error) => {
+      }, (error: any) => {
         deferred.reject(error);
       });
-    }, (error) => {
+    }, (error: any) => {
       deferred.reject(error);
     });
 
@@ -133,16 +163,16 @@ export class CodenvyLicense {
    * If there are no changes, it's not updated
    * @returns {*} the promise
    */
-  fetchLicenseKey() {
+  fetchLicenseKey(): ng.IPromise<any> {
     let deferred = this.$q.defer();
 
     let promise = this.remoteLicenseAPI.getLicense().$promise;
 
     // check if was OK or not
-    promise.then((license) => {
+    promise.then((license: {key: string}) => {
       this.currentLicense.key = license.key;
       deferred.resolve(license.key);
-    }, (error) => {
+    }, (error: any) => {
       if (error.status === 304) {
         deferred.resolve(this.currentLicense.key);
       } else {
@@ -158,17 +188,16 @@ export class CodenvyLicense {
    * If there are no changes, it's not updated
    * @returns {*} the promise
    */
-  fetchLicenseProperties() {
+  fetchLicenseProperties(): ng.IPromise<any> {
     let deferred = this.$q.defer();
 
     let promise = this.remoteLicenseAPI.getProperties().$promise;
-
     // check if was OK or not
-    promise.then((properties) => {
-      //update current license properties
-      this.currentLicense.properties = properties;//set properties
+    promise.then((properties: any) => {
+      // update current license properties
+      this.currentLicense.properties = properties;
       deferred.resolve(properties);
-    }, (error) => {
+    }, (error: any) => {
       if (error.status === 304) {
         deferred.resolve(this.currentLicense.properties);
       } else {
@@ -184,14 +213,14 @@ export class CodenvyLicense {
    * @param licenseKey
    * @returns {*} the promise
    */
-  addLicense(licenseKey) {
+  addLicense(licenseKey: string): ng.IPromise<any> {
     let promise = this.remoteLicenseAPI.setLicense(licenseKey).$promise;
 
     // check if was OK or not
     promise.then(() => {
-      //update current license
-      this.currentLicense.key = licenseKey;//add license key
-      this.fetchLicenseLegality();//fetch license legality
+      // update current license
+      this.currentLicense.key = licenseKey;
+      this.fetchLicenseLegality();
     });
 
     return promise;
@@ -201,20 +230,31 @@ export class CodenvyLicense {
    * Ask for the users license legality in asynchronous way
    * @returns {*} the promise
    */
-  fetchLicenseLegality() {
+  fetchLicenseLegality(): ng.IPromise<any> {
+    let deferred: ng.IDeferred<any> = this.$q.defer();
+
     let promise = this.remoteLicenseAPI.getLegality().$promise;
 
     // check if was OK or not
-    return promise.then((licenseLegality) => {
-      this.licenseLegality.value = licenseLegality.value === 'true';
+    promise.then((licenseLegality: ILicenseLegality) => {
+      this.licenseLegality.isLegal = licenseLegality.value === 'true';
+      deferred.resolve(this.licenseLegality);
+    }, (error: any) => {
+      if (error.status === 304) {
+        deferred.resolve(this.licenseLegality);
+      } else {
+        deferred.reject(error);
+      }
     });
+
+    return deferred.promise;
   }
 
   /**
    * Gets the users license legality
-   * @returns {*} the promise
+   * @returns {ILicenseLegality}
    */
-  getLicenseLegality() {
+  getLicenseLegality(): ILicenseLegality {
     return this.licenseLegality;
   }
 }

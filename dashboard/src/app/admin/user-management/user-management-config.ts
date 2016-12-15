@@ -14,13 +14,13 @@
  */
 'use strict';
 
-import {AdminsAddUserCtrl} from './add-user/add-user.controller';
+import {AdminsAddUserController} from './add-user/add-user.controller';
 import {AdminsUserManagementCtrl} from './user-management.controller';
 
 export class AdminsUserManagementConfig {
 
-  constructor(register) {
-    register.controller('AdminsAddUserCtrl', AdminsAddUserCtrl);
+  constructor(register: che.IRegisterService) {
+    register.controller('AdminsAddUserController', AdminsAddUserController);
     register.controller('AdminsUserManagementCtrl', AdminsUserManagementCtrl);
 
     // configure routes

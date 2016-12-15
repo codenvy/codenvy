@@ -37,6 +37,7 @@
         <module>cli</module>
         <module>cdec</module>
         <module>assembly</module>
+        <module>docs</module>
         <module>dockerfiles/agents</module>
     </modules>
     <scm>
@@ -103,6 +104,12 @@
                 <groupId>com.codahale.metrics</groupId>
                 <artifactId>metrics-servlets</artifactId>
                 <version>${com.codahale.metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy</groupId>
+                <artifactId>docs</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.cli</groupId>

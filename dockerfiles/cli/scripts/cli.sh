@@ -22,7 +22,7 @@ cli_parse () {
   COMMAND="cmd_$1"
 
   case $1 in
-      init|config|start|stop|restart|backup|restore|info|offline|add-node|remove-nodes|destroy|download|rmi|upgrade|version|ssh|mount|action|test|compile|help)
+      init|config|start|stop|restart|backup|restore|info|offline|add-node|list-nodes|remove-node|destroy|download|rmi|upgrade|version|ssh|mount|action|test|compile|help)
       ;;
       *)
          error "You passed an unknown command."
@@ -158,6 +158,14 @@ cmd_config_post_action() {
     echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
     echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
     echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+
+    # This is a post-config creation, so we should also do this to the host version of the file
+    sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+
+    echo "" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+    echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+    echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+    echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
 
     # On Windows, it is not possible to volume mount postgres data folder directly
     # This creates a named volume which will store postgres data in docker for win VM
