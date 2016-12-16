@@ -8,5 +8,5 @@
 IMAGE_NAME="codenvy/init"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 
-init
-build
+init "$@"
+build "$@"
