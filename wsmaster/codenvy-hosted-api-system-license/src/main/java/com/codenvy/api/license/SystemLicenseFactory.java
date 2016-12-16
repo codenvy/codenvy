@@ -63,7 +63,7 @@ public class SystemLicenseFactory {
     public SystemLicense create(String licenseText) throws InvalidSystemLicenseException {
         License license = LicenseValidator.validate(licenseText, publicKey, String.valueOf(productId), null, null, null, null);
         ValidationStatus licenseValidationStatus = license.getValidationStatus();
-        if (licenseValidationStatus != ValidationStatus.LICENSE_VALID) {
+        if (licenseValidationStatus.equals(ValidationStatus.LICENSE_INVALID)) {
             throw new InvalidSystemLicenseException("System license is not valid");
         }
 

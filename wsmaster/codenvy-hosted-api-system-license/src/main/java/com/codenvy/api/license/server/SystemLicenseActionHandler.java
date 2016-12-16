@@ -37,8 +37,8 @@ import java.util.Map;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
-import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
-import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 
 /**
  * Handles system license actions.
@@ -96,10 +96,10 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
         User user = userManager.getById(userId);
 
         try {
-            SystemLicenseActionImpl prevCodenvyLicenseAction = systemLicenseActionDao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
+            SystemLicenseActionImpl prevCodenvyLicenseAction = systemLicenseActionDao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED);
             systemLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
 
-            if (prevCodenvyLicenseAction.getLicenseQualifier().equalsIgnoreCase(systemLicense.getLicenseId())) {
+            if (prevCodenvyLicenseAction.getLicenseId().equalsIgnoreCase(systemLicense.getLicenseId())) {
                 return;
             }
         } catch (NotFoundException ignored) {
@@ -128,8 +128,8 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
      * @throws NotFoundException
      *      if no action found
      */
-    public SystemLicenseAction findAction(Constants.License licenseType, Constants.Action actionType) throws ServerException,
-                                                                                                             NotFoundException {
-        return systemLicenseActionDao.getByLicenseAndAction(licenseType, actionType);
+    public SystemLicenseAction findAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
+                                                                                                                 NotFoundException {
+        return systemLicenseActionDao.getByLicenseTypeAndAction(licenseType, actionType);
     }
 }

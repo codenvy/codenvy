@@ -17,7 +17,7 @@
 CREATE TABLE license_action (
     action_timestamp             BIGINT          NOT NULL,
     action_type                  VARCHAR(255)    NOT NULL,
-    license_qualifier            VARCHAR(255),
+    license_id                   VARCHAR(255),
     license_type                 VARCHAR(255)    NOT NULL,
 
     PRIMARY KEY (license_type, action_type)

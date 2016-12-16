@@ -53,7 +53,7 @@ import static org.testng.Assert.assertEquals;
  * @author Sergii Leschenko
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class SystemSystemLicenseServicePermissionsFilterTest {
+public class SystemLicenseServicePermissionsFilterTest {
     @SuppressWarnings("unused")
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 

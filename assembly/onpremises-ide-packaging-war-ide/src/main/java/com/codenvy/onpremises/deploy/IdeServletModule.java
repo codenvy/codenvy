@@ -14,14 +14,14 @@
  */
 package com.codenvy.onpremises.deploy;
 
-import com.codenvy.api.license.SystemLicenseFilter;
+import com.codenvy.api.license.SystemLicenseLoginFilter;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.inject.DynaModule;
 
-import static com.codenvy.api.license.SystemLicenseFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseFilter.NO_USER_INTERACTION;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 
 /**
  * Servlet module composer for ide war.
@@ -33,7 +33,7 @@ public class IdeServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         filter("/*").through(com.codenvy.auth.sso.client.LoginFilter.class);
-        filter("/*").through(SystemLicenseFilter.class);
+        filter("/*").through(SystemLicenseLoginFilter.class);
         filter("/*").through(com.codenvy.onpremises.DashboardRedirectionFilter.class);
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
 

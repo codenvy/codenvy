@@ -371,7 +371,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
             SystemLicense systemLicense = codenvy4xLicenseManager.load();
 
             SystemLicense.LicenseType licenseType = systemLicense.getLicenseType();
-            if (systemLicense.isExpired()) {
+            if (systemLicense.isExpiredCompletely()) {
                 switch (licenseType) {
                     case EVALUATION_PRODUCT_KEY:
                         throw new IllegalStateException("Your Codenvy subscription only allows a single server.");

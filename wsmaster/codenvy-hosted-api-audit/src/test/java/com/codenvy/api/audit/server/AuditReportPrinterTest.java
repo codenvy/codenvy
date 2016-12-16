@@ -136,7 +136,7 @@ public class AuditReportPrinterTest {
         //given
         SystemLicense license = mock(SystemLicense.class);
         when(license.getNumberOfUsers()).thenReturn(15);
-        when(license.getExpirationDate()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
+        when(license.getExpirationDateFeatureValue()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
 
         //when
         auditReportPrinter.printHeader(auditReport, 2, license);

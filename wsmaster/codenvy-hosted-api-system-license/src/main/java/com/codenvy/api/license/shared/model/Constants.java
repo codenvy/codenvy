@@ -30,9 +30,9 @@ public class Constants {
     }
 
     /**
-     * System license types.
+     * Paid system license types.
      */
-    public enum License {
+    public enum PaidLicense {
         FAIR_SOURCE_LICENSE,
         PRODUCT_LICENSE
     }

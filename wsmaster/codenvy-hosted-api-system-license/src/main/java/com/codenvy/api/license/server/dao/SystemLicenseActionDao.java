@@ -52,10 +52,10 @@ public interface SystemLicenseActionDao {
      * @throws ServerException
      *      any other error occurred
      */
-    void remove(Constants.License licenseType, Constants.Action actionType) throws ServerException;
+    void remove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException;
 
     /**
-     * Finds license action.
+     * Finds license action for certain license type.
      *
      * @param licenseType
      *          the type of the license
@@ -67,7 +67,23 @@ public interface SystemLicenseActionDao {
      * @throws ServerException
      *      any other error occurred
      */
-    SystemLicenseActionImpl getByLicenseAndAction(Constants.License licenseType, Constants.Action actionType) throws ServerException,
-                                                                                                                     NotFoundException;
+    SystemLicenseActionImpl getByLicenseTypeAndAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
+                                                                                                                             NotFoundException;
+
+    /**
+     * Finds license action for certain license id.
+     *
+     * @param licenseId
+     *          the id of the license
+     * @param actionType
+     *          the action happened with license
+     * @return {@link SystemLicenseActionImpl}
+     * @throws NotFoundException
+     *      no license action found
+     * @throws ServerException
+     *      any other error occurred
+     */
+     SystemLicenseActionImpl getByLicenseIdAndAction(String licenseId, Constants.Action actionType) throws ServerException,
+                                                                                                           NotFoundException;
 
 }

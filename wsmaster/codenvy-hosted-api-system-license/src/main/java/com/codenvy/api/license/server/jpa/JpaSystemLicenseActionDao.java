@@ -66,7 +66,7 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     }
 
     @Override
-    public void remove(Constants.License licenseType, Constants.Action actionType) throws ServerException {
+    public void remove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException {
         try {
             doRemove(licenseType, actionType);
         } catch (RuntimeException e) {
@@ -76,12 +76,29 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
 
     @Override
     @Transactional
-    public SystemLicenseActionImpl getByLicenseAndAction(Constants.License licenseType, Constants.Action actionType) throws ServerException,
-                                                                                                                            NotFoundException {
+    public SystemLicenseActionImpl getByLicenseTypeAndAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
+                                                                                                                                    NotFoundException {
         try {
             return managerProvider.get()
-                                  .createNamedQuery("LicenseAction.getByLicenseAndAction", SystemLicenseActionImpl.class)
+                                  .createNamedQuery("LicenseAction.getByLicenseTypeAndAction", SystemLicenseActionImpl.class)
                                   .setParameter("license_type", licenseType)
+                                  .setParameter("action_type", actionType)
+                                  .getSingleResult();
+        } catch (NoResultException e) {
+            throw new NotFoundException("System license action not found");
+        } catch (RuntimeException e) {
+            throw new ServerException(e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public SystemLicenseActionImpl getByLicenseIdAndAction(String licenseId, Constants.Action actionType) throws ServerException,
+                                                                                                                 NotFoundException {
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("LicenseAction.getByLicenseIdAndAction", SystemLicenseActionImpl.class)
+                                  .setParameter("license_id", licenseId)
                                   .setParameter("action_type", actionType)
                                   .getSingleResult();
         } catch (NoResultException e) {
@@ -97,9 +114,9 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     }
 
     @Transactional
-    protected void doRemove(Constants.License licenseType, Constants.Action actionType) throws ServerException {
+    protected void doRemove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException {
         try {
-            SystemLicenseActionImpl action = getByLicenseAndAction(licenseType, actionType);
+            SystemLicenseActionImpl action = getByLicenseTypeAndAction(licenseType, actionType);
             managerProvider.get().remove(action);
         } catch (NotFoundException ignored) {
         }
@@ -109,7 +126,7 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     protected void doUpsert(SystemLicenseActionImpl codenvyLicenseAction) {
         EntityManager entityManager = managerProvider.get();
         try {
-            entityManager.createNamedQuery("LicenseAction.getByLicenseAndAction", SystemLicenseActionImpl.class)
+            entityManager.createNamedQuery("LicenseAction.getByLicenseTypeAndAction", SystemLicenseActionImpl.class)
                          .setParameter("license_type", codenvyLicenseAction.getLicenseType())
                          .setParameter("action_type", codenvyLicenseAction.getActionType())
                          .getSingleResult();

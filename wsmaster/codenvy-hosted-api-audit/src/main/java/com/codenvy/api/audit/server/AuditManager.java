@@ -51,8 +51,8 @@ import java.util.stream.Collectors;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
-import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
-import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static java.nio.file.Files.createTempDirectory;
 

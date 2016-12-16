@@ -32,8 +32,8 @@ import org.testng.annotations.Test;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
-import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
-import static com.codenvy.api.license.shared.model.Constants.License.PRODUCT_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -60,17 +60,17 @@ public class JpaSystemLicenseActionDaoTest {
                                                                                            System.currentTimeMillis(),
                                                                                            null,
                                                                                            ImmutableMap.of("prop1", "value1",
-                                                                                                             "prop2", "value2",
-                                                                                                             "prop3", "value2")),
+                                                                                                           "prop2", "value2",
+                                                                                                           "prop3", "value2")),
                                                                new SystemLicenseActionImpl(PRODUCT_LICENSE,
                                                                                            ACCEPTED,
                                                                                            System.currentTimeMillis(),
-                                                                                           "licenseQualifier1",
+                                                                                           "licenseId1",
                                                                                            ImmutableMap.of()),
                                                                new SystemLicenseActionImpl(PRODUCT_LICENSE,
                                                                                            Constants.Action.EXPIRED,
                                                                                            System.currentTimeMillis(),
-                                                                                           "licenseQualifier1",
+                                                                                           "licenseId1",
                                                                                            ImmutableMap.of())};
         codenvyLicenseRepository.createAll(asList(codenvyLicenseActions));
     }
@@ -89,7 +89,7 @@ public class JpaSystemLicenseActionDaoTest {
                                                null,
                                                ImmutableMap.of("prop1", "value1")));
 
-        SystemLicenseActionImpl action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, EXPIRED);
+        SystemLicenseActionImpl action = dao.getByLicenseTypeAndAction(FAIR_SOURCE_LICENSE, EXPIRED);
         assertNotNull(action);
     }
 
@@ -105,7 +105,7 @@ public class JpaSystemLicenseActionDaoTest {
 
     @Test
     public void shouldFindRecordByLicenseAndAction() throws Exception {
-        SystemLicenseActionImpl codenvyLicenseAction = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        SystemLicenseActionImpl codenvyLicenseAction = dao.getByLicenseTypeAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
 
         assertNotNull(codenvyLicenseAction);
         assertEquals(codenvyLicenseAction.getAttributes().size(), 3);
@@ -116,16 +116,16 @@ public class JpaSystemLicenseActionDaoTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionIfRecordAbsent() throws Exception {
-        dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, Constants.Action.EXPIRED);
+        dao.getByLicenseTypeAndAction(FAIR_SOURCE_LICENSE, Constants.Action.EXPIRED);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldRemoveRecord() throws Exception {
-        assertNotNull(dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED));
+        assertNotNull(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED));
 
         dao.remove(PRODUCT_LICENSE, ACCEPTED);
 
-        dao.getByLicenseAndAction(PRODUCT_LICENSE, ACCEPTED);
+        dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class JpaSystemLicenseActionDaoTest {
 
     @Test
     public void shouldUpdaterRecord() throws Exception {
-        SystemLicenseActionImpl action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        SystemLicenseActionImpl action = dao.getByLicenseTypeAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
         assertEquals(action.getAttributes().get("prop1"), "value1");
 
         dao.upsert(new SystemLicenseActionImpl(FAIR_SOURCE_LICENSE,
@@ -145,7 +145,7 @@ public class JpaSystemLicenseActionDaoTest {
                                                null,
                                                ImmutableMap.of("prop2", "value2")));
 
-        action = dao.getByLicenseAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+        action = dao.getByLicenseTypeAndAction(FAIR_SOURCE_LICENSE, ACCEPTED);
         assertEquals(action.getAttributes().size(), 1);
         assertEquals(action.getAttributes().get("prop2"), "value2");
     }

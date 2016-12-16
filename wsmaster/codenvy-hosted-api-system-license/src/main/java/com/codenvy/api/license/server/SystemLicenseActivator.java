@@ -103,12 +103,12 @@ public class SystemLicenseActivator {
             String activatedLicenseText = systemLicenseStorage.loadActivatedLicense();
             License license = LicenseValidator.validate(activatedLicenseText, publicKey, String.valueOf(productId), null, null, null, null);
             switch (license.getValidationStatus()) {
-                case LICENSE_VALID:
-                case MISMATCH_HARDWARE_ID:
-                    break;
-                default:
+                case LICENSE_INVALID:
                     throw new SystemLicenseNotActivatedException(
-                            "Codenvy activation license text is not valid. Error code: " + license.getValidationStatus());
+                        "Codenvy activation license text is not valid. Error code: " + license.getValidationStatus());
+
+                default:
+                    break;
             }
 
             switch (license.getActivationStatus()) {

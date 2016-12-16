@@ -25,7 +25,7 @@ public interface SystemLicenseAction {
     /**
      * Returns system license type.
      */
-    Constants.License getLicenseType();
+    Constants.PaidLicense getLicenseType();
 
     /**
      * Returns Codenvy action type. It explains what happened with a license.
@@ -38,9 +38,9 @@ public interface SystemLicenseAction {
     long getActionTimestamp();
 
     /**
-     * License qualifier.
+     * License ID.
      */
-    String getLicenseQualifier();
+    String getLicenseId();
 
     /**
      * Returns any action attributes.

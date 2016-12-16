@@ -41,7 +41,7 @@ import java.util.List;
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_SERVERS;
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_USERS;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
-import static com.codenvy.api.license.shared.model.Constants.License.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -86,7 +86,7 @@ public class SystemLicenseManagerTest {
     @Mock
     private SystemLicenseActionDao  systemLicenseActionDao;
     @Mock
-    private SystemLicenseActionImpl codenvyLicenseAction;
+    private SystemLicenseActionImpl systemLicenseAction;
     @Mock
     private SystemLicenseStorage    systemLicenseStorage;
     @Mock
@@ -106,7 +106,7 @@ public class SystemLicenseManagerTest {
         when(newSystemLicense.getLicenseId()).thenReturn("2");
         when(newSystemLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        when(codenvyLicenseAction.getLicenseQualifier()).thenReturn(LICENSE_ID);
+        when(systemLicenseAction.getLicenseId()).thenReturn(LICENSE_ID);
 
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
@@ -140,7 +140,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIfFairSourceLicenseIsNotAccepted() throws Exception {
-        when(systemLicenseActionDao.getByLicenseAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
+        when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
             .thenThrow(new NotFoundException("System license not found"));
 
         assertFalse(systemLicenseManager.isFairSourceLicenseAccepted());
@@ -148,7 +148,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIfFairSourceLicenseIsAccepted() throws Exception {
-        when(systemLicenseActionDao.getByLicenseAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
+        when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
             .thenReturn(mock(SystemLicenseActionImpl.class));
 
         assertTrue(systemLicenseManager.isFairSourceLicenseAccepted());
@@ -304,20 +304,43 @@ public class SystemLicenseManagerTest {
     }
 
     @Test
-    public void shouldReturnListOfIssues() throws ServerException {
+    public void shouldReturnListOfIssuesWithExpiring() throws Exception {
         doReturn(false).when(systemLicenseManager).canUserBeAdded();
         doReturn(false).when(systemLicenseManager).isFairSourceLicenseAccepted();
+        doReturn(true).when(systemLicenseManager).isPaidLicenseExpiring();
+        doReturn("License expiring").when(systemLicenseManager).getMessageForLicenseExpiring();
         assertEquals(systemLicenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE),
+                                                            .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
-                                                            .withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE)));
+                                                            .withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
+                                      newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
+                                                            .withMessage("License expiring")));
     }
 
     @Test
-    public void shouldReturnEmptyListOfIssues() throws ServerException {
+    public void shouldReturnListOfIssuesWithExpired() throws Exception {
+        doReturn(false).when(systemLicenseManager).canUserBeAdded();
+        doReturn(false).when(systemLicenseManager).isFairSourceLicenseAccepted();
+        doReturn(false).when(systemLicenseManager).isPaidLicenseExpiring();
+        doReturn(true).when(systemLicenseManager).isPaidLicenseExpired();
+        doReturn(false).when(systemLicenseManager).isSystemUsageLegal();
+        doReturn("License expired").when(systemLicenseManager).getMessageForLicenseExpired();
+        assertEquals(systemLicenseManager.getLicenseIssues(),
+                     ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
+                                                            .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                      newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
+                                                            .withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
+                                      newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
+                                                            .withMessage("License expired")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListOfIssues() throws Exception {
         doReturn(true).when(systemLicenseManager).canUserBeAdded();
         doReturn(true).when(systemLicenseManager).isFairSourceLicenseAccepted();
+        doReturn(false).when(systemLicenseManager).isPaidLicenseExpiring();
+        doReturn(false).when(systemLicenseManager).isPaidLicenseExpired();
         assertEquals(systemLicenseManager.getLicenseIssues(), ImmutableList.of());
     }
 

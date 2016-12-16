@@ -41,10 +41,15 @@ import java.util.Objects;
 @Entity(name = "LicenseAction")
 @NamedQueries(
         {
-                @NamedQuery(name = "LicenseAction.getByLicenseAndAction",
+                @NamedQuery(name = "LicenseAction.getByLicenseTypeAndAction",
                             query = "SELECT l " +
                                     "FROM LicenseAction l " +
-                                    "WHERE :license_type = l.licenseType AND :action_type = l.actionType")
+                                    "WHERE :license_type = l.licenseType AND :action_type = l.actionType"),
+                @NamedQuery(name = "LicenseAction.getByLicenseIdAndAction",
+                            query = "SELECT l " +
+                                    "FROM LicenseAction l " +
+                                    "WHERE :license_id = l.licenseId AND :action_type = l.actionType")
+
         }
 )
 @Table(name = "license_action")
@@ -52,10 +57,10 @@ public class SystemLicenseActionImpl implements SystemLicenseAction {
     @Id
     @Enumerated(EnumType.STRING)
     @Column(name = "license_type", nullable = false)
-    private Constants.License licenseType;
+    private Constants.PaidLicense licenseType;
 
-    @Column(name = "license_qualifier")
-    private String licenseQualifier;
+    @Column(name = "license_id")
+    private String licenseId;
 
     @Id
     @Enumerated(EnumType.STRING)
@@ -77,26 +82,26 @@ public class SystemLicenseActionImpl implements SystemLicenseAction {
 
     public SystemLicenseActionImpl() { }
 
-    public SystemLicenseActionImpl(Constants.License licenseType,
+    public SystemLicenseActionImpl(Constants.PaidLicense licenseType,
                                    Constants.Action actionType,
                                    long actionTimestamp,
-                                   String licenseQualifier,
+                                   String licenseId,
                                    Map<String, String> attributes) {
         this.licenseType = licenseType;
-        this.licenseQualifier = licenseQualifier;
+        this.licenseId = licenseId;
         this.actionType = actionType;
         this.actionTimestamp = actionTimestamp;
         this.attributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes);
     }
 
     @Override
-    public Constants.License getLicenseType() {
+    public Constants.PaidLicense getLicenseType() {
         return licenseType;
     }
 
     @Override
-    public String getLicenseQualifier() {
-        return licenseQualifier;
+    public String getLicenseId() {
+        return licenseId;
     }
 
     @Override
@@ -124,7 +129,7 @@ public class SystemLicenseActionImpl implements SystemLicenseAction {
         }
         final SystemLicenseActionImpl that = (SystemLicenseActionImpl)obj;
         return Objects.equals(licenseType, that.licenseType)
-               && Objects.equals(licenseQualifier, that.licenseQualifier)
+               && Objects.equals(licenseId, that.licenseId)
                && Objects.equals(actionType, that.actionType)
                && Objects.equals(actionTimestamp, that.actionTimestamp)
                && getAttributes().equals(that.getAttributes());
@@ -134,7 +139,7 @@ public class SystemLicenseActionImpl implements SystemLicenseAction {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(licenseType);
-        hash = 31 * hash + Objects.hashCode(licenseQualifier);
+        hash = 31 * hash + Objects.hashCode(licenseId);
         hash = 31 * hash + Objects.hashCode(actionType);
         hash = 31 * hash + Objects.hashCode(actionTimestamp);
         hash = 31 * hash + getAttributes().hashCode();
@@ -145,7 +150,7 @@ public class SystemLicenseActionImpl implements SystemLicenseAction {
     public String toString() {
         return "CodenvyLicenseActionImpl{" +
                "licenseType=" + licenseType +
-               ", licenseQualifier='" + licenseQualifier + '\'' +
+               ", licenseId='" + licenseId + '\'' +
                ", actionType=" + actionType +
                ", actionTimestamp=" + actionTimestamp +
                ", attributes=" + attributes +

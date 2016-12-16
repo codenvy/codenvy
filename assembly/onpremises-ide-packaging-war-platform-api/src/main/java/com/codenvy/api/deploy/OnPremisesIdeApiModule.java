@@ -17,6 +17,7 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.audit.server.AuditService;
 import com.codenvy.api.audit.server.AuditServicePermissionsFilter;
+import com.codenvy.api.license.SystemLicenseWorkspaceFilter;
 import com.codenvy.api.license.server.SystemLicenseModule;
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
 import com.codenvy.api.permission.server.PermissionChecker;
@@ -126,7 +127,7 @@ import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
 
-import static com.codenvy.api.license.SystemLicenseFilter.NO_USER_INTERACTION;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
@@ -309,8 +310,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                         new ConjunctionRequestFilter(
                                 new RegexpRequestFilter("^/api/permissions$"),
                                 new RequestMethodFilter("GET")
-                        ),
-                        new UriStartFromRequestFilter("/api/license/system/legality")
+                        )
                 ));
 
 
@@ -327,9 +327,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(org.eclipse.che.api.environment.server.MachineService.class);
 
         install(new ScheduleModule());
-
-        bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(true);
-        install(new SystemLicenseModule());
 
         bind(org.eclipse.che.plugin.docker.client.DockerConnector.class).to(com.codenvy.swarm.client.SwarmDockerConnector.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
@@ -445,5 +442,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new com.codenvy.machine.agent.CodenvyAgentModule());
         bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
                 .to(com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.class);
+
+        // install system license verification staff
+        bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(true);
+        install(new SystemLicenseModule());
+
+        bind(SystemLicenseWorkspaceFilter.class);
     }
 }

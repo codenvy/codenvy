@@ -116,7 +116,7 @@ public class SystemLicenseFactoryTest {
         SystemLicense systemLicense = systemLicenseFactory.create(LICENCE_TEXT);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(systemLicense.getExpirationDate());
+        calendar.setTime(systemLicense.getExpirationDateFeatureValue());
 
         assertEquals(calendar.get(Calendar.YEAR), 2020);
         assertEquals(calendar.get(Calendar.MONTH), Calendar.DECEMBER);
@@ -127,14 +127,14 @@ public class SystemLicenseFactoryTest {
     public void testCheckExpirationDateShouldReturnFalse() throws Exception {
         SystemLicense systemLicense = systemLicenseFactory.create(LICENCE_TEXT);
 
-        assertFalse(systemLicense.isExpired());
+        assertFalse(systemLicense.isExpiredCompletely());
     }
 
     @Test
     public void testCheckExpirationDateShouldReturnTrueLicenseExpired() throws Exception {
         SystemLicense systemLicense = systemLicenseFactory.create(LICENSE_TEXT_EXPIRED);
 
-        assertTrue(systemLicense.isExpired());
+        assertTrue(systemLicense.isExpiredCompletely());
     }
 
     @Test

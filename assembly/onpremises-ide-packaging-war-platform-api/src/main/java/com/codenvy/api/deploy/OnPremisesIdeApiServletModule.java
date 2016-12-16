@@ -14,7 +14,8 @@
  */
 package com.codenvy.api.deploy;
 
-import com.codenvy.api.license.SystemLicenseFilter;
+import com.codenvy.api.license.SystemLicenseLoginFilter;
+import com.codenvy.api.license.SystemLicenseWorkspaceFilter;
 import com.google.inject.servlet.ServletModule;
 import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.inject.DynaModule;
@@ -108,7 +109,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         filter(pathForLoginFilter).through(com.codenvy.auth.sso.client.LoginFilter.class);
-        filter(pathForLoginFilter).through(SystemLicenseFilter.class);
+        filter(pathForLoginFilter).through(SystemLicenseLoginFilter.class);
 
         final Map<String, String> corsFilterParams = new HashMap<>();
         corsFilterParams.put("cors.allowed.origins", DEFAULT_ALLOWED_ORIGINS);

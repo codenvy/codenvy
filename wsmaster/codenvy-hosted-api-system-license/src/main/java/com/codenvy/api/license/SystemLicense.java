@@ -16,10 +16,11 @@ package com.codenvy.api.license;
 
 import com.codenvy.api.license.exception.IllegalSystemLicenseFormatException;
 import com.license4j.License;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -32,10 +33,11 @@ import java.util.regex.Pattern;
  * @author Anatoliy Bazko
  */
 public class SystemLicense {
-    private static final Pattern    LICENSE_ID_PATTERN         = Pattern.compile(".*\\(id: ([0-9]+)\\)");
-    public static final  DateFormat EXPIRATION_DATE_FORMAT     = new SimpleDateFormat("yyyy/MM/dd");
-    public static final  long       MAX_NUMBER_OF_FREE_USERS   = 3;
-    public static final  int        MAX_NUMBER_OF_FREE_SERVERS = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
+    private static final Pattern    LICENSE_ID_PATTERN                = Pattern.compile(".*\\(id: ([0-9]+)\\)");
+    public static final  DateFormat EXPIRATION_DATE_FORMAT            = new SimpleDateFormat("yyyy/MM/dd");
+    public static final  long       MAX_NUMBER_OF_FREE_USERS          = 3;
+    public static final  int        MAX_NUMBER_OF_FREE_SERVERS        = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
+    public static final  int        ADDITIONAL_DAYS_FOR_LICENSE_RENEW = 15;
 
     private final Map<SystemLicenseFeature, String> features;
     private final License                           license4j;
@@ -59,17 +61,42 @@ public class SystemLicense {
     }
 
     /**
-     * Indicates if license has been expired or hasn't.
+     * Indicates if license has been expired or hasn't, including additional days for license fix-up.
      */
-    public boolean isExpired() {
-        Date expirationDate = getExpirationDate();
-        return !expirationDate.after(Calendar.getInstance().getTime());
+    public boolean isExpiredCompletely() {
+        Date expirationDate = getExpirationDateFeatureValue();
+        return expirationDate.before(DateTime.now().minusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW).toDate());
+    }
+
+    /**
+     * Indicates if license is expired, but admin has additional time to renew it.
+     */
+    public boolean isExpiring() {
+        if (isExpiredCompletely()) {
+            return false;
+        }
+
+        return daysBeforeCompleteExpiration() <= ADDITIONAL_DAYS_FOR_LICENSE_RENEW;
+    }
+
+    /**
+     * Returns days between current date and expiration date + additional time torenew it, or 0 if license has already completely expired.
+     */
+    public int daysBeforeCompleteExpiration() {
+        if (isExpiredCompletely()) {
+            return 0;
+        }
+
+        int daysBeforeLicenseExpiredAccordingToItsFeatureValue = Days.daysBetween(new DateTime(System.currentTimeMillis()),
+                                                                                  new DateTime(getExpirationDateFeatureValue())).getDays();
+
+        return daysBeforeLicenseExpiredAccordingToItsFeatureValue + ADDITIONAL_DAYS_FOR_LICENSE_RENEW;
     }
 
     /**
      * @return {@link SystemLicenseFeature#EXPIRATION} feature value
      */
-    public Date getExpirationDate() {
+    public Date getExpirationDateFeatureValue() {
         return (Date)doGetFeature(SystemLicenseFeature.EXPIRATION);
     }
 
@@ -102,7 +129,7 @@ public class SystemLicense {
      * 4) if (PRODUCT_KEY            IS     expired) AND (actual number of users <= MAX_NUMBER_OF_FREE_USERS)
      */
     public boolean isLicenseUsageLegal(long actualUsers, int actualServers) {
-        if (isExpired()) {
+        if (isExpiredCompletely()) {
             switch (getLicenseType()) {
                 case EVALUATION_PRODUCT_KEY:
                 case PRODUCT_KEY:
@@ -159,9 +186,8 @@ public class SystemLicense {
         throw new IllegalSystemLicenseFormatException("Unrecognized license format. Id not found");
     }
 
-
     /**
-     * Ssytem license type.
+     * System license type.
      */
     public enum LicenseType {
         PRODUCT_KEY,

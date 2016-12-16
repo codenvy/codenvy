@@ -56,11 +56,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
 
-/** Test related to @SystemLicenseFilter class. */
+/** Test related to @SystemLicenseLoginFilter class. */
 @Listeners(value = MockitoTestNGListener.class)
-public class SystemLicenseFilterTest {
+public class SystemLicenseLoginFilterTest {
 
-    public static final Logger LOG          = LoggerFactory.getLogger(SystemLicenseFilterTest.class);
+    public static final Logger LOG          = LoggerFactory.getLogger(SystemLicenseLoginFilterTest.class);
     public static final String API_ENDPOINT = "http://localhost:8080/api";
 
     public static final String ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL                = "/site/auth/accept-fair-source-license";
@@ -90,7 +90,7 @@ public class SystemLicenseFilterTest {
     PrintWriter            servletResponseWriter;
 
     @InjectMocks
-    SystemLicenseFilter filter;
+    SystemLicenseLoginFilter filter;
 
     @BeforeMethod
     public void setup() throws IOException {

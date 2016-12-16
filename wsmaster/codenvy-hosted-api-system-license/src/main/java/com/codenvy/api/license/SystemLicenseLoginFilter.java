@@ -50,7 +50,7 @@ import java.io.PrintWriter;
 import static com.codenvy.api.license.shared.model.Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED;
 
 /**
- * Checks system license conditions. If fair source license isn't accepted, then:
+ * Checks system license conditions for login. If fair source license isn't accepted, then:
  * 1) if ("no.user.interaction" property == false),
  *     then if (user has permission to perform MANAGE_SYSTEM_ACTION): send redirection to accept-fair-source-license page in response;
  *          otherwise: send redirection to fair-source-license-is-not-accepted-error page in response;
@@ -59,7 +59,7 @@ import static com.codenvy.api.license.shared.model.Issue.Status.FAIR_SOURCE_LICE
  * @author Dmytro Nochevnov
  */
 @Singleton
-public class SystemLicenseFilter implements Filter {
+public class SystemLicenseLoginFilter implements Filter {
     public static final String NO_USER_INTERACTION                                = "no.user.interaction";
     public static final String ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL                = "license.system.accept_fair_source_license_page_url";
     public static final String FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL = "license.system.fair_source_license_is_not_accepted_error_page_url";
@@ -135,12 +135,6 @@ public class SystemLicenseFilter implements Filter {
 
     private boolean isAdmin() {
         return EnvironmentContext.getCurrent().getSubject().hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
-    }
-
-    private void sendUserToAcceptFairSourceLicensePage(HttpServletResponse response)
-        throws IOException {
-        UriBuilder redirectUrl = UriBuilder.fromPath(acceptFairSourceLicensePageUrl);
-        response.sendRedirect(redirectUrl.build().toString());
     }
 
     private void sendRedirection(HttpServletResponse response, String url) throws IOException {
