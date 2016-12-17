@@ -2,10 +2,8 @@
   <aside>
     {% if page.layout == 'tutorials' %} 
     {% assign layout_docs = site.data.tutorials %}
-    {% assign layout_sections = section.tutorials %}
     {% else %}
     {% assign layout_docs = site.data.docs %}
-    {% assign layout_sections = section.docs %}
     {% endif %}
     {% for section in layout_docs %}
     <h4>{{ section.title }}</h4>

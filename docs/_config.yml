@@ -37,6 +37,14 @@ exclude:
   - assembly/*
   - _site/*
   - pom.xml
+  - _docs/che/write-che-ide-plugins
+  - _docs/che/use-che-as-a-workspace-server
+  - _docs/che/setup-alternatives
+  - _docs/che/setup
+  - _docs/che/openshift-plugin
+  - _docs/che/chedir-portable-workspaces
+  - _docs/che/che-data-model
+  - _docs/che/artik-ide-plugin
   
 # The following are used to define markdown permalinks
 defaults:
@@ -77,13 +85,12 @@ defaults:
       categories: [ "docs" , "white-labels" ]
   -
     scope:
-      path: "_docs/che/docs/workspace-administration"
+      path: "_docs/che/workspace-administration"
     values:
       categories: [ "docs" , "getting-started" ]
-
   -
     scope:
-      path: "_docs/che/docs/use-che-as-an-ide"
+      path: "_docs/che/use-che-as-an-ide"
     values:
       categories: [ "docs" , "user-guide" ]
   -
