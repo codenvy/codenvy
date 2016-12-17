@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Architecture
 excerpt: ""
 layout: docs
-permalink: /docs/architecture/
+permalink: /:catagories/architecture/
 ---
 Codenvy is composed of 8 Docker containers in a compose relationship. A browser is required for administration of the Codenvy system and to use the (optional) Eclipse Che browser IDE.
 

@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Sharing Permissions
 excerpt: ""
 layout: docs
-permalink: /docs/user-guide/sharing-permissions/
+permalink: /:catagories/user-guide/sharing-permissions/
 ---
 
 ## Sharing Workspaces

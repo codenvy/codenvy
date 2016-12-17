@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Continuous Integration
 excerpt: ""
 layout: docs
-permalink: /docs/integration-guide/continuous-integration/
+permalink: /:catagories/continuous-integration/
 ---
 Codenvy integrates with CI systems through [Factories](../../integration-guide/workspace-automation). Factories can be added to CI jobs to generate developer workspaces pre-configured with the context of the CI job. For example, a failed CI build email can be customized to include a link to a Codenvy Factory that will generate a workspace already tied to the repo, branch and commit ID that broke the build, simplifying diagnosis.
 

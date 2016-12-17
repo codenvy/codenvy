@@ -3,5 +3,5 @@ tag: [ "codenvy" ]
 title: Teams and Collaboration
 excerpt: ""
 layout: tutorials
-permalink: /tutorials/teams-and-collaboration/
+permalink: /:catagories/teams-and-collaboration/
 ---
