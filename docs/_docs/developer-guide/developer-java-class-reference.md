@@ -2,7 +2,7 @@
 title: Java Class Reference
 excerpt: ""
 layout: docs
-permalink: /docs/dev-java-class-reference/
+permalink: /docs/java-class-reference/
 ---
 You can generate the JavaDoc for your installation from source. IDE and workspace extensions are written in Java. This is the JavaDoc for the internal class library.
 ```shell  
