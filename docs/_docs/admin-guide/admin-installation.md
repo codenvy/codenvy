@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Installation
 excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
-permalink: /:catagories/installation/
+permalink: /:categories/installation/
 ---
 # System Requirements
 Codenvy installs on Linux, Mac and Windows.

@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Introduction
 excerpt: "Welcome to Codenvy!"
 layout: docs
-permalink: /:catagories/introduction/
+permalink: /:categories/introduction/
 ---
 Codenvy makes Cloud workspaces for development teams featuring one-click Docker environments, team onboarding and a workspace platform for DevOps. Codenvy SaaS is available for self-service at codenvy.io. You can also install Codenvy on your own infrastructure with Codenvy On-Prem.
 

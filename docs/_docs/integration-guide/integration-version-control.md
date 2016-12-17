@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Version Control
 excerpt: ""
 layout: docs
-permalink: /:catagories/version-control/
+permalink: /:categories/version-control/
 ---
 Users/Administrators use private/public repository URLs to import projects into workspaces, to use the Git / Subversion menus, and to use/create a [Factory](../../docs/workspace-automation). Some repository tasks such as git push and access to private repositories require setting up SSH or oAuth authentication mentioned below.
 # Using SSH  

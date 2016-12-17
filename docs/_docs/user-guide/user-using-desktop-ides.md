@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Using Desktop IDEs
 excerpt: ""
 layout: docs
-permalink: /:catagories/using-desktop-ides/
+permalink: /:categories/using-desktop-ides/
 ---
 # Standard SSH Connection  
 It's possible to establish SSH connection between your desktop IDE and a remote Codenvy workspace.

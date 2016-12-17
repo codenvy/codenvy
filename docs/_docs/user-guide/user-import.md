@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Import
 excerpt: ""
 layout: docs
-permalink: /:catagories/import/
+permalink: /:categories/import/
 ---
 There are several ways to import a project:
 * `IDE > Import Project`

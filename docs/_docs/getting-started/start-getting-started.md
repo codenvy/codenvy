@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Getting Started
 excerpt: ""
 layout: docs
-permalink: /:catagories/getting-started/
+permalink: /:categories/getting-started/
 ---
 
 ## 1. Create a Free Account at codenvy.io

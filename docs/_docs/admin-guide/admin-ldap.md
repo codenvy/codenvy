@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: LDAP Integration
 excerpt: ""
 layout: docs
-permalink: /:catagories/ldap/
+permalink: /:categories/ldap/
 ---
 
 The Codenvy LDAP integration has two major roles: synchronization and authentication.

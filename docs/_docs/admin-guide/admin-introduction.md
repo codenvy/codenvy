@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Introduction
 excerpt: ""
 layout: docs
-permalink: /:catagories/introduction/
+permalink: /:categories/introduction/
 ---
 # Codenvy Installation and Operation
 Codenvy makes cloud workspaces for develoment teams. Install, run, and manage Codenvy with Docker.

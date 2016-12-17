@@ -3,7 +3,7 @@ tag: [ "codenvy" ]
 title: Managing
 excerpt: ""
 layout: docs
-permalink: /:catagories/managing/
+permalink: /:categories/managing/
 ---
 ## Scaling
 Codenvy workspaces can run on different physical nodes that are part of a Codenvy cluster managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power. You will want to allocate enough nodes and resources to handle the number of concurrently *running* workspaces, each of which will have its own RAM and CPU requirements.
