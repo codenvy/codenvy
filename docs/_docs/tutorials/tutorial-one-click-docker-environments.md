@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: One-Click Docker Environments
 excerpt: "Create workspaces with production runtimes containing your source code and dev tools. Choose any architecture - microservices, multi-tier, multi-container, or shared server. We excel at complex topologies."
 layout: tutorials

@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Configuration
 excerpt: "Techniques for configuring Codenvy"
 layout: docs

@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Introduction
 excerpt: "Welcome to Codenvy!"
 layout: docs

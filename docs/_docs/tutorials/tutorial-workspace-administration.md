@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Workspace Administration
 excerpt: ""
 layout: tutorials

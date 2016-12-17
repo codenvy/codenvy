@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Custom Assemblies
 excerpt: "Build your own Codenvy binaries"
 layout: docs

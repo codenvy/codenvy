@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Continuous Integration
 excerpt: ""
 layout: docs

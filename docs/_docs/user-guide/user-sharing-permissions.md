@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Sharing Permissions
 excerpt: ""
 layout: docs

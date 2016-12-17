@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: LDAP Integration
 excerpt: ""
 layout: docs

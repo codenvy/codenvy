@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Using Desktop IDEs
 excerpt: ""
 layout: docs

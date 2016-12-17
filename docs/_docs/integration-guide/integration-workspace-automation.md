@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Workspace Automation
 excerpt: "Automation for generating workspaces using URLs"
 layout: docs

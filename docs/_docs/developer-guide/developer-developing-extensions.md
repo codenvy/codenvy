@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Developing Extensions
 excerpt: ""
 layout: docs

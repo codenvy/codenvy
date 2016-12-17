@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Java Class Reference
 excerpt: ""
 layout: docs

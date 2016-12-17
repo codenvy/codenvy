@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: REST API
 excerpt: "APIs for the workspace master and agent using Swagger"
 layout: docs

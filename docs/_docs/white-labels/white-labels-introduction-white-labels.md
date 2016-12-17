@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Introduction
 excerpt: "White labeling is for embedding, distributing, or hosting Codenvy as part of another brand."
 layout: docs

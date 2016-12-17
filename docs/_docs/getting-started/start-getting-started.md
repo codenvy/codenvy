@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Getting Started
 excerpt: ""
 layout: docs

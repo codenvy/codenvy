@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Managing
 excerpt: ""
 layout: docs

@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: Architecture
 excerpt: ""
 layout: docs

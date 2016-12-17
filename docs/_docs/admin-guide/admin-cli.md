@@ -1,4 +1,5 @@
 ---
+tag: [ "codenvy" ]
 title: CLI Reference
 excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
