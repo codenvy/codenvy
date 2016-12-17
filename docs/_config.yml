@@ -77,47 +77,17 @@ defaults:
       categories: [ "docs" , "white-labels" ]
   -
     scope:
-      path: "_docs/che/docs/write-che-ide-plugins"
-    values:
-      categories: [ "docs" , "plugins" ]
-  -
-    scope:
       path: "_docs/che/docs/workspace-administration"
     values:
-      categories: [ "docs" , "workspace" ]
+      categories: [ "docs" , "getting-started" ]
 
   -
     scope:
       path: "_docs/che/docs/use-che-as-an-ide"
     values:
-      categories: [ "docs" , "ide" ]
-  -
-    scope:
-      path: "_docs/che/docs/use-che-as-a-workspace-server"
-    values:
-      categories: [ "docs" , "server" ]
+      categories: [ "docs" , "user-guide" ]
   -
     scope:
       path: "_docs/che/tutorials"
     values:
       categories: [ "tutorials" ]
-  -
-    scope:
-      path: "_docs/che/docs/setup-alternatives"
-    values:
-      categories: [ "docs" , "setup-alternatives" ]
-  -
-    scope:
-      path: "_docs/che/docs/setup"
-    values:
-      categories: [ "docs" , "setup" ]
-  -
-    scope:
-      path: "_docs/che/docs/chedir-portable-workspaces"
-    values:
-      categories: [ "docs" , "chedir" ]
-  -
-    scope:
-      path: "_docs/che/docs/che-data-model"
-    values:
-      categories: [ "docs" , "data-model" ]
