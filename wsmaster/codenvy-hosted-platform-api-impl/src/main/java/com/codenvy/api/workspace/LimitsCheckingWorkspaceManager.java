@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -86,8 +87,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                           AccountManager accountManager,
                                           @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
                                           @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-                                          EnvironmentRamCalculator environmentRamCalculator) {
-        super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao);
+                                          EnvironmentRamCalculator environmentRamCalculator,
+                                          WorkspaceSharedPool sharedPool) {
+        super(workspaceDao, runtimes, eventService, accountManager, defaultAutoSnapshot, defaultAutoRestore, snapshotDao, sharedPool);
         this.startedWorkspacesLimit = startedWorkspacesLimit;
         this.systemRamInfoProvider = systemRamInfoProvider;
         this.workspacesPerUser = workspacesPerUser;

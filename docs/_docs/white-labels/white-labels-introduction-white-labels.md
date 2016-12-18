@@ -69,4 +69,8 @@ To remove the "Make a Wish" widget in the footer, remove the `che-support-email`
 Alternatively you can leave the widget but change the link to point to your own organization's email by changing the `helpPath` and `supportEmail` attributes in the [product.json](dashboard/src/assets/branding/product.json) file.
 
 # Creating Custom Assemblies  
+<<<<<<< HEAD:docs/_docs/white-labels/white-labels-introduction-white-labels.md
 See the [custom assemblies documentation](../../docs/custom-assemblies/) in this section.
+=======
+See the [custom assemblies documentation](../../docs/custom-assemblies/) in this section.
+>>>>>>> master:docs/_docs/white-labels/introduction-white-labels.md

@@ -4,7 +4,7 @@ Cloud workspaces for development teams. One-click Docker environments to create 
 ![Eclipse Che](https://www.eclipse.org/che/images/banner@2x.png "Eclipse Che")
 
 ### Getting Started
-You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. The [docs will get you going](dockerfiles/init/docs/README.md). Quick start:
+You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. The [docs will get you going](https://github.com/codenvy/codenvy/tree/master/docs/_docs/admin-guide). Quick start:
 
 ```
 docker run codenvy/cli:nightly start
