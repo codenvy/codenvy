@@ -11,6 +11,12 @@ repository: https://github.com/codenvy/codenvy
 
 timezone: America/Los_Angeles
 
+product_name: "CODENVY"
+product_mini_name:  "codenvy"
+product_formal_name: "Codenvy"
+
+product_name: "CODENVY"
+
 collections:
   docs:
     output: true
