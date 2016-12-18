@@ -11,9 +11,9 @@ layout: default
         <article>
           <div class="improve right hide-on-mobiles">
             {% if page.tags[1] != null %} 
-            <a href="https://github.com/{{ page.tags[0] }}/{{ page.tags[1] }}/blob/master/docs/{{ page.path }}"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+            <a href="https://github.com/{{ page.tags[0] }}/{{ page.tags[1] }}/blob/master/docs/{{ page.path | replace_first:'/che','' }}"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
             {% else %} 
-            <a href="https://github.com/{{ page.tags[0] }}/{{ page.tags[0] }}/blob/master/docs/{{ page.path }}"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
+            <a href="https://github.com/{{ page.tags[0] }}/{{ page.tags[0] }}/blob/master/docs/{{ page.path | replace_first:'/che','' }}"><i class="fa fa-pencil"></i> &nbsp;Improve this page</a>
             {% endif %}
           </div>
           <div class="doc-title">
