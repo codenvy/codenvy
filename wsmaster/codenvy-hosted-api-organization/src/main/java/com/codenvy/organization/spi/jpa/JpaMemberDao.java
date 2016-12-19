@@ -23,11 +23,12 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.event.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -206,7 +207,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         }
 
         @Override
-        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws ApiException {
             removeMembers(event.getOrganization().getId(), PAGE_SIZE);
         }
 

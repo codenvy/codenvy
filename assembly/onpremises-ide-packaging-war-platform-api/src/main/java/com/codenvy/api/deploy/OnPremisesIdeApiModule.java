@@ -115,7 +115,7 @@ import org.eclipse.che.api.workspace.server.stack.StackService;
 import org.eclipse.che.commons.schedule.executor.ScheduleModule;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.JndiDataSourceProvider;
-import org.eclipse.che.core.db.event.CascadeEventService;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.PlaceholderReplacerProvider;

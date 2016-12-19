@@ -16,7 +16,7 @@ package com.codenvy.organization.api.event;
 
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
-import org.eclipse.che.core.db.event.CascadeEvent;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 
 /**
  * Published before {@link OrganizationImpl organization} removed.

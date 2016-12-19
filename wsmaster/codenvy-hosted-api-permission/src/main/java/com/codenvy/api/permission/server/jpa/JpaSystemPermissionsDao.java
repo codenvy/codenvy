@@ -18,12 +18,13 @@ import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.core.db.event.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -133,7 +134,7 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
         }
 
         @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws ApiException {
             for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
                 dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }
