@@ -3,7 +3,17 @@
 {% for item in include.items %}
   {% assign layout_type = page.layout | prepend:"/" | append:"/" %}
   {% assign item_url = item | prepend:layout_type | append:"/" %}
-  {% assign p = site.docs | where:"url", item_url | first %}
-  <li class="{% if item_url == page.url %}current{% endif %}"><a href="{{ base }}{{ p.url }}index.html">{{ p.title }}</a></li>
+  {% assign item_url = item_url | replace_first:'/start-','/getting-started/' | replace_first:'/admin-','/admin-guide/' %}
+  {% assign item_url = item_url | replace_first:'/developer-','/developer-guide/' | replace_first:'/integration-','/integration-guide/' %}
+  {% assign item_url = item_url | replace_first:'/tutorial-','/tutorials/' | replace_first:'/user-','/user-guide/' %}
+  {% assign item_url = item_url | replace_first:'/white-labels-','/white-labels/' %}
+  {% assign item_url = item_url | replace_first:'/ws-','/getting-started/' | replace_first:'/ide-','/user-guide/' %}
+  {% assign p = site.documents | where:"url", item_url | first %}
+  {% if page.url != "" %} 
+    <li class="{% if item_url == page.url %}current{% endif %}"><a href="{{ base }}{{ p.url }}index.html">{{ p.title }}</a></li>
+  {% else %} 
+    <li class=""><a href="">Error Generating Page Link. Contact Maintainer.</a></li>
+  {% endif %}
+  
 {% endfor %}
 </ul>

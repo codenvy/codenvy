@@ -22,7 +22,9 @@ import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -173,7 +175,8 @@ public class LimitsCheckingWorkspaceManagerTest {
     }
 
     @Test
-    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesIncludingMachineWithoutLimitsWhichDoesNotExceedRamLimit() throws Exception {
+    public void shouldBeAbleToCreateWorkspaceWithMultipleMachinesIncludingMachineWithoutLimitsWhichDoesNotExceedRamLimit()
+            throws Exception {
         when(environmentRamCalculator.calculate(any())).thenReturn(2560L);
         final WorkspaceConfig config = createConfig("1gb", "1gb", null);
 
@@ -344,6 +347,7 @@ public class LimitsCheckingWorkspaceManagerTest {
         private int                      workspacesPerUser;
         private int                      startedWorkspacesLimit;
         private int                      maxSameTimeStartWSRequests;
+        private WorkspaceSharedPool      sharedPool;
 
         ManagerBuilder() throws ServerException {
             workspacesPerUser = 2;
@@ -354,6 +358,7 @@ public class LimitsCheckingWorkspaceManagerTest {
             defaultAutoRestore = false;
 
             systemRamInfoProvider = mock(SystemRamInfoProvider.class);
+            sharedPool = mock(WorkspaceSharedPool.class);
             when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(0, parseSize("3 GiB")));
         }
 
@@ -370,7 +375,8 @@ public class LimitsCheckingWorkspaceManagerTest {
                                                           null,
                                                           defaultAutoSnapshot,
                                                           defaultAutoRestore,
-                                                          environmentRamCalculator));
+                                                          environmentRamCalculator,
+                                                          sharedPool));
         }
 
         ManagerBuilder setWorkspacesPerUser(int workspacesPerUser) {

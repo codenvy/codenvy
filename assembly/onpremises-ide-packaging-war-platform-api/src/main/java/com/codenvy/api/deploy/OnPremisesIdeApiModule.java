@@ -385,8 +385,14 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
 
         bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
-                      .to("$HOME/che/terminal/che-websocket-terminal -addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/ -path '/[^/]+' -enable-auth -enable-activity-tracking");
+                      .to("$HOME/che/terminal/che-websocket-terminal " +
+                          "-addr :4411 " +
+                          "-cmd ${SHELL_INTERPRETER} " +
+                          "-static $HOME/che/terminal/ " +
+                          "-path '/[^/]+' " +
+                          "-enable-auth " +
+                          "-enable-activity-tracking  " +
+                          "-logs-dir $HOME/che/exec-agent/logs");
 
         Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);

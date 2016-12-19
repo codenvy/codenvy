@@ -11,5 +11,5 @@
 IMAGE_NAME="codenvy/cli"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 
-init
-build
+init "$@"
+build "$@"

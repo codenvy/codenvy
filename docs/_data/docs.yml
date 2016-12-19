@@ -1,46 +1,45 @@
 - title: Getting Started
   docs:
-  - introduction
-  - getting-started
-  - architecture  
-  - workspace-admin-intro # Che workspace-administration
-  - stacks # Che workspace-administration
-  - recipes # Che workspace-administration
-  - samples # Che workspace-administration
-  - machines # Che workspace-administration
-  - volume-mounts # Che workspace-administration
-  - environments 
-  - workspace-agents # Che workspace-administration
+  - start-introduction
+  - start-getting-started
+  - start-architecture  
+  - ws-admin-intro # Che workspace-administration
+  - ws-stacks # Che workspace-administration
+  - ws-recipes # Che workspace-administration
+  - ws-samples # Che workspace-administration
+  - ws-machines # Che workspace-administration
+  - ws-volume-mounts # Che workspace-administration
+  - ws-agents # Che workspace-administration
 - title: User Guide
   docs:
-  - workspace-admin-intro # Che workspace-administration
-  - projects # Che use-che-as-an-ide
-  - import-a-project  # Che use-che-as-an-ide   
-  - git # Che use-che-as-an-ide
-  - editor-settings # Che use-che-as-an-ide
-  - intellisense # Che use-che-as-an-ide
-  - commands # Che use-che-as-an-ide
-  - priviews # Che use-che-as-an-ide
-  - build # Che use-che-as-an-ide
-  - run # Che use-che-as-an-ide
-  - debug # Che use-che-as-an-ide
-  - sharing # Che use-che-as-an-ide
-  - using-desktop-ides 
+  - ws-admin-intro # Che workspace-administration
+  - ide-projects # Che use-che-as-an-ide
+  - user-import   
+  - ide-git-svn # Che use-che-as-an-ide
+  - ide-editor-settings # Che use-che-as-an-ide
+  - ide-intellisense # Che use-che-as-an-ide
+  - ide-commands # Che use-che-as-an-ide
+  - ide-previews # Che use-che-as-an-ide
+  - ide-build # Che use-che-as-an-ide
+  - ide-run # Che use-che-as-an-ide
+  - ide-debug # Che use-che-as-an-ide
+  - user-sharing-permissions
+  - user-using-desktop-ides 
 - title: Admin Guide
   docs:
-  - installation
-  - configuration
-  - ldap
-  - managing
-  - cli
+  - admin-installation
+  - admin-configuration
+  - admin-ldap
+  - admin-managing
+  - admin-cli
 - title: Integration Guide
   docs:
-  - workspace-automation
-  - issue-management
-  - version-control
-  - continuous-integration
+  - integration-workspace-automation
+  - integration-issue-management
+  - integration-version-control
+  - integration-continuous-integration
 - title: White Label Guide
   docs:
-  - custom-assemblies
-  - introduction-white-labels
+  - white-labels-custom-assemblies
+  - white-labels-introduction-white-labels
   

@@ -87,11 +87,11 @@ RUN apk upgrade --update && \
             /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
             /opt/codenvy-data/license && \
-     postfix -c /etc/postfix start
+    curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
+     > /usr/bin/docker; chmod +x /usr/bin/docker
 
-RUN set -x \
-    && curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
-    > /usr/bin/docker; chmod +x /usr/bin/docker
+CMD [ "postfix", "-c", "/etc/postfix", "start" ]
+
 COPY dockerfiles/codenvy/entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
