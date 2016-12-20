@@ -103,5 +103,5 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
         return false;
     }
 
-    public abstract void remove(String instanceId) throws ServerException;
+    public abstract void remove(String instanceId) throws ConflictException, ServerException;
 }

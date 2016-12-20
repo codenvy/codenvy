@@ -17,13 +17,14 @@ package com.codenvy.organization.api.event;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.core.db.cascade.event.CascadeEvent;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Published before {@link OrganizationImpl organization} removed.
  *
  * @author Sergii Leschenko
  */
-public class BeforeOrganizationRemovedEvent extends CascadeEvent {
+public class BeforeOrganizationRemovedEvent extends RemoveEvent {
 
     private final OrganizationImpl organization;
 
