@@ -48,13 +48,14 @@ azure network vnet subnet create ${ResourceGroup} ${VNetName} ${SubNetName2} -a 
 ```
 
 ### Create NIC's
+```
 azure network nic create ${ResourceGroup} ${NICName1} -k ${SubNetName1} -m ${VNetName} -p ${IP1} -o ${SecurityGroupNIC1} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName2} -k ${SubNetName2} -m ${VNetName} -p ${IP2} -o ${SecurityGroupNIC2} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName3} -k ${SubNetName2} -m ${VNetName} -p ${IP3} -o ${SecurityGroupNIC2} -l ${Location}
 ```
 
-```
 ### Populate Security Group Rules
+```
 CreateSecRules () {
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 22 -c Allow -y 1000 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} ssh-allow-sgs1
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 80 -c Allow -y 1100 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} http-allow-sgs1
@@ -124,6 +125,7 @@ After starting the instance inside the first subnet we need to attach 3 data dis
 9. Activate swap volume: `#  swapon /dev/vg-docker/swap`
 
 Prepare data disk for databases and logs:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdc`
 2. Create volume group: `# vgcreate vg-data /dev/sdc`
 3. Create journal volume with size 10 GB: `#  lvcreate -L 10G -n journal vg-data`
@@ -135,16 +137,19 @@ Prepare data disk for databases and logs:
 9. Create docker data volume using all remaining disk space: `#  lvcreate -l 100%FREE -n docker vg-docker`
 
 Prepare data disk for FS:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdd`
 2. Create volume group: `# vgcreate vg-fs /dev/sdd`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n fs vg-fs`
 
 Prepare data disk for snapshots:
+
 1. Add data disk to LVM: `# pvcreate /dev/sde`
 2. Create volume group: `# vgcreate vg-ddistr /dev/sde`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n ddistr vg-ddistr`
 
 Make XFS filesystem for:
+
 1. journal: `# mkfs.xfs /dev/vg-data/journal`
 2. logs: `# mkfs.xfs /dev/vg-data/logs`
 3. machine-logs: `# mkfs.xfs /dev/vg-data/machine-logs`
@@ -194,17 +199,20 @@ After starting instance inside second subnet we need to attach 2 data disk for d
 9. Activate swap volume: `#  swapon /dev/vg-docker/swap`
 
 Prepare data disk for docker and logs:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdc`
 2. Create volume group: `# vgcreate vg-data /dev/sdc`
 3. Create journal volume with size 10 GB: `#  lvcreate -L 10G -n journal vg-data`
 4. Create docker data volume using all remaining disk space: `#  lvcreate -l 100%FREE -n docker vg-data`
 
 Prepare data disk for FS:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdd`
 2. Create volume group: `# vgcreate vg-fs /dev/sdd`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n fs vg-fs`
 
 Make XFS filesystem for:
+
 1. journal: `# mkfs.xfs /dev/vg-data/journal`
 2. docker: `# mkfs.xfs /dev/vg-data/docker`
 3. FS: `# mkfs.xfs /dev/vg-fs/fs`
