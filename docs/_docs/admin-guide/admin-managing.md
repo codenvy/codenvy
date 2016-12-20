@@ -12,6 +12,65 @@ Each Codenvy instance generates a configuration for the nodes in its cluster. Ru
 
 You can remove nodes with `codenvy remove-node <ip>`.
 
+#### Simulated Scaling
+You can simulate what it is like to scale Codenvy up and down with different nodes by launching Codenvy and its various cluster nodes within VMs using `docker-machine`, a utility that ships with Docker. Docker machine is a way to launch VMs that have Docker pre-installed in the VM using boot2docker. Docker machine uses different "drivers", such as HyperV or VirtualBox as the underlying hypervisor engine to launch the VMs. By lauching a set of VMs with different IP addresses, you can then simulate using Codenvy's Docker commands to start a main system and then having the other nodes add themselves to the cluster.
+
+This simulated scaling can be used for production, but it is generally discouraged because you would be running Docker in VMs that are on a host, and you are just taking on some extra I/O overhead that may not generally be necessary.  However, this simulated-based approach gives good pointers on configuration of a distributed, cluster-based system if you were to use VMs-only.
+
+As an example, the following sequence launches a 3-node cluster of Codenvy using Docker machine with a VirtualBox hypervisor. In this example, we launch 4 VMs: a Codenvy node, 2 additional workspace nodes, and a node to handle key-value storage. The key-value storage node is typically not part of the scaling configuration. However, Codenvy requires an "overlay" network, which is powered by a key-value storage provider such as Consule, etcd, or zookeeper. When running Codenvy on the host, we are able to setup an etcd key-value storage system automatically and associate the nodes with it. However, in a VM scale-out scenario, a dedicated key-value storage provider is needed. This particular example uses Consul key-value storage to setup the overlay network. 
+
+Start a VM with key-value storage and start Consule
+```
+# Key-Value Storage for overlay network
+# Grab the IP address of this VM and use it in other commands where we have <KV-IP> 
+docker-machine  create  -d virtualbox  --engine-env DOCKER_TLS=no kv
+docker -H <KV-IP:2376> run -d -p 8500:8500 -h consul progrium/consul -server -bootstrap
+```
+
+Start 3 VMs named 'codenvy', 'kv', 'ws1', 'ws2'):
+```
+# Codenvy 
+# Grab the IP address of this VM and use it in other commands where we have <CODENVY-IP>
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "2048" \
+                      --engine-opt host=tcp://0.0.0.0:2375 \
+                      --engine-opt="cluster-store=consul://<KV-IP>:8500" \
+                      --engine-opt="cluster-advertise=eth1:2376" codenvy
+
+# Workspace Node 1
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
+                      --engine-opt host=tcp://0.0.0.0:2375 \
+                      --engine-opt="cluster-store=consul://<KV-IP>:8500" \
+                      --engine-opt="cluster-advertise=eth1:2376" \
+                      --engine-insecure-registry="<CODENVY-IP>:5000" ws1
+
+# Workspace Node 2
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
+                      --engine-opt host=tcp://0.0.0.0:2375 \
+                      --engine-opt="cluster-store=consul://<KV-IP>:8500" \
+                      --engine-opt="cluster-advertise=eth1:2376" \
+                      --engine-insecure-registry="<CODENVY-IP>:5000" ws2
+```
+
+Connect to the Codenvy VM and start Codenvy:
+```
+# SSH into the VM
+docker-machine ssh codenvymaster
+
+# Initialize a Codenvy installation
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /home/docker/.codenvy:/data codenvy/cli:nightly init
+
+# Setup Codenvy's configuration file to have the IP addresses of each workspace node
+sed -i "s/^#CODENVY_WORKSPACE_AUTO_SNAPSHOT=true.*/CODENVY_WORKSPACE_AUTO_SNAPSHOT=true/g" ~/.codenvy/codenvy.env
+sed -i "s/^CODENVY_SWARM_NODES=.*/CODENVY_SWARM_NODES=<WS1-IP>:2376,<WS2-IP>:2376/g" ~/.codenvy/codenvy.env
+
+# Start Codenvy with this configuration
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /home/docker/.codenvy:/data codenvy/cli:nightly init
+
+# You can then access Codenvy at CODENVY-IP
+```
+
 ## Upgrading
 Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. You can run `codenvy version` to see the list of available versions that you can upgrade to.
 
