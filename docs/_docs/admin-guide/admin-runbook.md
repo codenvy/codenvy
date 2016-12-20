@@ -5,10 +5,27 @@ layout: docs
 permalink: /docs/admin-guide/runbook/
 ---
 
-This article provides some performance and security related guidance for installing Codenvy, these aren't rules because every install is slightly different. This doc outlines some of the steps we take in running the public Codenvy cloud.
-Some items are specific to Azure, others are more general.
+# Runbook
+Applies To: Codenvy on-premises installs.
 
-# Network Infrastructure Planning
+This article provides specific performance and security guidance for Codenvy on-premises installations based on our experience running codenvy.io hosted SaaS. For general information on managing a Codenvy on-premises instance see the [managing]() docs page.
+
+## Dockerized Codenvy
+### Recommended Docker Versions
+Codenvy can run on Docker 1.10+, but we recommend **Docker 1.12.5** for the best experience. If you choose to run with a lower version you may experience the following issues:
+
+| Issue | Link | Docker Version for Fix |
+|--- |--- |--- |
+| DockerConnector exception "Could not kill running container" | https://github.com/codenvy/codenvy/issues/1164 | Docker 1.12.5
+
+
+
+
+
+
+## Puppet-Based Codenvy (deprecated)
+
+### Network Infrastructure Planning
 We have 2 classes of instances:
 1. Machine Nodes that runs user workspaces
 2. Master Nodes used for running internal Codenvy services.
@@ -17,7 +34,7 @@ Because of the different purpose and security constraints we will group all inst
 
 Azure CLI snippet for creating network and security rules for Azure:
 ```
-# Create Security Groups
+### Create Security Groups
 azure network nsg create ${ResourceGroup} ${SecurityGroupSubNet1} ${Location}
 azure network nsg create ${ResourceGroup} ${SecurityGroupSubNet2} ${Location}
 
@@ -25,19 +42,19 @@ azure network nsg create ${ResourceGroup} ${SecurityGroupNIC1} ${Location}
 azure network nsg create ${ResourceGroup} ${SecurityGroupNIC2} ${Location}
 ```
 ```
-# Create SubNets
+### Create SubNets
 azure network vnet subnet create ${ResourceGroup} ${VNetName} ${SubNetName1} -a ${SubNetAddr1} -o ${SecurityGroupSubNet1}
 azure network vnet subnet create ${ResourceGroup} ${VNetName} ${SubNetName2} -a ${SubNetAddr2} -o ${SecurityGroupSubNet2}
 ```
 
-# Create NIC's
+### Create NIC's
 azure network nic create ${ResourceGroup} ${NICName1} -k ${SubNetName1} -m ${VNetName} -p ${IP1} -o ${SecurityGroupNIC1} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName2} -k ${SubNetName2} -m ${VNetName} -p ${IP2} -o ${SecurityGroupNIC2} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName3} -k ${SubNetName2} -m ${VNetName} -p ${IP3} -o ${SecurityGroupNIC2} -l ${Location}
 ```
 
 ```
-# Populate Security Group Rules
+### Populate Security Group Rules
 CreateSecRules () {
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 22 -c Allow -y 1000 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} ssh-allow-sgs1
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 80 -c Allow -y 1100 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} http-allow-sgs1
@@ -63,7 +80,7 @@ CreateSecRules () {
   }
 ```
 
-# Disk Setup Planning
+### Disk Setup Planning
 Because we are using clouds for hosting (Azure) we are able to quickly scale disk space up. To utilise this we choose LVM and XFS.
 
 First check if it is installed:
@@ -90,7 +107,7 @@ And for Machine Nodes:
 /home/codenvy/codenvy-data
 ```
 
-## For Setting Up Disks on Master Nodes
+#### For Setting Up Disks on Master Nodes
 After starting the instance inside the first subnet we need to attach 3 data disks:
 - For databases and logs, initial size is about 300 GB.
 - For main project storage/backups, initial size is about 1TB.
@@ -163,7 +180,7 @@ proc                    /proc                   proc    defaults        0 0
 - Check if swap activated: `# free`
 - Check if all volumes mounted and have correct sizes: `# df -h`
 
-## For Setting Up Disks on MachineNodes 
+#### For Setting Up Disks on MachineNodes 
 After starting instance inside second subnet we need to attach 2 data disk for docker internals and logs, initial size is about 300 GB. For main workspace project storage, initial size is about 1TB
 
 1. Unmount used ephemeral disk: `# umount /dev/sdb1`
@@ -217,7 +234,7 @@ proc                    /proc                   proc    defaults        0 0
 - Check if swap activated: `# free`
 - Check if all volumes mounted and have correct sizes: `# df -h`
 
-### Increasing Disk Space
+#### Increasing Disk Space
 If additional disk space is needed you can attach a new data disk (caches turned ON), then issue the following commands:
 
 1. Create physical volume: `# pvcreate /dev/sdg`
@@ -226,7 +243,7 @@ If additional disk space is needed you can attach a new data disk (caches turned
 4. Extend logical volume: `# lvextend -l +100%FREE /dev/vg-fs/fs`
 5. Grow actual FS, it must be run on mounted volume, no need to stop codenvy or unmount FS: `# xfs_growfs /home/codenvy/codenvy-data/fs/`
 
-### Detaching Disks
+#### Detaching Disks
 If you need to detach disks from one Azure instance and to reattach it to other Azure instance, you need to stop all services that may be using that volume:
 ```
 service puppet stop\nservice crond stop\nservice codenvy stop
