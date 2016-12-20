@@ -17,6 +17,7 @@ package com.codenvy.machine.backup;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -37,6 +38,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -59,9 +61,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
@@ -128,6 +132,8 @@ public class DockerEnvironmentBackupManagerTest {
     @Mock
     private WorkspaceRuntimeImpl                workspaceRuntime;
     @Mock
+    private MachineImpl                         devMachine;
+    @Mock
     private DockerInstance                      dockerInstance;
     @Mock
     private DockerNode                          dockerNode;
@@ -157,8 +163,9 @@ public class DockerEnvironmentBackupManagerTest {
 
         when(workspaceRuntimes.get(anyString())).thenReturn(runtimeDescriptor);
         when(runtimeDescriptor.getRuntime()).thenReturn(workspaceRuntime);
-        when(workspaceRuntime.getDevMachine()).thenReturn(dockerInstance);
-        when(dockerInstance.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(workspaceRuntime.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getStatus()).thenReturn(MachineStatus.RUNNING);
+        when(workspaceRuntimes.getMachine(anyString(), anyString())).thenReturn(dockerInstance);
         when(dockerInstance.getNode()).thenReturn(dockerNode);
         when(dockerNode.getHost()).thenReturn(NODE_HOST);
         when(dockerInstance.getContainer()).thenReturn(CONTAINER_ID);
@@ -226,6 +233,59 @@ public class DockerEnvironmentBackupManagerTest {
         backupManager.backupWorkspace(WORKSPACE_ID);
 
         verify(backupManager).executeCommand(anyObject(), anyInt(), anyString());
+    }
+
+    @Test
+    public void shouldNotBackupWSIfDevMachineInRuntimeDescriptorIsNull() throws Exception {
+        injectWorkspaceLock(WORKSPACE_ID);
+        when(workspaceRuntime.getDevMachine()).thenReturn(null);
+
+        backupManager.backupWorkspace(WORKSPACE_ID);
+
+        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString());
+        verifyNoMoreInteractions(docker,
+                                 dockerInstance,
+                                 dockerNode,
+                                 machineRuntimeInfo,
+                                 devMachine,
+                                 workspaceFolderPathProvider,
+                                 workspaceIdHashLocationFinder);
+    }
+
+    @Test(dataProvider = "nonRunningMachineStatusProvider")
+    public void shouldNotBackupWSIfDevMachineStatusIsNotRunning(MachineStatus status) throws Exception {
+        injectWorkspaceLock(WORKSPACE_ID);
+        when(devMachine.getStatus()).thenReturn(status);
+
+        backupManager.backupWorkspace(WORKSPACE_ID);
+
+        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString());
+        verify(workspaceRuntimes).get(eq(WORKSPACE_ID));
+        verifyNoMoreInteractions(docker,
+                                 dockerInstance,
+                                 dockerNode,
+                                 workspaceRuntimes,
+                                 machineRuntimeInfo,
+                                 workspaceFolderPathProvider,
+                                 workspaceIdHashLocationFinder);
+    }
+
+    @DataProvider(name = "nonRunningMachineStatusProvider")
+    public static Object[][] nonRunningMachineStatusProvider() {
+        return new Object[][] {
+                {MachineStatus.CREATING},
+                {MachineStatus.DESTROYING}
+        };
+    }
+
+    @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "test exception")
+    public void shouldNotBackupWSIfDevMachineStatusIsNotFoundInWSRuntimes() throws Exception {
+        injectWorkspaceLock(WORKSPACE_ID);
+        when(workspaceRuntimes.getMachine(anyString(), anyString())).thenThrow(new NotFoundException("test exception"));
+
+        backupManager.backupWorkspace(WORKSPACE_ID);
+
+        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString());
     }
 
     @Test

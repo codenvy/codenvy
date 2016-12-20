@@ -129,12 +129,13 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         try {
             WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor = workspaceRuntimes.get(workspaceId);
             Machine devMachine = runtimeDescriptor.getRuntime().getDevMachine();
-            if (devMachine.getStatus() != MachineStatus.RUNNING) {
-                // do nothing in the case when dev machine is not running
+            if (devMachine == null || devMachine.getStatus() != MachineStatus.RUNNING) {
+                // may happen if WS is no longer in RUNNING state
                 return;
             }
+            DockerInstance dockerDevMachine = (DockerInstance)workspaceRuntimes.getMachine(workspaceId,
+                                                                                           devMachine.getId());
             // machine that is not in running state can be just a stub and should not be casted
-            DockerInstance dockerDevMachine = (DockerInstance)devMachine;
             String nodeHost = dockerDevMachine.getNode().getHost();
             String srcPath = syncAgentInMachine ? projectFolderPath : workspaceFolderPathProvider.getPath(workspaceId);
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
