@@ -65,14 +65,20 @@ public class BitbucketService {
         this.sshServiceClient = sshServiceClient;
     }
 
+    @GET
+    @Path("endpoint")
+    public String getEndpoint() throws ServerException {
+        return bitbucket.getEndpoint();
+    }
+
     /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getUser()
+     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getUser(String)
      */
     @GET
-    @Path("user")
+    @Path("user/{username}")
     @Produces(APPLICATION_JSON)
-    public BitbucketUser getUser() throws IOException, BitbucketException, ServerException {
-        return bitbucket.getUser();
+    public BitbucketUser getUser(@PathParam("username") String username) throws IOException, BitbucketException, ServerException {
+        return bitbucket.getUser(username);
     }
 
     /**

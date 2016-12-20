@@ -18,19 +18,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>codenvy-plugin-parent</artifactId>
+        <artifactId>codenvy-plugin-bitbucket-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
         <version>5.0.0-M9-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>codenvy-plugin-bitbucket-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>Codenvy Plugin :: Bitbucket :: Parent</name>
-    <modules>
-        <module>codenvy-plugin-bitbucket-oauth2</module>
-        <module>codenvy-plugin-bitbucket-git-provider</module>
-        <module>codenvy-plugin-bitbucket-ext-bitbucket</module>
-        <module>codenvy-plugin-bitbucket-ws-master</module>
-        <module>codenvy-plugin-bitbucket-pullrequest</module>
-    </modules>
+    <artifactId>codenvy-plugin-bitbucket-ws-master</artifactId>
+    <packaging>jar</packaging>
+    <name>Codenvy Plugin :: Bitbucket :: WS-master</name>
+    <dependencies>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
+        </dependency>
+    </dependencies>
 </project>

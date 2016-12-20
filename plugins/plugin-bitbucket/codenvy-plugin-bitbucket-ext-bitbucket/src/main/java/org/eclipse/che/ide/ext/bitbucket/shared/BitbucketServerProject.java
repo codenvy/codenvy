@@ -17,27 +17,33 @@ package org.eclipse.che.ide.ext.bitbucket.shared;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Represents a Bitbucket repository fork.
+ * Represents a project in the Bitbucket Server API.
  *
- * @author Kevin Pollet
+ * @author Igor Vinokur
  */
 @DTO
-public interface BitbucketRepositoryFork {
+public interface BitbucketServerProject {
+    String getKey();
+
+    void setKey(String key);
+
+    BitbucketServerProject withKey(String key);
+
+    int getId();
+
+    void setId(int id);
+
+    BitbucketServerProject withId(int id);
+
     String getName();
 
     void setName(String name);
 
-    BitbucketRepositoryFork withName(String name);
+    BitbucketServerProject withName(String name);
 
-    boolean isIsPrivate();
+    BitbucketServerUser getOwner();
 
-    void setIsPrivate(boolean isIsPrivate);
+    void setOwner(BitbucketServerUser owner);
 
-    BitbucketRepositoryFork withIsPrivate(boolean isIsPrivate);
-
-    String getOwner();
-
-    void setOwner(String owner);
-
-    BitbucketRepositoryFork withOwner(String owner);
+    BitbucketServerProject withOwner(BitbucketServerUser owner);
 }

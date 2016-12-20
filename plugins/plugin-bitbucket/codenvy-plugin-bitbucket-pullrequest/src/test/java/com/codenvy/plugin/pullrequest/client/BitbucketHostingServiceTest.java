@@ -14,10 +14,10 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.bitbucket.client.BitbucketClientService;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
@@ -25,6 +25,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Mihail Kuznyetsov
@@ -36,34 +39,35 @@ public class BitbucketHostingServiceTest {
     private AppContext appContext;
 
     @Mock
-    private DtoUnmarshallerFactory dtoUnmarshallerFactory;
-
+    private DtoFactory               dtoFactory;
     @Mock
-    private DtoFactory             dtoFactory;
+    private BitbucketClientService   bitbucketClientService;
     @Mock
-    private BitbucketClientService bitbucketClientService;
+    private BitBucketTemplates       bitBucketTemplates;
     @Mock
-    private BitBucketTemplates     bitBucketTemplates;
+    private BitBucketServerTemplates bitBucketServerTemplates;
 
     private BitbucketHostingService bitbucketHostingService;
 
     @BeforeMethod
     public void setUp() {
+        Promise promise = mock(Promise.class);
+        when(bitbucketClientService.getBitbucketEndpoint()).thenReturn(promise);
         bitbucketHostingService =
                 new BitbucketHostingService(appContext,
-                                            dtoUnmarshallerFactory,
                                             dtoFactory,
                                             bitbucketClientService,
                                             bitBucketTemplates,
+                                            bitBucketServerTemplates,
                                             "");
     }
 
     @DataProvider(name = "valid")
     public static Object[][] validData() {
-        return new Object[][] {{"https://bitbucket.org/testuser/testrepo", "testrepo"},
-                               {"https://bitbucket.org/testuser/testrepo.git", "testrepo"},
-                               {"git@bitbucket.org:testuser/ssh-repo", "ssh-repo"},
-                               {"git@bitbucket.org:testuser/ssh-repo.git", "ssh-repo"}};
+        return new Object[][]{{"https://bitbucket.org/testuser/testrepo", "testrepo"},
+                              {"https://bitbucket.org/testuser/testrepo.git", "testrepo"},
+                              {"git@bitbucket.org:testuser/ssh-repo", "ssh-repo"},
+                              {"git@bitbucket.org:testuser/ssh-repo.git", "ssh-repo"}};
     }
     @Test(dataProvider = "valid")
     public void shouldGetRepositoryNameFromUrl(String remoteUrl, String name) {

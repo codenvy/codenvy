@@ -59,6 +59,8 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                "/analytics",
                "/oauth/token",
                "/oauth/authenticate",
+               "/oauth/1.0/authenticate",
+               "/oauth/1.0/authorization",
                "/password/change",
                "/runner/*",
                "/builder/*",

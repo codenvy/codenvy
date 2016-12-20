@@ -12,32 +12,22 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package org.eclipse.che.ide.ext.bitbucket.shared;
-
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.ide.ext.bitbucket.server;
 
 /**
- * Represents a Bitbucket repository fork.
+ * Url templates for Bitbucket rest API.
  *
- * @author Kevin Pollet
+ * @author Igor Vinokur
  */
-@DTO
-public interface BitbucketRepositoryFork {
-    String getName();
+public interface URLTemplates {
 
-    void setName(String name);
+    String repositoryUrl(String owner, String repositorySlug);
 
-    BitbucketRepositoryFork withName(String name);
+    String userUrl(String username);
 
-    boolean isIsPrivate();
+    String pullrequestUrl(String owner, String repositorySlug);
 
-    void setIsPrivate(boolean isIsPrivate);
+    String forksUrl(String owner, String repositorySlug);
 
-    BitbucketRepositoryFork withIsPrivate(boolean isIsPrivate);
-
-    String getOwner();
-
-    void setOwner(String owner);
-
-    BitbucketRepositoryFork withOwner(String owner);
+    String forkRepositoryUrl(String owner, String repositorySlug);
 }

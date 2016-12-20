@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositories;
@@ -29,6 +30,7 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -69,26 +71,21 @@ public class BitbucketClientService {
         return appContext.getDevMachine().getWsAgentBaseUrl() + "/bitbucket";
     }
 
-    /**
-     * Get authorized user information.
-     *
-     * @param callback
-     *         callback called when operation is done, cannot be {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if one parameter is not valid.
-     */
-    public void getUser(@NotNull AsyncRequestCallback<BitbucketUser> callback) throws IllegalArgumentException {
-        checkArgument(callback != null, "callback");
-
-        final String requestUrl = getBaseUrl() + USER;
-        asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send(callback);
+    public Promise<String> getBitbucketEndpoint() {
+        final String requestUrl = getBaseUrl() + "/endpoint";
+        return asyncRequestFactory.createGetRequest(requestUrl)
+                                  .loader(loaderFactory.newLoader())
+                                  .send(new StringUnmarshaller());
     }
 
     /**
      * Returns the promise which resolves authorized user information or rejects with an error.
+     *
+     * @param username
+     *         BitbucketServer API requires username
      */
-    public Promise<BitbucketUser> getUser() {
-        final String requestUrl = getBaseUrl() + USER;
+    public Promise<BitbucketUser> getUser(@Nullable String username) {
+        final String requestUrl = getBaseUrl() + USER + "/" + username;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(BitbucketUser.class));
