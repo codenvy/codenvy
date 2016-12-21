@@ -49,7 +49,7 @@ public class JpaStackPermissionsDaoTest {
 
     private JpaStackPermissionsDao dao;
 
-    private JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber removePermissionsBeforeStackRemovedEventSubscriber;
+    private JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber removePermissionsSubscriber;
 
     private StackPermissionsImpl[] permissions;
     private UserImpl[]             users;
@@ -73,8 +73,7 @@ public class JpaStackPermissionsDaoTest {
         Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(JpaStackPermissionsDao.class);
-        removePermissionsBeforeStackRemovedEventSubscriber =
-                injector.getInstance(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
+        removePermissionsSubscriber = injector.getInstance(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -122,7 +121,7 @@ public class JpaStackPermissionsDaoTest {
     @Test
     public void shouldRemoveStackPermissionsWhenStackIsRemoved() throws Exception {
         BeforeStackRemovedEvent event = new BeforeStackRemovedEvent(stacks[0]);
-        removePermissionsBeforeStackRemovedEventSubscriber.onEvent(event);
+        removePermissionsSubscriber.onEvent(event);
         assertTrue(dao.getByInstance("stack1", 30, 0).isEmpty());
     }
 

@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -156,14 +157,13 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     }
 
     @Singleton
-    public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
+    public static class RemoveWorkersBeforeWorkspaceRemovedEventSubscriber extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
-        private EventService eventService;
+        private CascadeEventService eventService;
         @Inject
-        private WorkerDao    workerDao;
+        private WorkerDao           workerDao;
 
         @PostConstruct
         public void subscribe() {
@@ -194,8 +194,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
     }
 
     @Singleton
-    public static class RemoveWorkersBeforeUserRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveWorkersBeforeUserRemovedEventSubscriber extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject

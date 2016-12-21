@@ -21,11 +21,11 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -56,7 +56,7 @@ public class OrganizationDaoTest {
     private OrganizationDao organizationDao;
 
     @Inject
-    private EventService eventService;
+    private CascadeEventService eventService;
 
     @Inject
     private TckRepository<OrganizationImpl> tckRepository;

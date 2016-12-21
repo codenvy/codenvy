@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
@@ -166,7 +165,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         manager.flush();
     }
 
-    @Transactional
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
     protected void doRemove(String organizationId) throws ConflictException, ServerException {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
@@ -183,7 +182,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         private static final int PAGE_SIZE = 100;
 
         @Inject
-        private EventService eventService;
+        private CascadeEventService eventService;
 
         @Inject
         private OrganizationDao organizationDao;

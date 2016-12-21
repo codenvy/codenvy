@@ -70,8 +70,7 @@ public class RemoveOrganizationDistributedResourcesSubscriberTest {
         manager = injector.getInstance(EntityManager.class);
         jpaOrganizationDao = injector.getInstance(JpaOrganizationDao.class);
         distributedResourcesDao = injector.getInstance(JpaOrganizationDistributedResourcesDao.class);
-        suborganizationsRemover =
-                injector.getInstance(RemoveOrganizationDistributedResourcesSubscriber.class);
+        suborganizationsRemover = injector.getInstance(RemoveOrganizationDistributedResourcesSubscriber.class);
     }
 
     @BeforeMethod

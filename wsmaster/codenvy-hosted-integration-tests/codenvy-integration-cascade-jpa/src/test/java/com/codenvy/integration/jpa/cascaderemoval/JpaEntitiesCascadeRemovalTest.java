@@ -86,6 +86,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
@@ -214,7 +215,7 @@ public class JpaEntitiesCascadeRemovalTest {
             @Override
             protected void configure() {
                 install(new JpaPersistModule("main"));
-                bind(EventService.class).in(Singleton.class);
+                bind(EventService.class).to(CascadeEventService.class);
                 bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(),
                                                                                      "che-schema",
                                                                                      "codenvy-schema"));

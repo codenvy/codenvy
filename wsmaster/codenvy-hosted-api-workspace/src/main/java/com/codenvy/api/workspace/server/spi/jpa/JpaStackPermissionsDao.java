@@ -24,9 +24,9 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -139,11 +139,10 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     }
 
     @Singleton
-    public static class RemovePermissionsBeforeStackRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeStackRemovedEvent> {
+    public static class RemovePermissionsBeforeStackRemovedEventSubscriber extends CascadeEventSubscriber<BeforeStackRemovedEvent> {
         private static final int PAGE_SIZE = 100;
         @Inject
-        private EventService           eventService;
+        private CascadeEventService    eventService;
         @Inject
         private JpaStackPermissionsDao dao;
 
