@@ -237,6 +237,16 @@
             return deferredResult;
         };
 
+        var logout = function() {
+            if (isWebsocketEnabled()) {
+                var loginUrl = "/api/auth/logout";
+                return $.ajax({
+                    url: loginUrl,
+                    type: "POST"
+                });
+            }
+        };
+
         var login = function(email, password) {
             if (isWebsocketEnabled()) {
                 var loginUrl = "/api/auth/login?" + window.location.search.substring(1);
