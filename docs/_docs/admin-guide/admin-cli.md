@@ -5,7 +5,11 @@ excerpt: "Manage your Codenvy installation on the command line."
 layout: docs
 permalink: /:categories/cli/
 ---
-The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
+
+**Applies To**: Codenvy on-premises installs.
+
+---
+Note: The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
 
 ## codenvy init  
 Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Codenvy creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `/data/backup`.  After initialization, a `codenvy.env` file is placed into the root of the path that you mounted to `/data`.
@@ -31,7 +35,7 @@ You can control the nature of how Codenvy downloads these images with command li
 | `--force` | Performs a forced removal of the local image using `docker rmi` and then pulls it again (anew) from DockerHub. You can use this as a way to clean your local cache and ensure that all images are new. |
 | `--offline` | Loads Docker images from `backup/*.tar` folder during a pre-boot mode of the CLI. Used if you are performing an installation or start while disconnected from the Internet. |
 
-The initialization of a Codenvy installation requires the acceptance of our default Fair Source 3 license agreement, which allows for some access to the source code and [usage for up to three people](http://codenvy.com/legal). You can auto-accept the license agreement without prompting for a response for silent installation by passing the `--accept-license` command line option.
+The initialization of a Codenvy installation requires the acceptance of our default [Fair Source license agreement](http://codenvy.com/legal), which allows for some access to the source code and free usage for up to three people. You can auto-accept the license agreement without prompting for a response for silent installation by passing the `--accept-license` command line option.
 
 You can reinstall Codenvy on a folder that is already initialized and preserve your `/data/codenvy.env` values by passing the `--reinit` flag.
 
