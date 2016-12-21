@@ -23,7 +23,6 @@ define(["jquery","underscore", "views/accountformbase","models/account"],
 
         	initialize : function(attributes){
         		AccountFormBase.prototype.initialize.apply(this,attributes);
-                Account.logout();
         	},
 
             __validationRules : function(){

@@ -24,7 +24,8 @@ define(["jquery","config",
         "views/onpremises-login",
         "views/factory-usage-notification",
         "views/login",
-        "views/accept-fair-source-license"
+        "views/accept-fair-source-license",
+        "views/fair-source-license-is-not-accepted-error"
         ],
 
     function($,Config,
@@ -35,7 +36,8 @@ define(["jquery","config",
         OnPremisesLogin,
         FactoryUsageNotification,
         MainPage,
-        AcceptLicensePage){
+        AcceptLicensePage,
+        FSLNotAcceptedErrorPage){
 
         function modernize(){
             Modernizr.load({
@@ -65,7 +67,15 @@ define(["jquery","config",
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
                         mainpage = $(".main-page"),
-                        acceptLicensePage = $(".accept-license-form");
+                        acceptLicensePage = $(".accept-license-form"),
+                        fslNotAcceptedPage = $(".fair-source-license-is-not-accepted-error");
+
+                    if(fslNotAcceptedPage.length !== 0){
+                        (function(){
+                            FSLNotAcceptedErrorPage.get(fslNotAcceptedPage);
+                        }());
+
+                    }
 
                     if(acceptLicensePage.length !== 0){
                         (function(){

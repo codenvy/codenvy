@@ -348,6 +348,7 @@
             loginWithOauthProvider: loginWithOauthProvider,
             getUserSettings: getUserSettings,
             acceptLicense: acceptLicense,
+            logout: logout,
             isValidDomain: function(domain) {
                 return (/^[a-z0-9][a-z0-9_.-]{2,19}$/).exec(domain) !== null;
             },
