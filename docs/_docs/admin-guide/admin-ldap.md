@@ -6,6 +6,10 @@ layout: docs
 permalink: /:categories/ldap/
 ---
 
+**Applies To**: Codenvy on-premises installs.
+
+---
+
 The Codenvy LDAP integration has two major roles: synchronization and authentication.
 
 Codenvy is compatible with `InetOrgPerson.schema`. For other schemas please contact us at info@codenvy.com. We support user authentication, LDAP connections, SSL, SASL, and various synchronization strategies.
@@ -21,7 +25,7 @@ Authentication
 * When a user enters their name and password, the system authenticates them against the remote LDAP.
 * If authentication is successful the user gains access to Codenvy.
 
-### LDAP Authentication
+# LDAP Authentication
 User authentication is implemented as follows:
 
 1. Search for for user DN according to the provided name. It can be performed in two ways: either by
@@ -30,18 +34,22 @@ User authentication is implemented as follows:
 3. If username and password match, the LDAP entry is taken and transformed to obtain UserID (this is where synchronization configuration mechanism is applied).
 4. Checks if the user with a given ID already exists in the Codenvy database. If it doesn't user is authenticated.
 
-| Authentication Type |  
-| --- |
-| DN Resolution  |
+| Authentication Type | DN Resolution | Password Check | Entry Resolver | Mandatory Properties |
+|--- |--- |--- |--- |--- 
+| AD | Format | Bind | User filter search | `ldap.auth.dn_format`
+| AUTHENTICATED | Search | Bind or Compare if `ldap.auth.user_password_attribute` is set | User filter search | `ldap.auth.user.filter`
+| ANONYMOUS | Search | Bind or Compare if `ldap.auth.user_password_attribute` is set | User filter search | `ldap.auth.user.filter`
+| DIRECT | Format | Bind | DN format search | `ldap.auth.dn_format`
+| SASL | Search | Bind | User filter search | `ldap.auth.user.filter`
 
-## Configuration
+# Configuration
 There are several types of configuration covered in the tables below:
 - Authentication configuration
 - Connection configuration
 - SSL configuration
 - SASL configuration
 
-### Authentication Configuration
+## Authentication Configuration
 
 | Configuration Item   | Description   
 | --- | ---
@@ -49,7 +57,7 @@ There are several types of configuration covered in the tables below:
 | ldap.auth.dn_format | Resolves an entry DN by using String#format. This resolver is typically used when an entry DN can be formatted directly from the user identifier. For instance, entry DNs of the form  uid=dfisher,ou=people,dc=ldaptive,dc=org could be formatted from uid=%s,ou=people,dc=ldaptive,dc=org. <br/><br/>Example:  <br/>-`CN=%1$s,CN=Users,DC=ad,DC=codenvy-dev,DC=com`<br/><br/>Parameters:<br/>- First parameter - user name provided for password validation.   
 | ldap.auth.subtree_search   | Indicates whether subtree search will be used (boolean). When set to true, allows to search authenticating DN out of the `base_dn` tree.   
 | ldap.auth.allow_multiple_dns   | Indicates whether DN resolution should fail if multiple DNs are found (boolean). When false, exception will be thrown if multiple DNs is found during search. When true, the first entry will be used for authentication attempt.   
-| ldap.auth.user.filter   |  Defines the LDAP search filter parameters applied during search for the user (string).<br><br>It must contain an `{user}` variable and, unlike similar property from synchronization, cannot contain wildcard ('*') values (because it is supposed to search for single entity).<br><br>Examples:<br> - OpenLDAP: `cn={user}`<br> - ActiveDirectory: `(&(objectCategory=Person)(sAMAccountName={user}))`<br><br>Variables:<br>- user - user name provided for password validation.   
+| ldap.auth.user.filter   |  Defines the [LDAP search filter](https://docs.oracle.com/cd/E19693-01/819-0997/gdxpo/index.html) parameters applied during search for the user (string).<br><br>It must contain an `{user}` variable and, unlike similar property from synchronization, cannot contain wildcard ('*') values (because it is supposed to search for single entity).<br><br>Examples:<br> - OpenLDAP: `cn={user}`<br> - ActiveDirectory: `(&(objectCategory=Person)(sAMAccountName={user}))`<br><br>Variables:<br>- user - user name provided for password validation.   
 | ldap.auth.user_password_attribute   | Defines the LDAP attribute name, which value will be interpreted as the password during authentication (string).   
 
 ### Connection Configuration
@@ -69,8 +77,8 @@ There are several types of configuration covered in the tables below:
 | ldap.connection.pool.prune_ms   | Period between connection pool prunes - when idle connections are removed (milliseconds).   
 | ldap.connection.pool.fail_fast   | Indicates whether an exception should be thrown during pool initialization when the pool does not contain at least one connection and it's minimum size is greater than zero (boolean).
 | ldap.connection.pool.block_wait_ms   | Time during which a pool which has reached maximum size will block new requests - during this time a `BlockingTimeoutException` will be thrown (milliseconds). Default time is `infinite`.
-| ldap.connection.bind.dn  | Since connections are initialized by performing a bind operation, this property indicates the DN to make this bind with (string).<br><br>Example: `userX`<br><br>On Active Directory, a special mode called FastBind.aspx) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
-| ldap.connection.bind.password | Credential for the initial connection bind (string).<br><br>Example: `password`<br><br>On Active Directory, a special mode called FastBind.aspx) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
+| ldap.connection.bind.dn  | Since connections are initialized by performing a bind operation, this property indicates the DN to make this bind with (string).<br><br>Example: `userX`<br><br>On Active Directory, a special mode called [FastBind](https://msdn.microsoft.com/en-us/library/cc223503) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
+| ldap.connection.bind.password | Credential for the initial connection bind (string).<br><br>Example: `password`<br><br>On Active Directory, a special mode called [FastBind](https://msdn.microsoft.com/en-us/library/cc223503) can be activated by setting both `ldap.connection.bind.dn` and `ldap.connection.bind.password` to a value of "*". In this mode, no group evaluation is done, so it can be used only to verify a client's credentials.
 
 
 ### SSL Configuration
