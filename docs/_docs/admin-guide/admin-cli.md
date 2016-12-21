@@ -1,20 +1,21 @@
 ---
 tag: [ "codenvy" ]
 title: CLI Reference
-excerpt: "Manage your Codenvy installation on the command line."
+excerpt: "Manage your {% product.formal_name %} installation on the command line."
 layout: docs
 permalink: /:categories/cli/
 ---
+
 The CLI will hide most error conditions from standard out. Internal stack traces and error output is redirected to `cli.log`, which is saved in the host folder where `:/data` is mounted.
 
-## codenvy init  
-Initializes an empty directory with a Codenvy configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then Codenvy creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `/data/backup`.  After initialization, a `codenvy.env` file is placed into the root of the path that you mounted to `/data`.
+## {% product.mini_name %} init 
+Initializes an empty directory with a {% product.formal_name %} configuration and instance folder where user data and runtime configuration will be stored. You must provide a `<path>:/data` volume mount, then {% product.formal_name %} creates a `instance` and `backup` subfolder of `<path>`. You can optionally override the location of `instance` by volume mounting an additional local folder to `/data/instance`. You can optionally override the location of where backups are stored by volume mounting an additional local folder to `/data/backup`.  After initialization, a `{% product.mini_name %}.env` file is placed into the root of the path that you mounted to `/data`.
 
 These variables can be set in your local environment shell before running and they will be respected during initialization:
 
 | Variable | Description |
 |----------|-------------|
-| `CODENVY_HOST` | The IP address or DNS name of the Codenvy service. We use `eclipse/che-ip` to attempt discovery if not set. |
+| `{% product.name %}_HOST` | The IP address or DNS name of the Codenvy service. We use `eclipse/che-ip` to attempt discovery if not set. |
 
 Codenvy depends upon Docker images. We use Docker images in three ways:
 1. As cross-platform utilites within the CLI. For example, in scenarios where we need to perform a `curl` operation, we use a small Docker image to perform this function. We do this as a precaution as many operating systems (like Windows) do not have curl installed.
