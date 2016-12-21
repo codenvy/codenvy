@@ -70,8 +70,9 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    BitbucketRepository getRepository(@NotNull String owner, @NotNull String repositorySlug)
-            throws IOException, BitbucketException, ServerException {
+    BitbucketRepository getRepository(@NotNull String owner, @NotNull String repositorySlug) throws IOException,
+                                                                                                    BitbucketException,
+                                                                                                    ServerException {
         final String response = getJson(urlTemplates.repositoryUrl(owner, repositorySlug), OK);
         return convertToBitbucketRepository(parseJsonResponse(response, BitbucketServerRepository.class));
     }
