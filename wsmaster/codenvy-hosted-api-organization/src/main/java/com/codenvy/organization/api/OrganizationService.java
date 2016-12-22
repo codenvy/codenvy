@@ -102,9 +102,9 @@ public class OrganizationService extends Service {
                                   String organizationId,
                                   @ApiParam(value = "Organization to update", required = true)
                                   OrganizationDto organization) throws BadRequestException,
-                                                                               ConflictException,
-                                                                               NotFoundException,
-                                                                               ServerException {
+                                                                       ConflictException,
+                                                                       NotFoundException,
+                                                                       ServerException {
         organizationValidator.checkOrganization(organization);
         return linksInjector.injectLinks(asDto(organizationManager.update(organizationId, organization)),
                                          getServiceContext());
