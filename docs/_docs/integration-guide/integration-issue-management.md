@@ -28,7 +28,7 @@ The Codenvy agile workflow with Atlassian JIRA requires:
 - Atlassian JIRA issue management system.
 - Codenvy Plug-in for Atlassian JIRA
 - GitHub or other git-based repo with webhooks for push and pull requests.
-![ProductInteractionFlowswithContinousDevelopment(1).svg](../../assets/imgs/ProductInteractionFlowswithContinousDevelopment(1).svg)
+![ProductInteractionFlowswithContinousDevelopment(1).svg]({{base}}/assets/imgs/ProductInteractionFlowswithContinousDevelopment(1).svg)
 
 The VCS Factory Plug-In updates Codenvy Factories in response to GitHub webhooks for push events and pull request events.
 
@@ -93,7 +93,7 @@ Log into JIRA and choose one of the project types that you have Factory-enabled.
 
 ## Using the Plug-In for JIRA  
 When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory]({{base}}/docs/integration-guide/workspace-automation/index.html) defines pre- and post-load behaviors.
-![JIRAplugin-DevelopandReviewinIDE(1).svg](../../assets/imgs/JIRAplugin-DevelopandReviewinIDE(1).svg)
+![JIRAplugin-DevelopandReviewinIDE(1).svg]({{base}}/assets/imgs/JIRAplugin-DevelopandReviewinIDE(1).svg)
 The git webhooks ensure that as the repository changes the JIRA issue Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
 
 ## Plug-In for JIRA User Data Usage and Privacy  
@@ -112,7 +112,7 @@ The Codenvy agile workflow with Microsoft Visual Studio Team Services requires:
 - A Codenvy installation with the VCS Factory Plug-In installed.
 - A Microsoft Visual Studio Team Services installation with a git-based repo.
 - The Codenvy Agile Plugin for VSTS
-![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png](../../assets/imgs/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
+![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png]({{base}}/assets/imgs/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
 
 ## Installing the Extension for VSTS   
 The Codenvy extension for Microsoft VSTS is available from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=codenvy.codenvy-extension)
@@ -150,8 +150,8 @@ webhook1=work-item-created,visualstudio,myaccount,DefaultCollection,2.2-preview.
 The VSTS credentials used must be secondary credentials. Read more about secondary credentials in the [Microsoft documentation](https://www.visualstudio.com/en-us/integrate/get-started/auth/overview).
 
 ### Defining the Parent Factory
-Each project in JIRA that you want to be [Factory-enabled](../../integration-guide/workspace-automation) must have a "Parent Factory" configured in Codenvy.
-1. Create the Parent Factory with the Codenvy VSTS user created [above](#section-creating-the-codenvy-user-for-vsts).
+Each project in JIRA that you want to be [Factory-enabled]({{base}}/docs/integration-guide/workspace-automation/index.html) must have a "Parent Factory" configured in Codenvy.
+1. Create the Parent Factory with the Codenvy VSTS user created above.
 2. Name the Parent Factory identically to the Team Project in VSTS that it will be associated with.
 
 ## Testing
@@ -162,6 +162,6 @@ Log into Microsoft VSTS and choose one of the project types that you have Factor
 ## Using the Codenvy Extension for Microsoft VSTS  
 When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory]({{base}}/docs/integration-guide/workspace-automation/index.html) defines pre- and post-load behaviors.
 
-![VSTSextension-DevelopandReviewinIDE.png](../../assets/imgs/VSTSextension-DevelopandReviewinIDE.png)
+![VSTSextension-DevelopandReviewinIDE.png]({{base}}/assets/imgs/VSTSextension-DevelopandReviewinIDE.png)
 
 The git webhooks ensure that as the repository changes the Microsoft VSTS work item Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
