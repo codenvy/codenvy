@@ -216,3 +216,20 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+
+########################
+# ZOOKEEPER
+########################
+  agents:
+    image: <%= ENV["IMAGE_ZOOKEEPER"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/data/:/data'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/datalog/:/datalog'
+    ports:
+      - '2181:2181'
+    ulimits:
+      nproc: 163840
+      nofile:
+        soft: 163840
+        hard: 163840
+    restart: always
