@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/issue-management/
 ---
+{% include base.html %}
 
 **Applies To**: Codenvy on-premises installs.
 
