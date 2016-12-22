@@ -5,6 +5,8 @@ excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
 permalink: /:categories/installation/
 ---
+{% include base.html %}
+
 
 **Applies To**: Codenvy on-premises installs.
 
@@ -47,14 +49,16 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
 
 Alternatively, you can edit the `CODENVY_HOST` value in `codenvy.env`. 
 
-## Installation Architectures
+## Codenvy Architecture
+Codenvy is composed of 8 Docker containers in a compose relationship. A browser is required for administration of the Codenvy system and to use the (optional) Eclipse Che browser IDE.
+
+![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
+
+### Installation Options
 There are two ways to install Codenvy:
 
 1. An all-in-one setup. This puts all the Codenvy master services and workspace containers on a single node. It's ideal for small teams and quick evaluations. If you start with this setup you can easily add workspace nodes later to handle increased demand.
 2. A distributed setup. This puts the Codenvy master services on their own node and workspaces nodes separate. There shouldn't be any workspaces run on the master node in this setup (it should not be part of the Docker swarm list). This mode is recommended for larger teams and production usage. 
-
-### Architecture
-TODO: ADD ARCHITECTURE DIAGRAM
 
 ## Ports
 ### All-in-One Setup
