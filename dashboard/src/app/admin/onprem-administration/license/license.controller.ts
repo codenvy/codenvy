@@ -107,21 +107,19 @@ export class OnPremisesAdminLicenseController {
    * Add new license
    */
   addLicense(): void {
-    this.licenseMessagesService.showLicenseAgreementPopup().then(() => {
-      this.isLoading = true;
-      this.codenvyLicense.addLicense(this.newLicense).then(() => {
-        this.isLoading = false;
-        this.isLicenseInvalid = false;
-        this.cheNotification.showInfo('License successfully added.');
-        this.licenseMessagesService.fetchMessages();
-        this.codenvyLicense.fetchLicenseProperties().then(() => {
-          this.checkLicense();
-        });
-      }, (error: any) => {
-        this.isLoading = false;
-        this.isLicenseInvalid = true;
-        this.cheNotification.showError(error.data.message ? error.data.message : 'License server error.');
+    this.isLoading = true;
+    this.codenvyLicense.addLicense(this.newLicense).then(() => {
+      this.isLoading = false;
+      this.isLicenseInvalid = false;
+      this.cheNotification.showInfo('License successfully added.');
+      this.licenseMessagesService.fetchMessages();
+      this.codenvyLicense.fetchLicenseProperties().then(() => {
+        this.checkLicense();
       });
+    }, (error: any) => {
+      this.isLoading = false;
+      this.isLicenseInvalid = true;
+      this.cheNotification.showError(error.data.message ? error.data.message : 'License server error.');
     });
   }
 }
