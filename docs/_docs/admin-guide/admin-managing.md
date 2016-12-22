@@ -5,7 +5,11 @@ excerpt: ""
 layout: docs
 permalink: /:categories/managing/
 ---
-## Scaling
+
+**Applies To**: Codenvy on-premises installs.
+
+---
+# Scaling
 Codenvy workspaces can run on different physical nodes managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power. You will want to allocate enough nodes and resources to handle the number of concurrently *running* workspaces, each of which will have its own RAM and CPU requirements.
 
 Codenvy requires a Docker overlay network to exist for our workspace nodes. An overlay network is a network that spans across the various nodes that allows Docker containers to simplify how they communicate with one another. This is mandatory for Codenvy since your workspaces can themselves be composed of multiple containers (such as defined by Docker Compose). If a single workspace has multiple runtimes, we can deploy those runtimes on different physical nodes. An overlay network allows those containers to have a common nework so that they can communicate with each other using container names, without each container having to understand the location of the other.
@@ -14,7 +18,7 @@ Overlay networks require a distributed key-value store. We embed Consul, a key-v
 
 The default network in Docker is a "bridge" network. If you know that your users will only ever have single container workspaces (this would be unusual and rare) and you can scale your system by using a larger single node, then bridge network can be used for production systems.
 
-#### Scaling With Overlay Network (Linux Only)
+## Scaling With Overlay Network (Linux Only)
 1: Collect the IP address of Codenvy `CODENVY-IP` and the network interface of the new workspace node `WS-IF` to be used in other configuration steps:
 
 ```shell
@@ -40,7 +44,7 @@ CODENVY_SWARM_NODES=<WS-IP>:2376,<WS2-IP>:2376,<WSn-IP>:2376
 
 6: Restart Codenvy with `codenvy/cli restart`.
 
-#### Simulated Scaling
+## Simulated Scaling
 You can simulate what it is like to scale Codenvy with different nodes by launching Codenvy and its various cluster nodes within VMs using `docker-machine`, a utility that ships with Docker. Docker machine is a way to launch VMs that have Docker pre-installed in the VM using boot2docker. Docker machine uses different "drivers", such as HyperV or VirtualBox as the underlying hypervisor engine to launch the VMs. By lauching a set of VMs with different IP addresses, you can then simulate using Codenvy's Docker commands to start a main system and then having the other nodes add themselves to the cluster.
 
 This simulated scaling can be used for production, but it is generally discouraged because you would be running Docker in VMs that are on a host, and you are just taking on some extra I/O overhead that may not generally be necessary.  However, this simulated-based approach gives good pointers on configuration of a distributed, cluster-based system if you were to use VMs-only.
@@ -102,7 +106,7 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
 # You can then access Codenvy at http://<CODENVY-IP>
 ```
 
-## Upgrading
+# Upgrading
 Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. You can run `codenvy version` to see the list of available versions that you can upgrade to.
 
 For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M8, then:
@@ -126,78 +130,55 @@ The upgrade process:
 6. Initializes the new version
 7. Starts Codenvy
 
-## Backup
+# Backup
 You can run `codenvy backup` to create a copy of the relevant configuration information, user data, projects, and workspaces. We do not save workspace snapshots as part of a routine backup exercise. You can run `codenvy restore` to recover Codenvy from a particular backup snapshot. The backup is saved as a TAR file that you can keep in your records.
 
-### Microsoft Windows and NTFS
+## Microsoft Windows and NTFS
 Due to differences in file system types between NTFS and what is commonly used in the Linux world, there is no convenient way to directly host mount Postgres database data from within the container onto your host. We store your database data in a Docker named volume inside your boot2docker or Docker for Windows VM. Your data is persisted but if the underlying VM is destroyed, then the data will be lost.
 
 However, when you do a `codenvy backup`, we do copy the Postgres data from the container's volume to your host drive, and make it available as part of a `codenvy restore` function. The difference is that if you are browsing your `/instance` folder, you will not see the database data on Windows.
 
-## Migration
+# Migration
 It is possible to migrate your configuration and user data from a puppet-based installation of Codenvy (5.0.0-M8 and earlier) to the Dockerized version of Codenvy. Please contact our support team for instructions.
 
-## Disaster Recovery
+# Disaster Recovery
 You can run Codenvy with hot-standy nodes, so that in the event of a failure of one Codenvy, you can perform a switchover to another standby system.
 
 A secondary Codenvy system should be installed and kept at the same version level as the primary system. On a nightly or more frequent basis the Codenvy data store, Docker images and configuration can be transferred to the secondary system.
 
 In the event of a failure of the primary, the secondary system can be powered on and traffic re-routed to it. Users accounts and workspaces will appear in the state they were in as of the last data transfer.  
 
-### Initial Setup
-#### Create the Secondary System
-Install Codenvy on a secondary system taking care to ensure that the version matches the primary system, remember to include the license file in this system. The secondary system should have the same number and size of nodes as the primary system.
+## Initial Setup
+### Create the Secondary System
+Install Codenvy on a secondary system taking care to ensure:
+- Version matches the primary system
+- License file is added to the secondary system.
+- Number of nodes and their resource capacity is the same as the primary system.
+- Source code repositories, artifact repositories and Docker registries are accessible from the secondary system.
 
-#### Transfer Data from Primary System
-On the primary system's master node:
+### Transfer Data
+1. Execute `codenvy-backup` on the primary system to get a copy of the `/instance` folder and the `codevy.env`.
+2. Execute `codenvy-restore` on the secondary system.
 
-1. Execute `codenvy backup`.
-2. Run `docker images` to get a list of all the images used in Codenvy.
-3. Run `docker save` for each of the listed images to create a TAR of each image for transfer.
-4. In the `/etc/puppet/manifests/nodes/codenvy/` directory copy the `codenvy.pp` file to a location where it is ready to transfer.
+### Setup Integrations
+Any integrations that are used with Codenvy must be setup on both primary and secondary systems (e.g. LDAP, JIRA and others).
 
-On the secondary system's master node:
-
-1. Execute `codenvy restore`.
-2. Run `docker load` against each of the TARs generated from the primary system.
-3. Replace the `codenvy.pp` file at `/etc/puppet/manifests/nodes/codenvy/` with the version copied from the primary system.
-4. Restart the Codenvy system.
-
-#### Setup Integrations
-Any integrations that are used in the system (like LDAP, JIRA and others) should be configured identically on the secondary system.
-
-#### Setup Network Routing
+### Setup Network Routing
 Codenvy requires a DNS entry. In the event of a failure traffic will need to be re-routed from the primary to secondary systems. There are a number of ways to accomplish this - consult with your networking team to determine which is most appropriate for your environment.
 
-#### Test the Secondary System
-Log into the secondary system and ensure that it works as expected, including any integrations. The tests should include logging in and instantiating a workspace at minimum. Once everything checks out you can leave the system idle (hot standby) or power it down (cold standby).
+### Test the Secondary System
+Log into the newly created secondary system and ensure that it works as expected, including any integrations. The tests should include logging in, instantiating a workspace using your custom images and snapshotting workspaces (if appropriate). Exercise any integrations at this time to ensure they function as expected.
 
-#### Encourage Developers to Commit
-The source of truth for code should be the source code repository. Developers should be encouraged to commit their changes nightly (at least) so that the code is up-to-date.
+Once everything checks out you can leave the system idle (hot standby) or power it down (cold standby).
 
-### On-Going Maintenance
-#### Version Updates
-Each time the primary system is updated the secondary system should be updated as well.  Test both systems after update to confirm that they are functioning correctly.
+## Encourage Developers to Commit
+Source code should be committed to the code repository frequently - this will facilitate the smooth transition from primary to secondary systems.
 
-#### Adding / Removing Nodes
-Each time the primary system nodes change (new nodes are added, existing are removed, or node resources are significantly changed) the same changes should be made to the secondary nodes.
+## On-Going Maintenance
+### System Updates and Changes
+Each time the primary system is updated to a new Codenvy version the secondary system should be updated as well.  Test both systems after update to confirm that they are functioning correctly.
 
-#### Nightly Data Transfers
-On a periodic basis (we suggest nightly) the data transfer steps below should be executed. These can be scripted.  This is best done off-hours.
+If new nodes are added or removed, or if existing nodes are resized, a matching change should be made to the secondary system.
 
-On the primary system's master node:
-
-1. Execute `codenvy backup`.
-2. Run `docker images` to get a list of all the images used in Codenvy.
-3. Run `docker save` for each of the listed images to create a TAR of each image for transfer.
-4. In the `/etc/puppet/manifests/nodes/codenvy/` directory copy the `codenvy.pp` file to a location where it is ready to transfer.
-
-On the secondary system's master node:
-
-1. Execute `codenvy restore`.
-2. Run `docker load` against each of the TARs generated from the primary system.
-3. Replace the `codenvy.pp` file at `/etc/puppet/manifests/nodes/codenvy/` with the version copied from the primary system.
-4. Restart the Codenvy system.
-
-### Triggering Failover
-If there is a failure with the primary system, start the secondary system and log in to ensure that everything is working as expected. Then re-route traffic to the secondary nodes.
+## Triggering Failover
+If there is a failure with the primary system, log into the secondary system to ensure that everything is working as expected. Then re-route DNS to the secondary nodes. The secondary must have the same DNS name as the primary after switchover to ensure all functions operate correctly.
