@@ -48,12 +48,12 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
 Alternatively, you can edit the `CODENVY_HOST` value in `codenvy.env`. 
 
 ## Ports
-The master node is where Codenvy is installed and running. In a [scalability mode](), you can add additional physical "workspace" nodes to increase system capacity. If you have not added any additional physical workspace nodes, then the Codenvy master node doubles as a workspace node and needs both sets of ports opened.
+The master node is where Codenvy is installed and running. In a [scalability mode]({{base}}/docs/admin-guide/managing/index.html), you can add additional physical "workspace" nodes to increase system capacity. If you have not added any additional physical workspace nodes, then the Codenvy master node doubles as a workspace node and needs both sets of ports opened.
 
 #### Master Node: External
 |Port|Service|Notes|
 |---|---|---|
-|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S](), then port 80 can be closed.
+|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
 |5000|Docker Registry|Embedded registry to save workspace snapshots. This port is not required if you configure an external registry.
 
 #### Master Node: Internal
@@ -68,7 +68,7 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 #### Workspace Node: External
 |Port|Service|Notes|
 |---|---|---|
-|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S](), then port 80 can be closed.
+|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
 |32768-65535|Docker|Codenvy users who launch servers in a workspace have outputs mapped to this range. This range can be limited.
 
 The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
