@@ -31,5 +31,6 @@
         <module>codenvy-plugin-bitbucket-git-provider</module>
         <module>codenvy-plugin-bitbucket-ext-bitbucket</module>
         <module>codenvy-plugin-bitbucket-pullrequest</module>
+        <module>codenvy-plugin-bitbucket-server-webhooks</module>
     </modules>
 </project>
