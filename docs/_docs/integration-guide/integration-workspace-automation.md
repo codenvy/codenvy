@@ -5,6 +5,8 @@ excerpt: "Automation for generating workspaces using URLs"
 layout: docs
 permalink: /:categories/workspace-automation/
 ---
+{% include base.html %}
+
 
 **Applies To**: Codenvy on-premises installs and codenvy.io hosted accounts.
 
@@ -379,5 +381,5 @@ The `gray` style will cause the small dark animation button to load. The `white`
 ```
 
 ```markdown  
-[![alt](https://codenvy.com/factory/resources/factory-white.png)](https://codenvy.com/f?id=s38eam174ji42vty)\
+[![alt](https://codenvy.com/factory/resources/factory-white.png)](https://codenvy.io/f?id=s38eam174ji42vty)\
 ```
