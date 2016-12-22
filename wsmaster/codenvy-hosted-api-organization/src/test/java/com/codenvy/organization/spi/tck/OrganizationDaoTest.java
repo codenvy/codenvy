@@ -15,7 +15,7 @@
 package com.codenvy.organization.spi.tck;
 
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
@@ -101,9 +101,9 @@ public class OrganizationDaoTest {
         final OrganizationImpl organization = new OrganizationImpl("organization123",
                                                                    "Test",
                                                                    null);
-        CascadeEventSubscriber<OrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
+        CascadeEventSubscriber<PostOrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
         doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, OrganizationPersistedEvent.class);
+        eventService.subscribe(subscriber, PostOrganizationPersistedEvent.class);
 
         try {
             organizationDao.create(organization);
@@ -111,7 +111,7 @@ public class OrganizationDaoTest {
         } catch (ConflictException ignored) {
         }
 
-        eventService.unsubscribe(subscriber, OrganizationPersistedEvent.class);
+        eventService.unsubscribe(subscriber, PostOrganizationPersistedEvent.class);
         organizationDao.getById(organization.getId());
     }
 

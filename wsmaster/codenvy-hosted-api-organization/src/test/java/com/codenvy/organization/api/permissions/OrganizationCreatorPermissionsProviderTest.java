@@ -14,7 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
@@ -64,7 +64,7 @@ public class OrganizationCreatorPermissionsProviderTest {
     public void shouldStoreMemberWithAllAllowedActionsOnEvent() throws Exception {
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl(null, "userId", null, false));
 
-        permissionsProvider.onEvent(new OrganizationPersistedEvent(new OrganizationImpl("organizationId", "name", "parent")));
+        permissionsProvider.onEvent(new PostOrganizationPersistedEvent(new OrganizationImpl("organizationId", "name", "parent")));
 
         verify(memberDao).store(eq(new MemberImpl("userId",
                                                   "organizationId",

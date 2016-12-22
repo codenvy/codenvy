@@ -15,7 +15,7 @@
 package com.codenvy.organization.spi.jpa;
 
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.inject.persist.Transactional;
@@ -153,7 +153,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         manager.persist(organization);
         manager.flush();
         //TODO Add test
-        eventService.publish(new OrganizationPersistedEvent(organization));
+        eventService.publish(new PostOrganizationPersistedEvent(organization));
     }
 
     @Transactional
