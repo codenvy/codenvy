@@ -5,6 +5,7 @@ excerpt: ""
 layout: docs
 permalink: /:categories/version-control/
 ---
+{% include base.html %}
 
 **Applies To**: Codenvy on-premises installs.
 
@@ -44,9 +45,9 @@ With oAuth setup you can perform all git actions with the repo, including commit
 After importing a repository, you can perform the most common Git and SVN operations using interactive menus or through console commands.
 
 **Note: Use of git menu remote push command will not work prior setting up SSH or oAuth authentication.**
-![git-menu.png](../../assets/imgs/git-menu.png)
+![git-menu.png]({{base}}/assets/imgs/git-menu.png)
 
-![svn-menu.png](../../assets/imgs/svn-menu.png)
+![svn-menu.png]({{base}}/assets/imgs/svn-menu.png)
 
 # Built-In Pull Request Panel
 Within the Codenvy IDE there is a pull request panel to simplify the creation of pull requests for GitHub, BitBucket or Microsoft VSTS (with git) repositories.
