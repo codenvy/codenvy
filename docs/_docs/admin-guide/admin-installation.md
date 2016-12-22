@@ -6,10 +6,9 @@ layout: docs
 permalink: /:categories/installation/
 ---
 
-**Applies To**: Codenvy on-premises installs.
-
----
-
+{% include base.html %}
+**Applies To**: Codenvy on-premises installs.		  **Applies To**: Codenvy on-premises installs.
+  		  
 # System Requirements
 Codenvy installs on Linux, Mac and Windows.
 
@@ -286,3 +285,10 @@ docker run codenvy/cli:<version> rmi
 # Delete the Codenvy CLI
 docker rmi -f codenvy/cli
 ```
+
+# System Architecture
+Codenvy's runtime launches a group of Docker containers in a compose relationship. Once running, Codenvy's containers can be accessed on the command line from within a browser.
+ 
+ ![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
+
+
