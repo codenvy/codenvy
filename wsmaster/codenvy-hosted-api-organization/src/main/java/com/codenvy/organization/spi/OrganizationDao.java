@@ -65,7 +65,7 @@ public interface OrganizationDao {
      * @throws NullPointerException
      *         when {@code organizationId} is null
      * @throws ConflictException
-     *         when organization cannot be removed
+     *         when any conflict occurs during cascade removing of related to organization data
      * @throws ServerException
      *         when any other error occurs during organization removing
      */

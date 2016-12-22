@@ -22,9 +22,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +44,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
         extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
 
     @Inject
-    private EventService eventService;
+    private CascadeEventService eventService;
 
     @Inject
     T storage;
@@ -62,7 +62,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
     @Override
     public void onCascadeEvent(BeforeUserRemovedEvent event) throws ApiException {
         for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
-            // This method can  potentially be source of race conditions,
+            // This method can potentially be source of race conditions,
             // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
             // so appropriate domain object (stack or recipe) will not be deleted, or vice versa,
             // deleted when it's not required anymore.

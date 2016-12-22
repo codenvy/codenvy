@@ -78,7 +78,7 @@ public class OrganizationService extends Service {
                                                       "(e.g. The organization with such name already exists)"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam(value = "Organization to create", required = true)
-                                   OrganizationDto organization) throws BadRequestException, ConflictException, ServerException {
+                           OrganizationDto organization) throws BadRequestException, ConflictException, ServerException {
         organizationValidator.checkOrganization(organization);
         return Response.status(201)
                        .entity(linksInjector.injectLinks(asDto(organizationManager.create(organization)), getServiceContext()))
@@ -99,9 +99,9 @@ public class OrganizationService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public OrganizationDto update(@ApiParam("Organization id")
                                   @PathParam("id")
-                                          String organizationId,
+                                  String organizationId,
                                   @ApiParam(value = "Organization to update", required = true)
-                                          OrganizationDto organization) throws BadRequestException,
+                                  OrganizationDto organization) throws BadRequestException,
                                                                                ConflictException,
                                                                                NotFoundException,
                                                                                ServerException {
@@ -114,7 +114,7 @@ public class OrganizationService extends Service {
     @Path("/{id}")
     @ApiOperation("Remove organization with given id")
     @ApiResponses({@ApiResponse(code = 204, message = "The organization successfully removed"),
-                   @ApiResponse(code = 409, message = ""),//TODO Add
+                   @ApiResponse(code = 409, message = "When any conflict occurs during cascade removing of related to organization data"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public void remove(@ApiParam("Organization id")
                        @PathParam("id") String organization) throws ConflictException, ServerException {

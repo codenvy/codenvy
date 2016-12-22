@@ -123,6 +123,5 @@ public class AdminUserCreator implements EventSubscriber<PostUserPersistedEvent>
         } catch (ServerException | NotFoundException | ConflictException e) {
             LOG.warn(format("System permissions creation failed for user %s", userId), e.getLocalizedMessage());
         }
-
     }
 }

@@ -14,6 +14,7 @@
  */
 package com.codenvy.organization.spi.tck;
 
+import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
@@ -26,6 +27,8 @@ import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.core.db.cascade.CascadeEventService;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -35,9 +38,14 @@ import javax.inject.Inject;
 import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Tests {@link OrganizationDao} contract.
@@ -87,16 +95,24 @@ public class OrganizationDaoTest {
         assertEquals(organizationDao.getById(organization.getId()), organization);
     }
 
-    @Test
-    public void shouldPublishOrganizationPersistedEventAfterStackIsPersisted() throws Exception {
-        final boolean[] isNotified = new boolean[] {false};
-        eventService.subscribe(event -> isNotified[0] = true, OrganizationPersistedEvent.class);
+    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById",
+          expectedExceptions = NotFoundException.class)
+    public void shouldNotCreateUserWhenSubscriberThrowsExceptionOnUserStoring() throws Exception {
+        final OrganizationImpl organization = new OrganizationImpl("organization123",
+                                                                   "Test",
+                                                                   null);
+        CascadeEventSubscriber<OrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, OrganizationPersistedEvent.class);
 
-        organizationDao.create(new OrganizationImpl("organization123",
-                                                    "Test",
-                                                    null));
+        try {
+            organizationDao.create(organization);
+            fail("OrganizationDao#create had to throw conflict exception");
+        } catch (ConflictException ignored) {
+        }
 
-        assertTrue(isNotified[0], "Event subscriber notified");
+        eventService.unsubscribe(subscriber, OrganizationPersistedEvent.class);
+        organizationDao.getById(organization.getId());
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -171,6 +187,23 @@ public class OrganizationDaoTest {
 
         //then
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
+    }
+
+    @Test(dependsOnMethods = "shouldGetOrganizationById")
+    public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
+        final OrganizationImpl organization = organizations[0];
+        CascadeEventSubscriber<BeforeOrganizationRemovedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        eventService.subscribe(subscriber, BeforeOrganizationRemovedEvent.class);
+
+        try {
+            organizationDao.remove(organization.getId());
+            fail("OrganizationDao#remove had to throw conflict exception");
+        } catch (ConflictException ignored) {
+        }
+
+        assertEquals(organizationDao.getById(organization.getId()), organization);
+        eventService.unsubscribe(subscriber, BeforeOrganizationRemovedEvent.class);
     }
 
     @Test
@@ -250,5 +283,12 @@ public class OrganizationDaoTest {
         } catch (NotFoundException x) {
             return null;
         }
+    }
+
+    private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
+        @SuppressWarnings("unchecked")
+        CascadeEventSubscriber<T> subscriber = mock(CascadeEventSubscriber.class);
+        doCallRealMethod().when(subscriber).onEvent(any());
+        return subscriber;
     }
 }

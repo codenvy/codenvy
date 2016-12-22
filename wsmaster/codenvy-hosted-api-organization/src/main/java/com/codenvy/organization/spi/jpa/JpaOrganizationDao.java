@@ -64,7 +64,6 @@ public class JpaOrganizationDao implements OrganizationDao {
         requireNonNull(organization, "Required non-null organization");
         try {
             doCreate(organization);
-            eventService.publish(new OrganizationPersistedEvent(organization));
         } catch (DuplicateKeyException e) {
             throw new ConflictException("Organization with such id or name already exists");
         } catch (RuntimeException x) {
@@ -148,11 +147,13 @@ public class JpaOrganizationDao implements OrganizationDao {
         }
     }
 
-    @Transactional
-    protected void doCreate(OrganizationImpl organization) {
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(OrganizationImpl organization) throws ConflictException, ServerException {
         EntityManager manager = managerProvider.get();
         manager.persist(organization);
         manager.flush();
+        //TODO Add test
+        eventService.publish(new OrganizationPersistedEvent(organization));
     }
 
     @Transactional
@@ -170,6 +171,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
+            //TODO Add test
             eventService.publish(new BeforeOrganizationRemovedEvent(new OrganizationImpl(organization)));
             manager.remove(organization);
             manager.flush();
