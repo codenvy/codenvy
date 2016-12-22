@@ -12,10 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.usage;
+package com.codenvy.api.account.personal;
 
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.mockito.Mock;
@@ -28,54 +27,44 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-/**
- * Tests for {@link UserResourcesPermissionsChecker}
- *
- * @author Sergii Leschenko
- */
 @Listeners(MockitoTestNGListener.class)
-public class UserResourcesPermissionsCheckerTest {
+public class PersonalAccountPermissionsCheckerTest {
+    private static String userId = "userok";
     @Mock
     private Subject subject;
 
-    private UserResourcesPermissionsChecker permissionsChecker;
+    private PersonalAccountPermissionsChecker permissionsChecker;
 
     @BeforeMethod
-    public void setUp() throws Exception {
-        permissionsChecker = new UserResourcesPermissionsChecker();
+    public void setUp() {
+        when(subject.getUserId()).thenReturn(userId);
         EnvironmentContext.getCurrent().setSubject(subject);
+
+        permissionsChecker = new PersonalAccountPermissionsChecker();
+    }
+
+    @AfterMethod
+    public void cleanUp() {
+        EnvironmentContext.getCurrent().setSubject(null);
     }
 
     @Test
-    public void shouldNotThrowExceptionWhenCurrentUserIdEqualsToRequestedAccountId() throws Exception {
-        //given
-        when(subject.getUserId()).thenReturn("user123");
-
-        //when
-        permissionsChecker.checkResourcesVisibility("user123");
+    public void shouldNotThrowExceptionWhenUserIdFromSubjectEqualsToSpecifiedAccountId() throws Exception {
+        permissionsChecker.checkPermissions(userId, null);
     }
 
     @Test(expectedExceptions = ForbiddenException.class,
-          expectedExceptionsMessageRegExp = "User is not authorized to see resources information of requested account.")
-    public void shouldThrowExceptionWhenCurrentUserIdDoesNotEqualToRequestedAccountId() throws Exception {
-        //given
-        when(subject.getUserId()).thenReturn("user321");
-
-        //when
-        permissionsChecker.checkResourcesVisibility("user123");
+          expectedExceptionsMessageRegExp = "User is not authorized to use specified account")
+    public void shouldThrowForbiddenExceptionWhenUserIdFromSubjectDoesNotEqualToSpecifiedAccountId() throws Exception {
+        permissionsChecker.checkPermissions("anotherUserId", null);
     }
 
     @Test
-    public void shouldReturnPersonalAccountTypeOnGettingAccountType() throws Exception {
+    public void shouldReturnPersonalAccountType() throws Exception {
         //when
         final String accountType = permissionsChecker.getAccountType();
 
         //then
-        assertEquals(accountType, UserImpl.PERSONAL_ACCOUNT);
-    }
-
-    @AfterMethod
-    public void cleanUp() throws Exception {
-        EnvironmentContext.getCurrent().setSubject(null);
+        assertEquals(accountType, OnpremisesUserManager.PERSONAL_ACCOUNT);
     }
 }

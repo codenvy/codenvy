@@ -14,13 +14,12 @@
  */
 package com.codenvy.organization.api;
 
+import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
+import com.codenvy.organization.api.event.OrganizationPersistedEvent;
 import com.codenvy.organization.api.event.OrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationRenamedEvent;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.shared.model.Member;
-import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
-import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
@@ -96,9 +95,7 @@ public class OrganizationManager {
                                                                    newOrganization.getName(),
                                                                    newOrganization.getParent());
         organizationDao.create(organization);
-        memberDao.store(new MemberImpl(EnvironmentContext.getCurrent().getSubject().getUserId(),
-                                       organization.getId(),
-                                       OrganizationDomain.getActions()));
+        addFirstMember(organization);
         eventService.publish(new OrganizationPersistedEvent(organization)).propagateException();
         return organization;
     }
@@ -257,6 +254,12 @@ public class OrganizationManager {
     public Page<? extends Member> getMembers(String organizationId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         return memberDao.getMembers(organizationId, maxItems, skipCount);
+    }
+
+    protected void addFirstMember(Organization organization) throws ServerException {
+        memberDao.store(new MemberImpl(EnvironmentContext.getCurrent().getSubject().getUserId(),
+                                       organization.getId(),
+                                       OrganizationDomain.getActions()));
     }
 
     /**

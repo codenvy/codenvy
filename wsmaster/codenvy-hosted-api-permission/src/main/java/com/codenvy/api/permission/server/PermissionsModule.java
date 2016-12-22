@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
+import com.codenvy.api.permission.server.account.AccountPermissionsChecker;
 import com.codenvy.api.permission.server.filter.GetPermissionsFilter;
 import com.codenvy.api.permission.server.filter.RemovePermissionsFilter;
 import com.codenvy.api.permission.server.filter.SetPermissionsFilter;
@@ -36,5 +37,9 @@ public class PermissionsModule extends AbstractModule {
         Multibinder.newSetBinder(binder(),
                                  String.class,
                                  Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
+
+
+        //initialize empty set binder
+        Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class);
     }
 }

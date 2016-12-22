@@ -117,6 +117,10 @@ public class OrganizationImpl implements Organization {
         this.parent = parent;
     }
 
+    public AccountImpl getAccount() {
+        return account;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

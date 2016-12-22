@@ -16,8 +16,6 @@ package com.codenvy.organization.api;
 
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
-import com.codenvy.organization.api.event.OrganizationRemovedEvent;
-import com.codenvy.organization.api.event.OrganizationRenamedEvent;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.shared.model.Member;
 import com.codenvy.organization.shared.model.Organization;
@@ -49,7 +47,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -118,8 +115,7 @@ public class OrganizationManagerTest {
         assertEquals(createdOrganization.getParent(), toCreate.getParent());
         verify(eventService).publish(persistEventCaptor.capture());
         assertEquals(persistEventCaptor.getValue().getOrganization(), createdOrganization);
-        verify(memberDao)
-                .store(new MemberImpl(USER_ID, createdOrganization.getId(), OrganizationDomain.getActions()));
+        verify(memberDao).store(new MemberImpl(USER_ID, createdOrganization.getId(), OrganizationDomain.getActions()));
     }
 
     @Test

@@ -12,28 +12,31 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.usage;
+package com.codenvy.api.permission.server.account;
 
 import org.eclipse.che.api.core.ForbiddenException;
 
 /**
- * Allows to define different permissions checking for different accounts types.
+ * Defines permissions checking for accounts with some type.
  *
- * @author Sergii Leschenko
+ * @author Sergii Leshchenko
  */
-public interface ResourcesPermissionsChecker {
+public interface AccountPermissionsChecker {
     /**
-     * Checks that current user is able to see resources information of specified account
+     * Checks that current subject is authorized to perform
+     * given operation with specified account
      *
      * @param accountId
-     *         account identifier
+     *         account to check
+     * @param operation
+     *         operation that is going to be performed
      * @throws ForbiddenException
-     *         when current user doesn't have permission to see resources information
+     *         when user doesn't have permissions to perform specified operation
      */
-    void checkResourcesVisibility(String accountId) throws ForbiddenException;
+    void checkPermissions(String accountId, AccountOperation operation) throws ForbiddenException;
 
     /**
-     * Returns account type for which this class checks permissions.
+     * Returns account type for which this class tracks check resources permissions.
      */
     String getAccountType();
 }

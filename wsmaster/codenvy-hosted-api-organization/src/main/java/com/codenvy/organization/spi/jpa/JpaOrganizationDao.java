@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.inject.Inject;
@@ -45,12 +44,10 @@ import static java.util.Objects.requireNonNull;
 public class JpaOrganizationDao implements OrganizationDao {
 
     private final Provider<EntityManager> managerProvider;
-    private final EventService            eventService;
 
     @Inject
-    public JpaOrganizationDao(Provider<EntityManager> managerProvider, EventService eventService) {
+    public JpaOrganizationDao(Provider<EntityManager> managerProvider) {
         this.managerProvider = managerProvider;
-        this.eventService = eventService;
     }
 
     @Override

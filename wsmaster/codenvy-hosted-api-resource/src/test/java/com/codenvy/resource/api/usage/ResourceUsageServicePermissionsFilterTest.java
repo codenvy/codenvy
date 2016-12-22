@@ -15,6 +15,8 @@
 package com.codenvy.resource.api.usage;
 
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.account.AccountOperation;
+import com.codenvy.api.permission.server.account.AccountPermissionsChecker;
 import com.codenvy.resource.api.free.FreeResourcesLimitService;
 import com.google.common.collect.ImmutableSet;
 
@@ -82,7 +84,7 @@ public class ResourceUsageServicePermissionsFilterTest {
     private static Subject subject;
 
     @Mock
-    private ResourcesPermissionsChecker checker;
+    private AccountPermissionsChecker checker;
 
     private ResourceUsageServicePermissionsFilter filter;
 
@@ -90,8 +92,8 @@ public class ResourceUsageServicePermissionsFilterTest {
     public void setUp() throws Exception {
         when(accountManager.getById(any())).thenReturn(account);
 
-        when(checker.getAccountType()).thenReturn("test");
         when(account.getType()).thenReturn("test");
+        when(checker.getAccountType()).thenReturn("test");
 
         filter = new ResourceUsageServicePermissionsFilter(accountManager,
                                                            ImmutableSet.of(checker));
@@ -133,7 +135,7 @@ public class ResourceUsageServicePermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/resource/account123");
 
-        verify(checker).checkResourcesVisibility("account123");
+        verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
         verify(service).getTotalResources("account123");
     }
 
@@ -146,7 +148,7 @@ public class ResourceUsageServicePermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/resource/account123/available");
 
-        verify(checker).checkResourcesVisibility("account123");
+        verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
         verify(service).getAvailableResources("account123");
     }
 
@@ -159,13 +161,13 @@ public class ResourceUsageServicePermissionsFilterTest {
                .when()
                .get(SECURE_PATH + "/resource/account123/used");
 
-        verify(checker).checkResourcesVisibility("account123");
+        verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
         verify(service).getUsedResources("account123");
     }
 
     @Test(dataProvider = "coveredPaths")
     public void shouldDenyRequestWhenUserDoesNotHasPermissionsToSeeResources(String path) throws Exception {
-        doThrow(new ForbiddenException("Forbidden")).when(checker).checkResourcesVisibility(any());
+        doThrow(new ForbiddenException("Forbidden")).when(checker).checkPermissions(anyString(), any());
 
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -174,7 +176,7 @@ public class ResourceUsageServicePermissionsFilterTest {
                .when()
                .get(SECURE_PATH + path);
 
-        verify(checker).checkResourcesVisibility("account123");
+        verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
     }
 
     @Test(dataProvider = "coveredPaths")
@@ -189,7 +191,7 @@ public class ResourceUsageServicePermissionsFilterTest {
                .get(SECURE_PATH + path);
 
         verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
-        verify(checker, never()).checkResourcesVisibility("account123");
+        verify(checker, never()).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
     }
 
     @Test(dataProvider = "coveredPaths")
@@ -210,7 +212,7 @@ public class ResourceUsageServicePermissionsFilterTest {
                 {"/resource/account123"},
                 {"/resource/account123/available"},
                 {"/resource/account123/used"},
-        };
+                };
     }
 
     @Filter
