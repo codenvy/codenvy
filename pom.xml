@@ -607,6 +607,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-bitbucket-server-webhooks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-github-factory-resolver</artifactId>
                 <version>${project.version}</version>
             </dependency>
