@@ -5,9 +5,11 @@ excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
 permalink: /:categories/installation/
 ---
-
 {% include base.html %}
-**Applies To**: Codenvy on-premises installs.		  **Applies To**: Codenvy on-premises installs.
+
+**Applies To**: Codenvy on-premises installs.
+
+---
   		  
 # System Requirements
 Codenvy installs on Linux, Mac and Windows.
