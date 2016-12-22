@@ -18,9 +18,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 
 /**
  * Inserts in each URL machine token.
@@ -35,12 +36,11 @@ public class CodenvyMachineLinksModifier implements WsAgentURLModifier {
 
     @Override
     public void initialize(DevMachine devMachine) {
-        for (Link link : devMachine.getDevMachineLinks()) {
-            if (Constants.WSAGENT_WEBSOCKET_REFERENCE.equals(link.getRel())) {
-                for (LinkParameter parameter : link.getParameters()) {
-                    if (MACHINE_TOKEN.equals(parameter.getName())) {
-                        machineToken = parameter.getDefaultValue();
-                    }
+        Link link = devMachine.getMachineLink(WSAGENT_WEBSOCKET_REFERENCE);
+        if (link != null) {
+            for (LinkParameter parameter : link.getParameters()) {
+                if (MACHINE_TOKEN.equals(parameter.getName())) {
+                    machineToken = parameter.getDefaultValue();
                 }
             }
         }
