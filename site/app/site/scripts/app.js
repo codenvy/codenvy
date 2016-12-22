@@ -72,7 +72,11 @@ define(["jquery","config",
 
                     if(fslNotAcceptedPage.length !== 0){
                         (function(){
-                            FSLNotAcceptedErrorPage.get(fslNotAcceptedPage);
+                            var form = FSLNotAcceptedErrorPage.get(fslNotAcceptedPage);
+                            errorReport = ErrorReport.get(errorContainer);
+                            form.on("invalid", function(field,message){
+                                errorReport.show(message);
+                            });
                         }());
 
                     }

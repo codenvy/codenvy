@@ -297,8 +297,8 @@ body,h1,h2,h3,h4,h5,h6,a{
 	overflow-y:scroll;
 	overflow-x:auto;
 	height:400px;
-	background-color: #D8D8D8;
-	color: #ADB0B5;
+	background-color: #fff;
+	color: #000;
 	padding: 10px 15px;
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Chrome/Safari/Opera */

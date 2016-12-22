@@ -263,19 +263,20 @@
             }
         };
 
-        var acceptLicense = function(firstName,lastName,email,error){
-                var acceptLicenseUrl = "/api/license/system/fair-source-license";
-                var data = {
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email
-                };
-                return $.ajax({
-                    url: acceptLicenseUrl,
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(data),
-                });
+        var acceptLicense = function(error){
+            var deferredResult = $.Deferred();
+            var acceptLicenseUrl = "/api/license/system/fair-source-license";
+            $.ajax({
+                url: acceptLicenseUrl,
+                type: "POST"
+            })
+            .success(function(response){
+                deferredResult.resolve(response);
+            })
+            .error(function(error){
+                deferredResult.reject(getResponseMessage(error));
+            });
+            return deferredResult;
         };
 
         var redirectToUrl = function(url) {

@@ -47,17 +47,14 @@ define(["jquery","underscore", "views/accountformbase","models/account"],
                 var self = this;
                 this.trigger("submitting");
                 this.__showProgress();
-                Account.acceptLicense(
-                    $(this.el).find("input[name='firstName']").val(),
-                    $(this.el).find("input[name='lastName']").val(),
-                    $(this.el).find("input[name='adminEmail']").val()
-                )
+                Account.acceptLicense()
                 .then(function(success){
                     window.console.log(success);
                     
                     Account.navigateToLocation();
                 })
                 .fail(function(error){
+                    self.trigger("invalid",null, error);
                     window.console.log(error);
                     self.__restoreForm();
                 })
