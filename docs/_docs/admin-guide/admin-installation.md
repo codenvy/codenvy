@@ -47,8 +47,72 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
 
 Alternatively, you can edit the `CODENVY_HOST` value in `codenvy.env`. 
 
+## Installation Architectures
+There are two ways to install Codenvy:
+
+1. An all-in-one setup. This puts all the Codenvy master services and workspace containers on a single node. It's ideal for small teams and quick evaluations. If you start with this setup you can easily add workspace nodes later to handle increased demand.
+2. A distributed setup. This puts the Codenvy master services on their own node and workspaces nodes separate. There shouldn't be any workspaces run on the master node in this setup (it should not be part of the Docker swarm list). This mode is recommended for larger teams and production usage. 
+
+### Architecture
+TODO: ADD ARCHITECTURE DIAGRAM
+
 ## Ports
-TODO - UPDATE PORT DESCRIPTION SECTION
+### All-in-One Setup
+**Externally Available TCP Ports**
+
+|Port|Service|Notes|
+|---|---|---|
+|80 / 443|HAProxy HTTP/S|By default Codenvy is installed for unsecured HTTP communication over port 80. If you configure HTTPS then you can close port 80 and open 443 for external traffic.
+|5000|Docker Registry|The built-in Codenvy registry is used to store workspace snapshots. If you configure your own external registry for workspace snapshots then you can close this port.
+|23750|Docker Swarm|Codenvy communicates with workspace nodes via Docker Swarm.
+|32768-65535|Docker|Docker uses the host's ephemeral port range to expose ports for services started in workspace containers. It is possible to limit this range - contact Codenvy to discuss.
+
+**Internally Available TCP Ports**
+
+|Port|Service
+|---|---|
+|81|Nginx
+|2375|Swarm
+|5432|Postgres
+|8080|Codenvy Server
+
+### Distributed Setup: Master Node
+The ports listed below assume you are not running developer workspaces on the master node - this is the recommended configuration.
+
+**Externally Available TCP Ports**
+
+|Port|Service|Notes|
+|---|---|---|
+|80 / 443|HAProxy HTTP/S|By default Codenvy is installed for unsecured HTTP communication over port 80. If you configure HTTPS then you can close port 80 and open 443 for external traffic.
+|5000|Docker Registry|The built-in Codenvy registry is used to store workspace snapshots. If you configure your own external registry for workspace snapshots then you can close this port.
+
+**Internally Available TCP Ports**
+
+|Port|Service
+|---|---|
+|81|Nginx
+|2375|Swarm
+|5432|Postgres
+|8080|Codenvy Server
+
+### Distributed Setup: Workspace Nodes
+**Externally Available TCP Ports**
+
+|Port|Service|Notes|
+|---|---|---|
+|80 / 443|HAProxy HTTP/S|By default Codenvy is installed for unsecured HTTP communication over port 80. If you configure HTTPS then you can close port 80 and open 443 for external traffic.
+|32768-65535|Docker|Docker uses the host's ephemeral port range to expose ports for services started in workspace containers. It is possible to limit this range - contact Codenvy to discuss.
+
+The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
+
+**Internally Available TCP Ports**
+
+|Port|Service
+|---|---|
+|81|Nginx
+|2375|Swarm
+|5432|Postgres
+|8080|Codenvy Server
 
 # Installation
 ## Syntax
