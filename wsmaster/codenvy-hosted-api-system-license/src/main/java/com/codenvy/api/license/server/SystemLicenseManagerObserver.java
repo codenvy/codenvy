@@ -15,7 +15,6 @@
 package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.SystemLicense;
-import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
 
 import org.eclipse.che.api.core.ApiException;
 
@@ -23,7 +22,7 @@ import org.eclipse.che.api.core.ApiException;
  * @author Anatolii Bazko
  */
 public interface SystemLicenseManagerObserver {
-    void onCodenvyFairSourceLicenseAccepted(FairSourceLicenseAcceptance licenseAcceptance) throws ApiException;
+    void onCodenvyFairSourceLicenseAccepted() throws ApiException;
 
     void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException;
 

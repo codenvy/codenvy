@@ -15,10 +15,8 @@
 package com.codenvy.api.audit.server;
 
 import com.codenvy.api.license.SystemLicense;
-import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;

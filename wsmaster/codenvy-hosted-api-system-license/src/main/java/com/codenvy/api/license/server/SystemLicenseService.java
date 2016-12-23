@@ -25,7 +25,6 @@ import com.codenvy.api.license.SystemLicenseFeature;
 import com.codenvy.api.license.exception.InvalidSystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
-import com.codenvy.api.license.shared.dto.FairSourceLicenseAcceptanceDto;
 import com.codenvy.api.license.shared.dto.LegalityDto;
 
 import org.eclipse.che.api.core.ApiException;
@@ -68,13 +67,10 @@ public class SystemLicenseService {
     public static final  String CODENVY_LICENSE_PROPERTY_IS_EXPIRED = "isExpired";
 
     private final SystemLicenseManager                 licenseManager;
-    private final FairSourceLicenseAcceptanceValidator licenseAcceptanceValidator;
 
     @Inject
-    public SystemLicenseService(SystemLicenseManager licenseManager,
-                                FairSourceLicenseAcceptanceValidator licenseAcceptanceValidator) {
+    public SystemLicenseService(SystemLicenseManager licenseManager) {
         this.licenseManager = licenseManager;
-        this.licenseAcceptanceValidator = licenseAcceptanceValidator;
     }
 
     @DELETE
@@ -206,9 +202,8 @@ public class SystemLicenseService {
                            @ApiResponse(code = 400, message = "Inappropriate accept request"),
                            @ApiResponse(code = 409, message = "Fair Source License has been already accepted"),
                            @ApiResponse(code = 500, message = "Server error")})
-    public Response acceptFairSourceLicense(FairSourceLicenseAcceptanceDto fairSourceLicenseAcceptanceDto) throws ApiException {
-        licenseAcceptanceValidator.validate(fairSourceLicenseAcceptanceDto);
-        licenseManager.acceptFairSourceLicense(fairSourceLicenseAcceptanceDto);
+    public Response acceptFairSourceLicense() throws ApiException {
+        licenseManager.acceptFairSourceLicense();
         return status(CREATED).build();
     }
 }

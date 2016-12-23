@@ -22,13 +22,11 @@ import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.dto.IssueDto;
-import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
 import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -258,16 +256,12 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      *
      * @see SystemLicenseActionDao#insert(SystemLicenseActionImpl)
      *
-     * @param fairSourceLicenseAcceptance
-     *      acceptance request
      * @throws ConflictException
      *      if license already has been accepted
-     * @throws BadRequestException
-     *      if request is not complete
      */
-    public void acceptFairSourceLicense(FairSourceLicenseAcceptance fairSourceLicenseAcceptance) throws ApiException {
+    public void acceptFairSourceLicense() throws ApiException {
         for (SystemLicenseManagerObserver observer : observers) {
-            observer.onCodenvyFairSourceLicenseAccepted(fairSourceLicenseAcceptance);
+            observer.onCodenvyFairSourceLicenseAccepted();
         }
     }
 
@@ -358,11 +352,6 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     @VisibleForTesting
-    Subject getSubject() {
-        return EnvironmentContext.getCurrent().getSubject();
-    }
-
-    @VisibleForTesting
     void revertToFairSourceLicense(SystemLicense license) throws ServerException, ConflictException {
         try {
             systemLicenseActionDao.getByLicenseIdAndAction(license.getLicenseId(), EXPIRED);
@@ -379,8 +368,9 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     private boolean isAdmin() {
-        if (getSubject() != null) {
-            return getSubject().hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        Subject subject = EnvironmentContext.getCurrent().getSubject();
+        if (subject != null) {
+            return subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         }
 
         return false;

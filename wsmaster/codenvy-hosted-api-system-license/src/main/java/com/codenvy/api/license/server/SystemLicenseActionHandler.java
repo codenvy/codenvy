@@ -17,13 +17,10 @@ package com.codenvy.api.license.server;
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
-import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
-import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.license.shared.model.Constants;
-import com.codenvy.api.license.shared.model.FairSourceLicenseAcceptance;
+import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -33,7 +30,6 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import java.util.Collections;
-import java.util.Map;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
@@ -62,15 +58,14 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
     }
 
     @Override
-    public void onCodenvyFairSourceLicenseAccepted(FairSourceLicenseAcceptance fairSourceLicenseAcceptance) throws ApiException {
-        Map<String, String> attributes = new FairSourceLicenseAcceptanceImpl(fairSourceLicenseAcceptance).toAttributes();
+    public void onCodenvyFairSourceLicenseAccepted() throws ApiException {
         try {
             SystemLicenseActionImpl codenvyLicenseAction
                     = new SystemLicenseActionImpl(FAIR_SOURCE_LICENSE,
                                                   ACCEPTED,
                                                   System.currentTimeMillis(),
                                                   null,
-                                                  attributes);
+                                                  Collections.emptyMap());
             systemLicenseActionDao.insert(codenvyLicenseAction);
         } catch (ConflictException e) {
             throw new ConflictException("Codenvy Fair Source License has been already accepted");

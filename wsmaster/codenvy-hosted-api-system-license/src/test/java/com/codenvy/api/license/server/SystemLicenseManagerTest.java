@@ -30,11 +30,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -131,6 +133,13 @@ public class SystemLicenseManagerTest {
                                                       systemLicenseActivator));
 
         doReturn(license).when(licenseManager).load();
+
+        EnvironmentContext.getCurrent().setSubject(subject);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        EnvironmentContext.reset();
     }
 
     @Test
@@ -447,7 +456,6 @@ public class SystemLicenseManagerTest {
     @Test
     public void testGetMessageForLicenseExpiredForAdmin() throws ServerException {
         // given
-        doReturn(subject).when(licenseManager).getSubject();
         doReturn(true).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
 
         // when
@@ -461,7 +469,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testGetMessageForLicenseExpiredForNonAdmin() throws ServerException {
         // given
-        doReturn(null).when(licenseManager).getSubject();
+        EnvironmentContext.getCurrent().setSubject(null);
 
         // when
         String result = licenseManager.getMessageForLicenseCompletelyExpired();
@@ -473,7 +481,6 @@ public class SystemLicenseManagerTest {
     @Test
     public void testGetMessageForLicenseExpiredWhenLicenseAbsentForNonAdmin() throws ServerException {
         // given
-        doReturn(subject).when(licenseManager).getSubject();
         doReturn(false).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         doThrow(SystemLicenseException.class).when(licenseManager).load();
 

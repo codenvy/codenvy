@@ -74,8 +74,6 @@ public class SystemLicenseServiceTest {
     private SystemLicense                        mockSystemLicense;
     @Mock
     private SystemLicenseFactory                 mockLicenseFactory;
-    @Mock
-    private FairSourceLicenseAcceptanceValidator licenseAcceptanceValidator;
 
     @InjectMocks
     SystemLicenseService systemLicenseService;

@@ -17,9 +17,6 @@ package com.codenvy.api.license.server;
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
-import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
-import com.google.common.collect.ImmutableMap;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
@@ -34,6 +31,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
@@ -88,25 +87,22 @@ public class SystemLicenseActionHandlerTest {
 
     @Test
     public void shouldAddFairSourceLicenseAcceptedRecord() throws Exception {
-        FairSourceLicenseAcceptanceImpl fairSourceLicenseAcceptance = new FairSourceLicenseAcceptanceImpl("fn", "ln", "em@codenvy.com");
-
-        systemLicenseActionHandler.onCodenvyFairSourceLicenseAccepted(fairSourceLicenseAcceptance);
+        systemLicenseActionHandler.onCodenvyFairSourceLicenseAccepted();
 
         ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
         verify(dao).insert(actionCaptor.capture());
         SystemLicenseActionImpl value = actionCaptor.getValue();
         assertEquals(value.getLicenseType(), FAIR_SOURCE_LICENSE);
         assertEquals(value.getActionType(), ACCEPTED);
-        assertEquals(value.getAttributes(), ImmutableMap.of("firstName", "fn", "lastName", "ln", "email", "em@codenvy.com"));
+        assertEquals(value.getAttributes(), Collections.emptyMap());
         assertNull(value.getLicenseId());
     }
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionIfDaoThrowConflictException() throws Exception {
-        FairSourceLicenseAcceptanceImpl fairSourceLicenseAcceptance = new FairSourceLicenseAcceptanceImpl("fn", "ln", "em@codenvy.com");
         doThrow(new ConflictException("conflict")).when(dao).insert(any(SystemLicenseActionImpl.class));
 
-        systemLicenseActionHandler.onCodenvyFairSourceLicenseAccepted(fairSourceLicenseAcceptance);
+        systemLicenseActionHandler.onCodenvyFairSourceLicenseAccepted();
     }
 
     @Test
