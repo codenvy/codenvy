@@ -13,12 +13,12 @@ permalink: /:categories/getting-started/
 ---
 You can get started with Codenvy through our hosted offering or by installing it yourself.
 
-## 1. Create a Free Account at codenvy.io
-Everyone gets 3GB for free. Connect to a public toolchain and be coding in minutes. [Sign up](https://codenvy.io/site/create-account).
+| Get Started Options | Action |
+|:--- | :---: |
+|Create a Free Account at codenvy.io. Everyone gets 3GB for free. Connect to a public toolchain and be coding in minutes.| [Sign up](https://codenvy.io/site/create-account)
+|Download Codenvy. Install Codenvy anywhere Docker runs and connect it to your private toolchain. Control security and configuration–even add your own extensions.|[Install Now]({{base}}docs/getting-started/getting-started/index.html#install)
 
-## 2. Download Codenvy
-Install Codenvy anywhere Docker runs and connect it to your private toolchain. Control security and configuration–even add your own extensions.
-
+## Install
 With Docker 1.11+ on Windows, Mac, or Linux:
 ```
 $ docker run codenvy/cli start
