@@ -17,8 +17,6 @@ package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
 /**
  * Represents a Bitbucket Server pull request.
  *
@@ -79,51 +77,6 @@ public interface BitbucketServerPullRequest {
         OPEN,
         DECLINED,
         MERGED
-    }
-
-    @DTO
-    interface BitbucketServerPullRequestLinks {
-        List<BitbucketLink> getSelf();
-
-        void setSelf(List<BitbucketLink> self);
-
-        BitbucketServerPullRequestLinks withSelf(List<BitbucketLink> self);
-    }
-
-    @DTO
-    interface BitbucketServerAuthor {
-        BitbucketServerUser getUser();
-
-        void setUser(BitbucketServerUser user);
-
-        BitbucketServerAuthor withUser(BitbucketServerUser user);
-    }
-
-    @DTO
-    interface BitbucketServerPullRequestRef {
-        String getId();
-
-        void setId(String id);
-
-        BitbucketServerPullRequestRef withId(String id);
-
-        String getDisplayId();
-
-        void setDisplayId(String displayId);
-
-        BitbucketServerPullRequestRef withDisplayId(String displayId);
-
-        String getLatestCommit();
-
-        void setLatestCommit(String latestCommit);
-
-        BitbucketServerPullRequestRef withLatestCommit(String latestCommit);
-
-        BitbucketServerRepository getRepository();
-
-        void setRepository(BitbucketServerRepository repository);
-
-        BitbucketServerPullRequestRef withRepository(BitbucketServerRepository repository);
     }
 
 }

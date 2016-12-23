@@ -18,7 +18,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
-import org.eclipse.che.ide.ext.bitbucket.server.Bitbucket;
+import org.eclipse.che.ide.ext.bitbucket.server.BitbucketConnection;
+import org.eclipse.che.ide.ext.bitbucket.server.BitbucketConnectionProvider;
 import org.eclipse.che.ide.ext.bitbucket.server.BitbucketProjectImporter;
 import org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketExceptionMapper;
 import org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketService;
@@ -35,7 +36,7 @@ public class BitbucketModule extends AbstractModule {
     /** {@inheritDoc} */
     @Override
     protected void configure() {
-        bind(Bitbucket.class);
+        bind(BitbucketConnection.class).toProvider(BitbucketConnectionProvider.class);
         bind(BitbucketService.class);
         bind(BitbucketExceptionMapper.class);
 

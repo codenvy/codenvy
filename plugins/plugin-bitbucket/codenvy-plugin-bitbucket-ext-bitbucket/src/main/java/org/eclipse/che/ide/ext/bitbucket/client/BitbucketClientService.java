@@ -20,7 +20,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositories;
@@ -30,6 +29,7 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
@@ -37,7 +37,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static org.eclipse.che.ide.ext.bitbucket.shared.Preconditions.checkArgument;
-import static org.eclipse.che.ide.ext.bitbucket.shared.StringHelper.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * The Bitbucket service implementation to be use by the client.
@@ -50,6 +50,7 @@ public class BitbucketClientService {
     private static final String REPOSITORIES = "/repositories";
     private static final String SSH_KEYS     = "/ssh-keys";
 
+    private final String                 baseUrl;
     private final LoaderFactory          loaderFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final AppContext             appContext;
@@ -59,11 +60,13 @@ public class BitbucketClientService {
     protected BitbucketClientService(AppContext appContext,
                                      LoaderFactory loaderFactory,
                                      AsyncRequestFactory asyncRequestFactory,
-                                     DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                                     DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                     @RestContext String baseUrl) {
         this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
+        this.baseUrl = baseUrl;
     }
 
 
@@ -71,8 +74,11 @@ public class BitbucketClientService {
         return appContext.getDevMachine().getWsAgentBaseUrl() + "/bitbucket";
     }
 
+    /**
+     * Returns configured url of Bitbucket.
+     */
     public Promise<String> getBitbucketEndpoint() {
-        final String requestUrl = getBaseUrl() + "/endpoint";
+        final String requestUrl = baseUrl + "/bitbucket/endpoint";
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send(new StringUnmarshaller());
@@ -82,9 +88,9 @@ public class BitbucketClientService {
      * Returns the promise which resolves authorized user information or rejects with an error.
      *
      * @param username
-     *         BitbucketServer API requires username
+     *         name of the user to retrieve
      */
-    public Promise<BitbucketUser> getUser(@Nullable String username) {
+    public Promise<BitbucketUser> getUser(String username) {
         final String requestUrl = getBaseUrl() + USER + "/" + username;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())

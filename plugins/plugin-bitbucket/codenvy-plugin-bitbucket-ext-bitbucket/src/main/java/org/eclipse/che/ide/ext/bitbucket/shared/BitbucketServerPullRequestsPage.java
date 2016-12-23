@@ -19,7 +19,7 @@ import org.eclipse.che.dto.shared.DTO;
 import java.util.List;
 
 /**
- * Represents a pull requests page in the Bitbucket Server API.
+ * Represents a pull requests page in the Bitbucket Server rest API.
  *
  * @author Igor Vinokur
  */

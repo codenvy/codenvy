@@ -24,7 +24,6 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoryFork;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -47,12 +46,12 @@ import static org.eclipse.che.ide.rest.HTTPStatus.OK;
  */
 public class BitbucketConnectionImpl extends BitbucketConnection {
 
-    private final URLTemplates urlTemplates;
+    private final URLTemplates       urlTemplates;
     private final OAuthTokenProvider tokenProvider;
 
     BitbucketConnectionImpl(OAuthTokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
-        this.urlTemplates = new BitbucketHostedURLTemplates();
+        this.urlTemplates = new BitbucketURLTemplates();
     }
 
     @Override
@@ -62,18 +61,16 @@ public class BitbucketConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    public BitbucketRepository getRepository(@NotNull String owner, @NotNull String repositorySlug) throws IOException,
-                                                                                                           BitbucketException,
-                                                                                                           ServerException {
+    public BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException, BitbucketException, ServerException {
         final String response = getJson(urlTemplates.repositoryUrl(owner, repositorySlug), OK);
         return parseJsonResponse(response, BitbucketRepository.class);
     }
 
     @Override
-    public List<BitbucketPullRequest> getRepositoryPullRequests(@NotNull String owner, @NotNull String repositorySlug) throws
-                                                                                                                       ServerException,
-                                                                                                                       IOException,
-                                                                                                                       BitbucketException {
+    public List<BitbucketPullRequest> getRepositoryPullRequests(String owner, String repositorySlug) throws
+                                                                                                     ServerException,
+                                                                                                     IOException,
+                                                                                                     BitbucketException {
         final List<BitbucketPullRequest> pullRequests = new ArrayList<>();
         BitbucketPullRequestsPage pullRequestsPage = newDto(BitbucketPullRequestsPage.class);
 
@@ -89,21 +86,20 @@ public class BitbucketConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    public BitbucketPullRequest openPullRequest(@NotNull String owner,
-                                                @NotNull String repositorySlug,
-                                                @NotNull BitbucketPullRequest pullRequest) throws ServerException,
-                                                                                                  IOException,
-                                                                                                  BitbucketException {
+    public BitbucketPullRequest openPullRequest(String owner,
+                                                String repositorySlug,
+                                                BitbucketPullRequest pullRequest) throws ServerException,
+                                                                                         IOException,
+                                                                                         BitbucketException {
         final String url = urlTemplates.pullrequestUrl(owner, repositorySlug);
         final String response = postJson(url, CREATED, toJson(pullRequest, CAMEL_UNDERSCORE));
         return parseJsonResponse(response, BitbucketPullRequest.class);
     }
 
     @Override
-    public List<BitbucketRepository> getRepositoryForks(@NotNull String owner, @NotNull String repositorySlug) throws IOException,
-                                                                                                                      BitbucketException,
-                                                                                                                      ServerException,
-                                                                                                                      IllegalArgumentException {
+    public List<BitbucketRepository> getRepositoryForks(String owner, String repositorySlug) throws IOException,
+                                                                                                    BitbucketException,
+                                                                                                    ServerException {
         final List<BitbucketRepository> repositories = new ArrayList<>();
         BitbucketRepositoriesPage repositoryPage = newDto(BitbucketRepositoriesPage.class);
 
@@ -119,9 +115,9 @@ public class BitbucketConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    public BitbucketRepositoryFork forkRepository(@NotNull String owner,
-                                                  @NotNull String repositorySlug,
-                                                  @NotNull String forkName,
+    public BitbucketRepositoryFork forkRepository(String owner,
+                                                  String repositorySlug,
+                                                  String forkName,
                                                   boolean isForkPrivate) throws IOException,
                                                                                 BitbucketException,
                                                                                 ServerException {

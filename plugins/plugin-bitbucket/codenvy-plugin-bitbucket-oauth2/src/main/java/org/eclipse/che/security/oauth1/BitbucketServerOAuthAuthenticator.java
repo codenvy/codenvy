@@ -34,12 +34,12 @@ public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
                                              @Named("oauth.bitbucket.authtokenuri") String authTokenUri,
                                              @Named("che.api") String apiEndpoint) {
         super(consumerKey,
-              null,
-              privateKey,
               requestTokenUri,
               accessTokenUri,
               authTokenUri,
-              apiEndpoint + "/oauth/1.0/callback");
+              apiEndpoint + "/oauth/1.0/callback",
+              null,
+              privateKey);
     }
 
     @Override

@@ -20,7 +20,7 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest.BitbucketPu
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest.BitbucketPullRequestLocation;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerPullRequest;
-import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerPullRequest.BitbucketServerPullRequestRef;
+import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerPullRequestRef;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerUser;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerProject;
@@ -34,7 +34,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Igor Vinokur
  */
-public class BitbucketServerDTOConverter {
+class BitbucketServerDTOConverter {
 
     static BitbucketUser convertToBitbucketUser(BitbucketServerUser bitbucketServerUser) {
 

@@ -15,11 +15,11 @@
 package org.eclipse.che.ide.ext.bitbucket.server;
 
 /**
- * Defines URL templates for BitBucket.
+ * Defines URL templates for hosted version of BitBucket.
  *
  * @author Igor Vinokur
  */
-public class BitbucketHostedURLTemplates implements URLTemplates {
+public class BitbucketURLTemplates implements URLTemplates {
 
     private static final String BITBUCKET_API_URL     = "https://api.bitbucket.org";
     private static final String BITBUCKET_2_0_API_URL = BITBUCKET_API_URL + "/2.0";

@@ -26,7 +26,6 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerUser;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    BitbucketUser getUser(String username) throws ServerException, IOException, BitbucketException {
+    public BitbucketUser getUser(String username) throws ServerException, IOException, BitbucketException {
         //Need to check if user has permissions to retrieve full information from Bitbucket Server rest API.
         //Other requests will not fail with 403 error, but may return empty data.
         doRequest(GET, bitbucketEndpoint + "/rest/api/latest/users", OK, null, null);
@@ -70,17 +69,17 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    BitbucketRepository getRepository(@NotNull String owner, @NotNull String repositorySlug) throws IOException,
-                                                                                                    BitbucketException,
-                                                                                                    ServerException {
+    public BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException,
+                                                                                         BitbucketException,
+                                                                                         ServerException {
         final String response = getJson(urlTemplates.repositoryUrl(owner, repositorySlug), OK);
         return convertToBitbucketRepository(parseJsonResponse(response, BitbucketServerRepository.class));
     }
 
     @Override
-    List<BitbucketPullRequest> getRepositoryPullRequests(@NotNull String owner, @NotNull String repositorySlug) throws ServerException,
-                                                                                                                       IOException,
-                                                                                                                       BitbucketException {
+    public List<BitbucketPullRequest> getRepositoryPullRequests(String owner, String repositorySlug) throws ServerException,
+                                                                                                            IOException,
+                                                                                                            BitbucketException {
         final List<BitbucketPullRequest> pullRequests = new ArrayList<>();
         BitbucketServerPullRequestsPage pullRequestsPage = null;
 
@@ -93,28 +92,29 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
                                                 .stream()
                                                 .map(BitbucketServerDTOConverter::convertToBitbucketPullRequest)
                                                 .collect(Collectors.toList()));
+
         } while (!pullRequestsPage.isIsLastPage());
 
         return pullRequests;
     }
 
     @Override
-    BitbucketPullRequest openPullRequest(@NotNull String owner,
-                                         @NotNull String repositorySlug,
-                                         @NotNull BitbucketPullRequest pullRequest) throws ServerException,
-                                                                                           IOException,
-                                                                                           BitbucketException {
+    public BitbucketPullRequest openPullRequest(String owner,
+                                                String repositorySlug,
+                                                BitbucketPullRequest pullRequest) throws ServerException,
+                                                                                         IOException,
+                                                                                         BitbucketException {
         final String url = urlTemplates.pullrequestUrl(owner, repositorySlug);
         final String response = postJson(url, CREATED, toJson(convertToBitbucketServerPullRequest(pullRequest)));
         return convertToBitbucketPullRequest(parseJsonResponse(response, BitbucketServerPullRequest.class));
     }
 
     @Override
-    public List<BitbucketRepository> getRepositoryForks(@NotNull String owner,
-                                                        @NotNull String repositorySlug) throws IOException,
-                                                                                               BitbucketException,
-                                                                                               ServerException,
-                                                                                               IllegalArgumentException {
+    public List<BitbucketRepository> getRepositoryForks(String owner,
+                                                        String repositorySlug) throws IOException,
+                                                                                      BitbucketException,
+                                                                                      ServerException,
+                                                                                      IllegalArgumentException {
         final List<BitbucketRepository> repositories = new ArrayList<>();
         BitbucketServerRepositoriesPage repositoriesPage = null;
 
@@ -132,9 +132,9 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     }
 
     @Override
-    public BitbucketRepositoryFork forkRepository(@NotNull String owner,
-                                                  @NotNull String repositorySlug,
-                                                  @NotNull String forkName,
+    public BitbucketRepositoryFork forkRepository(String owner,
+                                                  String repositorySlug,
+                                                  String forkName,
                                                   boolean isForkPrivate) throws IOException,
                                                                                 BitbucketException,
                                                                                 ServerException {

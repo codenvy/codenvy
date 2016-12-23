@@ -19,11 +19,12 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
+import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequests;
+import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositories;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoryFork;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 
-import javax.validation.constraints.NotNull;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,48 +47,130 @@ import static org.eclipse.che.ide.rest.HTTPMethod.POST;
 import static org.eclipse.che.ide.rest.HTTPStatus.OK;
 
 /**
- * Connection to Bitbucket rest API.
+ * Connection for retrieving data from Bitbucket.
  *
  * @author Igor Vinokur
  */
 public abstract class BitbucketConnection {
 
-    /** @see Bitbucket#getUser(String) */
-    abstract BitbucketUser getUser(String username) throws ServerException, IOException, BitbucketException;
+    /**
+     * Get user information.
+     *
+     * @return {@link BitbucketUser} object that describes received user
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract BitbucketUser getUser(String username) throws ServerException, IOException, BitbucketException;
 
-    /** @see Bitbucket#getRepository(String, String) */
-    abstract BitbucketRepository getRepository(@NotNull final String owner,
-                                               @NotNull final String repositorySlug) throws IOException,
-                                                                                            BitbucketException,
-                                                                                            ServerException;
+    /**
+     * Get Bitbucket repository information.
+     *
+     * @param owner
+     *         the repository owner
+     * @param repositorySlug
+     *         the repository name
+     * @return {@link BitbucketRepository} object that describes received repository
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException,
+                                                                                                  BitbucketException,
+                                                                                                  ServerException;
 
-    /** @see Bitbucket#getRepositoryPullRequests(String, String) */
-    abstract List<BitbucketPullRequest> getRepositoryPullRequests(@NotNull final String owner,
-                                                                  @NotNull final String repositorySlug) throws ServerException,
-                                                                                                               IOException,
-                                                                                                               BitbucketException;
+    /**
+     * Get Bitbucket repository pull requests.
+     *
+     * @param owner
+     *         the repositories owner
+     * @param repositorySlug
+     *         the repository name
+     * @return {@link BitbucketPullRequests} object that describes received pull requests
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract List<BitbucketPullRequest> getRepositoryPullRequests(String owner, String repositorySlug) throws ServerException,
+                                                                                                                     IOException,
+                                                                                                                     BitbucketException;
 
-    /** @see Bitbucket#openPullRequest(String, String, BitbucketPullRequest) */
-    abstract BitbucketPullRequest openPullRequest(@NotNull final String owner,
-                                                  @NotNull final String repositorySlug,
-                                                  @NotNull final BitbucketPullRequest pullRequest) throws ServerException,
-                                                                                                          IOException,
-                                                                                                          BitbucketException;
+    /**
+     * Open a pull request in the Bitbucket repository.
+     *
+     * @param owner
+     *         the repository owner
+     * @param repositorySlug
+     *         the repository name
+     * @param pullRequest
+     *         {@link BitbucketPullRequest} object that describes pull request parameters
+     * @return {@link BitbucketPullRequest} object that describes opened pull request.
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract BitbucketPullRequest openPullRequest(String owner,
+                                                         String repositorySlug,
+                                                         BitbucketPullRequest pullRequest) throws ServerException,
+                                                                                                  IOException,
+                                                                                                  BitbucketException;
 
-    /** @see Bitbucket#openPullRequest(String, String, BitbucketPullRequest) */
-    abstract public List<BitbucketRepository> getRepositoryForks(@NotNull final String owner,
-                                                                 @NotNull final String repositorySlug) throws IOException,
-                                                                                                              BitbucketException,
-                                                                                                              ServerException,
-                                                                                                              IllegalArgumentException;
+    /**
+     * Get Bitbucket repository forks.
+     *
+     * @param owner
+     *         the repository owner
+     * @param repositorySlug
+     *         the repository name
+     * @return {@link BitbucketRepositories} object that describes received forks
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract List<BitbucketRepository> getRepositoryForks(String owner, String repositorySlug) throws IOException,
+                                                                                                             BitbucketException,
+                                                                                                             ServerException;
 
-    /** @see Bitbucket#forkRepository(String, String, String, boolean) */
-    abstract public BitbucketRepositoryFork forkRepository(@NotNull final String owner,
-                                                           @NotNull final String repositorySlug,
-                                                           @NotNull final String forkName,
-                                                           final boolean isForkPrivate) throws IOException,
-                                                                                               BitbucketException,
-                                                                                               ServerException;
+    /**
+     * Fork a Bitbucket repository.
+     *
+     * @param owner
+     *         the repository owner
+     * @param repositorySlug
+     *         the repository name
+     * @param forkName
+     *         the fork name
+     * @param isForkPrivate
+     *         if the fork must be private
+     * @return {@link BitbucketRepositoryFork} object that describes created fork
+     * @throws ServerException
+     *         if any error occurs when parse Json response
+     * @throws IOException
+     *         if any i/o errors occurs
+     * @throws BitbucketException
+     *         if Bitbucket returned unexpected or error status for request
+     */
+    public abstract BitbucketRepositoryFork forkRepository(String owner,
+                                                           String repositorySlug,
+                                                           String forkName,
+                                                           boolean isForkPrivate) throws IOException,
+                                                                                         BitbucketException,
+                                                                                         ServerException;
 
     /**
      * Add authorization header to given HTTP connection.
@@ -176,11 +259,9 @@ public abstract class BitbucketConnection {
         }
     }
 
-    <O> O parseJsonResponse(final String json, final Class<O> clazz) throws ServerException {
+    <T> T parseJsonResponse(final String json, final Class<T> clazz) throws ServerException {
         try {
-
             return JsonHelper.fromJson(json, clazz, null, CAMEL_UNDERSCORE);
-
         } catch (JsonParseException e) {
             throw new ServerException(e);
         }

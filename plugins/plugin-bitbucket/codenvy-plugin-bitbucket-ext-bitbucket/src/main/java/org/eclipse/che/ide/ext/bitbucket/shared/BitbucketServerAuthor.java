@@ -17,21 +17,15 @@ package org.eclipse.che.ide.ext.bitbucket.shared;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Represents a link in Bitbucket Server rest API.
+ * Represents author of Bitbucket Server pull request.
  *
  * @author Igor Vinokur
  */
 @DTO
-public interface BitbucketServerLink {
-    String getName();
+public interface BitbucketServerAuthor {
+    BitbucketServerUser getUser();
 
-    void setName(String name);
+    void setUser(BitbucketServerUser user);
 
-    BitbucketServerLink withName(String name);
-
-    String getHref();
-
-    void setHref(String href);
-
-    BitbucketServerLink withHref(String href);
+    BitbucketServerAuthor withUser(BitbucketServerUser user);
 }

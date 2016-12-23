@@ -69,6 +69,7 @@ public class BitbucketHostingServiceTest {
                               {"git@bitbucket.org:testuser/ssh-repo", "ssh-repo"},
                               {"git@bitbucket.org:testuser/ssh-repo.git", "ssh-repo"}};
     }
+
     @Test(dataProvider = "valid")
     public void shouldGetRepositoryNameFromUrl(String remoteUrl, String name) {
         Assert.assertEquals(bitbucketHostingService.getRepositoryNameFromUrl(remoteUrl), name);

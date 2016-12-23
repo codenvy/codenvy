@@ -47,7 +47,6 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 import org.eclipse.che.ide.rest.RestContext;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest.BitbucketPullRequestBranch;
@@ -84,12 +83,12 @@ public class BitbucketHostingService implements VcsHostingService {
     private String                  bitbucketEndpoint;
 
     @Inject
-    public BitbucketHostingService(@NotNull final AppContext appContext,
-                                   @NotNull final DtoFactory dtoFactory,
-                                   @NotNull final BitbucketClientService bitbucketClientService,
-                                   @NotNull final BitBucketTemplates templates,
-                                   @NotNull final BitBucketServerTemplates bitbucketServerTemplates,
-                                   @NotNull @RestContext final String baseUrl) {
+    public BitbucketHostingService(final AppContext appContext,
+                                   final DtoFactory dtoFactory,
+                                   final BitbucketClientService bitbucketClientService,
+                                   final BitBucketTemplates templates,
+                                   final BitBucketServerTemplates bitbucketServerTemplates,
+                                   @RestContext final String baseUrl) {
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
         this.bitbucketClientService = bitbucketClientService;
@@ -113,20 +112,18 @@ public class BitbucketHostingService implements VcsHostingService {
         return this;
     }
 
-    @NotNull
     @Override
     public String getName() {
         return SERVICE_NAME;
     }
 
-    @NotNull
     @Override
     public String getHost() {
         return bitbucketEndpoint;
     }
 
     @Override
-    public boolean isHostRemoteUrl(@NotNull final String remoteUrl) {
+    public boolean isHostRemoteUrl(final String remoteUrl) {
         String hostName = bitbucketEndpoint.split("/")[2];
         if (hostName.contains(":")) {
             hostName = hostName.substring(0, hostName.indexOf(":"));
@@ -263,9 +260,8 @@ public class BitbucketHostingService implements VcsHostingService {
                                      });
     }
 
-    @NotNull
     @Override
-    public String getRepositoryNameFromUrl(@NotNull final String url) {
+    public String getRepositoryNameFromUrl(final String url) {
         String[] split = url.split("/");
         String repositoryName = split[split.length - 1];
         if (repositoryName.endsWith(REPOSITORY_GIT_EXTENSION)) {
@@ -275,9 +271,8 @@ public class BitbucketHostingService implements VcsHostingService {
         }
     }
 
-    @NotNull
     @Override
-    public String getRepositoryOwnerFromUrl(@NotNull final String url) {
+    public String getRepositoryOwnerFromUrl(final String url) {
         String[] split = url.split("/");
         String result = split[split.length - 2];
         if (result.startsWith("~")) {
@@ -321,9 +316,8 @@ public class BitbucketHostingService implements VcsHostingService {
                                      });
     }
 
-    @NotNull
     @Override
-    public String makeSSHRemoteUrl(@NotNull final String username, @NotNull final String repository) {
+    public String makeSSHRemoteUrl(final String username, final String repository) {
         if (DEFAULT_ENDPOINT.equals(bitbucketEndpoint)) {
             return templates.sshUrlTemplate(username, repository);
         } else {
@@ -331,9 +325,8 @@ public class BitbucketHostingService implements VcsHostingService {
         }
     }
 
-    @NotNull
     @Override
-    public String makeHttpRemoteUrl(@NotNull final String username, @NotNull final String repository) {
+    public String makeHttpRemoteUrl(final String username, final String repository) {
         if (DEFAULT_ENDPOINT.equals(bitbucketEndpoint)) {
             return templates.httpUrlTemplate(username, repository);
         } else {
@@ -341,11 +334,10 @@ public class BitbucketHostingService implements VcsHostingService {
         }
     }
 
-    @NotNull
     @Override
-    public String makePullRequestUrl(@NotNull final String username,
-                                     @NotNull final String repository,
-                                     @NotNull final String pullRequestNumber) {
+    public String makePullRequestUrl(final String username,
+                                     final String repository,
+                                     final String pullRequestNumber) {
         if (DEFAULT_ENDPOINT.equals(bitbucketEndpoint)) {
             return templates.pullRequestUrlTemplate(username, repository, pullRequestNumber);
         } else {
@@ -353,9 +345,8 @@ public class BitbucketHostingService implements VcsHostingService {
         }
     }
 
-    @NotNull
     @Override
-    public String formatReviewFactoryUrl(@NotNull final String reviewFactoryUrl) {
+    public String formatReviewFactoryUrl(final String reviewFactoryUrl) {
         final String protocol = Window.Location.getProtocol();
         final String host = Window.Location.getHost();
 
@@ -461,7 +452,7 @@ public class BitbucketHostingService implements VcsHostingService {
      *         the {@link org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepository}.
      * @return the HTTPS clone url from the clone links or {@code null} if none.
      */
-    private String getCloneHttpsUrl(@NotNull final BitbucketRepository bitbucketRepository) {
+    private String getCloneHttpsUrl(final BitbucketRepository bitbucketRepository) {
         if (bitbucketRepository.getLinks() != null && bitbucketRepository.getLinks().getClone() != null) {
             for (final BitbucketLink oneCloneLink : bitbucketRepository.getLinks().getClone()) {
                 if (oneCloneLink.getName() != null && "https".equals(oneCloneLink.getName())) {

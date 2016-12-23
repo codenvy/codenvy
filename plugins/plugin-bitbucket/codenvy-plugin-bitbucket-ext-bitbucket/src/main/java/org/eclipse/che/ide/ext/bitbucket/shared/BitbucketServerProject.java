@@ -17,7 +17,7 @@ package org.eclipse.che.ide.ext.bitbucket.shared;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Represents a project in the Bitbucket Server API.
+ * Represents a project in the Bitbucket Server rest API.
  *
  * @author Igor Vinokur
  */
