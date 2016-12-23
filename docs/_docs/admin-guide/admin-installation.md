@@ -54,14 +54,15 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 |Port|Service|Notes|
 |---|---|---|
 |80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
-|5000|Docker Registry|Embedded registry to save workspace snapshots. This port is not required if you configure an external registry.
+|5000|Docker Registry|Embedded registry to save workspace snapshots. This port is not required if you configure an external registry or have not added additional workspace nodes.
+|32768-65535|Docker|Users who launch servers in their workspace bind to ephemeral ports in this range. This range can be limited.
 
 #### Master Node: Internal
 |Port|Service
 |---|---|
 |81|Nginx
+|2181|ZooKeeper
 |2375|Swarm
-|2376|ZooKeeper
 |5432|Postgres
 |8080|Codenvy Server
 
@@ -69,15 +70,15 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 |Port|Service|Notes|
 |---|---|---|
 |80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
-|32768-65535|Docker|Codenvy users who launch servers in a workspace have outputs mapped to this range. This range can be limited.
+|32768-65535|Docker|Users who launch servers in their workspace bind to ephemeral ports in this range. This range can be limited.
 
 The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
 
 #### Workspace Node: Internal
 |Port|Service
 |---|---|
+|2181|ZooKeeper
 |2375|Swarm
-|2376|ZooKeeper
 |5000|Docker Registry
 
 # Installation
