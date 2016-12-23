@@ -36,8 +36,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
+import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 
 /**
@@ -62,17 +62,7 @@ public class MachineServiceAuthLinksInjector extends MachineServiceLinksInjector
     @VisibleForTesting
     protected void injectTerminalLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
         if (machine.getRuntime() != null) {
-            String token = null;
-            try {
-                token = httpJsonRequestFactory.fromUrl(tokenServiceBaseUrl + machine.getWorkspaceId())
-                                              .setMethod(HttpMethod.GET)
-                                              .request()
-                                              .asDto(MachineTokenDto.class)
-                                              .getMachineToken();
-            } catch (ApiException | IOException ex) {
-                LOG.warn("Failed to get machine token", ex);
-            }
-            final String machineToken = firstNonNull(token, "");
+            final String machineToken = getMachineToken(machine);
             final String scheme = serviceContext.getBaseUriBuilder().build().getScheme();
             final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
             servers.stream()
@@ -89,4 +79,40 @@ public class MachineServiceAuthLinksInjector extends MachineServiceLinksInjector
                                                                TERMINAL_REFERENCE)));
         }
     }
+
+
+    protected void injectExecAgentLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
+        final String scheme = serviceContext.getBaseUriBuilder().build().getScheme();
+        if (machine.getRuntime() != null) {
+            final String machineToken = getMachineToken(machine);
+            final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
+            servers.stream()
+                   .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+                   .findAny()
+                   .ifPresent(terminal ->
+                                      links.add(createLink("GET",
+                                                           UriBuilder.fromUri(terminal.getUrl())
+                                                                     .scheme("https".equals(scheme) ? "wss" : "ws")
+                                                                     .queryParam("token", machineToken)
+                                                                     .path("/connect")
+                                                                     .build()
+                                                                     .toString(),
+                                                           EXEC_AGENT_REFERENCE)));
+        }
+    }
+
+
+    private String getMachineToken(MachineDto machine) {
+        try {
+            return httpJsonRequestFactory.fromUrl(tokenServiceBaseUrl + machine.getWorkspaceId())
+                                          .setMethod(HttpMethod.GET)
+                                          .request()
+                                          .asDto(MachineTokenDto.class)
+                                          .getMachineToken();
+        } catch (ApiException | IOException ex) {
+            LOG.warn("Failed to get machine token", ex);
+        }
+        return "";
+    }
+
 }

@@ -25,9 +25,9 @@ docker run --net=host eclipse/che-ip:nightly
 ifconfig
 ```
 
-2: On the Codenvy master node, start Consul: `docker -H <CODENVY-IP>:2376 run -d -p 8500:8500 -h consul progrium/consul -server -bootstrap`
+2: On the Codenvy master node, start Consul: `docker run -d -p 8500:8500 -h consul progrium/consul -server -bootstrap`
 
-3: On each workspace node, [configure and restart Docker](https://docs.docker.com/engine/admin/) with three new options: `--cluster-store=consul://<CODENVY-IP>:8500`, `--cluster-advertise=<WS-IF>:2376`, and `--engine-insecure-registry=<CODENVY-IP>:5000`. The first parameter tells Docker where the key-value store is located. The second parameter tells Docker how to link its workspace node to the key-value storage broadcast. The third parameter opens Docker to communicate on Codenvy's swarm cluster. And the fourth parameter allows the Docker daemon to push snapshots to Codenvy's internal registry. If you are running Codenvy behind a proxy, each workspace node Docker daemon should get the same proxy configuration that you placed on the master node. If you would like your Codenvy master node to also host workspaces, you can add these parameters to your master Docker daemon as well.
+3: On each workspace node, configure and restart Docker with four new options: `--cluster-store=consul://<CODENVY-IP>:8500`, `--cluster-advertise=<WS-IF>:2376`, `--host=tcp://0.0.0.0:2375`, and `--engine-insecure-registry=:5000`. The first parameter tells Docker where the key-value store is located. The second parameter tells Docker how to link its workspace node to the key-value storage broadcast. The third parameter opens Docker to communicate on Codenvy's swarm cluster. And the fourth parameter allows the Docker daemon to push snapshots to Codenvy's internal registry. If you are running Codenvy behind a proxy, each workspace node Docker daemon should get the same proxy configuration that you placed on the master node. If you would like your Codenvy master node to also host workspaces, you can add these parameters to your master Docker daemon as well.
 
 4: Verify that Docker is running properly. Docker will not start if it is not able to connect to the key-value storage. Run a simple `docker run hello-world` to verify Docker is happy. Each workspace node that successfully runs this command is part of the overlay network.
 
@@ -47,8 +47,6 @@ This simulated scaling can be used for production, but it is generally discourag
 
 As an example, the following sequence launches a 3-node cluster of Codenvy using Docker machine with a VirtualBox hypervisor. In this example, we launch 4 VMs: a Codenvy node, 2 additional workspace nodes, and a node to handle key-value storage. The key-value storage node is typically not part of the scaling configuration. However, Codenvy requires an "overlay" network, which is powered by a key-value storage provider such as Consule, etcd, or zookeeper. When running Codenvy on the host, we are able to setup an etcd key-value storage system automatically and associate the nodes with it. However, in a VM scale-out scenario, a dedicated key-value storage provider is needed. This particular example uses Consul key-value storage to setup the overlay network. 
 
-One difference between running Codenvy using `docker-machine` is that each VM, including the Codenvy master, must have an additional option '--host=tcp://0.0.0.0:2375` added into the Docker daemon. This option is not part of the normal scaling configuration.
-
 Start a VM with key-value storage and start Consul:
 ```shell
 # Key-Value storage for overlay network
@@ -61,20 +59,17 @@ Start 3 VMs named 'codenvy', 'ws1', 'ws2'):
 ```shell
 # Codenvy 
 # Grab the IP address of this VM and use it in other commands where we have <CODENVY-IP>
-docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "2048" \
-                      --engine-opt="host=tcp://0.0.0.0:2375" codenvy
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "2048" codenvy
 
 # Workspace Node 1
 # 3GB RAM - enough to run a couple workspaces at the same time
 docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
-                      --engine-opt="host=tcp://0.0.0.0:2375" \
                       --engine-opt="cluster-store=consul://<KV-IP>:8500" \
                       --engine-opt="cluster-advertise=eth1:2376" \
                       --engine-insecure-registry="<CODENVY-IP>:5000" ws1
 
 # Workspace Node 2
 docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
-                      --engine-opt="host=tcp://0.0.0.0:2375" \
                       --engine-opt="cluster-store=consul://<KV-IP>:8500" \
                       --engine-opt="cluster-advertise=eth1:2376" \
                       --engine-insecure-registry="<CODENVY-IP>:5000" ws2
