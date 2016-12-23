@@ -16,7 +16,6 @@ package com.codenvy.api.license.server.dao;
 
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.model.Constants;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -31,16 +30,16 @@ public interface SystemLicenseActionDao {
     /**
      * Inserts license action record.
      *
-     * @param codenvyLicenseAction
+     * @param systemLicenseAction
      *      any license action
      * @throws ConflictException
      *      if action already exists in the system
      * @throws ServerException
      *      any other error occurred
      */
-    void insert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+    void insert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
-    void upsert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+    void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
     /**
      * Removes system license action record.

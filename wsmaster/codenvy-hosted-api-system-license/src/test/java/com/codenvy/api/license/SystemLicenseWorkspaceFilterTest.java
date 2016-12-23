@@ -32,7 +32,8 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /** Test related to @SystemLicenseWorkspaceFilter class. */
@@ -53,7 +54,7 @@ public class SystemLicenseWorkspaceFilterTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+    @Test(dataProvider = "testData")
     public void shouldNotThrowForbiddenException(String  workspaceServiceMethodName, Class[] workspaceServiceMethodParameters) throws
                                                                                                                                ServerException,
                                                                                                                                ForbiddenException,
@@ -66,7 +67,7 @@ public class SystemLicenseWorkspaceFilterTest {
         filter.filter(genericResourceMethod, null);
 
         //then
-        verifyNoMoreInteractions(licenseManager);
+        verify(licenseManager, never()).getMessageForLicenseCompletelyExpired();
     }
 
     @Test(dataProvider = "testData", expectedExceptions = ForbiddenException.class, expectedExceptionsMessageRegExp = "License expired")
@@ -78,7 +79,7 @@ public class SystemLicenseWorkspaceFilterTest {
         doReturn(WorkspaceService.class.getMethod(workspaceServiceMethodName, workspaceServiceMethodParameters)).when(genericResourceMethod).getMethod();
 
         doReturn(false).when(licenseManager).canStartWorkspace();
-        doReturn("License expired").when(licenseManager).getMessageForLicenseExpired();
+        doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
 
         //when
         filter.filter(genericResourceMethod, null);

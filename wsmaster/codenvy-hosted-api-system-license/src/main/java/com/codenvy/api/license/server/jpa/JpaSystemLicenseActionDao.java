@@ -19,7 +19,6 @@ import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.model.Constants;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -42,11 +41,11 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     protected Provider<EntityManager> managerProvider;
 
     @Override
-    public void insert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
-        requireNonNull(codenvyLicenseAction, "Required non-null system license action");
+    public void insert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException {
+        requireNonNull(systemLicenseAction, "Required non-null system license action");
 
         try {
-            doInsert(codenvyLicenseAction);
+            doInsert(systemLicenseAction);
         } catch (DuplicateKeyException e) {
             throw new ConflictException("System license action already exists");
         } catch (RuntimeException e) {
@@ -55,11 +54,11 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     }
 
     @Override
-    public void upsert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException {
-        requireNonNull(codenvyLicenseAction, "Required non-null system license action");
+    public void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException {
+        requireNonNull(systemLicenseAction, "Required non-null system license action");
 
         try {
-            doUpsert(codenvyLicenseAction);
+            doUpsert(systemLicenseAction);
         } catch (RuntimeException e) {
             throw new ServerException(e);
         }

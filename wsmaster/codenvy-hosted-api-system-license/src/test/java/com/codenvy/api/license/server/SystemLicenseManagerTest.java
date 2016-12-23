@@ -16,18 +16,23 @@ package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.SystemLicenseFactory;
+import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.model.Issue;
+import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.collect.ImmutableList;
-
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.commons.subject.Subject;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -36,13 +41,17 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_SERVERS;
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_USERS;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -68,41 +77,45 @@ public class SystemLicenseManagerTest {
     private static final String LICENSE_TEXT           = "# (id: 1)\nlicense text";
     private static final String NEW_LICENSE_TEXT       = "# (id: 2)\nnew license text";
     private static final String LICENSE_ID             = "1";
-    private static final long   USER_NUMBER            = 3;
+    private static final long   USER_NUMBER            = 4;
     private static final int    NODES_NUMBER           = 2;
 
     @Mock
-    private SystemLicense           systemLicense;
+    private SystemLicense                           license;
     @Mock
-    private SystemLicense           newSystemLicense;
+    private SystemLicense                           newSystemLicense;
     @Mock
-    private SystemLicenseFactory    licenseFactory;
+    private SystemLicenseFactory                    licenseFactory;
     @Mock
-    private SwarmDockerConnector    swarmDockerConnector;
+    private SwarmDockerConnector                    swarmDockerConnector;
     @Mock
-    private UserManager             userManager;
+    private UserManager                             userManager;
     @Mock
-    private List<DockerNode>        dockerNodes;
+    private List<DockerNode>                        dockerNodes;
     @Mock
-    private SystemLicenseActionDao  systemLicenseActionDao;
+    private SystemLicenseActionDao                  systemLicenseActionDao;
     @Mock
-    private SystemLicenseActionImpl systemLicenseAction;
+    private SystemLicenseActionImpl                 systemLicenseAction;
     @Mock
-    private SystemLicenseStorage    systemLicenseStorage;
+    private SystemLicenseStorage                    systemLicenseStorage;
     @Mock
-    private SystemLicenseActivator  systemLicenseActivator;
+    private SystemLicenseActivator                  systemLicenseActivator;
+    @Mock
+    private Subject                                 subject;
+    @Captor
+    private ArgumentCaptor<SystemLicenseActionImpl> actionCaptor;
 
-    private SystemLicenseManager systemLicenseManager;
+    private SystemLicenseManager licenseManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource(".");
         assertNotNull(resource);
 
-        when(licenseFactory.create(LICENSE_TEXT)).thenReturn(systemLicense);
+        when(licenseFactory.create(LICENSE_TEXT)).thenReturn(license);
         when(licenseFactory.create(NEW_LICENSE_TEXT)).thenReturn(newSystemLicense);
-        when(systemLicense.getLicenseText()).thenReturn(LICENSE_TEXT);
-        when(systemLicense.getLicenseId()).thenReturn(LICENSE_ID);
+        when(license.getLicenseText()).thenReturn(LICENSE_TEXT);
+        when(license.getLicenseId()).thenReturn(LICENSE_ID);
         when(newSystemLicense.getLicenseId()).thenReturn("2");
         when(newSystemLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
@@ -110,21 +123,23 @@ public class SystemLicenseManagerTest {
 
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
-        systemLicenseManager = spy(new SystemLicenseManager(licenseFactory,
-                                                            userManager,
-                                                            swarmDockerConnector,
-                                                            systemLicenseActionDao,
-                                                            systemLicenseStorage,
-                                                            systemLicenseActivator));
+        licenseManager = spy(new SystemLicenseManager(licenseFactory,
+                                                      userManager,
+                                                      swarmDockerConnector,
+                                                      systemLicenseActionDao,
+                                                      systemLicenseStorage,
+                                                      systemLicenseActivator));
+
+        doReturn(license).when(licenseManager).load();
     }
 
     @Test
     public void shouldActivateAndPersistLicense() throws Exception {
-        when(systemLicenseActivator.activateIfRequired(systemLicense)).thenReturn(ACTIVATED_LICENSE_TEXT);
+        when(systemLicenseActivator.activateIfRequired(license)).thenReturn(ACTIVATED_LICENSE_TEXT);
 
-        systemLicenseManager.store(LICENSE_TEXT);
+        licenseManager.store(LICENSE_TEXT);
 
-        verify(systemLicenseActivator).activateIfRequired(systemLicense);
+        verify(systemLicenseActivator).activateIfRequired(license);
         verify(systemLicenseStorage).persistLicense(LICENSE_TEXT);
         verify(systemLicenseStorage).persistActivatedLicense(ACTIVATED_LICENSE_TEXT);
     }
@@ -133,7 +148,7 @@ public class SystemLicenseManagerTest {
     public void shouldDeleteLicense() throws Exception {
         when(systemLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
-        systemLicenseManager.delete();
+        licenseManager.delete();
 
         verify(systemLicenseStorage).clean();
     }
@@ -143,7 +158,7 @@ public class SystemLicenseManagerTest {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
             .thenThrow(new NotFoundException("System license not found"));
 
-        assertFalse(systemLicenseManager.isFairSourceLicenseAccepted());
+        assertFalse(licenseManager.isFairSourceLicenseAccepted());
     }
 
     @Test
@@ -151,27 +166,27 @@ public class SystemLicenseManagerTest {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
             .thenReturn(mock(SystemLicenseActionImpl.class));
 
-        assertTrue(systemLicenseManager.isFairSourceLicenseAccepted());
+        assertTrue(licenseManager.isFairSourceLicenseAccepted());
     }
 
     @Test
     public void shouldLoadLicenseAndValidateActivation() throws Exception {
+        when(licenseManager.load()).thenCallRealMethod();
         when(systemLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
-        SystemLicense license = systemLicenseManager.load();
+        SystemLicense license = licenseManager.load();
 
-        verify(systemLicenseActivator).validateActivation(systemLicense);
+        verify(systemLicenseActivator).validateActivation(this.license);
         verify(systemLicenseStorage).loadLicense();
         verify(licenseFactory).create(LICENSE_TEXT);
-        assertEquals(license, systemLicense);
+        assertEquals(license, this.license);
     }
 
     @Test
     public void testIsSystemLicenseUsageLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(true).when(systemLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
+        doReturn(true).when(license).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
 
-        assertTrue(systemLicenseManager.isSystemUsageLegal());
+        assertTrue(licenseManager.isSystemUsageLegal());
     }
 
     @Test
@@ -179,17 +194,16 @@ public class SystemLicenseManagerTest {
         when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertTrue(systemLicenseManager.isSystemUsageLegal());
+        assertTrue(licenseManager.isSystemUsageLegal());
     }
 
     @Test
     public void testIsSystemLicenseUsageNotLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(false).when(systemLicense).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
+        doReturn(false).when(license).isLicenseUsageLegal(USER_NUMBER, NODES_NUMBER);
 
-        assertFalse(systemLicenseManager.isSystemUsageLegal());
+        assertFalse(licenseManager.isSystemUsageLegal());
     }
 
     @Test
@@ -197,42 +211,38 @@ public class SystemLicenseManagerTest {
         when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS + 1);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertFalse(systemLicenseManager.isSystemUsageLegal());
+        assertFalse(licenseManager.isSystemUsageLegal());
     }
 
     @Test
     public void testIsCodenvyActualNodesUsageLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(true).when(systemLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(true).when(license).isLicenseNodesUsageLegal(NODES_NUMBER);
 
-        assertTrue(systemLicenseManager.isSystemNodesUsageLegal(null));
+        assertTrue(licenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void testIsCodenvyGivenNodesUsageLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(true).when(systemLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(true).when(license).isLicenseNodesUsageLegal(NODES_NUMBER);
 
-        assertTrue(systemLicenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
+        assertTrue(licenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
         verify(swarmDockerConnector, never()).getAvailableNodes();
     }
 
     @Test
     public void testIsCodenvyActualNodesUsageNotLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(false).when(systemLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(false).when(license).isLicenseNodesUsageLegal(NODES_NUMBER);
 
-        assertFalse(systemLicenseManager.isSystemNodesUsageLegal(null));
+        assertFalse(licenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void testIsCodenvyGivenNodesUsageNotLegal() throws IOException, ServerException {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(false).when(systemLicense).isLicenseNodesUsageLegal(NODES_NUMBER);
+        doReturn(false).when(license).isLicenseNodesUsageLegal(NODES_NUMBER);
 
-        assertFalse(systemLicenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
+        assertFalse(licenseManager.isSystemNodesUsageLegal(NODES_NUMBER));
         verify(swarmDockerConnector, never()).getAvailableNodes();
     }
 
@@ -240,84 +250,80 @@ public class SystemLicenseManagerTest {
     public void testIsCodenvyNodesFreeUsageLegal() throws IOException, ServerException {
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertTrue(systemLicenseManager.isSystemNodesUsageLegal(null));
+        assertTrue(licenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void testIsCodenvyNodesFreeUsageNotLegal() throws IOException, ServerException {
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertFalse(systemLicenseManager.isSystemNodesUsageLegal(null));
+        assertFalse(licenseManager.isSystemNodesUsageLegal(null));
     }
 
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToLicense() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(true).when(systemLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
+        doReturn(true).when(license).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
-        assertTrue(systemLicenseManager.canUserBeAdded());
+        assertTrue(licenseManager.canUserBeAdded());
     }
 
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS - 1);
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertTrue(systemLicenseManager.canUserBeAdded());
+        assertTrue(licenseManager.canUserBeAdded());
     }
 
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToLicense() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(false).when(systemLicense).isLicenseUsageLegal(USER_NUMBER + 1, 0);
+        doReturn(false).when(license).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
-        assertFalse(systemLicenseManager.canUserBeAdded());
+        assertFalse(licenseManager.canUserBeAdded());
     }
 
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
 
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
-        assertFalse(systemLicenseManager.canUserBeAdded());
+        assertFalse(licenseManager.canUserBeAdded());
     }
 
     @Test
     public void shouldReturnAllowedUserNumberDueToLicense() {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn((int)USER_NUMBER).when(systemLicense).getNumberOfUsers();
-        doReturn(false).when(systemLicense).isExpiredCompletely();
+        doReturn((int)USER_NUMBER).when(license).getNumberOfUsers();
+        doReturn(false).when(license).isExpiredCompletely();
 
-        assertEquals(systemLicenseManager.getAllowedUserNumber(), USER_NUMBER);
+        assertEquals(licenseManager.getAllowedUserNumber(), USER_NUMBER);
     }
 
     @Test
     public void shouldReturnAllowedUserNumberDueToFreeUsageTerms() {
-        doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
-        assertEquals(systemLicenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
+        doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
+        assertEquals(licenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
     }
 
     @Test
     public void shouldReturnAllowedUserNumberDueToFreeUsageTermsWhenLicenseCompletelyExpired() {
-        doReturn(systemLicense).when(systemLicenseManager).load();
-        doReturn(true).when(systemLicense).isExpiredCompletely();
-        assertEquals(systemLicenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
+        doReturn(true).when(license).isExpiredCompletely();
+        assertEquals(licenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
     }
 
     @Test
     public void shouldReturnListOfIssuesWithExpiring() throws Exception {
-        doReturn(false).when(systemLicenseManager).canUserBeAdded();
-        doReturn(false).when(systemLicenseManager).isFairSourceLicenseAccepted();
-        doReturn(true).when(systemLicenseManager).isPaidLicenseExpiring();
-        doReturn("License expiring").when(systemLicenseManager).getMessageForLicenseExpiring();
-        assertEquals(systemLicenseManager.getLicenseIssues(),
+        doReturn(false).when(licenseManager).canUserBeAdded();
+        doReturn(false).when(licenseManager).isFairSourceLicenseAccepted();
+        doReturn(true).when(licenseManager).isPaidLicenseExpiring();
+        doReturn("License expiring").when(licenseManager).getMessageForLicenseExpiring();
+        assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
                                                             .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
@@ -328,13 +334,13 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldReturnListOfIssuesWithExpired() throws Exception {
-        doReturn(false).when(systemLicenseManager).canUserBeAdded();
-        doReturn(false).when(systemLicenseManager).isFairSourceLicenseAccepted();
-        doReturn(false).when(systemLicenseManager).isPaidLicenseExpiring();
-        doReturn(true).when(systemLicenseManager).isPaidLicenseExpired();
-        doReturn(false).when(systemLicenseManager).isSystemUsageLegal();
-        doReturn("License expired").when(systemLicenseManager).getMessageForLicenseExpired();
-        assertEquals(systemLicenseManager.getLicenseIssues(),
+        doReturn(false).when(licenseManager).canUserBeAdded();
+        doReturn(false).when(licenseManager).isFairSourceLicenseAccepted();
+        doReturn(false).when(licenseManager).isPaidLicenseExpiring();
+        doReturn(true).when(licenseManager).isPaidLicenseCompletelyExpired();
+        doReturn(false).when(licenseManager).isSystemUsageLegal();
+        doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
+        assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
                                                             .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
@@ -345,11 +351,165 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldReturnEmptyListOfIssues() throws Exception {
-        doReturn(true).when(systemLicenseManager).canUserBeAdded();
-        doReturn(true).when(systemLicenseManager).isFairSourceLicenseAccepted();
-        doReturn(false).when(systemLicenseManager).isPaidLicenseExpiring();
-        doReturn(false).when(systemLicenseManager).isPaidLicenseExpired();
-        assertEquals(systemLicenseManager.getLicenseIssues(), ImmutableList.of());
+        doReturn(true).when(licenseManager).canUserBeAdded();
+        doReturn(true).when(licenseManager).isFairSourceLicenseAccepted();
+        doReturn(false).when(licenseManager).isPaidLicenseExpiring();
+        doReturn(false).when(licenseManager).isPaidLicenseCompletelyExpired();
+        assertEquals(licenseManager.getLicenseIssues(), ImmutableList.of());
+    }
+
+    @Test
+    public void testCanStartWorkspace() throws ServerException {
+        // given
+        doReturn(true).when(licenseManager).isLicenseUsageLegal(USER_NUMBER);
+
+        // when
+        boolean result = licenseManager.canStartWorkspace();
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    public void testCannotStartWorkspace() throws ServerException {
+        // given
+        doReturn(false).when(licenseManager).isLicenseUsageLegal(USER_NUMBER);
+
+        // when
+        boolean result = licenseManager.canStartWorkspace();
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    public void shouldReturnExpiringStatus() {
+        // given
+        doReturn(true).when(license).isExpiring();
+
+        // when
+        boolean result = licenseManager.isPaidLicenseExpiring();
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    public void shouldNotReturnExpiringStatus() {
+        // given
+        doReturn(false).when(license).isExpiring();
+
+        // when
+        boolean result = licenseManager.isPaidLicenseExpiring();
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    public void shouldReturnMessageForLicenseExpiring() {
+        // given
+        doReturn(5).when(license).daysBeforeCompleteExpiration();
+
+        // when
+        String result = licenseManager.getMessageForLicenseExpiring();
+
+        // then
+        assertEquals(result, "License expired. Codenvy will downgrade to a 3 user Fair Source license in 5 days.");
+    }
+
+    @Test
+    public void shouldReturnExpiredStatus() throws ServerException, ConflictException {
+        // given
+        doReturn(true).when(license).isExpiredCompletely();
+
+        // when
+        Boolean result = licenseManager.isPaidLicenseCompletelyExpired();
+
+        // then
+        assertTrue(result);
+        verify(licenseManager).revertToFairSourceLicense(license);
+    }
+
+    @Test
+    public void shouldReturnNonExpiredStatus() throws ServerException, ConflictException {
+        // given
+        doReturn(false).when(license).isExpiredCompletely();
+
+        // when
+        Boolean result = licenseManager.isPaidLicenseCompletelyExpired();
+
+        // then
+        assertFalse(result);
+        verify(licenseManager, never()).revertToFairSourceLicense(license);
+    }
+
+    @Test
+    public void testGetMessageForLicenseExpiredForAdmin() throws ServerException {
+        // given
+        doReturn(subject).when(licenseManager).getSubject();
+        doReturn(true).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+
+        // when
+        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+
+        // then
+        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+        verify(licenseManager, never()).load();
+    }
+
+    @Test
+    public void testGetMessageForLicenseExpiredForNonAdmin() throws ServerException {
+        // given
+        doReturn(null).when(licenseManager).getSubject();
+
+        // when
+        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+
+        // then
+        assertEquals(result, "The Codenvy license is expired - you can access the user dashboard but not the IDE.");
+    }
+
+    @Test
+    public void testGetMessageForLicenseExpiredWhenLicenseAbsentForNonAdmin() throws ServerException {
+        // given
+        doReturn(subject).when(licenseManager).getSubject();
+        doReturn(false).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        doThrow(SystemLicenseException.class).when(licenseManager).load();
+
+        // when
+        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+
+        // then
+        assertEquals(result, "The Codenvy license has reached its user limit - you can access the user dashboard but not the IDE.");
+    }
+
+    @Test
+    public void shouldRevertToFairSourceLicense() throws ServerException, ConflictException, NotFoundException {
+        // given
+        doReturn(LICENSE_ID).when(license).getLicenseId();
+        doThrow(NotFoundException.class).when(systemLicenseActionDao).getByLicenseIdAndAction(LICENSE_ID, EXPIRED);
+
+        // when
+        licenseManager.revertToFairSourceLicense(license);
+
+        // then
+        verify(systemLicenseActionDao).upsert(actionCaptor.capture());
+
+        final SystemLicenseActionImpl action = actionCaptor.getValue();
+        assertEquals(action.getLicenseType(), PRODUCT_LICENSE);
+        assertEquals(action.getActionType(), EXPIRED);
+        assertEquals(action.getLicenseId(), LICENSE_ID);
+        assertEquals(action.getAttributes(), Collections.emptyMap());
+    }
+
+    @Test
+    public void shouldNotRevertToFairSourceLicense() throws ServerException, ConflictException, NotFoundException {
+        // when
+        licenseManager.revertToFairSourceLicense(license);
+
+        // then
+        verify(systemLicenseActionDao, never()).upsert(any());
     }
 
     private void setSizeOfAdditionalNodes(int size) throws IOException {
