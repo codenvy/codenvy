@@ -74,6 +74,15 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 
 The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
 
+#### Workspace Node: Internal
+The following ports need to be allowed for outbound connections only.
+
+|Port|Service|
+| --- |--- |
+|2181|ZooKeeper
+|2375|Swarm
+|5000|Docker Registry
+
 # Installation
 ## Syntax
 ```
