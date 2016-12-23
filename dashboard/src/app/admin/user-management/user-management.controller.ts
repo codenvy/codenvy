@@ -13,26 +13,45 @@
  * from Codenvy S.A..
  */
 'use strict';
+import {LicenseMessagesService} from '../../onprem/license-messages/license-messages.service';
+import {CodenvyAPI} from '../../../components/api/codenvy-api.factory';
+
 
 /**
  * This class is handling the controller for the admins user management
  * @author Oleksii Orel
  */
 export class AdminsUserManagementCtrl {
+  $q: ng.IQService;
+  $log: ng.ILogService;
+  $mdDialog: ng.material.IDialogService;
+  codenvyAPI: CodenvyAPI;
+  licenseMessagesService: LicenseMessagesService;
+  cheNotification: any;
+  pagesInfo: any;
+  users: Array<any>;
+  usersMap: Map<string, any>;
+  userFilter: {name: string};
+  usersSelectedStatus: Object;
+  userOrderBy: string;
+  maxItems: number;
+  skipCount: number;
+  isLoading: boolean;
+  isNoSelected: boolean;
+  isAllSelected: boolean;
+  isBulkChecked: boolean;
 
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($q, lodash, $document, $mdDialog, codenvyAPI, cheNotification) {
-    'ngInject';
-
+  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, codenvyAPI: CodenvyAPI, cheNotification: any, licenseMessagesService: LicenseMessagesService) {
     this.$q = $q;
-    this.lodash = lodash;
-    this.$document = $document;
+    this.$log = $log;
     this.$mdDialog = $mdDialog;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
+    this.licenseMessagesService = licenseMessagesService;
 
     this.isLoading = false;
 
@@ -56,7 +75,7 @@ export class AdminsUserManagementCtrl {
       codenvyAPI.getUser().fetchUsers(this.maxItems, this.skipCount).then(() => {
         this.isLoading = false;
         this.updateUsers();
-      }, (error) => {
+      }, (error: any) => {
         this.isLoading = false;
         if (error && error.status !== 304) {
           this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve the list of users.');
@@ -70,8 +89,8 @@ export class AdminsUserManagementCtrl {
   /**
    * Check all users in list
    */
-  selectAllUsers() {
-    this.users.forEach((user) => {
+  selectAllUsers(): void {
+    this.users.forEach((user: any) => {
       this.usersSelectedStatus[user.id] = true;
     });
   }
@@ -79,8 +98,8 @@ export class AdminsUserManagementCtrl {
   /**
    * Uncheck all users in list
    */
-  deselectAllUsers() {
-    this.users.forEach((user) => {
+  deselectAllUsers(): void {
+    this.users.forEach((user: any) => {
       this.usersSelectedStatus[user.id] = false;
     });
   }
@@ -88,7 +107,7 @@ export class AdminsUserManagementCtrl {
   /**
    * Change bulk selection value
    */
-  changeBulkSelection() {
+  changeBulkSelection(): void {
     if (this.isBulkChecked) {
       this.deselectAllUsers();
       this.isBulkChecked = false;
@@ -102,11 +121,11 @@ export class AdminsUserManagementCtrl {
   /**
    * Update users selected status
    */
-  updateSelectedStatus() {
+  updateSelectedStatus(): void {
     this.isNoSelected = true;
     this.isAllSelected = true;
 
-    this.users.forEach((user) => {
+    this.users.forEach((user: any) => {
       if (this.usersSelectedStatus[user.id]) {
         this.isNoSelected = false;
       } else {
@@ -126,10 +145,10 @@ export class AdminsUserManagementCtrl {
 
   /**
    * User clicked on the - action to remove the user. Show the dialog
-   * @param  event - the $event
-   * @param user - the selected user
+   * @param  event {MouseEvent} - the $event
+   * @param user {any} - the selected user
    */
-  removeUser(event, user) {
+  removeUser(event: MouseEvent, user: any): void {
     let confirm = this.$mdDialog.confirm()
       .title('Would you like to remove user ' + user.email + ' ?')
       .content('Please confirm for the user removal.')
@@ -144,7 +163,8 @@ export class AdminsUserManagementCtrl {
       promise.then(() => {
         this.isLoading = false;
         this.updateUsers();
-      }, (error) => {
+        this.licenseMessagesService.fetchMessages();
+      }, (error: any) => {
         this.isLoading = false;
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Delete user failed.');
       });
@@ -154,7 +174,7 @@ export class AdminsUserManagementCtrl {
   /**
    * Delete all selected users
    */
-  deleteSelectedUsers() {
+  deleteSelectedUsers(): void {
     let usersSelectedStatusKeys = Object.keys(this.usersSelectedStatus);
     let checkedUsersKeys = [];
 
@@ -163,7 +183,7 @@ export class AdminsUserManagementCtrl {
       return;
     }
 
-    usersSelectedStatusKeys.forEach((key) => {
+    usersSelectedStatusKeys.forEach((key: string) => {
       if (this.usersSelectedStatus[key] === true) {
         checkedUsersKeys.push(key);
       }
@@ -184,14 +204,14 @@ export class AdminsUserManagementCtrl {
       let deleteUserPromises = [];
       let currentUserId;
 
-      checkedUsersKeys.forEach((userId) => {
+      checkedUsersKeys.forEach((userId: string) => {
         currentUserId = userId;
         this.usersSelectedStatus[userId] = false;
 
         let promise = this.codenvyAPI.getUser().deleteUserById(userId);
         promise.then(() => {
           queueLength--;
-        }, (error) => {
+        }, (error: any) => {
           isError = true;
           this.$log.error('Cannot delete user: ', error);
         });
@@ -206,7 +226,8 @@ export class AdminsUserManagementCtrl {
           this.isLoading = false;
           this.updateUsers();
           this.updateSelectedStatus();
-        }, (error) => {
+          this.licenseMessagesService.fetchMessages();
+        }, (error: any) => {
           this.isLoading = false;
           this.$log.error(error);
         });
@@ -214,10 +235,7 @@ export class AdminsUserManagementCtrl {
           this.cheNotification.showError('Delete failed.');
         } else {
           if (numberToDelete === 1) {
-            let currentUser = this.lodash.find(this.users, (user) => {
-              return user.id === currentUserId;
-            });
-            this.cheNotification.showInfo(currentUser ? currentUser.email + 'has been removed.' : 'Selected user has been removed.');
+            this.cheNotification.showInfo('Selected user has been removed.');
           } else {
             this.cheNotification.showInfo('Selected users have been removed.');
           }
@@ -228,10 +246,10 @@ export class AdminsUserManagementCtrl {
 
   /**
    * Show confirmation popup before delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param numberToDelete {number}
+   * @returns {angular.IPromise<any>}
    */
-  showDeleteUsersConfirmation(numberToDelete) {
+  showDeleteUsersConfirmation(numberToDelete: number): angular.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' users?';
@@ -251,26 +269,26 @@ export class AdminsUserManagementCtrl {
   /**
    * Update users array
    */
-  updateUsers() {
-    //update users array
+  updateUsers(): void {
+    // update users array
     this.users.length = 0;
-    this.usersMap.forEach((user) => {
+    this.usersMap.forEach((user: any) => {
       this.users.push(user);
     });
   }
 
   /**
    * Ask for loading the users page in asynchronous way
-   * @param pageKey - the key of page
+   * @param pageKey {string} - the key of page
    */
-  fetchUsersPage(pageKey) {
+  fetchUsersPage(pageKey: string): void {
     this.isLoading = true;
     let promise = this.codenvyAPI.getUser().fetchUsersPage(pageKey);
 
     promise.then(() => {
       this.isLoading = false;
       this.updateUsers();
-    }, (error) => {
+    }, (error: any) => {
       this.isLoading = false;
       if (error.status === 304) {
         this.updateUsers();
@@ -284,7 +302,7 @@ export class AdminsUserManagementCtrl {
    * Returns true if the next page is exist.
    * @returns {boolean}
    */
-  hasNextPage() {
+  hasNextPage(): boolean {
     return this.pagesInfo.currentPageNumber < this.pagesInfo.countOfPages;
   }
 
@@ -292,7 +310,7 @@ export class AdminsUserManagementCtrl {
    * Returns true if the previous page is exist.
    * @returns {boolean}
    */
-  hasPreviousPage() {
+  hasPreviousPage(): boolean {
     return this.pagesInfo.currentPageNumber > 1;
   }
 
@@ -300,25 +318,22 @@ export class AdminsUserManagementCtrl {
    * Returns true if we have more then one page.
    * @returns {boolean}
    */
-  isPagination() {
+  isPagination(): boolean {
     return this.pagesInfo.countOfPages > 1;
   }
 
   /**
    * Add a new user. Show the dialog
-   * @param  event - the $event
+   * @param  event {MouseEvent} - the $event
    */
-  showAddUserDialog(event) {
-    let parentEl = angular.element(this.$document.body);
-
+  showAddUserDialog(event: MouseEvent): void {
     this.$mdDialog.show({
       targetEvent: event,
       bindToController: true,
       clickOutsideToClose: true,
-      controller: 'AdminsAddUserCtrl',
-      controllerAs: 'adminsAddUserCtrl',
+      controller: 'AdminsAddUserController',
+      controllerAs: 'adminsAddUserController',
       locals: {callbackController: this},
-      parent: parentEl,
       templateUrl: 'app/admin/user-management/add-user/add-user.html'
     });
   }

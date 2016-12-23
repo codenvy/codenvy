@@ -44,6 +44,7 @@ services:
     links:
       - 'nginx:codenvy-nginx'
       - 'rsyslog:codenvy-rsyslog'
+      - 'agents:codenvy-agents'
     ulimits:
       nproc: 163840
       nofile:
@@ -158,6 +159,24 @@ services:
     restart: always
 
 ########################
+# AGENTS
+########################
+  agents:
+    image: <%= ENV["IMAGE_AGENTS"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/lighttpd/lighttpd.conf:/etc/lighttpd/lighttpd.conf'
+<% if scope.lookupvar('compose::env') != 'production' -%>
+    ports:
+      - '9000:9000'
+<% end -%>
+    ulimits:
+      nproc: 163840
+      nofile:
+        soft: 163840
+        hard: 163840
+    restart: always
+
+########################
 # CODENVY
 ########################
   codenvy:
@@ -165,6 +184,7 @@ services:
     depends_on:
       - haproxy
       - postgres
+      - agents
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/codenvy/codenvy.env'

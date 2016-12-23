@@ -1,0 +1,104 @@
+markdown: kramdown
+highlighter: rouge
+
+
+kramdown:
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  input:          GFM
+
+repository: https://github.com/codenvy/codenvy
+
+timezone: America/Los_Angeles
+
+product_name: "CODENVY"
+product_mini_name:  "codenvy"
+product_formal_name: "Codenvy"
+
+collections:
+  docs:
+    output: true
+  tutorials:
+    output: true
+
+name: Codenvy Docs
+description: Cloud workspaces for development teams
+url: https://codenvy.com
+
+twitter:
+  username: codenvyhq
+
+logo: /img/logo-2x.png
+
+gems:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-sitemap
+
+exclude:
+  - .gitignore
+  - docs.sh
+  - assembly/*
+  - _site/*
+  - pom.xml
+  - _docs/che/write-che-ide-plugins
+  - _docs/che/use-che-as-a-workspace-server
+  - _docs/che/setup-alternatives
+  - _docs/che/setup
+  - _docs/che/openshift-plugin
+  - _docs/che/chedir-portable-workspaces
+  - _docs/che/che-data-model
+  - _docs/che/artik-ide-plugin
+  
+# The following are used to define markdown permalinks
+defaults:
+  -
+    scope:
+      path: "_docs/admin-guide"
+    values:
+      categories: [ "docs" , "admin-guide" ]
+  -
+    scope:
+      path: "_docs/developer-guide"
+    values:
+      categories: [ "docs" , "developer-guide" ]
+  -
+    scope:
+      path: "_docs/getting-started"
+    values:
+      categories: [ "docs" , "getting-started" ]
+  -
+    scope:
+      path: "_docs/integration-guide"
+    values:
+      categories: [ "docs" , "integration-guide" ]
+  -
+    scope:
+      path: "_docs/tutorials"
+    values:
+      categories: [ "tutorials" ]
+  -
+    scope:
+      path: "_docs/user-guide"
+    values:
+      categories: [ "docs" , "user-guide" ]
+  -
+    scope:
+      path: "_docs/white-labels"
+    values:
+      categories: [ "docs" , "white-labels" ]
+  -
+    scope:
+      path: "_docs/che/workspace-administration"
+    values:
+      categories: [ "docs" , "getting-started" ]
+  -
+    scope:
+      path: "_docs/che/use-che-as-an-ide"
+    values:
+      categories: [ "docs" , "user-guide" ]
+  -
+    scope:
+      path: "_docs/che/tutorials"
+    values:
+      categories: [ "tutorials" ]

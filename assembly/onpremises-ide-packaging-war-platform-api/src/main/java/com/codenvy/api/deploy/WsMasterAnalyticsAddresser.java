@@ -14,6 +14,7 @@
  */
 package com.codenvy.api.deploy;
 
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +33,13 @@ public class WsMasterAnalyticsAddresser {
 
     private static final Logger LOG = LoggerFactory.getLogger(WsMasterAnalyticsAddresser.class);
 
+    public static final String ID = NameGenerator.generate("COM", 10);
+
     @ScheduleRate(period = 1, unit = TimeUnit.HOURS)
     void send() {
         HttpURLConnection connection = null;
         try {
-            final URL url = new URL("https://install.codenvycorp.com/codenvy/init/server");
+            final URL url = new URL("https://install.codenvycorp.com/codenvy/init/server?ID=" + ID);
             connection = (HttpsURLConnection)url.openConnection();
             connection.getResponseCode();
         } catch (Exception e) {

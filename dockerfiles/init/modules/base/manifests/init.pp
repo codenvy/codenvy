@@ -16,4 +16,5 @@ class base {
   include codenvy
   include compose
   include rsyslog
+  include lighttpd
 }

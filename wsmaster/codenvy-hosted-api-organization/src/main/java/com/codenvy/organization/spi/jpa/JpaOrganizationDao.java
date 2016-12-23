@@ -37,6 +37,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -126,14 +127,15 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Override
     @Transactional
-    public Page<OrganizationImpl> getByParent(String parent, int maxItems, int skipCount) throws ServerException {
+    public Page<OrganizationImpl> getByParent(String parent, int maxItems, long skipCount) throws ServerException {
         requireNonNull(parent, "Required non-null parent");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {
             final EntityManager manager = managerProvider.get();
             final List<OrganizationImpl> result = manager.createNamedQuery("Organization.getByParent", OrganizationImpl.class)
                                                          .setParameter("parent", parent)
                                                          .setMaxResults(maxItems)
-                                                         .setFirstResult(skipCount)
+                                                         .setFirstResult((int)skipCount)
                                                          .getResultList();
             final Long suborganizationsCount = manager.createNamedQuery("Organization.getSuborganizationsCount", Long.class)
                                                       .setParameter("parent", parent)

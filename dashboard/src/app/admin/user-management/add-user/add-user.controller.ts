@@ -13,41 +13,55 @@
  * from Codenvy S.A..
  */
 'use strict';
+import {LicenseMessagesService} from '../../../onprem/license-messages/license-messages.service';
+import {CodenvyUser} from '../../../../components/api/codenvy-user.factory';
+import {AdminsUserManagementCtrl} from '../user-management.controller';
+
 
 /**
  * This class is handling the controller for the add user
  * @author Oleksii Orel
  */
-export class AdminsAddUserCtrl {
+export class AdminsAddUserController {
+  $mdDialog: ng.material.IDialogService;
+  cheNotification: any;
+  codenvyUser: CodenvyUser;
+  callbackController: AdminsUserManagementCtrl;
+  licenseMessagesService: LicenseMessagesService;
+  newUserName: string;
+  newUserEmail: string;
+  newUserPassword: string;
 
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, codenvyUser, cheNotification) {
+  constructor($mdDialog: ng.material.IDialogService, codenvyUser: CodenvyUser, cheNotification: any, licenseMessagesService: LicenseMessagesService) {
     this.$mdDialog = $mdDialog;
     this.codenvyUser = codenvyUser;
     this.cheNotification = cheNotification;
+    this.licenseMessagesService = licenseMessagesService;
   }
 
   /**
    * Callback of the cancel button of the dialog.
    */
-  abort() {
+  abort(): void {
     this.$mdDialog.hide();
   }
 
   /**
    * Callback of the add button of the dialog(create new user).
    */
-  createUser() {
+  createUser(): void {
     let promise = this.codenvyUser.createUser(this.newUserName, this.newUserEmail, this.newUserPassword);
 
     promise.then(() => {
       this.$mdDialog.hide();
       this.callbackController.updateUsers();
       this.cheNotification.showInfo('User successfully created.');
-    }, (error) => {
+      this.licenseMessagesService.fetchMessages();
+    }, (error: any) => {
       this.cheNotification.showError(error.data.message ? error.data.message : '.');
     });
   }

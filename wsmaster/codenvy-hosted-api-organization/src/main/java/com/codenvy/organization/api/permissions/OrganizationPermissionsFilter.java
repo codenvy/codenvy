@@ -43,9 +43,18 @@ import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE
  * @author Sergii Leschenko
  */
 @Filter
-@Path("/organization{path:(/.*)?}")
+@Path("/organization{path:(?!/resource)(/.*)?}")
 public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
+    // action of system domain for granting admins ability to work with foreign organizations
     public static final String MANAGE_ORGANIZATIONS_ACTION = "manageOrganizations";
+
+    static final String CREATE_METHOD            = "create";
+    static final String UPDATE_METHOD            = "update";
+    static final String REMOVE_METHOD            = "remove";
+    static final String GET_BY_PARENT_METHOD     = "getByParent";
+    static final String GET_ORGANIZATIONS_METHOD = "getOrganizations";
+    static final String GET_BY_ID_METHOD         = "getById";
+    static final String FIND_METHOD              = "find";
 
     @Inject
     private OrganizationManager manager;
@@ -59,22 +68,7 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
         String organizationId;
 
         switch (methodName) {
-            case "update":
-                organizationId = ((String)arguments[0]);
-                action = OrganizationDomain.UPDATE;
-                break;
-
-            case "remove":
-                organizationId = ((String)arguments[0]);
-                action = OrganizationDomain.DELETE;
-                break;
-
-            case "getByParent":
-                organizationId = ((String)arguments[0]);
-                action = OrganizationDomain.MANAGE_SUBORGANIZATIONS;
-                break;
-
-            case "create":
+            case CREATE_METHOD:
                 final OrganizationDto organization = (OrganizationDto)arguments[0];
                 if (organization.getParent() != null) {
                     organizationId = organization.getParent();
@@ -84,7 +78,22 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 //anybody can create root organization
                 return;
 
-            case "getOrganizations":
+            case UPDATE_METHOD:
+                organizationId = ((String)arguments[0]);
+                action = OrganizationDomain.UPDATE;
+                break;
+
+            case REMOVE_METHOD:
+                organizationId = ((String)arguments[0]);
+                action = OrganizationDomain.DELETE;
+                break;
+
+            case GET_BY_PARENT_METHOD:
+                organizationId = ((String)arguments[0]);
+                action = OrganizationDomain.MANAGE_SUBORGANIZATIONS;
+                break;
+
+            case GET_ORGANIZATIONS_METHOD:
                 final String userId = (String)arguments[0];
                 if (userId != null
                     && !userId.equals(currentSubject.getUserId())
@@ -95,8 +104,8 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
                 return;
 
             //methods accessible to every user
-            case "getById":
-            case "find":
+            case GET_BY_ID_METHOD:
+            case FIND_METHOD:
                 return;
 
             default:

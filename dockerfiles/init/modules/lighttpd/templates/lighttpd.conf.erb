@@ -1,0 +1,52 @@
+# {{{ variables
+var.basedir  = "/var/www/localhost"
+var.logdir   = "/var/log/lighttpd"
+var.statedir = "/var/lib/lighttpd"
+# }}}
+
+# {{{ modules
+# At the very least, mod_access and mod_accesslog should be enabled.
+# All other modules should only be loaded if necessary.
+# NOTE: the order of modules is important.
+server.modules = (
+    "mod_access",
+    "mod_accesslog"
+)
+# }}}
+
+# {{{ includes
+include "mime-types.conf"
+# }}}
+
+# {{{ server settings
+server.username      = "lighttpd"
+server.groupname     = "lighttpd"
+
+server.document-root = var.basedir + "/htdocs"
+server.pid-file      = "/run/lighttpd.pid"
+
+server.errorlog      = var.logdir  + "/error.log"
+
+server.indexfiles    = ("index.php", "index.html",
+						"index.htm", "default.htm")
+
+server.follow-symlink = "enable"
+
+# bind to port (defaults to 80)
+server.port          = 9000
+
+# {{{ mod_staticfile
+# which extensions should not be handled via static-file transfer
+# (extensions that are usually handled by mod_cgi, mod_fastcgi, etc).
+static-file.exclude-extensions = (".php", ".pl", ".cgi", ".fcgi")
+# }}}
+
+# {{{ mod_accesslog
+accesslog.filename   = var.logdir + "/access.log"
+# }}}
+
+# {{{ mod_access
+# see access.txt
+url.access-deny = ("~", ".inc")
+# }}}
+

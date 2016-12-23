@@ -38,6 +38,8 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
+import com.codenvy.machine.backup.EnvironmentBackupManager;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -361,6 +363,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                    com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
                         .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
 
+        MapBinder<String, EnvironmentBackupManager> backupManagers = MapBinder.newMapBinder(binder(),
+                                                                                            String.class,
+                                                                                            EnvironmentBackupManager.class);
+        backupManagers.addBinding("compose").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerfile").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerimage").to(DockerEnvironmentBackupManager.class);
+
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
 
@@ -385,8 +394,14 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
 
         bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
-                      .to("$HOME/che/terminal/che-websocket-terminal -addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/ -path '/[^/]+' -enable-auth -enable-activity-tracking");
+                      .to("$HOME/che/terminal/che-websocket-terminal " +
+                          "-addr :4411 " +
+                          "-cmd ${SHELL_INTERPRETER} " +
+                          "-static $HOME/che/terminal/ " +
+                          "-path '/[^/]+' " +
+                          "-enable-auth " +
+                          "-enable-activity-tracking  " +
+                          "-logs-dir $HOME/che/exec-agent/logs");
 
         Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);

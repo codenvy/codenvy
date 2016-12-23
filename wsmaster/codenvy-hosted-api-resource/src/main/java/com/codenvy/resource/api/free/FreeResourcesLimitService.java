@@ -49,7 +49,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Sergii Leschenko
  */
-@Api(value = "/resource/free", description = "Free resources limit REST API")
+@Api(value = "resource-free", description = "Free resources limit REST API")
 @Path("/resource/free")
 public class FreeResourcesLimitService extends Service {
     private final FreeResourcesLimitManager   freeResourcesLimitManager;

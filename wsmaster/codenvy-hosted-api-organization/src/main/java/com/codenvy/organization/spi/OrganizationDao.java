@@ -114,5 +114,5 @@ public interface OrganizationDao {
      * @throws ServerException
      *         when any other error occurs during organizations fetching
      */
-    Page<OrganizationImpl> getByParent(String parent, int maxItems, int skipCount) throws ServerException;
+    Page<OrganizationImpl> getByParent(String parent, int maxItems, long skipCount) throws ServerException;
 }

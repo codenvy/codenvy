@@ -39,10 +39,13 @@ export class CodenvyHttpBackend {
     this.pageMaxItem = 5;
     this.pageSkipCount = 0;
 
+    this.httpBackend.when('OPTIONS', '/api/').respond({});
+
     // change password
     this.httpBackend.when('POST', '/api/user/password').respond(() => {
       return [200, {success: true, errors: []}];
     });
+
     // create new user
     this.httpBackend.when('POST', '/api/user').respond(() => {
       return [200, {success: true, errors: []}];

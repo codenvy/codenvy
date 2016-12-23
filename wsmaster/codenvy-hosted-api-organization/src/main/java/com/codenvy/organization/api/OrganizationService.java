@@ -30,7 +30,6 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -44,6 +43,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import static com.codenvy.organization.api.DtoConverter.asDto;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
@@ -199,13 +199,6 @@ public class OrganizationService extends Service {
                                                                                                     getServiceContext())))
                        .header("Link", createLinkHeader(organizationsPage))
                        .build();
-    }
-
-    private OrganizationDto asDto(Organization organization) {
-        return DtoFactory.newDto(OrganizationDto.class)
-                         .withId(organization.getId())
-                         .withName(organization.getName())
-                         .withParent(organization.getParent());
     }
 
     /**

@@ -17,6 +17,8 @@ package com.codenvy.resource.spi.impl;
 import com.codenvy.resource.model.FreeResourcesLimit;
 import com.codenvy.resource.model.Resource;
 
+import org.eclipse.che.account.spi.AccountImpl;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +28,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +56,9 @@ public class FreeResourcesLimitImpl implements FreeResourcesLimit {
     @Id
     @Column(name = "accountid")
     private String accountId;
+
+    @PrimaryKeyJoinColumn
+    private AccountImpl account;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(name = "freeresourceslimit_resource",

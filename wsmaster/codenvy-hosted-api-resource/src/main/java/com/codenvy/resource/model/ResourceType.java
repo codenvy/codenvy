@@ -14,9 +14,7 @@
  */
 package com.codenvy.resource.model;
 
-import com.codenvy.resource.spi.impl.ResourceImpl;
-
-import org.eclipse.che.api.core.ConflictException;
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 
 import java.util.Set;
 
@@ -42,6 +40,11 @@ public interface ResourceType {
     Set<String> getSupportedUnits();
 
     /**
+     * Returns default unit.
+     */
+    String getDefaultUnit();
+
+    /**
      * Defines function for aggregating two resources of this type.
      *
      * @param resourceA
@@ -51,7 +54,7 @@ public interface ResourceType {
      * @throws IllegalArgumentException
      *         if one of resources has unsupported type or unit
      */
-    ResourceImpl aggregate(ResourceImpl resourceA, ResourceImpl resourceB);
+    Resource aggregate(Resource resourceA, Resource resourceB);
 
     /**
      * Defines function for subtraction two resources of this type.
@@ -62,8 +65,8 @@ public interface ResourceType {
      *         resource that should be deducted from {@code total}
      * @throws IllegalArgumentException
      *         if one of resources has unsupported type or unit
-     * @throws ConflictException
+     * @throws NoEnoughResourcesException
      *         when {@code total}'s amount is less than {@code deduction}'s amount
      */
-    ResourceImpl deduct(ResourceImpl total, ResourceImpl deduction) throws ConflictException;
+    Resource deduct(Resource total, Resource deduction) throws NoEnoughResourcesException;
 }

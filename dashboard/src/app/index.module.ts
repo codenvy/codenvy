@@ -25,6 +25,7 @@ import {AdminConfig} from './admin/admin-config';
 import {AccountConfig} from './account/details/account-config';
 import {CodenvyOnpremConfig} from './onprem/onprem-config';
 import {WorkspaceConfig} from './workspace/workspace-config';
+import {DocsConfig} from './documentation/docs-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
   'ngResource', 'ngRoute', 'ngPasswordStrength', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
@@ -98,9 +99,9 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
     ngClipProvider.setPath(ngClipProviderPath);
 }]);
 
-//add tasks to run
-initModule.run(['$rootScope', '$routeParams', 'nagMessageService', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope, $routeParams, nagMessageService, cheUIElementsInjectorService, workspaceDetailsService) => {
+// add tasks to run
+initModule.run(['$rootScope', '$routeParams', 'licenseMessagesService', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  ($rootScope, $routeParams, licenseMessagesService, cheUIElementsInjectorService, workspaceDetailsService) => {
 
     $rootScope.$on('$routeChangeSuccess', (event, next) => {
       if (next.$$route.title && angular.isFunction(next.$$route.title)) {
@@ -112,7 +113,7 @@ initModule.run(['$rootScope', '$routeParams', 'nagMessageService', 'cheUIElement
 
     workspaceDetailsService.addSection('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
     $rootScope.$on('$viewContentLoaded', () => {
-      nagMessageService.createLicenseMessage();
+      licenseMessagesService.fetchMessages();
       cheUIElementsInjectorService.addElementForInjection('dashboardPageContent', 'recentFactories', '<cdvy-last-factories></cdvy-last-factories>');
     });
   }]);
@@ -247,3 +248,4 @@ new AdminConfig(instanceRegister);
 new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
+new DocsConfig(instanceRegister);

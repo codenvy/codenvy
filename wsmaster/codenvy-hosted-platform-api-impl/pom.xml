@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-master-parent</artifactId>
         <groupId>com.codenvy.onpremises.wsmaster</groupId>
-        <version>5.0.0-M9-SNAPSHOT</version>
+        <version>5.0.0-M10-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-platform-api-impl</artifactId>
     <packaging>jar</packaging>
@@ -29,6 +29,10 @@
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-resource</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-system-ram</artifactId>

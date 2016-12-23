@@ -15,13 +15,13 @@
 package com.codenvy.resource.spi.impl;
 
 import com.codenvy.resource.model.Resource;
-import com.google.common.base.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 
 /**
  * @author Sergii Leschenko
@@ -73,27 +73,37 @@ public class ResourceImpl implements Resource {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResourceImpl)) return false;
-        ResourceImpl resource = (ResourceImpl)o;
-        return Objects.equal(id, resource.id) &&
-               Objects.equal(amount, resource.amount) &&
-               Objects.equal(type, resource.type) &&
-               Objects.equal(unit, resource.unit);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ResourceImpl)) {
+            return false;
+        }
+        final ResourceImpl that = (ResourceImpl)obj;
+        return amount == that.amount
+               && Objects.equals(id, that.id)
+               && Objects.equals(type, that.type)
+               && Objects.equals(unit, that.unit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, amount, type, unit);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(type);
+        hash = 31 * hash + Long.hashCode(amount);
+        hash = 31 * hash + Objects.hashCode(unit);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "ResourceImpl{" +
-               "type='" + type + '\'' +
+               "id=" + id +
+               ", type='" + type + '\'' +
                ", amount=" + amount +
-               ", unit=" + unit +
+               ", unit='" + unit + '\'' +
                '}';
     }
 }

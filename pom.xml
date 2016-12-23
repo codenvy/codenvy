@@ -20,11 +20,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-M9-SNAPSHOT</version>
+        <version>5.0.0-M10-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-assembly-parent</artifactId>
-    <version>5.0.0-M9-SNAPSHOT</version>
+    <version>5.0.0-M10-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
@@ -37,6 +37,8 @@
         <module>cli</module>
         <module>cdec</module>
         <module>assembly</module>
+        <module>docs</module>
+        <module>dockerfiles/agents</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/codenvy.git</connection>
@@ -45,8 +47,8 @@
     </scm>
     <properties>
         <aws.java.sdk.version>1.11.22</aws.java.sdk.version>
-        <che.lib.version>5.0.0-M9-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-M9-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M10-SNAPSHOT</che.lib.version>
+        <che.version>5.0.0-M10-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>
@@ -104,6 +106,12 @@
                 <version>${com.codahale.metrics.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.codenvy</groupId>
+                <artifactId>docs</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
                 <groupId>com.codenvy.cli</groupId>
                 <artifactId>cli-assembly</artifactId>
                 <version>${project.version}</version>
@@ -134,6 +142,12 @@
                 <artifactId>dashboard-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.dockerfiles</groupId>
+                <artifactId>dockerfiles-agents</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.factory</groupId>

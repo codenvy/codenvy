@@ -134,7 +134,7 @@ authWithoutRealmAndServerDns "cdec" "pwd123ABC"
 doPost "application/json" "{}" "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}/runtime?token=${TOKEN}"
 
 # obtain network ports
-doSleep "6m"  "Wait until workspace starts to avoid 'java.lang.NullPointerException' error on verifying workspace state"
+doSleep "12m"  "Wait until workspace starts to avoid 'java.lang.NullPointerException' error on verifying workspace state"
 doGet "http://${HOST_URL}/api/workspace/${WORKSPACE_ID}?token=${TOKEN}"
 validateExpectedString ".*\"status\":\"RUNNING\".*"
 fetchJsonParameter "network.ports"
