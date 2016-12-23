@@ -175,6 +175,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new org.eclipse.che.swagger.deploy.DocsModule());
 
+        install(new com.codenvy.plugin.webhooks.bitbucketserver.inject.BitbucketServerWebhookModule());
+
         //oauth 2
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);

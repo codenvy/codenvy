@@ -17,14 +17,11 @@ package com.codenvy.plugin.webhooks.bitbucketserver.inject;
 import com.codenvy.plugin.webhooks.bitbucketserver.BitbucketServerWebhookService;
 import com.google.inject.AbstractModule;
 
-import org.eclipse.che.inject.DynaModule;
-
 /**
  * Guice binding for Bitbucket Server webhook service.
  *
  * @author Igor Vinokur
  */
-@DynaModule
 public class BitbucketServerWebhookModule extends AbstractModule {
 
     @Override

@@ -30,6 +30,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -44,7 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -87,17 +87,10 @@ public class BitbucketServerWebhookServiceTest {
     @Test
     public void shouldHandlePushEvent() throws Exception {
         //given
-        PushEvent event = newDto(PushEvent.class)
-                .withRepository(newDto(Repository.class).withProject(newDto(Project.class).withOwner(newDto(User.class).withName("owner"))
-                                                                                          .withKey("projectkey")).withName("repository"))
-                .withRefChanges(singletonList(newDto(RefChange.class).withToHash("hash commit")
-                                                                     .withType("UPDATE")
-                                                                     .withRefId("refs/heads/testBranch")))
-                .withChangesets(newDto(Changesets.class).withValues(
-                        singletonList(newDto(Changeset.class).withToCommit(newDto(Commit.class).withId("hash commit")
-                                                                                               .withMessage("message")))));
+        PushEvent pushEvent = createPushEvent("commit");
+
         //when
-        service.handleWebhookEvent(prepareRequest(event));
+        service.handleWebhookEvent(prepareRequest(pushEvent));
 
         //then
         verify(service).handlePushEvent(anyObject(), anyString());
@@ -106,18 +99,10 @@ public class BitbucketServerWebhookServiceTest {
     @Test
     public void shouldChangeFactoryStartPointFromBranchToCommitWhenMergeCommitDetected() throws Exception {
         //given
-        String mergeCommitMessage = "Merge pull request #3 in ~projectkey/repository from testBranch to master";
-        PushEvent event = newDto(PushEvent.class)
-                .withRepository(newDto(Repository.class).withProject(newDto(Project.class).withOwner(newDto(User.class).withName("owner"))
-                                                                                          .withKey("projectkey")).withName("repository"))
-                .withRefChanges(singletonList(newDto(RefChange.class).withToHash("hash commit")
-                                                                     .withType("UPDATE")
-                                                                     .withRefId("refs/heads/master")))
-                .withChangesets(newDto(Changesets.class).withValues(
-                        singletonList(newDto(Changeset.class).withToCommit(newDto(Commit.class).withId("hash commit")
-                                                                                               .withMessage(mergeCommitMessage)))));
+        PushEvent pushEvent = createPushEvent("Merge pull request #3 in ~projectkey/repository from testBranch to master");
+
         //when
-        service.handleWebhookEvent(prepareRequest(event));
+        service.handleWebhookEvent(prepareRequest(pushEvent));
 
         //then
         verify(service).handleMergeEvent(anyObject(), anyString());
@@ -129,13 +114,32 @@ public class BitbucketServerWebhookServiceTest {
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(event.toString().getBytes(StandardCharsets.UTF_8));
-        ServletInputStream fakeInputStream = new ServletInputStream() {
+        ServletInputStream inputStream = new ServletInputStream() {
             public int read() throws IOException {
                 return byteArrayInputStream.read();
             }
         };
-        when(mockRequest.getInputStream()).thenReturn(fakeInputStream);
+        when(mockRequest.getInputStream()).thenReturn(inputStream);
 
         return mockRequest;
+    }
+
+    private PushEvent createPushEvent(String message) {
+        return DtoFactory.newDto(PushEvent.class)
+                         .withRepository(DtoFactory.newDto(Repository.class)
+                                                   .withProject(DtoFactory.newDto(Project.class)
+                                                                          .withOwner(DtoFactory.newDto(User.class)
+                                                                                               .withName("owner"))
+                                                                          .withKey("projectkey"))
+                                                   .withName("repository"))
+                         .withRefChanges(singletonList(DtoFactory.newDto(RefChange.class)
+                                                                 .withToHash("hash commit")
+                                                                 .withType("UPDATE")
+                                                                 .withRefId("refs/heads/master")))
+                         .withChangesets(DtoFactory.newDto(Changesets.class)
+                                                   .withValues(singletonList(DtoFactory.newDto(Changeset.class)
+                                                                                       .withToCommit(DtoFactory.newDto(Commit.class)
+                                                                                                               .withId("hash commit")
+                                                                                                               .withMessage(message)))));
     }
 }

@@ -75,7 +75,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     public Response handleWebhookEvent(@Context HttpServletRequest request) throws ServerException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
 
-        Response response = Response.ok().build();
+        Response response = Response.noContent().build();
         try (ServletInputStream inputStream = request.getInputStream()) {
             if (inputStream == null) {
                 return response;
