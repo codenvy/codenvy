@@ -32,14 +32,14 @@
   - admin-ldap
   - admin-managing
   - admin-cli
+  - admin-runbook
 - title: Integration Guide
   docs:
   - integration-workspace-automation
-  - integration-issue-management
   - integration-version-control
+  - integration-issue-management
   - integration-continuous-integration
 - title: White Label Guide
   docs:
-  - white-labels-custom-assemblies
   - white-labels-introduction-white-labels
-  
+  - white-labels-custom-assemblies

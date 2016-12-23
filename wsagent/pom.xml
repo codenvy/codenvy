@@ -20,11 +20,11 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.0.0-M9-SNAPSHOT</version>
+        <version>5.0.0-M10-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises.wsagent</groupId>
     <artifactId>codenvy-agent-parent</artifactId>
-    <version>5.0.0-M9-SNAPSHOT</version>
+    <version>5.0.0-M10-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Agent Parent</name>
     <modules>

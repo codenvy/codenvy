@@ -6,17 +6,102 @@ layout: docs
 permalink: /:categories/managing/
 ---
 ## Scaling
-Codenvy workspaces can run on different physical nodes that are part of a Codenvy cluster managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power. You will want to allocate enough nodes and resources to handle the number of concurrently *running* workspaces, each of which will have its own RAM and CPU requirements.
+Codenvy workspaces can run on different physical nodes managed by Docker Swarm. This is an essential part of managing large development teams, as workspaces are both RAM and CPU intensive operations, and developers do not like to share their computing power. You will want to allocate enough nodes and resources to handle the number of concurrently *running* workspaces, each of which will have its own RAM and CPU requirements.
 
-Each Codenvy instance generates a configuration for the nodes in its cluster. Run `codenvy add-node` for instructions on what to run on each physical node that should be added to the cluster. A script on the new node will install some software from the Codenvy master node, configure its Docker daemon, and then register itself as a member of the Codenvy cluster.
+Codenvy requires a Docker overlay network to exist for our workspace nodes. An overlay network is a network that spans across the various nodes that allows Docker containers to simplify how they communicate with one another. This is mandatory for Codenvy since your workspaces can themselves be composed of multiple containers (such as defined by Docker Compose). If a single workspace has multiple runtimes, we can deploy those runtimes on different physical nodes. An overlay network allows those containers to have a common nework so that they can communicate with each other using container names, without each container having to understand the location of the other.
 
-You can remove nodes with `codenvy remove-node <ip>`.
+Overlay networks require a distributed key-value store. We embed Consul, a key-value storage implementation as part of the Codenvy master node. We currently only support adding Linux nodes into an overlay network.
+
+The default network in Docker is a "bridge" network. If you know that your users will only ever have single container workspaces (this would be unusual and rare) and you can scale your system by using a larger single node, then bridge network can be used for production systems.
+
+#### Scaling With Overlay Network (Linux Only)
+1: Collect the IP address of Codenvy `CODENVY-IP` and the network interface of the new workspace node `WS-IF` to be used in other configuration steps:
+
+```shell
+# Codenvy IP is either set by you to CODENVY_HOST or auto-discovered with:
+docker run --net=host eclipse/che-ip:nightly
+
+# Get the network interface for your ws node, typically 'eth1' or 'eth0':
+ifconfig
+```
+
+2: On the Codenvy master node, start Consul: `docker run -d -p 8500:8500 -h consul progrium/consul -server -bootstrap`
+
+3: On each workspace node, configure and restart Docker with four new options: `--cluster-store=consul://<CODENVY-IP>:8500`, `--cluster-advertise=<WS-IF>:2376`, `--host=tcp://0.0.0.0:2375`, and `--engine-insecure-registry=:5000`. The first parameter tells Docker where the key-value store is located. The second parameter tells Docker how to link its workspace node to the key-value storage broadcast. The third parameter opens Docker to communicate on Codenvy's swarm cluster. And the fourth parameter allows the Docker daemon to push snapshots to Codenvy's internal registry. If you are running Codenvy behind a proxy, each workspace node Docker daemon should get the same proxy configuration that you placed on the master node. If you would like your Codenvy master node to also host workspaces, you can add these parameters to your master Docker daemon as well.
+
+4: Verify that Docker is running properly. Docker will not start if it is not able to connect to the key-value storage. Run a simple `docker run hello-world` to verify Docker is happy. Each workspace node that successfully runs this command is part of the overlay network.
+
+5: On the Codenvy master node, modify `codenvy.env` to uncomment or add:
+```json
+# Comma-separated list of IP addresses for each workspace node
+# The ports must match the `--cluster-advertise` port added to Docker daemons
+CODENVY_SWARM_NODES=<WS-IP>:2376,<WS2-IP>:2376,<WSn-IP>:2376
+```
+
+6: Restart Codenvy with `codenvy/cli restart`.
+
+#### Simulated Scaling
+You can simulate what it is like to scale Codenvy with different nodes by launching Codenvy and its various cluster nodes within VMs using `docker-machine`, a utility that ships with Docker. Docker machine is a way to launch VMs that have Docker pre-installed in the VM using boot2docker. Docker machine uses different "drivers", such as HyperV or VirtualBox as the underlying hypervisor engine to launch the VMs. By lauching a set of VMs with different IP addresses, you can then simulate using Codenvy's Docker commands to start a main system and then having the other nodes add themselves to the cluster.
+
+This simulated scaling can be used for production, but it is generally discouraged because you would be running Docker in VMs that are on a host, and you are just taking on some extra I/O overhead that may not generally be necessary.  However, this simulated-based approach gives good pointers on configuration of a distributed, cluster-based system if you were to use VMs-only.
+
+As an example, the following sequence launches a 3-node cluster of Codenvy using Docker machine with a VirtualBox hypervisor. In this example, we launch 4 VMs: a Codenvy node, 2 additional workspace nodes, and a node to handle key-value storage. The key-value storage node is typically not part of the scaling configuration. However, Codenvy requires an "overlay" network, which is powered by a key-value storage provider such as Consule, etcd, or zookeeper. When running Codenvy on the host, we are able to setup an etcd key-value storage system automatically and associate the nodes with it. However, in a VM scale-out scenario, a dedicated key-value storage provider is needed. This particular example uses Consul key-value storage to setup the overlay network. 
+
+Start a VM with key-value storage and start Consul:
+```shell
+# Key-Value storage for overlay network
+# Grab the IP address of this VM and use it in other commands where we have <KV-IP> 
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no kv
+docker -H <KV-IP:2376> run -d -p 8500:8500 -h consul progrium/consul -server -bootstrap
+```
+
+Start 3 VMs named 'codenvy', 'ws1', 'ws2'):
+```shell
+# Codenvy 
+# Grab the IP address of this VM and use it in other commands where we have <CODENVY-IP>
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "2048" codenvy
+
+# Workspace Node 1
+# 3GB RAM - enough to run a couple workspaces at the same time
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
+                      --engine-opt="cluster-store=consul://<KV-IP>:8500" \
+                      --engine-opt="cluster-advertise=eth1:2376" \
+                      --engine-insecure-registry="<CODENVY-IP>:5000" ws1
+
+# Workspace Node 2
+docker-machine create -d virtualbox --engine-env DOCKER_TLS=no --virtualbox-memory "3000" \
+                      --engine-opt="cluster-store=consul://<KV-IP>:8500" \
+                      --engine-opt="cluster-advertise=eth1:2376" \
+                      --engine-insecure-registry="<CODENVY-IP>:5000" ws2
+```
+
+Connect to the Codenvy VM and start Codenvy:
+```shell
+# SSH into the VM
+docker-machine ssh codenvy
+
+# Initialize a Codenvy installation
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /home/docker/.codenvy:/data codenvy/cli:nightly init
+
+# Setup Codenvy's configuration file to have the IP addresses of each workspace node
+sudo sed -i "s/^#CODENVY_WORKSPACE_AUTO_SNAPSHOT=true.*/CODENVY_WORKSPACE_AUTO_SNAPSHOT=true/g" \
+            ~/.codenvy/codenvy.env
+sudo sed -i "s/^CODENVY_SWARM_NODES=.*/CODENVY_SWARM_NODES=<WS1-IP>:2376,<WS2-IP>:2376/g" \
+            ~/.codenvy/codenvy.env
+
+# Start Codenvy with this configuration
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /home/docker/.codenvy:/data codenvy/cli:nightly start
+
+# You can then access Codenvy at http://<CODENVY-IP>
+```
 
 ## Upgrading
 Upgrading Codenvy is done by downloading a `codenvy/cli:<version>` that is newer than the version you currently have installed. You can run `codenvy version` to see the list of available versions that you can upgrade to.
 
 For example, if you have 5.0.0-M2 installed and want to upgrade to 5.0.0-M8, then:
-```
+```shell
 # Get the new version of Codenvy
 docker pull codenvy/cli:5.0.0-M8
 
@@ -45,10 +130,10 @@ Due to differences in file system types between NTFS and what is commonly used i
 However, when you do a `codenvy backup`, we do copy the Postgres data from the container's volume to your host drive, and make it available as part of a `codenvy restore` function. The difference is that if you are browsing your `/instance` folder, you will not see the database data on Windows.
 
 ## Migration
-We currently do not support migrating from the puppet-based configuration of Codenvy to the Dockerized version. We do have a manual process which can be followed to move data between the puppet and Dockerized versions. The versions must be identical. Contact us to let our support team perform this migration for you.
+It is possible to migrate your configuration and user data from a puppet-based installation of Codenvy (5.0.0-M8 and earlier) to the Dockerized version of Codenvy. Please contact our support team for instructions.
 
 ## Disaster Recovery
-Codenvy is not designed to be a "5-9s" system, however there are steps that can be taken by an operations team responsible for Codenvy to ensure a quick recovery from any crashes.
+You can run Codenvy with hot-standy nodes, so that in the event of a failure of one Codenvy, you can perform a switchover to another standby system.
 
 A secondary Codenvy system should be installed and kept at the same version level as the primary system. On a nightly or more frequent basis the Codenvy data store, Docker images and configuration can be transferred to the secondary system.
 

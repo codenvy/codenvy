@@ -5,10 +5,53 @@ layout: docs
 permalink: /docs/admin-guide/runbook/
 ---
 
-This article provides some performance and security related guidance for installing Codenvy, these aren't rules because every install is slightly different. This doc outlines some of the steps we take in running the public Codenvy cloud.
-Some items are specific to Azure, others are more general.
+Applies To: Codenvy on-premises installs.
 
-# Network Infrastructure Planning
+---
+
+This article provides specific performance and security guidance for Codenvy on-premises installations based on our experience running codenvy.io hosted SaaS. For general information on managing a Codenvy on-premises instance see the [managing]() docs page.
+
+## Dockerized Codenvy
+### Recommended Docker Versions
+Codenvy can run on Docker 1.10+, but we recommend **Docker 1.12.5** for the best experience. If you choose to run with a lower version you may experience the following issues:
+
+| Issue | Link | Docker Version for Fix |
+|--- |--- |--- |
+| DockerConnector exception "Could not kill running container" | https://github.com/codenvy/codenvy/issues/1164 | Docker 1.12.5
+
+### Zookeeper Configuration
+Zookeeper is a key-value store that is needed by Swarm in a clustered Codenvy setup. To optimize the setup:
+
+**Step 1**: On the master node, edit `etc/puppet/modules/all_in_one/templates/iptables.erb`. Add the following two lines:
+```
+#etcd
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 2379 -j ACCEPT
+...
+#zookeeper
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 2181 -j ACCEPT
+...
+-A INPUT -m state --state NEW -m udp -p udp --dport 4789 -j ACCEPT
+```
+
+**Step 2**: Create directories for Zookeeper:
+`mkdir -p var/lib/zookeeper/datalog`
+
+**Step 3**: Start the zookeeper service:
+`docker run --name codenvy-zookeeper --restart always -d -p 2181:2181 -v /var/lib/zookeeper/data:/data -v /var/lib/zookeeper/datalog:/datalog zookeeper`
+
+**Step 4**: Change the configuration of the Docker daemon by editing `/etc/puppet/modules/third_party/templates/docker/docker-network.erb`:
+```
+# /etc/sysconfig/docker-network
+DOCKER_NETWORK_OPTIONS=' --bip=172.17.42.1/16 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=zk://<%= scope.lookupvar('third_party::docker::install::docker_cluster_store') -%>:2181 --cluster-advertise=<%= scope.lookupvar('third_party::docker::install::docker_cluster_advertise') -%>:2375'
+```
+
+
+
+
+
+## Puppet-Based Codenvy (deprecated)
+
+### Network Infrastructure Planning
 We have 2 classes of instances:
 1. Machine Nodes that runs user workspaces
 2. Master Nodes used for running internal Codenvy services.
@@ -17,7 +60,7 @@ Because of the different purpose and security constraints we will group all inst
 
 Azure CLI snippet for creating network and security rules for Azure:
 ```
-# Create Security Groups
+### Create Security Groups
 azure network nsg create ${ResourceGroup} ${SecurityGroupSubNet1} ${Location}
 azure network nsg create ${ResourceGroup} ${SecurityGroupSubNet2} ${Location}
 
@@ -25,19 +68,20 @@ azure network nsg create ${ResourceGroup} ${SecurityGroupNIC1} ${Location}
 azure network nsg create ${ResourceGroup} ${SecurityGroupNIC2} ${Location}
 ```
 ```
-# Create SubNets
+### Create SubNets
 azure network vnet subnet create ${ResourceGroup} ${VNetName} ${SubNetName1} -a ${SubNetAddr1} -o ${SecurityGroupSubNet1}
 azure network vnet subnet create ${ResourceGroup} ${VNetName} ${SubNetName2} -a ${SubNetAddr2} -o ${SecurityGroupSubNet2}
 ```
 
-# Create NIC's
+### Create NIC's
+```
 azure network nic create ${ResourceGroup} ${NICName1} -k ${SubNetName1} -m ${VNetName} -p ${IP1} -o ${SecurityGroupNIC1} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName2} -k ${SubNetName2} -m ${VNetName} -p ${IP2} -o ${SecurityGroupNIC2} -l ${Location}
 azure network nic create ${ResourceGroup} ${NICName3} -k ${SubNetName2} -m ${VNetName} -p ${IP3} -o ${SecurityGroupNIC2} -l ${Location}
 ```
 
+### Populate Security Group Rules
 ```
-# Populate Security Group Rules
 CreateSecRules () {
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 22 -c Allow -y 1000 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} ssh-allow-sgs1
   azure network nsg rule create -p Tcp -f \\* -o \\* -e \\* -u 80 -c Allow -y 1100 -r Inbound  ${ResourceGroup} ${SecurityGroupSubNet1} http-allow-sgs1
@@ -63,7 +107,7 @@ CreateSecRules () {
   }
 ```
 
-# Disk Setup Planning
+### Disk Setup Planning
 Because we are using clouds for hosting (Azure) we are able to quickly scale disk space up. To utilise this we choose LVM and XFS.
 
 First check if it is installed:
@@ -90,7 +134,7 @@ And for Machine Nodes:
 /home/codenvy/codenvy-data
 ```
 
-## For Setting Up Disks on Master Nodes
+#### For Setting Up Disks on Master Nodes
 After starting the instance inside the first subnet we need to attach 3 data disks:
 - For databases and logs, initial size is about 300 GB.
 - For main project storage/backups, initial size is about 1TB.
@@ -107,6 +151,7 @@ After starting the instance inside the first subnet we need to attach 3 data dis
 9. Activate swap volume: `#  swapon /dev/vg-docker/swap`
 
 Prepare data disk for databases and logs:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdc`
 2. Create volume group: `# vgcreate vg-data /dev/sdc`
 3. Create journal volume with size 10 GB: `#  lvcreate -L 10G -n journal vg-data`
@@ -118,16 +163,19 @@ Prepare data disk for databases and logs:
 9. Create docker data volume using all remaining disk space: `#  lvcreate -l 100%FREE -n docker vg-docker`
 
 Prepare data disk for FS:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdd`
 2. Create volume group: `# vgcreate vg-fs /dev/sdd`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n fs vg-fs`
 
 Prepare data disk for snapshots:
+
 1. Add data disk to LVM: `# pvcreate /dev/sde`
 2. Create volume group: `# vgcreate vg-ddistr /dev/sde`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n ddistr vg-ddistr`
 
 Make XFS filesystem for:
+
 1. journal: `# mkfs.xfs /dev/vg-data/journal`
 2. logs: `# mkfs.xfs /dev/vg-data/logs`
 3. machine-logs: `# mkfs.xfs /dev/vg-data/machine-logs`
@@ -163,7 +211,7 @@ proc                    /proc                   proc    defaults        0 0
 - Check if swap activated: `# free`
 - Check if all volumes mounted and have correct sizes: `# df -h`
 
-## For Setting Up Disks on MachineNodes 
+#### For Setting Up Disks on MachineNodes 
 After starting instance inside second subnet we need to attach 2 data disk for docker internals and logs, initial size is about 300 GB. For main workspace project storage, initial size is about 1TB
 
 1. Unmount used ephemeral disk: `# umount /dev/sdb1`
@@ -177,17 +225,20 @@ After starting instance inside second subnet we need to attach 2 data disk for d
 9. Activate swap volume: `#  swapon /dev/vg-docker/swap`
 
 Prepare data disk for docker and logs:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdc`
 2. Create volume group: `# vgcreate vg-data /dev/sdc`
 3. Create journal volume with size 10 GB: `#  lvcreate -L 10G -n journal vg-data`
 4. Create docker data volume using all remaining disk space: `#  lvcreate -l 100%FREE -n docker vg-data`
 
 Prepare data disk for FS:
+
 1. Add data disk to LVM: `# pvcreate /dev/sdd`
 2. Create volume group: `# vgcreate vg-fs /dev/sdd`
 3. Create FS volume using all remaining disk space: `#  lvcreate -l 100%FREE -n fs vg-fs`
 
 Make XFS filesystem for:
+
 1. journal: `# mkfs.xfs /dev/vg-data/journal`
 2. docker: `# mkfs.xfs /dev/vg-data/docker`
 3. FS: `# mkfs.xfs /dev/vg-fs/fs`
@@ -217,7 +268,7 @@ proc                    /proc                   proc    defaults        0 0
 - Check if swap activated: `# free`
 - Check if all volumes mounted and have correct sizes: `# df -h`
 
-### Increasing Disk Space
+#### Increasing Disk Space
 If additional disk space is needed you can attach a new data disk (caches turned ON), then issue the following commands:
 
 1. Create physical volume: `# pvcreate /dev/sdg`
@@ -226,7 +277,7 @@ If additional disk space is needed you can attach a new data disk (caches turned
 4. Extend logical volume: `# lvextend -l +100%FREE /dev/vg-fs/fs`
 5. Grow actual FS, it must be run on mounted volume, no need to stop codenvy or unmount FS: `# xfs_growfs /home/codenvy/codenvy-data/fs/`
 
-### Detaching Disks
+#### Detaching Disks
 If you need to detach disks from one Azure instance and to reattach it to other Azure instance, you need to stop all services that may be using that volume:
 ```
 service puppet stop\nservice crond stop\nservice codenvy stop

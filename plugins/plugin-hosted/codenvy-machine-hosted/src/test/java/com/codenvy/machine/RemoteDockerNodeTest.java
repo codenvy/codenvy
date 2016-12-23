@@ -14,14 +14,10 @@
  */
 package com.codenvy.machine;
 
-import com.codenvy.machine.backup.MachineBackupManager;
+import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
 
-import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.MessageProcessor;
-import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -30,10 +26,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,13 +38,13 @@ public class RemoteDockerNodeTest {
     private static final String PATH = "WorkspacePath";
 
     @Mock
-    private MachineBackupManager        backupManager;
+    private DockerEnvironmentBackupManager backupManager;
     @Mock
-    private DockerConnector             dockerConnector;
+    private DockerConnector                dockerConnector;
     @Mock
-    private WorkspaceFolderPathProvider pathProvider;
+    private WorkspaceFolderPathProvider    pathProvider;
     @Mock
-    private Exec                        exec;
+    private Exec                           exec;
 
     private RemoteDockerNode remoteDockerNode;
 
@@ -63,60 +56,28 @@ public class RemoteDockerNodeTest {
         remoteDockerNode = new RemoteDockerNode(dockerConnector,
                                                 "ContainerId",
                                                 "WorkspaceId",
-                                                backupManager,
-                                                pathProvider,
-                                                25);
+                                                backupManager);
     }
 
     @Test
-    public void ShouldRestoreWorkspaceBackup() throws Exception {
-        //given
-        LogMessage message = mock(LogMessage.class);
-        when(message.getType()).thenReturn(LogMessage.Type.STDOUT);
-        when(message.getContent()).thenReturn("MessageContent");
-        doAnswer(invocation -> {
-            MessageProcessor<LogMessage> messageProcessor = (MessageProcessor<LogMessage>)invocation.getArguments()[1];
-            messageProcessor.process(message);
-            messageProcessor.process(message);
-            return null;
-        }).when(dockerConnector).startExec(any(StartExecParams.class), any(MessageProcessor.class));
-
+    public void shouldRestoreWorkspaceBackupOnNodeBinding() throws Exception {
         //when
         remoteDockerNode.bindWorkspace();
 
         //then
         verify(backupManager).restoreWorkspaceBackup(eq("WorkspaceId"),
-                                                     eq(PATH),
-                                                     eq("MessageContent"),
-                                                     eq("MessageContent"),
-                                                     eq("127.0.0.1"),
-                                                     anyInt());
+                                                     eq("ContainerId"),
+                                                     eq("127.0.0.1"));
     }
 
-    @Test(expectedExceptions = MachineException.class,
-          expectedExceptionsMessageRegExp = "Can't detect container user ids to chown backed up files of workspace WorkspaceId")
-    public void ShouldThrowExceptionIfOnlyOneExecMessageReceived() throws Exception {
-        //given
-        LogMessage message = mock(LogMessage.class);
-        when(message.getType()).thenReturn(LogMessage.Type.STDOUT);
-        when(message.getContent()).thenReturn("MessageContent");
-        doAnswer(invocation -> {
-            MessageProcessor<LogMessage> messageProcessor = (MessageProcessor<LogMessage>)invocation.getArguments()[1];
-            messageProcessor.process(message);
-            return null;
-        }).when(dockerConnector).startExec(any(StartExecParams.class), any(MessageProcessor.class));
-
+    @Test
+    public void shouldBackupAndCleanupWSOnNodeUnbinding() throws Exception {
         //when
-        remoteDockerNode.bindWorkspace();
-    }
+        remoteDockerNode.unbindWorkspace();
 
-    @Test(expectedExceptions = MachineException.class,
-          expectedExceptionsMessageRegExp = "Can't detect container user ids to chown backed up files of workspace WorkspaceId")
-    public void ShouldThrowExceptionIfNoExecMessagesReceived() throws Exception {
-        //given
-        doAnswer(invocation -> null).when(dockerConnector).startExec(any(StartExecParams.class), any(MessageProcessor.class));
-
-        //when
-        remoteDockerNode.bindWorkspace();
+        //then
+        verify(backupManager).backupWorkspaceAndCleanup(eq("WorkspaceId"),
+                                                        eq("ContainerId"),
+                                                        eq("127.0.0.1"));
     }
 }

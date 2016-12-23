@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-agent-parent</artifactId>
         <groupId>com.codenvy.onpremises.wsagent</groupId>
-        <version>5.0.0-M9-SNAPSHOT</version>
+        <version>5.0.0-M10-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-workspace-activity-agent</artifactId>
     <name>Codenvy :: Hosted :: Workspace Activity Agent</name>

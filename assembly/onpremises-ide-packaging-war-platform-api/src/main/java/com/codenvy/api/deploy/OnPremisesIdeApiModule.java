@@ -38,6 +38,8 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
+import com.codenvy.machine.backup.EnvironmentBackupManager;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -364,6 +366,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                         .implement(org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo.class,
                                    com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
                         .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
+
+        MapBinder<String, EnvironmentBackupManager> backupManagers = MapBinder.newMapBinder(binder(),
+                                                                                            String.class,
+                                                                                            EnvironmentBackupManager.class);
+        backupManagers.addBinding("compose").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerfile").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerimage").to(DockerEnvironmentBackupManager.class);
 
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
