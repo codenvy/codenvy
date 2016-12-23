@@ -76,11 +76,9 @@ The Docker daemon will need to be remotely accessed by Codenvy, so it has to be 
 #### Workspace Node: Internal
 |Port|Service
 |---|---|
-|81|Nginx
 |2375|Swarm
 |2376|ZooKeeper
-|5432|Postgres
-|8080|Codenvy Server
+|5000|Docker Registry
 
 # Installation
 ## Syntax
