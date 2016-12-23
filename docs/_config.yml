@@ -13,6 +13,7 @@ timezone: America/Los_Angeles
 
 product_name: "CODENVY"
 product_mini_name:  "codenvy"
+product_mini_name_capitalized:  "Codenvy"
 product_formal_name: "Codenvy"
 
 collections:
