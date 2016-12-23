@@ -18,6 +18,10 @@ class rsyslog {
     ensure  => "present",
     content => template("rsyslog/swarm.conf.erb"),
     mode    => '644',
+  } ->  file { "/opt/codenvy/config/rsyslog/zookeeper.conf":
+    ensure  => "present",
+    content => template("rsyslog/zookeeper.conf.erb"),
+    mode    => '644',
   } ->
   file { "/opt/codenvy/config/rsyslog/registry.conf":
     ensure  => "present",
