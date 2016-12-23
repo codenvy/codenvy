@@ -51,6 +51,8 @@ Alternatively, you can edit the `CODENVY_HOST` value in `codenvy.env`.
 The master node is where Codenvy is installed and running. In a [scalability mode]({{base}}/docs/admin-guide/managing/index.html), you can add additional physical "workspace" nodes to increase system capacity. If you have not added any additional physical workspace nodes, then the Codenvy master node doubles as a workspace node and needs both sets of ports opened.
 
 #### Master Node: External
+All ports are TCP unless otherwise noted.
+
 |Port|Service|Notes|
 |---|---|---|
 |80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
@@ -58,15 +60,21 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 |32768-65535|Docker|Users who launch servers in their workspace bind to ephemeral ports in this range. This range can be limited.
 
 #### Master Node: Internal
+All ports are TCP unless otherwise noted.
+
 |Port|Service
 |---|---|
 |81|Nginx
 |2181|ZooKeeper
 |2375|Swarm
+|4789|Docker Overlay (UDP)
 |5432|Postgres
+|7946|Docker Overlay (TCP + UDP)
 |8080|Codenvy Server
 
 #### Workspace Node: External
+All ports are TCP unless otherwise noted.
+
 |Port|Service|Notes|
 |---|---|---|
 |80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
@@ -75,13 +83,15 @@ The master node is where Codenvy is installed and running. In a [scalability mod
 The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
 
 #### Workspace Node: Internal
-The following ports need to be allowed for outbound connections only.
+The following ports need to be allowed for outbound connections only. All ports are TCP unless otherwise noted.
 
 |Port|Service|
 | --- |--- |
 |2181|ZooKeeper
 |2375|Swarm
+|4789|Docker Overlay (UDP)
 |5000|Docker Registry
+|7946|Docker Overlay (TCP + UDP)
 
 # Installation
 ## Syntax
