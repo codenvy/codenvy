@@ -222,7 +222,11 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     public long getAllowedUserNumber() {
         try {
             SystemLicense systemLicense = load();
-            return systemLicense.getNumberOfUsers();
+            if (!systemLicense.isExpiredCompletely()) {
+                return systemLicense.getNumberOfUsers();
+            } else {
+                return SystemLicense.MAX_NUMBER_OF_FREE_USERS;
+            }
         } catch (SystemLicenseException e) {
             return SystemLicense.MAX_NUMBER_OF_FREE_USERS;
         }

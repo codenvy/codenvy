@@ -293,6 +293,7 @@ public class SystemLicenseManagerTest {
     public void shouldReturnAllowedUserNumberDueToLicense() {
         doReturn(systemLicense).when(systemLicenseManager).load();
         doReturn((int)USER_NUMBER).when(systemLicense).getNumberOfUsers();
+        doReturn(false).when(systemLicense).isExpiredCompletely();
 
         assertEquals(systemLicenseManager.getAllowedUserNumber(), USER_NUMBER);
     }
@@ -300,6 +301,13 @@ public class SystemLicenseManagerTest {
     @Test
     public void shouldReturnAllowedUserNumberDueToFreeUsageTerms() {
         doThrow(SystemLicenseNotFoundException.class).when(systemLicenseManager).load();
+        assertEquals(systemLicenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
+    }
+
+    @Test
+    public void shouldReturnAllowedUserNumberDueToFreeUsageTermsWhenLicenseCompletelyExpired() {
+        doReturn(systemLicense).when(systemLicenseManager).load();
+        doReturn(true).when(systemLicense).isExpiredCompletely();
         assertEquals(systemLicenseManager.getAllowedUserNumber(), MAX_NUMBER_OF_FREE_USERS);
     }
 
