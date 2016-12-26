@@ -26,7 +26,6 @@ import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UserTokenProvider;
 import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
-import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -109,8 +108,6 @@ public class MachineModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
 
         bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
-
-        bind(WSocketEventBusClient.class).asEagerSingleton();
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
 

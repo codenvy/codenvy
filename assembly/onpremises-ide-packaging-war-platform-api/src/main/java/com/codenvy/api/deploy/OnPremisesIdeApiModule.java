@@ -343,8 +343,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         allMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
 
-        bind(String.class).annotatedWith(Names.named("machine.docker.machine_env"))
-                          .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
+        Multibinder<String> allMachinesEnvVars = Multibinder.newSetBinder(binder(),
+                                                                          String.class,
+                                                                          Names.named("machine.docker.machine_env"))
+                                                            .permitDuplicates();
+        allMachinesEnvVars.addBinding().toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
 
