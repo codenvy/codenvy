@@ -28,6 +28,10 @@ export class NagMessage {
   templateUrl: string;
   numberOfFreeUsers: number;
 
+  scope: {
+    [propName: string]: string
+  };
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
@@ -36,6 +40,10 @@ export class NagMessage {
     this.restrict = 'E';
     this.replace = true;
 
+    this.scope = {
+      message: '@?cheMessage'
+    };
+
     this.numberOfFreeUsers = codenvyLicense.getNumberOfFreeUsers();
   }
 
@@ -43,10 +51,18 @@ export class NagMessage {
    * Template for the nag message
    * @returns {string} the template
    */
-  template() {
+  template($element: ng.IAugmentedJQuery, attrs: any) {
+    let message;
+    if (attrs.cheMessage) {
+      message = attrs.cheMessage;
+    } else {
+      message = 'No valid license detected. Codenvy is free for ' + this.numberOfFreeUsers + ' users.&nbsp;' +
+        '<che-link ng-href="https://codenvy.com/legal/fair-source/" che-link-text="Please upgrade" che-no-padding="true" che-new-window></che-link>' +
+        '.&nbsp;Your mother would approve!';
+    }
+
     return '<div class="license-message">' +
-      'No valid license detected. Codenvy is free for ' + this.numberOfFreeUsers + ' users.&nbsp;' +
-      '<che-link ng-href="https://codenvy.com/legal/fair-source/" che-link-text="Please upgrade" che-no-padding="true" che-new-window></che-link>' +
-      '.&nbsp;Your mother would approve!</div>';
+        message +
+      '</div>';
   }
 }

@@ -97,7 +97,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>docs.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy:docs</include>
+                <include>com.codenvy.docs:codenvy-docs</include>
             </includes>
         </dependencySet>
     </dependencySets>

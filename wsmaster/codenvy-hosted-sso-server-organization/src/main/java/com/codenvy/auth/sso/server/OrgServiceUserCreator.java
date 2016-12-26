@@ -15,10 +15,12 @@
 package com.codenvy.auth.sso.server;
 
 
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
@@ -39,25 +41,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.codenvy.api.license.server.SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
+
 /**
  * @author Sergii Kabashniuk
  */
 public class OrgServiceUserCreator implements UserCreator {
     private static final Logger LOG = LoggerFactory.getLogger(OrgServiceUserCreator.class);
 
-    private final UserManager       userManager;
-    private final ProfileManager    profileManager;
-    private final PreferenceManager preferenceManager;
-    private final boolean           userSelfCreationAllowed;
+    private final UserManager          userManager;
+    private final ProfileManager       profileManager;
+    private final PreferenceManager    preferenceManager;
+    private final SystemLicenseManager licenseManager;
+    private final boolean              userSelfCreationAllowed;
 
     @Inject
     public OrgServiceUserCreator(UserManager userManager,
                                  ProfileManager profileManager,
                                  PreferenceManager preferenceManager,
+                                 SystemLicenseManager licenseManager,
                                  @Named("che.auth.user_self_creation") boolean userSelfCreationAllowed) {
         this.userManager = userManager;
         this.profileManager = profileManager;
         this.preferenceManager = preferenceManager;
+        this.licenseManager = licenseManager;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
     }
 
@@ -67,6 +74,18 @@ public class OrgServiceUserCreator implements UserCreator {
         try {
             return userManager.getByEmail(email);
         } catch (NotFoundException e) {
+            try {
+                if (!licenseManager.isFairSourceLicenseAccepted()) {
+                    throw new ForbiddenException(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE);
+                }
+
+                if (!licenseManager.canUserBeAdded()) {
+                    throw new ForbiddenException("Unable to add your account. The Codenvy license has reached its user limit.");
+                }
+            } catch (Exception ex) {
+                throw new IOException(ex.getLocalizedMessage(), ex);
+            }
+
             if (!userSelfCreationAllowed) {
                 throw new IOException("Currently only admins can create accounts. Please contact our Admin Team for further info.");
             }

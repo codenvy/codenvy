@@ -14,10 +14,11 @@
  */
 package com.codenvy.api.user.server;
 
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.permission.server.SystemDomain;
-
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -29,6 +30,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Path;
 
+import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static java.lang.String.format;
 import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALLOWED;
 
 /**
@@ -41,11 +44,14 @@ import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALL
 public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
     public static final String MANAGE_USERS_ACTION = "manageUsers";
 
-    private final boolean userSelfCreationAllowed;
+    private final boolean              userSelfCreationAllowed;
+    private final SystemLicenseManager licenseManager;
 
     @Inject
-    public UserServicePermissionsFilter(@Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed) {
+    public UserServicePermissionsFilter(@Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed,
+                                        SystemLicenseManager licenseManager) {
         this.userSelfCreationAllowed = userSelfCreationAllowed;
+        this.licenseManager = licenseManager;
     }
 
     @Override
@@ -66,10 +72,16 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
                     //it is available to create user from token without permissions
                     if (!userSelfCreationAllowed && !subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
                         throw new ForbiddenException(
-                                "Currently only admins can create accounts. Please contact our Admin Team for further info.");
+                            "Currently only admins can create accounts. Please contact our Admin Team for further info.");
                     }
+
+                    checkIfUserCanBeAdded(subject);
+
                     return;
                 }
+
+                checkIfUserCanBeAdded(subject);
+
                 subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
                 break;
             case "remove":
@@ -83,6 +95,17 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
             default:
                 //unknown method
                 throw new ForbiddenException("User is not authorized to perform this operation");
+        }
+    }
+
+    private void checkIfUserCanBeAdded(Subject subject) throws ServerException, ForbiddenException {
+        if (!licenseManager.canUserBeAdded()) {
+            if (subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
+                throw new ForbiddenException(format("The user cannot be added. You have %s users in Codenvy which is the maximum allowed by your current license.",
+                                                    licenseManager.getAllowedUserNumber()));
+            } else {
+                throw new ForbiddenException(UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE);
+            }
         }
     }
 }

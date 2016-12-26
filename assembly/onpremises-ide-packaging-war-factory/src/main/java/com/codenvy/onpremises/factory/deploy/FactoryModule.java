@@ -14,6 +14,9 @@
  */
 package com.codenvy.onpremises.factory.deploy;
 
+import com.codenvy.api.permission.server.HttpPermissionCheckerImpl;
+import com.codenvy.api.permission.server.PermissionChecker;
+import com.codenvy.auth.sso.client.TokenHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
@@ -28,7 +31,11 @@ import org.eclipse.che.inject.DynaModule;
 public class FactoryModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(com.codenvy.auth.sso.client.TokenHandler.class).to(com.codenvy.auth.sso.client.RecoverableTokenHandler.class);
+        bind(PermissionChecker.class).to(HttpPermissionCheckerImpl.class);
+        bind(TokenHandler.class).to(com.codenvy.api.permission.server.PermissionTokenHandler.class);
+        bind(TokenHandler.class).annotatedWith(Names.named("delegated.handler"))
+                                .to(com.codenvy.auth.sso.client.RecoverableTokenHandler.class);
+
         bindConstant().annotatedWith(Names.named("auth.sso.client_skip_filter_regexp")).to("^/factory/(_sso|resources|metrics)/(.+)$");
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url")).to("/site/error/error-cookies-disabled");

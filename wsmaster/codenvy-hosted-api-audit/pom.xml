@@ -28,19 +28,15 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-license</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-permission</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-workspace</artifactId>
+            <artifactId>codenvy-hosted-api-system-license</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-license-shared</artifactId>
+            <artifactId>codenvy-hosted-api-workspace</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

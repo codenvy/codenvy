@@ -14,7 +14,7 @@
  */
 package com.codenvy.report;
 
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.mail.MailSenderClient;
 import com.codenvy.report.shared.dto.Ip;
 import com.google.inject.Inject;
@@ -54,7 +54,7 @@ public class ReportSender {
     private final MailSenderClient       mailClient;
     private final HttpJsonRequestFactory httpJsonRequestFactory;
     private final String                 updateServerEndpoint;
-    private final CodenvyLicenseManager  licenseManager;
+    private final SystemLicenseManager   licenseManager;
     private final UserManager            userManager;
     private final String                 apiEndpoint;
 
@@ -63,7 +63,7 @@ public class ReportSender {
                         @Named("che.api") String apiEndpoint,
                         MailSenderClient mailClient,
                         HttpJsonRequestFactory httpJsonRequestFactory,
-                        CodenvyLicenseManager licenseManager,
+                        SystemLicenseManager licenseManager,
                         UserManager userManager) {
         this.mailClient = mailClient;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
@@ -84,12 +84,12 @@ public class ReportSender {
 
     private void sendNumberOfUsers() throws IOException, MessagingException, JsonParseException, ApiException {
         try {
-            if (licenseManager.isCodenvyUsageLegal()) {
+            if (licenseManager.isSystemUsageLegal()) {
                 // do not send a report if codenvy usage is legal.
                 return;
             }
         } catch (Exception e) {
-            LOG.error("There is a problem with Codenvy License.", e);
+            LOG.error("There is a problem with system License.", e);
             // send report if there is a problem with license
         }
 

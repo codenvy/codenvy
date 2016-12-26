@@ -14,12 +14,13 @@
  */
 package com.codenvy.api.audit.server;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.server.CodenvyLicenseManager;
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.server.SystemLicenseActionHandler;
+import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -44,9 +45,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
+import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
 import static java.nio.file.Files.createTempDirectory;
 
@@ -60,11 +67,12 @@ public class AuditManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuditManager.class);
 
-    private final WorkspaceManager      workspaceManager;
-    private final PermissionsManager    permissionsManager;
-    private final CodenvyLicenseManager licenseManager;
-    private final AuditReportPrinter    reportPrinter;
-    private final UserManager           userManager;
+    private final WorkspaceManager           workspaceManager;
+    private final PermissionsManager         permissionsManager;
+    private final SystemLicenseManager       licenseManager;
+    private final SystemLicenseActionHandler systemLicenseActionHandler;
+    private final AuditReportPrinter         reportPrinter;
+    private final UserManager                userManager;
 
     private AtomicBoolean inProgress = new AtomicBoolean(false);
 
@@ -72,12 +80,14 @@ public class AuditManager {
     public AuditManager(UserManager userManager,
                         WorkspaceManager workspaceManager,
                         PermissionsManager permissionsManager,
-                        CodenvyLicenseManager licenseManager,
+                        SystemLicenseManager licenseManager,
+                        SystemLicenseActionHandler systemLicenseActionHandler,
                         AuditReportPrinter reportPrinter) {
         this.userManager = userManager;
         this.workspaceManager = workspaceManager;
         this.permissionsManager = permissionsManager;
         this.licenseManager = licenseManager;
+        this.systemLicenseActionHandler = systemLicenseActionHandler;
         this.reportPrinter = reportPrinter;
     }
 
@@ -102,12 +112,15 @@ public class AuditManager {
             auditReport = createTempDirectory(null).resolve("report_" + dateTime + ".txt");
             Files.createFile(auditReport);
 
-            CodenvyLicense license = null;
+            SystemLicense license = null;
             try {
                 license = licenseManager.load();
-            } catch (LicenseException ignored) {
+            } catch (SystemLicenseException ignored) {
                 //Continue printing report without license info
             }
+
+            processLicenseActions(auditReport);
+
             reportPrinter.printHeader(auditReport, userManager.getTotalCount(), license);
             printAllUsers(auditReport);
         } catch (Exception exception) {
@@ -121,6 +134,57 @@ public class AuditManager {
         }
 
         return auditReport;
+    }
+
+    /**
+     * Print license actions info in chronological order.
+     * @param auditReport
+     * @throws ServerException
+     */
+    private void processLicenseActions(Path auditReport) throws ServerException {
+        Map<Long, Runnable> actions = new TreeMap<>();
+        try {
+            SystemLicenseAction systemProductLicenseExpiredAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
+            actions.put(systemProductLicenseExpiredAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printProductLicenseExpirationInfo(systemProductLicenseExpiredAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (NotFoundException ignored) {
+        }
+
+        try {
+            SystemLicenseAction systemProductLicenseAddedAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED);
+            actions.put(systemProductLicenseAddedAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printProductLicenseAdditionInfo(systemProductLicenseAddedAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (NotFoundException ignored) {
+        }
+
+        try {
+            SystemLicenseAction systemFairSourceLicenseAcceptedAction = systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+            actions.put(systemFairSourceLicenseAcceptedAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printFairSourceLicenseAcceptanceInfo(systemFairSourceLicenseAcceptedAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (NotFoundException ignored) {
+        }
+
+        try {
+            actions.values().stream().forEach(Runnable::run);
+        } catch (RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            reportPrinter.printError("Failed to retrieve license info.", auditReport);
+        }
     }
 
     private void printAllUsers(Path auditReport) throws ServerException {
@@ -140,7 +204,7 @@ public class AuditManager {
                                     .filter(workspace -> !workspaceIds.contains(workspace.getId()))
                                     .forEach(workspaces::add);
                 } catch (ServerException exception) {
-                    reportPrinter.printError("Failed to receive list of related workspaces for user " + user.getId(), auditReport);
+                    reportPrinter.printError("Failed to retrieve the list of related workspaces for user " + user.getId(), auditReport);
                     continue;
                 }
                 Map<String, AbstractPermissions> wsPermissions = new HashMap<>();
