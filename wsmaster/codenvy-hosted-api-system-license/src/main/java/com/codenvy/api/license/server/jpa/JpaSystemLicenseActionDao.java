@@ -66,6 +66,9 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
 
     @Override
     public void remove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException {
+        requireNonNull(licenseType, "Required non-null system license type");
+        requireNonNull(actionType, "Required non-null system action type");
+
         try {
             doRemove(licenseType, actionType);
         } catch (RuntimeException e) {
@@ -77,6 +80,9 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     @Transactional
     public SystemLicenseActionImpl getByLicenseTypeAndAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
                                                                                                                                     NotFoundException {
+        requireNonNull(licenseType, "Required non-null system license type");
+        requireNonNull(actionType, "Required non-null system action type");
+
         try {
             return managerProvider.get()
                                   .createNamedQuery("LicenseAction.getByLicenseTypeAndAction", SystemLicenseActionImpl.class)
@@ -94,6 +100,9 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     @Transactional
     public SystemLicenseActionImpl getByLicenseIdAndAction(String licenseId, Constants.Action actionType) throws ServerException,
                                                                                                                  NotFoundException {
+        requireNonNull(licenseId, "Required non-null system license id");
+        requireNonNull(actionType, "Required non-null system action type");
+
         try {
             return managerProvider.get()
                                   .createNamedQuery("LicenseAction.getByLicenseIdAndAction", SystemLicenseActionImpl.class)

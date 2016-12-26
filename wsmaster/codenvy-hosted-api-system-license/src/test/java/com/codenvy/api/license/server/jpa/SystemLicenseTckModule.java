@@ -18,8 +18,7 @@ import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
-
-import org.eclipse.che.commons.test.tck.JpaCleaner;
+import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
@@ -40,7 +39,7 @@ public class SystemLicenseTckModule extends TckModule {
         install(new JpaPersistModule("main"));
         bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
         bind(DBInitializer.class).asEagerSingleton();
-        bind(TckResourcesCleaner.class).to(JpaCleaner.class);
+        bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
 
         bind(new TypeLiteral<TckRepository<SystemLicenseActionImpl>>() {})
                 .toInstance(new JpaTckRepository<>(SystemLicenseActionImpl.class));

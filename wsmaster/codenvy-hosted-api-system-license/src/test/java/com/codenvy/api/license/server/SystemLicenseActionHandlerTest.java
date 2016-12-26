@@ -108,9 +108,6 @@ public class SystemLicenseActionHandlerTest {
 
     @Test
     public void shouldAddProductLicenseExpiredRecord() throws Exception {
-        // given
-        doThrow(NotFoundException.class).when(dao).getByLicenseIdAndAction(LICENSE_ID, EXPIRED);
-
         // when
         systemLicenseActionHandler.onProductLicenseDeleted(systemLicense);
 
@@ -121,15 +118,6 @@ public class SystemLicenseActionHandlerTest {
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), EXPIRED);
         assertEquals(expireAction.getLicenseId(), LICENSE_ID);
-    }
-
-    @Test
-    public void shouldNotUpsertProductLicenseExpiredRecordForExistedRecord() throws Exception {
-        // when
-        systemLicenseActionHandler.onProductLicenseDeleted(systemLicense);
-
-        // then
-        verify(dao, never()).upsert(any());
     }
 
     @Test

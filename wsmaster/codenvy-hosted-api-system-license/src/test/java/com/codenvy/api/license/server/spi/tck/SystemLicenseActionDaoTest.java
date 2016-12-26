@@ -43,7 +43,7 @@ import static org.testng.Assert.assertNotNull;
  */
 @Listeners(TckListener.class)
 @Test(suiteName = "systemLicenseActionDaoTck")
-public class JpaSystemLicenseActionDaoTest {
+public class SystemLicenseActionDaoTest {
     public static final String LICENSE_ID = "licenseId1";
 
     private SystemLicenseActionImpl systemLicenseActions[];

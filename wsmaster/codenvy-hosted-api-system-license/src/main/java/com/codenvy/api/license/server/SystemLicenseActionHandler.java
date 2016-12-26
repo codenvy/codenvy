@@ -75,19 +75,14 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
 
     @Override
     public void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException {
-        // don't update existed record about expiration of the same license
-        try {
-            systemLicenseActionDao.getByLicenseIdAndAction(systemLicense.getLicenseId(), EXPIRED);
-        } catch (NotFoundException e) {
-            SystemLicenseActionImpl codenvyLicenseAction
-                = new SystemLicenseActionImpl(PRODUCT_LICENSE,
-                                              EXPIRED,
-                                              System.currentTimeMillis(),
-                                              systemLicense.getLicenseId(),
-                                              Collections.emptyMap());
+        SystemLicenseActionImpl codenvyLicenseAction
+            = new SystemLicenseActionImpl(PRODUCT_LICENSE,
+                                          EXPIRED,
+                                          System.currentTimeMillis(),
+                                          systemLicense.getLicenseId(),
+                                          Collections.emptyMap());
 
-            systemLicenseActionDao.upsert(codenvyLicenseAction);
-        }
+        systemLicenseActionDao.upsert(codenvyLicenseAction);
     }
 
     @Override
