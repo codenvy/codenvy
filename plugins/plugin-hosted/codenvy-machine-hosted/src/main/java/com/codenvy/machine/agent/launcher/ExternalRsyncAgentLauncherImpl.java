@@ -16,6 +16,8 @@ package com.codenvy.machine.agent.launcher;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLaunchingChecker;
+import org.eclipse.che.api.agent.server.launcher.CommandExistsAgentChecker;
+import org.eclipse.che.api.agent.server.launcher.CompositeAgentLaunchingChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -41,7 +43,10 @@ public class ExternalRsyncAgentLauncherImpl extends AbstractAgentLauncher {
     @Inject
     public ExternalRsyncAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
                                           @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, AgentLaunchingChecker.DEFAULT);
+        super(agentMaxStartTimeMs,
+              agentPingDelayMs,
+              new CompositeAgentLaunchingChecker(new CommandExistsAgentChecker("rsync"),
+                                                 AgentLaunchingChecker.DEFAULT));
     }
 
     @Override
