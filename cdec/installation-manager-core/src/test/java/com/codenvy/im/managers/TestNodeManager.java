@@ -183,9 +183,9 @@ public class TestNodeManager extends BaseTest {
     }
 
     @Test(expectedExceptions = IllegalStateException.class,
-        expectedExceptionsMessageRegExp = "Codenvy License error")
+        expectedExceptionsMessageRegExp = "System License error")
     public void testAddNodeShouldFailedWhenLicenseInvalid() throws Exception {
-        doThrow(new IllegalStateException("Codenvy License error")).when(mockHelper).validateLicense();
+        doThrow(new IllegalStateException("System License error")).when(mockHelper).validateLicense();
         spyManager.add(TEST_NODE_DNS);
         verify(mockHelper, never()).getAddNodeCommand(any(NodeConfig.class), anyString());
     }

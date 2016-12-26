@@ -48,10 +48,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-license</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-machine</artifactId>
         </dependency>
         <dependency>
@@ -73,6 +69,10 @@
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-system-license</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
@@ -193,6 +193,7 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
+            <version>${com.google.gwt.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>

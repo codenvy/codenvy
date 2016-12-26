@@ -14,10 +14,10 @@
  */
 package com.codenvy.im.managers.helper;
 
-import com.codenvy.api.license.CodenvyLicense;
-import com.codenvy.api.license.InvalidLicenseException;
-import com.codenvy.api.license.LicenseException;
-import com.codenvy.api.license.LicenseNotFoundException;
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.exception.InvalidSystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.im.artifacts.CDECArtifact;
 import com.codenvy.im.artifacts.helper.SystemProxySettings;
 import com.codenvy.im.commands.Command;
@@ -352,7 +352,7 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                 throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
             }
         }  catch (JsonParseException | IOException e) {
-            throw new IllegalStateException("Codenvy License can't be validated.", e);
+            throw new IllegalStateException("System License can't be validated.", e);
         }
     }
 
@@ -368,10 +368,10 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
         }
 
         try {
-            CodenvyLicense codenvyLicense = codenvy4xLicenseManager.load();
+            SystemLicense systemLicense = codenvy4xLicenseManager.load();
 
-            CodenvyLicense.LicenseType licenseType = codenvyLicense.getLicenseType();
-            if (codenvyLicense.isExpired()) {
+            SystemLicense.LicenseType licenseType = systemLicense.getLicenseType();
+            if (systemLicense.isExpiredCompletely()) {
                 switch (licenseType) {
                     case EVALUATION_PRODUCT_KEY:
                         throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
@@ -380,12 +380,12 @@ public class NodeManagerHelperCodenvy4Impl extends NodeManagerHelper {
                         // do nothing
                 }
             }
-        } catch (LicenseNotFoundException e) {
+        } catch (SystemLicenseNotFoundException e) {
             throw new IllegalStateException("Your Codenvy subscription only allows a single server.");
-        } catch (InvalidLicenseException e) {
-            throw new IllegalStateException("Codenvy License is invalid or has unappropriated format.");
-        } catch (LicenseException e) {
-            throw new IllegalStateException("Codenvy License can't be validated.", e);
+        } catch (InvalidSystemLicenseException e) {
+            throw new IllegalStateException("System License is invalid or has unappropriated format.");
+        } catch (SystemLicenseException e) {
+            throw new IllegalStateException("System License can't be validated.", e);
         }
     }
 

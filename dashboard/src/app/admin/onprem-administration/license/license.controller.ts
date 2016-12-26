@@ -108,9 +108,7 @@ export class OnPremisesAdminLicenseController {
    */
   addLicense(): void {
     this.isLoading = true;
-    let promise = this.codenvyLicense.addLicense(this.newLicense);
-
-    promise.then(() => {
+    this.codenvyLicense.addLicense(this.newLicense).then(() => {
       this.isLoading = false;
       this.isLicenseInvalid = false;
       this.cheNotification.showInfo('License successfully added.');

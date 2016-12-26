@@ -341,11 +341,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-api-license</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-machine</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -410,6 +405,17 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-system-license</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-system-license</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-workspace</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -437,11 +443,6 @@
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-infra-filters</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-license-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

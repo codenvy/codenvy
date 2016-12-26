@@ -54,8 +54,7 @@
         <module>codenvy-hosted-api-permission-shared</module>
         <module>codenvy-hosted-integration-tests</module>
         <module>codenvy-ldap</module>
-        <module>codenvy-hosted-api-license</module>
-        <module>codenvy-hosted-license-shared</module>
+        <module>codenvy-hosted-api-system-license</module>
         <module>codenvy-hosted-report-shared</module>
         <module>codenvy-hosted-report</module>
         <module>codenvy-hosted-api-admin</module>

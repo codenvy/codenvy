@@ -1,0 +1,620 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-popup title="Accept Codenvy License Agreement" on-close="licenseAgreementController.cancel()">
+  <div class="license-agreement-message">
+    <div class="agreement">
+      <h4>TERMS OF SERVICE</h4>
+      PLEASE REVIEW THESE TERMS OF SERVICE (THIS <b>“AGREEMENT”</b>) CAREFULLY AS THEY
+      CONSTITUTE A LEGAL AGREEMENT BETWEEN YOU (<b>“CUSTOMER”</b>) AND CODENVY S.A. (<b>“CODENVY”</b>)
+      WITH RESPECT TO CUSTOMER’S USE OF THE SERVICES (AS DEFINED BELOW). BY USING THE SERVICES, YOU AGREE TO BE
+      BOUND BY EACH OF THE TERMS AND CONDITIONS SET FORTH HEREIN. IF YOU DO NOT AGREE WITH THE TERMS AND CONDITIONS
+      SET FORTH HEREIN, YOU MAY NOT ACCESS, REGISTER FOR, OR USE THE SERVICES. Codenvy and Customer may be referred
+      to herein individually as a <b>“Party,”</b> and together as the <b>“Parties.”</b>
+      <ol type="1">
+        <li><u>DEFINITIONS</u>.</li>
+        <ol>
+          <li>“<u>Services</u>” means the combination of Software and Support Services as defined below.</li>
+          <li>"<u>Software</u>" means the Codenvy proprietary software in any form and related documentation
+            delivered to or downloaded by Customer. The term “Software” also includes any updates,
+            upgrades or other new features, functionality or enhancements to the Software provided to
+            Customer by Codenvy or its resellers or agents as part of a new purchase, through Support
+            Services or otherwise. All references to the “purchase” or “sale” of Software mean the granting
+            of a license to use such Software under the terms of this Agreement.
+          </li>
+          <li>“<u>Support Services</u>” may include, depending on Customer’s purchase selections, any or all of the
+            following: product installation support and/or customary technical support and maintenance services.
+          </li>
+        </ol>
+        <li><u>GENERAL</u>.</li>
+        <ol>
+          <li><u>Scope of Agreement</u>. This Agreement applies to Customer’s purchase and use of all Services,
+            whether directly from Codenvy or from an authorized reseller of the Services (<b>“Reseller”</b>).
+          </li>
+          <li><u>Authority</u>. Each Party represents and warrants to the other Party that: (a) its performance under
+            this Agreement will not violate any applicable law; (b) it is duly formed, validly existing and in
+            good standing under the laws of the jurisdiction of its formation; (c) it has the full right, power
+            and authority to enter into this Agreement and to perform its obligations hereunder; and (d)
+            this Agreement has been duly executed by its authorized representative and is legally binding
+            upon it and enforceable in accordance with its terms.
+          </li>
+        </ol>
+        <li><u>LICENSE</u>.<span> Subject to the terms and conditions set forth in this Agreement, Codenvy grants
+          Customer a nonexclusive, nontransferable, non-sublicensable and revocable right and license to: (a) install
+          and use an object code version of the Software in accordance with the related documentation solely for
+          its own internal business operations; (b) reproduce and distribute internally a reasonable number of
+          copies of the documentation with respect to the Software provided by Codenvy (the
+          <b>“Documentation”</b>), provided that Customer must include on all copies of such Documentation all
+          Codenvy trademarks, trade names, logos and notices present thereon as originally provided by
+          Codenvy; and (c) make a reasonable number of copies of the Software solely for backup and/or
+          archival purposes. Codenvy reserves all rights in the Software not expressly granted to Customer
+          under this Agreement.</span>
+        </li>
+        <li><u>LIMITATIONS ON USE</u>.</li>
+        <ol>
+          <li><u>Authorized Users Only</u>. Customer agrees that only up to that number of individuals for whom it
+            has purchased the requisite licenses in accordance with this Agreement, as set forth on the
+            applicable Order (as defined below) and as controlled by Customer’s license key, may access
+            and use the Software (each such individual, an <b>“Authorized User”</b>). Customer hereby agrees it
+            is liable for the actions of all Authorized Users and is responsible for ensuring each Authorized
+            User complies with the terms and conditions set forth in this Agreement.
+          </li>
+          <li><u>No Right to Source Code</u>. Customer acknowledges that the source code and underlying
+            structure and algorithms of the Software are the property and proprietary trade secrets of
+            Codenvy or its licensors. Except as provided by the open source licenses described in Section 23
+            below: (a) no license is granted to use source code of the Software and all such use is expressly
+            prohibited; and (b) Customer agrees not to: (i) modify, reverse engineer, decompile, translate,
+            or disassemble the Software, (ii) obtain or attempt to create, derive, or obtain the source code
+            of the Software, (iii) create a source code equivalent of or derivative of the Software, or (iv)
+            cause or permit any third party to do any of the foregoing.
+          </li>
+          <li><u>No Right to Transfer, Resell, or Provide Services</u>. Customer is expressly prohibited from: (a)
+            assigning, distributing, licensing, sublicensing, selling, renting, leasing, granting a security
+            interest in, or otherwise transferring any rights in or to the Software; and (b) reselling the
+            Software, using the Software to provide any type of paid or unpaid services to third parties
+            (including, without limitation, incorporating any part of the Software into a product or service
+            Customer provides to a third party), or otherwise making the Software available to third parties,
+            whether on a time-sharing, service provider, hosting, or other basis.
+          </li>
+          <li><u>Use of Coded Instructions</u>. Customer acknowledges and agrees that the Software may contain
+            coded instructions which will: (a) limit the number of users who can access the Software; (b)
+            disable some or all of the features of the Software and any related electronic documentation
+            upon the termination of the licenses granted hereunder; and (c) contain such other permissions
+            or restrictions as may be specifically included in this Agreement. Customer agrees not to
+            interfere with any license key mechanism in the Software, or otherwise attempt to circumvent,
+            disable or disrupt any mechanism in the Software intended to audit or limit use of the Software.
+          </li>
+          <li><u>Other Restrictions</u>. Customer agrees not to: (a) remove, alter or cover any copyright notices,
+            trademark notices or other proprietary rights notices placed or embedded on or in the Software
+            or cause or permit any third party to do any of the foregoing; (b) use the licenses and rights
+            granted under this Agreement to design, develop or distribute a commercial product or service
+            that competes with the Software; (c) make available to any third party any analysis of the
+            results of operation of the Software, including benchmarking results, or otherwise publicly
+            disseminate information regarding the performance of the Software; or (d) use or distribute the
+            Software in violation of any applicable laws, regulations or export restrictions.
+          </li>
+          <li><u>European Union Exception</u>. If Customer uses the Software in any country within the European
+            Union, the prohibitions set forth herein will not affect Customer’s rights under any legislation
+            implementing the E.C. Council Directive on the Legal Protection of Computer Programs.
+          </li>
+        </ol>
+        <li><u>PROPRIETARY RIGHTS</u>.<span> As between Codenvy and Customer, Codenvy is and will remain the sole and
+            exclusive owner of the Software and all intellectual property rights associated therewith. Customer
+            will not take any actions inconsistent with Codenvy’s ownership of each of Codenvy’s rights in and to
+            the Software and the intellectual property associated therewith.</span>
+        </li>
+        <li><u>SUPPORT SERVICES</u>.<span> Codenvy will use commercially reasonable efforts to provide the Support
+          Services purchased by Customer in accordance with the support policy published at:
+          <a href="https://codenvy.com/docs/support-policy.pdf" target="_blank">
+            https://codenvy.com/docs/support-policy.pdf
+          </a>. Customer understands Codenvy’s ability to provide the Support Services are conditioned upon
+          Customer’s timely response to Codenvy’s requests for information and other inputs from Customer
+          (of any nature to the extent related to the Support Services). Customer hereby acknowledges and agrees
+          Codenvy will not be in breach of this Agreement or of any Order for performance delays caused primarily by
+          Customer’s failure to provide such timely response. Further, such delays will not affect
+          Customer’s payment obligations hereunder.</span>
+        </li>
+        <li><u>TERM AND TERMINATION</u>.</li>
+        <ol>
+          <li>The term of this Agreement commences on the date set forth in the initial Order (the <b>“Effective
+            Date”</b>) and, unless earlier terminated as provided herein, continues for the period set forth on
+            the Order or, if no such period is set forth thereon, a period of twelve (12) months (the <b>“Initial
+              Term”</b>). Contemporaneous with the expiration of such Initial Term and each successive Renewal
+            Term (as defined herein), this Agreement automatically will renew for a period of twelve (12)
+            months (each, a <b>“Renewal Term”</b>), unless and until terminated in accordance with the terms
+            and conditions set forth herein (the Initial Term, together with each Renewal Term collectively,
+            the <b>“Term”</b>). The term of each Service provided hereunder will be set forth in the applicable
+            Order.
+          </li>
+          <li>Either Party may terminate this Agreement as of the end of the Initial Term or the then current
+            Renewal Term, as the case may be, by providing the non-terminating Party with thirty (30) days’
+            prior written notice of its intention not to renew this Agreement no later than thirty (30) days
+            prior to the end of the Initial Term or the then current Renewal Term, as the case may be. A
+            Party may terminate this Agreement immediately in the event that: (a) the other Party fails to
+            cure a material breach of any term, condition, representation or warranty set forth herein
+            within fifteen (15) days after such other Party’s receipt of written notice thereof; or (b) in the
+            event the other Party files a petition in bankruptcy or for reorganization or a third party files a
+            petition in bankruptcy or for reorganization against such other Party, which is not dismissed
+            within sixty (60) days, or in the event of an assignment by such other Party for the benefit of its
+            creditors, or the appointment of a receiver, trustee, liquidator or custodian for all or a
+            substantial part of such other Party’s assets. Upon any termination or expiration of this
+            Agreement: (i) the licenses and rights granted under this Agreement terminate effective
+            immediately as of the date of such termination or expiration; (ii) Customer agrees it will delete
+            all Software contained on Customer’s systems and provide Codenvy with written certification
+            thereof at Codenvy’s request; and (iii) Customer will remain obligated to pay Reseller or
+            Codenvy, as the case may be in accordance with Section 8 below, all fees and expenses which
+            were incurred prior to (and on) the effective date of such termination or expiration.
+          </li>
+          <li>Any provision of this Agreement which by its terms imposes continuing obligations on the
+            Parties, including, but not limited to, Sections 4, 5, 7.2, 7.3, 7.4, 8.2, 10, 11, 13-19, 22, 23, and
+            24 hereof, shall survive any expiration or termination of this Agreement.
+          </li>
+          <li>Customer hereby understands and agrees that if Reseller’s agreement with Codenvy terminates
+            during the Term, Codenvy will provide Customer with written notice thereof; and immediately
+            thereupon, Customer’s payment obligation to Reseller with respect to the Services, if any,
+            automatically becomes Customer’s payment obligation to Codenvy in accordance with the
+            terms and conditions set forth herein, without Customer’s further action or consent (the
+            <b>“Automatic Assignment”</b>).
+          </li>
+        </ol>
+        <li><u>ORDERS AND PAYMENT</u>.</li>
+        <ol>
+          <li><u>Quotes and Orders</u>.Customer will issue to Reseller or Codenvy, as the case may be, a written
+            purchase order or other form of written or electronic communication committing to a purchase
+            of the Services. Each such purchase order must include Customer’s name, address, contact
+            information, the Services purchased by, or licensed to, Customer thereunder, the commercial
+            terms and specific usage rights with respect to the Services (if any), the term of the Services,
+            and such other terms as the Parties may mutually agree. No purchase order is binding on
+            Codenvy unless and until it is accepted by an authorized representative of Codenvy, including
+            Reseller (if and as applicable) (each such accepted purchase order, an <b>“Order”</b>). Except as
+            expressly agreed in writing by Codenvy’s authorized representative or otherwise provided
+            herein, any terms or conditions in any purchase order or other communication from Customer
+            that conflict, modify, or add to the terms and conditions hereof are hereby rejected and are
+            null, void, and of no legal effect, and any failure to object thereto is not an acceptance thereof,
+            nor will it constitute a waiver of the terms and conditions hereof. Notwithstanding the
+            foregoing, if Customer issues a purchase order based on a written quote from Codenvy or
+            Reseller, as the case may be, specifying pricing terms, form of payment, timing of payment,
+            and/or quantity, configuration, or other description of the Services (each a <b>“Quote”</b>), Customer
+            will be deemed to have accepted such terms, including, without limitation, any such terms that
+            conflict with, modify, or add to the terms of this Agreement, and this Agreement is explicitly
+            made subject to such terms of such Quote.
+          </li>
+          <li><u>Payment Terms</u>.In consideration of the rights granted to Customer under this Agreement,
+            Customer will pay to Reseller (if Customer purchases the Services through Reseller) or Codenvy,
+            as applicable, the fees set forth in each Order in accordance with the terms of this Section 8.2.
+            All fees and expenses are due and payable in U.S. Dollars: (a) if payable to Codenvy, net thirty
+            (30) days from the date of invoice, unless otherwise stated by Codenvy in writing; and (b) if
+            payable to Reseller, in accordance with the payment terms set forth in Customer’s agreement
+            with Reseller. Any amounts not paid to Codenvy when due will accrue interest at the rate of
+            one and one half percent (1.5%) per month, or the maximum amount allowed by law, if lower.
+            In the event that any payment is more than thirty (30) days past due, Codenvy may suspend the
+            Services (including access to the Software) without incurring any liability to Customer. Despite
+            any such suspension, Customer acknowledges and agrees it will be required to pay all fees and
+            expenses due and payable until this Agreement is terminated in accordance with the
+            termination provisions set forth herein. In the event that any payment is more than sixty (60)
+            days past due, Customer is responsible for, and agrees to pay, Codenvy’s reasonable costs and
+            expenses of collection, including, but not limited to, court and attorneys’ fees and expenses.
+          </li>
+        </ol>
+        <li><u>ACCEPTANCE</u>.<span> Unless otherwise agreed in writing, all Services will automatically be deemed
+          accepted upon delivery. Customer shall have no right to return any Services acquired.</span>
+        </li>
+        <li><u>DISCLAIMER OF WARRANTY</u>.<span> EXCEPT TO THE EXTENT EXPRESSLY SET FORTH HEREIN, THE SERVICES
+          ARE PROVIDED “AS IS” AND “AS AVAILABLE” AND WITHOUT REPRESENTATION OR WARRANTY OF
+          ANY KIND. EXCEPT TO THE EXTENT EXPRESSLY SET FORTH HEREIN, TO THE MAXIMUM EXTENT
+          PERMITTED BY APPLICABLE LAW, CODENVY DISCLAIMS ANY AND ALL REPRESENTATIONS AND
+          WARRANTIES, WHETHER ORAL OR WRITTEN, EXPRESS OR IMPLIED, INCLUDING (WITHOUT
+          LIMITATION) ANY WARRANTY AS TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR
+          USE, TITLE, OR NON-INFRINGEMENT. CODENVY DOES NOT WARRANT THE SERVICES WILL MEET
+          CUSTOMER’S REQUIREMENTS NOR DOES IT GIVE ANY WARRANTY ABOUT THE RESULTS THAT MAY BE
+          OBTAINED BY USING THE SERVICES. CUSTOMER EXPRESSLY ACKNOWLEDGES AND AGREES THE
+          SERVICES MAY RELY UPON THIRD-PARTY SOFTWARE FOR CERTAIN FUNCTIONS AND, EXCEPT AS SET
+          FORTH EXPRESSLY HEREIN, CODENVY MAKES NO REPRESENTATION, WARRANTY, PROMISE OR
+          GUARANTEE TO CUSTOMER THAT SUCH SOFTWARE WILL BE ERROR FREE, ACCOMPLISH A SPECIFIED
+          PURPOSE OR PERFORM IN ACCORDANCE WITH ANY PARTICULAR STANDARD, LEVEL OR METRIC AND
+          CODENVY WILL NOT BE LIABLE TO CUSTOMER FOR ANY FAILURE THEREOF. CUSTOMER
+          ACKNOWLEDGES AND AGREES THE SERVICES ARE NOT INTENDED TO REPLACE CUSTOMER’S
+          PROFESSIONAL SKILLS OR JUDGEMENT. CUSTOMER’S USE OF THE SERVICES IS AT CUSTOMER’S OWN
+          RISK, AND CUSTOMER ASSUMES ALL LIABILITY FOR OUTCOMES BASED THEREON.</span>
+        </li>
+        <li><u>LIMITATION OF LIABILITY</u>.<span> IN NO EVENT WILL CODENVY BE LIABLE TO CUSTOMER OR ANY OTHER
+          PARTY FOR ANY SPECIAL, DIRECT, INDIRECT, INCIDENTAL, EXEMPLARY, CONSEQUENTIAL, LOST
+          PROFITS, OR PUNITIVE DAMAGES ARISING FROM OR RELATED TO THE SERVICES OR THIS
+          AGREEMENT, INCLUDING, BUT NOT LIMITED TO, DAMAGES FOR LOSS OF DATA, LOSS OF USE, OR
+          LOSS OF PROFITS, EVEN IF CODENVY HAS BEEN ADVISED IN ADVANCE OF THE POSSIBILITY OF SUCH
+          LOSS OR DAMAGES. FURTHER, IN NO EVENT WILL CODENVY’S TOTAL CUMULATIVE LIABILITY TO
+          CUSTOMER OR ANY OTHER PARTY FOR CLAIMS, LOSSES, OR DAMAGES OF ANY KIND, WHETHER
+          BASED ON CONTRACT, TORT, NEGLIGENCE, INDEMNITY OR OTHERWISE, ARISING OUT OF OR
+          RELATED IN ANY WAY TO THIS AGREEMENT OR THE SERVICES EXCEED THE FEES PAID HEREUNDER
+          DURING THE SIX (6)-MONTH PERIOD ENDING ON THE DATE OF THE CAUSE OF ACTION UNDERLYING
+          SUCH CLAIM, LOSS OR DAMAGE. No claim may be asserted by Customer against Codenvy more than
+          twelve (12) months after the date this Agreement terminates or expires. In the event of any failure,
+          or Codenvy’s non-provision, of the Services, Customer’s sole and exclusive remedy is for Codenvy to
+          use commercially reasonable efforts to repair or provide the Services.”
+          CUSTOMER ACKNOWLEDGES CODENVY DOES NOT CONTROL THE TRANSFER OF DATA OVER
+          COMMUNICATIONS FACILITIES, INCLUDING THE INTERNET, AND THAT THE SERVICES MAY BE SUBJECT
+          TO LIMITATIONS, DELAYS, AND OTHER PROBLEMS INHERENT IN THE USE OF SUCH
+          COMMUNICATIONS FACILITIES. ACCORDINGLY, CODENVY WILL NOT BE RESPONSIBLE FOR ANY
+          DELAYS, DELIVERY FAILURES, OR OTHER DAMAGE RESULTING FROM SUCH PROBLEMS. CUSTOMER
+          UNDERSTANDS AND AGREES ITS USE OF THE SERVICES IS AT ITS OWN RISK AND DISCRETION.
+          THE PARTIES EXPRESSLY ACKNOWLEDGE AND AGREE THAT EACH PARTY HAS ENTERED INTO THIS
+          AGREEMENT IN RELIANCE UPON THE LIMITATIONS OF LIABILITY SPECIFIED HEREIN, WHICH
+          ALLOCATE RISK BETWEEN CODENVY AND CUSTOMER AND FORM A BASIS OF BARGAIN BETWEEN
+          THE PARTIES. SOLELY IF AND TO THE EXTENT REQUIRED IN ORDER TO MAKE THIS LIMITATION OF
+          LIABILITY ENFORCEABLE, NOTHING SET FORTH IN THIS AGREEMENT WILL EXCLUDE OR LIMIT
+          LIABILITY TO A GREATER EXTENT THAN IS PERMITTED BY APPLICABLE LAW OR WILL EXCLUDE OR
+          LIMIT LIABILITY FOR FRAUD, FRAUDULENT MISREPRESENTATION OR FOR DEATH OR PERSONAL
+          INJURY CAUSED BY NEGLIGENCE.</span>
+        </li>
+        <li><u>TRADEMARKS</u>.<span> Codenvy uses certain trademarks and trade names in connection with the Services.
+          Customer is not authorized to use any such trademarks for any purpose; provided, however,
+          Codenvy hereby grants Customer a limited, non-exclusive, non-transferable, non-sublicensable and
+          revocable right and license to reproduce Codenvy’s trademarks provided on the Documentation
+          solely for the purpose described in Section 3(b) above.</span>
+        </li>
+        <li><u>CONFIDENTIALITY</u>.<span> Except to the extent expressly governed by a separate nondisclosure and
+          confidentiality agreement between the Parties (the <b>“NDA”</b>), this Section 13 governs the use and
+          protection of Confidential Information (as defined herein) disclosed by the Parties on and after the
+          Effective Date. Each Receiving Party (as defined herein) hereby agrees to hold in strict confidence,
+          not to use except as otherwise authorized herein, and to protect from disclosure to unauthorized
+          third parties the Confidential Information of the Disclosing Party (as defined below). For purposes
+          hereof, <b>“Confidential Information”</b> means any information disclosed by one party (the
+          <b>“Disclosing Party”</b>) to the other party (the <b>“Receiving Party”</b>) that relates to such Disclosing
+          Party and that reasonably should be known by the Receiving Party to be confidential or proprietary to the
+          Disclosing Party under the circumstances of disclosure or in light of the nature of the information
+          disclosed. Confidential Information does not include information that: (a) was publicly available, or
+          that subsequently becomes publicly available, except by wrongful disclosure hereunder by the
+          Receiving Party; (b) was in the Receiving Party’s possession prior to receipt of the same hereunder,
+          as evidenced by the Receiving Party’s prior written records; (c) was received from a third party who
+          was not known by the Receiving Party to be under any obligation of confidentiality with respect to
+          such information or to have violated any applicable law; or (d) was independently developed by the
+          Receiving Party as must be evidenced by written records created by such Receiving Party
+          contemporaneously with such independent development. In the event that the Receiving Party
+          becomes required by law, rule, regulation, judicial or administrative process to disclose any of the
+          Disclosing Party’s Confidential Information, prior to making such disclosure, such Receiving Party will
+          provide the Disclosing Party with prompt written notice thereof, to the extent not prohibited by
+          applicable law or regulation, so that the Disclosing Party may seek a protective order or other
+          appropriate remedy. All of a Disclosing Party’s Confidential Information will be returned or
+          destroyed, as instructed by such Disclosing Party, upon the termination or expiration of this
+          Agreement.</span>
+        </li>
+        <li><u>SPECIFIC ENFORCEMENT</u>.<span> Customer hereby acknowledges and agrees that the terms, conditions
+          and restrictions set forth in Section 4, Section 5, and Section 13 above are reasonably necessary for
+          the protection of Codenvy’s business and goodwill, and that any breach or threatened breach by
+          Customer of any of such terms, conditions or restrictions will cause Codenvy substantial and
+          irreparable harm for which monetary damages alone will not be adequate; and accordingly, that in
+          the event of such a breach or threatened breach, Codenvy has the right to seek immediate injunctive
+          relief and/or specific performance, in addition to any other remedies available at law or in equity.</span>
+        </li>
+        <li><u>INDEMNIFICATION</u>.</li>
+        <ol>
+          <li>Subject to the indemnification obligations described in Section 15.2 below, at its sole cost and
+            expense, Customer hereby agrees to defend and hold harmless Codenvy and its affiliates and
+            subsidiaries, and its and their officers, directors, stockholders, employees, consultants,
+            representatives, agents, successors and assigns (the “Indemnitees”) in any third party action or
+            claim, and to indemnify Codenvy and its Indemnitees from and against any and all claims,
+            losses, liabilities, sums of money, damages, expenses, and costs (including, but not limited to,
+            reasonable attorneys’ fees) (collectively, “Claims”) arising from such action or claim and related
+            to: (a) Customer’s breach of any term or condition, or of any of its representations or
+            warranties, set forth in this Agreement; (b) Authorized Users’ and/or Customer’s customers’ use
+            of the Services; (c) Customer’s violation of applicable law; (d) Customer’s gross negligence or
+            willful misconduct; and/or (e) Customer’s infringement, violation or misappropriation of any
+            intellectual property, privacy or other rights of any third party.
+          </li>
+          <li>Subject to the indemnification obligations described in Section 15.1 above, at its sole cost and
+            expense, Codenvy agrees to defend and hold harmless Customer and its Indemnitees in any
+            third party action or claim, and to indemnify Customer and its Indemnitees from and against
+            any and all Claims arising from such action or claim and related to: (a) the infringement or
+            misappropriation of a third party’s United States or European Union intellectual property right
+            to the extent caused by Codenvy; and/or (b) Codenvy’s breach of Section 13 above or of the
+            terms of any license granted by Customer hereunder. If Customer’s use of the Services is, or is
+            likely to be, enjoined, or if necessary to avoid liability hereunder, as determined by Codenvy at
+            its sole discretion, Codenvy may, at its sole discretion: (i) procure for Customer the right to
+            continue using the affected Service; (ii) replace or modify the affected Service so that
+            Customer’s use becomes non-infringing; and/or (iii) terminate Customer’s right to use the
+            applicable Service and refund a pro rata portion of the fees prepaid by Customer. This Section
+            15.2 sets forth Codenvy’s sole liability and Customer’s sole remedy with respect to the
+            infringement or misappropriation of a third party’s intellectual property rights caused by
+            Codenvy.
+          </li>
+          <li>Notwithstanding the foregoing, the indemnifying Party under this Section 16 is not required to
+            fulfill its indemnification obligation set forth in this Section 15 if the indemnified party fails to:
+            (a) promptly notify such indemnifying Party of the action or claim, and such failure prejudices
+            such indemnifying Party’s ability to fulfill its obligations hereunder; (b) provide such
+            indemnifying Party with reasonable assistance in its defense and settlement of such action or
+            claim, at such indemnifying Party’s sole cost and expense; and (c) provide such indemnifying
+            Party with the exclusive right to control and direct the defense of such action or claim;
+            provided, however, that such indemnifying Party may not settle an action or claim without the
+            indemnified party’s prior written consent, unless such settlement: (i) includes an unconditional
+            release of such indemnified party(ies) from all liability arising out of such action or claim; and
+            (ii) is solely monetary in nature and does not include an admission of fault by such indemnified
+            party(ies), any injunctive or equitable relief against such indemnified party(ies), or otherwise
+            adversely affect such indemnified party(ies).
+          </li>
+          <li>Notwithstanding anything to the contrary set forth in Section 15.2 above, Codenvy is not
+            required to perform its indemnification obligations set forth in Section 15.2 above to the extent
+            a Claim arises out of or is connected to: (a) Customer’s misuse or unauthorized use of the
+            Services; (b) Customer’s combination of the Services with any products, services, information,
+            materials, technologies, business methods or processes not furnished or authorized by
+            Codenvy; (c) Customer’s
+          </li>
+        </ol>
+        <li><u>COMPLIANCE</u>.</li>
+        <ol>
+          <li>Client acknowledges that the Services may be subject to U.S. or other countries’ export control
+            laws and regulations. Accordingly, Customer may not export, re-export or otherwise transfer
+            any portion of the Services except in full compliance with all applicable laws and regulations,
+            including but not limited to the Export Administration Regulations of the U.S. Department of
+            Commerce, the International Traffic in Arms Regulations of the U.S. Department of State, and
+            the regulations administered by the Office of Foreign Assets Control of the United States
+            Department of the Treasury (<b>“OFAC”</b>) or other similar laws.
+          </li>
+          <li>Customer represents and warrants to Codenvy that: (a) neither it, nor any of its officers,
+            directors, controlling owners or employees is located in any U.S. embargoed country, named as
+            a “Specially Designated National” or “Blocked Person” as designated by OFAC, or is otherwise
+            blacklisted by any instrumentality of the U.S.; (b) it will not use the Services to design or
+            develop nuclear, chemical, or biological weapons or missile technology without the prior
+            permission of the U.S. government; and (c) its use of the Services is and will at all times
+            be: (i) in accordance with all applicable laws, rules and regulations; and (ii) without infringement or
+            misappropriation of any intellectual property right or other rights of a third party.
+          </li>
+        </ol>
+        <li><u>AUDIT</u>.<span> Customer agrees to implement reasonable controls to ensure its use of the Services
+          complies with  the terms and conditions  set forth in this Agreement.  Customer acknowledges and
+          agrees that  Codenvy, at  any  time  during normal  business  hours, and  upon  reasonable  written  notice,
+          has the right to  audit  Customer’s  use  of the  Services  and  its  books  and records for the  purpose  of
+          verifying  compliance  with  the  terms  and  conditions  of  this  Agreement.</span>
+        </li>
+        <li><u>GOVERNING LAW</u>.<span> This  Agreement  will  be  governed  by,  and  construed  and  enforced  in
+          accordance with, the laws of the State of California, as it is applied to agreements entered into and to be
+          performed entirely within California, except for those conflicts of law rules thereof that would
+          require or permit the application of the laws of another jurisdiction.  Any dispute or controversy
+          arising under, out of, or in connection  with this Agreement  will be resolved by binding  arbitration
+          under the then current Commercial Arbitration Rules of the American Arbitration Association
+          (including the expedited procedures and optional rules for emergency measures of protection
+          thereunder)  before  a  single  arbitrator;  provided,  however,  that  nothing  set  forth  herein  is
+          construed  to  limit  Codenvy’s  remedies  described  in  Section  14 above.  Any  such  arbitration
+          will  be  conducted  in San Francisco, California.  Judgment upon any award may be entered in
+          any court of competent jurisdiction.  The  arbitrator  shall  be  designated  by  mutual  agreement
+          of  the  Parties  hereto  or,  if  the Parties  cannot  agree  on  an  arbitrator  within  ten  (10)
+          days  after a  request  for  arbitration  hereunder, each  Party  shall  designate  one  (1)  arbitrator
+          and  the  arbitrators  so  designated  shall  designate  a  third arbitrator who shall conduct the
+          arbitration.  The decision of the arbitrator shall be binding and conclusive upon the  Parties.
+          Any  arbitration  award  granted hereunder shall be  enforceable under the applicable terms and conditions
+          of the Convention on the Recognition and Enforcement of Foreign  Arbitral  Awards, 1958
+          (the  New  York  Convention),  as  amended  to  date.  The  Parties  expressly agree this Agreement
+          is not governed by the provisions of the United Nations Convention on Contracts  for  the  International
+          Sale  of  Goods.  All  rights  and  remedies  hereunder  are  cumulative.</span>
+        </li>
+        <li><u>ENTIRE AGREEMENT</u>.<span> This Agreement and each Order, if and as applicable (and the NDA if
+          applicable),  constitute the  entire  agreement  between  Customer and  Codenvy regarding  the  subject
+          matter  hereof and  supersede  any  other  communications  with  respect  to  the  Services,  and there  are
+          no  promises,  terms,  conditions  or  obligations,  oral  or  written,  express  or  implied,  between
+          Customer  and Codenvy relating to the subject matter hereof other than those contained herein. This
+          Agreement  may  be  modified  by  Codenvy  from  time  to  time,  which  modifications  are  effective  once
+          posted  on  www.codenvy.com  (the  <b>“Site”</b>).  Customer  acknowledges  and  agrees  the  rights  to  use
+          the  Services for which it is contracting hereunder is neither contingent on the delivery of any future
+          functionality or features or the delivery of any other services nor is it dependent on any oral or
+          written public comments made by or on behalf of Codenvy regarding future functionality or features.
+          If purchased by Customer, professional services are provided by Codenvy separate and distinct  from  the
+          Software  and  are  not  required  for  Customer’s  use  or  enjoyment  of  the  Software.</span>
+        </li>
+        <li><u>SEVERABILITY; WAIVER</u>.<span> If any provision of this Agreement is held invalid or unenforceable,
+          the remainder  of this  Agreement  will  continue  in full force  and  effect.  Failure  by  a  Party to
+          insist  upon performance  by  the  other  Party  of  any  of  its  obligations  under  this  Agreement
+          will  not  constitute  a waiver  of  the  right  to  enforce  its  rights  with  respect  to  the  same
+          or  any  other  provision.  No  waiver of  any right or remedy  with respect to  any occurrence or  event
+          shall be deemed  a  waiver of such right  or  remedy  with  respect  to  such  occurrence  or  event
+          in  the  future.</span>
+        </li>
+        <li><u>ASSIGNMENT</u>.<span> Except  pursuant  to  a  merger,  acquisition  or  business  combination and/or
+          in  the  event of an Automatic Assignment, neither Party may assign this Agreement, by operation of law or
+          otherwise, without the prior written consent of the other Party, which consent will not be unreasonably
+          withheld.  Any  prohibited  assignment,  sublicense  or  transfer  will be  null  and  void.  This Agreement
+          will  be  binding  upon  the  respective  successors  and  permitted  assigns  of  the Parties.</span>
+        </li>
+        <li><u>ATTORNEYS’ FEES</u>.<span> In the event legal action is required to enforce or interpret any terms
+          and conditions of this Agreement, the prevailing Party in such legal action will recover all reasonable
+          costs  and  expenses,  including  attorneys’ fees,  incurred  in  connection  with  such  action.</span>
+        </li>
+        <li><u>OPEN SOURCE LICENSING, THIRD PARTY MATERIALS, ADD-ON’S</u>.</li>
+        <ol>
+          <li>The Services may be provided with open source software. Codenvy lists (and updates from
+            time to time) the open source software provided with the Services here:
+            <a href="https://codenvy.com/legal/open-source" target="_blank"> https://codenvy.com/legal/open-source</a>.
+            Customer’s use of such open source software must
+            be in compliance with the terms of the applicable open source license. Except as otherwise
+            set forth in the applicable open source license(s), the open source software provided with the
+            Services is provided “as is,” and without representation or warranty of any kind.
+          </li>
+          <li>The Services may also include components licensed from third parties (“Third Party
+            Materials”). Customer agrees: (a) to use the Third Party Materials solely with the Services
+            and in the form provided by Codenvy; and (b) not to modify or attempt to gain direct access
+            to the Third Party Materials. Customer acknowledges and agrees the owner(s) of the Third Party
+            Materials retain all ownership and intellectual property rights therein.
+          </li>
+          <li>
+            Codenvy may provide Customer with software development kits, application programming
+            interfaces, and associated documentation (collectively, the “Guides”) in order to permit
+            Customer to develop plugins, extensions, add-ons, or other software products or services that
+            interoperate or integrate with the Services (the “Add-Ons”). Subject to the limitations set
+            forth herein and in the Guides, to the extent the Add-Ons: (a) do not incorporate any
+            Software; and (b) are not developed by Codenvy as part of the Support Services or professional services;
+            Customer shall be the sole and exclusive owner of all right, title and interest in and to
+            the AddOns and the intellectual property rights associated therewith. Customer acknowledges and
+            agrees Codenvy does not support, make any representations or warranties with respect to,
+            agree to indemnify, or have any other obligation or liability with respect to Customer’s
+            Add-Ons or their combination, interaction, or use with the Services. Customer agrees it will develop
+            Add-Ons strictly in accordance with the terms and conditions set forth in the Guides. Customer
+            represents and warrants to Codenvy that it will not combine, link, integrate, incorporate, or
+            otherwise use any open source, copyleft, public or similar software (including, without
+            limitation, any software licensed under the GPL or LGPL) in any manner that would: (i)
+            require Codenvy to make or permit any disclosure of, or to make available, any source code for
+            Codenvy’s proprietary software; or (ii) prohibit Codenvy from restricting further modification
+            or distribution of its source code by third parties.
+          </li>
+        </ol>
+        <li><u>FORCE MAJEURE</u>.<span> The performance by either Party of its obligations hereunder (other than the
+          payment  of  money)  will  be  excused  during  any  period  of  time  in  which the  failure  to  perform
+          results from  acts  of  God,  the  elements,  fire,  flood,  component  shortages,  force  majeure,  riot,
+          insurrection, industrial dispute, accident, war, embargoes, legal restrictions or any other cause beyond the
+          reasonable  control  of  a  Party.</span>
+        </li>
+        <li><u>CONSENT TO USE OF ELECTRONIC SIGNATURES AND RECORDS</u>.<span> Customer  acknowledges  and  agrees
+          that  by  clicking  “I  Agree”  or  “I  Accept”  anywhere  on  the  Site  or  by  otherwise  agreeing
+          to  the  terms and conditions set forth in any agreement posted on the Site: (a) Customer agrees to conduct
+          electronically  the  particular  transaction  into  which  it  is  entering;  (b)  Customer  read,
+          understands  and agrees  to  be  bound  by  the  electronic  copy  of  electronic  contracts,
+          notices  and  records  to  which  it  is agreeing,  including,  without  limitation,  this  Agreement;
+          (c)  Customer  is  capable  of  printing  or  storing a  copy  of  electronic  records  of  agreements
+          to  which  it  is  agreeing  including,  without  limitation,  this Agreement;  and  (d)
+          Customer  agrees  to  receive  electronically  information about  the  agreements  to which  it  is  agreeing
+          including,  without  limitation,  this  Agreement.</span>
+        </li>
+      </ol>
+      <h4>HOSTED SERVICES ADDENDUM</h4>
+      This Hosted Services Addendum (this <b>“Addendum”</b>) applies to Customer’s subscription
+      to use the Hosted Services pursuant to the terms of service published at:
+      <a href="http://codenvy.com/docs/terms-of-service.pdf" target="_blank">
+        http://codenvy.com/docs/terms-of-service.pdf
+      </a> (the <b>“Agreement”</b>), and is subject to Customer’s
+      acceptance of, and compliance with all terms and conditions set forth in, the Agreement. All
+      capitalized terms used but not otherwise defined herein have the meanings ascribed to them in the
+      Agreement.
+      <ol type="1">
+        <li><u>Hosted Services</u>.<span> Subject to the terms and conditions set forth in the Agreement and in
+          this Addendum, Codenvy hereby grants Customer a limited, non-exclusive, non-transferable, nonsublicensable
+          and revocable right to access and use the Hosted Services solely for its own internal
+          business purposes for the period of time, and in accordance with the limitations, set forth in the
+          applicable Order Form or on the Site, as the case may be. Codenvy offers access to the Hosted
+          Services on a pay-as-you-go and subscription basis, as set forth in the Order Form or on the Site,
+          as the case may be.</span></li>
+        <li><u>Limitations</u>.
+          <span> Customer’s access to and use of the Hosted Services is subject to the following limitations:
+            <span>
+              <span>(a) Storage and bandwidth with respect to the Hosted Services is capped in accordance with the
+                terms set forth in an Order Form.</span>
+              <span>(b) Customer agrees that it will not:</span>
+              <span>
+                <span>(i) undertake any actions that could compromise the integrity of Codenvy’s systems,
+                  including probing, scanning, or testing the vulnerability of any system or network that
+                  hosts Codenvy’s Hosted Services;
+                </span>
+                <span>(ii) tamper with, reverse-engineer, or hack the Hosted Services, circumventing any security or
+                  authentication measures, or attempting to gain unauthorized access to the services, related systems,
+                  networks, or data;
+                </span>
+                <span>(iii) modify, disable, or compromise the integrity or performance of the Hosted
+                  Services or related systems, network or data;
+                </span>
+                <span>(iv) decipher any transmissions to or from the servers running the Hosted Services;</span>
+                <span>(v) overwhelm or attempting to overwhelm Codenvy’s infrastructure by imposing an unreasonably
+                  large load on Codenvy systems that consume extraordinary resources
+                  (CPUs, memory, disk space, bandwidth, etc.), such as:
+                </span>
+                <span>
+                  <span>(A) using “robots,” “spiders,” “offline readers,” or other automated systems to sends more
+                    request messages to Codenvy’s servers than a human could reasonably send in the same period of
+                    time by using a normal browser;</span>
+                  <span>(B) exceeding the use parameters for any given Service as described in its corresponding
+                     documentation; and/or
+                  </span>
+                  <span>(C) consuming an unreasonable amount of storage for music, videos,
+                    etc., in a way that is unrelated to the purposes for which the Hosted Services were designed.
+                   </span>
+                </span>
+              <span>(vi) misrepresent itself, or disguise the origin of any content (including by “spoofing”,
+                “phishing”, manipulating headers or other identifiers, impersonating anyone else, or
+                falsely implying any sponsorship or association with Codenvy or any third party);
+              </span>
+              <span>(vii) use the Hosted Services to violate the privacy of others, including
+                publishing or posting private and confidential information of third parties without their express
+                permission, or collecting or gathering personal information of third parties (including account
+                names or information) from the Hosted Services;
+              </span>
+              <span>(viii) use the Hosted Services to stalk, harass, or post direct, specific
+                threats of violence against others;
+              </span>
+              <span>(ix) access or search any part of the services by any means other than Codenvy’s
+                publicly supported interfaces (for example, “scraping”); and/or
+              </span>
+              <span>(x) use meta tags or any other “hidden text” including Codenvy’s or Codenvy’s
+                suppliers’ product names or trademarks.
+              </span>
+              <span>
+                (c) Customer agrees it will not use the Hosted Services to post, share, or send Customer Content that:
+              </span>
+              <span>(i) infringes Codenvy’s or a third party’s intellectual property or other rights,
+                including any copyright, trademark, patent, trade secret, moral rights, privacy rights of publicity,
+                or any other intellectual property right or proprietary or contractual right;
+              </span>
+              <span>(ii) is abusive, threatening, obscene, defamatory, libelous, or racially, sexually,
+                or religiously offensive, unsuitable for or harmful to children under the age of thirteen (13), or
+                otherwise objectionable, (including child pornography, which Codenvy will remove and report to
+                law enforcement, including the National Center for Missing and Exploited Children) or that
+                impersonates any other person, or that contains nudity, excessive violence, or offensive subject matter;
+              </span>
+              <span>(iii) encourages illegal or tortious conduct or that is otherwise inappropriate, as
+                determined by Codenvy in its sole discretion;
+              </span>
+              <span>(iv) attacks others based on their race, ethnicity, national origin, religion, sex,
+                gender, sexual orientation, disability, or medical condition;
+              </span>
+              <span>(v) contains viruses, bots, worms, scripting exploits, time bombs, trap doors, or
+                any other computer code, files or programs or repetitive requests for information designed to
+                interrupt, destroy or limit the functionality of any computer software or hardware or
+                telecommunications equipment or to diminish the quality of, interfere with the performance of, or
+                impair the functionality of the Hosted Services;
+              </span>
+              <span>(vi) promotes products or services from a U.S. embargoed or blacklisted
+                country, individual or entity; and/or
+              </span>
+              <span>(vii) could otherwise cause damage to Codenvy or any third party.
+                Customer acknowledges and agrees that Codenvy has no obligation to monitor, preview,
+                verify, flag, modify, filter or remove any Customer Content. Notwithstanding the foregoing,
+                Codenvy reserves the right to suspend or terminate any Customer account that violates the
+                limitations set forth herein. Despite any such suspension or termination, Customer acknowledges
+                and agrees it will be required to pay all Fees due and payable until the Agreement is terminated in
+                accordance with the termination provisions set forth therein
+              </span>
+                </p>
+          </span></li>
+        <li><u>Security Measures</u>.<span> Customer acknowledges Codenvy implements security procedures and
+          safeguards to protect Customer Content from security attacks in accordance with generally accepted industry
+          standards. Notwithstanding the foregoing, Codenvy does not guarantee that such security procedures will be
+          error free, that transmissions of Customer Content will be secure, or that third parties will never be able
+          to defeat such security measures, and Codenvy will not be responsible or liable for any deletion, correction,
+          destruction, damage, loss or failure to store any Customer Content.</span></li>
+        <li><u>Service Level Agreement</u>.<span> Codenvy shall use commercially reasonable efforts to
+          provide the Hosted Services in a manner which meets or exceeds the service levels set forth in the
+          Codenvy service level agreement located at
+          <a href="https://codenvy.com/docs/ce-service-level-agreement.pdf" target="_blank">
+             https://codenvy.com/docs/ce-service-level-agreement.pdf
+          </a>, as may be modified by Codenvy from time to time (which modification is not considered an amendment
+          of the Agreement).</span></li>
+      </ol>
+    </div>
+    <che-button-primary che-button-title="OK"
+                        ng-click="licenseAgreementController.hide()">
+    </che-button-primary>
+    <che-button-notice che-button-title="Cancel"
+                       ng-click="licenseAgreementController.cancel()">
+    </che-button-notice>
+  </div>
+</che-popup>

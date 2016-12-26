@@ -78,10 +78,10 @@
 	        proceedCreate : function(){
 	        	action = 'create';
 	        	var self = this;
-	        	$(".col-md-12").append(this.createTemplate());//TODO show Create form
+                $(".col-md-12").append(this.createTemplate());//show Create form
                 //bind onclick to Google and GitHub buttons
                 $("#signIn").click(function(){
-                	$(".col-md-12").empty();//TODO hide create form
+                    $(".col-md-12").empty();//hide create form
                 	self.proceedLogin();
                 });
                 Account.getOAuthproviders(_.bind(this.constructOAuthElements,this));
@@ -144,12 +144,9 @@
                     username: {
                         required : this.settings.noUsernameErrorMessage
                     },
-                    domain: {
-                        required : this.settings.noDomainErrorMessage,
-                        validDomain : this.settings.invalidDomainNameErrorMessage
-                    },
+
                     email: {
-                        required : this.settings.noEmailErrorMessage,
+                        required : this.settings.noEmailAddressErrorMessage,
                         checkEmail : this.settings.invalidEmailErrorMessage
                     },
                     password: {
@@ -177,13 +174,7 @@
                     return;
                 }
                 
-                if(typeof errorMap.domain !== 'undefined'){
-                    this.trigger("invalid","domain",errorMap.domain, errorContainer);
-                    refocus(this.$("input[name='domain']"));
-                    return;
-                }
-                
-                if(typeof errorMap.password !== 'undefined'){
+                 if(typeof errorMap.password !== 'undefined'){
                     this.trigger("invalid","password",errorMap.password, errorContainer);
                     refocus(this.$("input[name='password']"));
                     return;
