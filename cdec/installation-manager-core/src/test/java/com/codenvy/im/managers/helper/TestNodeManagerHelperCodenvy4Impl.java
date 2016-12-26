@@ -519,7 +519,7 @@ public class TestNodeManagerHelperCodenvy4Impl extends BaseTest {
         spyHelperCodenvy4.validateLicense();
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Codenvy License can't be validated.")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "System License can't be validated.")
     public void processVerifyLicenseShouldBeFailed() throws IOException, ApiException {
         doThrow(IOException.class).when(transport).doGetWithoutProxy(anyString());
 

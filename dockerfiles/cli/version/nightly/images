@@ -1,11 +1,12 @@
-IMAGE_SOCAT=codenvy/socat:nightly
 IMAGE_HAPROXY=haproxy:1.5.18-alpine
 IMAGE_NGINX=nginx:1.10-alpine
 IMAGE_SWARM=swarm:1.2.5
 IMAGE_REGISTRY=registry:2.5.0
 IMAGE_POSTGRES=postgres:9.5.4
-IMAGE_INIT=codenvy/init:nightly
-IMAGE_CODENVY=codenvy/codenvy:nightly
-IMAGE_AGENTS=codenvy/agents:nightly
 IMAGE_COMPOSE=docker/compose:1.8.1
+IMAGE_ZOOKEEPER=zookeeper:3.4.9
+IMAGE_SOCAT=codenvy/socat:nightly
+IMAGE_INIT=codenvy/init:nightly
+IMAGE_AGENTS=codenvy/agents:nightly
+IMAGE_CODENVY=codenvy/codenvy:nightly
 IMAGE_RSYSLOG=codenvy/rsyslog:nightly

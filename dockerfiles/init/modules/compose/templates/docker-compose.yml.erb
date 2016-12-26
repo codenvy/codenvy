@@ -15,9 +15,11 @@ services:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/haproxy.conf:/etc/rsyslog.d/haproxy.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/registry.conf:/etc/rsyslog.d/registry.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/swarm.conf:/etc/rsyslog.d/swarm.conf'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/zookeeper.conf:/etc/rsyslog.d/zookeeper.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/registry/:/var/log/registry'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/zookeeper/:/var/log/zookeeper'
     ports:
       - '5140:514'
     ulimits:
@@ -216,3 +218,27 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+
+########################
+# ZOOKEEPER
+########################
+  zookeeper:
+    image: <%= ENV["IMAGE_ZOOKEEPER"] %>
+    volumes:
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/data/:/data'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/datalog/:/datalog'
+    ports:
+      - '2181:2181'
+    ulimits:
+      nproc: 163840
+      nofile:
+        soft: 163840
+        hard: 163840
+    restart: always
+    depends_on:
+      - rsyslog
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://localhost:5140"
+        syslog-facility: "local1"

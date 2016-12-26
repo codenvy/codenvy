@@ -17,6 +17,7 @@ package com.codenvy.activity.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
@@ -120,8 +121,11 @@ public class WorkspaceActivityManager {
                     workspaceManager.stopWorkspace(workspaceId);
                 } catch (NotFoundException e) {
                     LOG.info("Workspace already stopped");
+                } catch (ConflictException e) {
+                    LOG.warn(e.getLocalizedMessage());
                 } catch (Exception ex) {
-                    LOG.error("Failed to stop the workspace", ex);
+                    LOG.error(ex.getLocalizedMessage());
+                    LOG.debug(ex.getLocalizedMessage(), ex);
                 } finally {
                     activeWorkspaces.remove(workspaceExpireEntry.getKey());
                 }

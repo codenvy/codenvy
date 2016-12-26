@@ -52,7 +52,7 @@ export class CodenvyAPI {
   }
 
   /**
-   * The Codenvy License API interaction service.
+   * The System License API interaction service.
    *
    * @returns {CodenvyLicense}
    */

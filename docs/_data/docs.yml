@@ -2,7 +2,6 @@
   docs:
   - start-introduction
   - start-getting-started
-  - start-architecture  
   - ws-admin-intro # Che workspace-administration
   - ws-stacks # Che workspace-administration
   - ws-recipes # Che workspace-administration

@@ -5,11 +5,12 @@ excerpt: "Install Codenvy in a public cloud or on your own servers."
 layout: docs
 permalink: /:categories/installation/
 ---
+{% include base.html %}
 
 **Applies To**: Codenvy on-premises installs.
 
 ---
-
+  		  
 # System Requirements
 Codenvy installs on Linux, Mac and Windows.
 
@@ -23,7 +24,7 @@ Codenvy services require 2 GB storage and 4 GB RAM. The RAM, CPU and storage res
 
 Boot2Docker, docker-machine, Docker for Windows, and Docker for Mac are all Docker variations that launch VMs with Docker running in the VM with access to Docker from your host. We recommend increasing your default VM size to at least 4GB. Each of these technologies have different ways to allow host folder mounting into the VM. Please enable this for your OS so that Codenvy data is persisted on your host disk.
 
-#### Software
+## Software
 * Docker 1.11+
 
 The Codenvy CLI - a Docker image - manages the other Docker images and supporting utilities that Codenvy uses during its configuration or operations phases. The CLI also provides utilities for downloading an offline bundle to run Codenvy while disconnected from the network.
@@ -32,7 +33,6 @@ Given the nature of the development and release cycle it is important that you h
 
 Install the most recent version of the Docker Engine for your platform using the [official Docker releases](http://docs.docker.com/engine/installation/), including support for Mac and Windows!  If you are on Linux, you can also install with `wget -qO- https://get.docker.com/ | sh`.
 
-### SElinux
 Sometimes Fedora and RHEL/CentOS users will encounter issues with SElinux. Try disabling selinux with `setenforce 0` and check if resolves the issue. If using the latest docker version and/or disabling selinux does not fix the issue then please file a issue request on the [issues](https://github.com/codenvy/codenvy/issues) page. If you are a licensed customer of Codenvy, you can get prioritized support with support@codenvy.com.
 
 ## Hostnames
@@ -48,7 +48,48 @@ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock
 Alternatively, you can edit the `CODENVY_HOST` value in `codenvy.env`. 
 
 ## Ports
-TODO - UPDATE PORT DESCRIPTION SECTION
+The master node is where Codenvy is installed and running. In a [scalability mode]({{base}}/docs/admin-guide/managing/index.html), you can add additional physical "workspace" nodes to increase system capacity. If you have not added any additional physical workspace nodes, then the Codenvy master node doubles as a workspace node and needs both sets of ports opened.
+
+#### Master Node: External
+All ports are TCP unless otherwise noted.
+
+|Port|Service|Notes|
+|---|---|---|
+|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
+|5000|Docker Registry|Embedded registry to save workspace snapshots. This port is not required if you configure an external registry or have not added additional workspace nodes.
+|32768-65535|Docker|Users who launch servers in their workspace bind to ephemeral ports in this range. This range can be limited.
+
+#### Master Node: Internal
+All ports are TCP unless otherwise noted.
+
+|Port|Service
+|---|---|
+|81|Nginx
+|2181|ZooKeeper
+|2375|Swarm
+|4789|Docker Overlay (UDP)
+|5432|Postgres
+|7946|Docker Overlay (TCP + UDP)
+|8080|Codenvy Server
+
+#### Workspace Node: External
+All ports are TCP unless otherwise noted.
+
+|Port|Service|Notes|
+|---|---|---|
+|80 / 443|HAProxy HTTP/S|HTTP is the default. If you configure [HTTP/S]({{base}}/docs/admin-guide/configuration/index.html#https), then port 80 can be closed.
+|32768-65535|Docker|Users who launch servers in their workspace bind to ephemeral ports in this range. This range can be limited.
+
+The Docker daemon will need to be remotely accessed by Codenvy, so it has to be [setup to use a TCP socket](https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option). This port only needs to be accessible to the Codenvy master node.
+
+#### Workspace Node: Internal
+The following ports need to be allowed in the internal network.
+
+|Port|Service|Notes|
+| --- |--- |--- |
+|2375|Docker Daemon|Swarm should be able to reach Docker daemon from the master node. If Master node is in a different network, this port should be extrenally accessible.
+|4789|Docker Overlay (UDP)|Workspace nodes use this port to create overlay networks. If Workspace nodes are is different networks, this port should be externally accessible.
+|7946|Docker Overlay (TCP + UDP)|Workspace nodes use this port to create overlay networks. If Workspace nodes are is different networks, this port should be externally accessible.
 
 # Installation
 ## Syntax
@@ -244,7 +285,7 @@ docker run <other-properties> -v /tmp/offline:/data/backup codenvy/cli:<version>
 ```
 The `--offline` parameter instructs Codenvy CLI to load all of the TAR files located in the folder mounted to `/data/backup`. These images will then be used instead of routing out to the Internet to check for DockerHub. The preboot sequence takes place before any CLI functions make use of Docker. The `codenvy start`, `codenvy download`, and `codenvy init` commands support `--offline` mode which triggers this preboot seequence.
 
-## Uninstall
+# Uninstall
 ```
 # Remove your Codevy configuration and destroy user projects and database
 docker run codenvy/cli:<version> destroy [--quiet|--cli]
@@ -255,3 +296,10 @@ docker run codenvy/cli:<version> rmi
 # Delete the Codenvy CLI
 docker rmi -f codenvy/cli
 ```
+
+# System Architecture
+Codenvy's runtime launches a group of Docker containers in a compose relationship. Once running, Codenvy's containers can be accessed on the command line from within a browser.
+ 
+ ![Architecture](https://cloud.githubusercontent.com/assets/5337267/19623944/f2366c74-989d-11e6-970b-db0ff41f618a.png)
+
+

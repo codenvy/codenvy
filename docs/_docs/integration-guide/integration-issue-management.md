@@ -5,20 +5,22 @@ excerpt: ""
 layout: docs
 permalink: /:categories/issue-management/
 ---
+{% include base.html %}
 
+**Applies To**: Codenvy on-premises installs.
 
+---
 
-[Codenvy Factories](../../integration-guide/workspace-automation) can be integrated with nearly any issue mangement system. However, we have developed two plug-ins that allow completely automated Factory creation and update based on changes to JIRA or Microsoft VSTS issue management.
+[Codenvy Factories]({{base}}/docs/integration-guide/workspace-automation/index.html) can be integrated with nearly any issue mangement system. However, we have developed two plug-ins that allow completely automated Factory creation and update based on changes to Atlassian JIRA or Microsoft VSTS issue management.
 
-* Codenvy Plug-In for Atlassian JIRA: [Documentation](#codenvy-plug-in-for-atlassian-jira) / [Video](https://www.youtube.com/watch?v=y4wdplYj6qs)
-* Codenvy Extension for Microsoft VSTS: [Documentation](#codenvy-extension-for-microsoft-visual-studio-team-services) / [Video]()
-
+* Codenvy Plug-In for Atlassian JIRA: [Documentation]({{base}}/docs/integration-guide/issue-management/index.html#codenvy-plug-in-for-atlassian-jira) / [Video](https://www.youtube.com/watch?v=y4wdplYj6qs)
+* Codenvy Extension for Microsoft VSTS: [Documentation]({{base}}/docs/integration-guide/issue-management/index.html#codenvy-extension-for-microsoft-visual-studio-team-services) / [Video]()
 
 # Codenvy Plug-in for Atlassian JIRA  
 The Codenvy plug-in for Atlassian JIRA allows anyone to jump directly from an issue in JIRA to a custom, isolated workspace designed to let them edit, built, debug and review the issue.  [This video](https://www.youtube.com/watch?v=y4wdplYj6qs) shows the agile flow from JIRA to Codenvy.
 
 The plug-in for JIRA consists of three parts:
-1. **Issue event listener**: Automatically generates [Codenvy Factories](../../integration-guide/workspace-automation) for the develop and review issue fields when an issue in a Factory-enabled project is created.
+1. **Issue event listener**: Automatically generates [Codenvy Factories]({{base}}/docs/integration-guide/workspace-automation/index.html) for the develop and review issue fields when an issue in a Factory-enabled project is created.
 2. **Custom issue fields**: Display the links to the develop and review workspaces in Codenvy.
 3. **Plug-in administration page**: Defines the location of the associated Codenvy instance, username and password.
 
@@ -27,7 +29,7 @@ The Codenvy agile workflow with Atlassian JIRA requires:
 - Atlassian JIRA issue management system.
 - Codenvy Plug-in for Atlassian JIRA
 - GitHub or other git-based repo with webhooks for push and pull requests.
-![ProductInteractionFlowswithContinousDevelopment(1).svg](../../assets/imgs/ProductInteractionFlowswithContinousDevelopment(1).svg)
+![ProductInteractionFlowswithContinousDevelopment(1).svg]({{base}}/assets/imgs/ProductInteractionFlowswithContinousDevelopment(1).svg)
 
 The VCS Factory Plug-In updates Codenvy Factories in response to GitHub webhooks for push events and pull request events.
 
@@ -40,7 +42,7 @@ The Codenvy plug-in for JIRA is available from the [Atlassian Marketplace](https
 ## Configuring the Plug-In for JIRA   
 ### Defining the Parent Factory  
 1. In Codenvy create a new generic user account that will house the factories created by the plug-in for JIRA (e.g. `jira-user@some-email.com`).
-2. Each project in JIRA that you want to be [Factory-enabled](../../integration-guide/workspace-automation) must have a "parent Factory" configured in Codenvy. The parent Factory needs to be named identically to the Key of the JIRA Project it is associated with.
+2. Each project in JIRA that you want to be [Factory-enabled]({{base}}/docs/integration-guide/workspace-automation/index.html) must have a "parent Factory" configured in Codenvy. The parent Factory defines the workspace needed by developers working with the project and must be named identically to the Key of the JIRA Project it is associated with (e.g. if JIRA Key is "SPRING" then the parent Factory must be called "SPRING").
 
 ### Connecting Codenvy to JIRA
 1. Log into your JIRA instance as an admin.
@@ -70,7 +72,7 @@ The Codenvy plug-in for JIRA is available from the [Atlassian Marketplace](https
 4. Content Type is application/json.
 5. Leave the Secret field empty.
 5. Select "Let me select individual events" radio button.
-6. Check "Push" and "Pull request" checkboxes.
+6. Check "Push" and "Pull Request" checkboxes.
 
 ### Configuring VCS Factory Plug-in with GitHub
 1. In `/home/codenvy` create a `github-webhooks.properties` file with the following content for your GitHub webhooks:
@@ -82,7 +84,7 @@ webhook1=github,https://github.com/myorg/myproject,gfn6lgml8wl47rbr
 2. In the same directory, create a `credentials.properties` file and enter the username and password of your JIRA user (e.g. jira-plugin@some-email.com) as below:
 ```  
 username=somebody@somemail.com
-password=somepwd\
+password=somepwd
 ```
 
 ## Testing
@@ -91,8 +93,8 @@ At this point Codenvy will automatically generate custom develop and review work
 Log into JIRA and choose one of the project types that you have Factory-enabled.  Create a new issue. There will be two new labels "Develop" and "Review" each with a link that will load a Codenvy workspace.
 
 ## Using the Plug-In for JIRA  
-When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](../../integration-guide/workspace-automation) defines pre- and post-load behaviors.
-![JIRAplugin-DevelopandReviewinIDE(1).svg](../../assets/imgs/JIRAplugin-DevelopandReviewinIDE(1).svg)
+When a developer is ready to start work on an issue they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory]({{base}}/docs/integration-guide/workspace-automation/index.html) defines pre- and post-load behaviors.
+![JIRAplugin-DevelopandReviewinIDE(1).svg]({{base}}/assets/imgs/JIRAplugin-DevelopandReviewinIDE(1).svg)
 The git webhooks ensure that as the repository changes the JIRA issue Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
 
 ## Plug-In for JIRA User Data Usage and Privacy  
@@ -104,14 +106,14 @@ If you have security or privacy questions regarding this plug-in please contact 
 The Codenvy extension for Microsoft Visual Studio Team Services (VSTS) allows anyone to jump directly from an work item in VSTS to a custom, isolated workspace designed to let them edit, build, debug and review the code.  [This video](http://www.screencast.com/users/codenvy-brad/folders/Default/media/9ebfd758-d808-4ab9-9940-61d0c58775a2) shows the agile flow from Microsoft VSTS to Codenvy.
 
 The plug-in processes events from VSTS issue management:
-1. **Work Item created events**: Triggers the creation of a work item-specific [Codenvy Factory](../../integration-guide/workspace-automation) and adds it to the "Develop" and "Review" fields in the Codenvy section of the work item detail card.
+1. **Work Item created events**: Triggers the creation of a work item-specific [Codenvy Factory]({{base}}/docs/integration-guide/workspace-automation/index.html) and adds it to the "Develop" and "Review" fields in the Codenvy section of the work item detail card.
 2. **Git repo events**: Updates the branch and commitID information for the Codenvy Factory based on changes in the git repo.
 
 The Codenvy agile workflow with Microsoft Visual Studio Team Services requires:
 - A Codenvy installation with the VCS Factory Plug-In installed.
 - A Microsoft Visual Studio Team Services installation with a git-based repo.
 - The Codenvy Agile Plugin for VSTS
-![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png](../../assets/imgs/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
+![AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png]({{base}}/assets/imgs/AgileWorkflowArchitecture-MicrosoftVSTS-Phase1.png)
 
 ## Installing the Extension for VSTS   
 The Codenvy extension for Microsoft VSTS is available from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=codenvy.codenvy-extension)
@@ -132,7 +134,7 @@ https://{your-account}.visualstudio.com/{your-collection}/{your-project-name}/_a
 
 ### Setting Properties in Codenvy
 1. In `/home/codenvy/credentials.properties`
-Include the Codenvy User for VSTS username and password created [above](#section-creating-the-codenvy-user-for-vsts).
+Include the Codenvy User for VSTS username and password created above.
 ```  
 username=somebody@somemail.com
 password=somepw\
@@ -149,8 +151,8 @@ webhook1=work-item-created,visualstudio,myaccount,DefaultCollection,2.2-preview.
 The VSTS credentials used must be secondary credentials. Read more about secondary credentials in the [Microsoft documentation](https://www.visualstudio.com/en-us/integrate/get-started/auth/overview).
 
 ### Defining the Parent Factory
-Each project in JIRA that you want to be [Factory-enabled](../../integration-guide/workspace-automation) must have a "Parent Factory" configured in Codenvy.
-1. Create the Parent Factory with the Codenvy VSTS user created [above](#section-creating-the-codenvy-user-for-vsts).
+Each project in JIRA that you want to be [Factory-enabled]({{base}}/docs/integration-guide/workspace-automation/index.html) must have a "Parent Factory" configured in Codenvy.
+1. Create the Parent Factory with the Codenvy VSTS user created above.
 2. Name the Parent Factory identically to the Team Project in VSTS that it will be associated with.
 
 ## Testing
@@ -159,8 +161,8 @@ Test that Codenvy automatically generates custom develop and review workspaces f
 Log into Microsoft VSTS and choose one of the project types that you have Factory-enabled.  Create a new work item and open its detail card. There will be a new section called "Codenvy" with a link for Developer Workspace and one for Review Workspace.
 
 ## Using the Codenvy Extension for Microsoft VSTS  
-When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory](../../integration-guide/workspace-automation) defines pre- and post-load behaviors.
+When a developer is ready to start work on a work item they click the Develop link.  They are brought into a developer workspace that is isolated to them and includes project sources and the build / run / debug environments needed for the project.  The definition of the [project's parent Factory]({{base}}/docs/integration-guide/workspace-automation/index.html) defines pre- and post-load behaviors.
 
-![VSTSextension-DevelopandReviewinIDE.png](../../assets/imgs/VSTSextension-DevelopandReviewinIDE.png)
+![VSTSextension-DevelopandReviewinIDE.png]({{base}}/assets/imgs/VSTSextension-DevelopandReviewinIDE.png)
 
 The git webhooks ensure that as the repository changes the Microsoft VSTS work item Factory is kept up to date. For example, if a branch associated with the Factory is merged then the Factory will be updated to point to the commitID on the branch that was merged-to.
