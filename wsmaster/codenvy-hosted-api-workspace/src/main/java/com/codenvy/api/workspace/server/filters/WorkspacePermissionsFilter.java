@@ -173,7 +173,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
             //check permissions on workspace level
             if (!currentSubject.hasPermission(DOMAIN_ID, workspace.getId(), action)) {
                 throw new ForbiddenException(
-                        "The user does not have permission to " + action + " workspace with id '" + workspace.getId() + "'");
+                    "The user does not have permission to " + action + " workspace with id '" + workspace.getId() + "'");
             }
         }
     }

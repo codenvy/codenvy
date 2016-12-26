@@ -51,7 +51,7 @@ export class CodenvyHttpBackend {
       return [200, {success: true, errors: []}];
     });
     //license legality - true
-    this.httpBackend.when('GET', '/api/license/system/legality').respond({value: true});
+    this.httpBackend.when('GET', '/api/license/system/legality').respond({isLegal: true});
 
     // admin role - false
     this.httpBackend.when('GET', '/api/user/inrole?role=admin&scope=system&scopeId=').respond(false);

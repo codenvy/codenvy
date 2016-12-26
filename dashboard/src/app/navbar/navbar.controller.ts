@@ -146,12 +146,13 @@ export class CodenvyNavBarCtrl {
   /**
    * Logout current user
    */
-  logout() {
+  logout(): void {
     let data = {token: this.$cookies['session-access-key']};
     let promise = this.logoutAPI.save(data).$promise;
     promise.then(() => {
       this.$rootScope.showIDE = false;
       this.$window.location.href = this.menuItemUrl.login;
+      this.$cookies.remove('LICENSE_EXPIRED');
     });
   }
 }

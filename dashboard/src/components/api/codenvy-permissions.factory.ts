@@ -144,8 +144,8 @@ export class CodenvyPermissions {
   }
 
   _updateUserServices(systemPermissions: ISystemPermissions): void {
-    let isManageUsers = systemPermissions && systemPermissions.actions.includes('manageUsers');
-    let isManageSystem = systemPermissions && systemPermissions.actions.includes('manageSystem');
+    let isManageUsers: boolean = systemPermissions && systemPermissions.actions.includes('manageUsers');
+    let isManageSystem: boolean = systemPermissions && systemPermissions.actions.includes('manageSystem');
 
     this.userServices.hasUserService = isManageUsers;
     this.userServices.hasUserProfileService = isManageUsers;

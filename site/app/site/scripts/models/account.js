@@ -237,6 +237,16 @@
             return deferredResult;
         };
 
+        var logout = function() {
+            if (isWebsocketEnabled()) {
+                var loginUrl = "/api/auth/logout";
+                return $.ajax({
+                    url: loginUrl,
+                    type: "POST"
+                });
+            }
+        };
+
         var login = function(email, password) {
             if (isWebsocketEnabled()) {
                 var loginUrl = "/api/auth/login?" + window.location.search.substring(1);
@@ -251,6 +261,22 @@
                     data: JSON.stringify(data),
                 });
             }
+        };
+
+        var acceptLicense = function(error){
+            var deferredResult = $.Deferred();
+            var acceptLicenseUrl = "/api/license/system/fair-source-license";
+            $.ajax({
+                url: acceptLicenseUrl,
+                type: "POST"
+            })
+            .success(function(response){
+                deferredResult.resolve(response);
+            })
+            .error(function(error){
+                deferredResult.reject(getResponseMessage(error));
+            });
+            return deferredResult;
         };
 
         var redirectToUrl = function(url) {
@@ -322,6 +348,8 @@
             getOAuthproviders: getOAuthproviders,
             loginWithOauthProvider: loginWithOauthProvider,
             getUserSettings: getUserSettings,
+            acceptLicense: acceptLicense,
+            logout: logout,
             isValidDomain: function(domain) {
                 return (/^[a-z0-9][a-z0-9_.-]{2,19}$/).exec(domain) !== null;
             },

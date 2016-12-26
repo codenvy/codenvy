@@ -23,7 +23,9 @@ define(["jquery","config",
         "views/create_ws_add_member",
         "views/onpremises-login",
         "views/factory-usage-notification",
-        "views/login"
+        "views/login",
+        "views/accept-fair-source-license",
+        "views/fair-source-license-is-not-accepted-error"
         ],
 
     function($,Config,
@@ -33,7 +35,9 @@ define(["jquery","config",
         CreateWsAdd_Member,
         OnPremisesLogin,
         FactoryUsageNotification,
-        MainPage){
+        MainPage,
+        AcceptLicensePage,
+        FSLNotAcceptedErrorPage){
 
         function modernize(){
             Modernizr.load({
@@ -62,7 +66,34 @@ define(["jquery","config",
                         creatWsAddMember = $(".create-ws-add-memeber"),
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
-                        mainpage = $(".main-page");
+                        mainpage = $(".main-page"),
+                        acceptLicensePage = $(".accept-license-form"),
+                        fslNotAcceptedPage = $(".fair-source-license-is-not-accepted-error");
+
+                    if(fslNotAcceptedPage.length !== 0){
+                        (function(){
+                            var form = FSLNotAcceptedErrorPage.get(fslNotAcceptedPage);
+                            errorReport = ErrorReport.get(errorContainer);
+                            form.on("invalid", function(field,message){
+                                errorReport.show(message);
+                            });
+                        }());
+
+                    }
+
+                    if(acceptLicensePage.length !== 0){
+                        (function(){
+                            var form = AcceptLicensePage.get(acceptLicensePage);
+                            errorReport = ErrorReport.get(errorContainer);
+                            form.on("invalid", function(field,message){
+                                errorReport.show(message);
+                            });
+                            form.on("submitting", function(){
+                                errorReport.hide();
+                            });
+                        }());
+
+                    }
 
                     if(factoryUsageNotification.length !== 0){
                         (function(){

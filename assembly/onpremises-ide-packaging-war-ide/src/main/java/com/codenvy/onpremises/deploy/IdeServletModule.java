@@ -14,9 +14,14 @@
  */
 package com.codenvy.onpremises.deploy;
 
+import com.codenvy.api.license.SystemLicenseLoginFilter;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
-
 import org.eclipse.che.inject.DynaModule;
+
+import static com.codenvy.api.license.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
+import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 
 /**
  * Servlet module composer for ide war.
@@ -28,7 +33,14 @@ public class IdeServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         filter("/*").through(com.codenvy.auth.sso.client.LoginFilter.class);
+        filter("/*").through(SystemLicenseLoginFilter.class);
         filter("/*").through(com.codenvy.onpremises.DashboardRedirectionFilter.class);
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
+
+        bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(false);
+        bindConstant().annotatedWith(Names.named(ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL))
+                      .to("/site/auth/accept-fair-source-license");
+        bindConstant().annotatedWith(Names.named(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL))
+                      .to("/site/error/fair-source-license-is-not-accepted-error");
     }
 }
