@@ -369,10 +369,6 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
 
     private boolean isAdmin() {
         Subject subject = EnvironmentContext.getCurrent().getSubject();
-        if (subject != null) {
-            return subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
-        }
-
-        return false;
+        return subject != null && subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     }
 }

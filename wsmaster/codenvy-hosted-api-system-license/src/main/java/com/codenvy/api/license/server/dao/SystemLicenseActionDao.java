@@ -39,6 +39,14 @@ public interface SystemLicenseActionDao {
      */
     void insert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
+    /**
+     * Inserts new license action record, or updates existed one.
+     *
+     * @param systemLicenseAction
+     *      any license action
+     * @throws ServerException
+     *      any other error occurred
+     */
     void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
     /**

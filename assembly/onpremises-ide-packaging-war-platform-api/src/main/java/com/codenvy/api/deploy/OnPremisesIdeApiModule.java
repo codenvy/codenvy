@@ -455,7 +455,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
                 .to(com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.class);
 
-        // install system license verification staff
+        // install system license verification stuff
         bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(true);
         install(new SystemLicenseModule());
 
