@@ -25,6 +25,7 @@ import com.google.inject.name.Named;
  */
 @Singleton
 public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
+
     @Inject
     public BitbucketServerOAuthAuthenticator(@Named("oauth.bitbucket.consumerkey") String consumerKey,
                                              @Named("oauth.bitbucket.privatekey") String privateKey,
