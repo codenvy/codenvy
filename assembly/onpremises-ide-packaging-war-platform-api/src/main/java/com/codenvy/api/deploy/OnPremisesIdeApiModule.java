@@ -176,10 +176,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         install(new org.eclipse.che.swagger.deploy.DocsModule());
 
-        //oauth 2
+        //oauth
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
         bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
+
+        install(new org.eclipse.che.security.oauth.BitbucketModule());
+        install(new org.eclipse.che.security.oauth1.BitbucketModule());
 
         bind(BitbucketConfigurationService.class);
 

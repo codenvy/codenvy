@@ -12,7 +12,6 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-
 package com.codenvy.service.bitbucket;
 
 import org.eclipse.che.api.core.rest.Service;
@@ -23,7 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 /**
- * Service for retrieving configured Bitbucket endpoint from ws-master.
+ * Service for retrieving configured Bitbucket properties from ws-master.
  *
  * @author Igor Vinokur
  */
@@ -33,7 +32,7 @@ public class BitbucketConfigurationService extends Service {
     private final String bitbucketEndpoint;
 
     @Inject
-    public BitbucketConfigurationService(@Named ("bitbucket.endpoint") String bitbucketEndpoint) {
+    public BitbucketConfigurationService(@Named("bitbucket.endpoint") String bitbucketEndpoint) {
         this.bitbucketEndpoint = bitbucketEndpoint;
     }
 

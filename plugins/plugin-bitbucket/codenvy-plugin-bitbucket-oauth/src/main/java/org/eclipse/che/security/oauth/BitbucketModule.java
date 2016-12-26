@@ -12,23 +12,20 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package org.eclipse.che.security.oauth1;
-
-import org.eclipse.che.inject.DynaModule;
+package org.eclipse.che.security.oauth;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 /**
- * Register {@link BitbucketServerOAuthAuthenticator} in guice container.
+ * Register BitbucketOauthAuthenticator in guice container.
  *
- * @author Igor Vinokur
+ * @author Michail Kuznyetsov
  */
-@DynaModule
 public class BitbucketModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<OAuthAuthenticator> oAuthAuthenticators = Multibinder.newSetBinder(binder(), OAuthAuthenticator.class);
-        oAuthAuthenticators.addBinding().to(BitbucketServerOAuthAuthenticator.class);
+        oAuthAuthenticators.addBinding().to(BitbucketOAuthAuthenticator.class);
     }
 }

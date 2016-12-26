@@ -597,7 +597,7 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-bitbucket-oauth2</artifactId>
+                <artifactId>codenvy-plugin-bitbucket-oauth</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -607,7 +607,7 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-bitbucket-ws-master</artifactId>
+                <artifactId>codenvy-plugin-bitbucket-configuration</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
