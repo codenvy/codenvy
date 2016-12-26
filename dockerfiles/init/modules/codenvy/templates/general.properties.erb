@@ -26,6 +26,8 @@ schedule.core_pool_size=10
 # GIT
 git.server.uri.prefix=git
 
+bitbucket.endpoint=<%= scope.lookupvar('codenvy::bitbucket_endpoint') %>
+
 che.auth.user_self_creation=<%= scope.lookupvar('codenvy::user_self_creation_allowed') %>
 
 # Limits

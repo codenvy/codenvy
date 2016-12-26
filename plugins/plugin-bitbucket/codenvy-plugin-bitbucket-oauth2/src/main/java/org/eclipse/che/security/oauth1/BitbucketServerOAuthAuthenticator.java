@@ -25,25 +25,27 @@ import com.google.inject.name.Named;
  */
 @Singleton
 public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
-
     @Inject
     public BitbucketServerOAuthAuthenticator(@Named("oauth.bitbucket.consumerkey") String consumerKey,
                                              @Named("oauth.bitbucket.privatekey") String privateKey,
-                                             @Named("oauth.bitbucket.requesttokenuri") String requestTokenUri,
-                                             @Named("oauth.bitbucket.acessTokenuri") String accessTokenUri,
-                                             @Named("oauth.bitbucket.authtokenuri") String authTokenUri,
+                                             @Named("bitbucket.endpoint") String bitbucketEndpoint,
                                              @Named("che.api") String apiEndpoint) {
         super(consumerKey,
-              requestTokenUri,
-              accessTokenUri,
-              authTokenUri,
+              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/request-token",
+              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/access-token",
+              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/authorize",
               apiEndpoint + "/oauth/1.0/callback",
               null,
               privateKey);
+
     }
 
     @Override
     public final String getOAuthProvider() {
         return "bitbucket-server";
+    }
+
+    private static String normalizeUrl(String endpoint) {
+        return endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
     }
 }
