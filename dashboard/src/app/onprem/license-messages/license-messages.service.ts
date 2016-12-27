@@ -61,7 +61,7 @@ export class LicenseMessagesService {
   fetchMessages(): void {
     this.codenvyLicense.fetchLicenseLegality().then(() => {
       if (!this.codenvyPermissions.getSystemPermissions()) {
-        this.codenvyPermissions.fetchSystemPermissions().then(() => {
+        this.codenvyPermissions.fetchSystemPermissions().finally(() => {
           this.checkLicenseMessage();
           this.checkIssues();
         });
@@ -76,9 +76,6 @@ export class LicenseMessagesService {
    * Check the license issues
    */
   checkIssues(): void {
-    if (!this.legality || !this.userServices.hasAdminUserService) {
-      return;
-    }
     let issues: Array<{message: string, status: string}> = this.legality.issues;
 
     let messages: Map<string, string> = new Map();
@@ -86,23 +83,25 @@ export class LicenseMessagesService {
       messages.set(issue.status, issue.message);
     });
 
-    let noMorePopups = false;
-    // check LICENSE EXPIRED
-    if (messages.get(LICENSE_EXPIRED)) {
-      if (!this.$cookies.getObject(LICENSE_EXPIRED)) {
-        this.showLicensePopup(LICENSE_EXPIRED, messages.get(LICENSE_EXPIRED));
-        noMorePopups = true;
+    if (this.userServices.hasAdminUserService) {
+      let noMorePopups = false;
+      // check LICENSE EXPIRED
+      if (messages.get(LICENSE_EXPIRED)) {
+        if (!this.$cookies.getObject(LICENSE_EXPIRED)) {
+          this.showLicensePopup(LICENSE_EXPIRED, messages.get(LICENSE_EXPIRED));
+          noMorePopups = true;
+        }
+      } else {
+        this.$cookies.remove(LICENSE_EXPIRED);
       }
-    } else {
-      this.$cookies.remove(LICENSE_EXPIRED);
-    }
-    // check USER_LICENSE_HAS_REACHED_ITS_LIMIT
-    if (messages.get(USER_LICENSE_HAS_REACHED_ITS_LIMIT)) {
-     if (noMorePopups === false && !this.$cookies.getObject(USER_LICENSE_HAS_REACHED_ITS_LIMIT)) {
-       this.showLicensePopup(USER_LICENSE_HAS_REACHED_ITS_LIMIT, messages.get(USER_LICENSE_HAS_REACHED_ITS_LIMIT));
-     }
-    } else {
-      this.$cookies.remove(USER_LICENSE_HAS_REACHED_ITS_LIMIT);
+      // check USER_LICENSE_HAS_REACHED_ITS_LIMIT
+      if (messages.get(USER_LICENSE_HAS_REACHED_ITS_LIMIT)) {
+        if (noMorePopups === false && !this.$cookies.getObject(USER_LICENSE_HAS_REACHED_ITS_LIMIT)) {
+          this.showLicensePopup(USER_LICENSE_HAS_REACHED_ITS_LIMIT, messages.get(USER_LICENSE_HAS_REACHED_ITS_LIMIT));
+        }
+      } else {
+        this.$cookies.remove(USER_LICENSE_HAS_REACHED_ITS_LIMIT);
+      }
     }
 
     // check LICENSE_EXPIRING status to show nag-message
