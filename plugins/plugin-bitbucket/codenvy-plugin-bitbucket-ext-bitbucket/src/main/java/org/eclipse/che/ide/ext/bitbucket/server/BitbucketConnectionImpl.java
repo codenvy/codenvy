@@ -17,6 +17,7 @@ package org.eclipse.che.ide.ext.bitbucket.server;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequestsPage;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoriesPage;
@@ -37,7 +38,6 @@ import static org.eclipse.che.ide.MimeType.APPLICATION_FORM_URLENCODED;
 import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.doRequest;
 import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getBitbucketPage;
 import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getJson;
-import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getUserId;
 import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.parseJsonResponse;
 import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.postJson;
 import static org.eclipse.che.ide.rest.HTTPHeader.AUTHORIZATION;
@@ -131,7 +131,7 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
 
     @Override
     public void authorizeRequest(HttpURLConnection http, String requestMethod, String requestUrl) throws IOException {
-        final OAuthToken token = tokenProvider.getToken("bitbucket", getUserId());
+        final OAuthToken token = tokenProvider.getToken("bitbucket", EnvironmentContext.getCurrent().getSubject().getUserId());
         if (token != null) {
             http.setRequestProperty(AUTHORIZATION, "Bearer " + token.getToken());
         }

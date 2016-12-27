@@ -15,7 +15,6 @@
 package org.eclipse.che.ide.ext.bitbucket.server.rest;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.ide.ext.bitbucket.server.BitbucketConnection;
@@ -43,13 +42,6 @@ import static org.eclipse.che.ide.rest.HTTPStatus.OK;
  * @author Igor Vinokur
  */
 public class BitbucketRequestUtils {
-
-    /**
-     * Returns current User Id.
-     */
-    public static String getUserId() {
-        return EnvironmentContext.getCurrent().getSubject().getUserId();
-    }
 
     /**
      * Returns Bitbucket page object from Bitbucket API request.
