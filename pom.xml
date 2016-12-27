@@ -594,6 +594,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-bitbucket-configuration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -610,11 +615,6 @@
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-bitbucket-pullrequest</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.plugin</groupId>
-                <artifactId>codenvy-plugin-bitbucket-configuration</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

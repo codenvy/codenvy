@@ -62,17 +62,30 @@ public class BitbucketHostingServiceTest {
                                             "");
     }
 
-    @DataProvider(name = "valid")
-    public static Object[][] validData() {
+    @DataProvider(name = "repoNames")
+    public static Object[][] repoNames() {
         return new Object[][]{{"https://bitbucket.org/testuser/testrepo", "testrepo"},
                               {"https://bitbucket.org/testuser/testrepo.git", "testrepo"},
                               {"git@bitbucket.org:testuser/ssh-repo", "ssh-repo"},
                               {"git@bitbucket.org:testuser/ssh-repo.git", "ssh-repo"}};
     }
 
-    @Test(dataProvider = "valid")
+    @DataProvider(name = "repoOwners")
+    public static Object[][] repoOwners() {
+        return new Object[][]{{"https://bitbucket.org/testuser/testrepo", "testuser"},
+                              {"https://bitbucket.org/testuser/testrepo.git", "testuser"},
+                              {"git@bitbucket.org:testuser/ssh-repo", "testuser"},
+                              {"git@bitbucket.org:testuser/ssh-repo.git", "testuser"}};
+    }
+
+    @Test(dataProvider = "repoNames")
     public void shouldGetRepositoryNameFromUrl(String remoteUrl, String name) {
         Assert.assertEquals(bitbucketHostingService.getRepositoryNameFromUrl(remoteUrl), name);
 
+    }
+
+    @Test(dataProvider = "repoOwners")
+    public void shouldGetRepositoryOwnerFromUrl(String remoteUrl, String owner) {
+        Assert.assertEquals(bitbucketHostingService.getRepositoryOwnerFromUrl(remoteUrl), owner);
     }
 }

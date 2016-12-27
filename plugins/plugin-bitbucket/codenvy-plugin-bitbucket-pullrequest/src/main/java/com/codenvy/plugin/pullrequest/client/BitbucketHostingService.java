@@ -275,6 +275,9 @@ public class BitbucketHostingService implements VcsHostingService {
     public String getRepositoryOwnerFromUrl(final String url) {
         String[] split = url.split("/");
         String result = split[split.length - 2];
+        if (result.contains(":")) {
+            result = result.substring(result.indexOf(":") + 1);
+        }
         if (result.startsWith("~")) {
             result = result.substring(1);
         }

@@ -39,6 +39,12 @@ import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConvert
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketRepository;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketServerPullRequest;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketUser;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.doRequest;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getBitbucketPage;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getJson;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.getUserId;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.parseJsonResponse;
+import static org.eclipse.che.ide.ext.bitbucket.server.rest.BitbucketRequestUtils.postJson;
 import static org.eclipse.che.ide.rest.HTTPStatus.CREATED;
 import static org.eclipse.che.ide.rest.HTTPStatus.OK;
 
@@ -47,7 +53,7 @@ import static org.eclipse.che.ide.rest.HTTPStatus.OK;
  *
  * @author Igor Vinokur
  */
-public class BitbucketServerConnectionImpl extends BitbucketConnection {
+public class BitbucketServerConnectionImpl implements BitbucketConnection {
 
     private final URLTemplates                     urlTemplates;
     private final String                           bitbucketEndpoint;
@@ -63,8 +69,8 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     public BitbucketUser getUser(String username) throws ServerException, IOException, BitbucketException {
         //Need to check if user has permissions to retrieve full information from Bitbucket Server rest API.
         //Other requests will not fail with 403 error, but may return empty data.
-        doRequest(GET, bitbucketEndpoint + "/rest/api/latest/users", OK, null, null);
-        final String response = getJson(urlTemplates.userUrl(username), OK);
+        doRequest(this, GET, bitbucketEndpoint + "/rest/api/latest/users", OK, null, null);
+        final String response = getJson(this, urlTemplates.userUrl(username), OK);
         return convertToBitbucketUser(parseJsonResponse(response, BitbucketServerUser.class));
     }
 
@@ -72,7 +78,7 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
     public BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException,
                                                                                          BitbucketException,
                                                                                          ServerException {
-        final String response = getJson(urlTemplates.repositoryUrl(owner, repositorySlug), OK);
+        final String response = getJson(this, urlTemplates.repositoryUrl(owner, repositorySlug), OK);
         return convertToBitbucketRepository(parseJsonResponse(response, BitbucketServerRepository.class));
     }
 
@@ -87,7 +93,7 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
             final String url = urlTemplates.pullrequestUrl(owner, repositorySlug) +
                                (pullRequestsPage != null ? "?start=" + String.valueOf(pullRequestsPage.getNextPageStart()) : "");
 
-            pullRequestsPage = getBitbucketPage(url, BitbucketServerPullRequestsPage.class);
+            pullRequestsPage = getBitbucketPage(this, url, BitbucketServerPullRequestsPage.class);
             pullRequests.addAll(pullRequestsPage.getValues()
                                                 .stream()
                                                 .map(BitbucketServerDTOConverter::convertToBitbucketPullRequest)
@@ -105,7 +111,7 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
                                                                                          IOException,
                                                                                          BitbucketException {
         final String url = urlTemplates.pullrequestUrl(owner, repositorySlug);
-        final String response = postJson(url, CREATED, toJson(convertToBitbucketServerPullRequest(pullRequest)));
+        final String response = postJson(this, url, CREATED, toJson(convertToBitbucketServerPullRequest(pullRequest)));
         return convertToBitbucketPullRequest(parseJsonResponse(response, BitbucketServerPullRequest.class));
     }
 
@@ -121,7 +127,7 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
         do {
             final String url = urlTemplates.forksUrl(owner, repositorySlug) +
                                (repositoriesPage != null ? "?start=" + String.valueOf(repositoriesPage.getNextPageStart()) : "");
-            repositoriesPage = getBitbucketPage(url, BitbucketServerRepositoriesPage.class);
+            repositoriesPage = getBitbucketPage(this, url, BitbucketServerRepositoriesPage.class);
             repositories.addAll(repositoriesPage.getValues()
                                                 .stream()
                                                 .map(BitbucketServerDTOConverter::convertToBitbucketRepository)
@@ -139,12 +145,12 @@ public class BitbucketServerConnectionImpl extends BitbucketConnection {
                                                                                 BitbucketException,
                                                                                 ServerException {
         final String url = urlTemplates.repositoryUrl(owner, repositorySlug);
-        final String response = postJson(url, CREATED, "{\"name\": " + forkName + "}");
+        final String response = postJson(this, url, CREATED, "{\"name\": " + forkName + "}");
         return parseJsonResponse(response, BitbucketRepositoryFork.class);
     }
 
     @Override
-    void authorizeRequest(HttpURLConnection http, String requestMethod, String requestUrl) {
+    public void authorizeRequest(HttpURLConnection http, String requestMethod, String requestUrl) {
         String authorizationHeader = headerProvider.getAuthorizationHeader("bitbucket-server",
                                                                            getUserId(),
                                                                            requestMethod,
