@@ -14,9 +14,12 @@
  */
 package com.codenvy.api.permission.server.filter;
 
+import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.shared.dto.PermissionsDto;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -32,12 +35,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -54,13 +61,15 @@ public class RemovePermissionsFilterTest {
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
     @Mock
-    static Subject subject;
+    private static Subject subject;
 
     @Mock
-    PermissionsService permissionsService;
+    private PermissionsService         permissionsService;
+    @Mock
+    private InstanceParameterValidator instanceValidator;
 
     @InjectMocks
-    RemovePermissionsFilter permissionsFilter;
+    private RemovePermissionsFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
@@ -80,6 +89,25 @@ public class RemovePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(unwrapError(response), "User can't edit permissions for this instance");
         verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
+    }
+
+    @Test
+    public void shouldRespond400IfInstanceIsNotValid() throws Exception {
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+        doThrow(new BadRequestException("instance is not valid"))
+                .when(instanceValidator).validate(any(), any());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .delete(SECURE_PATH + "/permissions/test?instance=test123&user123");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "instance is not valid");
+        verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
     }
 
     @Test
@@ -94,6 +122,7 @@ public class RemovePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).removePermissions(eq("test"), eq("test123"), eq("user123"));
+        verify(instanceValidator).validate("test", "test123");
     }
 
     private static String unwrapError(Response response) {

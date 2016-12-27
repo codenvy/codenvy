@@ -14,13 +14,14 @@
  */
 package com.codenvy.api.permission.server.filter;
 
+import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsManager;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
@@ -46,13 +47,18 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
     private String instance;
 
     @Inject
-    PermissionsManager permissionsManager;
+    private PermissionsManager permissionsManager;
+
+    @Inject
+    private InstanceParameterValidator instanceValidator;
 
     @Override
     public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
-            throws UnauthorizedException, ForbiddenException, ServerException, ConflictException {
+            throws BadRequestException, NotFoundException, ConflictException, ForbiddenException, ServerException {
+
         final String methodName = genericResourceMethod.getMethod().getName();
         if (methodName.equals("getUsersPermissions")) {
+            instanceValidator.validate(domain, instance);
             final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             try {
                 permissionsManager.get(userId, domain, instance);
