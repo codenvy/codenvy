@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -139,7 +139,7 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
 
     @Singleton
     public static class RemovePermissionsBeforeRecipeRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeRecipeRemovedEvent> {
+            extends CancelableEventSubscriber<BeforeRecipeRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -158,7 +158,7 @@ public class JpaRecipePermissionsDao extends AbstractJpaPermissionsDao<RecipePer
         }
 
         @Override
-        public void onCascadeEvent(BeforeRecipeRemovedEvent event) throws Exception {
+        public void onCancelableEvent(BeforeRecipeRemovedEvent event) throws Exception {
             removeRecipePermissions(event.getRecipe().getId(), PAGE_SIZE);
         }
 

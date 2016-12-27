@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -35,21 +35,21 @@ import javax.inject.Singleton;
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class StackCreatorPermissionsProvider extends CascadeEventSubscriber<StackPersistedEvent> {
+public class StackCreatorPermissionsProvider extends CancelableEventSubscriber<StackPersistedEvent> {
 
     @Inject
-    private PermissionsManager permManager;
+    private PermissionsManager permissionsManager;
 
     @Inject
     private EventService eventService;
 
     @Override
-    public void onCascadeEvent(StackPersistedEvent event) throws Exception {
+    public void onCancelableEvent(StackPersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         if (subject != null) {
-            permManager.storePermission(new StackPermissionsImpl(subject.getUserId(),
-                                                                 event.getStack().getId(),
-                                                                 StackDomain.getActions()));
+            permissionsManager.storePermission(new StackPermissionsImpl(subject.getUserId(),
+                                                                        event.getStack().getId(),
+                                                                        StackDomain.getActions()));
         }
     }
 

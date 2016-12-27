@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -35,7 +35,7 @@ import javax.inject.Singleton;
  * @author Anton Korneta
  */
 @Singleton
-public class RecipeCreatorPermissionsProvider extends CascadeEventSubscriber<RecipePersistedEvent> {
+public class RecipeCreatorPermissionsProvider extends CancelableEventSubscriber<RecipePersistedEvent> {
 
     @Inject
     private PermissionsManager permissionsManager;
@@ -44,7 +44,7 @@ public class RecipeCreatorPermissionsProvider extends CascadeEventSubscriber<Rec
     private EventService eventService;
 
     @Override
-    public void onCascadeEvent(RecipePersistedEvent event) throws Exception {
+    public void onCancelableEvent(RecipePersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         if (subject != null) {
             permissionsManager.storePermission(new RecipePermissionsImpl(subject.getUserId(),

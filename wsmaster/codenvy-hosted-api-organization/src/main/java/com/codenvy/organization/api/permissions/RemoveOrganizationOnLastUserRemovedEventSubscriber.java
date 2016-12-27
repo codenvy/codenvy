@@ -18,7 +18,6 @@ import com.codenvy.api.permission.server.jpa.listener.RemovePermissionsOnLastUse
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 

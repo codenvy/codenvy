@@ -28,8 +28,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
-import org.eclipse.che.core.db.cascade.event.CascadeEvent;
+import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CancelableEvent;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -102,8 +102,8 @@ public class OrganizationDaoTest {
         final OrganizationImpl organization = new OrganizationImpl("organization123",
                                                                    "Test",
                                                                    null);
-        CascadeEventSubscriber<PostOrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        CancelableEventSubscriber<PostOrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ConflictException("error")).when(subscriber).onCancelableEvent(any());
         eventService.subscribe(subscriber, PostOrganizationPersistedEvent.class);
 
         try {
@@ -193,8 +193,8 @@ public class OrganizationDaoTest {
     @Test(dependsOnMethods = "shouldGetOrganizationById")
     public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
         final OrganizationImpl organization = organizations[0];
-        CascadeEventSubscriber<BeforeOrganizationRemovedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
+        CancelableEventSubscriber<BeforeOrganizationRemovedEvent> subscriber = mockCascadeEventSubscriber();
+        doThrow(new ServerException("error")).when(subscriber).onCancelableEvent(any());
         eventService.subscribe(subscriber, BeforeOrganizationRemovedEvent.class);
 
         try {
@@ -286,9 +286,9 @@ public class OrganizationDaoTest {
         }
     }
 
-    private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
+    private <T extends CancelableEvent> CancelableEventSubscriber<T> mockCascadeEventSubscriber() {
         @SuppressWarnings("unchecked")
-        CascadeEventSubscriber<T> subscriber = mock(CascadeEventSubscriber.class);
+        CancelableEventSubscriber<T> subscriber = mock(CancelableEventSubscriber.class);
         doCallRealMethod().when(subscriber).onEvent(any());
         return subscriber;
     }

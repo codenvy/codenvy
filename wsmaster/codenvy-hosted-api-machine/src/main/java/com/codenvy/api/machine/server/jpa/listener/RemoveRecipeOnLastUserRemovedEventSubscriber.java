@@ -28,7 +28,7 @@ import javax.inject.Singleton;
 /**
  * Listens for {@link UserImpl} removal events, and checks if the removing user is the last who have "setPermissions"
  * role to particular recipe, and if it is, then removes recipe itself.
- *
+
  * @author Max Shaposhnik
  */
 @Singleton

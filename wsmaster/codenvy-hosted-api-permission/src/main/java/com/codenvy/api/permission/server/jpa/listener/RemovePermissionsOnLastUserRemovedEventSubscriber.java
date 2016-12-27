@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,7 +39,7 @@ import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PE
  * @author Max Shaposhnik
  */
 public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extends PermissionsDao<? extends AbstractPermissions>>
-        extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
+        extends CancelableEventSubscriber<BeforeUserRemovedEvent> {
 
     @Inject
     private EventService eventService;
@@ -58,7 +58,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
     }
 
     @Override
-    public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
+    public void onCancelableEvent(BeforeUserRemovedEvent event) throws Exception {
         for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
             // This method can potentially be source of race conditions,
             // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
