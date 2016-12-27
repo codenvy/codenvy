@@ -14,10 +14,12 @@
  */
 package com.codenvy.api.permission.server.filter;
 
+import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsService;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -41,6 +43,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -60,14 +63,74 @@ public class SetPermissionsFilterTest {
     static Subject subject;
 
     @Mock
-    PermissionsService permissionsService;
+    private PermissionsService         permissionsService;
+    @Mock
+    private InstanceParameterValidator instanceValidator;
 
     @InjectMocks
-    SetPermissionsFilter permissionsFilter;
+    private SetPermissionsFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
         when(subject.getUserId()).thenReturn("user123");
+    }
+
+    @Test
+    public void shouldRespond400IfBodyIsNull() throws Exception {
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .post(SECURE_PATH + "/permissions");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Permissions descriptor required");
+        verifyZeroInteractions(permissionsService);
+    }
+
+    @Test
+    public void shouldRespond400IfDomainIdIsEmpty() throws Exception {
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(DtoFactory.newDto(PermissionsDto.class)
+                                                         .withDomainId("")
+                                                         .withInstanceId("test123")
+                                                         .withUserId("user123")
+                                                         .withActions(Collections.singletonList("read")))
+                                         .when()
+                                         .post(SECURE_PATH + "/permissions");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Domain required");
+        verifyZeroInteractions(permissionsService);
+    }
+
+    @Test
+    public void shouldRespond400IfInstanceIsNotValid() throws Exception {
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+        doThrow(new BadRequestException("instance is not valid"))
+                .when(instanceValidator).validate(any(), any());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(DtoFactory.newDto(PermissionsDto.class)
+                                                         .withDomainId("test")
+                                                         .withInstanceId("test123")
+                                                         .withUserId("user123")
+                                                         .withActions(Collections.singletonList("read")))
+                                         .when()
+                                         .post(SECURE_PATH + "/permissions");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "instance is not valid");
+        verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
     }
 
     @Test
@@ -88,6 +151,7 @@ public class SetPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(unwrapError(response), "User can't edit permissions for this instance");
         verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
     }
 
     @Test
@@ -107,6 +171,7 @@ public class SetPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).storePermissions(any());
+        verify(instanceValidator).validate("test", "test123");
     }
 
     private static String unwrapError(Response response) {

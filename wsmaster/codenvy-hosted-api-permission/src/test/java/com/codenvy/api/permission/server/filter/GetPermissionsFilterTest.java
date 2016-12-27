@@ -14,11 +14,13 @@
  */
 package com.codenvy.api.permission.server.filter;
 
+import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.PermissionsService;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -37,14 +39,16 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -61,16 +65,17 @@ public class GetPermissionsFilterTest {
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
     @Mock
-    static Subject subject;
+    private static Subject subject;
 
     @Mock
-    PermissionsManager permissionsManager;
-
+    private PermissionsManager         permissionsManager;
     @Mock
-    PermissionsService permissionsService;
+    private PermissionsService         permissionsService;
+    @Mock
+    private InstanceParameterValidator instanceValidator;
 
     @InjectMocks
-    GetPermissionsFilter permissionsFilter;
+    private GetPermissionsFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
@@ -90,6 +95,25 @@ public class GetPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(unwrapError(response), "User is not authorized to perform this operation");
         verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
+    }
+
+    @Test
+    public void shouldRespond400IfInstanceIsNotValid() throws Exception {
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+        doThrow(new BadRequestException("instance is not valid"))
+                .when(instanceValidator).validate(any(), any());
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/permissions/test/all?instance=test123");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "instance is not valid");
+        verifyZeroInteractions(permissionsService);
+        verify(instanceValidator).validate("test", "test123");
     }
 
     @Test
@@ -107,6 +131,7 @@ public class GetPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
+        verify(instanceValidator).validate("test", "test123");
     }
 
     private static String unwrapError(Response response) {

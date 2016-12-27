@@ -62,11 +62,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Api(value = "/permissions", description = "Permissions REST API")
 @Path("/permissions")
 public class PermissionsService extends Service {
-    private final PermissionsManager permissionsManager;
+    private final PermissionsManager         permissionsManager;
+    private final InstanceParameterValidator instanceValidator;
 
     @Inject
-    public PermissionsService(PermissionsManager permissionsManager) {
+    public PermissionsService(PermissionsManager permissionsManager, InstanceParameterValidator instanceValidator) {
         this.permissionsManager = permissionsManager;
+        this.instanceValidator = instanceValidator;
     }
 
     @GET
@@ -106,6 +108,7 @@ public class PermissionsService extends Service {
         checkArgument(permissionsDto != null, "Permissions descriptor required");
         checkArgument(!isNullOrEmpty(permissionsDto.getUserId()), "User required");
         checkArgument(!isNullOrEmpty(permissionsDto.getDomainId()), "Domain required");
+        instanceValidator.validate(permissionsDto.getDomainId(), permissionsDto.getInstanceId());
         checkArgument(!permissionsDto.getActions().isEmpty(), "One or more actions required");
 
         permissionsManager.storePermission(permissionsDto);
@@ -117,6 +120,7 @@ public class PermissionsService extends Service {
     @ApiOperation(value = "Get permissions of current user which are related to specified domain and instance",
                   response = PermissionsDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The permissions successfully fetched"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
                    @ApiResponse(code = 404, message = "Permissions for current user with specified domain and instance was not found"),
                    @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
@@ -124,9 +128,11 @@ public class PermissionsService extends Service {
     public PermissionsDto getCurrentUsersPermissions(@ApiParam(value = "Domain id to retrieve user's permissions")
                                                      @PathParam("domain") String domain,
                                                      @ApiParam(value = "Instance id to retrieve user's permissions")
-                                                     @QueryParam("instance") String instance) throws ServerException,
+                                                     @QueryParam("instance") String instance) throws BadRequestException,
                                                                                                      NotFoundException,
-                                                                                                     ConflictException {
+                                                                                                     ConflictException,
+                                                                                                     ServerException {
+        instanceValidator.validate(domain, instance);
         return toDto(permissionsManager.get(EnvironmentContext.getCurrent().getSubject().getUserId(), domain, instance));
     }
 
@@ -152,6 +158,7 @@ public class PermissionsService extends Service {
                                                                                                           NotFoundException,
                                                                                                           ConflictException,
                                                                                                           BadRequestException {
+        instanceValidator.validate(domain, instance);
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
 
@@ -166,6 +173,7 @@ public class PermissionsService extends Service {
     @Path("/{domain}")
     @ApiOperation("Removes user's permissions related to the particular instance of specified domain")
     @ApiResponses({@ApiResponse(code = 204, message = "The permissions successfully removed"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 404, message = "Specified domain is unsupported"),
                    @ApiResponse(code = 409, message = "User has last 'setPermissions' of given instance"),
                    @ApiResponse(code = 409, message = "Given domain requires non nullable value for instance but it is null"),
@@ -175,7 +183,11 @@ public class PermissionsService extends Service {
                                   @ApiParam(value = "Instance id to remove user's permissions")
                                   @QueryParam("instance") String instance,
                                   @ApiParam(value = "User id", required = true)
-                                  @QueryParam("user") @Required String user) throws ConflictException, ServerException, NotFoundException {
+                                  @QueryParam("user") @Required String user) throws BadRequestException,
+                                                                                    NotFoundException,
+                                                                                    ConflictException,
+                                                                                    ServerException {
+        instanceValidator.validate(domain, instance);
         permissionsManager.remove(user, domain, instance);
     }
 
