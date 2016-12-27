@@ -14,26 +14,37 @@
  */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
-/**
- * Helper to work with strings
- *
- * @author Kevin Pollet
- */
-public final class StringHelper {
-    /**
-     * Disable instantiation.
-     */
-    private StringHelper() {
-    }
+import org.eclipse.che.dto.shared.DTO;
 
-    /**
-     * Return if the given string is {@code null} or empty. A {@link String} is empty if it contains only whitespaces.
-     *
-     * @param string
-     *         the {@link String} to test.
-     * @return {@code true} if the {@link String} is {@code null} or empty, {@code false} otherwise.
-     */
-    public static boolean isNullOrEmpty(final String string) {
-        return string == null || string.trim().isEmpty();
+import java.util.List;
+
+/**
+ * Represents a Bitbucket Server user.
+ *
+ * @author Igor Vinokur
+ */
+@DTO
+public interface BitbucketServerUser {
+    String getName();
+
+    void setName(String name);
+
+    String getDisplayName();
+
+    void setDisplayName(String displayName);
+
+    String getId();
+
+    void setId(String id);
+
+    BitbucketServerUserLinks getLinks();
+
+    void setLinks(BitbucketServerUserLinks links);
+
+    @DTO
+    interface BitbucketServerUserLinks {
+        List<BitbucketLink> getSelf();
+
+        void setSelf(List<BitbucketLink> self);
     }
 }

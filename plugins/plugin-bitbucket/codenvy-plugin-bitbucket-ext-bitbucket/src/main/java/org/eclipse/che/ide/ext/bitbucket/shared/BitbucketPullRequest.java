@@ -28,6 +28,8 @@ public interface BitbucketPullRequest {
 
     void setId(int id);
 
+    BitbucketPullRequest withId(int id);
+
     String getTitle();
 
     void setTitle(String title);
@@ -44,9 +46,13 @@ public interface BitbucketPullRequest {
 
     void setState(State state);
 
+    BitbucketPullRequest withState(State state);
+
     BitbucketPullRequestLinks getLinks();
 
     void setLinks(BitbucketPullRequestLinks links);
+
+    BitbucketPullRequest withLinks(BitbucketPullRequestLinks links);
 
     BitbucketPullRequestLocation getSource();
 
@@ -63,6 +69,8 @@ public interface BitbucketPullRequest {
     BitbucketUser getAuthor();
 
     void setAuthor(BitbucketUser author);
+
+    BitbucketPullRequest withAuthor(BitbucketUser author);
 
     enum State {
         OPEN,

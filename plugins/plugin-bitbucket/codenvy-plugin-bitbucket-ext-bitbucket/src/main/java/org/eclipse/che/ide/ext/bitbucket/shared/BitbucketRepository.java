@@ -29,30 +29,44 @@ public interface BitbucketRepository {
 
     void setName(String name);
 
+    BitbucketRepository withName(String name);
+
     BitbucketRepository getParent();
 
     void setParent(BitbucketRepository parent);
+
+    BitbucketRepository withParent(BitbucketRepository parent);
 
     boolean isIsPrivate();
 
     void setIsPrivate(boolean isIsPrivate);
 
+    BitbucketRepository withIsPrivate(boolean isIsPrivate);
+
     BitbucketRepositoryLinks getLinks();
 
     void setLinks(BitbucketRepositoryLinks links);
+
+    BitbucketRepository withLinks(BitbucketRepositoryLinks links);
 
     BitbucketUser getOwner();
 
     void setOwner(BitbucketUser owner);
 
+    BitbucketRepository withOwner(BitbucketUser owner);
+
     String getFullName();
 
     void setFullName(String fullName);
+
+    BitbucketRepository withFullName(String fullName);
 
     @DTO
     interface BitbucketRepositoryLinks {
         List<BitbucketLink> getClone();
 
         void setClone(List<BitbucketLink> clone);
+
+        BitbucketRepositoryLinks withClone(List<BitbucketLink> clone);
     }
 }

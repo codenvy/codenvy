@@ -27,9 +27,10 @@
     <packaging>pom</packaging>
     <name>Codenvy Plugin :: Bitbucket :: Parent</name>
     <modules>
-        <module>codenvy-plugin-bitbucket-oauth2</module>
+        <module>codenvy-plugin-bitbucket-oauth</module>
         <module>codenvy-plugin-bitbucket-git-provider</module>
         <module>codenvy-plugin-bitbucket-ext-bitbucket</module>
+        <module>codenvy-plugin-bitbucket-configuration</module>
         <module>codenvy-plugin-bitbucket-pullrequest</module>
         <module>codenvy-plugin-bitbucketserver-webhooks</module>
     </modules>

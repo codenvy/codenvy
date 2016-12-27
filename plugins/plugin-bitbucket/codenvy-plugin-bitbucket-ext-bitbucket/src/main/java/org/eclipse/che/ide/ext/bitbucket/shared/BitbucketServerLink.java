@@ -12,23 +12,26 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package org.eclipse.che.security.oauth;
+package org.eclipse.che.ide.ext.bitbucket.shared;
 
-import org.eclipse.che.inject.DynaModule;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Register BitbucketOauthAuthenticator in guice container.
+ * Represents a link in Bitbucket Server rest API.
  *
- * @author Michail Kuznyetsov
+ * @author Igor Vinokur
  */
-@DynaModule
-public class BitbucketModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        Multibinder<OAuthAuthenticator> oAuthAuthenticators = Multibinder.newSetBinder(binder(), OAuthAuthenticator.class);
-        oAuthAuthenticators.addBinding().to(BitbucketOAuthAuthenticator.class);
-    }
+@DTO
+public interface BitbucketServerLink {
+    String getName();
+
+    void setName(String name);
+
+    BitbucketServerLink withName(String name);
+
+    String getHref();
+
+    void setHref(String href);
+
+    BitbucketServerLink withHref(String href);
 }

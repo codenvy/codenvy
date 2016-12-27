@@ -24,6 +24,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UserTokenProvider;
+import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
@@ -49,6 +50,7 @@ import org.eclipse.che.plugin.github.server.inject.GitHubModule;
 import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.plugin.maven.server.inject.MavenModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
+import org.eclipse.che.security.oauth1.RemoteOAuthAuthorizationHeaderProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
@@ -71,6 +73,7 @@ public class MachineModule extends AbstractModule {
 
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
+        bind(OAuthAuthorizationHeaderProvider.class).to(RemoteOAuthAuthorizationHeaderProvider.class);
         bind(org.eclipse.che.plugin.ssh.key.script.SshKeyProvider.class)
                 .to(org.eclipse.che.plugin.ssh.key.script.SshKeyProviderImpl.class);
 

@@ -14,14 +14,16 @@
  */
 package org.eclipse.che.ide.ext.bitbucket.server.rest;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
-import org.eclipse.che.ide.ext.bitbucket.server.Bitbucket;
+import org.eclipse.che.ide.ext.bitbucket.server.BitbucketConnection;
 import org.eclipse.che.ide.ext.bitbucket.server.BitbucketException;
 import org.eclipse.che.ide.ext.bitbucket.server.BitbucketKeyUploader;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest;
@@ -30,7 +32,6 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketRepositoryFork;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -42,6 +43,7 @@ import javax.ws.rs.QueryParam;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -49,99 +51,87 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * REST service for Bitbucket.
  *
  * @author Kevin Pollet
+ * @author Igor Vinokur
  */
 @Path("/bitbucket")
-public class BitbucketService {
-    private final Bitbucket            bitbucket;
+public class BitbucketService extends Service {
+
+    private final BitbucketConnection  bitbucketConnection;
     private final BitbucketKeyUploader bitbucketKeyUploader;
     private final SshServiceClient     sshServiceClient;
 
     @Inject
-    public BitbucketService(@NotNull final Bitbucket bitbucket,
-                            @NotNull final BitbucketKeyUploader bitbucketKeyUploader,
-                            @NotNull final SshServiceClient sshServiceClient) {
-        this.bitbucket = bitbucket;
+    public BitbucketService(BitbucketConnection bitbucketConnection,
+                            BitbucketKeyUploader bitbucketKeyUploader,
+                            SshServiceClient sshServiceClient) {
+        this.bitbucketConnection = bitbucketConnection;
         this.bitbucketKeyUploader = bitbucketKeyUploader;
         this.sshServiceClient = sshServiceClient;
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getUser()
-     */
     @GET
-    @Path("user")
+    @Path("user/{username}")
     @Produces(APPLICATION_JSON)
-    public BitbucketUser getUser() throws IOException, BitbucketException, ServerException {
-        return bitbucket.getUser();
+    public BitbucketUser getUser(@PathParam("username") String username) throws IOException, BitbucketException, ServerException {
+        return bitbucketConnection.getUser(username);
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getRepository(String, String)
-     */
     @GET
     @Path("repositories/{owner}/{repositorySlug}")
     @Produces(APPLICATION_JSON)
-    public BitbucketRepository getRepository(@PathParam("owner") final String owner,
-                                             @PathParam("repositorySlug") final String repositorySlug)
-            throws IOException, BitbucketException, ServerException {
-
-        return bitbucket.getRepository(owner, repositorySlug);
+    public BitbucketRepository getRepository(@PathParam("owner") String owner,
+                                             @PathParam("repositorySlug") String repositorySlug) throws IOException,
+                                                                                                        BitbucketException,
+                                                                                                        ServerException {
+        return bitbucketConnection.getRepository(owner, repositorySlug);
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getRepositoryForks(String, String)
-     */
     @GET
     @Path("repositories/{owner}/{repositorySlug}/forks")
     @Produces(APPLICATION_JSON)
-    public List<BitbucketRepository> getRepositoryForks(@PathParam("owner") final String owner,
-                                                        @PathParam("repositorySlug") final String repositorySlug)
-            throws IOException, BitbucketException, ServerException {
-
-        return bitbucket.getRepositoryForks(owner, repositorySlug);
+    public List<BitbucketRepository> getRepositoryForks(@PathParam("owner") String owner,
+                                                        @PathParam("repositorySlug") String repositorySlug) throws IOException,
+                                                                                                                   BitbucketException,
+                                                                                                                   ServerException {
+        return bitbucketConnection.getRepositoryForks(owner, repositorySlug);
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#forkRepository(String, String, String, boolean)
-     */
     @POST
     @Path("repositories/{owner}/{repositorySlug}/fork")
     @Produces(APPLICATION_JSON)
-    public BitbucketRepositoryFork forkRepository(@PathParam("owner") final String owner,
-                                                  @PathParam("repositorySlug") final String repositorySlug,
-                                                  @QueryParam("forkName") final String forkName,
+    public BitbucketRepositoryFork forkRepository(@PathParam("owner") String owner,
+                                                  @PathParam("repositorySlug") String repositorySlug,
+                                                  @QueryParam("forkName") String forkName,
                                                   @QueryParam("isForkPrivate") @DefaultValue("false") final boolean isForkPrivate)
-            throws IOException, BitbucketException, ServerException {
+            throws IOException, BitbucketException, ServerException, BadRequestException {
 
-        return bitbucket.forkRepository(owner, repositorySlug, forkName, isForkPrivate);
+        if (isNullOrEmpty(forkName)) {
+            throw new BadRequestException("Fork name is required");
+        }
+        return bitbucketConnection.forkRepository(owner, repositorySlug, forkName, isForkPrivate);
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#getRepositoryPullRequests(String, String)
-     */
     @GET
     @Path("repositories/{owner}/{repositorySlug}/pullrequests")
     @Produces(APPLICATION_JSON)
-    public List<BitbucketPullRequest> getRepositoryPullRequests(@PathParam("owner") final String owner,
-                                                                @PathParam("repositorySlug") final String repositorySlug)
+    public List<BitbucketPullRequest> getRepositoryPullRequests(@PathParam("owner") String owner,
+                                                                @PathParam("repositorySlug") String repositorySlug)
             throws IOException, BitbucketException, ServerException {
 
-        return bitbucket.getRepositoryPullRequests(owner, repositorySlug);
+        return bitbucketConnection.getRepositoryPullRequests(owner, repositorySlug);
     }
 
-    /**
-     * @see org.eclipse.che.ide.ext.bitbucket.server.Bitbucket#openPullRequest(String, String, org.eclipse.che.ide.ext.bitbucket.shared.BitbucketPullRequest)
-     */
     @POST
     @Path("repositories/{owner}/{repositorySlug}/pullrequests")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public BitbucketPullRequest openPullRequest(@PathParam("owner") final String owner,
-                                                @PathParam("repositorySlug") final String repositorySlug,
-                                                BitbucketPullRequest pullRequest)
-            throws IOException, BitbucketException, ServerException {
+    public BitbucketPullRequest openPullRequest(@PathParam("owner") String owner,
+                                                @PathParam("repositorySlug") String repositorySlug,
+                                                BitbucketPullRequest pullRequest) throws IOException,
+                                                                                         BitbucketException,
+                                                                                         ServerException {
 
-        return bitbucket.openPullRequest(owner, repositorySlug, pullRequest);
+        return bitbucketConnection.openPullRequest(owner, repositorySlug, pullRequest);
     }
 
     @POST

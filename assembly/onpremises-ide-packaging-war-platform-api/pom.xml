@@ -152,11 +152,15 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-bitbucket-oauth2</artifactId>
+            <artifactId>codenvy-plugin-bitbucket-configuration</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-bitbucket-server-webhooks</artifactId>
+            <artifactId>codenvy-plugin-bitbucket-oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin</groupId>
+            <artifactId>codenvy-plugin-bitbucketserver-webhooks</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>

@@ -25,6 +25,8 @@ oauth.wso2.git.pattern=(http|https)://((([0-9a-fA-F]{32}(:x-oauth-basic)?)|([0-9
 
 oauth.bitbucket.clientid=<%= scope.lookupvar('codenvy::bitbucket_client_id') %>
 oauth.bitbucket.clientsecret=<%= scope.lookupvar('codenvy::bitbucket_secret') %>
+oauth.bitbucket.consumerkey=<%= scope.lookupvar('codenvy::bitbucket_consumer_key') %>
+oauth.bitbucket.privatekey=<%= scope.lookupvar('codenvy::bitbucket_private_key') %>
 oauth.bitbucket.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
 oauth.bitbucket.authuri=https://bitbucket.org/site/oauth2/authorize
 oauth.bitbucket.tokenuri=https://bitbucket.org/site/oauth2/access_token

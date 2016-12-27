@@ -27,11 +27,17 @@ public interface BitbucketRepositoryFork {
 
     void setName(String name);
 
+    BitbucketRepositoryFork withName(String name);
+
     boolean isIsPrivate();
 
     void setIsPrivate(boolean isIsPrivate);
 
+    BitbucketRepositoryFork withIsPrivate(boolean isIsPrivate);
+
     String getOwner();
 
     void setOwner(String owner);
+
+    BitbucketRepositoryFork withOwner(String owner);
 }

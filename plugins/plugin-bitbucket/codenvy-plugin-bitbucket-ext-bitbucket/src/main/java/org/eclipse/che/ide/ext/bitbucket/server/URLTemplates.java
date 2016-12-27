@@ -1,5 +1,5 @@
 /*
- *  [2015] - [2016] Codenvy, S.A.
+ *  [2012] - [2016] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -12,18 +12,22 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-'use strict';
+package org.eclipse.che.ide.ext.bitbucket.server;
 
-export class DocsConfig {
+/**
+ * Url templates for Bitbucket rest API.
+ *
+ * @author Igor Vinokur
+ */
+public interface URLTemplates {
 
-  constructor(register: any) {
-    // config routes
-    register.app.config(($routeProvider: any) => {
-      $routeProvider.accessWhen('/docs', {
-        title: 'Documentation',
-        templateUrl: 'app/documentation/docs.html'
-      });
-    });
-  }
+    String repositoryUrl(String owner, String repositorySlug);
+
+    String userUrl(String username);
+
+    String pullrequestUrl(String owner, String repositorySlug);
+
+    String forksUrl(String owner, String repositorySlug);
+
+    String forkRepositoryUrl(String owner, String repositorySlug);
 }
-

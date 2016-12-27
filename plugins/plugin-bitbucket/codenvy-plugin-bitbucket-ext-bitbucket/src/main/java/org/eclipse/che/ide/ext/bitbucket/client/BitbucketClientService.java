@@ -29,13 +29,15 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.RestContext;
+import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static org.eclipse.che.ide.ext.bitbucket.shared.Preconditions.checkArgument;
-import static org.eclipse.che.ide.ext.bitbucket.shared.StringHelper.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * The Bitbucket service implementation to be use by the client.
@@ -48,6 +50,7 @@ public class BitbucketClientService {
     private static final String REPOSITORIES = "/repositories";
     private static final String SSH_KEYS     = "/ssh-keys";
 
+    private final String                 baseUrl;
     private final LoaderFactory          loaderFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final AppContext             appContext;
@@ -57,11 +60,13 @@ public class BitbucketClientService {
     protected BitbucketClientService(AppContext appContext,
                                      LoaderFactory loaderFactory,
                                      AsyncRequestFactory asyncRequestFactory,
-                                     DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                                     DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                     @RestContext String baseUrl) {
         this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
+        this.baseUrl = baseUrl;
     }
 
 
@@ -70,25 +75,23 @@ public class BitbucketClientService {
     }
 
     /**
-     * Get authorized user information.
-     *
-     * @param callback
-     *         callback called when operation is done, cannot be {@code null}.
-     * @throws java.lang.IllegalArgumentException
-     *         if one parameter is not valid.
+     * Returns configured url of Bitbucket.
      */
-    public void getUser(@NotNull AsyncRequestCallback<BitbucketUser> callback) throws IllegalArgumentException {
-        checkArgument(callback != null, "callback");
-
-        final String requestUrl = getBaseUrl() + USER;
-        asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send(callback);
+    public Promise<String> getBitbucketEndpoint() {
+        final String requestUrl = baseUrl + "/bitbucket/endpoint";
+        return asyncRequestFactory.createGetRequest(requestUrl)
+                                  .loader(loaderFactory.newLoader())
+                                  .send(new StringUnmarshaller());
     }
 
     /**
      * Returns the promise which resolves authorized user information or rejects with an error.
+     *
+     * @param username
+     *         name of the user to retrieve
      */
-    public Promise<BitbucketUser> getUser() {
-        final String requestUrl = getBaseUrl() + USER;
+    public Promise<BitbucketUser> getUser(String username) {
+        final String requestUrl = getBaseUrl() + USER + "/" + username;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(BitbucketUser.class));

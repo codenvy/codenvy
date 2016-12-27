@@ -27,23 +27,33 @@ public interface BitbucketUser {
 
     void setUsername(String username);
 
+    BitbucketUser withUsername(String username);
+
 
     String getDisplayName();
 
     void setDisplayName(String displayName);
 
+    BitbucketUser withDisplayName(String displayName);
+
     String getUuid();
 
     void setUuid(String uuid);
 
+    BitbucketUser withUuid(String uuid);
+
     BitbucketUserLinks getLinks();
 
     void setLinks(BitbucketUserLinks links);
+
+    BitbucketUser withLinks(BitbucketUserLinks links);
 
     @DTO
     interface BitbucketUserLinks {
         BitbucketLink getSelf();
 
         void setSelf(BitbucketLink self);
+
+        BitbucketUserLinks withSelf(BitbucketLink self);
     }
 }

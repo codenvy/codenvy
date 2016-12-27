@@ -176,6 +176,9 @@ node default {
 # BitBucket. Leave is as is, unless you need to use BitBucket oAuth.
   $bitbucket_client_id = getValue("CODENVY_BITBUCKET_CLIENT_ID","NULL")
   $bitbucket_secret = getValue("CODENVY_BITBUCKET_SECRET","NULL")
+  $bitbucket_endpoint = getValue("CODENVY_BITBUCKET_ENDPOINT","https://bitbucket.org")
+  $bitbucket_consumer_key = getValue("CODENVY_BITBUCKET_CONSUMER_KEY","NULL")
+  $bitbucket_private_key = getValue("CODENVY_BITBUCKET_PRIVATE_KEY","NULL")
 # WSO2. Leave is as is, unless you need to use WSO2 oAuth. Visit - https://cloud.wso2.com/
   $wso2_client_id = getValue("CODENVY_WSO2_CLIENT_ID","NULL")
   $wso2_secret = getValue("CODENVY_WSO2_SECRET","NULL")
