@@ -86,8 +86,8 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
-import org.eclipse.che.core.db.cascade.event.CancelableEvent;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -334,8 +334,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
     public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
-            Class<CancelableEventSubscriber<CancelableEvent>> subscriberClass,
-            Class<CancelableEvent> eventClass) throws Exception {
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
         createTestData();
         eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 

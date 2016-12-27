@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -138,7 +138,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     }
 
     @Singleton
-    public static class RemovePermissionsBeforeStackRemovedEventSubscriber extends CancelableEventSubscriber<BeforeStackRemovedEvent> {
+    public static class RemovePermissionsBeforeStackRemovedEventSubscriber extends CascadeEventSubscriber<BeforeStackRemovedEvent> {
         private static final int PAGE_SIZE = 100;
         @Inject
         private EventService           eventService;
@@ -156,7 +156,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
         }
 
         @Override
-        public void onCancelableEvent(BeforeStackRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeStackRemovedEvent event) throws Exception {
             removeStackPermissions(event.getStack().getId(), PAGE_SIZE);
         }
 

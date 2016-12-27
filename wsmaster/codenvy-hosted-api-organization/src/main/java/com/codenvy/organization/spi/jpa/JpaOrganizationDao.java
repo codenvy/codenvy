@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.cascade.CancelableEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
@@ -178,7 +178,7 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Singleton
     public static class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber
-            extends CancelableEventSubscriber<BeforeOrganizationRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -198,7 +198,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         }
 
         @Override
-        public void onCancelableEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             removeSuborganizations(event.getOrganization().getId(), PAGE_SIZE);
         }
 
