@@ -18,7 +18,6 @@ import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.api.permission.server.model.impl.SystemPermissionsImpl;
 import com.google.inject.persist.Transactional;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -134,7 +133,7 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
         }
 
         @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws ApiException {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
             for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
                 dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }

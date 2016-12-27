@@ -114,12 +114,10 @@ public class OrganizationManager {
      *         organization id
      * @throws NullPointerException
      *         when {@code organizationId} is null
-     * @throws ConflictException
-     *         when any conflict occurs during cascade removing of related to organization data
      * @throws ServerException
      *         when any other error occurs during organization removing
      */
-    public void remove(String organizationId) throws ConflictException, ServerException {
+    public void remove(String organizationId) throws ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         organizationDao.remove(organizationId);
     }

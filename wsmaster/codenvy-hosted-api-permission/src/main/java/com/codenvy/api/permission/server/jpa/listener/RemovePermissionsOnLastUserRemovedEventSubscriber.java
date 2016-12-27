@@ -17,14 +17,12 @@ package com.codenvy.api.permission.server.jpa.listener;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -44,7 +42,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
         extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
 
     @Inject
-    private CascadeEventService eventService;
+    private EventService eventService;
 
     @Inject
     T storage;
@@ -60,7 +58,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
     }
 
     @Override
-    public void onCascadeEvent(BeforeUserRemovedEvent event) throws ApiException {
+    public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
         for (AbstractPermissions permissions : storage.getByUser(event.getUser().getId())) {
             // This method can potentially be source of race conditions,
             // e.g. when performing search by permissions, another thread can add/or remove another setPermission,
@@ -77,7 +75,7 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
     }
 
     private boolean userHasLastSetPermissions(String userId,
-                                              String instanceId) throws ServerException, ConflictException {
+                                              String instanceId) throws ServerException {
         try {
             Page<? extends AbstractPermissions> page = storage.getByInstance(instanceId, 30, 0);
             boolean hasSetPermission;
@@ -103,5 +101,5 @@ public abstract class RemovePermissionsOnLastUserRemovedEventSubscriber<T extend
         return false;
     }
 
-    public abstract void remove(String instanceId) throws ConflictException, ServerException;
+    public abstract void remove(String instanceId) throws ServerException;
 }

@@ -161,7 +161,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         private static final int PAGE_SIZE = 100;
 
         @Inject
-        private CascadeEventService eventService;
+        private EventService eventService;
         @Inject
         private WorkerDao           workerDao;
 
@@ -176,7 +176,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
 
         @Override
-        public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws ApiException {
+        public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
             removeWorkers(event.getWorkspace().getId(), PAGE_SIZE);
         }
 
@@ -211,7 +211,7 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
         }
 
         @Override
-        public void onCascadeEvent(BeforeUserRemovedEvent event) throws ApiException {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
             for (WorkerImpl worker : dao.getWorkersByUser(event.getUser().getId())) {
                 dao.removeWorker(worker.getInstanceId(), worker.getUserId());
             }

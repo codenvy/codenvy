@@ -20,13 +20,12 @@ import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -142,7 +141,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
     public static class RemovePermissionsBeforeStackRemovedEventSubscriber extends CascadeEventSubscriber<BeforeStackRemovedEvent> {
         private static final int PAGE_SIZE = 100;
         @Inject
-        private CascadeEventService    eventService;
+        private EventService           eventService;
         @Inject
         private JpaStackPermissionsDao dao;
 
@@ -157,7 +156,7 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
         }
 
         @Override
-        public void onCascadeEvent(BeforeStackRemovedEvent event) throws ApiException {
+        public void onCascadeEvent(BeforeStackRemovedEvent event) throws Exception {
             removeStackPermissions(event.getStack().getId(), PAGE_SIZE);
         }
 

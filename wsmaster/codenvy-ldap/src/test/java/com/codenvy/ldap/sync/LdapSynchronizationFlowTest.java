@@ -38,7 +38,6 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.ldaptive.ConnectionFactory;
@@ -201,7 +200,7 @@ public class LdapSynchronizationFlowTest {
         @Override
         protected void configure() {
             // configure dependencies
-            bind(EventService.class).to(CascadeEventService.class);
+            bind(EventService.class).in(Singleton.class);
             bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
             bind(DBInitializer.class).asEagerSingleton();
             bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);

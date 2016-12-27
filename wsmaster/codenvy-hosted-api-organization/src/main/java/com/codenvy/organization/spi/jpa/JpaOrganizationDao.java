@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
@@ -51,10 +51,10 @@ import static java.util.Objects.requireNonNull;
 public class JpaOrganizationDao implements OrganizationDao {
 
     private final Provider<EntityManager> managerProvider;
-    private final CascadeEventService     eventService;
+    private final EventService            eventService;
 
     @Inject
-    public JpaOrganizationDao(Provider<EntityManager> managerProvider, CascadeEventService eventService) {
+    public JpaOrganizationDao(Provider<EntityManager> managerProvider, EventService eventService) {
         this.managerProvider = managerProvider;
         this.eventService = eventService;
     }
@@ -84,7 +84,7 @@ public class JpaOrganizationDao implements OrganizationDao {
     }
 
     @Override
-    public void remove(String organizationId) throws ConflictException, ServerException {
+    public void remove(String organizationId) throws ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         try {
             doRemove(organizationId);
@@ -152,7 +152,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         EntityManager manager = managerProvider.get();
         manager.persist(organization);
         manager.flush();
-        eventService.publish(new PostOrganizationPersistedEvent(organization));
+        eventService.publish(new PostOrganizationPersistedEvent(organization)).propagateException();
     }
 
     @Transactional
@@ -165,12 +165,12 @@ public class JpaOrganizationDao implements OrganizationDao {
         manager.flush();
     }
 
-    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
-    protected void doRemove(String organizationId) throws ConflictException, ServerException {
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected void doRemove(String organizationId) throws ServerException {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
-            eventService.publish(new BeforeOrganizationRemovedEvent(new OrganizationImpl(organization)));
+            eventService.publish(new BeforeOrganizationRemovedEvent(new OrganizationImpl(organization))).propagateException();
             manager.remove(organization);
             manager.flush();
         }
@@ -182,7 +182,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         private static final int PAGE_SIZE = 100;
 
         @Inject
-        private CascadeEventService eventService;
+        private EventService eventService;
 
         @Inject
         private OrganizationDao organizationDao;

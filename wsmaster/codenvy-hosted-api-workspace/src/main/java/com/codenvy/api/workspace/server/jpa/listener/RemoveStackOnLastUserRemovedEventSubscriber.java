@@ -38,7 +38,7 @@ public class RemoveStackOnLastUserRemovedEventSubscriber extends RemovePermissio
     private JpaStackDao stackDao;
 
     @Override
-    public void remove(String instanceId) throws ConflictException, ServerException{
+    public void remove(String instanceId) throws ServerException{
         stackDao.remove(instanceId);
     }
 }

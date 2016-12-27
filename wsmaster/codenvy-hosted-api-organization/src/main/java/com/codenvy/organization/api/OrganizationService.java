@@ -117,7 +117,7 @@ public class OrganizationService extends Service {
                    @ApiResponse(code = 409, message = "When any conflict occurs during cascade removing of related to organization data"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public void remove(@ApiParam("Organization id")
-                       @PathParam("id") String organization) throws ConflictException, ServerException {
+                       @PathParam("id") String organization) throws ServerException {
         organizationManager.remove(organization);
     }
 

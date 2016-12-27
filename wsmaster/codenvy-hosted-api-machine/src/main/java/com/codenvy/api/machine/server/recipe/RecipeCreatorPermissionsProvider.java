@@ -16,11 +16,10 @@ package com.codenvy.api.machine.server.recipe;
 
 import com.codenvy.api.permission.server.PermissionsManager;
 
-import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.RecipePersistedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -42,10 +41,10 @@ public class RecipeCreatorPermissionsProvider extends CascadeEventSubscriber<Rec
     private PermissionsManager permissionsManager;
 
     @Inject
-    private CascadeEventService eventService;
+    private EventService eventService;
 
     @Override
-    public void onCascadeEvent(RecipePersistedEvent event) throws ApiException {
+    public void onCascadeEvent(RecipePersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         if (subject != null) {
             permissionsManager.storePermission(new RecipePermissionsImpl(subject.getUserId(),

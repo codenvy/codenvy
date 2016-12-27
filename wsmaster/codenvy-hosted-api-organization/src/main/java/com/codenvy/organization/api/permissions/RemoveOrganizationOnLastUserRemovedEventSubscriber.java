@@ -39,7 +39,7 @@ public class RemoveOrganizationOnLastUserRemovedEventSubscriber
     private OrganizationDao organizationDao;
 
     @Override
-    public void remove(String instanceId) throws ConflictException, ServerException {
+    public void remove(String instanceId) throws ServerException {
         organizationDao.remove(instanceId);
     }
 }

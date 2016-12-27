@@ -23,11 +23,10 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
@@ -192,9 +191,9 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         private static final int PAGE_SIZE = 100;
 
         @Inject
-        private CascadeEventService eventService;
+        private EventService eventService;
         @Inject
-        private MemberDao           memberDao;
+        private MemberDao    memberDao;
 
         @PostConstruct
         public void subscribe() {
@@ -207,7 +206,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         }
 
         @Override
-        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws ApiException {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             removeMembers(event.getOrganization().getId(), PAGE_SIZE);
         }
 

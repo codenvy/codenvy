@@ -22,11 +22,12 @@ import com.codenvy.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-import org.eclipse.che.core.db.cascade.CascadeEventService;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.testng.annotations.AfterMethod;
@@ -64,7 +65,7 @@ public class OrganizationDaoTest {
     private OrganizationDao organizationDao;
 
     @Inject
-    private CascadeEventService eventService;
+    private EventService eventService;
 
     @Inject
     private TckRepository<OrganizationImpl> tckRepository;
@@ -193,13 +194,13 @@ public class OrganizationDaoTest {
     public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
         final OrganizationImpl organization = organizations[0];
         CascadeEventSubscriber<BeforeOrganizationRemovedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
+        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
         eventService.subscribe(subscriber, BeforeOrganizationRemovedEvent.class);
 
         try {
             organizationDao.remove(organization.getId());
-            fail("OrganizationDao#remove had to throw conflict exception");
-        } catch (ConflictException ignored) {
+            fail("OrganizationDao#remove had to throw server exception");
+        } catch (ServerException ignored) {
         }
 
         assertEquals(organizationDao.getById(organization.getId()), organization);
