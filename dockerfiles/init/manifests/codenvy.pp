@@ -216,7 +216,7 @@ node default {
   $machine_ws_agent_max_start_time_ms = getValue("CODENVY_MACHINE_WS_AGENT_MAX_START_TIME_MS","300000")
   $machine_ws_agent_run_command = getValue("CODENVY_MACHINE_WS_AGENT_RUN_COMMAND","~/che/ws-agent/bin/catalina.sh run")
 # Docker privilege mode, default false
-  $machine_docker_privilege_mode = getValue("CODENVY_MACHINE_DOCKER_PRIVILEGED","false")
+  $machine_docker_privileged = getValue("CODENVY_MACHINE_DOCKER_PRIVILEGED","false")
 # Allows to adjust machine swap memory by multiplication current machnine memory on provided value.
 # default is 0 which means disabled swap, if set multiplier value equal to 0.5 machine swap will be
 # configured with size that equal to half of current machine memory.
