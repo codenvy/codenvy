@@ -454,38 +454,52 @@ public class SystemLicenseManagerTest {
     }
 
     @Test
-    public void testGetMessageForLicenseExpiredForAdmin() throws ServerException {
+    public void testGetMessageWhenAdminCannotStartWorkspaceWhenLicenseExpired() throws ServerException {
         // given
         doReturn(true).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        doReturn(true).when(license).isExpiredCompletely();
 
         // when
-        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+        String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
         assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
-        verify(licenseManager, never()).load();
     }
 
     @Test
-    public void testGetMessageForLicenseExpiredForNonAdmin() throws ServerException {
+    public void testGetMessageWhenNonAdminCannotStartWorkspaceWhenLicenseExpired() throws ServerException {
         // given
-        EnvironmentContext.getCurrent().setSubject(null);
+        doReturn(false).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        doReturn(true).when(license).isExpiredCompletely();
 
         // when
-        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+        String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
         assertEquals(result, "The Codenvy license is expired - you can access the user dashboard but not the IDE.");
     }
 
     @Test
-    public void testGetMessageForLicenseExpiredWhenLicenseAbsentForNonAdmin() throws ServerException {
+    public void testGetMessageWhenAdminCannotStartWorkspaceWhenThereIsNoLicense() throws ServerException {
         // given
-        doReturn(false).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        doReturn(true).when(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         doThrow(SystemLicenseException.class).when(licenseManager).load();
 
         // when
-        String result = licenseManager.getMessageForLicenseCompletelyExpired();
+        String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
+
+        // then
+        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+    }
+
+    @Test
+    public void testGetMessageWhenNonAdminCannotStartWorkspaceWhenThereIsNoLicense() throws ServerException {
+        // given
+        EnvironmentContext.getCurrent().setSubject(null);
+        doThrow(SystemLicenseException.class).when(licenseManager).load();
+
+        // when
+        String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
         assertEquals(result, "The Codenvy license has reached its user limit - you can access the user dashboard but not the IDE.");

@@ -299,7 +299,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
 
     /**
      * Returns error message when license completely expired (including additional time for renew license) with different content
-     * depending on if current user is admin, and if there is existed license in the system.
+     * depending on if current user is admin.
      * @throws ServerException
      */
     public String getMessageForLicenseCompletelyExpired() throws ServerException {
@@ -308,12 +308,33 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
                           userManager.getTotalCount(),
                           SystemLicense.MAX_NUMBER_OF_FREE_USERS);
         } else {
-            try {
-                load();
                 return LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN;
-            } catch (SystemLicenseException e) {
-                return LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE;
+        }
+    }
+
+    /**
+     * Returns error message when license completely expired (including additional time for renew license) with different content
+     * depending on if current user is admin, and if there is existed license in the system.
+     * @throws ServerException
+     */
+    public String getMessageWhenUserCannotStartWorkspace() throws ServerException {
+        try {
+            // when license exists
+            SystemLicense license = load();   // check if license exists
+            if (license.isExpiredCompletely()) {
+                return getMessageForLicenseCompletelyExpired();
             }
+        } catch (SystemLicenseException e) {
+            // do nothing
+        }
+
+        // when license absent, invalid or non-completely-expired
+        if (isAdmin()) {
+            return format(LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
+                          userManager.getTotalCount(),
+                          SystemLicense.MAX_NUMBER_OF_FREE_USERS);
+        } else {
+            return LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE;
         }
     }
 

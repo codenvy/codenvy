@@ -43,7 +43,7 @@ public class SystemLicenseWorkspaceFilter extends CheMethodInvokerFilter {
             case "startFromConfig":
             case "startById":
                 if (!licenseManager.canStartWorkspace()) {
-                    throw new ForbiddenException(licenseManager.getMessageForLicenseCompletelyExpired());
+                    throw new ForbiddenException(licenseManager.getMessageWhenUserCannotStartWorkspace());
                 }
 
                 break;

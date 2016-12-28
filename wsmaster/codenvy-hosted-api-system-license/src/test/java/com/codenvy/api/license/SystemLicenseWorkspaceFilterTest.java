@@ -67,7 +67,7 @@ public class SystemLicenseWorkspaceFilterTest {
         filter.filter(genericResourceMethod, null);
 
         //then
-        verify(licenseManager, never()).getMessageForLicenseCompletelyExpired();
+        verify(licenseManager, never()).getMessageWhenUserCannotStartWorkspace();
     }
 
     @Test(dataProvider = "testData", expectedExceptions = ForbiddenException.class, expectedExceptionsMessageRegExp = "License expired")
@@ -79,7 +79,7 @@ public class SystemLicenseWorkspaceFilterTest {
         doReturn(WorkspaceService.class.getMethod(workspaceServiceMethodName, workspaceServiceMethodParameters)).when(genericResourceMethod).getMethod();
 
         doReturn(false).when(licenseManager).canStartWorkspace();
-        doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
+        doReturn("License expired").when(licenseManager).getMessageWhenUserCannotStartWorkspace();
 
         //when
         filter.filter(genericResourceMethod, null);
