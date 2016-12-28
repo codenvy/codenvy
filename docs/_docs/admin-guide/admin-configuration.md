@@ -192,7 +192,7 @@ Docker's privileged mode allows a container to have root-level access to the hos
 By default, workspaces are not configured with Docker privileged mode.  There are many security risks to activating this feature - please review the various issues with blogs posted online. In `codenvy.env`:
 
 ```shell
-CODENVY_MACHINE_DOCKER_PRIVILEGE_MODE=true
+CODENVY_MACHINE_DOCKER_PRIVILEGED=true
 ```
 
 ### Mirroring Docker Hub  
