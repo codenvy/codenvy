@@ -61,6 +61,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import com.palominolabs.metrics.guice.InstrumentationModule;
+
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
@@ -469,5 +470,15 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new SystemLicenseModule());
 
         bind(SystemLicenseWorkspaceFilter.class);
+
+        MapBinder<String, org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy> strategies =
+                MapBinder.newMapBinder(binder(),
+                                       String.class,
+                                       org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.class);
+        strategies.addBinding("codenvy")
+                  .to(com.codenvy.machine.CodenvyDockerServerEvaluationStrategy.class);
+
+        bindConstant().annotatedWith(Names.named("che.docker.server_evaluation_strategy"))
+                      .to("codenvy");
     }
 }

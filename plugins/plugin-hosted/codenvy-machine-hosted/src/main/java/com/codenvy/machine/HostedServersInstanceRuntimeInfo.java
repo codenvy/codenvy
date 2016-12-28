@@ -19,9 +19,9 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
+import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategyProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,16 +41,16 @@ public class HostedServersInstanceRuntimeInfo extends DockerInstanceRuntimeInfo 
 
     @Inject
     public HostedServersInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
-                                            @Assisted("externalhost") @Nullable String containerExternalHostname,
-                                            @Assisted("internalhost") String containerInternalHostname,
+                                            @Assisted String containerInternalHostname,
                                             @Assisted MachineConfig machineConfig,
                                             @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                             @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
-                                            Map<String, MachineServerProxyTransformer> transformers) {
+                                            Map<String, MachineServerProxyTransformer> transformers,
+                                            ServerEvaluationStrategyProvider serverEvaluationStrategyProvider) {
         super(containerInfo,
-              containerExternalHostname,
-              containerInternalHostname,
               machineConfig,
+              containerInternalHostname,
+              serverEvaluationStrategyProvider,
               devMachineServers,
               allMachinesServers);
         this.transformers = transformers;
