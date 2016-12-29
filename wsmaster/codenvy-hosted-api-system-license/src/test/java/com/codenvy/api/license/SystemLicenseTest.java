@@ -16,7 +16,7 @@ package com.codenvy.api.license;
 
 import com.google.common.collect.ImmutableMap;
 import com.license4j.License;
-
+import org.joda.time.DateTime;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -24,8 +24,13 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.text.ParseException;
 import java.util.Map;
 
+import static com.codenvy.api.license.SystemLicense.ADDITIONAL_DAYS_FOR_LICENSE_RENEW;
+import static com.codenvy.api.license.SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY;
+import static com.codenvy.api.license.SystemLicense.LicenseType.PRODUCT_KEY;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -65,35 +70,35 @@ public class SystemLicenseTest {
     public Object[][] getDataToTestIsLicenseUsageLegal() {
         return new Object[][]{
                 // expired product key
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS,
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
 
                 // non-expired product key
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
                  SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
 
                 // expired evaluation product key
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_USERS, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
 
                 // non-expired evaluation product key
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
                  SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
                  SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
                 };
     }
@@ -116,8 +121,9 @@ public class SystemLicenseTest {
     }
 
     @Test(dataProvider = "getDataToTestIsLegalToAddNode")
-          public void testIsLegalToAddNode(String type, String expiration, int actualServers, boolean isAddNodeLegal) {
-        Map<SystemLicenseFeature, String> features = ImmutableMap.of(SystemLicenseFeature.TYPE, type, SystemLicenseFeature.EXPIRATION, expiration);
+    public void testIsLegalToAddNode(String type, String expiration, int actualServers, boolean isAddNodeLegal) {
+        Map<SystemLicenseFeature, String> features = ImmutableMap.of(SystemLicenseFeature.TYPE, type,
+                                                                     SystemLicenseFeature.EXPIRATION, expiration);
         SystemLicense systemLicense = new SystemLicense(license4j, features);
 
         boolean result = systemLicense.isLicenseNodesUsageLegal(actualServers);
@@ -127,20 +133,48 @@ public class SystemLicenseTest {
     @DataProvider
     public Object[][] getDataToTestIsLegalToAddNode() {
         return new Object[][]{
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 0, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), NON_EXPIRED_DATE, Integer.MAX_VALUE, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), EXPIRED_DATE, 0, true},
-                {SystemLicense.LicenseType.PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 0, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, Integer.MAX_VALUE, true},
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, 0, true},
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, true},
 
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 0, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 5, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 6, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, Integer.MAX_VALUE, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 5, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, 6, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, Integer.MAX_VALUE, true},
 
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 0, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 1, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 5, true},
-                {SystemLicense.LicenseType.EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 1, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, 5, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, Integer.MAX_VALUE, true},
+        };
+    }
+
+    @Test(dataProvider = "dataForTestExpiration")
+    public void testExpiration(boolean isExpired, boolean isExpiring, boolean isTimeForRenewExpired, int daysBeforeTimeForRenewExpires, DateTime currentTime) {
+        // given
+        Map<SystemLicenseFeature, String> features = ImmutableMap.of(SystemLicenseFeature.TYPE, PRODUCT_KEY.toString(),
+                                                                     SystemLicenseFeature.EXPIRATION, EXPIRED_DATE);
+        SystemLicense license = spy(new SystemLicense(license4j, features));
+        when(license.getCurrentTime()).thenReturn(currentTime.toDate());
+
+        // when..then
+        assertEquals(license.isExpired(), isExpired);
+        assertEquals(license.isExpiring(), isExpiring);
+        assertEquals(license.isTimeForRenewExpired(), isTimeForRenewExpired);
+        assertEquals(license.daysBeforeTimeForRenewExpires(), daysBeforeTimeForRenewExpires);
+    }
+
+    @DataProvider
+    public Object[][] dataForTestExpiration() throws ParseException {
+        DateTime expiredDateValue = new DateTime(SystemLicense.EXPIRATION_DATE_FORMAT.parse(EXPIRED_DATE)).plusMillis(1);
+
+        return new Object[][] {
+            {false, false, false, -1, expiredDateValue.minusDays(1)},
+            {true,  true,  false, ADDITIONAL_DAYS_FOR_LICENSE_RENEW, expiredDateValue},
+            {true,  true,  false, 1, expiredDateValue.plusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW - 1)},
+            {true,  false, true,  0, expiredDateValue.plusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW)},
+            {true,  false, true,  0, expiredDateValue.plusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW + 1)},
         };
     }
 }

@@ -210,7 +210,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     public long getAllowedUserNumber() {
         try {
             SystemLicense systemLicense = load();
-            if (!systemLicense.isExpiredCompletely()) {
+            if (!systemLicense.isTimeForRenewExpired()) {
                 return systemLicense.getNumberOfUsers();
             } else {
                 return SystemLicense.MAX_NUMBER_OF_FREE_USERS;
@@ -240,7 +240,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
             if (isPaidLicenseExpiring()) {
                 issues.add(newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
                                                  .withMessage(getMessageForLicenseExpiring()));
-            } else if (isPaidLicenseCompletelyExpired() && ! isSystemUsageLegal()) {
+            } else if (isTimeForPaidLicenseRenewExpired() && ! isSystemUsageLegal()) {
                 issues.add(newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
                                                  .withMessage(getMessageForLicenseCompletelyExpired()));
             }
@@ -294,7 +294,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     public String getMessageForLicenseExpiring() {
         return format(LICENSE_EXPIRING_MESSAGE_TEMPLATE,
                       SystemLicense.MAX_NUMBER_OF_FREE_USERS,
-                      load().daysBeforeCompleteExpiration());
+                      load().daysBeforeTimeForRenewExpires());
     }
 
     /**
@@ -321,7 +321,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
         try {
             // when license exists
             SystemLicense license = load();   // check if license exists
-            if (license.isExpiredCompletely()) {
+            if (license.isTimeForRenewExpired()) {
                 return getMessageForLicenseCompletelyExpired();
             }
         } catch (SystemLicenseException e) {
@@ -362,9 +362,9 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     @VisibleForTesting
-    boolean isPaidLicenseCompletelyExpired() throws ServerException, ConflictException {
+    boolean isTimeForPaidLicenseRenewExpired() throws ServerException, ConflictException {
         SystemLicense license = load();
-        if (license.isExpiredCompletely()) {
+        if (license.isTimeForRenewExpired()) {
             revertToFairSourceLicense(license);
             return true;
         } else {

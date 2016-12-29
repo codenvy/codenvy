@@ -146,7 +146,7 @@ public class SystemLicenseService {
                 .stream()
                 .collect(Collectors.toMap(entry -> entry.getKey().toString(), Map.Entry::getValue));
 
-            boolean licenseExpired = systemLicense.isExpiredCompletely();
+            boolean licenseExpired = systemLicense.isExpired();
             properties.put(CODENVY_LICENSE_PROPERTY_IS_EXPIRED, valueOf(licenseExpired));
 
             return status(OK).entity(new JsonStringMapImpl<>(properties)).build();

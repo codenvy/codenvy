@@ -14,15 +14,15 @@
  */
 package com.codenvy.api.license.server;
 
+import com.codenvy.api.license.SystemLicense;
+import com.codenvy.api.license.SystemLicenseFactory;
+import com.codenvy.api.license.SystemLicenseFeature;
+import com.codenvy.api.license.exception.InvalidSystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseException;
+import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.dto.LegalityDto;
 import com.codenvy.api.license.shared.model.Issue;
-import com.codenvy.api.license.SystemLicense;
-import com.codenvy.api.license.SystemLicenseFactory;
-import com.codenvy.api.license.exception.InvalidSystemLicenseException;
-import com.codenvy.api.license.exception.SystemLicenseException;
-import com.codenvy.api.license.SystemLicenseFeature;
-import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
@@ -174,7 +174,7 @@ public class SystemLicenseServiceTest {
         doReturn(ImmutableMap.of(SystemLicenseFeature.TYPE, "type",
                                  SystemLicenseFeature.EXPIRATION, "2015/10/10",
                                  SystemLicenseFeature.USERS, "15")).when(mockSystemLicense).getFeatures();
-        doReturn(Boolean.FALSE).when(mockSystemLicense).isExpiredCompletely();
+        doReturn(true).when(mockSystemLicense).isExpired();
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
@@ -189,7 +189,7 @@ public class SystemLicenseServiceTest {
         assertEquals(m.get(SystemLicenseFeature.TYPE.toString()), "type");
         assertEquals(m.get(SystemLicenseFeature.EXPIRATION.toString()), "2015/10/10");
         assertEquals(m.get(SystemLicenseFeature.USERS.toString()), "15");
-        assertEquals(m.get(SystemLicenseService.CODENVY_LICENSE_PROPERTY_IS_EXPIRED), "false");
+        assertEquals(m.get(SystemLicenseService.CODENVY_LICENSE_PROPERTY_IS_EXPIRED), "true");
     }
 
     @Test

@@ -127,14 +127,14 @@ public class SystemLicenseFactoryTest {
     public void testCheckExpirationDateShouldReturnFalse() throws Exception {
         SystemLicense systemLicense = systemLicenseFactory.create(LICENCE_TEXT);
 
-        assertFalse(systemLicense.isExpiredCompletely());
+        assertFalse(systemLicense.isExpired());
     }
 
     @Test
     public void testCheckExpirationDateShouldReturnTrueLicenseExpired() throws Exception {
         SystemLicense systemLicense = systemLicenseFactory.create(LICENSE_TEXT_EXPIRED);
 
-        assertTrue(systemLicense.isExpiredCompletely());
+        assertTrue(systemLicense.isExpired());
     }
 
     @Test

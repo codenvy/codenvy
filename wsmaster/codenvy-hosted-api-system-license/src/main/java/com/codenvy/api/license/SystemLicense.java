@@ -15,12 +15,14 @@
 package com.codenvy.api.license;
 
 import com.codenvy.api.license.exception.IllegalSystemLicenseFormatException;
+import com.google.common.annotations.VisibleForTesting;
 import com.license4j.License;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -61,36 +63,55 @@ public class SystemLicense {
     }
 
     /**
+     * Indicates if time for renew license expired.
+     */
+    public boolean isTimeForRenewExpired() {
+        return getCurrentTime().after(getLicenseRenewExpirationDate());
+    }
+
+    /**
      * Indicates if license has been expired or hasn't, including additional days for license fix-up.
      */
-    public boolean isExpiredCompletely() {
+    public boolean isExpired() {
         Date expirationDate = getExpirationDateFeatureValue();
-        return expirationDate.before(DateTime.now().minusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW).toDate());
+        return getCurrentTime().after(expirationDate);
+    }
+
+    @VisibleForTesting
+    Date getCurrentTime() {
+        return Calendar.getInstance().getTime();
     }
 
     /**
      * Indicates if license is expired, but admin has additional time to renew it.
      */
     public boolean isExpiring() {
-        if (isExpiredCompletely()) {
-            return false;
-        }
-
-        return daysBeforeCompleteExpiration() <= ADDITIONAL_DAYS_FOR_LICENSE_RENEW;
+        return isExpired() && !isTimeForRenewExpired();
     }
 
     /**
-     * Returns days between current date and expiration date + additional time torenew it, or 0 if license has already completely expired.
+     * Returns:
+     * 1) days between current date and expiration date + additional time to renew it;
+     * 2) 0 if time for license renew expired;
+     * 3) -1 if license isn't expired.
      */
-    public int daysBeforeCompleteExpiration() {
-        if (isExpiredCompletely()) {
+    public int daysBeforeTimeForRenewExpires() {
+        if (isTimeForRenewExpired()) {
             return 0;
         }
 
-        int daysBeforeLicenseExpiredAccordingToItsFeatureValue = Days.daysBetween(new DateTime(System.currentTimeMillis()),
-                                                                                  new DateTime(getExpirationDateFeatureValue())).getDays();
+        if (!isExpired()) {
+            return -1;
+        }
 
-        return daysBeforeLicenseExpiredAccordingToItsFeatureValue + ADDITIONAL_DAYS_FOR_LICENSE_RENEW;
+        int wholeDaysBeforeLicenseRenewExpires = Days.daysBetween(new DateTime(getCurrentTime()),
+                                                                  new DateTime(getLicenseRenewExpirationDate())).getDays();
+        return wholeDaysBeforeLicenseRenewExpires + 1;
+    }
+
+    private Date getLicenseRenewExpirationDate() {
+        Date expirationDate = getExpirationDateFeatureValue();
+        return new DateTime(expirationDate).plusDays(ADDITIONAL_DAYS_FOR_LICENSE_RENEW).toDate();
     }
 
     /**
@@ -129,7 +150,7 @@ public class SystemLicense {
      * 4) if (PRODUCT_KEY            IS     expired) AND (actual number of users <= MAX_NUMBER_OF_FREE_USERS)
      */
     public boolean isLicenseUsageLegal(long actualUsers, int actualServers) {
-        if (isExpiredCompletely()) {
+        if (isTimeForRenewExpired()) {
             switch (getLicenseType()) {
                 case EVALUATION_PRODUCT_KEY:
                 case PRODUCT_KEY:
