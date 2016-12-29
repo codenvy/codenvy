@@ -26,6 +26,7 @@ import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.collect.ImmutableList;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -53,7 +54,6 @@ import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -157,7 +157,7 @@ public class SystemLicenseManagerTest {
     public void shouldDeleteLicense() throws Exception {
         when(systemLicenseStorage.loadLicense()).thenReturn(LICENSE_TEXT);
 
-        licenseManager.delete();
+        licenseManager.remove();
 
         verify(systemLicenseStorage).clean();
     }
@@ -428,7 +428,7 @@ public class SystemLicenseManagerTest {
     }
 
     @Test
-    public void shouldReturnExpiredStatus() throws ServerException, ConflictException {
+    public void shouldReturnExpiredStatus() throws ApiException {
         // given
         doReturn(true).when(license).isTimeForRenewExpired();
 
@@ -437,11 +437,10 @@ public class SystemLicenseManagerTest {
 
         // then
         assertTrue(result);
-        verify(licenseManager).revertToFairSourceLicense(license);
     }
 
     @Test
-    public void shouldReturnNonExpiredStatus() throws ServerException, ConflictException {
+    public void shouldReturnNonExpiredStatus() throws ApiException {
         // given
         doReturn(false).when(license).isTimeForRenewExpired();
 
@@ -450,7 +449,6 @@ public class SystemLicenseManagerTest {
 
         // then
         assertFalse(result);
-        verify(licenseManager, never()).revertToFairSourceLicense(license);
     }
 
     @Test
@@ -503,34 +501,6 @@ public class SystemLicenseManagerTest {
 
         // then
         assertEquals(result, "The Codenvy license has reached its user limit - you can access the user dashboard but not the IDE.");
-    }
-
-    @Test
-    public void shouldRevertToFairSourceLicense() throws ServerException, ConflictException, NotFoundException {
-        // given
-        doReturn(LICENSE_ID).when(license).getLicenseId();
-        doThrow(NotFoundException.class).when(systemLicenseActionDao).getByLicenseIdAndAction(LICENSE_ID, EXPIRED);
-
-        // when
-        licenseManager.revertToFairSourceLicense(license);
-
-        // then
-        verify(systemLicenseActionDao).upsert(actionCaptor.capture());
-
-        final SystemLicenseActionImpl action = actionCaptor.getValue();
-        assertEquals(action.getLicenseType(), PRODUCT_LICENSE);
-        assertEquals(action.getActionType(), EXPIRED);
-        assertEquals(action.getLicenseId(), LICENSE_ID);
-        assertEquals(action.getAttributes(), Collections.emptyMap());
-    }
-
-    @Test
-    public void shouldNotRevertToFairSourceLicense() throws ServerException, ConflictException, NotFoundException {
-        // when
-        licenseManager.revertToFairSourceLicense(license);
-
-        // then
-        verify(systemLicenseActionDao, never()).upsert(any());
     }
 
     private void setSizeOfAdditionalNodes(int size) throws IOException {

@@ -21,7 +21,7 @@ import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
@@ -45,6 +45,7 @@ import java.util.List;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static java.nio.file.Files.createTempFile;
@@ -67,53 +68,6 @@ import static org.testng.Assert.assertEquals;
 @Listeners(value = MockitoTestNGListener.class)
 public class AuditManagerTest {
 
-    private static final String FULL_AUDIT_REPORT                                  =
-            "2016 March 03 22:15:00 Fair Source license was accepted.\n"
-            + "admin@codenvy.com added Codenvy license 1234 at 2016 March 04 22:15:00\n"
-            + "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n"
-            + "Number of all users: 2\n"
-            + "Number of users licensed: 15\n"
-            + "Date when license expires: 01 January 2016\n"
-            + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
-            + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
-            + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
-            + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
-            + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
-    private static final String AUDIT_REPORT_WITHOUT_LICENSE                       =
-            "2016 March 03 22:15:00 Fair Source license was accepted.\n"
-            + "admin@codenvy.com added Codenvy license 1234 at 2016 March 04 22:15:00\n"
-            + "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n"
-            + "Number of all users: 2\n"
-            + "[ERROR] Failed to retrieve license!\n"
-            + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
-            + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
-            + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
-            + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
-            + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
-    private static final String AUDIT_REPORT_WITHOUT_USER_WORKSPACES               =
-            "2016 March 03 22:15:00 Fair Source license was accepted.\n"
-            + "admin@codenvy.com added Codenvy license 1234 at 2016 March 04 22:15:00\n"
-            + "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n"
-            + "Number of all users: 2\n"
-            + "Number of users licensed: 15\n"
-            + "Date when license expires: 01 January 2016\n"
-            + "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n"
-            + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
-            + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
-    private static final String AUDIT_REPORT_WITHOUT_USER_PERMISSIONS_TO_WORKSPACE =
-            "2016 March 03 22:15:00 Fair Source license was accepted.\n"
-            + "admin@codenvy.com added Codenvy license 1234 at 2016 March 04 22:15:00\n"
-            + "Paid license 1234 expired on 2016 March 05 22:15:00. System returned to previously accepted Fair Source license.\n"
-            + "Number of all users: 2\n"
-            + "Number of users licensed: 15\n"
-            + "Date when license expires: 01 January 2016\n"
-            + "user@email.com is owner of 0 workspaces and has permissions in 2 workspaces\n"
-            + "   └ Workspace1Name, is owner: false, permissions: [read, use, run, configure, setPermissions, delete]\n"
-            + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
-            + "user2@email.com is owner of 2 workspaces and has permissions in 1 workspace\n"
-            + "   └ Workspace1Name, is owner: true, permissions: []\n"
-            + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n";
-
     private Path auditReport;
 
     @Mock
@@ -132,33 +86,24 @@ public class AuditManagerTest {
     private WorkspaceImpl              workspace2;
 
     private AuditManager auditManager;
+    public static final SystemLicenseAction ADD_PRODUCT_LICENSE_ACTION    = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction EXPIRE_PRODUCT_LICENSE_ACTION = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction REMOVE_PRODUCT_LICENSE_ACTION = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction ACCEPT_FAIR_SOURCE_LICENSE_ACTION = mock(SystemLicenseAction.class);
 
     @BeforeMethod
     public void setUp() throws Exception {
+        auditReport = createTempFile("report", ".txt");
+
+        auditManager =
+            new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, systemLicenseActionHandler);
+
         //License
         SystemLicense license = mock(SystemLicense.class);
         when(license.getNumberOfUsers()).thenReturn(15);
         when(license.getExpirationDateFeatureValue()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
         when(licenseManager.load()).thenReturn(license);
 
-        SystemLicenseAction acceptFairSourceLicenseAction = mock(SystemLicenseAction.class);
-        when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(acceptFairSourceLicenseAction.getActionTimestamp())
-                .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
-
-        SystemLicenseAction addProductLicenseAction = mock(SystemLicenseAction.class);
-        when(addProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(addProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(addProductLicenseAction.getActionTimestamp())
-                .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(addProductLicenseAction);
-
-        SystemLicenseAction expireProductLicenseAction = mock(SystemLicenseAction.class);
-        when(expireProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(expireProductLicenseAction.getActionTimestamp())
-                .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(expireProductLicenseAction);
         //User
         UserImpl user1 = mock(UserImpl.class);
         UserImpl user2 = mock(UserImpl.class);
@@ -207,10 +152,21 @@ public class AuditManagerTest {
 
         when(userManager.getTotalCount()).thenReturn(2L);
 
-        auditManager =
-                new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, systemLicenseActionHandler,
-                                 new AuditReportPrinter());
-        auditReport = createTempFile("report", ".txt");
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(ADDED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(ADD_PRODUCT_LICENSE_ACTION);
+
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(EXPIRED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(EXPIRE_PRODUCT_LICENSE_ACTION);
+
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(REMOVED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenReturn(REMOVE_PRODUCT_LICENSE_ACTION);
+
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getLicenseType()).thenReturn(FAIR_SOURCE_LICENSE);
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionType()).thenReturn(ACCEPTED);
+        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(ACCEPT_FAIR_SOURCE_LICENSE_ACTION);
     }
 
     @AfterMethod
@@ -220,11 +176,39 @@ public class AuditManagerTest {
 
     @Test
     public void shouldReturnFullAuditReport() throws Exception {
+        // given
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
+
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
+
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
+
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
+
         //when
         auditReport = auditManager.generateAuditReport();
 
         //then
-        assertEquals(readFileToString(auditReport.toFile()), FULL_AUDIT_REPORT);
+        assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
+                                                             + "2016 Mar 04 - 22:15:00: admin@codenvy.com added paid license 1234.\n"
+                                                             + "2016 Mar 05 - 22:15:00: Paid license 1234 expired. System returned to previously accepted Fair Source license.\n" 
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
+                                                             + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
+                                                             + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
+                                                             + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
+                                                             + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
+                                                             + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");
     }
 
     @Test
@@ -237,11 +221,39 @@ public class AuditManagerTest {
         when(workspaceManager.getWorkspaces("User2Id")).thenReturn(workspaces);
         when(workspaceManager.getByNamespace("User2")).thenReturn(asList(workspace1, workspace2));
 
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
+
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
+
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("5678");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
+
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
+
         //when
         auditReport = auditManager.generateAuditReport();
 
         //then
-        assertEquals(readFileToString(auditReport.toFile()), AUDIT_REPORT_WITHOUT_USER_PERMISSIONS_TO_WORKSPACE);
+        assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
+                                                             + "2016 Mar 04 - 22:15:00: Paid license 1234 removed. System returned to previously accepted Fair Source license.\n"
+                                                             + "2016 Mar 05 - 22:15:00: admin@codenvy.com added paid license 5678.\n"
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
+                                                             + "user@email.com is owner of 0 workspaces and has permissions in 2 workspaces\n"
+                                                             + "   └ Workspace1Name, is owner: false, permissions: [read, use, run, configure, setPermissions, delete]\n"
+                                                             + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
+                                                             + "user2@email.com is owner of 2 workspaces and has permissions in 1 workspace\n"
+                                                             + "   └ Workspace1Name, is owner: true, permissions: []\n"
+                                                             + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");
     }
 
     @Test
@@ -249,22 +261,56 @@ public class AuditManagerTest {
         //given
         when(licenseManager.load()).thenThrow(new SystemLicenseException("Failed to retrieve license info"));
 
+        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenThrow(NotFoundException.class);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenThrow(NotFoundException.class);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
+
         //when
         auditReport = auditManager.generateAuditReport();
 
         //then
-        assertEquals(readFileToString(auditReport.toFile()), AUDIT_REPORT_WITHOUT_LICENSE);
+        assertEquals(readFileToString(auditReport.toFile()), "\n"
+                                                             + "--- CURRENT STATE ---\n" 
+                                                             + "Number of users: 2\n"
+                                                             + "[ERROR] Failed to retrieve license!\n"
+                                                             + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
+                                                             + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
+                                                             + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
+                                                             + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
+                                                             + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");
     }
 
     @Test
     public void shouldReturnAuditReportWithoutUserWorkspacesIfFailedToRetrieveTheListOfHisWorkspaces() throws Exception {
         //given
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
+
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
+            .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
+
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
+
         when(workspaceManager.getWorkspaces(eq("User1Id"))).thenThrow(new ServerException("Failed to retrieve workspaces"));
 
         //when
         auditReport = auditManager.generateAuditReport();
 
         //then
-        assertEquals(readFileToString(auditReport.toFile()), AUDIT_REPORT_WITHOUT_USER_WORKSPACES);
+        assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
+                                                             + "2016 Mar 04 - 22:15:00: admin@codenvy.com added paid license 1234.\n"
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
+                                                             + "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n"
+                                                             + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
+                                                             + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");
     }
 }

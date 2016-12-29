@@ -14,19 +14,17 @@
  */
 package com.codenvy.api.license.server;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.SystemLicenseFeature;
 import com.codenvy.api.license.exception.InvalidSystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.shared.dto.LegalityDto;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -61,12 +59,12 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Alexander Andrienko
  */
 @Path("/license/system")
-@Api(value = "license-system", description = "System License manager")
+@Api(value = "license-system", description = "System License service")
 public class SystemLicenseService {
     private static final Logger LOG                                 = LoggerFactory.getLogger(SystemLicenseService.class);
     public static final  String CODENVY_LICENSE_PROPERTY_IS_EXPIRED = "isExpired";
 
-    private final SystemLicenseManager                 licenseManager;
+    private final SystemLicenseManager licenseManager;
 
     @Inject
     public SystemLicenseService(SystemLicenseManager licenseManager) {
@@ -80,7 +78,7 @@ public class SystemLicenseService {
                            @ApiResponse(code = 404, message = "License not found")})
     public void deleteLicense() throws ApiException {
         try {
-            licenseManager.delete();
+            licenseManager.remove();
         } catch (SystemLicenseNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (SystemLicenseException e) {

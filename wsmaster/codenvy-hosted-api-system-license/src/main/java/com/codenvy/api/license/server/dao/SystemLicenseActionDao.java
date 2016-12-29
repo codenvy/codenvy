@@ -50,7 +50,7 @@ public interface SystemLicenseActionDao {
     void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
     /**
-     * Removes system license action record.
+     * Removes system license action record. Don't throw NotFoundException if record doesn't exist.
      *
      * @param licenseType
      *          the type of the license
@@ -60,6 +60,18 @@ public interface SystemLicenseActionDao {
      *      any other error occurred
      */
     void remove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException;
+
+    /**
+     * Removes action record of system license with certain license id. Don't throw NotFoundException if record doesn't exist.
+     *
+     * @param licenseId
+     *          the id of the license
+     * @param actionType
+     *          the action happened with license
+     * @throws ServerException
+     *      any other error occurred
+     */
+    void remove(String licenseId, Constants.Action actionType) throws ServerException;
 
     /**
      * Finds license action for certain license type.

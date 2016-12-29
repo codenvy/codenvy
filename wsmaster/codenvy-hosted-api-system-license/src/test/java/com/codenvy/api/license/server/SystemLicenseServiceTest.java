@@ -26,6 +26,7 @@ import com.codenvy.api.license.shared.model.Issue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -125,7 +126,7 @@ public class SystemLicenseServiceTest {
 
     @Test
     public void testDeleteLicensShouldNotFindLicenseToDelete() throws Exception {
-        doThrow(new SystemLicenseNotFoundException("error")).when(licenseManager).delete();
+        doThrow(new SystemLicenseNotFoundException("error")).when(licenseManager).remove();
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
@@ -136,7 +137,7 @@ public class SystemLicenseServiceTest {
 
     @Test
     public void testDeleteLicenseShouldReturnServerErrorWhenFacadeThrowLicenseException() throws Exception {
-        doThrow(new SystemLicenseException("error")).when(licenseManager).delete();
+        doThrow(new SystemLicenseException("error")).when(licenseManager).remove();
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
@@ -215,7 +216,7 @@ public class SystemLicenseServiceTest {
     }
 
     @Test
-    public void testisSystemUsageLegal() throws IOException, ServerException, ConflictException {
+    public void testisSystemUsageLegal() throws IOException, ApiException {
         doReturn(true).when(licenseManager).isSystemUsageLegal();
         doReturn(ImmutableList.of()).when(licenseManager).getLicenseIssues();
 
@@ -227,7 +228,7 @@ public class SystemLicenseServiceTest {
     }
 
     @Test
-    public void testIsCodenvyUsageNotLegal() throws IOException, ServerException, ConflictException {
+    public void testIsCodenvyUsageNotLegal() throws IOException, ApiException {
         doReturn(false).when(licenseManager).isSystemUsageLegal();
         doReturn(ImmutableList.of(issue)).when(licenseManager).getLicenseIssues();
 

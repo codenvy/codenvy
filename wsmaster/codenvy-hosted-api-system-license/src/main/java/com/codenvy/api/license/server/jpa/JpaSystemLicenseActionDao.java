@@ -76,6 +76,17 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
         }
     }
 
+    @Override public void remove(String licenseId, Constants.Action actionType) throws ServerException {
+        requireNonNull(licenseId, "Required non-null system license id");
+        requireNonNull(actionType, "Required non-null system action type");
+
+        try {
+            doRemove(licenseId, actionType);
+        } catch (RuntimeException e) {
+            throw new ServerException(e);
+        }
+    }
+
     @Override
     @Transactional
     public SystemLicenseActionImpl getByLicenseTypeAndAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
@@ -125,6 +136,15 @@ public class JpaSystemLicenseActionDao implements SystemLicenseActionDao {
     protected void doRemove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException {
         try {
             SystemLicenseActionImpl action = getByLicenseTypeAndAction(licenseType, actionType);
+            managerProvider.get().remove(action);
+        } catch (NotFoundException ignored) {
+        }
+    }
+
+    @Transactional
+    protected void doRemove(String licenseId, Constants.Action actionType) throws ServerException {
+        try {
+            SystemLicenseActionImpl action = getByLicenseIdAndAction(licenseId, actionType);
             managerProvider.get().remove(action);
         } catch (NotFoundException ignored) {
         }

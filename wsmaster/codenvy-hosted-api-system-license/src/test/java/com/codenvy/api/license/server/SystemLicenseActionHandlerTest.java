@@ -37,6 +37,7 @@ import java.util.Collections;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static org.mockito.Matchers.any;
@@ -108,8 +109,11 @@ public class SystemLicenseActionHandlerTest {
 
     @Test
     public void shouldAddProductLicenseExpiredRecord() throws Exception {
+        // given
+        when(dao.getByLicenseIdAndAction(LICENSE_ID, EXPIRED)).thenThrow(new NotFoundException("Not found"));
+
         // when
-        systemLicenseActionHandler.onProductLicenseDeleted(systemLicense);
+        systemLicenseActionHandler.onProductLicenseExpired(systemLicense);
 
         // then
         ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
@@ -118,6 +122,18 @@ public class SystemLicenseActionHandlerTest {
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), EXPIRED);
         assertEquals(expireAction.getLicenseId(), LICENSE_ID);
+
+        verify(dao).remove(PRODUCT_LICENSE, REMOVED);
+    }
+
+    @Test
+    public void shouldNotUpsertProductLicenseExpiredRecordIfItHasAlreadyExists() throws Exception {
+        // when
+        systemLicenseActionHandler.onProductLicenseExpired(systemLicense);
+
+        // then
+        verify(dao, never()).upsert(any());
+        verify(dao, never()).remove(PRODUCT_LICENSE, REMOVED);
     }
 
     @Test
@@ -133,6 +149,8 @@ public class SystemLicenseActionHandlerTest {
         assertEquals(acceptAction.getActionType(), ADDED);
         assertEquals(acceptAction.getLicenseId(), LICENSE_ID);
         assertEquals(acceptAction.getAttributes().get("email"), "test@user");
+
+        verify(dao).remove(LICENSE_ID, EXPIRED);
     }
 
     @Test
@@ -159,5 +177,64 @@ public class SystemLicenseActionHandlerTest {
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
         assertEquals(expireAction.getActionType(), ADDED);
         assertEquals(expireAction.getLicenseId(), LICENSE_ID);
+    }
+
+    @Test
+    public void shouldAddProductLicenseRemovedRecord() throws Exception {
+        // given
+        doThrow(NotFoundException.class).when(dao).getByLicenseTypeAndAction(PRODUCT_LICENSE, EXPIRED);
+
+        // when
+        systemLicenseActionHandler.onProductLicenseRemoved(systemLicense);
+
+        // then
+        ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
+        verify(dao).upsert(actionCaptor.capture());
+        SystemLicenseActionImpl expireAction = actionCaptor.getValue();
+        assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
+        assertEquals(expireAction.getActionType(), REMOVED);
+        assertEquals(expireAction.getLicenseId(), LICENSE_ID);
+
+        verify(dao).remove(PRODUCT_LICENSE, EXPIRED);
+    }
+
+    @Test
+    public void shouldNotAddProductLicenseRemovedRecordIfDifferentLicenseExpiredActionExists() throws Exception {
+        // given
+        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(new SystemLicenseActionImpl(PRODUCT_LICENSE,
+                                                                                                             EXPIRED,
+                                                                                                             System.currentTimeMillis(),
+                                                                                                             "different_id",
+                                                                                                             Collections.emptyMap()));
+
+        // when
+        systemLicenseActionHandler.onProductLicenseRemoved(systemLicense);
+
+        // then
+        ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
+        verify(dao).upsert(actionCaptor.capture());
+        SystemLicenseActionImpl expireAction = actionCaptor.getValue();
+        assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
+        assertEquals(expireAction.getActionType(), REMOVED);
+        assertEquals(expireAction.getLicenseId(), LICENSE_ID);
+
+        verify(dao).remove(PRODUCT_LICENSE, EXPIRED);
+    }
+
+    @Test
+    public void shouldNotAddProductLicenseRemovedRecordIfSameLicenseExpiredActionExists() throws Exception {
+        // given
+        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(new SystemLicenseActionImpl(PRODUCT_LICENSE,
+                                                                                                             EXPIRED,
+                                                                                                             System.currentTimeMillis(),
+                                                                                                             LICENSE_ID,
+                                                                                                             Collections.emptyMap()));
+
+        // when
+        systemLicenseActionHandler.onProductLicenseRemoved(systemLicense);
+
+        // then
+        verify(dao, never()).upsert(any());
+        verify(dao, never()).remove(PRODUCT_LICENSE, EXPIRED);
     }
 }

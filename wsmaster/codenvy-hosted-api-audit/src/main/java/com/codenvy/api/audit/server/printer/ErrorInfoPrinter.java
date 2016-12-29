@@ -12,32 +12,31 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.shared.model;
+package com.codenvy.api.audit.server.printer;
+
+import org.eclipse.che.api.core.ServerException;
+
+import java.nio.file.Path;
 
 /**
- * @author Anatolii Bazko
+ * Prints error in format:
+ * [ERROR] <error text>!
+ *
+ * @author Dmytro Nochevnov
  */
-public class Constants {
+public class ErrorInfoPrinter extends Printer {
 
-    public static final char[] PRODUCT_ID = "OPL-STN-SM".toCharArray();
+    private String error;
 
-    /**
-     * System license actions.
-     */
-    public enum Action {
-        ACCEPTED,
-        ADDED,
-        EXPIRED,
-        REMOVED
+    public ErrorInfoPrinter(Path auditReport, String error) {
+        super(auditReport);
+
+        this.error = error;
     }
 
-    /**
-     * Paid system license types.
-     */
-    public enum PaidLicense {
-        FAIR_SOURCE_LICENSE,
-        PRODUCT_LICENSE
+    @Override
+    public void print() throws ServerException {
+        printError(error);
     }
 
-    private Constants() { }
 }
