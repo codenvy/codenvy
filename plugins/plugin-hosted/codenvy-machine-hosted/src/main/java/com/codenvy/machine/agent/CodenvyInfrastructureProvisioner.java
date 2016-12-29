@@ -15,106 +15,50 @@
 package com.codenvy.machine.agent;
 
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.environment.server.AgentConfigApplier;
-import org.eclipse.che.api.environment.server.DefaultInfrastructureProvisioner;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import org.eclipse.che.api.environment.server.InfrastructureProvisioner;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
 
 /**
- * Infrastructure provisioner that adds volume/agent for workspace files synchronization.
- * Different strategies of synchronization are switched by property {@link #SYNC_STRATEGY_PROPERTY}.
+ * Infrastructure provisioner that finds another infrastructure provisioner needed for current type of installation
+ * and forward provisioning to it.
+ * </p>
+ * Different strategies of provisioning are switched by property {@value #INFRASTRUCTURE_TYPE_PROPERTY}.
  *
  * @author Alexander Garagatyi
  */
-public class CodenvyInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
-    public static final String SYNC_STRATEGY_PROPERTY = "codenvy.sync.strategy";
+public class CodenvyInfrastructureProvisioner implements InfrastructureProvisioner {
+    public static final String INFRASTRUCTURE_TYPE_PROPERTY = "codenvy.infrastructure";
 
-    private final String                      pubSyncKey;
-    private final WorkspaceFolderPathProvider workspaceFolderPathProvider;
-    private final WindowsPathEscaper          pathEscaper;
-    private final String                      projectFolderPath;
-    private final boolean                     syncAgentInMachine;
+    private final InfrastructureProvisioner environmentBasedInfraProvisioner;
 
     @Inject
-    public CodenvyInfrastructureProvisioner(AgentConfigApplier agentConfigApplier,
-                                            @Named("workspace.backup.public_key") String pubSyncKey,
-                                            @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
-                                            WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                                            WindowsPathEscaper pathEscaper,
-                                            @Named("che.workspace.projects.storage") String projectFolderPath) {
-        super(agentConfigApplier);
-        this.pubSyncKey = pubSyncKey;
-        this.workspaceFolderPathProvider = workspaceFolderPathProvider;
-        this.pathEscaper = pathEscaper;
-        this.projectFolderPath = projectFolderPath;
-        switch (syncStrategy) {
-            case "rsync":
-                syncAgentInMachine = false;
-                break;
-            case "rsync-agent":
-                syncAgentInMachine = true;
-                break;
-            default:
-                throw new RuntimeException(
-                        format("Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
-                               SYNC_STRATEGY_PROPERTY,
-                               syncStrategy));
+    public CodenvyInfrastructureProvisioner(@Named(INFRASTRUCTURE_TYPE_PROPERTY) String codenvyInfrastructure,
+                                            Map<String, InfrastructureProvisioner> infrastructureProvisioners) {
+        if (!infrastructureProvisioners.containsKey(codenvyInfrastructure)) {
+            throw new RuntimeException(format("Property '%s' has illegal value '%s'. Valid values: '%s'",
+                                              INFRASTRUCTURE_TYPE_PROPERTY,
+                                              codenvyInfrastructure,
+                                              infrastructureProvisioners.keySet()));
         }
+        environmentBasedInfraProvisioner = infrastructureProvisioners.get(codenvyInfrastructure);
     }
 
     @Override
     public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
-        String devMachineName = envConfig.getMachines()
-                                         .entrySet()
-                                         .stream()
-                                         .filter(entry -> entry.getValue()
-                                                               .getAgents() != null &&
-                                                          entry.getValue()
-                                                               .getAgents()
-                                                               .contains("org.eclipse.che.ws-agent"))
-                                         .map(Map.Entry::getKey)
-                                         .findAny()
-                                         .orElseThrow(() -> new EnvironmentException(
-                                                 "ws-machine is not found on agents applying"));
-        String syncAgentId;
-        if (syncAgentInMachine) {
-            syncAgentId = "com.codenvy.rsync_in_machine";
-            internalEnv.getServices()
-                       .get(devMachineName)
-                       .getEnvironment()
-                       .put("CODENVY_SYNC_PUB_KEY", pubSyncKey);
-        } else {
-            syncAgentId = "com.codenvy.external_rsync";
-            // find path for mounting workspace FS on host
-            String projectFolderVolume;
-            try {
-                projectFolderVolume = format("%s:%s:Z",
-                                             workspaceFolderPathProvider.getPath(internalEnv.getWorkspaceId()),
-                                             projectFolderPath);
-            } catch (IOException e) {
-                throw new EnvironmentException("Error occurred on resolving path to files of workspace " +
-                                               internalEnv.getWorkspaceId());
-            }
-            internalEnv.getServices()
-                       .get(devMachineName)
-                       .getVolumes()
-                       .add(SystemInfo.isWindows() ? pathEscaper.escapePath(projectFolderVolume)
-                                                   : projectFolderVolume);
-        }
-        List<String> agents = envConfig.getMachines().get(devMachineName).getAgents();
-        agents.add(agents.indexOf("org.eclipse.che.ws-agent"), syncAgentId);
+        environmentBasedInfraProvisioner.provision(envConfig, internalEnv);
+    }
 
-        super.provision(envConfig, internalEnv);
+    @Override
+    public void provision(ExtendedMachine machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
+        environmentBasedInfraProvisioner.provision(machineConfig, internalMachine);
     }
 }
