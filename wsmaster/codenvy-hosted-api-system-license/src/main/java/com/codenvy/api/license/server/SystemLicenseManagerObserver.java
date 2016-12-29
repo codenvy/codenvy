@@ -24,7 +24,9 @@ import org.eclipse.che.api.core.ApiException;
 public interface SystemLicenseManagerObserver {
     void onCodenvyFairSourceLicenseAccepted() throws ApiException;
 
-    void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException;
+    void onProductLicenseRemoved(SystemLicense systemLicense) throws ApiException;
 
     void onProductLicenseStored(SystemLicense systemLicense) throws ApiException;
+
+    void onProductLicenseExpired(SystemLicense systemLicense) throws ApiException;
 }

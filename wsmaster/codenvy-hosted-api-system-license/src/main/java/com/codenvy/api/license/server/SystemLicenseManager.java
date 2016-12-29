@@ -46,6 +46,7 @@ import java.util.List;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static java.lang.String.format;
@@ -139,22 +140,22 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     /**
-     * Deletes system license from the storage.
+     * Removes system license from the storage.
      *
      * @throws SystemLicenseNotFoundException
      *      if system license not found
      * @throws SystemLicenseException
      *       if error occurred while deleting license
      */
-    public void delete() throws SystemLicenseException, ApiException {
+    public void remove() throws SystemLicenseException, ApiException {
         String licenseText = systemLicenseStorage.loadLicense();
 
         try {
-            SystemLicense systemLicense = licenseFactory.create(licenseText);
+            SystemLicense license = licenseFactory.create(licenseText);
             systemLicenseStorage.clean();
 
             for (SystemLicenseManagerObserver observer : observers) {
-                observer.onProductLicenseDeleted(systemLicense);
+                observer.onProductLicenseRemoved(license);
             }
         } catch (InvalidSystemLicenseException e) {
             systemLicenseStorage.clean();
@@ -223,7 +224,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     /**
      * Returns list of issues related to actual license.
      */
-    public List<IssueDto> getLicenseIssues() throws ServerException, ConflictException, IOException {
+    public List<IssueDto> getLicenseIssues() throws ApiException, IOException {
         List<IssueDto> issues = new ArrayList<>();
 
         if (!canUserBeAdded()) {
@@ -362,29 +363,15 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     @VisibleForTesting
-    boolean isTimeForPaidLicenseRenewExpired() throws ServerException, ConflictException {
+    boolean isTimeForPaidLicenseRenewExpired() throws ApiException {
         SystemLicense license = load();
         if (license.isTimeForRenewExpired()) {
-            revertToFairSourceLicense(license);
+            for (SystemLicenseManagerObserver observer : observers) {
+                observer.onProductLicenseExpired(license);
+            }
             return true;
         } else {
             return false;
-        }
-    }
-
-    @VisibleForTesting
-    void revertToFairSourceLicense(SystemLicense license) throws ServerException, ConflictException {
-        try {
-            systemLicenseActionDao.getByLicenseIdAndAction(license.getLicenseId(), EXPIRED);
-        } catch (NotFoundException e) {
-            SystemLicenseActionImpl codenvyLicenseAction
-                = new SystemLicenseActionImpl(PRODUCT_LICENSE,
-                                              EXPIRED,
-                                              System.currentTimeMillis(),
-                                              license.getLicenseId(),
-                                              Collections.emptyMap());
-
-            systemLicenseActionDao.upsert(codenvyLicenseAction);
         }
     }
 

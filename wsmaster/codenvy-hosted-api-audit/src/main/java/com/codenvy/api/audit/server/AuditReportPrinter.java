@@ -164,7 +164,7 @@ class AuditReportPrinter {
                                                         Path auditReport) throws ServerException {
         String acceptanceTime = timestampToString(systemLicenseAction);
 
-        printRow(format("%s Fair Source license was accepted.", acceptanceTime), auditReport);
+        printRow(format("%s: Fair Source license was accepted.", acceptanceTime), auditReport);
         printRow("\n", auditReport);
     }
 
@@ -176,8 +176,8 @@ class AuditReportPrinter {
         String email = systemLicenseAction.getAttributes().get("email");
         String acceptanceTime = timestampToString(systemLicenseAction);
 
-        printRow(format("%s added Codenvy license %s at %s",
-                        email, systemLicenseAction.getLicenseId(), acceptanceTime), auditReport);
+        printRow(format("%s: %s added Codenvy license %s",
+                        acceptanceTime, email, systemLicenseAction.getLicenseId()), auditReport);
         printRow("\n", auditReport);
     }
 
@@ -188,13 +188,25 @@ class AuditReportPrinter {
     protected void printProductLicenseExpirationInfo(SystemLicenseAction systemLicenseAction, Path auditReport) throws ServerException {
         String acceptanceTime = timestampToString(systemLicenseAction);
 
-        printRow(format("Paid license %s expired on %s. System returned to previously accepted Fair Source license.",
+        printRow(format("%s: Paid license %s expired. System returned to previously accepted Fair Source license.",
+                        systemLicenseAction.getLicenseId(), acceptanceTime), auditReport);
+        printRow("\n", auditReport);
+    }
+
+    /**
+     * @param systemLicenseAction
+     *      expiration action
+     */
+    protected void printProductLicenseRemovalInfo(SystemLicenseAction systemLicenseAction, Path auditReport) throws ServerException {
+        String acceptanceTime = timestampToString(systemLicenseAction);
+
+        printRow(format("%s: Paid license %s removed. System returned to previously accepted Fair Source license.",
                         systemLicenseAction.getLicenseId(), acceptanceTime), auditReport);
         printRow("\n", auditReport);
     }
 
     private String timestampToString(SystemLicenseAction systemLicenseAction) {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy MMMM dd HH:mm:ss", Locale.ENGLISH);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy MMM dd - HH:mm:ss", Locale.ENGLISH);
         return df.format(systemLicenseAction.getActionTimestamp());
     }
 
