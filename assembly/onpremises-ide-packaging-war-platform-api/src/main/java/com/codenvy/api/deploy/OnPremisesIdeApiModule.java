@@ -40,6 +40,7 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.machine.agent.WorkspaceInfrastructureModule;
 import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
 import com.codenvy.machine.backup.EnvironmentBackupManager;
 import com.codenvy.organization.api.OrganizationApiModule;
@@ -355,8 +356,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                                             .permitDuplicates();
         allMachinesEnvVars.addBinding().toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
         install(new SystemPermissionsJpaModule());
@@ -469,5 +468,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new SystemLicenseModule());
 
         bind(SystemLicenseWorkspaceFilter.class);
+
+        install(new WorkspaceInfrastructureModule());
     }
 }
