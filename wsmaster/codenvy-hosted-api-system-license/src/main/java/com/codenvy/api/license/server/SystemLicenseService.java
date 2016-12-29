@@ -80,7 +80,7 @@ public class SystemLicenseService {
                            @ApiResponse(code = 404, message = "License not found")})
     public void deleteLicense() throws ApiException {
         try {
-            licenseManager.delete();
+            licenseManager.remove();
         } catch (SystemLicenseNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (SystemLicenseException e) {

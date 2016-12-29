@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
@@ -172,6 +173,18 @@ public class AuditManager {
             actions.put(systemFairSourceLicenseAcceptedAction.getActionTimestamp(), () -> {
                 try {
                     reportPrinter.printFairSourceLicenseAcceptanceInfo(systemFairSourceLicenseAcceptedAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (NotFoundException ignored) {
+        }
+
+        try {
+            SystemLicenseAction systemProductLicenseRemovalAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED);
+            actions.put(systemProductLicenseRemovalAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printProductLicenseRemovalInfo(systemProductLicenseRemovalAction, auditReport);
                 } catch (ServerException e) {
                     throw new RuntimeException(e);
                 }

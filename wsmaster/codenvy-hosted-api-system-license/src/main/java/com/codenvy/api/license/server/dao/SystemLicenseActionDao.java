@@ -50,7 +50,7 @@ public interface SystemLicenseActionDao {
     void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
     /**
-     * Removes system license action record.
+     * Removes system license action record. Don't throw NotFoundException if record doesn't exist.
      *
      * @param licenseType
      *          the type of the license

@@ -34,6 +34,7 @@ import java.util.Collections;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 
@@ -45,60 +46,85 @@ import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT
 @Singleton
 public class SystemLicenseActionHandler implements SystemLicenseManagerObserver {
 
-    private final SystemLicenseActionDao systemLicenseActionDao;
+    private final SystemLicenseActionDao dao;
     private final UserManager            userManager;
 
 
     @Inject
-    public SystemLicenseActionHandler(SystemLicenseManager systemLicenseManager,
-                                      SystemLicenseActionDao systemLicenseActionDao,
+    public SystemLicenseActionHandler(SystemLicenseManager licenseManager,
+                                      SystemLicenseActionDao dao,
                                       UserManager userManager) {
-        this.systemLicenseActionDao = systemLicenseActionDao;
+        this.dao = dao;
         this.userManager = userManager;
-        systemLicenseManager.addObserver(this);
+        licenseManager.addObserver(this);
     }
 
     @Override
     public void onCodenvyFairSourceLicenseAccepted() throws ApiException {
         try {
-            SystemLicenseActionImpl codenvyLicenseAction
+            SystemLicenseActionImpl licenseAction
                     = new SystemLicenseActionImpl(FAIR_SOURCE_LICENSE,
                                                   ACCEPTED,
                                                   System.currentTimeMillis(),
                                                   null,
                                                   Collections.emptyMap());
-            systemLicenseActionDao.insert(codenvyLicenseAction);
+            dao.insert(licenseAction);
         } catch (ConflictException e) {
             throw new ConflictException("Codenvy Fair Source License has been already accepted");
         }
     }
 
     @Override
-    public void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException {
-        SystemLicenseActionImpl codenvyLicenseAction
-            = new SystemLicenseActionImpl(PRODUCT_LICENSE,
-                                          EXPIRED,
-                                          System.currentTimeMillis(),
-                                          systemLicense.getLicenseId(),
-                                          Collections.emptyMap());
-
-        systemLicenseActionDao.upsert(codenvyLicenseAction);
-    }
-
-    @Override
-    public void onProductLicenseStored(SystemLicense systemLicense) throws ApiException {
+    public void onProductLicenseStored(SystemLicense license) throws ApiException {
         EnvironmentContext current = EnvironmentContext.getCurrent();
         String userId = current.getSubject().getUserId();
         User user = userManager.getById(userId);
 
-        SystemLicenseActionImpl codenvyLicenseAction
+        SystemLicenseActionImpl licenseAction
                 = new SystemLicenseActionImpl(PRODUCT_LICENSE,
                                               ADDED,
                                               System.currentTimeMillis(),
-                                              systemLicense.getLicenseId(),
+                                              license.getLicenseId(),
                                               Collections.singletonMap("email", user.getEmail()));
 
-        systemLicenseActionDao.upsert(codenvyLicenseAction);
+        dao.upsert(licenseAction);
+    }
+
+    @Override
+    public void onProductLicenseExpired(SystemLicense license) throws ApiException {
+        SystemLicenseActionImpl licenseExpiredAction
+            = new SystemLicenseActionImpl(PRODUCT_LICENSE,
+                                          EXPIRED,
+                                          System.currentTimeMillis(),
+                                          license.getLicenseId(),
+                                          Collections.emptyMap());
+
+        dao.upsert(licenseExpiredAction);
+        dao.remove(PRODUCT_LICENSE, REMOVED);  // ensure there is no record of license removed action
+    }
+
+    @Override
+    public void onProductLicenseRemoved(SystemLicense license) throws ApiException {
+        try {
+            SystemLicenseAction licenseExpiredAction = dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, EXPIRED);
+            if (licenseExpiredAction.getLicenseId().equals(license.getLicenseId())) {
+                return;  // do not add action of removing of license which had already expired before
+            }
+        } catch(NotFoundException e) {
+            // ignore
+        }
+
+        // ensure there is no record of license expired action
+        SystemLicenseActionImpl licenseAction
+            = new SystemLicenseActionImpl(PRODUCT_LICENSE,
+                                          REMOVED,
+                                          System.currentTimeMillis(),
+                                          license.getLicenseId(),
+                                          Collections.emptyMap());
+
+        dao.upsert(licenseAction);
+
+        dao.remove(PRODUCT_LICENSE, EXPIRED);  // ensure there is no record of license expired action
     }
 
     /**
@@ -116,6 +142,6 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
      */
     public SystemLicenseAction findAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
                                                                                                                  NotFoundException {
-        return systemLicenseActionDao.getByLicenseTypeAndAction(licenseType, actionType);
+        return dao.getByLicenseTypeAndAction(licenseType, actionType);
     }
 }

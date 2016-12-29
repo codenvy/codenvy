@@ -27,7 +27,8 @@ public class Constants {
     public enum Action {
         ACCEPTED,
         ADDED,
-        EXPIRED
+        EXPIRED,
+        REMOVED
     }
 
     /**
