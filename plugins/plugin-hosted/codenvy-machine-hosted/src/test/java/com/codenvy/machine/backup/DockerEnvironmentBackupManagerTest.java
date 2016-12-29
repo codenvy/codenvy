@@ -92,7 +92,7 @@ public class DockerEnvironmentBackupManagerTest {
     private static final String PATH_TO_WORKSPACE              = "00/00/00/";
     private static final String ABSOLUTE_PATH_TO_WORKSPACE_DIR = BACKUPS_ROOT_PATH + PATH_TO_WORKSPACE + WORKSPACE_ID;
     private static final String NODE_HOST                      = "192.19.20.78";
-    private static final String SYNC_STRATEGY                  = "rsync";
+    private static final String SYNC_STRATEGY                  = "native";
     private static final String PROJECTS_PATH_IN_CONTAINER     = "/projects-folder";
     private static final String USER_IN_CONTAINER              = "test-user";
 

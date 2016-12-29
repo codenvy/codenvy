@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.SYNC_STRATEGY_PROPERTY;
+import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.INFRASTRUCTURE_TYPE_PROPERTY;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -91,7 +91,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                           @Named("machine.backup.restore_duration_second") int restoreDurationSec,
                                           @Named("che.user.workspaces.storage") File backupsRootDir,
                                           WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder,
-                                          @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
+                                          @Named(INFRASTRUCTURE_TYPE_PROPERTY) String syncStrategy,
                                           @Named("che.workspace.projects.storage") String projectFolderPath,
                                           WorkspaceRuntimes workspaceRuntimes,
                                           WorkspaceFolderPathProvider workspaceFolderPathProvider,
@@ -108,16 +108,16 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         this.dockerConnector = dockerConnector;
 
         switch (syncStrategy) {
-            case "rsync":
+            case "native":
                 syncAgentInMachine = false;
                 break;
-            case "rsync-agent":
+            case "in-container":
                 syncAgentInMachine = true;
                 break;
             default:
                 throw new RuntimeException(format(
-                        "Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
-                        SYNC_STRATEGY_PROPERTY,
+                        "Property '%s' has illegal value '%s'. Valid values: native, in-container",
+                        INFRASTRUCTURE_TYPE_PROPERTY,
                         syncStrategy));
         }
 
