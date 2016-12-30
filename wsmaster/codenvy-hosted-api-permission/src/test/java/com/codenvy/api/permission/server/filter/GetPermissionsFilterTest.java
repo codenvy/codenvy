@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.jayway.restassured.response.Response;
 
@@ -43,7 +44,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -61,16 +62,19 @@ public class GetPermissionsFilterTest {
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
     @Mock
-    static Subject subject;
+    private static Subject subject;
 
     @Mock
-    PermissionsManager permissionsManager;
+    private PermissionsManager permissionsManager;
 
     @Mock
-    PermissionsService permissionsService;
+    private PermissionsService permissionsService;
+
+    @Mock
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @InjectMocks
-    GetPermissionsFilter permissionsFilter;
+    private GetPermissionsFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
@@ -107,6 +111,22 @@ public class GetPermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
+    }
+
+    @Test
+    public void shouldDoChainIfUserDoesNotHaveAnyPermissionsForInstanceButHasSuperPrivileges() throws Exception {
+        when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
+        when(permissionsManager.get("user123", "test", "test123")).thenThrow(new NotFoundException("not found"));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/permissions/test/all?instance=test123");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
+        verify(superPrivilegesChecker).isPrivilegedToManagePermissions("test");
     }
 
     private static String unwrapError(Response response) {

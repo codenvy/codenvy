@@ -14,7 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
-import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributionService;
 
@@ -45,7 +45,9 @@ public class OrganizationResourceDistributionServicePermissionsFilter extends Ch
     static final String RESET_DISTRIBUTED_RESOURCES      = "reset";
 
     @Inject
-    private OrganizationManager organizationManager;
+    private OrganizationManager    organizationManager;
+    @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @Override
     protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException {
@@ -68,7 +70,7 @@ public class OrganizationResourceDistributionServicePermissionsFilter extends Ch
                 organizationId = (String)arguments[0];
                 // get organization to ensure that organization exists
                 organizationManager.getById(organizationId);
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, OrganizationPermissionsFilter.MANAGE_ORGANIZATIONS_ACTION)) {
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
                     //user is able to see information about all organizations
                     return;
                 }

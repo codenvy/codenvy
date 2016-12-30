@@ -15,8 +15,10 @@
 package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -37,6 +39,8 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -54,13 +58,16 @@ public class RemovePermissionsFilterTest {
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
     @Mock
-    static Subject subject;
+    private static Subject subject;
 
     @Mock
-    PermissionsService permissionsService;
+    private PermissionsService permissionsService;
+
+    @Mock
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @InjectMocks
-    RemovePermissionsFilter permissionsFilter;
+    private RemovePermissionsFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
@@ -94,6 +101,22 @@ public class RemovePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).removePermissions(eq("test"), eq("test123"), eq("user123"));
+    }
+
+    @Test
+    public void shouldDoChainIfUserDoesNotHavePermissionToSetPermissionsButHasSuperPrivileges() throws Exception {
+        when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .delete(SECURE_PATH + "/permissions/test?instance=test123&user=user123");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).removePermissions(eq("test"), eq("test123"), eq("user123"));
+        verify(superPrivilegesChecker).isPrivilegedToManagePermissions("test");
     }
 
     private static String unwrapError(Response response) {

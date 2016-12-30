@@ -15,6 +15,7 @@
 package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.PermissionsManager;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -46,13 +47,21 @@ public class GetPermissionsFilter extends CheMethodInvokerFilter {
     private String instance;
 
     @Inject
-    PermissionsManager permissionsManager;
+    private PermissionsManager permissionsManager;
+
+    @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @Override
-    public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
-            throws UnauthorizedException, ForbiddenException, ServerException, ConflictException {
+    public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments) throws ForbiddenException,
+                                                                                               ServerException,
+                                                                                               ConflictException {
         final String methodName = genericResourceMethod.getMethod().getName();
         if (methodName.equals("getUsersPermissions")) {
+            if (superPrivilegesChecker.isPrivilegedToManagePermissions(domain)) {
+                return;
+            }
+
             final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             try {
                 permissionsManager.get(userId, domain, instance);

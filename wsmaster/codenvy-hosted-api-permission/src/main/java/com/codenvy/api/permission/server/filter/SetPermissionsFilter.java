@@ -14,16 +14,17 @@
  */
 package com.codenvy.api.permission.server.filter;
 
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
+import javax.inject.Inject;
 import javax.ws.rs.Path;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
@@ -36,12 +37,18 @@ import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PE
 @Filter
 @Path("/permissions/")
 public class SetPermissionsFilter extends CheMethodInvokerFilter {
+    @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
+
     @Override
-    public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
-            throws UnauthorizedException, ForbiddenException, ServerException {
+    public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments) throws ForbiddenException, ServerException {
         final String methodName = genericResourceMethod.getMethod().getName();
         if (methodName.equals("storePermissions")) {
             final PermissionsDto permissions = (PermissionsDto)arguments[0];
+
+            if (superPrivilegesChecker.isPrivilegedToManagePermissions(permissions.getDomainId())) {
+                return;
+            }
 
             if (!EnvironmentContext.getCurrent().getSubject().hasPermission(permissions.getDomainId(),
                                                                             permissions.getInstanceId(),
