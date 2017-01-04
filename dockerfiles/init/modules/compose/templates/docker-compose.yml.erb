@@ -94,6 +94,8 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/swarm/node_list:/node_list'
     command: manage -H 0.0.0.0:2375 file:///node_list
+    ports:
+        - "127.0.0.1:23751:2375"
     links:
       - 'socat:codenvy-socat'
     ulimits:
