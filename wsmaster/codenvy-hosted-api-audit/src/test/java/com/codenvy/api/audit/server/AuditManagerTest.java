@@ -21,7 +21,6 @@ import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -37,7 +36,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,14 +86,17 @@ public class AuditManagerTest {
     private WorkspaceImpl              workspace2;
 
     private AuditManager auditManager;
+    public static final SystemLicenseAction ADD_PRODUCT_LICENSE_ACTION    = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction EXPIRE_PRODUCT_LICENSE_ACTION = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction REMOVE_PRODUCT_LICENSE_ACTION = mock(SystemLicenseAction.class);
+    public static final SystemLicenseAction ACCEPT_FAIR_SOURCE_LICENSE_ACTION = mock(SystemLicenseAction.class);
 
     @BeforeMethod
     public void setUp() throws Exception {
         auditReport = createTempFile("report", ".txt");
 
         auditManager =
-            new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, systemLicenseActionHandler,
-                             new AuditReportPrinter());
+            new AuditManager(userManager, workspaceManager, permissionsManager, licenseManager, systemLicenseActionHandler);
 
         //License
         SystemLicense license = mock(SystemLicense.class);
@@ -150,6 +151,22 @@ public class AuditManagerTest {
         when(userManager.getAll(30, 0)).thenReturn(page);
 
         when(userManager.getTotalCount()).thenReturn(2L);
+
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(ADDED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(ADD_PRODUCT_LICENSE_ACTION);
+
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(EXPIRED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(EXPIRE_PRODUCT_LICENSE_ACTION);
+
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getLicenseType()).thenReturn(PRODUCT_LICENSE);
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getActionType()).thenReturn(REMOVED);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenReturn(REMOVE_PRODUCT_LICENSE_ACTION);
+
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getLicenseType()).thenReturn(FAIR_SOURCE_LICENSE);
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionType()).thenReturn(ACCEPTED);
+        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(ACCEPT_FAIR_SOURCE_LICENSE_ACTION);
     }
 
     @AfterMethod
@@ -160,24 +177,18 @@ public class AuditManagerTest {
     @Test
     public void shouldReturnFullAuditReport() throws Exception {
         // given
-        SystemLicenseAction acceptFairSourceLicenseAction = mock(SystemLicenseAction.class);
-        when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(acceptFairSourceLicenseAction.getActionTimestamp())
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
 
-        SystemLicenseAction addProductLicenseAction = mock(SystemLicenseAction.class);
-        when(addProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(addProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(addProductLicenseAction.getActionTimestamp())
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(addProductLicenseAction);
 
-        SystemLicenseAction expireProductLicenseAction = mock(SystemLicenseAction.class);
-        when(expireProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(expireProductLicenseAction.getActionTimestamp())
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(EXPIRE_PRODUCT_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenReturn(expireProductLicenseAction);
 
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
 
@@ -187,10 +198,12 @@ public class AuditManagerTest {
         //then
         assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
                                                              + "2016 Mar 04 - 22:15:00: admin@codenvy.com added paid license 1234.\n"
-                                                             + "2016 Mar 05 - 22:15:00: Paid license 1234 expired. System returned to previously accepted Fair Source license.\n"
-                                                             + "Number of all users: 2\n"
-                                                             + "Number of users licensed: 15\n"
-                                                             + "Date when license expires: 01 January 2016\n"
+                                                             + "2016 Mar 05 - 22:15:00: Paid license 1234 expired. System returned to previously accepted Fair Source license.\n" 
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
                                                              + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
                                                              + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
                                                              + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
@@ -208,24 +221,18 @@ public class AuditManagerTest {
         when(workspaceManager.getWorkspaces("User2Id")).thenReturn(workspaces);
         when(workspaceManager.getByNamespace("User2")).thenReturn(asList(workspace1, workspace2));
 
-        SystemLicenseAction acceptFairSourceLicenseAction = mock(SystemLicenseAction.class);
-        when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(acceptFairSourceLicenseAction.getActionTimestamp())
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
 
-        SystemLicenseAction expireProductLicenseAction = mock(SystemLicenseAction.class);
-        when(expireProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(expireProductLicenseAction.getActionTimestamp())
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(REMOVE_PRODUCT_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenReturn(expireProductLicenseAction);
 
-        SystemLicenseAction addProductLicenseAction = mock(SystemLicenseAction.class);
-        when(addProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(addProductLicenseAction.getLicenseId()).thenReturn("5678");
-        when(addProductLicenseAction.getActionTimestamp())
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("5678");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 5, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(addProductLicenseAction);
 
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
 
@@ -236,9 +243,11 @@ public class AuditManagerTest {
         assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
                                                              + "2016 Mar 04 - 22:15:00: Paid license 1234 removed. System returned to previously accepted Fair Source license.\n"
                                                              + "2016 Mar 05 - 22:15:00: admin@codenvy.com added paid license 5678.\n"
-                                                             + "Number of all users: 2\n"
-                                                             + "Number of users licensed: 15\n"
-                                                             + "Date when license expires: 01 January 2016\n"
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
                                                              + "user@email.com is owner of 0 workspaces and has permissions in 2 workspaces\n"
                                                              + "   └ Workspace1Name, is owner: false, permissions: [read, use, run, configure, setPermissions, delete]\n"
                                                              + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
@@ -261,7 +270,9 @@ public class AuditManagerTest {
         auditReport = auditManager.generateAuditReport();
 
         //then
-        assertEquals(readFileToString(auditReport.toFile()), "Number of all users: 2\n"
+        assertEquals(readFileToString(auditReport.toFile()), "\n"
+                                                             + "--- CURRENT STATE ---\n" 
+                                                             + "Number of users: 2\n"
                                                              + "[ERROR] Failed to retrieve license!\n"
                                                              + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
                                                              + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
@@ -273,22 +284,17 @@ public class AuditManagerTest {
     @Test
     public void shouldReturnAuditReportWithoutUserWorkspacesIfFailedToRetrieveTheListOfHisWorkspaces() throws Exception {
         //given
-        SystemLicenseAction acceptFairSourceLicenseAction = mock(SystemLicenseAction.class);
-        when(acceptFairSourceLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(acceptFairSourceLicenseAction.getActionTimestamp())
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
 
-        SystemLicenseAction addProductLicenseAction = mock(SystemLicenseAction.class);
-        when(addProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(addProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(addProductLicenseAction.getActionTimestamp())
+        when(ADD_PRODUCT_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(ADD_PRODUCT_LICENSE_ACTION.getLicenseId()).thenReturn("1234");
+        when(ADD_PRODUCT_LICENSE_ACTION.getActionTimestamp())
             .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(addProductLicenseAction);
 
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
-
 
         when(workspaceManager.getWorkspaces(eq("User1Id"))).thenThrow(new ServerException("Failed to retrieve workspaces"));
 
@@ -298,9 +304,11 @@ public class AuditManagerTest {
         //then
         assertEquals(readFileToString(auditReport.toFile()), "2016 Mar 03 - 22:15:00: Fair Source license was accepted.\n"
                                                              + "2016 Mar 04 - 22:15:00: admin@codenvy.com added paid license 1234.\n"
-                                                             + "Number of all users: 2\n"
-                                                             + "Number of users licensed: 15\n"
-                                                             + "Date when license expires: 01 January 2016\n"
+                                                             + "\n"
+                                                             + "--- CURRENT STATE ---\n"
+                                                             + "Number of users: 2\n"
+                                                             + "Number of licensed seats: 15\n"
+                                                             + "License expiration: 01 January 2016\n"
                                                              + "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n"
                                                              + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
                                                              + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");

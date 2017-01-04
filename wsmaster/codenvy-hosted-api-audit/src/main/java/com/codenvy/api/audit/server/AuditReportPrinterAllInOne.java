@@ -45,9 +45,9 @@ import static java.util.Collections.sort;
  * @author Igor Vinokur
  */
 @Singleton
-class AuditReportPrinter {
+class AuditReportPrinterAllInOne {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuditReportPrinter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuditReportPrinterAllInOne.class);
 
     /**
      * Prints header of audit report in format:

@@ -14,6 +14,10 @@
  */
 package com.codenvy.api.audit.server;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
@@ -29,7 +33,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import static java.nio.file.Files.copy;
-import static java.nio.file.Files.readAllBytes;
 
 /**
  * Defines Audit report REST API.
@@ -37,6 +40,7 @@ import static java.nio.file.Files.readAllBytes;
  * @author Igor Vinokur
  */
 @Path("/audit")
+@Api(value = "audit", description = "Audit service")
 public class AuditService extends Service {
 
     private final AuditManager auditManager;
@@ -48,6 +52,9 @@ public class AuditService extends Service {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = "Generate audit log")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
+                           @ApiResponse(code = 500, message = "Server error")})
     public Response downloadReport() throws ServerException, ConflictException, IOException {
         java.nio.file.Path report = auditManager.generateAuditReport();
 

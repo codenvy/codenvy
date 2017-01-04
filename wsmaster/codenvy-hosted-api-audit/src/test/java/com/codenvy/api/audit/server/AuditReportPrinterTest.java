@@ -16,7 +16,6 @@ package com.codenvy.api.audit.server;
 
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -41,7 +40,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
- * Tests for {@link AuditReportPrinter}
+ * Tests for {@link AuditReportPrinterAllInOne}
  *
  * @author Igor Vinokur
  */
@@ -63,19 +62,19 @@ public class AuditReportPrinterTest {
 
     @Mock
     UserImpl user;
-    private AuditReportPrinter  auditReportPrinter;
+    private AuditReportPrinterAllInOne auditReportPrinterAllInOne;
     @Mock
-    private WorkspaceImpl       workspace0;
+    private WorkspaceImpl              workspace0;
     @Mock
-    private WorkspaceImpl       workspace1;
+    private WorkspaceImpl              workspace1;
     @Mock
-    private WorkspaceImpl       workspace2;
+    private WorkspaceImpl              workspace2;
     @Mock
-    private AbstractPermissions ws0User1Permissions;
+    private AbstractPermissions        ws0User1Permissions;
     @Mock
-    private AbstractPermissions ws1User1Permissions;
+    private AbstractPermissions        ws1User1Permissions;
     @Mock
-    private AbstractPermissions ws2User1Permissions;
+    private AbstractPermissions        ws2User1Permissions;
 
     private Path auditReport;
 
@@ -123,7 +122,7 @@ public class AuditReportPrinterTest {
 
         auditReport = Files.createTempFile("report", ".txt");
 
-        auditReportPrinter = new AuditReportPrinter();
+        auditReportPrinterAllInOne = new AuditReportPrinterAllInOne();
     }
 
     @AfterMethod
@@ -139,7 +138,7 @@ public class AuditReportPrinterTest {
         when(license.getExpirationDateFeatureValue()).thenReturn(new GregorianCalendar(2016, JANUARY, 1).getTime());
 
         //when
-        auditReportPrinter.printHeader(auditReport, 2, license);
+        auditReportPrinterAllInOne.printHeader(auditReport, 2, license);
 
         //then
         assertEquals(AUDIT_REPORT_HEADER, readFileToString(auditReport.toFile()));
@@ -148,7 +147,7 @@ public class AuditReportPrinterTest {
     @Test
     public void shouldWriteAuditReportHeaderToFileWithoutLicenseInfo() throws Exception {
         //when
-        auditReportPrinter.printHeader(auditReport, 2, null);
+        auditReportPrinterAllInOne.printHeader(auditReport, 2, null);
 
         //then
         assertEquals(AUDIT_REPORT_HEADER_WITHOUT_LICENSE, readFileToString(auditReport.toFile()));
@@ -163,10 +162,10 @@ public class AuditReportPrinterTest {
         map.put("Workspace2Id", ws2User1Permissions);
 
         //when
-        auditReportPrinter.printUserInfoWithHisWorkspacesInfo(auditReport,
-                                                              user,
-                                                              asList(workspace0, workspace1, workspace2),
-                                                              map);
+        auditReportPrinterAllInOne.printUserInfoWithHisWorkspacesInfo(auditReport,
+                                                                      user,
+                                                                      asList(workspace0, workspace1, workspace2),
+                                                                      map);
 
         //then
         assertEquals(USER_INFO_WITH_HIS_WORKSPACES_INFO, readFileToString(auditReport.toFile()));
