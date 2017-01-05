@@ -56,7 +56,7 @@ public class SwarmDockerConnector extends DockerConnector {
     private final String                  nodeDaemonScheme;
     private final int                     nodeDescriptionLength;
 
-    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .*  not found$");
+    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .* not found$");
 
     @Inject
     public SwarmDockerConnector(DockerConnectorConfiguration connectorConfiguration,
