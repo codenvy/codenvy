@@ -31,7 +31,7 @@ import static java.lang.String.format;
  * Infrastructure provisioner that finds another infrastructure provisioner needed for current type of installation
  * and forward provisioning to it.
  * </p>
- * Different strategies of provisioning are switched by property {@link #INFRASTRUCTURE_TYPE_PROPERTY}.
+ * Different strategies of provisioning are switched by property {@value #INFRASTRUCTURE_TYPE_PROPERTY}.
  *
  * @author Alexander Garagatyi
  */

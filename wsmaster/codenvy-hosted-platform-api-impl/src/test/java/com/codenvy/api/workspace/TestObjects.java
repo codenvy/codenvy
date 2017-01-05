@@ -38,6 +38,7 @@ import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
 import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -112,14 +113,8 @@ public final class TestObjects {
         final WorkspaceImpl workspace = createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams);
         final String envName = workspace.getConfig().getDefaultEnv();
         EnvironmentImpl env = workspace.getConfig().getEnvironments().get(envName);
-        Map.Entry<String, ExtendedMachineImpl> devMachine = env.getMachines()
-                                                               .entrySet()
-                                                               .stream()
-                                                               .filter(entry -> entry.getValue().getAgents() != null &&
-                                                                                entry.getValue().getAgents()
-                                                                                     .contains("org.eclipse.che.ws-agent"))
-                                                               .findAny()
-                                                               .get();
+        String devMachineName = getDevMachineName(env);
+        ExtendedMachineImpl devMachine = env.getMachines().get(devMachineName);
         final WorkspaceRuntimeImpl runtime =
                 new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(),
                                          null,
@@ -128,17 +123,27 @@ public final class TestObjects {
                                             .map(entry -> createMachine(workspace.getId(),
                                                                         envName,
                                                                         entry.getKey(),
-                                                                        devMachine.getKey().equals(entry.getKey()),
+                                                                        devMachineName.equals(entry.getKey()),
                                                                         entry.getValue().getAttributes().get("memoryLimitBytes")))
                                             .collect(toList()),
                                          createMachine(workspace.getId(),
                                                        envName,
-                                                       devMachine.getKey(),
+                                                       devMachineName,
                                                        true,
-                                                       devMachine.getValue().getAttributes().get("memoryLimitBytes")));
+                                                       devMachine.getAttributes().get("memoryLimitBytes")));
         workspace.setStatus(RUNNING);
         workspace.setRuntime(runtime);
         return workspace;
+    }
+
+    private static String getDevMachineName(EnvironmentImpl envConfig) throws Exception {
+        for (Map.Entry<String, ? extends ExtendedMachineImpl> entry : envConfig.getMachines().entrySet()) {
+            List<String> agents = entry.getValue().getAgents();
+            if (agents != null && agents.contains("org.eclipse.che.ws-agent")) {
+                return entry.getKey();
+            }
+        }
+        throw new Exception("ws-machine is not found");
     }
 
     private static MachineImpl createMachine(String workspaceId,

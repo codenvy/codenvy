@@ -109,16 +109,12 @@ public class NativeCodenvyInfrastructureProvisioner extends DefaultInfrastructur
     }
 
     private String getDevMachineName(Environment envConfig) throws EnvironmentException {
-        return envConfig.getMachines()
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> entry.getValue()
-                                              .getAgents() != null &&
-                                         entry.getValue()
-                                              .getAgents()
-                                              .contains("org.eclipse.che.ws-agent"))
-                        .map(Map.Entry::getKey)
-                        .findAny()
-                        .orElseThrow(() -> new EnvironmentException("ws-machine is not found on agents applying"));
+        for (Map.Entry<String, ? extends ExtendedMachine> entry : envConfig.getMachines().entrySet()) {
+            List<String> agents = entry.getValue().getAgents();
+            if (agents != null && agents.contains("org.eclipse.che.ws-agent")) {
+                return entry.getKey();
+            }
+        }
+        throw new EnvironmentException("ws-machine is not found on agents applying");
     }
 }
