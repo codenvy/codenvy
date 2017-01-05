@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.primitives.Ints.tryParse;
@@ -54,6 +55,8 @@ public class SwarmDockerConnector extends DockerConnector {
     //TODO should it be done in other way?
     private final String                  nodeDaemonScheme;
     private final int                     nodeDescriptionLength;
+
+    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .*  not found$");
 
     @Inject
     public SwarmDockerConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -94,7 +97,8 @@ public class SwarmDockerConnector extends DockerConnector {
             return super.createContainer(params);
         } catch (DockerException e) {
             // TODO fix this workaround. Is needed for https://github.com/codenvy/codenvy/issues/1215
-            if (e.getStatus() == 500 && e.getOriginError().endsWith("not found")) { // if swarm failed to see image
+            if (e.getStatus() == 500 &&
+                IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE.matcher(e.getOriginError()).matches()) { // if swarm failed to see image
                 try {
                     Thread.sleep(5000);                   // wait a bit
                     return super.createContainer(params); // and retry after pause
