@@ -93,6 +93,17 @@ public class SwarmDockerConnector extends DockerConnector {
         try {
             return super.createContainer(params);
         } catch (DockerException e) {
+            // TODO fix this workaround. Is needed for https://github.com/codenvy/codenvy/issues/1215
+            if (e.getStatus() == 500 && e.getOriginError().endsWith("not found")) { // if swarm failed to see image
+                try {
+                    Thread.sleep(5000);                   // wait a bit
+                    return super.createContainer(params); // and retry after pause
+                } catch (DockerException de) {
+                    throw decorateMessage(de);
+                } catch (InterruptedException ie) {
+                    throw decorateMessage(e);
+                }
+            }
             throw decorateMessage(e);
         }
     }
