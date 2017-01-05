@@ -214,8 +214,10 @@ services:
     links:
       - 'postgres:codenvy-postgres'
       - 'swarm:codenvy-swarm'
-<% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
+      - '32001:32001'
+      - '32101:32101'
+<% if scope.lookupvar('compose::env') != 'production' -%>
       - '8000:8000'
 <% end -%>
     ulimits:
