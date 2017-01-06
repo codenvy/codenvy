@@ -40,11 +40,96 @@
                         </goals>
                         <configuration>
                             <target>
-                                <exec dir="${project.basedir}" executable="jekyll" failonerror="true">
-                                    <arg value="build" />
-                                    <arg value="--config" />
-                                    <arg value="assembly/build_war.yml" />
+                                <available file="${project.build.directory}/che-repo" property="cheRepoExists" type="dir"/>
+                                <mkdir dir="${project.build.directory}/che-repo"/>
+                                <exec dir="${project.basedir}" executable="docker" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="--name" />
+                                    <arg value="jekyll_git_che" />
+                                    <arg value="jekyll/jekyll" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="cd /srv/jekyll/ ; git init ; git remote add -t add-docs-images -f origin https://github.com/eclipse/che.git ; git checkout add-docs-images" />
+                                </exec>                                
+                                <exec dir="${project.basedir}" executable="docker" failonerror="true">
+                                    <arg value="cp" />
+                                    <arg value="jekyll_git_che:/srv/jekyll/" />
+                                    <arg value="${project.build.directory}/che-repo" />
                                 </exec>
+                                <exec dir="${project.basedir}" executable="docker" failonerror="true">
+                                    <arg value="rm" />
+                                    <arg value="-f" />
+                                    <arg value="jekyll_git_che" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="-d" />
+                                    <arg value="--name" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="jekyll/jekyll" />
+                                    <arg value="tail" />
+                                    <arg value="-f" />
+                                    <arg value="/dev/null" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="cp" />
+                                    <arg value="${project.basedir}" />
+                                    <arg value="jekyll-war-build:/tmp" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="mv /tmp/docs/* /srv/jekyll/" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="mv /srv/jekyll/target/che-repo/jekyll/docs/_docs /srv/jekyll/_docs/che" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="mkdir -p /srv/jekyll/assets/imgs/ ; cp -rf /srv/jekyll/target/che-repo/jekyll/docs/assets/imgs/* /srv/jekyll/assets/imgs/" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="rm -r /srv/jekyll/target" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="sh" />
+                                    <arg value="-c" />
+                                    <arg value="chown -R jekyll:jekyll /srv/jekyll" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="exec" />
+                                    <arg value="jekyll-war-build" />
+                                    <arg value="jekyll" />
+                                    <arg value="build" />
+                                </exec>
+                                <exec dir="${project.build.directory}" executable="docker" failonerror="true">
+                                    <arg value="cp" />
+                                    <arg value="jekyll-war-build:/srv/jekyll/_site" />
+                                    <arg value="${project.build.directory}" />
+                                </exec>
+                                <exec dir="${project.basedir}" executable="docker" failonerror="true">
+                                    <arg value="rm" />
+                                    <arg value="-f" />
+                                    <arg value="jekyll-war-build" />
+                                </exec>
+                                <delete file="${project.build.directory}/_site/feed.xml" />
+                                <delete file="${project.build.directory}/_site/feed.xslt.xml" />
+                                <delete file="${project.build.directory}/_site/sitemap.xml" />
                             </target>
                         </configuration>
                     </execution>
@@ -57,7 +142,7 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
-                            <directory>target/_site/docs</directory>
+                            <directory>${project.build.directory}/_site</directory>
                         </resource>
                     </webResources>
                 </configuration>
