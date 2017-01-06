@@ -38,7 +38,6 @@ import org.eclipse.che.plugin.docker.compose.ComposeEnvironment;
 import org.eclipse.che.plugin.docker.compose.ComposeServiceImpl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -46,6 +45,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
  * Test util class, helps to create test objects.
@@ -114,6 +114,9 @@ public final class TestObjects {
         final String envName = workspace.getConfig().getDefaultEnv();
         EnvironmentImpl env = workspace.getConfig().getEnvironments().get(envName);
         String devMachineName = getDevMachineName(env);
+        if (devMachineName == null) {
+            throw new Exception("ws-machine is not found");
+        }
         ExtendedMachineImpl devMachine = env.getMachines().get(devMachineName);
         final WorkspaceRuntimeImpl runtime =
                 new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(),
@@ -134,16 +137,6 @@ public final class TestObjects {
         workspace.setStatus(RUNNING);
         workspace.setRuntime(runtime);
         return workspace;
-    }
-
-    private static String getDevMachineName(EnvironmentImpl envConfig) throws Exception {
-        for (Map.Entry<String, ? extends ExtendedMachineImpl> entry : envConfig.getMachines().entrySet()) {
-            List<String> agents = entry.getValue().getAgents();
-            if (agents != null && agents.contains("org.eclipse.che.ws-agent")) {
-                return entry.getKey();
-            }
-        }
-        throw new Exception("ws-machine is not found");
     }
 
     private static MachineImpl createMachine(String workspaceId,

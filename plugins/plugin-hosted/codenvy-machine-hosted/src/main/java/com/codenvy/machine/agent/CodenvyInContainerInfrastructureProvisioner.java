@@ -27,7 +27,8 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingPr
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
-import java.util.Map;
+
+import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
  * Infrastructure provisioner that adds workspace machines configuration needed for running Codenvy in container.
@@ -48,6 +49,9 @@ public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastr
     @Override
     public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
         String devMachineName = getDevMachineName(envConfig);
+        if (devMachineName == null) {
+            throw new EnvironmentException("ws-machine is not found on agents applying");
+        }
         CheServiceImpl devMachine = internalEnv.getServices().get(devMachineName);
 
         // dev-machine-only configuration
@@ -65,15 +69,5 @@ public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastr
     @Override
     public void provision(ExtendedMachine machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
         super.provision(machineConfig, internalMachine);
-    }
-
-    private String getDevMachineName(Environment envConfig) throws EnvironmentException {
-        for (Map.Entry<String, ? extends ExtendedMachine> entry : envConfig.getMachines().entrySet()) {
-            List<String> agents = entry.getValue().getAgents();
-            if (agents != null && agents.contains("org.eclipse.che.ws-agent")) {
-                return entry.getKey();
-            }
-        }
-        throw new EnvironmentException("ws-machine is not found on agents applying");
     }
 }
