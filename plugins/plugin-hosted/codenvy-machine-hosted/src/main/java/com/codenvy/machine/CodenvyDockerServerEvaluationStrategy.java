@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -32,11 +32,6 @@ import java.util.Map;
  * @see ServerEvaluationStrategy
  */
 public class CodenvyDockerServerEvaluationStrategy extends ServerEvaluationStrategy {
-
-    public CodenvyDockerServerEvaluationStrategy() {
-        super(null, null);
-    }
-
     @Override
     protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
         Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
