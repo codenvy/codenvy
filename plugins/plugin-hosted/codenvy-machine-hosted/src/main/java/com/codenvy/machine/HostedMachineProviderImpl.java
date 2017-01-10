@@ -27,7 +27,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
@@ -66,7 +65,6 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
 
     @Inject
     public HostedMachineProviderImpl(DockerConnector docker,
-                                     DockerConnectorConfiguration dockerConnectorConfiguration,
                                      UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                      DockerMachineFactory dockerMachineFactory,
                                      DockerInstanceStopDetector dockerInstanceStopDetector,
@@ -75,7 +73,6 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                      @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                      @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                                     @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                      @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
                                      @Named("che.docker.privileged") boolean privilegedMode,
                                      @Named("che.docker.pids_limit") int pidsLimit,
@@ -89,10 +86,10 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Nullable @Named("che.docker.parent_cgroup") String parentCgroup,
                                      @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
                                      @Named("che.docker.cpu_period") long cpuPeriod,
-                                     @Named("che.docker.cpu_quota") long cpuQuota)
+                                     @Named("che.docker.cpu_quota") long cpuQuota,
+                                     @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
             throws IOException {
         super(docker,
-              dockerConnectorConfiguration,
               dockerCredentials,
               dockerMachineFactory,
               dockerInstanceStopDetector,
@@ -100,7 +97,6 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               allMachinesServers,
               devMachineSystemVolumes,
               allMachinesSystemVolumes,
-              allMachinesExtraHosts,
               doForcePullOnBuild,
               privilegedMode,
               pidsLimit,
@@ -114,7 +110,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               cpusetCpus,
               cpuPeriod,
               cpuQuota,
-              windowsPathEscaper);
+              windowsPathEscaper,
+              additionalHosts);
 
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;

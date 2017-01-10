@@ -113,7 +113,6 @@ public class HostedMachineProviderImplTest {
     @Test
     public void shouldAddMaintenanceConstraintWhenBuildImage() throws Exception {
         provider = new HostedMachineProviderImpl(dockerConnector,
-                                                 dockerConnectorConfiguration,
                                                  credentialsReader,
                                                  dockerMachineFactory,
                                                  dockerInstanceStopDetector,
@@ -122,7 +121,6 @@ public class HostedMachineProviderImplTest {
                                                  emptySet(),
                                                  emptySet(),
                                                  emptySet(),
-                                                 null,
                                                  false,
                                                  false,
                                                  -1,
@@ -136,9 +134,10 @@ public class HostedMachineProviderImplTest {
                                                  null,
                                                  null,
                                                  0,
-                                                 0);
+                                                 0,
+                                                 emptySet());
 
-        createInstanceFromRecipe(true);
+        createInstanceFromRecipe();
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
         verify(dockerConnector).buildImage(argumentCaptor.capture(), anyObject());
         assertNotNull(argumentCaptor.getValue().getBuildArgs().get(MAINTENANCE_CONSTRAINT_KEY));
@@ -163,12 +162,12 @@ public class HostedMachineProviderImplTest {
         return service;
     }
 
-    private void createInstanceFromRecipe(boolean isDev) throws Exception {
+    private void createInstanceFromRecipe() throws Exception {
         provider.startService(USER_NAME,
                               WORKSPACE_ID,
                               "env",
                               MACHINE_NAME,
-                              isDev,
+                              true,
                               "net",
                               createService(),
                               LineConsumer.DEV_NULL);
