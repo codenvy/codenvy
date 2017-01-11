@@ -34,8 +34,8 @@
        <suffixPattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</suffixPattern>
     </appender>
 <appender name="email" class="ch.qos.logback.classic.net.SMTPAppender">
-   <SMTPHost>localhost</SMTPHost>
-   <SMTPPort>25</SMTPPort>
+   <SMTPHost><%= scope.lookupvar('codenvy::codenvy_logback_smtp_host') %></SMTPHost>
+   <SMTPPort><%= scope.lookupvar('codenvy::codenvy_logback_smtp_port') %></SMTPPort>
    <SSL>false</SSL>
         <to><%= scope.lookupvar('codenvy::email_to').encode(:xml => :text) %></to>
         <from><%= scope.lookupvar('codenvy::email_from').encode(:xml => :text) %></from>
