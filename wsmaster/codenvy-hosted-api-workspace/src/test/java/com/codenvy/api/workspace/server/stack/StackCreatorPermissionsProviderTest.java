@@ -85,14 +85,14 @@ public class StackCreatorPermissionsProviderTest {
     public void shouldSubscribe() {
         permProvider.subscribe();
 
-        verify(eventService).subscribe(permProvider);
+        verify(eventService).subscribe(permProvider, StackPersistedEvent.class);
     }
 
     @Test
     public void shouldUnsubscribe() {
         permProvider.unsubscribe();
 
-        verify(eventService).unsubscribe(permProvider);
+        verify(eventService).unsubscribe(permProvider, StackPersistedEvent.class);
     }
 
     private static StackImpl createStack() {

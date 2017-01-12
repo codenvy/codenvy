@@ -125,6 +125,7 @@ public class JpaOrganizationDistributedResourcesDao implements OrganizationDistr
         OrganizationDistributedResourcesImpl distributedResources = manager.find(OrganizationDistributedResourcesImpl.class, id);
         if (distributedResources != null) {
             manager.remove(distributedResources);
+            manager.flush();
         }
     }
 
@@ -139,6 +140,7 @@ public class JpaOrganizationDistributedResourcesDao implements OrganizationDistr
             existingDistributedResources.getResources().clear();
             existingDistributedResources.getResources().addAll(distributedResources.getResources());
         }
+        manager.flush();
     }
 
     @Singleton

@@ -17,6 +17,7 @@ package com.codenvy.organization.api.event;
 import com.codenvy.organization.shared.model.Organization;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
 /**
  * Published after organization instance is persisted.
@@ -24,10 +25,10 @@ import org.eclipse.che.api.core.notification.EventOrigin;
  * @author Sergii Leschenko
  */
 @EventOrigin("organization")
-public class OrganizationPersistedEvent {
+public class PostOrganizationPersistedEvent extends PersistEvent {
     private final Organization organization;
 
-    public OrganizationPersistedEvent(Organization organization) {
+    public PostOrganizationPersistedEvent(Organization organization) {
         this.organization = organization;
     }
 

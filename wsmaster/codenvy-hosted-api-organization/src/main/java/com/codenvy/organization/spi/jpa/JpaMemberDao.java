@@ -27,7 +27,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -163,6 +163,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
                                           .getResultList();
         if (!members.isEmpty()) {
             manager.remove(members.get(0));
+            manager.flush();
         }
     }
 
@@ -186,7 +187,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
     @Singleton
     public static class RemoveMembersBeforeOrganizationRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -205,7 +206,7 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
         }
 
         @Override
-        public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             removeMembers(event.getOrganization().getId(), PAGE_SIZE);
         }
 

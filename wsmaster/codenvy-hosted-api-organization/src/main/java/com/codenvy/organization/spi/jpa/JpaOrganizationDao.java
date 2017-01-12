@@ -15,17 +15,18 @@
 package com.codenvy.organization.spi.jpa;
 
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.annotation.PostConstruct;
@@ -63,7 +64,6 @@ public class JpaOrganizationDao implements OrganizationDao {
         requireNonNull(organization, "Required non-null organization");
         try {
             doCreate(organization);
-            eventService.publish(new OrganizationPersistedEvent(organization));
         } catch (DuplicateKeyException e) {
             throw new ConflictException("Organization with such id or name already exists");
         } catch (RuntimeException x) {
@@ -147,9 +147,12 @@ public class JpaOrganizationDao implements OrganizationDao {
         }
     }
 
-    @Transactional
-    protected void doCreate(OrganizationImpl organization) {
-        managerProvider.get().persist(organization);
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
+    protected void doCreate(OrganizationImpl organization) throws ConflictException, ServerException {
+        EntityManager manager = managerProvider.get();
+        manager.persist(organization);
+        manager.flush();
+        eventService.publish(new PostOrganizationPersistedEvent(organization)).propagateException();
     }
 
     @Transactional
@@ -159,13 +162,15 @@ public class JpaOrganizationDao implements OrganizationDao {
             throw new NotFoundException(format("Couldn't update organization with id '%s' because it doesn't exist", update.getId()));
         }
         manager.merge(update);
+        manager.flush();
     }
 
-    @Transactional
-    protected void doRemove(String organizationId) {
+    @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+    protected void doRemove(String organizationId) throws ServerException {
         final EntityManager manager = managerProvider.get();
         final OrganizationImpl organization = manager.find(OrganizationImpl.class, organizationId);
         if (organization != null) {
+            eventService.publish(new BeforeOrganizationRemovedEvent(new OrganizationImpl(organization))).propagateException();
             manager.remove(organization);
             manager.flush();
         }
@@ -173,7 +178,7 @@ public class JpaOrganizationDao implements OrganizationDao {
 
     @Singleton
     public static class RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeOrganizationRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
         private static final int PAGE_SIZE = 100;
 
         @Inject
@@ -193,7 +198,7 @@ public class JpaOrganizationDao implements OrganizationDao {
         }
 
         @Override
-        public void onRemovalEvent(BeforeOrganizationRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
             removeSuborganizations(event.getOrganization().getId(), PAGE_SIZE);
         }
 

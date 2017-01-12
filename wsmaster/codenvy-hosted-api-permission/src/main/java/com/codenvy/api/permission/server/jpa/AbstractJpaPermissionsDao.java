@@ -113,12 +113,15 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
         } catch (NotFoundException n) {
             manager.persist(permissions);
         }
+        manager.flush();
     }
 
     @Transactional
     protected void doRemove(String userId, String instanceId) throws ServerException, NotFoundException {
         final T entity = getEntity(wildcardToNull(userId), instanceId);
-        managerProvider.get().remove(entity);
+        EntityManager manager = managerProvider.get();
+        manager.remove(entity);
+        manager.flush();
     }
 
     /**

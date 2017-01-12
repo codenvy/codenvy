@@ -87,14 +87,14 @@ public class RecipeCreatorPermissionsProviderTest {
     public void shouldSubscribe() {
         permProvider.subscribe();
 
-        verify(eventService).subscribe(permProvider);
+        verify(eventService).subscribe(permProvider, RecipePersistedEvent.class);
     }
 
     @Test
     public void shouldUnsubscribe() {
         permProvider.unsubscribe();
 
-        verify(eventService).unsubscribe(permProvider);
+        verify(eventService).unsubscribe(permProvider, RecipePersistedEvent.class);
     }
 
     private static RecipeImpl createRecipe() {

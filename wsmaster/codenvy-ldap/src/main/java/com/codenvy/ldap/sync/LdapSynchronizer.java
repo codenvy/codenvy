@@ -237,7 +237,7 @@ public class LdapSynchronizer {
                     userDao.remove(user.getId());
                     syncResult.removed++;
                     LOG.debug("Removed user '{}'", user.getId());
-                } catch (NotFoundException | ServerException | ConflictException x) {
+                } catch (NotFoundException | ServerException x) {
                     LOG.info(format("Couldn't remove user '%s' due to occurred error", linkingId), x);
                     syncResult.failed++;
                 }
