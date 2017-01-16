@@ -114,6 +114,16 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
                               .getResultList();
     }
 
+    @Override
+    public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
+        requireNonNull(userId, "User identifier required");
+        try {
+            doRemove(userId, instanceId);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
     @Singleton
     public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber
             extends CascadeEventSubscriber<BeforeUserRemovedEvent> {

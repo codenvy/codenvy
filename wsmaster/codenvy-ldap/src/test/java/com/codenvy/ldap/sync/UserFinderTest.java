@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Tests {@link DBUserFinder}.
+ * Tests {@link DBUserLinker}.
  *
  * @author Yevhenii Voevodin
  */
@@ -53,41 +53,45 @@ public class UserFinderTest {
     }
 
     @Test(dataProvider = "findsIdsProvider")
-    public void findsIds(BiFunction<UserDao, DBHelper, DBUserFinder> provider, String query) throws Exception {
-        final DBUserFinder finder = provider.apply(userDao, dbHelper);
+    public void findsIds(BiFunction<UserDao, DBHelper, DBUserLinker> provider, String query) throws Exception {
+        final DBUserLinker finder = provider.apply(userDao, dbHelper);
         final List<String> ids = Arrays.asList("id1", "id2");
         when(dbHelper.executeNativeQuery(query)).thenReturn(ids);
 
-        assertEquals(finder.findLinkingIds(), new HashSet<>(ids));
+        assertEquals(finder.findIds(), new HashSet<>(ids));
     }
 
     @Test(dataProvider = "findsUserProvider")
-    public void findsUser(BiFunction<UserDao, DBHelper, DBUserFinder> provider, BiConsumer<UserDao, UserImpl> mocker) throws Exception {
-        final DBUserFinder finder = provider.apply(userDao, dbHelper);
+    public void findsUser(BiFunction<UserDao, DBHelper, DBUserLinker> provider, BiConsumer<UserDao, UserImpl> mocker) throws Exception {
+        final DBUserLinker finder = provider.apply(userDao, dbHelper);
         final UserImpl user = new UserImpl("id", "id", "id");
         mocker.accept(userDao, user);
 
-        assertEquals(finder.findOne("id"), user);
+        assertEquals(finder.findUser("id"), user);
     }
 
     @Test(dataProvider = "extractsIdsProvider")
-    public void extractsIds(BiFunction<UserDao, DBHelper, DBUserFinder> provider, Function<UserImpl, String> idExtractor) {
-        final DBUserFinder finder = provider.apply(userDao, dbHelper);
+    public void extractsIds(BiFunction<UserDao, DBHelper, DBUserLinker> provider, Function<UserImpl, String> idExtractor) {
+        final DBUserLinker finder = provider.apply(userDao, dbHelper);
         final UserImpl user = new UserImpl("id", "email", "name");
 
-        assertEquals(finder.extractLinkingId(user), idExtractor.apply(user));
+        assertEquals(finder.extractId(user), idExtractor.apply(user));
     }
 
     @DataProvider
     private Object[][] findsIdsProvider() {
         return new Object[][] {
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newIdFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newIdLinker,
                         "SELECT id FROM Usr"
                 },
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newEmailFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newEmailLinker,
                         "SELECT email FROM Usr"
+                },
+                {
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newNameLinker,
+                        "SELECT name FROM Usr"
                 }
         };
     }
@@ -96,7 +100,7 @@ public class UserFinderTest {
     private Object[][] findsUserProvider() {
         return new Object[][] {
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newIdFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newIdLinker,
                         (BiConsumer<UserDao, UserImpl>)(userDao, user) -> {
                             try {
                                 when(userDao.getById(user.getId())).thenReturn(user);
@@ -106,10 +110,20 @@ public class UserFinderTest {
                         }
                 },
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newEmailFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newEmailLinker,
                         (BiConsumer<UserDao, UserImpl>)(userDao, user) -> {
                             try {
                                 when(userDao.getByEmail(user.getEmail())).thenReturn(user);
+                            } catch (Exception x) {
+                                throw new RuntimeException(x);
+                            }
+                        }
+                },
+                {
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newNameLinker,
+                        (BiConsumer<UserDao, UserImpl>)(userDao, user) -> {
+                            try {
+                                when(userDao.getByName(user.getName())).thenReturn(user);
                             } catch (Exception x) {
                                 throw new RuntimeException(x);
                             }
@@ -122,12 +136,16 @@ public class UserFinderTest {
     private Object[][] extractsIdsProvider() {
         return new Object[][] {
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newIdFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newIdLinker,
                         (Function<UserImpl, String>)UserImpl::getId
                 },
                 {
-                        (BiFunction<UserDao, DBHelper, DBUserFinder>)DBUserFinder::newEmailFinder,
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newEmailLinker,
                         (Function<UserImpl, String>)UserImpl::getEmail
+                },
+                {
+                        (BiFunction<UserDao, DBHelper, DBUserLinker>)DBUserLinker::newNameLinker,
+                        (Function<UserImpl, String>)UserImpl::getName
                 }
         };
     }
