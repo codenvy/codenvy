@@ -42,7 +42,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Size;
-import org.eclipse.che.commons.lang.concurrent.CloseableLock;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -115,7 +115,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                   NotFoundException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace);
@@ -130,7 +130,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                 ConflictException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace, attributes);
@@ -146,7 +146,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         WorkspaceImpl workspace = this.getWorkspace(workspaceId);
         String accountId = workspace.getAccount().getId();
 
-        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, workspace.getNamespace(), workspace.getConfig(), envName);
 
@@ -163,7 +163,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
 
         String accountId = accountManager.getByName(namespace).getId();
-        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, namespace, config, null);
@@ -182,7 +182,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         String accountId = workspace.getAccount().getId();
 
         // Workspace must not be updated while the manager checks it's resources to allow start
-        try (CloseableLock lock = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
             return super.updateWorkspace(id, update);
         }
     }

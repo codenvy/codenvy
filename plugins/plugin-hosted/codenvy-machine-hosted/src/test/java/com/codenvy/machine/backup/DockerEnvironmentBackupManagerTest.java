@@ -19,7 +19,9 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
@@ -120,25 +122,25 @@ public class DockerEnvironmentBackupManagerTest {
                                                                            USER_IN_CONTAINER};
 
     @Mock
-    private WorkspaceIdHashLocationFinder       workspaceIdHashLocationFinder;
+    private WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder;
     @Mock
-    private WorkspaceFolderPathProvider         workspaceFolderPathProvider;
+    private WorkspaceFolderPathProvider   workspaceFolderPathProvider;
     @Mock
-    private WorkspaceRuntimes                   workspaceRuntimes;
+    private DockerConnector               docker;
     @Mock
-    private DockerConnector                     docker;
+    private WorkspaceImpl                 workspace;
     @Mock
-    private WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor;
+    private WorkspaceRuntimeImpl          workspaceRuntime;
     @Mock
-    private WorkspaceRuntimeImpl                workspaceRuntime;
+    private MachineImpl                   devMachine;
     @Mock
-    private MachineImpl                         devMachine;
+    private DockerInstance                dockerInstance;
     @Mock
-    private DockerInstance                      dockerInstance;
+    private DockerNode                    dockerNode;
     @Mock
-    private DockerNode                          dockerNode;
+    private MachineRuntimeInfoImpl        machineRuntimeInfo;
     @Mock
-    private MachineRuntimeInfoImpl              machineRuntimeInfo;
+    private WorkspaceManager              workspaceManager;
 
     @Captor
     private ArgumentCaptor<String[]> cmdCaptor;
@@ -157,15 +159,15 @@ public class DockerEnvironmentBackupManagerTest {
                                                                workspaceIdHashLocationFinder,
                                                                SYNC_STRATEGY,
                                                                PROJECTS_PATH_IN_CONTAINER,
-                                                               workspaceRuntimes,
+                                                               workspaceManager,
                                                                workspaceFolderPathProvider,
                                                                docker));
 
-        when(workspaceRuntimes.get(anyString())).thenReturn(runtimeDescriptor);
-        when(runtimeDescriptor.getRuntime()).thenReturn(workspaceRuntime);
+        when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
+        when(workspace.getRuntime()).thenReturn(workspaceRuntime);
         when(workspaceRuntime.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getStatus()).thenReturn(MachineStatus.RUNNING);
-        when(workspaceRuntimes.getMachine(anyString(), anyString())).thenReturn(dockerInstance);
+        when(workspaceManager.getMachineInstance(anyString(), anyString())).thenReturn(dockerInstance);
         when(dockerInstance.getNode()).thenReturn(dockerNode);
         when(dockerNode.getHost()).thenReturn(NODE_HOST);
         when(dockerInstance.getContainer()).thenReturn(CONTAINER_ID);
@@ -260,11 +262,11 @@ public class DockerEnvironmentBackupManagerTest {
         backupManager.backupWorkspace(WORKSPACE_ID);
 
         verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString());
-        verify(workspaceRuntimes).get(eq(WORKSPACE_ID));
+        verify(workspaceManager).getWorkspace(eq(WORKSPACE_ID));
         verifyNoMoreInteractions(docker,
                                  dockerInstance,
                                  dockerNode,
-                                 workspaceRuntimes,
+                                 workspaceManager,
                                  machineRuntimeInfo,
                                  workspaceFolderPathProvider,
                                  workspaceIdHashLocationFinder);
@@ -281,7 +283,7 @@ public class DockerEnvironmentBackupManagerTest {
     @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "test exception")
     public void shouldNotBackupWSIfDevMachineStatusIsNotFoundInWSRuntimes() throws Exception {
         injectWorkspaceLock(WORKSPACE_ID);
-        when(workspaceRuntimes.getMachine(anyString(), anyString())).thenThrow(new NotFoundException("test exception"));
+        when(workspaceManager.getMachineInstance(anyString(), anyString())).thenThrow(new NotFoundException("test exception"));
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
@@ -440,7 +442,8 @@ public class DockerEnvironmentBackupManagerTest {
             backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
                                                  CONTAINER_ID,
                                                  NODE_HOST);
-        } catch (ServerException ignore) {}
+        } catch (ServerException ignore) {
+        }
 
         // when
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
@@ -460,7 +463,8 @@ public class DockerEnvironmentBackupManagerTest {
                                                  CONTAINER_ID,
                                                  NODE_HOST);
             fail("Restore should not be performed while backup is in progress");
-        } catch (ServerException ignore) {}
+        } catch (ServerException ignore) {
+        }
 
         backupFreezer.unfreeze();
         awaitFinalization();
@@ -642,8 +646,9 @@ public class DockerEnvironmentBackupManagerTest {
      * Runs processes to do specified task simultaneously and wait until they finish.
      *
      * @param task
-     *        specifies task which will be run
-     * @throws InterruptedException if waiting in this method is interrupted
+     *         specifies task which will be run
+     * @throws InterruptedException
+     *         if waiting in this method is interrupted
      */
     private void executeTaskNTimesSimultaneouslyWithBarrier(Runnable task) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(5);
@@ -662,10 +667,11 @@ public class DockerEnvironmentBackupManagerTest {
      * Runs given tasks simultaneously and wait until they finish.
      *
      * @param tasks
-     *        tasks to run
-     * @throws InterruptedException if waiting in this method is interrupted
+     *         tasks to run
+     * @throws InterruptedException
+     *         if waiting in this method is interrupted
      */
-    private void executeTasksSimultaneouslyWithBarrier(Runnable ... tasks) throws InterruptedException {
+    private void executeTasksSimultaneouslyWithBarrier(Runnable... tasks) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(tasks.length);
 
         for (Runnable task : tasks) {
@@ -725,7 +731,7 @@ public class DockerEnvironmentBackupManagerTest {
             Field locks = DockerEnvironmentBackupManager.class.getDeclaredField("workspacesBackupLocks");
             locks.setAccessible(true);
             @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
-            ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
+                    ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
                     (ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager);
             workspacesBackupLocks.put(workspaceId, new ReentrantLock());
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -746,7 +752,7 @@ public class DockerEnvironmentBackupManagerTest {
             Field locks = DockerEnvironmentBackupManager.class.getDeclaredField("workspacesBackupLocks");
             locks.setAccessible(true);
             @SuppressWarnings("unchecked") // field workspacesBackupLocks newer change its type
-            ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
+                    ConcurrentHashMap<String, ReentrantLock> workspacesBackupLocks =
                     (ConcurrentHashMap<String, ReentrantLock>)locks.get(backupManager);
             lock = workspacesBackupLocks.get(workspaceId);
             if (lock != null) {
