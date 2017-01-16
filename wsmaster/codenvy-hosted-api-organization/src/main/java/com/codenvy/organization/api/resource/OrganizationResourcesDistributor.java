@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -29,7 +29,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.lang.concurrent.CloseableLock;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -106,7 +106,7 @@ public class OrganizationResourcesDistributor {
         // locking resources by suborganization should lock resources whole organization tree
         // so we can check resource availability for suborganization and parent organization
         // TODO Rework it to using resourcesLocks.acquiresLock(suborganizationId, parentOrganizationId) when it will be implemented
-        try (CloseableLock lock = resourcesLocks.acquiresLock(suborganizationId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(suborganizationId)) {
             checkResourcesAvailability(suborganizationId,
                                        getDistributionOrganization(suborganizationId),
                                        getDistributedResources(suborganizationId),
@@ -177,7 +177,7 @@ public class OrganizationResourcesDistributor {
                                                     ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
 
-        try (CloseableLock lock = resourcesLocks.acquiresLock(organizationId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(organizationId)) {
             checkResourcesAvailability(organizationId,
                                        getDistributionOrganization(organizationId),
                                        getDistributedResources(organizationId),

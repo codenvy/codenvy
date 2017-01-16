@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -94,6 +94,11 @@ public class SystemPermissionsDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowExceptionWhenGetPermissionsUserIdArgumentIsNull() throws Exception {
         dao.get(null, "instance");
+    }
+
+    @Test
+    public void doesNotThrowNpeWhenInstanceIsNull() throws Exception {
+        dao.get(users[0].getId(), null);
     }
 
     @Test

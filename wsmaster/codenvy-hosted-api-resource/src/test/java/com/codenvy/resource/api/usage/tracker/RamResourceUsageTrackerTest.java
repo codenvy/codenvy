@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -42,6 +42,7 @@ import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -87,7 +88,7 @@ public class RamResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString()))
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
         Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
@@ -100,7 +101,7 @@ public class RamResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString()))
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.RUNNING, 1000, 500, 500)));
 
         Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
@@ -111,7 +112,7 @@ public class RamResourceUsageTrackerTest {
         assertEquals(usedRam.getAmount(), 2000L);
         assertEquals(usedRam.getUnit(), RamResourceType.UNIT);
         verify(accountManager).getById(eq("account123"));
-        verify(workspaceManager).getByNamespace(eq("testAccount"));
+        verify(workspaceManager).getByNamespace(eq("testAccount"), eq(true));
     }
 
     @Test
@@ -119,14 +120,14 @@ public class RamResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString()))
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
         Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
         assertFalse(usedRamOpt.isPresent());
         verify(accountManager).getById(eq("account123"));
-        verify(workspaceManager).getByNamespace(eq("testAccount"));
+        verify(workspaceManager).getByNamespace(eq("testAccount"), eq(true));
     }
 
     /** Creates users workspace object based on the status and machines RAM. */

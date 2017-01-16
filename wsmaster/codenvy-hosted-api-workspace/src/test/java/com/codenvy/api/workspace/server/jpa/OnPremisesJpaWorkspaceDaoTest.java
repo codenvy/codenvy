@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -41,15 +41,9 @@ import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -136,7 +130,6 @@ public class OnPremisesJpaWorkspaceDaoTest {
     }
 
     private class TestModule extends AbstractModule {
-
         @Override
         protected void configure() {
             bind(JpaStackDao.class).to(OnPremisesJpaStackDao.class);

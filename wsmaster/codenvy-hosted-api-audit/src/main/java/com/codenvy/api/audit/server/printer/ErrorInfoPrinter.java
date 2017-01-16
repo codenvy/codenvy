@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -12,26 +12,31 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.organization.api.event;
+package com.codenvy.api.audit.server.printer;
 
-import com.codenvy.organization.shared.model.Organization;
+import org.eclipse.che.api.core.ServerException;
 
-import org.eclipse.che.api.core.notification.EventOrigin;
+import java.nio.file.Path;
 
 /**
- * Published after organization instance is persisted.
+ * Prints error in format:
+ * [ERROR] <error text>!
  *
- * @author Sergii Leschenko
+ * @author Dmytro Nochevnov
  */
-@EventOrigin("organization")
-public class OrganizationPersistedEvent {
-    private final Organization organization;
+public class ErrorInfoPrinter extends Printer {
 
-    public OrganizationPersistedEvent(Organization organization) {
-        this.organization = organization;
+    private String error;
+
+    public ErrorInfoPrinter(Path auditReport, String error) {
+        super(auditReport);
+
+        this.error = error;
     }
 
-    public Organization getOrganization() {
-        return organization;
+    @Override
+    public void print() throws ServerException {
+        printError(error);
     }
+
 }

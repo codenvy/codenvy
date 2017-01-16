@@ -4,7 +4,9 @@ Cloud workspaces for development teams. One-click Docker environments to create 
 ![Eclipse Che](https://www.eclipse.org/che/images/banner@2x.png "Eclipse Che")
 
 ### Getting Started
-You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. The [docs will get you going](https://github.com/codenvy/codenvy/tree/master/docs/_docs/admin-guide). Quick start:
+You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. 
+
+The [docs are awesome](https://github.com/codenvy/codenvy/tree/master/docs/_docs/admin-guide). Or, quick start:
 
 ```
 docker run codenvy/cli:nightly start
@@ -14,7 +16,7 @@ The `codenvy` repository is where we do development. Your license grants you acc
 
 - [Submit bugs and feature requests](http://github.com/codenvy/codenvy/issues) and help us verify them
 - Review [source code changes](http://github.com/codenvy/codenvy/pulls)
-- [Review the docs](https://github.com/codenvy/codenvy/docs/README.md) and make improvements
+- [Review the docs](https://codenvy.com/docs/) and make improvements
 
 ### License
 Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf) that includes premium support.

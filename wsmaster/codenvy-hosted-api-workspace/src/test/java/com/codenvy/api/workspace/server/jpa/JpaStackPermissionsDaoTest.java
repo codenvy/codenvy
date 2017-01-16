@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
@@ -50,7 +49,7 @@ public class JpaStackPermissionsDaoTest {
 
     private JpaStackPermissionsDao dao;
 
-    private JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber removePermissionsBeforeStackRemovedEventSubscriber;
+    private JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber removePermissionsSubscriber;
 
     private StackPermissionsImpl[] permissions;
     private UserImpl[]             users;
@@ -74,8 +73,7 @@ public class JpaStackPermissionsDaoTest {
         Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaWorkspaceModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(JpaStackPermissionsDao.class);
-        removePermissionsBeforeStackRemovedEventSubscriber =
-                injector.getInstance(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
+        removePermissionsSubscriber = injector.getInstance(JpaStackPermissionsDao.RemovePermissionsBeforeStackRemovedEventSubscriber.class);
     }
 
     @BeforeMethod
@@ -121,9 +119,9 @@ public class JpaStackPermissionsDaoTest {
     }
 
     @Test
-    public void shouldStackPermissionsWhenStackIsRemoved() throws Exception {
+    public void shouldRemoveStackPermissionsWhenStackIsRemoved() throws Exception {
         BeforeStackRemovedEvent event = new BeforeStackRemovedEvent(stacks[0]);
-        removePermissionsBeforeStackRemovedEventSubscriber.onEvent(event);
+        removePermissionsSubscriber.onEvent(event);
         assertTrue(dao.getByInstance("stack1", 30, 0).isEmpty());
     }
 

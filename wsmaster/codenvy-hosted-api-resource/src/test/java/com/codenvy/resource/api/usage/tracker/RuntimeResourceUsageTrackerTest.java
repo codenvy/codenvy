@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -82,7 +83,7 @@ public class RuntimeResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString())).thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED)));
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean())).thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED)));
 
         Optional<ResourceImpl> usedRuntimesOpt = runtimeResourceUsageTracker.getUsedResource("account123");
 
@@ -94,7 +95,7 @@ public class RuntimeResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString()))
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(Stream.of(WorkspaceStatus.values())
                                   .map(RuntimeResourceUsageTrackerTest::createWorkspace)
                                   .collect(Collectors.toList()));
@@ -107,7 +108,7 @@ public class RuntimeResourceUsageTrackerTest {
         assertEquals(usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); //except stopped workspaces
         assertEquals(usedRuntimes.getUnit(), RuntimeResourceType.UNIT);
         verify(accountManager).getById(eq("account123"));
-        verify(workspaceManager).getByNamespace(eq("testAccount"));
+        verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
     }
 
     /** Creates users workspace object based on the status. */

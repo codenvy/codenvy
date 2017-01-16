@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -45,6 +45,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
 
 /**
  * Test util class, helps to create test objects.
@@ -112,14 +113,11 @@ public final class TestObjects {
         final WorkspaceImpl workspace = createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams);
         final String envName = workspace.getConfig().getDefaultEnv();
         EnvironmentImpl env = workspace.getConfig().getEnvironments().get(envName);
-        Map.Entry<String, ExtendedMachineImpl> devMachine = env.getMachines()
-                                                               .entrySet()
-                                                               .stream()
-                                                               .filter(entry -> entry.getValue().getAgents() != null &&
-                                                                                entry.getValue().getAgents()
-                                                                                     .contains("org.eclipse.che.ws-agent"))
-                                                               .findAny()
-                                                               .get();
+        String devMachineName = getDevMachineName(env);
+        if (devMachineName == null) {
+            throw new Exception("ws-machine is not found");
+        }
+        ExtendedMachineImpl devMachine = env.getMachines().get(devMachineName);
         final WorkspaceRuntimeImpl runtime =
                 new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv(),
                                          null,
@@ -128,14 +126,14 @@ public final class TestObjects {
                                             .map(entry -> createMachine(workspace.getId(),
                                                                         envName,
                                                                         entry.getKey(),
-                                                                        devMachine.getKey().equals(entry.getKey()),
+                                                                        devMachineName.equals(entry.getKey()),
                                                                         entry.getValue().getAttributes().get("memoryLimitBytes")))
                                             .collect(toList()),
                                          createMachine(workspace.getId(),
                                                        envName,
-                                                       devMachine.getKey(),
+                                                       devMachineName,
                                                        true,
-                                                       devMachine.getValue().getAttributes().get("memoryLimitBytes")));
+                                                       devMachine.getAttributes().get("memoryLimitBytes")));
         workspace.setStatus(RUNNING);
         workspace.setRuntime(runtime);
         return workspace;

@@ -44,7 +44,6 @@ get_display_url() {
   fi
 }
 
-
 cmd_backup_extra_args() {
   # if windows we backup data volume
   if has_docker_for_windows_client; then
@@ -115,39 +114,53 @@ cmd_init_reinit_pre_action() {
 cmd_start_check_ports() {
 
   # If dev mode is on, then we also need to check the debug port set by the user for availability
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if debug_server; then
     USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" alpine sh -c 'echo $CODENVY_DEBUG_PORT')
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
       # If the user has not set a debug port, then use the default
       CODENVY_DEBUG_PORT=8000
+      CHE_DEBUG_PORT=8000
     else 
       # Otherwise, this is the value set by the user
       CODENVY_DEBUG_PORT=$USER_DEBUG_PORT
+      CHE_DEBUG_PORT=$USER_DEBUG_PORT
     fi
   fi
 
+  PORT_BREAK="no" 
   text   "         port 80 (http):        $(port_open 80 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   text   "         port 443 (https):      $(port_open 443 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 5000 (registry):  $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   text   "         port 2181 (zookeeper): $(port_open 2181 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  text   "         port 5000 (registry):  $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  text   "         port 23750 (socat):    $(port_open 23750 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  text   "         port 23751 (swarm):    $(port_open 23751 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  text   "         port 32001 (jmx):      $(port_open 32001 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  text   "         port 32101 (jmx):      $(port_open 32101 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  if debug_server; then
     text   "         port ${CODENVY_DEBUG_PORT} (debug):     $(port_open ${CODENVY_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
     text   "         port 9000 (lighttpd):  $(port_open 9000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
   fi
 
-  if ! $(port_open 80) || ! $(port_open 443) || ! $(port_open 5000); then
-    echo ""
-    error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-    return 1;
+  if ! $(port_open 80) || \
+     ! $(port_open 443) || \
+     ! $(port_open 2181) || \
+     ! $(port_open 5000) || \
+     ! $(port_open 23750) || \
+     ! $(port_open 23751) || \
+     ! $(port_open 32001) || \
+     ! $(port_open 32101); then
+     echo ""
+     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
+     return 2;
   fi
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
-    if ! $(port_open ${CODENVY_DEBUG_PORT}); then
+  if debug_server; then
+    if ! $(port_open ${CODENVY_DEBUG_PORT}) || ! $(port_open 9000); then
       echo ""
       error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
       return 1;
     fi
-  fi
+  fi  
 }
 
 cmd_config_post_action() {
@@ -175,7 +188,7 @@ cmd_config_post_action() {
     docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
   fi
 
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
+  if local_repo; then
     # copy workspace agent assembly to instance folder
     if [[ ! -f $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${WS_AGENT_IN_REPO}) ]]; then
       warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} workspace agent assembly."
@@ -208,50 +221,56 @@ generate_configuration_with_puppet() {
     CODENVY_ENV_FILE="${CHE_HOST_INSTANCE}/config/codenvy/$CHE_MINI_PRODUCT_NAME.env"
   fi
 
-  if [ "${CHE_DEVELOPMENT_MODE}" = "on" ]; then
-  # Note - bug in docker requires relative path for env, not absolute
-  GENERATE_CONFIG_COMMAND="docker_run \
-                  --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
-                  --env-file=/version/$CHE_VERSION/images \
-                  -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
-                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro \
-                  -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro \
-                  -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
-                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
-                  -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
-                  -e \"CHE_ENVIRONMENT=development\" \
-                  -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
-                  -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
-                  -e \"CHE_DEVELOPMENT_REPO=${CHE_HOST_DEVELOPMENT_REPO}\" \
-                  -e \"PATH_TO_CHE_ASSEMBLY=${CHE_ASSEMBLY}\" \
-                  -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}\" \
-                  -e \"PATH_TO_TERMINAL_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${TERMINAL_AGENT_ASSEMBLY}\" \
-                  --entrypoint=/usr/bin/puppet \
-                      $IMAGE_INIT \
-                          apply --modulepath \
-                                /etc/puppet/modules/ \
-                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff"
+  if debug_server; then
+    CHE_ENVIRONMENT="development"
+    WRITE_LOGS=""
   else
+    CHE_ENVIRONMENT="production"
+    WRITE_LOGS=">> \"${LOGS}\""
+  fi
+
+  if local_repo; then
+    CHE_REPO="on"
+    WRITE_PARAMETERS=" -e \"PATH_TO_CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+    WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}\""
+    WRITE_PARAMETERS+=" -e \"PATH_TO_TERMINAL_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${TERMINAL_AGENT_ASSEMBLY}\""
+
+    # add local mounts only if they are present
+    if [[ -d "/repo/dockerfiles/init/manifests" ]]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/manifests\":/etc/puppet/manifests:ro"
+    fi
+    if [[ -d "/repo/dockerfiles/init/modules" ]]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/modules\":/etc/puppet/modules:ro"
+    fi
+
+    # Handle override/addon
+    if [[ -d "/repo/dockerfiles/init/addon/" ]]; then
+      WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
+    fi
+  else
+    CHE_REPO="off"
+    WRITE_PARAMETERS=""
+  fi
+
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
                   -v \"${CHE_HOST_INSTANCE}\":/opt/${CHE_MINI_PRODUCT_NAME}:rw \
+                  ${WRITE_PARAMETERS} \
                   -e \"POSTGRES_ENV_FILE=${POSTGRES_ENV_FILE}\" \
-                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
                   -e \"CODENVY_ENV_FILE=${CODENVY_ENV_FILE}\" \
-                  -e \"CHE_ENVIRONMENT=production\" \
+                  -e \"CHE_CONTAINER_ROOT=${CHE_CONTAINER_ROOT}\" \
+                  -e \"CHE_ENVIRONMENT=${CHE_ENVIRONMENT}\" \
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
+                  -e \"CHE_REPO=${CHE_REPO}\" \
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
                                 /etc/puppet/modules/ \
-                                /etc/puppet/manifests/${CHE_MINI_PRODUCT_NAME}.pp --show_diff >> \"${LOGS}\""
-  fi
+                                /etc/puppet/manifests/ --show_diff ${WRITE_LOGS}"
 
   log ${GENERATE_CONFIG_COMMAND}
   eval ${GENERATE_CONFIG_COMMAND}
 }
-
-
 

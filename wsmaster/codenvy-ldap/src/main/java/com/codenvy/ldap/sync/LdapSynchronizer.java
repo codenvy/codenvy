@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -95,7 +95,7 @@ public class LdapSynchronizer {
     private final ScheduledExecutorService         scheduler;
     private final AtomicBoolean                    isSyncing;
     private final LdapUserIdNormalizer             idNormalizer;
-    private final DBUserFinder                     userFinder;
+    private final DBUserLinker                     linker;
 
     /**
      * Creates an instance of synchronizer.
@@ -136,7 +136,7 @@ public class LdapSynchronizer {
      * @param removeIfMissing
      *         whether remove those users who are present in persistence layer while missing
      *         from ldap storage
-     * @param userFinder
+     * @param userLinker
      *         gets database users and their attributes
      */
     @Inject
@@ -154,7 +154,7 @@ public class LdapSynchronizer {
                             @Named("ldap.sync.profile.attrs") @Nullable Pair<String, String>[] profileAttributes,
                             @Named("ldap.sync.update_if_exists") boolean updateIfExists,
                             @Named("ldap.sync.remove_if_missing") boolean removeIfMissing,
-                            DBUserFinder userFinder) {
+                            DBUserLinker userLinker) {
         if (initDelayMs < 0) {
             throw new IllegalArgumentException("'ldap.sync.initial_delay_ms' must be >= 0, the actual value is " + initDelayMs);
         }
@@ -170,7 +170,7 @@ public class LdapSynchronizer {
         this.isSyncing = new AtomicBoolean(false);
         this.updateIfExists = updateIfExists;
         this.removeIfMissing = removeIfMissing;
-        this.userFinder = userFinder;
+        this.linker = userLinker;
         this.scheduler = Executors.newScheduledThreadPool(1,
                                                           new ThreadFactoryBuilder().setNameFormat("LdapSynchronizer-%d")
                                                                                     .setUncaughtExceptionHandler(
@@ -205,21 +205,24 @@ public class LdapSynchronizer {
     public SyncResult syncAll() throws LdapException, SyncException {
         LOG.info("Preparing synchronization environment");
         final SyncResult syncResult = new SyncResult();
-        final Set<String> linkingIds = userFinder.findLinkingIds();
+        final Set<String> linkingIds = linker.findIds();
         LOG.debug("Using selector {} for synchronization", selector);
         LOG.info("Starting synchronization of users/profiles");
         try (Connection connection = connFactory.getConnection()) {
             connection.open();
-            long iteration = 0;
             for (LdapEntry entry : selector.select(connection)) {
-                iteration++;
+                syncResult.fetched++;
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Synchronizing entry: {}", entry);
+                }
 
                 syncFetched(entry, linkingIds, syncResult);
 
                 // Each EACH_ENTRIES_COUNT_CHECK_INTERRUPTION synchronized entries check whether thread wasn't interrupted
                 // if it was - stop the synchronization, all the users who were not synchronized
                 // will be synchronized with the next synchronization
-                if (iteration % EACH_ENTRIES_COUNT_CHECK_INTERRUPTION == 0) {
+                if (syncResult.fetched % EACH_ENTRIES_COUNT_CHECK_INTERRUPTION == 0) {
                     if (Thread.currentThread().isInterrupted()) {
                         LOG.warn("User/Profile synchronization was interrupted");
                         LOG.info("Synchronization result: {}", syncResult);
@@ -233,11 +236,11 @@ public class LdapSynchronizer {
             LOG.info("Removing users missing from ldap storage, users to remove '{}'", linkingIds.size());
             for (String linkingId : linkingIds) {
                 try {
-                    final User user = userFinder.findOne(linkingId);
+                    final User user = linker.findUser(linkingId);
                     userDao.remove(user.getId());
                     syncResult.removed++;
                     LOG.debug("Removed user '{}'", user.getId());
-                } catch (NotFoundException | ServerException | ConflictException x) {
+                } catch (NotFoundException | ServerException x) {
                     LOG.info(format("Couldn't remove user '%s' due to occurred error", linkingId), x);
                     syncResult.failed++;
                 }
@@ -260,7 +263,7 @@ public class LdapSynchronizer {
 
         final ProfileImpl ldapProfile = profileMapper.apply(entry);
         try {
-            final String linkingId = userFinder.extractLinkingId(ldapUser);
+            final String linkingId = linker.extractId(ldapUser);
             if (!linkingIds.remove(linkingId)) {
                 createUserAndProfile(ldapUser, ldapProfile);
                 syncResult.created++;
@@ -274,8 +277,18 @@ public class LdapSynchronizer {
                 return;
             }
 
-            final User dbUser = userFinder.findOne(linkingId);
-            final Profile dbProfile = profileDao.getById(dbUser.getId());
+            final User dbUser = linker.findUser(linkingId);
+            final ProfileImpl dbProfile = profileDao.getById(dbUser.getId());
+            // user identifier in database is always 'id', which means
+            // that if linking attribute is different from 'id' then
+            // update may update the different user entity or fail.
+            // e.g.
+            // ldapUser.id    = "user123" !=  dbUser.id    = "123user"
+            // ldapUser.email = "m@m.com" ==  dbUser.email = "m@m.com"
+            // linking_attribute = 'email' update will fail with not found exception
+            //
+            // always use db id for user
+            ldapUser.setId(dbUser.getId());
             if (updateUserAndProfile(dbUser, dbProfile, ldapUser, ldapProfile)) {
                 syncResult.updated++;
                 LOG.debug("Updated user & profile '{}'", ldapUser.getId());
@@ -375,7 +388,7 @@ public class LdapSynchronizer {
         }
         if (user.getEmail() == null) {
             LOG.warn(format("Cannot find out user's email. Please, check configuration `%s` parameter correctness.",
-                            USER_NAME_ATTRIBUTE_NAME));
+                            USER_EMAIL_ATTRIBUTE_NAME));
             return false;
         }
         return true;
@@ -390,6 +403,7 @@ public class LdapSynchronizer {
         private long failed;
         private long upToDate;
         private long skipped;
+        private long fetched;
 
         /** How many users where removed. */
         public long getRemoved() {
@@ -425,6 +439,13 @@ public class LdapSynchronizer {
         }
 
         /**
+         * How many users were fetched from ldap storage.
+         */
+        public long getFetched() {
+            return fetched;
+        }
+
+        /**
          * How many synchronization attempts were performed
          * or how many ldap users were processed.
          */
@@ -440,14 +461,16 @@ public class LdapSynchronizer {
                           "removed = '%d', " +
                           "failed = '%d', " +
                           "up-to-date = '%d', " +
-                          "skipped = '%d'",
+                          "skipped = '%d', " +
+                          "fetched = '%d'",
                           getProcessed(),
                           created,
                           updated,
                           removed,
                           failed,
                           upToDate,
-                          skipped);
+                          skipped,
+                          fetched);
         }
     }
 

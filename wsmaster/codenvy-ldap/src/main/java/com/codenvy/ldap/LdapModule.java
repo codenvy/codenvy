@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -22,8 +22,8 @@ import com.codenvy.ldap.sync.LdapEntrySelector;
 import com.codenvy.ldap.sync.LdapEntrySelectorProvider;
 import com.codenvy.ldap.sync.LdapSynchronizer;
 import com.codenvy.ldap.sync.LdapSynchronizerService;
-import com.codenvy.ldap.sync.DBUserFinder;
-import com.codenvy.ldap.sync.DBUserFinderProvider;
+import com.codenvy.ldap.sync.DBUserLinker;
+import com.codenvy.ldap.sync.DBUserLinkerProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
@@ -52,7 +52,7 @@ public class LdapModule extends AbstractModule {
 
         bind(EntryResolver.class).toProvider(EntryResolverProvider.class);
 
-        bind(DBUserFinder.class).toProvider(DBUserFinderProvider.class);
+        bind(DBUserLinker.class).toProvider(DBUserLinkerProvider.class);
         bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
         bind(LdapSynchronizer.class).asEagerSingleton();
         bind(LdapSynchronizerService.class);

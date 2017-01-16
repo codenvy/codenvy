@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -30,6 +30,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -83,6 +84,7 @@ public class MachineTokenInterceptorTest {
                 bind(AccountDao.class).toInstance(mock(AccountDao.class));
                 bindConstant().annotatedWith(Names.named("che.workspace.auto_restore")).to(false);
                 bindConstant().annotatedWith(Names.named("che.workspace.auto_snapshot")).to(false);
+                bind(WorkspaceSharedPool.class).toInstance(new WorkspaceSharedPool("cached", null, null));
                 bind(WorkspaceManager.class);
                 bind(SnapshotDao.class).toInstance(mock(SnapshotDao.class));
                 bind(WorkspaceFilesCleaner.class).toInstance(workspaceFilesCleaner);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-     [2012] - [2016] Codenvy, S.A.
+     [2012] - [2017] Codenvy, S.A.
      All Rights Reserved.
 
     NOTICE:  All information contained herein is, and remains
@@ -20,11 +20,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-assembly-parent</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>5.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises :: Parent</name>
     <modules>
@@ -47,9 +47,10 @@
     </scm>
     <properties>
         <aws.java.sdk.version>1.11.22</aws.java.sdk.version>
-        <che.lib.version>5.0.0-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-SNAPSHOT</che.version>
+        <che.lib.version>5.1.0-SNAPSHOT</che.lib.version>
+        <che.version>5.1.0-SNAPSHOT</che.version>
         <codenvy.analytics.version>3.13.4</codenvy.analytics.version>
+        <codenvy.docs.version>5.1.0-SNAPSHOT</codenvy.docs.version>
         <com.braintreepayments.gateway.version>2.39.2</com.braintreepayments.gateway.version>
         <com.codahale.metrics.version>3.0.2</com.codahale.metrics.version>
         <com.dumbster.version>1.7.1</com.dumbster.version>
@@ -152,7 +153,7 @@
             <dependency>
                 <groupId>com.codenvy.docs</groupId>
                 <artifactId>codenvy-docs</artifactId>
-                <version>${project.version}</version>
+                <version>${codenvy.docs.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
@@ -841,14 +842,14 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>exec-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>zip</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>exec-agent</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>zip</type>
                 <classifier>linux_arm7</classifier>
             </dependency>

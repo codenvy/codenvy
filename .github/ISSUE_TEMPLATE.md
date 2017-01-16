@@ -1,23 +1,14 @@
-[Short description of problem here]
+<!--- 
+Replace this comment with a description of the problem.
+Please help us by providing all requested diagnostics. A complete request with diagnostics is very helpful. 
+--> 
 
 **Reproduction Steps:**
 
-[First Step]
-[Second Step]
-[Other Steps...]
+**Codenvy version:**    <!--- In the dashboard or if on-prem retrieve by 'docker run codenvy/cli version' -->
 
-**Expected behavior:**
+**OS and version:**    
 
-[Describe expected behavior here]
+**Docker version:** <!--- Use 'docker version' to get the client and engine versions -->   
 
-**Observed behavior:**
-
-[Describe observed behavior here]
-
-**Codenvy version:** [Enter Codenvy version here]
-**OS and version:** [Enter OS name and version here]
-**Browser version:** [Enter browser name and version here]
-
-**Other questions:**
-Problem happens at codenvy.io or with the installed Codenvy Enterprise?: 
-Problem can be reliably reproduced: [Yes / No - it's random]
+**Codenvy cli.log output:**  <!--- This file is in the path mounted to `:/data` (for on-prem installs) -->

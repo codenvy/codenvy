@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-     [2012] - [2016] Codenvy, S.A.
+     [2012] - [2017] Codenvy, S.A.
      All Rights Reserved.
 
     NOTICE:  All information contained herein is, and remains
@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-hosted-integration-tests</artifactId>
         <groupId>com.codenvy.integration.tests</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-integration-tck-jpa</artifactId>
     <packaging>jar</packaging>
@@ -176,6 +176,11 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-sql-schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

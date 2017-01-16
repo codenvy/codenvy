@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -114,9 +114,19 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
                               .getResultList();
     }
 
+    @Override
+    public void remove(String userId, String instanceId) throws ServerException, NotFoundException {
+        requireNonNull(userId, "User identifier required");
+        try {
+            doRemove(userId, instanceId);
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
     @Singleton
     public static class RemoveSystemPermissionsBeforeUserRemovedEventSubscriber
-            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
+            extends CascadeEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -133,7 +143,7 @@ public class JpaSystemPermissionsDao extends AbstractJpaPermissionsDao<SystemPer
         }
 
         @Override
-        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+        public void onCascadeEvent(BeforeUserRemovedEvent event) throws Exception {
             for (SystemPermissionsImpl permissions : dao.getByUser(event.getUser().getId())) {
                 dao.remove(permissions.getUserId(), permissions.getInstanceId());
             }

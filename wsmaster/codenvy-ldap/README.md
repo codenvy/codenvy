@@ -172,8 +172,8 @@ integer value, if it is set to _0_ then synchronization will be performed immedi
 on sever startup.
 
 - __ldap.sync.user_linking_attribute__ _(optional)_ - what attribute to use
-  for linking ldap users and database users. Possible value are: _id_, _email_.
-If this attribute is not configured _id_ will be used
+  for linking ldap users and database users. Possible value are: _id_, _email_, _name_.
+If this attribute is not configured _id_ is used
 
 - __ldap.sync.remove_if_missing__ - whether to remove those users who are present
  in LDAP cache but missing from LDAP storage

@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -18,19 +18,14 @@ import com.codenvy.api.permission.server.PermissionsManager;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
-import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Singleton;
-
-import static java.lang.String.format;
 
 /**
  * Grants access to stack which is created by user who is {@link EnvironmentContext#getSubject() subject},
@@ -40,41 +35,31 @@ import static java.lang.String.format;
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class StackCreatorPermissionsProvider implements EventSubscriber<StackPersistedEvent> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(StackCreatorPermissionsProvider.class);
+public class StackCreatorPermissionsProvider extends CascadeEventSubscriber<StackPersistedEvent> {
 
     @Inject
-    private PermissionsManager permManager;
+    private PermissionsManager permissionsManager;
 
     @Inject
     private EventService eventService;
 
     @Override
-    public void onEvent(StackPersistedEvent event) {
+    public void onCascadeEvent(StackPersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
         if (subject != null) {
-            final Stack stack = event.getStack();
-            try {
-                permManager.storePermission(new StackPermissionsImpl(subject.getUserId(),
-                                                                     stack.getId(),
-                                                                     StackDomain.getActions()));
-            } catch (Exception x) {
-                LOG.error(format("Couldn't grant permissions for user with id '%s' to stack with id '%s'",
-                                 subject.getUserId(),
-                                 stack.getId()),
-                          x);
-            }
+            permissionsManager.storePermission(new StackPermissionsImpl(subject.getUserId(),
+                                                                        event.getStack().getId(),
+                                                                        StackDomain.getActions()));
         }
     }
 
     @PostConstruct
     public void subscribe() {
-        eventService.subscribe(this);
+        eventService.subscribe(this, StackPersistedEvent.class);
     }
 
     @PreDestroy
     public void unsubscribe() {
-        eventService.unsubscribe(this);
+        eventService.unsubscribe(this, StackPersistedEvent.class);
     }
 }

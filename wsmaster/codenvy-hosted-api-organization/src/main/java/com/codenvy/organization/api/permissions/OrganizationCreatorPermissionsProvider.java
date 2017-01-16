@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -14,7 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
-import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 
@@ -36,7 +36,7 @@ import javax.inject.Singleton;
  * @author Sergii Leschenko
  */
 @Singleton
-public class OrganizationCreatorPermissionsProvider implements EventSubscriber<OrganizationPersistedEvent> {
+public class OrganizationCreatorPermissionsProvider implements EventSubscriber<PostOrganizationPersistedEvent> {
     private static final Logger LOG = LoggerFactory.getLogger(OrganizationCreatorPermissionsProvider.class);
 
     private final MemberDao    memberDao;
@@ -59,7 +59,7 @@ public class OrganizationCreatorPermissionsProvider implements EventSubscriber<O
     }
 
     @Override
-    public void onEvent(OrganizationPersistedEvent event) {
+    public void onEvent(PostOrganizationPersistedEvent event) {
         try {
             memberDao.store(new MemberImpl(EnvironmentContext.getCurrent().getSubject().getUserId(),
                                            event.getOrganization().getId(),

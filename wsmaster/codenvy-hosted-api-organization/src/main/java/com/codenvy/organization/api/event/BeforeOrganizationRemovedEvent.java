@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -16,14 +16,14 @@ package com.codenvy.organization.api.event;
 
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
+import org.eclipse.che.core.db.cascade.event.RemoveEvent;
 
 /**
  * Published before {@link OrganizationImpl organization} removed.
  *
  * @author Sergii Leschenko
  */
-public class BeforeOrganizationRemovedEvent extends CascadeRemovalEvent {
+public class BeforeOrganizationRemovedEvent extends RemoveEvent {
 
     private final OrganizationImpl organization;
 

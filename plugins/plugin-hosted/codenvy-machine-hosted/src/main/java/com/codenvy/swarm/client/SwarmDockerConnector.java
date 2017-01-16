@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.primitives.Ints.tryParse;
@@ -54,6 +55,8 @@ public class SwarmDockerConnector extends DockerConnector {
     //TODO should it be done in other way?
     private final String                  nodeDaemonScheme;
     private final int                     nodeDescriptionLength;
+
+    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .* not found.*", Pattern.DOTALL);
 
     @Inject
     public SwarmDockerConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -93,6 +96,18 @@ public class SwarmDockerConnector extends DockerConnector {
         try {
             return super.createContainer(params);
         } catch (DockerException e) {
+            // TODO fix this workaround. Is needed for https://github.com/codenvy/codenvy/issues/1215
+            if (e.getStatus() == 500 &&
+                IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE.matcher(e.getOriginError()).matches()) { // if swarm failed to see image
+                try {
+                    Thread.sleep(5000);                   // wait a bit
+                    return super.createContainer(params); // and retry after pause
+                } catch (DockerException de) {
+                    throw decorateMessage(de);
+                } catch (InterruptedException ie) {
+                    throw decorateMessage(e);
+                }
+            }
             throw decorateMessage(e);
         }
     }

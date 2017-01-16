@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -24,7 +24,9 @@ import org.eclipse.che.api.core.ApiException;
 public interface SystemLicenseManagerObserver {
     void onCodenvyFairSourceLicenseAccepted() throws ApiException;
 
-    void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException;
+    void onProductLicenseRemoved(SystemLicense systemLicense) throws ApiException;
 
     void onProductLicenseStored(SystemLicense systemLicense) throws ApiException;
+
+    void onProductLicenseExpired(SystemLicense systemLicense) throws ApiException;
 }

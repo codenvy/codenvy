@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -14,13 +14,17 @@
  */
 package com.codenvy.api.audit.server;
 
+import com.codenvy.api.audit.server.printer.Printer;
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.server.SystemLicenseActionHandler;
 import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -40,10 +44,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,6 +58,7 @@ import java.util.stream.Collectors;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
+import static com.codenvy.api.license.shared.model.Constants.Action.REMOVED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static com.codenvy.api.workspace.server.WorkspaceDomain.DOMAIN_ID;
@@ -71,7 +78,6 @@ public class AuditManager {
     private final PermissionsManager         permissionsManager;
     private final SystemLicenseManager       licenseManager;
     private final SystemLicenseActionHandler systemLicenseActionHandler;
-    private final AuditReportPrinter         reportPrinter;
     private final UserManager                userManager;
 
     private AtomicBoolean inProgress = new AtomicBoolean(false);
@@ -81,14 +87,12 @@ public class AuditManager {
                         WorkspaceManager workspaceManager,
                         PermissionsManager permissionsManager,
                         SystemLicenseManager licenseManager,
-                        SystemLicenseActionHandler systemLicenseActionHandler,
-                        AuditReportPrinter reportPrinter) {
+                        SystemLicenseActionHandler systemLicenseActionHandler) {
         this.userManager = userManager;
         this.workspaceManager = workspaceManager;
         this.permissionsManager = permissionsManager;
         this.licenseManager = licenseManager;
         this.systemLicenseActionHandler = systemLicenseActionHandler;
-        this.reportPrinter = reportPrinter;
     }
 
     /**
@@ -108,21 +112,16 @@ public class AuditManager {
 
         Path auditReport = null;
         try {
-            String dateTime = new SimpleDateFormat("dd-MM-yyyy_hh:mm:ss").format(new Date());
-            auditReport = createTempDirectory(null).resolve("report_" + dateTime + ".txt");
-            Files.createFile(auditReport);
+            auditReport = createEmptyAuditReportFile();
 
-            SystemLicense license = null;
-            try {
-                license = licenseManager.load();
-            } catch (SystemLicenseException ignored) {
-                //Continue printing report without license info
-            }
+            printLicenseActionInfo(auditReport);
 
-            processLicenseActions(auditReport);
+            printDelimiter(auditReport, "CURRENT STATE");
 
-            reportPrinter.printHeader(auditReport, userManager.getTotalCount(), license);
-            printAllUsers(auditReport);
+            printSystemInfo(auditReport);
+
+            printAllUsersInfo(auditReport);
+
         } catch (Exception exception) {
             if (auditReport != null) {
                 deleteReportDirectory(auditReport);
@@ -136,75 +135,95 @@ public class AuditManager {
         return auditReport;
     }
 
+    private Path createEmptyAuditReportFile() throws IOException {
+        String dateTime = new SimpleDateFormat("dd-MM-yyyy_hh:mm:ss").format(new Date());
+        Path auditReport = createTempDirectory(null).resolve("report_" + dateTime + ".txt");
+        Files.createFile(auditReport);
+        return auditReport;
+    }
+
+    private void printDelimiter(Path auditReport, String title) throws ServerException {
+        Printer.createDelimiterPrinter(auditReport, title).print();
+    }
+
+    void printSystemInfo(Path auditReport) throws ServerException {
+        SystemLicense license = null;
+        try {
+            license = licenseManager.load();
+        } catch (SystemLicenseException ignored) {
+            //Continue printing report without license info
+        }
+
+        Printer.createSystemInfoPrinter(auditReport, userManager.getTotalCount(), license).print();
+    }
+
     /**
-     * Print license actions info in chronological order.
+     * Prints license actions info in chronological order.
      * @param auditReport
      * @throws ServerException
      */
-    private void processLicenseActions(Path auditReport) throws ServerException {
-        Map<Long, Runnable> actions = new TreeMap<>();
-        try {
-            SystemLicenseAction systemProductLicenseExpiredAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
-            actions.put(systemProductLicenseExpiredAction.getActionTimestamp(), () -> {
-                try {
-                    reportPrinter.printProductLicenseExpirationInfo(systemProductLicenseExpiredAction, auditReport);
-                } catch (ServerException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (NotFoundException ignored) {
-        }
+    private void printLicenseActionInfo(Path auditReport) throws ServerException {
+        Map<Long, Optional<Printer>> actions = new TreeMap<>();
 
-        try {
-            SystemLicenseAction systemProductLicenseAddedAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED);
-            actions.put(systemProductLicenseAddedAction.getActionTimestamp(), () -> {
-                try {
-                    reportPrinter.printProductLicenseAdditionInfo(systemProductLicenseAddedAction, auditReport);
-                } catch (ServerException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (NotFoundException ignored) {
-        }
+        List<Map.Entry<Constants.PaidLicense, Constants.Action>> actionAttributesList = ImmutableList.of(
+            new SimpleEntry<>(FAIR_SOURCE_LICENSE, ACCEPTED),
+            new SimpleEntry<>(PRODUCT_LICENSE, ADDED),
+            new SimpleEntry<>(PRODUCT_LICENSE, EXPIRED),
+            new SimpleEntry<>(PRODUCT_LICENSE, REMOVED)
+        );
 
-        try {
-            SystemLicenseAction systemFairSourceLicenseAcceptedAction = systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
-            actions.put(systemFairSourceLicenseAcceptedAction.getActionTimestamp(), () -> {
-                try {
-                    reportPrinter.printFairSourceLicenseAcceptanceInfo(systemFairSourceLicenseAcceptedAction, auditReport);
-                } catch (ServerException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (NotFoundException ignored) {
-        }
+        actionAttributesList.stream()
+                            .forEach(actionAttributes -> getLicenseActionInfo(auditReport, actions, actionAttributes));
 
+        actions.values().stream()
+               .forEach(p -> p.map(printer -> {
+                   try {
+                       printer.print();
+                   } catch (ServerException e) {
+                       try {
+                           Printer.createErrorPrinter(auditReport, "Failed to log license action info.").print();
+                       } catch (ServerException e1) {
+                           throw new RuntimeException("Failed to log error info.", e);
+                       }
+                   }
+
+                   return null;
+               }));
+    }
+
+    private void getLicenseActionInfo(Path auditReport, Map<Long, Optional<Printer>> actions, Map.Entry<Constants.PaidLicense, Constants.Action> actionAttributes) {
         try {
-            actions.values().stream().forEach(Runnable::run);
-        } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-            reportPrinter.printError("Failed to retrieve license info.", auditReport);
+            SystemLicenseAction action = systemLicenseActionHandler.findAction(actionAttributes.getKey(), actionAttributes.getValue());
+            actions.put(action.getActionTimestamp(), Printer.createActionPrinter(auditReport, action));
+        } catch (ServerException e) {
+            try {
+                Printer.createErrorPrinter(auditReport, "Failed to obtain license action info.").print();
+            } catch (ServerException e1) {
+                throw new RuntimeException("Failed to log error info.", e);
+            }
+        } catch (NotFoundException e) {
+            // ignore
         }
     }
 
-    private void printAllUsers(Path auditReport) throws ServerException {
+    private void printAllUsersInfo(Path auditReport) throws ServerException {
         Page<UserImpl> currentPage = userManager.getAll(30, 0);
         do {
             //Print users with their workspaces from current page
             for (UserImpl user : currentPage.getItems()) {
                 List<WorkspaceImpl> workspaces;
                 try {
-                    workspaces = workspaceManager.getWorkspaces(user.getId());
+                    workspaces = workspaceManager.getWorkspaces(user.getId(), false);
                     Set<String> workspaceIds = workspaces.stream()
                                                          .map(WorkspaceImpl::getId)
                                                          .collect(Collectors.toSet());
                     //add workspaces witch are belong to user, but user doesn't have permissions for them.
-                    workspaceManager.getByNamespace(user.getName())
+                    workspaceManager.getByNamespace(user.getName(), false)
                                     .stream()
                                     .filter(workspace -> !workspaceIds.contains(workspace.getId()))
                                     .forEach(workspaces::add);
                 } catch (ServerException exception) {
-                    reportPrinter.printError("Failed to retrieve the list of related workspaces for user " + user.getId(), auditReport);
+                    Printer.createErrorPrinter(auditReport, "Failed to retrieve the list of related workspaces for user " + user.getId()).print();
                     continue;
                 }
                 Map<String, AbstractPermissions> wsPermissions = new HashMap<>();
@@ -215,7 +234,7 @@ public class AuditManager {
                         //User doesn't have permissions for workspace
                     }
                 }
-                reportPrinter.printUserInfoWithHisWorkspacesInfo(auditReport, user, workspaces, wsPermissions);
+                Printer.createUserPrinter(auditReport, user, workspaces, wsPermissions).print();
             }
 
         } while ((currentPage = getNextPage(currentPage)) != null);
@@ -230,6 +249,7 @@ public class AuditManager {
         }
     }
 
+    @VisibleForTesting
     void deleteReportDirectory(Path auditReport) {
         try {
             FileUtils.deleteDirectory(auditReport.getParent().toFile());

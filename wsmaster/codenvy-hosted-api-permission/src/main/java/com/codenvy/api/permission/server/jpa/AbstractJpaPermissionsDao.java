@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -113,12 +113,15 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
         } catch (NotFoundException n) {
             manager.persist(permissions);
         }
+        manager.flush();
     }
 
     @Transactional
     protected void doRemove(String userId, String instanceId) throws ServerException, NotFoundException {
         final T entity = getEntity(wildcardToNull(userId), instanceId);
-        managerProvider.get().remove(entity);
+        EntityManager manager = managerProvider.get();
+        manager.remove(entity);
+        manager.flush();
     }
 
     /**

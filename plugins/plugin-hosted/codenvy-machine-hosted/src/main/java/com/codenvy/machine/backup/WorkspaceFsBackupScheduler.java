@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -77,7 +77,7 @@ public class WorkspaceFsBackupScheduler {
 
     @ScheduleRate(initialDelay = 1, period = 1, unit = TimeUnit.MINUTES)
     public void scheduleBackup() {
-        for (String workspaceId : workspaceRuntimes.getWorkspaces().keySet()) {
+        for (String workspaceId : workspaceRuntimes.getRuntimesIds()) {
 
             try {
                 // re-read workspace state to ensure that it's still active after processing of all previous workspaces

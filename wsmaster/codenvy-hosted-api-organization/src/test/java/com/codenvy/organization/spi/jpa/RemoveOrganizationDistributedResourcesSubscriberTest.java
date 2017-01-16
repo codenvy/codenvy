@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -70,8 +70,7 @@ public class RemoveOrganizationDistributedResourcesSubscriberTest {
         manager = injector.getInstance(EntityManager.class);
         jpaOrganizationDao = injector.getInstance(JpaOrganizationDao.class);
         distributedResourcesDao = injector.getInstance(JpaOrganizationDistributedResourcesDao.class);
-        suborganizationsRemover =
-                injector.getInstance(RemoveOrganizationDistributedResourcesSubscriber.class);
+        suborganizationsRemover = injector.getInstance(RemoveOrganizationDistributedResourcesSubscriber.class);
     }
 
     @BeforeMethod

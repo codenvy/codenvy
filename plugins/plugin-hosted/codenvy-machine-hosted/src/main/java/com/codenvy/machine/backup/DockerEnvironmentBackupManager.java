@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -25,7 +25,8 @@ import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.ValueHolder;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -52,7 +53,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.SYNC_STRATEGY_PROPERTY;
+import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.INFRASTRUCTURE_TYPE_PROPERTY;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -80,7 +81,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     private final String                               projectFolderPath;
     private final ConcurrentMap<String, ReentrantLock> workspacesBackupLocks;
     private final boolean                              syncAgentInMachine;
-    private final WorkspaceRuntimes                    workspaceRuntimes;
+    private final WorkspaceManager                     workspaceManager;
     private final WorkspaceFolderPathProvider          workspaceFolderPathProvider;
     private final DockerConnector                      dockerConnector;
 
@@ -91,9 +92,9 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                           @Named("machine.backup.restore_duration_second") int restoreDurationSec,
                                           @Named("che.user.workspaces.storage") File backupsRootDir,
                                           WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder,
-                                          @Named(SYNC_STRATEGY_PROPERTY) String syncStrategy,
+                                          @Named(INFRASTRUCTURE_TYPE_PROPERTY) String syncStrategy,
                                           @Named("che.workspace.projects.storage") String projectFolderPath,
-                                          WorkspaceRuntimes workspaceRuntimes,
+                                          WorkspaceManager workspaceManager,
                                           WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                           DockerConnector dockerConnector) {
         this.backupScript = backupScript;
@@ -103,21 +104,21 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         this.backupsRootDir = backupsRootDir;
         this.workspaceIdHashLocationFinder = workspaceIdHashLocationFinder;
         this.projectFolderPath = projectFolderPath;
-        this.workspaceRuntimes = workspaceRuntimes;
+        this.workspaceManager = workspaceManager;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.dockerConnector = dockerConnector;
 
         switch (syncStrategy) {
-            case "rsync":
+            case "native":
                 syncAgentInMachine = false;
                 break;
-            case "rsync-agent":
+            case "in-container":
                 syncAgentInMachine = true;
                 break;
             default:
                 throw new RuntimeException(format(
-                        "Property '%s' has illegal value '%s'. Valid values: rsync, rsync-agent",
-                        SYNC_STRATEGY_PROPERTY,
+                        "Property '%s' has illegal value '%s'. Valid values: native, in-container",
+                        INFRASTRUCTURE_TYPE_PROPERTY,
                         syncStrategy));
         }
 
@@ -127,14 +128,17 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     @Override
     public void backupWorkspace(String workspaceId) throws ServerException, NotFoundException {
         try {
-            WorkspaceRuntimes.RuntimeDescriptor runtimeDescriptor = workspaceRuntimes.get(workspaceId);
-            Machine devMachine = runtimeDescriptor.getRuntime().getDevMachine();
+            WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
+            if (workspace.getRuntime() == null) {
+                throw new NotFoundException("Workspace is not running");
+            }
+            Machine devMachine = workspace.getRuntime().getDevMachine();
             if (devMachine == null || devMachine.getStatus() != MachineStatus.RUNNING) {
                 // may happen if WS is no longer in RUNNING state
                 return;
             }
-            DockerInstance dockerDevMachine = (DockerInstance)workspaceRuntimes.getMachine(workspaceId,
-                                                                                           devMachine.getId());
+            DockerInstance dockerDevMachine = (DockerInstance)workspaceManager.getMachineInstance(workspaceId,
+                                                                                                  devMachine.getId());
             // machine that is not in running state can be just a stub and should not be casted
             String nodeHost = dockerDevMachine.getNode().getHost();
             String srcPath = syncAgentInMachine ? projectFolderPath : workspaceFolderPathProvider.getPath(workspaceId);

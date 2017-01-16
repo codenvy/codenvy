@@ -126,6 +126,8 @@ node default {
   $email_to = getValue("CODENVY_EMAIL_TO","admin@example.com")
   $email_from = getValue("CODENVY_EMAIL_FROM","noreply@codenvy.onprem")
   $email_subject = getValue("CODENVY_EMAIL_SUBJECT","Codenvy codenvy.onprem error: %logger{20} - %m")
+  $codenvy_logback_smtp_host = getValue("CODENVY_LOGBACK_SMTP_HOST","localhost")
+  $codenvy_logback_smtp_port = getValue("CODENVY_LOGBACK_SMTP_PORT","25")
 
 ###############################
 # PGSQL Server, used as back-end for billing
@@ -299,6 +301,8 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
   $codenvy_debug_port = getValue("CODENVY_DEBUG_PORT","8000")
 # codenvy debug suspend
   $codenvy_debug_suspend = getValue("CODENVY_DEBUG_SUSPEND","false")
+# use local repository flag on / off
+  $codenvy_repo = getValue("CHE_REPO","off")
 
 ###############################
 # Include base module

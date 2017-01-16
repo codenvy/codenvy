@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -110,6 +110,7 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
         final FreeResourcesLimitImpl resourcesLimit = manager.find(FreeResourcesLimitImpl.class, id);
         if (resourcesLimit != null) {
             manager.remove(resourcesLimit);
+            manager.flush();
         }
     }
 
@@ -122,6 +123,7 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
         } catch (NoResultException n) {
             manager.persist(resourcesLimit);
         }
+        manager.flush();
     }
 
     @Transactional

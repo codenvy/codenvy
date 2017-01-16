@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -30,8 +30,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static java.lang.Thread.sleep;
 import static org.mockito.Matchers.eq;
@@ -64,9 +64,9 @@ public class WorkspaceFsBackupSchedulerTest {
     @Mock
     private EnvironmentBackupManager backupManager;
 
-    private WorkspaceConfigImpl                           workspaceConfig;
-    private WorkspaceFsBackupScheduler                    scheduler;
-    private Map<String, WorkspaceRuntimes.WorkspaceState> workspaces;
+    private WorkspaceConfigImpl        workspaceConfig;
+    private WorkspaceFsBackupScheduler scheduler;
+    private Set<String>                ids;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -83,15 +83,13 @@ public class WorkspaceFsBackupSchedulerTest {
         workspaceConfig.setEnvironments(Collections.singletonMap(ACTIVE_ENV, environment));
         this.workspaceConfig = spy(workspaceConfig);
 
-        workspaces = new LinkedHashMap<>();
+        ids = new LinkedHashSet<>();
         addWorkspace(WORKSPACE_ID_1);
         addWorkspace(WORKSPACE_ID_2);
-        when(workspaceRuntimes.getWorkspaces()).thenReturn(workspaces);
+        when(workspaceRuntimes.getRuntimesIds()).thenReturn(ids);
     }
 
     private WorkspaceImpl addWorkspace(String wsId) throws Exception {
-        WorkspaceRuntimes.WorkspaceState workspaceState =
-                new WorkspaceRuntimes.WorkspaceState(WorkspaceStatus.RUNNING, ACTIVE_ENV);
         WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         WorkspaceRuntimeImpl workspaceRuntime = mock(WorkspaceRuntimeImpl.class);
 
@@ -101,7 +99,7 @@ public class WorkspaceFsBackupSchedulerTest {
         when(workspace.getConfig()).thenReturn(workspaceConfig);
         when(workspaceRuntime.getActiveEnv()).thenReturn(ACTIVE_ENV);
 
-        workspaces.put(wsId, workspaceState);
+        ids.add(wsId);
 
         return workspace;
     }
@@ -112,8 +110,8 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        for (Map.Entry<String, WorkspaceRuntimes.WorkspaceState> workspaceState : workspaces.entrySet()) {
-            verify(backupManager, timeout(2000)).backupWorkspace(workspaceState.getKey());
+        for (String id : ids) {
+            verify(backupManager, timeout(2000)).backupWorkspace(id);
         }
     }
 
@@ -139,7 +137,7 @@ public class WorkspaceFsBackupSchedulerTest {
     @Test
     public void shouldNotBackupWsIfBackupManagerNotFound() throws Exception {
         // given
-        workspaces.clear();
+        ids.clear();
         String wsId = "testWsId";
         WorkspaceImpl workspace = addWorkspace(wsId);
         workspace.getConfig().getEnvironments().values().iterator().next().getRecipe().setType("somethingElse");
@@ -180,7 +178,7 @@ public class WorkspaceFsBackupSchedulerTest {
     @Test
     public void shouldNotBackupMachineIfElapsedTimeFromLastSyncTooSmall() throws Exception {
         // given
-        workspaces.clear();
+        ids.clear();
         addWorkspace("ws3");
         scheduler.scheduleBackup();
 
@@ -191,7 +189,7 @@ public class WorkspaceFsBackupSchedulerTest {
         // second synchronization
         scheduler.scheduleBackup();
 
-        verify(workspaceRuntimes, times(2)).getWorkspaces();
+        verify(workspaceRuntimes, times(2)).getRuntimesIds();
         verify(scheduler, times(2)).isTimeToBackup("ws3");
         Thread.sleep(1000);
         verify(backupManager, timeout(2000)).backupWorkspace(eq("ws3"));
@@ -200,7 +198,7 @@ public class WorkspaceFsBackupSchedulerTest {
     @Test
     public void shouldBackupMachineFsIfLastSyncTimeoutIsExpired() throws Exception {
         // given
-        workspaces.clear();
+        ids.clear();
         addWorkspace("ws3");
         scheduler = spy(new WorkspaceFsBackupScheduler(Collections.singletonMap(ENV_TYPE, backupManager),
                                                        workspaceRuntimes,
@@ -218,14 +216,14 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(workspaceRuntimes, times(2)).getWorkspaces();
+        verify(workspaceRuntimes, times(2)).getRuntimesIds();
         verify(backupManager, timeout(2000).times(2)).backupWorkspace(eq("ws3"));
     }
 
     @Test
     public void shouldNotBackupMachineFsIfPreviousBackupIsStillRunning() throws Exception {
         // given
-        workspaces.clear();
+        ids.clear();
         addWorkspace("ws3");
         scheduler = spy(new WorkspaceFsBackupScheduler(Collections.singletonMap(ENV_TYPE, backupManager),
                                                        workspaceRuntimes,
@@ -243,7 +241,7 @@ public class WorkspaceFsBackupSchedulerTest {
         scheduler.scheduleBackup();
 
         // then
-        verify(workspaceRuntimes, times(2)).getWorkspaces();
+        verify(workspaceRuntimes, times(2)).getRuntimesIds();
         verify(backupManager, timeout(2000)).backupWorkspace(eq("ws3"));
     }
 }

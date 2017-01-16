@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -79,7 +80,7 @@ public class WorkspaceResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString())).thenReturn(Collections.emptyList());
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean())).thenReturn(Collections.emptyList());
 
         Optional<ResourceImpl> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
 
@@ -91,7 +92,7 @@ public class WorkspaceResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString()))
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()));
 
         Optional<ResourceImpl> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
@@ -102,6 +103,6 @@ public class WorkspaceResourceUsageTrackerTest {
         assertEquals(usedWorkspaces.getAmount(), 3);
         assertEquals(usedWorkspaces.getUnit(), WorkspaceResourceType.UNIT);
         verify(accountManager).getById(eq("account123"));
-        verify(workspaceManager).getByNamespace(eq("testAccount"));
+        verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
     }
 }

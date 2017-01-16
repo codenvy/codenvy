@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -222,7 +222,6 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldNotBeAbleToStartNewWorkspaceIfSystemRamLimitIsExceeded() throws Exception {
         when(systemRamInfoProvider.getSystemRamInfo()).thenReturn(new SystemRamInfo(parseSize("2.95 GiB"), parseSize("3 GiB")));
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setSystemRamInfoProvider(systemRamInfoProvider).build();
-        doReturn(emptyList()).when(manager).getByNamespace(anyString());
 
         manager.checkSystemRamLimitAndPropagateStart(null);
     }
@@ -231,7 +230,6 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldCallStartCallbackIfEverythingIsOkayWithSystemRamLimits() throws Exception {
         final WorkspaceCallback callback = mock(WorkspaceCallback.class);
         final LimitsCheckingWorkspaceManager manager = managerBuilder().build();
-        doReturn(singletonList(createRuntime("1gb", "1gb"))).when(manager).getByNamespace(anyString());
 
         manager.checkSystemRamLimitAndPropagateStart(callback);
 
@@ -268,8 +266,6 @@ public class LimitsCheckingWorkspaceManagerTest {
         Semaphore semaphore = mock(Semaphore.class);
         WorkspaceCallback callback = mock(WorkspaceCallback.class);
         manager.startSemaphore = semaphore;
-        doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager)
-                                                                      .getByNamespace(anyString());
 
         manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
@@ -296,7 +292,6 @@ public class LimitsCheckingWorkspaceManagerTest {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxSameTimeStartWSRequests(0)
                                                                        .build();
         WorkspaceCallback callback = mock(WorkspaceCallback.class);
-        doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager).getByNamespace(anyString());
 
         manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
@@ -307,8 +302,6 @@ public class LimitsCheckingWorkspaceManagerTest {
     public void shouldSetSemaphoreToNullIfThroughputPropertyIsLessThenZero() throws Exception {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxSameTimeStartWSRequests(-1).build();
         WorkspaceCallback callback = mock(WorkspaceCallback.class);
-        doReturn(singletonList(createRuntime("256mb", "256mb", null))).when(manager)
-                                                                      .getByNamespace(anyString());
 
         manager.checkSystemRamLimitAndPropagateLimitedThroughputStart(callback);
 
@@ -318,7 +311,6 @@ public class LimitsCheckingWorkspaceManagerTest {
     @Test(timeOut = 3000)
     public void shouldPermitToCheckRamOnlyForFiveThreadsAtTheSameTime() throws Exception {
         final LimitsCheckingWorkspaceManager manager = managerBuilder().setMaxSameTimeStartWSRequests(5).build();
-        doReturn(singletonList(createRuntime("1gb", "1gb"))).when(manager).getByNamespace(anyString()); // <- currently running 2gb
         /*
           The count-down latch is needed to reach the throughput limit by acquiring RAM check permits.
           The lath is configured to 6 invocations: 5 (number of allowed same time requests) + 1 for main thread

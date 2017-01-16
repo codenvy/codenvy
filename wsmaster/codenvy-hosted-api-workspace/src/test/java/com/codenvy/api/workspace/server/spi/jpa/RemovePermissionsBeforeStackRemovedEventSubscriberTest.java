@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -27,6 +27,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.commons.test.db.H2TestHelper;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
@@ -96,13 +97,13 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
     @AfterMethod
     public void cleanup() {
         manager.getTransaction().begin();
+        manager.createQuery("SELECT recipePermissions FROM RecipePermissions recipePermissions", RecipePermissionsImpl.class)
+               .getResultList()
+               .forEach(manager::remove);
         manager.createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
                .getResultList()
                .forEach(manager::remove);
         manager.createQuery("SELECT usr FROM Usr usr", UserImpl.class)
-               .getResultList()
-               .forEach(manager::remove);
-        manager.createQuery("SELECT recipePermissions FROM RecipePermissions recipePermissions", RecipePermissionsImpl.class)
                .getResultList()
                .forEach(manager::remove);
         manager.getTransaction().commit();
@@ -112,6 +113,7 @@ public class RemovePermissionsBeforeStackRemovedEventSubscriberTest {
     public void shutdown() throws Exception {
         subscriber.unsubscribe();
         manager.getEntityManagerFactory().close();
+        H2TestHelper.shutdownDefault();
     }
 
     @Test

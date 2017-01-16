@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -50,7 +50,7 @@ public class WorkspaceResourceUsageTracker implements ResourceUsageTracker {
     @Override
     public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
-        final List<WorkspaceImpl> accountWorkspaces = workspaceManagerProvider.get().getByNamespace(account.getName());
+        final List<WorkspaceImpl> accountWorkspaces = workspaceManagerProvider.get().getByNamespace(account.getName(), false);
         if (!accountWorkspaces.isEmpty()) {
             return Optional.of(new ResourceImpl(WorkspaceResourceType.ID, accountWorkspaces.size(), WorkspaceResourceType.UNIT));
         } else {

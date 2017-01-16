@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
@@ -26,9 +27,11 @@ import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProcessesCleaner;
+import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -43,15 +46,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 /**
@@ -84,11 +88,13 @@ public class HostedDockerInstanceTest {
 
     private HostedDockerInstance       dockerInstance;
 
-    private HostedDockerInstance getDockerInstance() {
+    private HostedDockerInstance getDockerInstance() throws MachineException {
+        DockerMachineFactory machineFactory = mock(DockerMachineFactory.class);
+        when(machineFactory.createMetadata(any(), any(), any())).thenReturn(mock(DockerInstanceRuntimeInfo.class));
         return new HostedDockerInstance(dockerConnectorMock,
                                         REGISTRY,
                                         USERNAME,
-                                        mock(DockerMachineFactory.class),
+                                        machineFactory,
                                         getMachine(getMachineConfig(true, NAME, TYPE), OWNER, MACHINE_ID, WORKSPACE_ID, STATUS),
                                         CONTAINER,
                                         IMAGE,
@@ -101,7 +107,7 @@ public class HostedDockerInstanceTest {
     }
 
     @BeforeMethod
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, MachineException {
         when(dockerNode.getHost()).thenReturn("host1");
         dockerInstance = Mockito.spy(getDockerInstance());
         executor = Executors.newFixedThreadPool(3);
@@ -175,7 +181,9 @@ public class HostedDockerInstanceTest {
 
         // thread #3 commit executed too
         verify(dockerInstance, timeout(2000)).commitContainer(eq(repo3), eq(TAG));
-        verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
+        ArgumentCaptor<CommitParams> paramsCaptor = ArgumentCaptor.forClass(CommitParams.class);
+        verify(dockerConnectorMock, atLeastOnce()).commit(paramsCaptor.capture());
+        assertEquals(paramsCaptor.getValue().getRepository(), repo3);
 
         // completing first 2 calls
         waitingAnswer1.completeAnswer();

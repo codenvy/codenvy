@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -15,29 +15,24 @@
 package com.codenvy.machine;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
-import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
+import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategyProvider;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -50,15 +45,9 @@ public class HostedServersInstanceRuntimeInfoTest {
     private static final String DEFAULT_HOST = "default-host.com";
 
     @Mock
-    private ContainerInfo   containerInfo;
+    private ServerEvaluationStrategyProvider serverEvaluationStrategyProvider;
     @Mock
-    private NetworkSettings networkSettings;
-    @Mock
-    private MachineConfig   machineConfig;
-    @Mock
-    private ContainerConfig containerConfig;
-
-    private HostedServersInstanceRuntimeInfo runtimeInfo;
+    private ServerEvaluationStrategy         serverEvaluationStrategy;
 
     @Test
     public void shouldReturnUnchangedServersOfDockerInstanceRuntimeInfoIfNoModifiersIsProvided() throws Exception {
@@ -69,16 +58,21 @@ public class HostedServersInstanceRuntimeInfoTest {
                                                      "http://" + DEFAULT_HOST + ":32000/some/path",
                                                      new ServerPropertiesImpl("/some/path",
                                                                               DEFAULT_HOST + ":32000",
-                                                                              "http://" + DEFAULT_HOST + ":32000/some/path")));
+                                                                              "http://" + DEFAULT_HOST +
+                                                                              ":32000/some/path")));
         originServers.put("1000/tcp", new ServerImpl("ref2",
                                                      "wss",
                                                      DEFAULT_HOST + ":32001",
                                                      "wss://" + DEFAULT_HOST + ":32001/some/path",
                                                      new ServerPropertiesImpl("/some/path",
                                                                               DEFAULT_HOST + ":32001",
-                                                                              "wss://" + DEFAULT_HOST + ":32001/some/path")));
-        makeParentOfHostedRuntimeInfoReturnServers(originServers, singletonMap("otherreference",
-                                                                               new UriTemplateServerProxyTransformer("http://host:9090/path") {}));
+                                                                              "wss://" + DEFAULT_HOST +
+                                                                              ":32001/some/path")));
+        HostedServersInstanceRuntimeInfo runtimeInfo =
+                prepareHostedServersInstanceRuntimeInfo(originServers,
+                                                        singletonMap("otherreference",
+                                                                     new UriTemplateServerProxyTransformer(
+                                                                             "http://host:9090/path") {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 
@@ -94,14 +88,16 @@ public class HostedServersInstanceRuntimeInfoTest {
                                                      "http://" + DEFAULT_HOST + ":32000/some/path",
                                                      new ServerPropertiesImpl("/some/path",
                                                                               DEFAULT_HOST + ":32000",
-                                                                              "http://" + DEFAULT_HOST + ":32000/some/path")));
+                                                                              "http://" + DEFAULT_HOST +
+                                                                              ":32000/some/path")));
         originServers.put("1000/tcp", new ServerImpl("ref2",
                                                      "wss",
                                                      DEFAULT_HOST + ":30001",
                                                      "wss://" + DEFAULT_HOST + ":32001/some/path",
                                                      new ServerPropertiesImpl("/some/path",
                                                                               DEFAULT_HOST + ":30001",
-                                                                              "wss://" + DEFAULT_HOST + ":32001/some/path")));
+                                                                              "wss://" + DEFAULT_HOST +
+                                                                              ":32001/some/path")));
         HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("8080/tcp", originServers.get("8080/tcp"));
         expectedServers.put("1000/tcp", new ServerImpl("ref2",
@@ -112,40 +108,30 @@ public class HostedServersInstanceRuntimeInfoTest {
                                                                                 "host:9090",
                                                                                 "http://host:9090/path")));
 
-        makeParentOfHostedRuntimeInfoReturnServers(expectedServers, singletonMap("ref2",
-                                                                                 new UriTemplateServerProxyTransformer("http://host:9090/path") {}));
+        HostedServersInstanceRuntimeInfo runtimeInfo =
+                prepareHostedServersInstanceRuntimeInfo(originServers,
+                                                        singletonMap("ref2", new UriTemplateServerProxyTransformer(
+                                                                "http://host:9090/path") {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 
         assertEquals(modifiedServers, expectedServers);
     }
 
-    private void makeParentOfHostedRuntimeInfoReturnServers(Map<String, ServerImpl> servers,
-                                                            Map<String, MachineServerProxyTransformer> modifiers) {
-        Set<ServerConf> serverConfigs = new HashSet<>();
-        HashMap<String, List<PortBinding>> exposedPorts = new HashMap<>();
-        for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
-            ServerImpl server = serverEntry.getValue();
-            serverConfigs.add(new ServerConfImpl(server.getRef(),
-                                                 serverEntry.getKey(),
-                                                 server.getProtocol(),
-                                                 server.getProperties().getPath()));
+    private HostedServersInstanceRuntimeInfo prepareHostedServersInstanceRuntimeInfo(
+            Map<String, ServerImpl> servers, Map<String, MachineServerProxyTransformer> modifiers) {
 
-            exposedPorts.put(serverEntry.getKey(),
-                             singletonList(new PortBinding().withHostPort(server.getAddress().split(":")[1])));
-        }
+        HostedServersInstanceRuntimeInfo runtimeInfo = spy(new HostedServersInstanceRuntimeInfo(mock(ContainerInfo.class),
+                                                                                                DEFAULT_HOST,
+                                                                                                mock(MachineConfig.class),
+                                                                                                emptySet(),
+                                                                                                emptySet(),
+                                                                                                modifiers,
+                                                                                                serverEvaluationStrategyProvider));
 
-        runtimeInfo = spy(new HostedServersInstanceRuntimeInfo(containerInfo,
-                                                               null,
-                                                               DEFAULT_HOST,
-                                                               machineConfig,
-                                                               emptySet(),
-                                                               serverConfigs,
-                                                               modifiers));
+        when(serverEvaluationStrategyProvider.get()).thenReturn(serverEvaluationStrategy);
+        when(serverEvaluationStrategy.getServers(any(ContainerInfo.class), anyString(), any())).thenReturn(servers);
 
-        when(containerInfo.getNetworkSettings()).thenReturn(networkSettings);
-        when(networkSettings.getPorts()).thenReturn(exposedPorts);
-        when(containerInfo.getConfig()).thenReturn(containerConfig);
-        when(containerConfig.getLabels()).thenReturn(Collections.emptyMap());
+        return runtimeInfo;
     }
 }

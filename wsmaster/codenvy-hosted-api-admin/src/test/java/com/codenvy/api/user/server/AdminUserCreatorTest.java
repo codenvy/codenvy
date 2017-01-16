@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -25,7 +25,7 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.PostUserPersistedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
@@ -39,7 +39,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.annotation.PostConstruct;
-
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -122,7 +121,7 @@ public class AdminUserCreatorTest {
     public void shouldAddSystemPermissionsInLdapMode() throws Exception {
         Injector injector = Guice.createInjector(new LdapModule());
         AdminUserCreator creator = injector.getInstance(AdminUserCreator.class);
-        creator.onEvent(new BeforeUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
+        creator.onEvent(new PostUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
         verify(permissionsManager).storePermission(argThat(new ArgumentMatcher<SystemPermissionsImpl>() {
             @Override
             public boolean matches(Object argument) {

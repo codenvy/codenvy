@@ -1,5 +1,5 @@
 /*
- *  [2012] - [2016] Codenvy, S.A.
+ *  [2012] - [2017] Codenvy, S.A.
  *  All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -77,6 +77,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -86,8 +87,8 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.core.db.DBInitializer;
-import org.eclipse.che.core.db.event.CascadeRemovalEvent;
-import org.eclipse.che.core.db.event.CascadeRemovalEventSubscriber;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.core.db.cascade.event.CascadeEvent;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -240,6 +241,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 bind(AccountManager.class);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_snapshot")).toInstance(false);
                 bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_restore")).toInstance(false);
+                bind(WorkspaceSharedPool.class).toInstance(new WorkspaceSharedPool("cached", null, null));
             }
         });
 
@@ -334,8 +336,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
     public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
-            Class<CascadeRemovalEventSubscriber<CascadeRemovalEvent>> subscriberClass,
-            Class<CascadeRemovalEvent> eventClass) throws Exception {
+            Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass,
+            Class<CascadeEvent> eventClass) throws Exception {
         createTestData();
         eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 
