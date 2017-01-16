@@ -19,7 +19,6 @@ import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,22 +35,11 @@ public class CodenvyDockerServerEvaluationStrategy extends ServerEvaluationStrat
     protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
         Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
 
-        return getAddressesAndPorts(internalHost, portBindings);
+        return getExposedPortsToAddressPorts(internalHost, portBindings);
     }
 
     @Override
     protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
         return getInternalAddressesAndPorts(containerInfo, internalHost);
-    }
-
-    // TODO move into base class
-    private Map<String, String> getAddressesAndPorts(String address, Map<String, List<PortBinding>> ports) {
-        Map<String, String> addressesAndPorts = new HashMap<>();
-        for (Map.Entry<String, List<PortBinding>> portEntry : ports.entrySet()) {
-            // there is one value always
-            String port = portEntry.getValue().get(0).getHostPort();
-            addressesAndPorts.put(portEntry.getKey(), address + ":" + port);
-        }
-        return addressesAndPorts;
     }
 }
