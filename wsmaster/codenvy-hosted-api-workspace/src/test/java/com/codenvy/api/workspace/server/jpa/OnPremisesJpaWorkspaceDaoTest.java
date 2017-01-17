@@ -14,9 +14,6 @@
  */
 package com.codenvy.api.workspace.server.jpa;
 
-import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
-import com.codenvy.api.permission.server.PermissionsModule;
-import com.codenvy.api.permission.server.jpa.SystemPermissionsJpaModule;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.jpa.OnPremisesJpaStackDao;
 import com.codenvy.api.workspace.server.spi.jpa.OnPremisesJpaWorkspaceDao;
@@ -72,9 +69,7 @@ public class OnPremisesJpaWorkspaceDaoTest {
                 new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("wrksp1", "", "cfg1", null, null, null)),
                 new WorkspaceImpl("ws2", users[0].getAccount(), new WorkspaceConfigImpl("wrksp2", "", "cfg2", null, null, null)),
                 new WorkspaceImpl("ws3", users[0].getAccount(), new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null))};
-        Injector injector =
-                Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule(),
-                                     new SystemPermissionsJpaModule());
+        Injector injector = Guice.createInjector(new TestModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(OnPremisesJpaWorkspaceDao.class);
     }

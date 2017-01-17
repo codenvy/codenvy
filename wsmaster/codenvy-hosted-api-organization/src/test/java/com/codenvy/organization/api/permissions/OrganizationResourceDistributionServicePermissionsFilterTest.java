@@ -14,6 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributionService;
@@ -47,7 +48,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.codenvy.organization.api.permissions.OrganizationPermissionsFilter.MANAGE_ORGANIZATIONS_ACTION;
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
@@ -82,13 +82,16 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
     private static final String PARENT_ORGANIZATION = "parentOrg123";
 
     @Mock
+    private static Subject subject;
+
+    @Mock
     private OrganizationResourcesDistributionService service;
 
     @Mock
     private OrganizationManager manager;
 
     @Mock
-    private static Subject subject;
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @InjectMocks
     private OrganizationResourceDistributionServicePermissionsFilter permissionsFilter;
@@ -177,10 +180,8 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
     }
 
     @Test
-    public void shouldCheckManageResourcesPermissionsOnGettingDistributedResourcesWhenUserDoesNotHaveManageOrganizationsPermission()
+    public void shouldCheckManageResourcesPermissionsOnGettingDistributedResourcesWhenUserDoesNotHaveSuperPrivileges()
             throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(false);
-
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .expect()
@@ -189,13 +190,14 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
                .get(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION);
 
         verify(service).getDistributedResources(eq(PARENT_ORGANIZATION), anyInt(), anyLong());
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, OrganizationPermissionsFilter.MANAGE_ORGANIZATIONS_ACTION);
+        verify(subject).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
+        verify(superPrivilegesChecker).hasSuperPrivileges();
     }
 
     @Test
-    public void shouldNotCheckManageResourcesPermissionsOnGettingDistributedResourcesWhenUserHasManageOrganizationsPermission()
+    public void shouldNotCheckManageResourcesPermissionsOnGettingDistributedResourcesWhenUserHasSuperPrivileges()
             throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)).thenReturn(true);
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
 
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -205,7 +207,8 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
                .get(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION);
 
         verify(service).getDistributedResources(eq(PARENT_ORGANIZATION), anyInt(), anyLong());
-        verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION);
+        verify(subject, never()).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
+        verify(superPrivilegesChecker).hasSuperPrivileges();
     }
 
     @Test(expectedExceptions = ForbiddenException.class,

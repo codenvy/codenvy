@@ -73,3 +73,6 @@ db.schema.flyway.scripts.locations=<%= scope.lookupvar('addon::db_schema_flyway_
 db.schema.flyway.scripts.locations=<%= scope.lookupvar('codenvy::db_schema_flyway_scripts_locations') %>
 <% end -%>
 db.jndi.datasource.name=java:/comp/env/jdbc/codenvy
+
+# Super privileged mode
+system.super_privileged_mode=<%= scope.lookupvar('codenvy::system_super_privileged_mode') %>
