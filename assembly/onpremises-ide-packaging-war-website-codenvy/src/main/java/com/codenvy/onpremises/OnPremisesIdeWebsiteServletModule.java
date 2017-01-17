@@ -21,7 +21,6 @@ import com.codenvy.auth.sso.client.deploy.SsoClientServletModule;
 import com.codenvy.auth.sso.client.token.ChainedTokenExtractor;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
-
 import org.eclipse.che.inject.DynaModule;
 
 import javax.inject.Singleton;
@@ -44,8 +43,9 @@ public class OnPremisesIdeWebsiteServletModule extends ServletModule {
 
         bind(com.codahale.metrics.servlets.ThreadDumpServlet.class).in(Singleton.class);
         bind(com.codahale.metrics.servlets.PingServlet.class).in(Singleton.class);
+        bind(com.xemantic.tadedon.servlet.CacheDisablingFilter.class).in(Singleton.class);
 
-        filter("/*").through(com.codenvy.servlet.CacheDisablingFilter.class);
+        filter("/*").through(com.xemantic.tadedon.servlet.CacheDisablingFilter.class);
         filter("/private/*", "/zendesk").through(LoginFilter.class);
         filter("/*").through(PagesExtensionHider.class);
         serve("/metrics/ping").with(com.codahale.metrics.servlets.PingServlet.class);
