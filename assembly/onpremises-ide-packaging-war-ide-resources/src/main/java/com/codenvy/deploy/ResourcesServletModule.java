@@ -25,7 +25,7 @@ import org.eclipse.che.inject.DynaModule;
 public class ResourcesServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        filterRegex("^.*\\.nocache\\..*$", "^.*/_app/.*$").through(com.codenvy.servlet.CacheDisablingFilter.class);
-        filterRegex("^.*\\.cache\\..*$").through(com.codenvy.servlet.CacheForcingFilter.class);
+        filterRegex("^.*\\.nocache\\..*$", "^.*/_app/.*$").through(com.xemantic.tadedon.servlet.CacheDisablingFilter.class);
+        filterRegex("^.*\\.cache\\..*$").through(com.xemantic.tadedon.servlet.CacheForcingFilter.class);
     }
 }
