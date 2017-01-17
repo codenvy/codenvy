@@ -1,12 +1,10 @@
 var gulp = require('gulp'),
     tinylr = require('tiny-lr'), // Mini webserver for livereload
-    minifyCSS = require('gulp-minify-css'), // CSS minifying
-    watch = require('gulp-watch'),
+    cleanCSS = require('gulp-clean-css'), // CSS minifying
     shell = require('gulp-shell'),
     print = require('gulp-print'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
-    //imagemin = require('gulp-imagemin'), // Img minifying
     uglify = require('gulp-uglify'),    // JS minifying
     concat = require('gulp-concat'),    // Files merging
     rev = require('gulp-rev'),          // Files versioning
@@ -19,10 +17,6 @@ var gulp = require('gulp'),
     reverse = require('reversible'),
     rimraf = require('gulp-rimraf');    // Remove files and folders depricated
     var del = require('del'); //TODO replace gulp-rimraf
-    //wait = require('gulp-wait'),
-    //
-    //server = lr(),
-    //livereload = require('gulp-livereload'), // Livereload for Gulp
 
 var buildConfig = {
         jekyllStageConfig : "_config.stage.yml", //saas-stage
@@ -269,7 +263,7 @@ gulp.task('rmbuild-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se',
   return gulp.src(paths.onpremSE+'**/*.html')
   .pipe(useref())
   .pipe(print(function(filepath) {
-        return "remove <!-- build:js ... blocks -> built: " + filepath;
+        return "remove <!-- build:js ... blocks -> done: " + filepath;
       }))
   .pipe(gulp.dest(paths.onpremSE));
 
@@ -345,16 +339,5 @@ function notifyLiveReload(event) {
     }
   });
 }
-
-gulp.task('__watch', function() {
-  gulp.watch(''+paths.src+'site/styles/*.scss', ['css_gh']);
-  gulp.watch(''+paths.src+'site/**/*.html', ['jekyll_gh']);
-  gulp.watch(''+paths.gh+'**/*.html', notifyLiveReload);
-  gulp.watch(''+paths.gh+'site/styles/*.css', notifyLiveReload);
-});
-
-gulp.task('lr', ['css_gh', 'express', 'livereload', 'watch'], function() {
-
-});
 
 // -------------------- Utils ------------------------
