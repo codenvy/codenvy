@@ -97,6 +97,11 @@ public class SystemPermissionsDaoTest {
     }
 
     @Test
+    public void doesNotThrowNpeWhenInstanceIsNull() throws Exception {
+        dao.get(users[0].getId(), null);
+    }
+
+    @Test
     public void shouldBeAbleToGetPermissions() throws Exception {
         final SystemPermissionsImpl result1 = dao.get(systemPermissions[0].getUserId(), systemPermissions[0].getInstanceId());
         final SystemPermissionsImpl result2 = dao.get(systemPermissions[1].getUserId(), systemPermissions[1].getInstanceId());

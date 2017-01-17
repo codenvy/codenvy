@@ -213,12 +213,12 @@ public class AuditManager {
             for (UserImpl user : currentPage.getItems()) {
                 List<WorkspaceImpl> workspaces;
                 try {
-                    workspaces = workspaceManager.getWorkspaces(user.getId());
+                    workspaces = workspaceManager.getWorkspaces(user.getId(), false);
                     Set<String> workspaceIds = workspaces.stream()
                                                          .map(WorkspaceImpl::getId)
                                                          .collect(Collectors.toSet());
                     //add workspaces witch are belong to user, but user doesn't have permissions for them.
-                    workspaceManager.getByNamespace(user.getName())
+                    workspaceManager.getByNamespace(user.getName(), false)
                                     .stream()
                                     .filter(workspace -> !workspaceIds.contains(workspace.getId()))
                                     .forEach(workspaces::add);

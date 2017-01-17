@@ -125,8 +125,8 @@ public class AuditManagerTest {
         when(workspace2.getId()).thenReturn("Workspace2Id");
         when(workspace1.getConfig()).thenReturn(ws1config);
         when(workspace2.getConfig()).thenReturn(ws2config);
-        when(workspaceManager.getWorkspaces("User1Id")).thenReturn(asList(workspace1, workspace2));
-        when(workspaceManager.getWorkspaces("User2Id")).thenReturn(singletonList(workspace2));
+        when(workspaceManager.getWorkspaces(eq("User1Id"), eq(false))).thenReturn(asList(workspace1, workspace2));
+        when(workspaceManager.getWorkspaces(eq("User2Id"), eq(false))).thenReturn(singletonList(workspace2));
         //Permissions
         AbstractPermissions ws1User1Permissions = mock(AbstractPermissions.class);
         AbstractPermissions ws2User1Permissions = mock(AbstractPermissions.class);
@@ -218,8 +218,8 @@ public class AuditManagerTest {
         workspaces.add(workspace2);
         when(workspace1.getNamespace()).thenReturn("User2");
         when(workspace2.getNamespace()).thenReturn("User2");
-        when(workspaceManager.getWorkspaces("User2Id")).thenReturn(workspaces);
-        when(workspaceManager.getByNamespace("User2")).thenReturn(asList(workspace1, workspace2));
+        when(workspaceManager.getWorkspaces(eq("User2Id"), eq(false))).thenReturn(workspaces);
+        when(workspaceManager.getByNamespace(eq("User2"), eq(false))).thenReturn(asList(workspace1, workspace2));
 
         when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
         when(ACCEPT_FAIR_SOURCE_LICENSE_ACTION.getActionTimestamp())
@@ -296,7 +296,7 @@ public class AuditManagerTest {
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED)).thenThrow(NotFoundException.class);
         when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, REMOVED)).thenThrow(NotFoundException.class);
 
-        when(workspaceManager.getWorkspaces(eq("User1Id"))).thenThrow(new ServerException("Failed to retrieve workspaces"));
+        when(workspaceManager.getWorkspaces(eq("User1Id"), eq(false))).thenThrow(new ServerException("Failed to retrieve workspaces"));
 
         //when
         auditReport = auditManager.generateAuditReport();

@@ -52,7 +52,7 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
     public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
         final long currentlyUsedRamMB = workspaceManagerProvider.get()
-                                                                .getByNamespace(account.getName())
+                                                                .getByNamespace(account.getName(), true)
                                                                 .stream()
                                                                 .filter(ws -> STOPPED != ws.getStatus())
                                                                 .map(ws -> ws.getRuntime().getMachines())

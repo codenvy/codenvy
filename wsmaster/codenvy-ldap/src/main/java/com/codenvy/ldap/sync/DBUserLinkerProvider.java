@@ -21,11 +21,11 @@ import javax.inject.Named;
 import javax.inject.Provider;
 
 /**
- * Provides {@link DBUserFinder} instances based on configuration.
+ * Provides {@link DBUserLinker} instances based on configuration.
  *
  * @author Yevhenii Voevodin
  */
-public class DBUserFinderProvider implements Provider<DBUserFinder> {
+public class DBUserLinkerProvider implements Provider<DBUserLinker> {
 
     @Inject
     private UserDao userDao;
@@ -38,13 +38,17 @@ public class DBUserFinderProvider implements Provider<DBUserFinder> {
     private String linkAttr;
 
     @Override
-    public DBUserFinder get() {
+    public DBUserLinker get() {
         if (linkAttr == null || linkAttr.equals("id")) {
-            return DBUserFinder.newIdFinder(userDao, dbHelper);
+            return DBUserLinker.newIdLinker(userDao, dbHelper);
         }
         if (linkAttr.equals("email")) {
-            return DBUserFinder.newEmailFinder(userDao, dbHelper);
+            return DBUserLinker.newEmailLinker(userDao, dbHelper);
         }
-        throw new IllegalStateException("Supported values for the property 'ldap.sync.user_linking_attribute' are 'id' or 'email'");
+        if (linkAttr.equals("name")) {
+            return DBUserLinker.newNameLinker(userDao, dbHelper);
+        }
+        throw new IllegalStateException("Supported values for the property 'ldap.sync.user_linking_attribute' " +
+                                        "are 'id', 'email' or 'name");
     }
 }

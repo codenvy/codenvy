@@ -52,7 +52,7 @@ public class RuntimeResourceUsageTracker implements ResourceUsageTracker {
     public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
         final long currentlyUsedRuntimes = workspaceManagerProvider.get()
-                                                                   .getByNamespace(account.getName())
+                                                                   .getByNamespace(account.getName(), false)
                                                                    .stream()
                                                                    .filter(ws -> STOPPED != ws.getStatus())
                                                                    .count();

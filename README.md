@@ -16,7 +16,7 @@ The `codenvy` repository is where we do development. Your license grants you acc
 
 - [Submit bugs and feature requests](http://github.com/codenvy/codenvy/issues) and help us verify them
 - Review [source code changes](http://github.com/codenvy/codenvy/pulls)
-- [Review the docs](https://github.com/codenvy/codenvy/docs/README.md) and make improvements
+- [Review the docs](https://codenvy.com/docs/) and make improvements
 
 ### License
 Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf) that includes premium support.

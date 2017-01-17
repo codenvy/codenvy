@@ -20,8 +20,8 @@ import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.lang.concurrent.CloseableLock;
 import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -72,8 +72,8 @@ public class ResourcesLocks {
      * @throws ServerException
      *         when any other error occurs
      */
-    public CloseableLock acquiresLock(String accountId) throws NotFoundException,
-                                                               ServerException {
+    public Unlocker acquiresLock(String accountId) throws NotFoundException,
+                                                          ServerException {
         final Account account = accountManager.getById(accountId);
         final ResourceLockKeyProvider resourceLockKeyProvider = accountTypeToLockProvider.get(account.getType());
         String lockKey;
@@ -85,10 +85,10 @@ public class ResourcesLocks {
             lockKey = resourceLockKeyProvider.getLockKey(accountId);
         }
 
-        return stripedLocks.acquireWriteLock(lockKey);
+        return stripedLocks.writeLock(lockKey);
     }
 
-    public CloseableLock acquireLock(String... accountIds) throws NotFoundException,
+    public Unlocker acquireLock(String... accountIds) throws NotFoundException,
                                                                   ServerException {
         // TODO It should be implemented for making possible lock resources by two or more accounts in case of resources redistribution
         throw new UnsupportedOperationException("Not implemented.");
