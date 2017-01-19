@@ -10,6 +10,7 @@
 # --hostname=<CODENVY HOSTNAME>
 # --license=accept
 # --install-directory=<PATH TO SINGLE DIRECTORY FOR ALL RESOURCES>
+# --downloads-directory=<PATH TO SINGLE DIRECTORY FOR DOWNLOADS>
 # --im-cli: to install IM CLI client only
 # --config=<PATH/URL TO CUSTOM CODENVY CONFIG>
 # --docker-registry-mirror=<URL>
@@ -141,6 +142,7 @@ setRunOptions() {
     SUPPRESS=false
     LICENSE_ACCEPTED=false
     INSTALL_DIR=./codenvy
+    DOWNLOADS_DIR=""
     DISABLE_MONITORING_TOOLS=false
     SKIP_POST_FLIGHT_CHECK=false
 
@@ -171,6 +173,9 @@ setRunOptions() {
         elif [[ "$var" =~ --install-directory=.* ]]; then
             INSTALL_DIR="$(echo "$var" | sed -e "s/--install-directory=//g")"
 
+        elif [[ "$var" =~ --downloads-directory=.* ]]; then
+            DOWNLOADS_DIR=$(echo "$var" | sed -e "s/--downloads-directory=//g")
+            
         elif [[ "$var" =~ --docker-registry-mirror=.* ]]; then
             DOCKER_REGISTRY_MIRROR="$(removeTrailingSlash "$(echo "$var" | sed -e "s/--docker-registry-mirror=//g")")"
 
@@ -249,6 +254,13 @@ setRunOptions() {
 
     mkdir --parents "${INSTALL_DIR}"
     INSTALL_DIR=$(readlink -f $INSTALL_DIR)
+    
+    if [[ -z "{DOWNLOADS_DIR}" ]]; then
+        DOWNLOADS_DIR="$INSTALL_DIR/downloads"        
+    fi
+    
+    mkdir --parents "${DOWNLOADS_DIR}"
+    DOWNLOADS_DIR=$(readlink -f $DOWNLOADS_DIR)
 
     INSTALL_LOG="$INSTALL_DIR/install.log"
     CONFIG="$INSTALL_DIR/codenvy.properties"
@@ -459,6 +471,22 @@ putLineIntoFile() {
     fi
 }
 
+# parameter $1 - path to file that should be downloaded to
+validateDownload() {
+    if [[ ! -e "$1" ]] || [[ ! -e "$1.done" ]]; then
+        return 1
+    fi
+}
+
+# parameter $1 - path to file that all already downloaded
+completeDownload() {
+    if [[ ! -e "$1" ]]; then
+        return 1
+    fi
+
+    echo "" > $1.done
+}
+
 # parameter $1 - path to file which should be copied into the $1.<time>
 createFileBackup() {
     local pathToFile=$1
@@ -484,22 +512,49 @@ doInstallImCli() {
 doDownloadBinaries() {
     setStepIndicator 3
 
-    for ((;;)); do
-        OUTPUT=$(doEvalWaitReconnection executeIMCommand download ${ARTIFACT} ${VERSION})
-        local exitCode=$?
-        echo "${OUTPUT}" | sed 's/\[[=> ]*\]//g'  >> ${INSTALL_LOG}
+    local binFileName=$(fetchProperty "https://codenvy.com/update/repository/properties/${ARTIFACT}/${VERSION}" "file")
+    local propFileName=".properties"
+    
+    local installDir="${INSTALL_DIR}/updates/${ARTIFACT}/${VERSION}"
+    local downloadsDir="${DOWNLOADS_DIR}/${ARTIFACT}/${VERSION}"
+    
+    local binFilePath="${downloadsDir}/${binFileName}"
+    local propFilePath="${downloadsDir}/${propFileName}"
+    
+    validateDownload ${binFilePath}
+    local binFileOk=$?
+    
+    validateDownload ${propFilePath}
+    local propFileOk=$?
 
-        if [[ ${exitCode} == 0 ]]; then
-            break
-        fi
-
-        if [[ "${OUTPUT}" =~ .*File.corrupted.* ]]; then
-            echo "Codenvy binaries will be redownloaded" >> ${INSTALL_LOG}
-            continue
-        else
-            validateExitCode ${exitCode}
-        fi
-    done
+    if [[ ! "${binFileOk}" == "0" ]] || [[ ! "${propFileOk}" == "0" ]]; then    
+        for ((;;)); do
+            OUTPUT=$(doEvalWaitReconnection executeIMCommand download ${ARTIFACT} ${VERSION})
+            local exitCode=$?
+            echo "${OUTPUT}" | sed 's/\[[=> ]*\]//g'  >> ${INSTALL_LOG}
+    
+            if [[ ${exitCode} == 0 ]]; then
+                break
+            fi
+    
+            if [[ "${OUTPUT}" =~ .*File.corrupted.* ]]; then
+                echo "Codenvy binaries will be redownloaded" >> ${INSTALL_LOG}
+                continue
+            else
+                validateExitCode ${exitCode}
+            fi
+        done
+    
+        mkdir --parent "${downloadsDir}"
+        cp -af "${installDir}/." "${downloadsDir}"
+        
+        completeDownload ${binFilePath}
+        completeDownload ${propFilePath}
+    else
+         mkdir --parent "${installDir}"
+        cp -af "${downloadsDir}/." "${installDir}"
+    fi
+    
     doUpdateDownloadProgress 100
 
     executeIMCommand download --list-local >> ${INSTALL_LOG}
@@ -700,12 +755,19 @@ preConfigureSystem() {
 installJava() {
     echo -n "Install java package from '${JRE_URL}' into the directory '${INSTALL_DIR}/jre' ... " >> ${INSTALL_LOG}
 
-    wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "${JRE_URL}" --output-document=${INSTALL_DIR}/jre.tar.gz >> ${INSTALL_LOG} 2>&1 || return 1
-    tar -xf ${INSTALL_DIR}/jre.tar.gz -C ${INSTALL_DIR} >> ${INSTALL_LOG} 2>&1
+    local jreFilePath="${DOWNLOADS_DIR}/${JRE_URL##*/}"
+    
+    validateDownload ${jreFilePath}
+    
+   if [[ ! "$?" == "0" ]]; then
+        wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "${JRE_URL}" --output-document=${jreFilePath} >> ${INSTALL_LOG} 2>&1 || return 1
+        completeDownload ${jreFilePath}
+    fi
+    
+    tar -xf ${jreFilePath} -C ${INSTALL_DIR} >> ${INSTALL_LOG} 2>&1
 
     rm -fr ${INSTALL_DIR}/jre >> ${INSTALL_LOG} 2>&1
     mv -f ${INSTALL_DIR}/jre1.8.0_45 ${INSTALL_DIR}/jre >> ${INSTALL_LOG} 2>&1
-    rm ${INSTALL_DIR}/jre.tar.gz >> ${INSTALL_LOG} 2>&1
 
     echo " [OK]" >> ${INSTALL_LOG}
 }
@@ -718,19 +780,23 @@ installIm() {
     fi
     echo "${imUrl}" >> ${INSTALL_LOG}
 
-    local imFilePath="${INSTALL_DIR}/$(curl -sI "${imUrl}" | grep -o -E 'filename=(.*)[.]tar.gz' | sed -e 's/filename=//')"
+    local imFilePath="${DOWNLOADS_DIR}/$(curl -sI "${imUrl}" | grep -o -E 'filename=(.*)[.]tar.gz' | sed -e 's/filename=//')"
     if [[ ! $? == 0 ]]; then
         return 1
     fi
-
-    curl -s --output "${imFilePath}" -L "${imUrl}" || return 1
+    
+    validateDownload ${imFilePath}
+    
+    if [[ ! "$?" == "0" ]]; then
+        curl -s --output "${imFilePath}" -L "${imUrl}" || return 1
+        completeDownload ${imFilePath}
+    fi
 
     local imCliDir="${INSTALL_DIR}/cli"
     if [ -d ${imCliDir} ]; then rm -rf ${imCliDir}; fi
     mkdir "${imCliDir}"
 
     tar -xf "${imFilePath}" -C "${imCliDir}"
-    rm "${imFilePath}"
 
     sed -i "2iJAVA_HOME=${INSTALL_DIR}/jre" ${imCliDir}/bin/codenvy
     printf "\nexport CODENVY_IM_BASE=${INSTALL_DIR}\n" >> ${HOME}/.bashrc
