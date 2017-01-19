@@ -46,7 +46,7 @@ public class StackCreatorPermissionsProvider extends CascadeEventSubscriber<Stac
     @Override
     public void onCascadeEvent(StackPersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
-        if (subject != null) {
+        if (!subject.isAnonymous()) {
             permissionsManager.storePermission(new StackPermissionsImpl(subject.getUserId(),
                                                                         event.getStack().getId(),
                                                                         StackDomain.getActions()));
