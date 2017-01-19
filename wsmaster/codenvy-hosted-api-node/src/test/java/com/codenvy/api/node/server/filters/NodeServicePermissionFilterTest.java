@@ -57,17 +57,16 @@ public class NodeServicePermissionFilterTest {
     private static final EnvironmentFilter  FILTER = new EnvironmentFilter();
 
     @Mock
-    NodeService service;
+    private NodeService service;
 
     @Mock
     private static Subject subject;
 
-    NodeServicePermissionFilter permissionsFilter;
+    private NodeServicePermissionFilter permissionsFilter;
 
     @BeforeMethod
     public void setUp() {
         permissionsFilter = new NodeServicePermissionFilter();
-        when(subject.getUserId()).thenReturn("userok");
     }
 
     @Test
