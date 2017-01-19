@@ -43,7 +43,7 @@ public class DashboardServletModule extends ServletModule {
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url"))
                       .to("/site/error/error-cookies-disabled");
 
-        bind(com.xemantic.tadedon.servlet.CacheDisablingFilter.class).in(Singleton.class);
+        bind(com.xemantic.tadedon.servlet.CacheForcingFilter.class).in(Singleton.class);
 
         bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(false);
         bindConstant().annotatedWith(Names.named(ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL))
@@ -51,7 +51,7 @@ public class DashboardServletModule extends ServletModule {
         bindConstant().annotatedWith(Names.named(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL))
                       .to("/site/error/fair-source-license-is-not-accepted-error");
 
-        filterRegex("/(?!_sso/).*$").through(com.xemantic.tadedon.servlet.CacheDisablingFilter.class);
+        filterRegex("/(?!assets/).*$").through(com.xemantic.tadedon.servlet.CacheForcingFilter.class);
 
         filterRegex("/(?!_sso/).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
 
