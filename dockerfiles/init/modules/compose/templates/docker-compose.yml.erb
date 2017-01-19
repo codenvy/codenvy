@@ -106,6 +106,7 @@ services:
     restart: always
     depends_on:
       - rsyslog
+      - zookeeper
     logging:
       driver: syslog
       options:
@@ -193,6 +194,7 @@ services:
       - haproxy
       - postgres
       - agents
+      - swarm
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/codenvy/codenvy.env'
