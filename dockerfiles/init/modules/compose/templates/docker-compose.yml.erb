@@ -195,6 +195,7 @@ services:
       - postgres
       - agents
       - swarm
+      - registry
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/codenvy/codenvy.env'
