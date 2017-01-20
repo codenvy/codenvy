@@ -33,12 +33,32 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
+            <artifactId>onpremises-ide-packaging-war-dashboard</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises</groupId>
             <artifactId>onpremises-ide-packaging-war-factory</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
+            <artifactId>onpremises-ide-packaging-war-ide</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises</groupId>
+            <artifactId>onpremises-ide-packaging-war-ide-resources</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises</groupId>
             <artifactId>onpremises-ide-packaging-war-platform-api</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises</groupId>
+            <artifactId>onpremises-ide-packaging-war-website-codenvy</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -55,6 +75,16 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-templates</artifactId>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-swagger-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
