@@ -12,8 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.servlet;
+package com.codenvy.service.http;
 
+import ch.qos.logback.classic.ClassicConstants;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.selector.ContextSelector;
 import ch.qos.logback.classic.util.ContextSelectorStaticBinder;
@@ -25,8 +26,6 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import static ch.qos.logback.classic.ClassicConstants.JNDI_CONTEXT_NAME;
 
 /**
  * ServletContextListener  used to terminate all work inside of logback LoggerContext.
@@ -47,8 +46,8 @@ public class Slf4jLoggerListener implements ServletContextListener {
 
         try {
             Context ctx = JNDIUtil.getInitialContext();
-            loggerContextName = (String)JNDIUtil.lookup(ctx, JNDI_CONTEXT_NAME);
-        } catch (NamingException ne) {
+            loggerContextName = JNDIUtil.lookup(ctx, ClassicConstants.JNDI_CONTEXT_NAME);
+        } catch (NamingException ignored) {
         }
 
         if (loggerContextName != null) {

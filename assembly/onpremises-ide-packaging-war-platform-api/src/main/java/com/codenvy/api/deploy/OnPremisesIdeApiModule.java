@@ -245,8 +245,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(WorkspaceMessenger.class).asEagerSingleton();
 
 
-        bind(com.codenvy.service.http.WorkspaceInfoCache.class);
-
         bind(com.codenvy.service.password.PasswordService.class);
 
         bind(SystemRamLimitMessageSender.class);
@@ -328,9 +326,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
 
         bindConstant().annotatedWith(Names.named("notification.server.propagate_events")).to("vfs,workspace");
-
-        bind(com.codenvy.service.http.WorkspaceInfoCache.WorkspaceCacheLoader.class)
-                .to(com.codenvy.service.http.WorkspaceInfoCache.ManagerCacheLoader.class);
 
         install(new com.codenvy.workspace.interceptor.InterceptorModule());
         install(new com.codenvy.auth.sso.server.deploy.SsoServerModule());

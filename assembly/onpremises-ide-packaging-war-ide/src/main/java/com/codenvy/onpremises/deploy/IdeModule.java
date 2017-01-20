@@ -31,8 +31,6 @@ import org.eclipse.che.inject.DynaModule;
 public class IdeModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(com.codenvy.service.http.WorkspaceInfoCache.WorkspaceCacheLoader.class)
-                .to(com.codenvy.service.http.WorkspaceInfoCache.HttpWorkspaceCacheLoader.class);
 
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url")).to("/site/error/error-cookies-disabled");

@@ -34,7 +34,6 @@
         <module>codenvy-hosted-infra-filters</module>
         <module>codenvy-hosted-recoverpassword</module>
         <module>codenvy-hosted-events</module>
-        <module>codenvy-hosted-commons-j2ee</module>
         <module>codenvy-hosted-machine-authentication-shared</module>
         <module>codenvy-hosted-machine-authentication</module>
         <module>codenvy-hosted-machine-authentication-ide</module>

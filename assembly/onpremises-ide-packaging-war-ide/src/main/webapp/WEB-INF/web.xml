@@ -48,7 +48,7 @@
         <listener-class>com.codenvy.auth.sso.client.DestroySessionListener</listener-class>
     </listener>
     <listener>
-        <listener-class>com.codenvy.servlet.Slf4jLoggerListener</listener-class>
+        <listener-class>com.codenvy.service.http.Slf4jLoggerListener</listener-class>
     </listener>
 
 

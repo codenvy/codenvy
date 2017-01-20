@@ -115,7 +115,7 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-commons-j2ee</artifactId>
+            <artifactId>codenvy-hosted-infra-filters</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>

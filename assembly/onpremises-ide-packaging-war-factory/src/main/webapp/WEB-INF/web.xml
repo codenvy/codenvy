@@ -41,7 +41,7 @@
     </listener>
 
     <listener>
-        <listener-class>com.codenvy.servlet.Slf4jLoggerListener</listener-class>
+        <listener-class>com.codenvy.service.http.Slf4jLoggerListener</listener-class>
     </listener>
 
     <session-config>
