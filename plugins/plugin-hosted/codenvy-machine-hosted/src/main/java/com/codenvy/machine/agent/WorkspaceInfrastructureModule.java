@@ -30,7 +30,6 @@ public class WorkspaceInfrastructureModule extends AbstractModule {
                                        String.class,
                                        InfrastructureProvisioner.class);
 
-        infrastructureProvisionerBinder.addBinding("native").to(NativeCodenvyInfrastructureProvisioner.class);
         infrastructureProvisionerBinder.addBinding("in-container")
                                        .to(CodenvyInContainerInfrastructureProvisioner.class);
     }
