@@ -26,6 +26,7 @@ import org.apache.directory.server.ldap.LdapServer;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.shared.ldap.entry.Modification;
 import org.apache.directory.shared.ldap.entry.ServerEntry;
+import org.apache.directory.shared.ldap.exception.LdapInvalidDnException;
 import org.apache.directory.shared.ldap.name.DN;
 import org.apache.directory.shared.ldap.schema.SchemaManager;
 import org.apache.directory.shared.ldap.schema.ldif.extractor.SchemaLdifExtractor;
@@ -177,6 +178,10 @@ public class EmbeddedLdapServer {
      */
     public ServerEntry newEntry(String name, String value) throws Exception {
         return service.newEntry(new DN(name + '=' + value + ',' + baseDn.toString()));
+    }
+
+    public ServerEntry newEntry(String name, String value, ServerEntry parent) throws Exception {
+        return service.newEntry(new DN(name + '=' + value + ',' + parent.getDn()));
     }
 
     /**
