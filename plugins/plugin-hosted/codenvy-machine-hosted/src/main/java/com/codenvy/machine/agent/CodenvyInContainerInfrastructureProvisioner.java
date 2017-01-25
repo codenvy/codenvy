@@ -73,7 +73,7 @@ public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastr
         agents.add(agents.indexOf("org.eclipse.che.ws-agent"), "com.codenvy.rsync_in_machine");
         extendedMachine.setAgents(agents);
 
-        ArrayList<String> volumes = new ArrayList<>(devMachine.getVolumes());
+        List<String> volumes = new ArrayList<>(devMachine.getVolumes());
         volumes.add(projectFolder);
         devMachine.setVolumes(volumes);
 
