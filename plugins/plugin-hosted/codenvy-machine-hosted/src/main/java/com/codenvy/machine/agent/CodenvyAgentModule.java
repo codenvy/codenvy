@@ -27,17 +27,43 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 public class CodenvyAgentModule extends AbstractModule {
     @Override
     protected void configure() {
+        bind(org.eclipse.che.api.agent.server.AgentRegistryService.class);
+
         bind(org.eclipse.che.api.agent.server.WsAgentHealthChecker.class)
                 .to(com.codenvy.machine.WsAgentHealthCheckerWithAuth.class);
 
-        Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.WsAgentWithAuthLauncherImpl.class);
-        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(com.codenvy.machine.agent.launcher.ExternalRsyncAgentLauncherImpl.class);
+        bind(org.eclipse.che.api.agent.server.AgentRegistry.class).to(org.eclipse.che.api.agent.server.impl.AgentRegistryImpl.class);
 
-        Multibinder<Agent> agentsMultibinder = Multibinder.newSetBinder(binder(), Agent.class);
-        agentsMultibinder.addBinding().to(com.codenvy.machine.agent.MachineInnerRsyncAgent.class);
-        agentsMultibinder.addBinding().to(com.codenvy.machine.agent.ExternalRsyncAgent.class);
+        bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
+                      .to("$HOME/che/terminal/che-websocket-terminal " +
+                          "-addr :4411 " +
+                          "-cmd ${SHELL_INTERPRETER} " +
+                          "-static $HOME/che/terminal/ " +
+                          "-path '/[^/]+' " +
+                          "-enable-auth " +
+                          "-enable-activity-tracking  " +
+                          "-logs-dir $HOME/che/exec-agent/logs");
+
+        Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
+        launchers.addBinding().to(com.codenvy.machine.agent.launcher.WsAgentWithAuthLauncherImpl.class);
+        launchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
+        launchers.addBinding().to(com.codenvy.machine.agent.launcher.ExternalRsyncAgentLauncherImpl.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.SshMachineExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.SshAgentLauncher.class);
+
+        Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
+        agents.addBinding().to(com.codenvy.machine.agent.MachineInnerRsyncAgent.class);
+        agents.addBinding().to(com.codenvy.machine.agent.ExternalRsyncAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.SshAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.UnisonAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.ExecAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.WsAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.LSPhpAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.LSPythonAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.LSJsonAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.LSCSharpAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.LSTypeScriptAgent.class);
 
         bind(String.class).annotatedWith(Names.named("workspace.backup.public_key"))
                           .toProvider(com.codenvy.machine.agent.WorkspaceSyncPublicKeyProvider.class);
