@@ -16,6 +16,7 @@ package com.codenvy.machine.agent.launcher;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 
+import org.eclipse.che.api.agent.WsAgentLauncher;
 import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
@@ -23,7 +24,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
@@ -42,7 +42,7 @@ import java.io.IOException;
  * @author Anatolii Bazko
  */
 @Singleton
-public class WsAgentWithAuthLauncherImpl extends WsAgentLauncherImpl {
+public class WsAgentWithAuthLauncherImpl extends WsAgentLauncher {
 
     private final HttpJsonRequestFactory httpJsonRequestFactory;
     private final String                 apiEndpoint;

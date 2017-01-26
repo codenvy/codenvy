@@ -62,6 +62,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final MachineTokenRegistry                          tokenRegistry;
+    private final String                                        cpusetCpus;
+    private final long                                          cpuPeriod;
+    private final long                                          cpuQuota;
 
     @Inject
     public HostedMachineProviderImpl(DockerConnector docker,
@@ -116,6 +119,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.tokenRegistry = tokenRegistry;
+        this.cpusetCpus = cpusetCpus;
+        this.cpuPeriod = cpuPeriod;
+        this.cpuQuota = cpuQuota;
     }
 
     @Override
@@ -155,6 +161,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               .withDoForcePull(true)
                                               .withMemoryLimit(service.getMemLimit())
                                               .withMemorySwapLimit(-1)
+                                              .withCpusetCpus(cpusetCpus)
+                                              .withCpuPeriod(cpuPeriod)
+                                              .withCpuQuota(cpuQuota)
                                               // don't build an image on a node under maintenance
                                               .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE),
                               progressMonitor);
@@ -203,6 +212,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                             .withDoForcePull(doForcePullOnBuild)
                             .withMemoryLimit(service.getMemLimit())
                             .withMemorySwapLimit(-1)
+                            .withCpusetCpus(cpusetCpus)
+                            .withCpuPeriod(cpuPeriod)
+                            .withCpuQuota(cpuQuota)
                             // don't build an image on a node under maintenance
                             .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE);
 

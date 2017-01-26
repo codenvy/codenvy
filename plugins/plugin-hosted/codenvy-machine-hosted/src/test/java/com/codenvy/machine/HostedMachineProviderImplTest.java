@@ -144,6 +144,45 @@ public class HostedMachineProviderImplTest {
         assertEquals(argumentCaptor.getValue().getBuildArgs().get(MAINTENANCE_CONSTRAINT_KEY), MAINTENANCE_CONSTRAINT_VALUE);
     }
 
+    @Test
+    public void shouldAddCpuConsumptionLimitsWhenBuildImage() throws Exception {
+        final String cpusetCpus = "2,4";
+        final Long cpuPeriod = 10000L;
+        final Long cpuQuota = 7500L;
+
+        provider = new HostedMachineProviderImpl(dockerConnector,
+                                                 credentialsReader,
+                                                 dockerMachineFactory,
+                                                 dockerInstanceStopDetector,
+                                                 windowsPathEscaper,
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 false,
+                                                 false,
+                                                 -1,
+                                                 emptySet(),
+                                                 emptySet(),
+                                                 SNAPSHOT_USE_REGISTRY,
+                                                 MEMORY_SWAP_MULTIPLIER,
+                                                 machineTokenRegistry,
+                                                 emptySet(),
+                                                 null,
+                                                 null,
+                                                 cpusetCpus,
+                                                 cpuPeriod,
+                                                 cpuQuota,
+                                                 emptySet());
+
+        createInstanceFromRecipe();
+        ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
+        verify(dockerConnector).buildImage(argumentCaptor.capture(), anyObject());
+        assertEquals(argumentCaptor.getValue().getCpusetCpus(), cpusetCpus);
+        assertEquals(argumentCaptor.getValue().getCpuPeriod(), cpuPeriod);
+        assertEquals(argumentCaptor.getValue().getCpuQuota(), cpuQuota);
+    }
+
     public CheServiceImpl createService() {
         CheServiceImpl service = new CheServiceImpl();
         service.setImage("image");

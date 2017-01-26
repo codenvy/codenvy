@@ -213,7 +213,7 @@ node default {
 # Codenvy machine configurations
 #
   $machine_extra_hosts = getValue("CODENVY_MACHINE_EXTRA_HOSTS","NULL")
-  $machine_ws_agent_inactive_stop_timeout_ms = getValue("CODENVY_MACHINE_WS_AGENT_INACTIVE_STOP_TIMEOUT_MS","600000")
+  $machine_ws_agent_inactive_stop_timeout_ms = getValue("CODENVY_MACHINE_WS_AGENT_INACTIVE_STOP_TIMEOUT_MS","14400000")
   $machine_default_mem_size_mb = getValue("CODENVY_MACHINE_DEFAULT_MEM_SIZE_MB","1024")
   $machine_ws_agent_max_start_time_ms = getValue("CODENVY_MACHINE_WS_AGENT_MAX_START_TIME_MS","300000")
   $machine_ws_agent_run_command = getValue("CODENVY_MACHINE_WS_AGENT_RUN_COMMAND","~/che/ws-agent/bin/catalina.sh run")
