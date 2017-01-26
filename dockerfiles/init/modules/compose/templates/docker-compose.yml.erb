@@ -28,6 +28,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # HAPROXY
@@ -53,6 +59,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # NGINX
@@ -68,6 +80,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # SOCAT
@@ -85,6 +103,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # SWARM
@@ -112,6 +136,12 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local3"
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # DOCKER REGISTRY
@@ -136,6 +166,12 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local0"
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # POSTGRES
@@ -162,6 +198,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # AGENTS
@@ -184,6 +226,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # CODENVY
@@ -229,6 +277,12 @@ services:
         soft: 163840
         hard: 163840
     restart: always
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
 
 ########################
 # ZOOKEEPER
@@ -253,3 +307,9 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local1"
+<% if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL' -%>
+    extra_hosts:
+<% scope.lookupvar('compose::codenvy_extra_hosts').split(",").each do |val| -%>
+<%='      - "' + val + '"' %>
+<% end -%>
+<% end -%>
