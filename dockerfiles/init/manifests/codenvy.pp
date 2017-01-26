@@ -305,7 +305,7 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
   $codenvy_repo = getValue("CHE_REPO","off")
 
 ###############################
-# Codenvy development mode
+# Codenvy system extra hosts
   $codenvy_extra_hosts = getValue("CODENVY_EXTRA_HOSTS","NULL")
 
 ###############################
