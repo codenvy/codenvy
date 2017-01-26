@@ -65,7 +65,6 @@ import com.palominolabs.metrics.guice.InstrumentationModule;
 
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.auth.AuthenticationDao;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
@@ -397,25 +396,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding()
                                        .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
-
-        bind(org.eclipse.che.api.agent.server.AgentRegistry.class)
-                .to(org.eclipse.che.api.agent.server.impl.LocalAgentRegistryImpl.class);
-
-        bindConstant().annotatedWith(Names.named("machine.terminal_agent.run_command"))
-                      .to("$HOME/che/terminal/che-websocket-terminal " +
-                          "-addr :4411 " +
-                          "-cmd ${SHELL_INTERPRETER} " +
-                          "-static $HOME/che/terminal/ " +
-                          "-path '/[^/]+' " +
-                          "-enable-auth " +
-                          "-enable-activity-tracking  " +
-                          "-logs-dir $HOME/che/exec-agent/logs");
-
-        Multibinder<AgentLauncher> agentLaunchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.TerminalAgentLauncherImpl.class);
-        agentLaunchers.addBinding().to(org.eclipse.che.api.workspace.server.launcher.SshAgentLauncherImpl.class);
-
-        install(new org.eclipse.che.api.agent.server.AgentModule());
 
         //workspace activity service
         install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());

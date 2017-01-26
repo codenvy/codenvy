@@ -46,7 +46,7 @@ public class RecipeCreatorPermissionsProvider extends CascadeEventSubscriber<Rec
     @Override
     public void onCascadeEvent(RecipePersistedEvent event) throws Exception {
         final Subject subject = EnvironmentContext.getCurrent().getSubject();
-        if (subject != null) {
+        if (!subject.isAnonymous()) {
             permissionsManager.storePermission(new RecipePermissionsImpl(subject.getUserId(),
                                                                          event.getRecipe().getId(),
                                                                          RecipeDomain.getActions()));

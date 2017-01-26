@@ -37,6 +37,7 @@ import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,7 +152,7 @@ public class VSTSWebhookService extends BaseWebhookService {
         LOG.debug("{}", workItemCreationEvent);
 
         // Set current Codenvy user
-        if (EnvironmentContext.getCurrent().getSubject() == null) {
+        if (EnvironmentContext.getCurrent().getSubject().isAnonymous()) {
             EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         }
 
@@ -240,7 +241,7 @@ public class VSTSWebhookService extends BaseWebhookService {
         LOG.debug("{}", pullRequestUpdatedEvent);
 
         // Set current Codenvy user
-        if (EnvironmentContext.getCurrent().getSubject() == null) {
+        if (EnvironmentContext.getCurrent().getSubject().isAnonymous()) {
             EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         }
 

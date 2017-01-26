@@ -6,11 +6,14 @@ Cloud workspaces for development teams. One-click Docker environments to create 
 ### Getting Started
 You can run Codenvy [in the public cloud](http://codenvy.io), a private cloud, or install it on any OS that has Docker 1.11+ installed. Codenvy has been tested on many flavors of Linux, MacOS, and Windows. A private Codenvy install allows you to configure LDAP, permissions, Eclipse Che extensions, Jira integration, Jenkins integration and integration to your private toolchain. 
 
-The [docs are awesome](https://github.com/codenvy/codenvy/tree/master/docs/_docs/admin-guide). Or, quick start:
+The [docs are awesome](https://codenvy.com/docs/). 
 
+Or, quick start:
 ```
-docker run codenvy/cli:nightly start
+docker run codenvy/cli start
 ```
+
+Then open `http://localhost` and log in as `admin` / `password`.
 
 The `codenvy` repository is where we do development. Your license grants you access to the source code for customization, but you are not able to redistribute the source code or use it in commercial endeavors.
 
@@ -19,10 +22,10 @@ The `codenvy` repository is where we do development. Your license grants you acc
 - [Review the docs](https://codenvy.com/docs/) and make improvements
 
 ### License
-Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf) that includes premium support.
+Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users or support, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf).
 
 ### Customiziing 
-There are many ways to customize Codenvy out-of-the-box. Codenvy is customized using Eclipse Che including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 
+There are many ways to customize Codenvy. Codenvy is customized using Eclipse Che including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 
 
 ### Clone
 

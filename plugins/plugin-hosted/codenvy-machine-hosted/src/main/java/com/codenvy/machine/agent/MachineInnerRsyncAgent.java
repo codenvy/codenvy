@@ -14,7 +14,8 @@
  */
 package com.codenvy.machine.agent;
 
-import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+
+import org.eclipse.che.api.agent.shared.model.impl.AgentImpl;
 
 import java.util.Collections;
 
