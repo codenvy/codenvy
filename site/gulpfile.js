@@ -136,19 +136,19 @@ gulp.task('onprem_se',
   'duplicate_html', //duplicate login.html as /index.html
   'css_onprem_se', //processing scss by compass styles and copy to /site/styles
   'jekyll_onprem_se', //building pages
-  'clean_templates_se', //clean up /site/templates/
+  'clean_templates_se', //clean up /site/templates/ TODO remove this
   'rjs_se', //buld amd-app.js file
   'rev-se', //versioning amd-app.js
   'copy_onprem_se', //copy onprem-se site to /dist/onprem-se
-  'onprem_copy_templates', //copy html templates to /site/template
-  'copy_onprem_se_email_templates', //copy onprem-se email templates to /dist/onprem-se/site/email-templates
-  'del_replaced_files', //delete replaced files
-  'onprem_login_page'], //copy onprem custom login page to /onprem-se/site
+  'onprem_copy_templates', //copy html templates to /site/template TODO remove this
+  'copy_onprem_se_email_templates', //copy onprem-se email templates to /dist/onprem-se/site/email-templates TODO remove this
+  'del_replaced_files', //delete replaced files TODO remove this
+  'onprem_login_page'], //copy onprem custom login page to /onprem-se/site TODO remove this
   function(){
 
 })
 
-// Copy onprem custom pages
+// Copy onprem custom pages TODO remove this
 gulp.task('onprem_copy_templates', ['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se','clean_templates_se'], function(){
   return   gulp.src(paths.onpremSE + 'site/custom_pages/onprem-se/templates/*.html')
   .pipe(gulp.dest(paths.onpremSE+'/site/templates'))
@@ -157,7 +157,7 @@ gulp.task('onprem_copy_templates', ['copy_src','onprem_se_cfg','css_onprem_se','
   }));
 });
 
-// Cleaning files and folders to be replaced with custom ones
+// Cleaning files and folders to be replaced with custom ones TODO remove this
 gulp.task('del_replaced_files',['copy_src','onprem_se_cfg','css_onprem_se','duplicate_html','jekyll_onprem_se'], function(){
   return del([
     paths.onpremSE+'/site/login.html',
@@ -165,7 +165,7 @@ gulp.task('del_replaced_files',['copy_src','onprem_se_cfg','css_onprem_se','dupl
     ]);
 });
 
-// Copy onprem login custom page
+// Copy onprem login custom page TODO remove this
 gulp.task('onprem_login_page', ['copy_src','onprem_se_cfg','css_onprem_se','clean_templates_se','del_replaced_files','jekyll_onprem_se','duplicate_html'], function(){
   return   gulp.src(paths.onpremSE + 'site/custom_pages/onprem-se/login.html')
   .pipe(gulp.dest(paths.onpremSE+'/site'))
@@ -176,7 +176,7 @@ gulp.task('onprem_login_page', ['copy_src','onprem_se_cfg','css_onprem_se','clea
   }));
 });
 
-// clean prod templates
+// clean prod templates TODO remove this
 gulp.task('clean_templates_se',['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se'], function(){
   return gulp.src(paths.onpremSE + '/site/templates/')
   .pipe(rimraf());
@@ -294,8 +294,8 @@ gulp.task('copy_onprem_se',
   gulp.src([paths.onpremSE+'**/*.html', // all HTML
     '!'+paths.onpremSE+'site/custom_pages/**/*.html',
     '!'+paths.onpremSE+'site/admin.html',
-    '!'+paths.onpremSE+'site/email-templates_onpremises/*.html',
-    '!'+paths.onpremSE+'site/email-templates/*.html',
+    '!'+paths.onpremSE+'site/email-templates_onpremises/*.html', //TODO remove this
+    '!'+paths.onpremSE+'site/email-templates/*.html', //TODO remove this
     paths.onpremSE+'**/amd-app-*.js', // minified JS
     paths.onpremSE+'**/*-*.css', // minified CSS
     paths.onpremSE+'**/*.jpg',
@@ -313,7 +313,7 @@ gulp.task('copy_onprem_se',
   .pipe(gulp.dest(paths.dist+'onprem-se'));
 });
 
-// Copy omprem email templates page
+// Copy omprem email templates page TODO remove this
 gulp.task('copy_onprem_se_email_templates', ['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se'], function(){
   return   gulp.src(paths.onpremSE+'site/email-templates_onpremises/*.html')
     .pipe(gulp.dest(paths.dist+'onprem-se/site/email-templates'))
