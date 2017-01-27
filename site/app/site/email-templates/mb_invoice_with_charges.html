@@ -33,12 +33,12 @@
         </p>
         </td>
         <td style="border: 1px solid grey; padding: 10px;">
-            <p><strong th:text="'Receipt Total: $' + ${#numbers.formatDecimal(invoice.total, 1, 2)}">Receipt Total: $69.79</strong></p>
+            <p><strong th:text="'Receipt Total: $' + ${invoice.total}">Receipt Total: $69.79</strong></p>
 
              <p><span th:if="${creditCard != null}" th:text="'Charged to: ' + ${creditCard.type} + ' ending...' + ${#strings.substring(creditCard.Number,12,16)}">Charged to: VISA ending ...2547</span><br/>
                 <span th:text="'Receipt Date: ' + ${#dates.format(sendDate, 'dd-MMM-yyyy')}">Receipt Date: 2-Jan-2015</span><br/>
                 <span th:text="'Receipt ID: ' + ${invoice.id}">Receipt ID: 123</span><br/>
-                <span th:text="'Usage Period: ' + ${#dates.format(fromDate, 'MMM dd')} + ' - ' + ${#dates.format(tillDate, 'MMM dd')}">Usage Period: Dec 01 - Dec 31</span>&nbsp;
+                <span th:text="'Usage Period: ' + ${#dates.format(fromDate, 'MMM,dd')} + ' - ' + ${#dates.format(tillDate, 'MMM,dd')}">Usage Period: December, 2014</span>&nbsp;
             </p>
         </td>
     </tr>
@@ -83,14 +83,14 @@
     </tr>
     <tr th:if="${saasCharge.prePaidAmount != 0}">
         <td colspan="1" style="text-align: left; border: 1px solid grey; padding: 10px;">Pre-Paid Usage</td>
-        <td th:text="${#numbers.formatDecimal(saasCharge.providedPrepaidAmount, 1, 2)}" style="text-align: right; border: 1px solid grey; padding: 10px;">8000.00</td>
+        <td th:text="${prepaidAvailable != null} ? ${#numbers.formatDecimal(prepaidAvailable, 1, 2)} : '0.00'" style="text-align: right; border: 1px solid grey; padding: 10px;">8000.00</td>
         <td th:text="${#numbers.formatDecimal(saasCharge.prePaidAmount, 1, 6)}" colspan="1" style="text-align: right; border: 1px solid grey; padding: 10px;">6000.00</td>
         <!-- td colspan="1" style="text-align: right; border: 1px solid grey; padding: 10px;">&nbsp;</td -->
         <td colspan="2" style="text-align: right; border: 1px solid grey; padding: 10px;">Pre-paid</td>
     </tr>
     <tr>
         <td colspan="1" style="text-align: left; border: 1px solid grey; padding: 10px;">Free Usage</td>
-        <td th:text="${#numbers.formatDecimal(saasCharge.providedFreeAmount, 1, 2)}" style="text-align: right; border: 1px solid grey; padding: 10px;">10.00</td>
+        <td th:text="${#numbers.formatDecimal(freeLimit, 1, 2)}" style="text-align: right; border: 1px solid grey; padding: 10px;">10.00</td>
         <td th:text="${saasCharge != null} ? ${#numbers.formatDecimal(saasCharge.freeAmount, 1, 6)} : '0.000000'" colspan="1" style="text-align: right; border: 1px solid grey; padding: 10px;">10.00</td>
         <td colspan="1" style="text-align: right; border: 1px solid grey; padding: 10px;">Free</td>
         <td colspan="1" style="text-align: right; border: 1px solid grey; padding: 10px;">$ 0.00</td>
