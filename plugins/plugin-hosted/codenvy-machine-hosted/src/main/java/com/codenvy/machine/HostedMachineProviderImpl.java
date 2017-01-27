@@ -222,7 +222,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                     LOG.error("Failed to delete pulled snapshot: " + image);
                 }
             }
-        }, 10, TimeUnit.SECONDS);
+        }, 10L, TimeUnit.SECONDS);
     }
 
     /**
@@ -276,19 +276,14 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
 
     @PreDestroy
     private void preDestroy() {
-        finalizeSnapshotImagesCleaner();
-    }
-
-    /**
-     * Tries to clean up snapshots images which is in the cleaner queue, but were canceled due to server stopping.
-     * To avoid freezing of server on stop performs post clean in separate thread.
-     */
-    private void finalizeSnapshotImagesCleaner() {
+        // Tries to clean up snapshots images which is in the cleaner queue, but were canceled due to server stopping.
+        // To avoid freezing of server on stop performs clean in separate thread.
         List<Runnable> queue = snapshotImagesCleanerService.shutdownNow();
-        Thread snapshotsCleaner = new Thread(() -> queue.forEach(Runnable::run));
-        snapshotsCleaner.setDaemon(true);
-        snapshotsCleaner.setName("PreDestroySnapshotImagesCleaner");
-        snapshotsCleaner.start();
+        if (!queue.isEmpty()) {
+            Thread snapshotsCleaner = new Thread(() -> queue.forEach(Runnable::run));
+            snapshotsCleaner.setName("PreDestroySnapshotImagesCleaner");
+            snapshotsCleaner.start();
+        }
     }
 
 }
