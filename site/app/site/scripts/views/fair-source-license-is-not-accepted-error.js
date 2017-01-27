@@ -16,9 +16,9 @@
  * from Codenvy S.A..
  */
  
-define(["models/account"],
+define(["models/account", "backbone"],
 
-    function(Account){
+    function(Account, Backbone){
         var FSLnotAcceptedPage = Backbone.View.extend({
 
         	initialize : function(){

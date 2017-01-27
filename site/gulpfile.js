@@ -27,6 +27,7 @@ var paths = {
         src: 'app/',
          // assembly folders
         onpremSE: './target/onprem-se/',
+        stage: './target/stage/',
         // ------------------
         temp: 'target/temp/',
         dist: 'target/dist/', //dist folder
@@ -39,6 +40,14 @@ gulp.task('connect', ['gh'], function() {
     root: paths.gh
   });
 });
+
+gulp.task('lint',function(){
+  gulp.src(['!'+paths.src+'site/scripts/vendor/*.*',paths.src+'site/scripts/**/*.js'])
+    .pipe(jshint())
+  .pipe(jshint.reporter('jshint-stylish'))
+  .pipe(jshint.reporter('fail'))
+});
+
 // --------------------------- Building Stage -----------------------------
 //----------------
 //----------
@@ -46,7 +55,7 @@ gulp.task('stage',['copy_src','stage_cfg','css_stage','jekyll_stage','copy_stage
 
 })
 // Copies src to temp folder
-gulp.task('copy_src', ['duplicate_html','duplicate_error_html'], function(){
+gulp.task('copy_src', ['lint','duplicate_html','duplicate_error_html'], function(){
   return gulp.src(paths.src + '**/*.*')
   .pipe(gulp.dest(paths.temp))
 })
