@@ -275,10 +275,19 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
     }
 
     @PreDestroy
-    private void preDestroy() {
-        // Tries to clean up snapshots images which is in the cleaner queue, but were canceled due to server stopping.
-        List<Runnable> cleanSnapshotImagesTasksQueue = snapshotImagesCleanerService.shutdownNow();
-        cleanSnapshotImagesTasksQueue.forEach(Runnable::run);
+    private void finalizeSnapshotImagesCleaner() {
+        snapshotImagesCleanerService.shutdown();
+        try {
+            if (!snapshotImagesCleanerService.awaitTermination(30L, TimeUnit.SECONDS)) {
+                snapshotImagesCleanerService.shutdownNow();
+                if (!snapshotImagesCleanerService.awaitTermination(10L, TimeUnit.SECONDS)) {
+                    LOG.warn("Failed to terminate SnapshotImagesCleaner scheduler");
+                }
+            }
+        } catch (InterruptedException e) {
+            snapshotImagesCleanerService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
 }
