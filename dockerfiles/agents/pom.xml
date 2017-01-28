@@ -46,6 +46,36 @@
             <type>tar.gz</type>
             <classifier>linux_amd64</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>csharp</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>go</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>json</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>php</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>python</artifactId>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls</groupId>
+            <artifactId>typescript</artifactId>
+            <type>tar.gz</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

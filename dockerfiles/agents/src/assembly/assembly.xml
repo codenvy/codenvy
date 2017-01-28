@@ -49,5 +49,59 @@
                 <include>org.eclipse.che:exec-agent:tar.gz:linux_arm7</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.php.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:php</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.csharp.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:csharp</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.json.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:json</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.typescript.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:typescript</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.go.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:go</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>agents</outputDirectory>
+            <outputFileNameMapping>org.eclipse.che.ls.python.tar.gz</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ls:python</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
 </assembly>
