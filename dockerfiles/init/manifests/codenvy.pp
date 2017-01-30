@@ -309,6 +309,10 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
   $codenvy_extra_hosts = getValue("CODENVY_EXTRA_HOSTS","NULL")
 
 ###############################
+#
+  $db_schema_flyway_scripts_locations=getValue("DB_SCHEMA_FLYWAY_SCRIPTS_LOCATIONS","classpath:che-schema,classpath:codenvy-schema")
+
+###############################
 # Include base module
   include base
 }
