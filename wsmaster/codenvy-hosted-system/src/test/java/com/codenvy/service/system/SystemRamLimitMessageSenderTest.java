@@ -12,8 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.systemram;
+package com.codenvy.service.system;
 
+import org.eclipse.che.api.system.server.SystemManager;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -40,6 +41,8 @@ public class SystemRamLimitMessageSenderTest {
     private SystemRamInfoProvider systemRamInfoProvider;
     @Mock
     private SystemRamInfo systemRamInfo;
+    @Mock
+    private SystemManager systemManager;
     @InjectMocks
     private SystemRamLimitMessageSender systemRamLimitMessageSender;
 

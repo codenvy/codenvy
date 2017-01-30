@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.systemram;
+package com.codenvy.service.system;
 
 import java.util.Objects;
 
