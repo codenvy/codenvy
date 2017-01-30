@@ -14,6 +14,7 @@
  */
 package com.codenvy.ext.java.server;
 
+import com.codenvy.api.agent.CodenvyProjectServiceLinksInjector;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.auth.sso.client.TokenHandler;
 import com.codenvy.auth.sso.client.token.RequestTokenExtractor;
@@ -38,6 +39,7 @@ import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LocalGitUserResolver;
 import org.eclipse.che.api.project.server.ProjectApiModule;
+import org.eclipse.che.api.project.server.ProjectServiceLinksInjector;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
@@ -110,6 +112,8 @@ public class MachineModule extends AbstractModule {
         bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
+
+        bind(ProjectServiceLinksInjector.class).to(CodenvyProjectServiceLinksInjector.class);
 
         bind(HttpJsonRequestFactory.class).to(AuthorizeTokenHttpJsonRequestFactory.class);
 

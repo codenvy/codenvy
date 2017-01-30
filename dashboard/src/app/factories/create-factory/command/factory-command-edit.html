@@ -1,21 +1,18 @@
-<md-dialog flex="50">
-  <form name="editActionForm">
-    <che-panel che-title="Edit Command">
-      <md-dialog-content>
-        <che-input focusable
-                   che-name="Editing"
-                   che-form="editActionForm"
-                   che-label-name="Param"
-                   required
-                   ng-model="factoryCommandDialogEditCtrl.selectedValue">
-          <div ng-message="required">Param is required</div>
-        </che-input>
-      </md-dialog-content>
-      <div class="md-actions">
-        <md-button ng-click="factoryCommandDialogEditCtrl.abort()" tabindex="0" type="button">Cancel</md-button>
-        <md-button class="md-primary" ng-click="factoryCommandDialogEditCtrl.edit()" ng-disabled="editActionForm.$invalid">Edit</md-button>
-      </div>
-    </che-panel>
-
+<che-popup title="Edit command" on-close="factoryCommandDialogEditCtrl.abort()">
+  <form name="editActionForm" flex>
+    <che-input focusable
+               che-name="Editing"
+               che-form="editActionForm"
+               che-label-name="Param"
+               required
+               ng-model="factoryCommandDialogEditCtrl.selectedValue">
+      <div ng-message="required">Param is required</div>
+    </che-input>
+    <che-button-notice che-button-title="Close"
+                       ng-click="factoryCommandDialogEditCtrl.abort()">
+    </che-button-notice>
+    <che-button-primary
+      che-button-title="Edit" ng-disabled="editActionForm.$invalid"
+      ng-click="factoryCommandDialogEditCtrl.edit()"></che-button-primary>
   </form>
-</md-dialog>
+</che-popup>

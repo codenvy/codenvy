@@ -20,11 +20,13 @@
  */
 export class FactoryInformationCtrl {
 
+  private  confirmDialogService: any;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, cheAPI, codenvyAPI, cheNotification, $location, $mdDialog, $log, $timeout, lodash, $filter, $q) {
+  constructor($scope, cheAPI, codenvyAPI, cheNotification, $location, $mdDialog, $log, $timeout, lodash, $filter, $q, confirmDialogService: any) {
     this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
@@ -34,6 +36,7 @@ export class FactoryInformationCtrl {
     this.$timeout = $timeout;
     this.lodash = lodash;
     this.$filter = $filter;
+    this.confirmDialogService = confirmDialogService;
 
     this.timeoutPromise = null;
     $scope.$on('$destroy', () => {
@@ -174,17 +177,12 @@ export class FactoryInformationCtrl {
     });
   }
 
-  //Perform factory deletion.
-  deleteFactory(event) {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the factory ' + (this.factory.name ? '"' + this.factory.name + '"' : this.factory.id + '?'))
-      .content('Please confirm for the factory removal.')
-      .ariaLabel('Remove factory')
-      .ok('Delete it!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
+  // perform factory deletion.
+  deleteFactory(): void {
+    let content = 'Please confirm removal for the factory \'' + (this.factory.name ? this.factory.name : this.factory.id) + '\'.';
+    let promise = this.confirmDialogService.showConfirmDialog('Remove the factory', content, 'Delete');
+
+    promise.then(() => {
       // remove it !
       let promise = this.codenvyAPI.getFactory().deleteFactoryById(this.factory.id);
       promise.then(() => {

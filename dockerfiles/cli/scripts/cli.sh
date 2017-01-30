@@ -7,7 +7,7 @@
 #
 
 cli_pre_init() {
-  GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host eclipse/che-ip:nightly)}
+  GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host ${UTILITY_IMAGE_CHEIP})}
   DEFAULT_CODENVY_HOST=$GLOBAL_HOST_IP
   CODENVY_HOST=${CODENVY_HOST:-${DEFAULT_CODENVY_HOST}}
   CODENVY_PORT=80
@@ -113,9 +113,22 @@ cmd_init_reinit_pre_action() {
 
 cmd_start_check_ports() {
 
+  # Develop array of port #, description.
+  # Format of array is "<port>;<port_string>" where the <port_string> is the text to appear in console
+  local PORT_ARRAY=(
+     "80;port 80 (http):        "
+     "443;port 443 (https):      "
+     "2181;port 2181 (zookeeper): "
+     "5000;port 5000 (registry):  "
+     "23750;port 23750 (socat):    "
+     "23751;port 23751 (swarm):    "
+     "32000;port 32000 (jmx):      "
+     "32001;port 32001 (jmx):      "
+    )
+
   # If dev mode is on, then we also need to check the debug port set by the user for availability
   if debug_server; then
-    USER_DEBUG_PORT=$(docker_run --env-file="${REFERENCE_CONTAINER_ENVIRONMENT_FILE}" alpine sh -c 'echo $CODENVY_DEBUG_PORT')
+    USER_DEBUG_PORT=$(get_value_of_var_from_env_file CODENVY_DEBUG_PORT)
 
     if [[ "$USER_DEBUG_PORT" = "" ]]; then
       # If the user has not set a debug port, then use the default
@@ -126,41 +139,16 @@ cmd_start_check_ports() {
       CODENVY_DEBUG_PORT=$USER_DEBUG_PORT
       CHE_DEBUG_PORT=$USER_DEBUG_PORT
     fi
+
+    PORT_ARRAY+=("$CODENVY_DEBUG_PORT;port ${CODENVY_DEBUG_PORT} (debug):      ")
+    PORT_ARRAY+=("9000;port 9000 (lighttpd):  ")
   fi
 
-  PORT_BREAK="no" 
-  text   "         port 80 (http):        $(port_open 80 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 443 (https):      $(port_open 443 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 2181 (zookeeper): $(port_open 2181 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 5000 (registry):  $(port_open 5000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 23750 (socat):    $(port_open 23750 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 23751 (swarm):    $(port_open 23751 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 32001 (jmx):      $(port_open 32001 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  text   "         port 32101 (jmx):      $(port_open 32101 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-  if debug_server; then
-    text   "         port ${CODENVY_DEBUG_PORT} (debug):     $(port_open ${CODENVY_DEBUG_PORT} && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
-    text   "         port 9000 (lighttpd):  $(port_open 9000 && echo "${GREEN}[AVAILABLE]${NC}" || echo "${RED}[ALREADY IN USE]${NC}") \n"
+  if check_all_ports "${PORT_ARRAY[@]}"; then
+    print_ports_as_ok "${PORT_ARRAY[@]}"
+  else
+    find_and_print_ports_as_notok "${PORT_ARRAY[@]}"
   fi
-
-  if ! $(port_open 80) || \
-     ! $(port_open 443) || \
-     ! $(port_open 2181) || \
-     ! $(port_open 5000) || \
-     ! $(port_open 23750) || \
-     ! $(port_open 23751) || \
-     ! $(port_open 32001) || \
-     ! $(port_open 32101); then
-     echo ""
-     error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-     return 2;
-  fi
-  if debug_server; then
-    if ! $(port_open ${CODENVY_DEBUG_PORT}) || ! $(port_open 9000); then
-      echo ""
-      error "Ports required to run $CHE_MINI_PRODUCT_NAME are used by another program."
-      return 1;
-    fi
-  fi  
 }
 
 cmd_config_post_action() {
@@ -229,9 +217,15 @@ generate_configuration_with_puppet() {
     WRITE_LOGS=">> \"${LOGS}\""
   fi
 
-  if local_repo; then
+  CHE_REPO="off"
+  WRITE_PARAMETERS=""
+
+  if local_repo || local_assembly; then
     CHE_REPO="on"
     WRITE_PARAMETERS=" -e \"PATH_TO_CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
+  fi
+
+  if local_repo; then
     WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}\""
     WRITE_PARAMETERS+=" -e \"PATH_TO_TERMINAL_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${TERMINAL_AGENT_ASSEMBLY}\""
 
@@ -246,10 +240,10 @@ generate_configuration_with_puppet() {
     # Handle override/addon
     if [[ -d "/repo/dockerfiles/init/addon/" ]]; then
       WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/addon.pp\":/etc/puppet/manifests/addon.pp:ro"
+      if [ -d "/repo/dockerfiles/init/addon/modules" ]; then
+        WRITE_PARAMETERS+=" -v \"${CHE_HOST_DEVELOPMENT_REPO}/dockerfiles/init/addon/modules/\":/etc/puppet/addon/:ro"
+      fi
     fi
-  else
-    CHE_REPO="off"
-    WRITE_PARAMETERS=""
   fi
 
   GENERATE_CONFIG_COMMAND="docker_run \
@@ -267,7 +261,7 @@ generate_configuration_with_puppet() {
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
-                                /etc/puppet/modules/ \
+                                /etc/puppet/modules/:/etc/puppet/addon/ \
                                 /etc/puppet/manifests/ --show_diff ${WRITE_LOGS}"
 
   log ${GENERATE_CONFIG_COMMAND}

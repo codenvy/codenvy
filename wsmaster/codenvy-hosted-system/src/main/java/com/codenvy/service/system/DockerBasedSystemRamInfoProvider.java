@@ -12,12 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.systemram;
+package com.codenvy.service.system;
 
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,8 @@ public class DockerBasedSystemRamInfoProvider implements SystemRamInfoProvider {
     private final DockerConnector dockerConnector;
 
     @Inject
-    public DockerBasedSystemRamInfoProvider(DockerConnector dockerConnector) {
-        this.dockerConnector = dockerConnector;
+    public DockerBasedSystemRamInfoProvider(DockerConnectorProvider dockerConnectorProvider) {
+        this.dockerConnector = dockerConnectorProvider.get();
     }
 
     @Override

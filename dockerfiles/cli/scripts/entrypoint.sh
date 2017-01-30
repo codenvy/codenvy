@@ -41,6 +41,7 @@ OPTIONAL DOCKER PARAMETERS:
   -v <LOCAL_PATH>:${CHE_CONTAINER_ROOT}/backup         Where backup files will be saved
   -v <LOCAL_PATH>:/cli                 Where the CLI trace log is saved
   -v <LOCAL_PATH>:/repo                ${CHE_FORMAL_PRODUCT_NAME} git repo to activate dev mode
+  -v <LOCAL_PATH>:/assembly            ${CHE_FORMAL_PRODUCT_NAME} local assembly (for development)
   -v <LOCAL_PATH>:/sync                Where remote ws files will be copied with sync command
   -v <LOCAL_PATH>:/unison              Where unison profile for optimzing sync command resides
     

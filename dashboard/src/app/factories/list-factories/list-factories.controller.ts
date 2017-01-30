@@ -21,15 +21,18 @@
  */
 export class ListFactoriesCtrl {
 
+  private confirmDialogService: any;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q, $mdDialog, codenvyAPI, cheNotification, $rootScope) {
+  constructor($q, $mdDialog, codenvyAPI, cheNotification, $rootScope, confirmDialogService: any) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
+    this.confirmDialogService = confirmDialogService;
 
     this.maxItems = 15;
     this.skipCount = 0;
@@ -245,23 +248,16 @@ export class ListFactoriesCtrl {
 
   /**
    * Show confirmation popup before delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param numberToDelete {number}
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteFactoriesConfirmation(numberToDelete) {
-    let confirmTitle = 'Would you like to delete ';
+  showDeleteFactoriesConfirmation(numberToDelete: number): ng.IPromise<any> {
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' factories?';
+      content += 'these ' + numberToDelete + ' factories?';
     } else {
-      confirmTitle += 'this selected factory?';
+      content += 'this selected factory?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove factories')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
-
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove factories', content, 'Delete');
   }
 }

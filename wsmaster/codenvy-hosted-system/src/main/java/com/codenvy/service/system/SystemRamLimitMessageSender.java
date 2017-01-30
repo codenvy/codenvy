@@ -12,13 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.systemram;
+package com.codenvy.service.system;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.schedule.ScheduleDelay;
-import com.codenvy.service.systemram.dto.SystemRamLimitDto;
+import com.codenvy.service.system.dto.SystemRamLimitDto;
 
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;

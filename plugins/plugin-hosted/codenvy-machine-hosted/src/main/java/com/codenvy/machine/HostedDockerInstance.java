@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProcessesCleaner;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
@@ -45,7 +45,7 @@ public class HostedDockerInstance extends DockerInstance {
     private final int concurrentCommits;
 
     @Inject
-    public HostedDockerInstance(DockerConnector docker,
+    public HostedDockerInstance(DockerConnectorProvider dockerConnectorProvider,
                                 @Named("che.docker.registry") String registry,
                                 @Named("che.docker.namespace") @Nullable String registryNamespace,
                                 DockerMachineFactory dockerMachineFactory,
@@ -58,7 +58,7 @@ public class HostedDockerInstance extends DockerInstance {
                                 DockerInstanceProcessesCleaner processesCleaner,
                                 @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
                                 @Named("che.docker.concurrent_commits_on_node") int concurrentCommits) throws MachineException {
-        super(docker,
+        super(dockerConnectorProvider,
               registry,
               registryNamespace,
               dockerMachineFactory,

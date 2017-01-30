@@ -105,7 +105,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                                                                  "/ldap/sync/*",
                                                                  "/organization",
                                                                  "/organization/*",
-                                                                 "/system/ram/*",
+                                                                 "/system/*",
                                                                  "/license/account/*",
                                                                  "/resource/*");
 

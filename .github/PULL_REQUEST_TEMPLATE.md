@@ -1,17 +1,19 @@
+<!-- Please review the following before submitting a PR:
+Pull Request Policy: https://github.com/codenvy/planning/wiki/Development-Workflow#pull-requests
+-->
+
 ### What does this PR do?
+
 
 ### What issues does this PR fix or reference?
 
-### Previous Behavior
-Remove this section if not relevant
 
-### New Behavior
-This content may also be included in the release notes.
+### Changelog and Release Note Information
+**Changelog**:<!-- one line entry to be added to changelog -->
 
-### Tests written?
-Yes/No
+**Release Notes**:<!-- markdown to be included in marketing announcement - N/A for bugs -->
 
-### Docs requirements?
-Include the content for all the docs changes required. 
-1.  API changes  
-2.  User docs changes  
+
+### Docs Pull Request
+<!-- Please add a matching PR to [the docs repo](http://github.com/eclipse/che-docs) and link that PR to this issue.
+Both will be merged at the same time. -->

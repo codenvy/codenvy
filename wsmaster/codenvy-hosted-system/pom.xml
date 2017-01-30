@@ -22,12 +22,16 @@
         <groupId>com.codenvy.onpremises.wsmaster</groupId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>codenvy-hosted-system-ram</artifactId>
-    <name>Codenvy :: Hosted :: System RAM API</name>
+    <artifactId>codenvy-hosted-system</artifactId>
+    <name>Codenvy :: Hosted :: System API</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-permission</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -62,6 +66,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
@@ -80,6 +88,10 @@
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
             <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
@@ -89,6 +101,11 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -126,6 +143,20 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoredDependency>com.codenvy.onpremises.wsmaster:codenvy-hosted-api-permission</ignoredDependency>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
                 <version>${che.version}</version>
@@ -140,16 +171,16 @@
                 <dependencies>
                     <dependency>
                         <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                        <artifactId>codenvy-hosted-system-ram</artifactId>
+                        <artifactId>codenvy-hosted-system</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
                     <dtoPackages>
-                        <package>com.codenvy.service.systemram.dto</package>
+                        <package>com.codenvy.service.system.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>com.codenvy.service.systemram.DtoServerImpls</genClassName>
+                    <genClassName>com.codenvy.service.system.DtoServerImpls</genClassName>
                     <impl>server</impl>
                 </configuration>
             </plugin>

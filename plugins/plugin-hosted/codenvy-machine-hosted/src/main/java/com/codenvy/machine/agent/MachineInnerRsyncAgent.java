@@ -44,7 +44,7 @@ public class MachineInnerRsyncAgent extends AgentImpl {
               "#\n\n" +
               "unset SUDO\n" +
               "unset PACKAGES\n" +
-              "test \"$(id -u)\" = 0 || SUDO=\"sudo\"\n\n" +
+              "test \"$(id -u)\" = 0 || SUDO=\"sudo -E\"\n\n" +
               "LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')\n" +
               "LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)\n\n" +
               "###############################\n" +

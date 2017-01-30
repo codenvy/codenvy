@@ -58,17 +58,11 @@ che.auth.reserved_user_names=api,dashboard,factory,ide-resources,main,site,swagg
 # SSO
 auth.sso.client_allow_anonymous=false
 
-# braintree configurations, must be empty for on premise installations.
-braintree.merchant_id=<% if has_variable?('codenvy::braintree_merchant_id') %><%= scope.lookupvar('codenvy::braintree_merchant_id') %><% else %><% end %>
-braintree.public_key=<% if has_variable?('codenvy::braintree_public_key') %><%= scope.lookupvar('codenvy::braintree_public_key') %><% else %><% end %>
-braintree.private_key=<% if has_variable?('codenvy::braintree_private_key') %><%= scope.lookupvar('codenvy::braintree_private_key') %><% else %><% end %>
-braintree.environment=<% if has_variable?('codenvy::braintree_environment') %><%= scope.lookupvar('codenvy::braintree_environment') %><% else %><% end %>
-
 # DB initialization and migration configuration
 db.schema.flyway.baseline.enabled=true
 db.schema.flyway.baseline.version=5.0.0.8.1.2
 db.schema.flyway.scripts.prefix=
 db.schema.flyway.scripts.suffix=.sql
 db.schema.flyway.scripts.version_separator=__
-db.schema.flyway.scripts.locations=classpath:che-schema,classpath:codenvy-schema
+db.schema.flyway.scripts.locations=<%= scope.lookupvar('codenvy::db_schema_flyway_scripts_locations') %>
 db.jndi.datasource.name=java:/comp/env/jdbc/codenvy

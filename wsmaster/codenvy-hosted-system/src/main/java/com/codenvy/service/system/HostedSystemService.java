@@ -12,12 +12,13 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.service.systemram;
+package com.codenvy.service.system;
 
-import com.codenvy.service.systemram.dto.SystemRamLimitDto;
+import com.codenvy.service.system.dto.SystemRamLimitDto;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.system.server.SystemManager;
+import org.eclipse.che.api.system.server.SystemService;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -28,22 +29,24 @@ import javax.ws.rs.core.MediaType;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
- * Defines system RAM REST API.
+ * Extends system REST API.
  *
  * @author Igor Vinokur
+ * @author Yevhenii Voevodin
  */
-@Path("/system/ram")
-public class SystemRamService extends Service {
+@Path("/system")
+public class HostedSystemService extends SystemService {
 
     private final SystemRamInfoProvider systemRamInfoProvider;
 
     @Inject
-    public SystemRamService(SystemRamInfoProvider systemRamInfoProvider) {
+    public HostedSystemService(SystemManager manager, SystemRamInfoProvider systemRamInfoProvider) {
+        super(manager);
         this.systemRamInfoProvider = systemRamInfoProvider;
     }
 
     @GET
-    @Path("/limit")
+    @Path("/ram/limit")
     @Produces(MediaType.APPLICATION_JSON)
     public SystemRamLimitDto getSystemRamLimitStatus() throws ServerException {
         return newDto(SystemRamLimitDto.class)

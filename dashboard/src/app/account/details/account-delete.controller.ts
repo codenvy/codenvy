@@ -22,42 +22,38 @@ import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
  * @author Oleksii Orel
  */
 export class AccountDeleteController {
-  $location: ng.ILocationService;
-  $mdDialog: ng.material.IDialogService;
-  codenvyUser: CodenvyUser;
-  cheNotification: any;
+
+  private $location: ng.ILocationService;
+  private $mdDialog: ng.material.IDialogService;
+  private codenvyUser: CodenvyUser;
+  private cheNotification: any;
+  private confirmDialogService: any;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $mdDialog: ng.material.IDialogService, codenvyUser: CodenvyUser, cheNotification: any) {
+  constructor($location: ng.ILocationService, $mdDialog: ng.material.IDialogService, codenvyUser: CodenvyUser, cheNotification: any, confirmDialogService: any) {
     this.$location = $location;
     this.$mdDialog = $mdDialog;
     this.codenvyUser = codenvyUser;
     this.cheNotification = cheNotification;
+    this.confirmDialogService = confirmDialogService;
   }
 
   /**
    * Delete account
-   * @param event{MouseEvent}
    */
-  deleteAccount(event: MouseEvent): void {
-    let confirm = this.$mdDialog.confirm()
-      .title('Delete Account')
-      .content('Account deletion cannot be undone. Please confirm you want to delete your account.')
-      .ariaLabel('Remove account')
-      .ok('Delete it!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
+  deleteAccount(): void {
+    let content = 'This is irreversible. Please confirm your want to delete your account.';
+    let promise = this.confirmDialogService.showConfirmDialog('Remove account', content, 'Delete');
 
-    this.$mdDialog.show(confirm).then(() => {
+    promise.then(() => {
       this.codenvyUser.deleteCurrentUser().then(() => {
         this.codenvyUser.logout().then(() => {
           this.$location.path('/site/account-deleted');
         });
-      }, (error) => {
+      }, (error: any) => {
         this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Account deletion failed.');
       });
     });

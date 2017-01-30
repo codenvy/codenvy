@@ -35,6 +35,10 @@
             <artifactId>metrics-servlets</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.onpremises.wsagent</groupId>
+            <artifactId>wsagent-codenvy</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-admin</artifactId>
         </dependency>
@@ -132,7 +136,7 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-system-ram</artifactId>
+            <artifactId>codenvy-hosted-system</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>

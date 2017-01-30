@@ -13,6 +13,8 @@
  * from Codenvy S.A..
  */
 'use strict';
+import {CodenvyPermissions} from '../../../../components/api/codenvy-permissions.factory';
+import {ShareWorkspaceController} from '../share-workspace.controller';
 
 /**
  * Controller for a permission user item.
@@ -21,30 +23,32 @@
  */
 export class UserItemController {
 
+  user: { id: string; email: string; permissions: { actions: Array<string> } };
+
+  private confirmDialogService: any;
+  private codenvyPermissions: CodenvyPermissions;
+  private $mdDialog: ng.material.IDialogService;
+  private callback: ShareWorkspaceController;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(codenvyPermissions, $mdDialog) {
+  constructor(confirmDialogService: any, codenvyPermissions: CodenvyPermissions, $mdDialog: ng.material.IDialogService) {
+    this.confirmDialogService = confirmDialogService;
     this.codenvyPermissions = codenvyPermissions;
     this.$mdDialog = $mdDialog;
   }
 
   /**
-   * Call user permissions removal. Show the dialog
-   * @param  event - the $event
+   * Call user permissions removal. Show the dialog.
    */
-  removeUser(event) {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to remove member  ' + this.user.email + ' ?')
-      .content('Please confirm for the member removal.')
-      .ariaLabel('Remove member')
-      .ok('Remove')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
-      //Callback is set in scope definition:
+  removeUser(): void {
+    let content = 'Please confirm removal for the member \'' + this.user.email + '\'.';
+    let promise = this.confirmDialogService.showConfirmDialog('Remove the member', content, 'Delete');
+
+    promise.then(() => {
+      // callback is set in scope definition:
       this.callback.removePermissions(this.user);
     });
   }
@@ -54,8 +58,8 @@ export class UserItemController {
    *
    * @returns {string} string format of actions array
    */
-  getUserActions() {
-    //User is set in scope definition:
+  getUserActions(): string {
+    // user is set in scope definition:
     return this.user.permissions.actions.join(', ');
   }
 }

@@ -24,6 +24,7 @@ import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -59,6 +60,8 @@ import static org.testng.Assert.assertNotNull;
 @Listeners(MockitoTestNGListener.class)
 public class HostedMachineProviderImplTest {
 
+    @Mock
+    private DockerConnectorProvider dockerConnectorProviderMock;
     @Mock
     private DockerConnector                               dockerConnector;
     @Mock
@@ -96,6 +99,7 @@ public class HostedMachineProviderImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        when(dockerConnectorProviderMock.get()).thenReturn(dockerConnector);
         when(dockerConnectorConfiguration.getDockerHostIp()).thenReturn("123.123.123.123");
 
         EnvironmentContext envCont = new EnvironmentContext();
@@ -112,7 +116,7 @@ public class HostedMachineProviderImplTest {
 
     @Test
     public void shouldAddMaintenanceConstraintWhenBuildImage() throws Exception {
-        provider = new HostedMachineProviderImpl(dockerConnector,
+        provider = new HostedMachineProviderImpl(dockerConnectorProviderMock,
                                                  credentialsReader,
                                                  dockerMachineFactory,
                                                  dockerInstanceStopDetector,
@@ -150,7 +154,7 @@ public class HostedMachineProviderImplTest {
         final Long cpuPeriod = 10000L;
         final Long cpuQuota = 7500L;
 
-        provider = new HostedMachineProviderImpl(dockerConnector,
+        provider = new HostedMachineProviderImpl(dockerConnectorProviderMock,
                                                  credentialsReader,
                                                  dockerMachineFactory,
                                                  dockerInstanceStopDetector,

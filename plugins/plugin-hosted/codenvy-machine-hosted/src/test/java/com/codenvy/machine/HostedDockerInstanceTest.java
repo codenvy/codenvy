@@ -25,6 +25,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.commons.test.mockito.answer.WaitingAnswer;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
+import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProcessesCleaner;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
@@ -76,6 +77,8 @@ public class HostedDockerInstanceTest {
     private static final int           CONCURRENCY  = 2;
     private static final MachineStatus STATUS       = MachineStatus.RUNNING;
     @Mock
+    private DockerConnectorProvider    dockerConnectorProviderMock;
+    @Mock
     private DockerConnector            dockerConnectorMock;
     @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetectorMock;
@@ -91,7 +94,7 @@ public class HostedDockerInstanceTest {
     private HostedDockerInstance getDockerInstance() throws MachineException {
         DockerMachineFactory machineFactory = mock(DockerMachineFactory.class);
         when(machineFactory.createMetadata(any(), any(), any())).thenReturn(mock(DockerInstanceRuntimeInfo.class));
-        return new HostedDockerInstance(dockerConnectorMock,
+        return new HostedDockerInstance(dockerConnectorProviderMock,
                                         REGISTRY,
                                         USERNAME,
                                         machineFactory,
@@ -109,6 +112,7 @@ public class HostedDockerInstanceTest {
     @BeforeMethod
     public void setUp() throws IOException, MachineException {
         when(dockerNode.getHost()).thenReturn("host1");
+        when(dockerConnectorProviderMock.get()).thenReturn(dockerConnectorMock);
         dockerInstance = Mockito.spy(getDockerInstance());
         executor = Executors.newFixedThreadPool(3);
     }
