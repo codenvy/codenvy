@@ -174,7 +174,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                                          .collect(toSet());
 
         if (webhooks.isEmpty()) {
-            LOG.error("No BitBucket Server webhooks were registered for repository {}", repositoryUrl);
+            LOG.warn("No BitBucket Server webhooks were registered for repository {}", repositoryUrl);
         }
 
         return properties.entrySet()

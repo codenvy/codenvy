@@ -232,7 +232,6 @@ public class GitHubWebhookService extends BaseWebhookService {
      * @param baseRepositoryHtmlUrl
      *         the URL of the repository for which a webhook is configured
      * @return the factories configured in a webhook and that contain a project that matches given repo and branch
-     * @throws ServerException
      */
     private Set<String> getWebhookConfiguredFactoriesIDs(final String baseRepositoryHtmlUrl) {
         Map<String, String> properties = configurationProperties.getProperties(WEBHOOK_PROPERTY_PATTERN);
@@ -245,7 +244,7 @@ public class GitHubWebhookService extends BaseWebhookService {
                                          .collect(toSet());
 
         if (webhooks.isEmpty()) {
-            LOG.error("No GitHub webhooks were registered for repository {}", baseRepositoryHtmlUrl);
+            LOG.warn("No GitHub webhooks were registered for repository {}", baseRepositoryHtmlUrl);
         }
 
         return properties.entrySet()
