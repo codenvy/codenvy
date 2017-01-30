@@ -20,6 +20,7 @@ import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -60,6 +64,13 @@ public class TestGitHubWebhookService {
 
     @Before
     public void setUp() throws Exception {
+        // Prepare webhook
+        ConfigurationProperties configurationProperties = mock(ConfigurationProperties.class);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("env.CODENVY_GITHUB_WEBHOOK_WEBHOOK1_REPOSITORY_URL", "https://github.com/codenvy-demos/dashboard");
+        properties.put("env.CODENVY_GITHUB_WEBHOOK_WEBHOOK1_FACTORY1_ID", "fakeFactoryId");
+        when(configurationProperties.getProperties(eq("env.CODENVY_GITHUB_WEBHOOK_.+"))).thenReturn(properties);
+
         // Prepare authConnection
         Token fakeToken = DtoFactory.newDto(Token.class).withValue("fakeToken");
         AuthConnection mockAuthConnection = mock(AuthConnection.class);
@@ -73,12 +84,17 @@ public class TestGitHubWebhookService {
 
         // Prepare factoryConnection
         FactoryConnection mockFactoryConnection = mock(FactoryConnection.class);
-        FactoryDto gitHubfakeFactory = DtoFactory.getInstance().createDtoFromJson(resourceToString("factory-MKTG-341.json"), FactoryDto.class);
+        FactoryDto gitHubfakeFactory =
+                DtoFactory.getInstance().createDtoFromJson(resourceToString("factory-MKTG-341.json"), FactoryDto.class);
         when(mockFactoryConnection.getFactory("fakeFactoryId")).thenReturn(gitHubfakeFactory);
         when(mockFactoryConnection.updateFactory(gitHubfakeFactory)).thenReturn(gitHubfakeFactory);
 
         // Prepare GitHubWebhookService
-        fakeGitHubWebhookService = new GitHubWebhookService(mockAuthConnection, mockFactoryConnection);
+        fakeGitHubWebhookService = new GitHubWebhookService(mockAuthConnection,
+                                                            mockFactoryConnection,
+                                                            configurationProperties,
+                                                            "username",
+                                                            "password");
     }
 
     @Test
