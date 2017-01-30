@@ -72,7 +72,8 @@ public class HostedServersInstanceRuntimeInfoTest {
                 prepareHostedServersInstanceRuntimeInfo(originServers,
                                                         singletonMap("otherreference",
                                                                      new UriTemplateServerProxyTransformer(
-                                                                             "http://host:9090/path") {}));
+                                                                             "http://host:9090/path",
+                                                                             "http://host2:9090/path") {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 
@@ -105,13 +106,14 @@ public class HostedServersInstanceRuntimeInfoTest {
                                                        "host:9090",
                                                        "http://host:9090/path",
                                                        new ServerPropertiesImpl("/path",
-                                                                                "host:9090",
-                                                                                "http://host:9090/path")));
+                                                                                "host2:9090",
+                                                                                "http://host2:9090/path")));
 
         HostedServersInstanceRuntimeInfo runtimeInfo =
                 prepareHostedServersInstanceRuntimeInfo(originServers,
                                                         singletonMap("ref2", new UriTemplateServerProxyTransformer(
-                                                                "http://host:9090/path") {}));
+                                                                "http://host:9090/path",
+                                                                "http://host2:9090/path") {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 

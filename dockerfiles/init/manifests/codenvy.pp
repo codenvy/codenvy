@@ -12,6 +12,8 @@ node default {
 #    DNS entry provided by the provider.
   $host_url = getValue("CODENVY_HOST","codenvy.onprem")
 
+  $host_is_mac_or_windows = getValue("HOST_IS_MAC_OR_WINDOWS","false")
+
 ###############################
 # Docker IP adress on host
   $docker_ip = getValue("CODENVY_DOCKER_IP","172.17.0.1")

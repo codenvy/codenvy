@@ -63,10 +63,16 @@ che.docker.tcp_connection_read_timeout_ms=600000
 che.docker.always_pull_image=true
 che.docker.api=1.20
 
-# https support
-machine.proxy_wsagent_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
-machine.proxy_terminal_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
-
+# Handle https and port mapping by adding proxy on wsagent and terminal endpoints.
+# string format arguments available are:
+# %1 - Server reference
+# %2 - Server location hostname
+# %3 - Server location external port
+# %4 - Server path (without leading slash if present)
+machine.proxy_wsagent_server_external_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<% if scope.lookupvar('codenvy::host_is_mac_or_windows') == "true" %>localhost<% else -%><%= scope.lookupvar('codenvy::host_url') %><% end -%>/%3$s_%2$s/%4$s
+machine.proxy_wsagent_server_internal_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
+machine.proxy_terminal_server_external_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<% if scope.lookupvar('codenvy::host_is_mac_or_windows') == "true" %>localhost<% else -%><%= scope.lookupvar('codenvy::host_url') %><% end -%>/%3$s_%2$s/%4$s
+machine.proxy_terminal_server_internal_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
 
 # If true, then all docker machines will start in privilege mode.
 che.docker.privileged=<%= scope.lookupvar('codenvy::machine_docker_privileged') %>

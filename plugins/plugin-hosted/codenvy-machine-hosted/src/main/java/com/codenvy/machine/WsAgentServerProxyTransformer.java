@@ -24,7 +24,8 @@ import javax.inject.Named;
  */
 public class WsAgentServerProxyTransformer extends UriTemplateServerProxyTransformer {
     @Inject
-    public WsAgentServerProxyTransformer(@Named("machine.proxy_wsagent_server_url_template") String serverUrlTemplate) {
-        super(serverUrlTemplate);
+    public WsAgentServerProxyTransformer(@Named("machine.proxy_wsagent_server_external_url_template") String serverExternalUrlTemplate,
+                                         @Named("machine.proxy_wsagent_server_internal_url_template") String serverInternalUrlTemplate) {
+        super(serverExternalUrlTemplate, serverInternalUrlTemplate);
     }
 }

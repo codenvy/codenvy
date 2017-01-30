@@ -24,7 +24,8 @@ import javax.inject.Named;
  */
 public class TerminalServerProxyTransformer extends UriTemplateServerProxyTransformer {
     @Inject
-    public TerminalServerProxyTransformer(@Named("machine.proxy_terminal_server_url_template") String serverUrlTemplate) {
-        super(serverUrlTemplate);
+    public TerminalServerProxyTransformer(@Named("machine.proxy_terminal_server_external_url_template") String serverExternalUrlTemplate,
+                                          @Named("machine.proxy_terminal_server_internal_url_template") String serverInternalUrlTemplate) {
+        super(serverExternalUrlTemplate, serverInternalUrlTemplate);
     }
 }

@@ -32,10 +32,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 public abstract class UriTemplateServerProxyTransformer implements MachineServerProxyTransformer {
     private static final Logger LOG = getLogger(RemoteDockerNode.class);
 
-    private final String serverUrlTemplate;
+    private final String serverExternalUrlTemplate;
+    private final String serverInternalUrlTemplate;
 
     /**
-     * Template URI is used in {@link String#format(String, Object...)} with such arguments:
+     * Accepts templates for external and internal server URLs.
+     *
+     * </p>Template URIs are used in {@link String#format(String, Object...)} with such arguments:
      * <ul>
      * <li>Template URI</li>
      * <li>Server reference</li>
@@ -47,8 +50,10 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
      * Modified server components will be retrieved from URI created by this operation.<br>
      * To avoid changing of server use template:http://%2$s:%3$s/%4$s
      */
-    public UriTemplateServerProxyTransformer(String serverUrlTemplate) {
-        this.serverUrlTemplate = serverUrlTemplate;
+    public UriTemplateServerProxyTransformer(String serverExternalUrlTemplate,
+                                             String serverInternalUrlTemplate) {
+        this.serverExternalUrlTemplate = serverExternalUrlTemplate;
+        this.serverInternalUrlTemplate = serverInternalUrlTemplate;
     }
 
     @Override
@@ -65,26 +70,47 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
             serverPath = serverPath.substring(1);
         }
 
+        URI serverExternalUri;
+        URI serverInternalUri;
         try {
-            URI serverUri = new URI(format(serverUrlTemplate,
-                                                 server.getRef(),
-                                                 serverHost,
-                                                 serverPort,
-                                                 serverPath));
-            String newServerAddress = serverUri.getHost() +
-                                      (serverUri.getPort() == -1 ? "" : ":" + serverUri.getPort());
+            serverExternalUri = new URI(format(serverExternalUrlTemplate,
+                                               server.getRef(),
+                                               serverHost,
+                                               serverPort,
+                                               serverPath));
 
-            return new ServerImpl(server.getRef(),
-                                  serverUri.getScheme(),
-                                  newServerAddress,
-                                  serverUri.toString(),
-                                  new ServerPropertiesImpl(serverUri.getPath(), newServerAddress, serverUri.toString()));
         } catch (URISyntaxException e) {
             LOG.error(format("Server uri created from template taken from configuration is invalid. Template:%s. Origin server:%s",
-                             serverUrlTemplate,
+                             serverExternalUrlTemplate,
                              server),
                       e);
             return server;
         }
+        try {
+            serverInternalUri = new URI(format(serverInternalUrlTemplate,
+                                               server.getRef(),
+                                               serverHost,
+                                               serverPort,
+                                               serverPath));
+        } catch (URISyntaxException e) {
+            LOG.error(
+                    format("Server uri created from template taken from configuration is invalid. Template:%s. Origin server:%s",
+                           serverInternalUrlTemplate,
+                           server),
+                    e);
+            return server;
+        }
+        String newServerExternalAddress = serverExternalUri.getHost() +
+                                          (serverExternalUri.getPort() == -1 ? ""
+                                                                             : ":" + serverExternalUri.getPort());
+        String newServerInternalAddress = serverInternalUri.getHost() +
+                                          (serverInternalUri.getPort() == -1 ? ""
+                                                                             : ":" + serverInternalUri.getPort());
+        return new ServerImpl(server.getRef(),
+                              serverExternalUri.getScheme(),
+                              newServerExternalAddress,
+                              serverExternalUri.toString(),
+                              new ServerPropertiesImpl(serverExternalUri.getPath(), newServerInternalAddress,
+                                                       serverInternalUri.toString()));
     }
 }

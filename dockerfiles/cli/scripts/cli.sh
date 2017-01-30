@@ -246,6 +246,12 @@ generate_configuration_with_puppet() {
     fi
   fi
 
+  if is_docker_for_windows || is_docker_for_mac; then
+    local HOST_IS_MAC_OR_WINDOWS=true
+  else
+    local HOST_IS_MAC_OR_WINDOWS=false
+  fi
+
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
                   --env-file=/version/$CHE_VERSION/images \
@@ -258,6 +264,7 @@ generate_configuration_with_puppet() {
                   -e \"CHE_CONFIG=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_INSTANCE=${CHE_HOST_INSTANCE}\" \
                   -e \"CHE_REPO=${CHE_REPO}\" \
+                  -e \"HOST_IS_MAC_OR_WINDOWS=${HOST_IS_MAC_OR_WINDOWS}\"
                   --entrypoint=/usr/bin/puppet \
                       $IMAGE_INIT \
                           apply --modulepath \
