@@ -137,13 +137,13 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
         String commitId = event.getRefChanges().get(0).getToHash();
         Project project = event.getRepository().getProject();
         String baseRepositoryName = event.getRepository().getName();
-        String baseUrl = computeCloneUrl(source.contains(":") ? source.substring(1, source.indexOf("/")) : project.getOwner().getName(),
+        String headUrl = computeCloneUrl(source.contains(":") ? source.substring(1, source.indexOf("/")) : project.getOwner().getName(),
                                          source.contains(":") ? source.substring(0, source.indexOf("/")) : project.getKey(),
                                          source.contains(":") ? source.substring(source.indexOf("/") + 1, source.indexOf(":"))
                                                               : baseRepositoryName);
-        String headUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), baseRepositoryName);
+        String baseUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), baseRepositoryName);
 
-        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(baseUrl), baseUrl, branch)) {
+        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(headUrl), headUrl, branch)) {
             updateFactory(updateProjectInFactory(factory, headUrl, branch, baseUrl, commitId));
         }
     }
