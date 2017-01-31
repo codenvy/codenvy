@@ -15,8 +15,7 @@ var gulp = require('gulp'),
     useref = require('gulp-useref'),    //Removes <!-- build:js ... blocks from html
     replaceRevRef = require('gulp-rev-manifest-replace'), //Plugin to replace assets urls based on generated manifest file
     reverse = require('reversible'),
-    rimraf = require('gulp-rimraf');    // Remove files and folders depricated
-    var del = require('del'); //TODO replace gulp-rimraf
+    del = require('del');               // Remove files and folders
 
 var buildConfig = {
         jekyllStageConfig : "_config.stage.yml", //saas-stage
@@ -27,6 +26,7 @@ var paths = {
         src: 'app/',
          // assembly folders
         onpremSE: './target/onprem-se/',
+        stage: './target/stage/',
         // ------------------
         temp: 'target/temp/',
         dist: 'target/dist/', //dist folder
@@ -39,6 +39,14 @@ gulp.task('connect', ['gh'], function() {
     root: paths.gh
   });
 });
+
+gulp.task('lint',function(){
+  gulp.src(['!'+paths.src+'site/scripts/vendor/*.*',paths.src+'site/scripts/**/*.js'])
+    .pipe(jshint())
+  .pipe(jshint.reporter('jshint-stylish'))
+  .pipe(jshint.reporter('fail'))
+});
+
 // --------------------------- Building Stage -----------------------------
 //----------------
 //----------
@@ -46,7 +54,7 @@ gulp.task('stage',['copy_src','stage_cfg','css_stage','jekyll_stage','copy_stage
 
 })
 // Copies src to temp folder
-gulp.task('copy_src', ['duplicate_html','duplicate_error_html'], function(){
+gulp.task('copy_src', ['lint','duplicate_html','duplicate_error_html'], function(){
   return gulp.src(paths.src + '**/*.*')
   .pipe(gulp.dest(paths.temp))
 })
@@ -127,51 +135,12 @@ gulp.task('onprem_se',
   'duplicate_html', //duplicate login.html as /index.html
   'css_onprem_se', //processing scss by compass styles and copy to /site/styles
   'jekyll_onprem_se', //building pages
-  'clean_templates_se', //clean up /site/templates/
   'rjs_se', //buld amd-app.js file
   'rev-se', //versioning amd-app.js
-  'copy_onprem_se', //copy onprem-se site to /dist/onprem-se
-  'onprem_copy_templates', //copy html templates to /site/template
-  'copy_onprem_se_email_templates', //copy onprem-se email templates to /dist/onprem-se/site/email-templates
-  'del_replaced_files', //delete replaced files
-  'onprem_login_page'], //copy onprem custom login page to /onprem-se/site
+  'copy_onprem_se'], //copy onprem-se site to /dist/onprem-se
   function(){
 
 })
-
-// Copy onprem custom pages
-gulp.task('onprem_copy_templates', ['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se','clean_templates_se'], function(){
-  return   gulp.src(paths.onpremSE + 'site/custom_pages/onprem-se/templates/*.html')
-  .pipe(gulp.dest(paths.onpremSE+'/site/templates'))
-  .pipe(print(function(filepath) {
-    return "Copy onprem-se custom pages to ->" + filepath;
-  }));
-});
-
-// Cleaning files and folders to be replaced with custom ones
-gulp.task('del_replaced_files',['copy_src','onprem_se_cfg','css_onprem_se','duplicate_html','jekyll_onprem_se'], function(){
-  return del([
-    paths.onpremSE+'/site/login.html',
-    paths.onpremSE+'/index.html'
-    ]);
-});
-
-// Copy onprem login custom page
-gulp.task('onprem_login_page', ['copy_src','onprem_se_cfg','css_onprem_se','clean_templates_se','del_replaced_files','jekyll_onprem_se','duplicate_html'], function(){
-  return   gulp.src(paths.onpremSE + 'site/custom_pages/onprem-se/login.html')
-  .pipe(gulp.dest(paths.onpremSE+'/site'))
-  .pipe(rename('index.html'))
-  .pipe(gulp.dest(paths.onpremSE))
-  .pipe(print(function(filepath) {
-    return "Copy onprem-se login pages to ->" + filepath;
-  }));
-});
-
-// clean prod templates
-gulp.task('clean_templates_se',['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se'], function(){
-  return gulp.src(paths.onpremSE + '/site/templates/')
-  .pipe(rimraf());
-});
 
 gulp.task('onprem_se_cfg', function(){
   return gulp.src(paths.config + buildConfig.jekyllOnpremSEConfig)
@@ -205,7 +174,7 @@ gulp.task('jekyll_onprem_se',['copy_src','onprem_se_cfg'], function () {
 });
 
 // Builds projects using require.js's optimizer + Minify files with UglifyJS
-gulp.task('rjs_se',['copy_src','jekyll_onprem_se','onprem_copy_templates'], function(){
+gulp.task('rjs_se',['copy_src','jekyll_onprem_se'], function(){
       return  rjs({
             mainConfigFile: paths.onpremSE +'site/scripts/main.js',
             //optimize: 'none', //hardcoded in requirejs plugin
@@ -226,7 +195,7 @@ gulp.task('rjs_se',['copy_src','jekyll_onprem_se','onprem_copy_templates'], func
  });
 
 // Replaces references with reved names
-  gulp.task ('rev-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se','onprem_copy_templates'], function(){
+  gulp.task ('rev-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se'], function(){
     return gulp.src([paths.onpremSE + 'site/scripts/amd-app.js', paths.onpremSE + 'site/styles/*.css'],{base:paths.onpremSE})
     //.pipe(wait(1500))
     .pipe(rev())
@@ -242,7 +211,7 @@ gulp.task('rjs_se',['copy_src','jekyll_onprem_se','onprem_copy_templates'], func
   });
 
 // Start replacing rev references
-gulp.task('replace-se',['copy_src','css_onprem_se', 'rjs_se','jekyll_onprem_se','onprem_copy_templates','rev-se'], function(){
+gulp.task('replace-se',['copy_src','css_onprem_se', 'rjs_se','jekyll_onprem_se','rev-se'], function(){
 
   var manifest = require(paths.onpremSE+'rev-manifest.json')
   console.log('Process rev-manifest.json: \n');
@@ -259,7 +228,7 @@ gulp.task('replace-se',['copy_src','css_onprem_se', 'rjs_se','jekyll_onprem_se',
 });
 
 // Removes <!-- build:js ... blocks from html for prod configeration
-gulp.task('rmbuild-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se','onprem_copy_templates','rev-se','replace-se'], function(){
+gulp.task('rmbuild-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se','rev-se','replace-se'], function(){
   return gulp.src(paths.onpremSE+'**/*.html')
   .pipe(useref())
   .pipe(print(function(filepath) {
@@ -274,19 +243,14 @@ gulp.task('copy_onprem_se',
   'onprem_se_cfg',
   'css_onprem_se',
   'jekyll_onprem_se',
-  'onprem_copy_templates',
-  'onprem_login_page',
   'rjs_se',
   'rev-se',
   'replace-se',
-  'rmbuild-se',
-  'del_replaced_files'
+  'rmbuild-se'
   ], function(){
   gulp.src([paths.onpremSE+'**/*.html', // all HTML
     '!'+paths.onpremSE+'site/custom_pages/**/*.html',
     '!'+paths.onpremSE+'site/admin.html',
-    '!'+paths.onpremSE+'site/email-templates_onpremises/*.html',
-    '!'+paths.onpremSE+'site/email-templates/*.html',
     paths.onpremSE+'**/amd-app-*.js', // minified JS
     paths.onpremSE+'**/*-*.css', // minified CSS
     paths.onpremSE+'**/*.jpg',
@@ -304,11 +268,6 @@ gulp.task('copy_onprem_se',
   .pipe(gulp.dest(paths.dist+'onprem-se'));
 });
 
-// Copy omprem email templates page
-gulp.task('copy_onprem_se_email_templates', ['copy_src','onprem_se_cfg','css_onprem_se','jekyll_onprem_se'], function(){
-  return   gulp.src(paths.onpremSE+'site/email-templates_onpremises/*.html')
-    .pipe(gulp.dest(paths.dist+'onprem-se/site/email-templates'))
-});
 //***************************************************************** On-premises (base version)
 
 // --------------------------- Dev config for LiveReload localhost:8080) -----------------------------

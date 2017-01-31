@@ -24,11 +24,13 @@
  */
 export class ShareWorkspaceController {
 
+  private confirmDialogService: any;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, codenvyUser, codenvyPermissions, cheNotification, $mdDialog, $document, $mdConstant, $route, $q, lodash) {
+  constructor(cheWorkspace, codenvyUser, codenvyPermissions, cheNotification, $mdDialog, $document, $mdConstant, $route, $q, lodash, confirmDialogService: any) {
     "ngInject";
 
     this.cheWorkspace = cheWorkspace;
@@ -39,6 +41,7 @@ export class ShareWorkspaceController {
     this.$document = $document;
     this.$q = $q;
     this.lodash = lodash;
+    this.confirmDialogService = confirmDialogService;
 
     //Email values separators:
     this.separators = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA, $mdConstant.KEY_CODE.SPACE];
@@ -280,24 +283,18 @@ export class ShareWorkspaceController {
 
   /**
    * Show confirmation popup before delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param numberToDelete {number}
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteConfirmation(numberToDelete) {
-    let confirmTitle = 'Would you like to delete ';
+  showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
+    let content = 'Would you like to delete ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' members?';
+      content += 'these ' + numberToDelete + ' members?';
     } else {
-      confirmTitle += 'this selected member?';
+      content += 'this selected member?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove members')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove members', content, 'Delete');
   }
 
 

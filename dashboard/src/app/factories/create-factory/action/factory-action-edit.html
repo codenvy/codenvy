@@ -1,33 +1,31 @@
-<md-dialog flex="50">
-  <form name="editActionForm">
-    <che-panel che-title="Edit Action">
-
-      <md-dialog-content>
-        <div ng-if="factoryActionDialogEditCtrl.selectedValue.name">
-        <che-input focusable
-                   che-name="Editing"
-                   che-form="editActionForm"
-                   che-label-name="Param"
-                   required
-                   ng-model="factoryActionDialogEditCtrl.selectedValue.name">
-          <div ng-message="required">Param is required</div>
-        </che-input>
-        </div>
-        <div ng-if="factoryActionDialogEditCtrl.selectedValue.file">
-        <che-input focusable
-                   che-name="Editing"
-                   che-form="editActionForm"
-                   che-label-name="Param"
-                   required
-                   ng-model="factoryActionDialogEditCtrl.selectedValue.file">
-          <div ng-message="required">Param is required</div>
-        </che-input>
-        </div>
-      </md-dialog-content>
-      <div class="md-actions">
-        <md-button ng-click="factoryActionDialogEditCtrl.abort()" tabindex="0" type="button">Cancel</md-button>
-        <md-button class="md-primary" ng-click="factoryActionDialogEditCtrl.edit()" ng-disabled="editActionForm.$invalid">Edit</md-button>
-      </div>
-    </che-panel>
+<che-popup title="Edit action" on-close="factoryActionDialogEditCtrl.abort()">
+  <form name="editActionForm" flex>
+    <div ng-if="factoryActionDialogEditCtrl.isName">
+      <che-input focusable
+                 che-name="Editing"
+                 che-form="editActionForm"
+                 che-label-name="Param"
+                 required
+                 ng-model="factoryActionDialogEditCtrl.selectedValue.name">
+        <div ng-message="required">Param is required</div>
+      </che-input>
+    </div>
+    <div ng-if="factoryActionDialogEditCtrl.isFile">
+      <che-input focusable
+                 che-name="Editing"
+                 che-form="editActionForm"
+                 che-label-name="Param"
+                 required
+                 ng-model="factoryActionDialogEditCtrl.selectedValue.file">
+        <div ng-message="required">Param is required</div>
+      </che-input>
+    </div>
+    <che-button-notice che-button-title="Close"
+                       ng-click="factoryActionDialogEditCtrl.abort()">
+    </che-button-notice>
+    <che-button-primary
+      che-button-title="Edit" ng-disabled="editActionForm.$invalid"
+      ng-click="factoryActionDialogEditCtrl.edit()"></che-button-primary>
   </form>
-</md-dialog>
+</che-popup>
+

@@ -21,8 +21,8 @@ import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.spi.impl.ResourceImpl;
-import com.codenvy.service.systemram.SystemRamInfo;
-import com.codenvy.service.systemram.SystemRamInfoProvider;
+import com.codenvy.service.system.SystemRamInfo;
+import com.codenvy.service.system.SystemRamInfoProvider;
 
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ServerException;
@@ -39,13 +39,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 import static com.codenvy.api.workspace.TestObjects.createConfig;
-import static com.codenvy.api.workspace.TestObjects.createRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.commons.lang.Size.parseSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;

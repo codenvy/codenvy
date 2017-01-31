@@ -22,7 +22,7 @@ import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.api.usage.ResourcesLocks;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ResourceImpl;
-import com.codenvy.service.systemram.SystemRamInfoProvider;
+import com.codenvy.service.system.SystemRamInfoProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 

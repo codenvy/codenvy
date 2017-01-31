@@ -17,34 +17,37 @@
     from Codenvy S.A..
 
 -->
-<ng-form name="workspaceUsersForm" class="add-workspace-members">
-  <div class="form-input-fields">
-    <md-chips flex class="share-user-input"
-              name="emails"
-              ng-model="addMemberController.callbackController.emails"
-              md-separator-keys="addMemberController.callbackController.separators"
-              md-transform-chip="addMemberController.callbackController.handleUserAdding($chip)"
-              md-on-remove="addMemberController.callbackController.onRemoveEmail($chip)"
-              secondary-placeholder="Enter comma-separated email list of developers to invite">
-      <md-chip-template>
-        <div>{{$chip}}
+<che-popup title="Add developers" on-close="addMemberController.abort()">
+  <ng-form name="workspaceUsersForm" class="add-workspace-members">
+    <div class="form-input-fields">
+      <md-chips flex class="share-user-input"
+                name="emails"
+                ng-model="addMemberController.callbackController.emails"
+                md-separator-keys="addMemberController.callbackController.separators"
+                md-transform-chip="addMemberController.callbackController.handleUserAdding($chip)"
+                md-on-remove="addMemberController.callbackController.onRemoveEmail($chip)"
+                secondary-placeholder="Enter comma-separated email list of developers to invite">
+        <md-chip-template>
+          <div>{{$chip}}
             <span class="material-design icon-ic_done_24px user-exists-checked"
                   ng-if="addMemberController.callbackController.isUserExists($chip)"></span>
-        </div>
-      </md-chip-template>
-    </md-chips>
-    <div ng-show="addMemberController.callbackController.notExistingUsers.length > 0" class="user-not-found">
-      User<span ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span> with email<span
-            ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span>
-      <b>{{addMemberController.callbackController.getNotExistingEmails()}}</b> not found. Workspaces can be shared with registered users
-      only.
+          </div>
+        </md-chip-template>
+      </md-chips>
+      <div ng-show="addMemberController.callbackController.notExistingUsers.length > 0" class="user-not-found">
+        User<span ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span> with email<span
+        ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span>
+        <b>{{addMemberController.callbackController.getNotExistingEmails()}}</b> not found. Workspaces can be shared
+        with registered users
+        only.
+      </div>
     </div>
-  </div>
-  <che-button-primary
-          ng-disabled="addMemberController.callbackController.existingUsers.size === 0 || addMemberController.callbackController.isLoading"
-          che-button-title="Share" name="shareButton"
-          ng-click="addMemberController.shareWorkspace()"></che-button-primary>
-  <che-button-notice che-button-title="Cancel"
-                     ng-click="addMemberController.abort()">
-  </che-button-notice>
-</ng-form>
+    <che-button-notice che-button-title="Close"
+                       ng-click="addMemberController.abort()">
+    </che-button-notice>
+    <che-button-primary
+      ng-disabled="addMemberController.callbackController.existingUsers.size === 0 || addMemberController.callbackController.isLoading"
+      che-button-title="Share" name="shareButton"
+      ng-click="addMemberController.shareWorkspace()"></che-button-primary>
+  </ng-form>
+</che-popup>

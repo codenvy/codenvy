@@ -41,17 +41,20 @@ export class AdminsUserManagementCtrl {
   isAllSelected: boolean;
   isBulkChecked: boolean;
 
+  private confirmDialogService: any;
+
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, codenvyAPI: CodenvyAPI, cheNotification: any, licenseMessagesService: LicenseMessagesService) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, codenvyAPI: CodenvyAPI, cheNotification: any, licenseMessagesService: LicenseMessagesService, confirmDialogService: any) {
     this.$q = $q;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
     this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
     this.licenseMessagesService = licenseMessagesService;
+    this.confirmDialogService = confirmDialogService;
 
     this.isLoading = false;
 
@@ -149,15 +152,10 @@ export class AdminsUserManagementCtrl {
    * @param user {any} - the selected user
    */
   removeUser(event: MouseEvent, user: any): void {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to remove user ' + user.email + ' ?')
-      .content('Please confirm for the user removal.')
-      .ariaLabel('Remove user')
-      .ok('Remove')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
+    let content = 'Are you sure you want to remove \'' + user.email + '\'?';
+    let promise = this.confirmDialogService.showConfirmDialog('Remove user', content, 'Delete', 'Cancel');
+
+    promise.then(() => {
       this.isLoading = true;
       let promise = this.codenvyAPI.getUser().deleteUserById(user.id);
       promise.then(() => {
@@ -250,20 +248,14 @@ export class AdminsUserManagementCtrl {
    * @returns {angular.IPromise<any>}
    */
   showDeleteUsersConfirmation(numberToDelete: number): angular.IPromise<any> {
-    let confirmTitle = 'Would you like to delete ';
+    let content = 'Are you sure you want to remove ' + numberToDelete + ' selected ';
     if (numberToDelete > 1) {
-      confirmTitle += 'these ' + numberToDelete + ' users?';
+      content += 'users?';
     } else {
-      confirmTitle += 'this selected user?';
+      content += 'user?';
     }
-    let confirm = this.$mdDialog.confirm()
-      .title(confirmTitle)
-      .ariaLabel('Remove users')
-      .ok('Delete!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true);
 
-    return this.$mdDialog.show(confirm);
+    return this.confirmDialogService.showConfirmDialog('Remove users', content, 'Delete', 'Cancel');
   }
 
   /**

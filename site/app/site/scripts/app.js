@@ -72,7 +72,7 @@ define(["jquery","config",
 
                     if(fslNotAcceptedPage.length !== 0){
                         (function(){
-                            var form = FSLNotAcceptedErrorPage.get(fslNotAcceptedPage);
+                            var form = FSLNotAcceptedErrorPage.get(fslNotAcceptedPage),
                             errorReport = ErrorReport.get(errorContainer);
                             form.on("invalid", function(field,message){
                                 errorReport.show(message);
@@ -83,7 +83,7 @@ define(["jquery","config",
 
                     if(acceptLicensePage.length !== 0){
                         (function(){
-                            var form = AcceptLicensePage.get(acceptLicensePage);
+                            var form = AcceptLicensePage.get(acceptLicensePage),
                             errorReport = ErrorReport.get(errorContainer);
                             form.on("invalid", function(field,message){
                                 errorReport.show(message);

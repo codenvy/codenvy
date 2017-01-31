@@ -6,6 +6,32 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
+# utility functions
+is_docker_for_mac_or_windows() {
+  if uname -r | grep -q 'moby'; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_docker_external_hostname() {
+  if is_docker_for_mac_or_windows; then
+    echo "localhost"
+  else
+    echo ""
+  fi
+}
+
+has_external_hostname() {
+  if [ "${HOSTNAME}" = "" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+
 #
 # Check if Postgres is running. There's a 5 min timeout
 # for Postgres to start. If it does not Codenvy Tomcat
@@ -39,6 +65,13 @@ COUNT=0
                 exit
              fi
   done
+
+# CHE_DOCKER_IP_EXTERNAL must be set on mac/windows as internal docker ip is not reachable from host
+# example : docker ip = 192.168.65.2 but client on host needs to use localhost
+HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
+if has_external_hostname; then
+  export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
+fi
 
 # start codenvy tomcat
 exec /opt/codenvy-tomcat/bin/catalina.sh ${JPDA} run

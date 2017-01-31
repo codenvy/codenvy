@@ -72,7 +72,7 @@ public class HostedServersInstanceRuntimeInfoTest {
                 prepareHostedServersInstanceRuntimeInfo(originServers,
                                                         singletonMap("otherreference",
                                                                      new UriTemplateServerProxyTransformer(
-                                                                             "http://host:9090/path") {}));
+                                                                             "http://host:9090/path", null, null) {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 
@@ -111,7 +111,7 @@ public class HostedServersInstanceRuntimeInfoTest {
         HostedServersInstanceRuntimeInfo runtimeInfo =
                 prepareHostedServersInstanceRuntimeInfo(originServers,
                                                         singletonMap("ref2", new UriTemplateServerProxyTransformer(
-                                                                "http://host:9090/path") {}));
+                                                                "http://host:9090/path", null, null) {}));
 
         Map<String, ServerImpl> modifiedServers = runtimeInfo.getServers();
 

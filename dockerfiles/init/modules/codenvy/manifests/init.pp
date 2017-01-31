@@ -68,14 +68,6 @@ class codenvy {
     require => File[$config_dirs],
   }
 
-# creating billing.properties
-  file { "/opt/codenvy/config/codenvy/conf/billing.properties":
-    ensure  => "present",
-    content => template("codenvy/billing.properties.erb"),
-    mode    => "644",
-    require => File[$config_dirs],
-  }
-
 # creating metrics.properties
   file { "/opt/codenvy/config/codenvy/conf/metrics.properties":
     ensure  => "present",

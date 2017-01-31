@@ -41,7 +41,4 @@
         <module>onpremises-ide-packaging-tomcat-codenvy-allinone</module>
         <module>onpremises-ide-packaging-zip-terminal</module>
     </modules>
-    <properties>
-        <site.classifier>onprem-se</site.classifier>
-    </properties>
 </project>

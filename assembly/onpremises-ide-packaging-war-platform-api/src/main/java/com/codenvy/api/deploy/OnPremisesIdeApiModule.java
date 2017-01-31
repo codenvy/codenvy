@@ -50,10 +50,11 @@ import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolve
 import com.codenvy.report.ReportModule;
 import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.service.bitbucket.BitbucketConfigurationService;
-import com.codenvy.service.systemram.DockerBasedSystemRamInfoProvider;
-import com.codenvy.service.systemram.SystemRamInfoProvider;
-import com.codenvy.service.systemram.SystemRamLimitMessageSender;
-import com.codenvy.service.systemram.SystemRamService;
+import com.codenvy.service.system.DockerBasedSystemRamInfoProvider;
+import com.codenvy.service.system.SystemRamInfoProvider;
+import com.codenvy.service.system.SystemRamLimitMessageSender;
+import com.codenvy.service.system.HostedSystemService;
+import com.codenvy.service.system.SystemServicePermissionsFilter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
@@ -248,7 +249,9 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bind(SystemRamLimitMessageSender.class);
 
-        bind(SystemRamService.class);
+        bind(HostedSystemService.class);
+        bind(SystemServicePermissionsFilter.class);
+        bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class).asEagerSingleton();
 
         bind(SystemRamInfoProvider.class).to(DockerBasedSystemRamInfoProvider.class);
 

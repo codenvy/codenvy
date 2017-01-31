@@ -13,6 +13,7 @@
  * from Codenvy S.A..
  */
 'use strict';
+import {FactoryActionBoxController} from './factory-action-box.controller';
 
 /**
  * @ngdoc controller
@@ -21,16 +22,25 @@
  * @author Florent Benoit
  */
 export class FactoryActionDialogEditController {
+  isName: boolean;
+  isFile: boolean;
+  selectedValue: { name: string; file: string };
+
+  private $mdDialog: ng.material.IDialogService;
+  private index: number;
+  private callbackController: FactoryActionBoxController;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog) {
+  constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
     // this.selectedValue = this.selectedAction.id === 'runCommand' ? this.selectedAction.properties.name : this.selectedAction.properties.file;
     console.log('>>>  this.selectedValue: ', this.selectedValue);
+    this.isName = angular.isDefined(this.selectedValue.name);
+    this.isFile = angular.isDefined(this.selectedValue.file);
   }
 
   /**

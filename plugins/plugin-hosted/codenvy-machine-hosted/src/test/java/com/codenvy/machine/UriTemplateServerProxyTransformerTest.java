@@ -28,7 +28,7 @@ public class UriTemplateServerProxyTransformerTest {
 
     @Test
     public void shouldBeAbleToNotChangeServer() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer("http://%2$s:%3$s/%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer("http://%2$s:%3$s/%4$s", null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
@@ -52,7 +52,7 @@ public class UriTemplateServerProxyTransformerTest {
 
     @Test
     public void shouldRemoveLeadingSlashFromArgumentServerPath() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer("http://%2$s:%3$s/%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer("http://%2$s:%3$s/%4$s", null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
@@ -68,7 +68,7 @@ public class UriTemplateServerProxyTransformerTest {
 
     @Test
     public void shouldReturnUnchangedServerIfCreatedUriIsInvalid() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer(":::://:%3$s`%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer(":::://:%3$s`%4$s",null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
@@ -84,7 +84,7 @@ public class UriTemplateServerProxyTransformerTest {
 
     @Test
     public void shouldNotAdd80PortToUrl() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer("http://transform-host/%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer("http://transform-host/%4$s",null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
@@ -100,7 +100,7 @@ public class UriTemplateServerProxyTransformerTest {
 
     @Test
     public void shouldBeAbleToChangeServerAttributes() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer("https://%3$s-%2$s.transform-host:444/%1$s/%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer("https://%3$s-%2$s.transform-host:444/%1$s/%4$s",null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",
@@ -122,8 +122,31 @@ public class UriTemplateServerProxyTransformerTest {
     }
 
     @Test
+    public void shouldBeAbleToChangeServerAttributesWithCustomAttributes() throws Exception {
+        serverModifier = new UriTemplateServerProxyTransformer("https://%5$s/%3$s_%2$s/%4$s","public-host.com", "localhost") {};
+        ServerImpl originServer = new ServerImpl("myRef",
+                                                 "http",
+                                                 "my-server.com:32589",
+                                                 "http://my-server.com:32589/some/path",
+                                                 new ServerPropertiesImpl("/some/path",
+                                                                          "my-server.com:32589",
+                                                                          "http://my-server.com:32589/some/path"));
+        ServerImpl expectedServer = new ServerImpl("myRef",
+                                                   "https",
+                                                   "localhost",
+                                                   "https://localhost/32589_my-server.com/some/path",
+                                                   new ServerPropertiesImpl("/32589_my-server.com/some/path",
+                                                                            "public-host.com",
+                                                                            "https://public-host.com/32589_my-server.com/some/path"));
+
+        ServerImpl modifiedServer = serverModifier.transform(originServer);
+
+        assertEquals(modifiedServer, expectedServer);
+    }
+
+    @Test
     public void shouldWorkProperlyIfPathIsNull() throws Exception {
-        serverModifier = new UriTemplateServerProxyTransformer("https://%3$s-%2$s.transform-host:444/%4$s") {};
+        serverModifier = new UriTemplateServerProxyTransformer("https://%3$s-%2$s.transform-host:444/%4$s", null, null) {};
         ServerImpl originServer = new ServerImpl("myRef",
                                                  "http",
                                                  "my-server.com:32589",

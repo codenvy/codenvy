@@ -14,6 +14,8 @@
  */
 package com.codenvy.machine;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -24,7 +26,7 @@ import javax.inject.Named;
  */
 public class WsAgentServerProxyTransformer extends UriTemplateServerProxyTransformer {
     @Inject
-    public WsAgentServerProxyTransformer(@Named("machine.proxy_wsagent_server_url_template") String serverUrlTemplate) {
-        super(serverUrlTemplate);
+    public WsAgentServerProxyTransformer(@Named("machine.proxy_wsagent_server_url_template") String serverUrlTemplate, @Named("codenvy.host") String codenvyHost, @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal) {
+        super(serverUrlTemplate, codenvyHost, cheDockerIpExternal);
     }
 }
