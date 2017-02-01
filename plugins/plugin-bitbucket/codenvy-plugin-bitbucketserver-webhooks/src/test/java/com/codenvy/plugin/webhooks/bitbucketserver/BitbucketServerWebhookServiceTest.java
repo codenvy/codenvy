@@ -16,8 +16,8 @@ package com.codenvy.plugin.webhooks.bitbucketserver;
 
 import com.codenvy.plugin.webhooks.AuthConnection;
 import com.codenvy.plugin.webhooks.FactoryConnection;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changesets;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changeset;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changesets;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Commit;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Project;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.PushEvent;
@@ -30,6 +30,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.test.servlet.MockServletInputStream;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.mockito.testng.MockitoTestNGListener;
@@ -37,10 +38,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,12 +125,9 @@ public class BitbucketServerWebhookServiceTest {
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(event.toString().getBytes(StandardCharsets.UTF_8));
-        ServletInputStream inputStream = new ServletInputStream() {
-            public int read() throws IOException {
-                return byteArrayInputStream.read();
-            }
-        };
-        when(mockRequest.getInputStream()).thenReturn(inputStream);
+        final MockServletInputStream mockServletInputStream = new MockServletInputStream(byteArrayInputStream);
+
+        when(mockRequest.getInputStream()).thenReturn(mockServletInputStream);
 
         return mockRequest;
     }

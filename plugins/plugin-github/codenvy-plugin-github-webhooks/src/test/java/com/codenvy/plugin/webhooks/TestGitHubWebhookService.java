@@ -19,6 +19,7 @@ import com.codenvy.plugin.webhooks.github.GitHubWebhookService;
 import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.shared.dto.UserDto;
+import org.eclipse.che.commons.test.servlet.MockServletInputStream;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.junit.Assert;
@@ -31,7 +32,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,10 +39,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static javax.ws.rs.core.Response.Status.OK;
 
 /**
  * Unit tests for GitHubWebhookService
@@ -131,11 +131,7 @@ public class TestGitHubWebhookService {
         ServletInputStream fakeInputStream = null;
         if (eventMessageString != null) {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(eventMessageString.getBytes(StandardCharsets.UTF_8));
-            fakeInputStream = new ServletInputStream() {
-                public int read() throws IOException {
-                    return byteArrayInputStream.read();
-                }
-            };
+            fakeInputStream = new MockServletInputStream(byteArrayInputStream);
         }
         if (service == Service.GITHUB) {
             when(mockRequest.getHeader(REQUEST_HEADER_GITHUB_EVENT)).thenReturn(eventType);
