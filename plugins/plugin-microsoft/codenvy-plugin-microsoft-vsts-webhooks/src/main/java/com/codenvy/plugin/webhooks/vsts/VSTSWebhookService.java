@@ -37,12 +37,13 @@ import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -82,9 +83,14 @@ public class VSTSWebhookService extends BaseWebhookService {
     private final VSTSConnection    vstsConnection;
 
     @Inject
-    public VSTSWebhookService(final AuthConnection authConnection, final FactoryConnection factoryConnection,
-                              final UserConnection userConnection, final VSTSConnection vstsConnection) {
-        super(authConnection, factoryConnection);
+    public VSTSWebhookService(final AuthConnection authConnection,
+                              final FactoryConnection factoryConnection,
+                              final UserConnection userConnection,
+                              final VSTSConnection vstsConnection,
+                              final ConfigurationProperties configurationProperties,
+                              @Named("integration.factory.owner.username") String username,
+                              @Named("integration.factory.owner.password") String password) {
+        super(authConnection, factoryConnection, configurationProperties, username, password);
 
         this.factoryConnection = factoryConnection;
         this.userConnection = userConnection;
@@ -195,7 +201,7 @@ public class VSTSWebhookService extends BaseWebhookService {
         final String host = hostSplit[1];
 
         // Get configured 'work item created' webhook for given VSTS account, host and collection
-        Optional<WorkItemCreatedWebhook> webhook  = getWorkItemCreatedWebhook(host, account, collection);
+        Optional<WorkItemCreatedWebhook> webhook = getWorkItemCreatedWebhook(host, account, collection);
 
         WorkItemCreatedWebhook w = webhook.orElseThrow(
                 () -> new ServerException("No 'work item created' webhook configured for collection URL " + collectionUrl));
@@ -272,7 +278,7 @@ public class VSTSWebhookService extends BaseWebhookService {
             final String host = hostSplit[1];
 
             // Get VSTS 'pull request merged' webhook configured for given host, account and collection
-            final Optional<PullRequestUpdatedWebhook> webhook  = getPullRequestUpdatedWebhook(host, account, collection);
+            final Optional<PullRequestUpdatedWebhook> webhook = getPullRequestUpdatedWebhook(host, account, collection);
 
             final PullRequestUpdatedWebhook w = webhook.orElseThrow(() -> new ServerException(
                     "No 'pull request updated' webhook configured for host " + host + ", account " + account + " and collection " +
@@ -319,8 +325,7 @@ public class VSTSWebhookService extends BaseWebhookService {
      *         'DEVELOP' or 'REVIEW'
      * @param workItemId
      *         the id of the VSTS work item
-     * @return
-     *  the new created factory
+     * @return the new created factory
      * @throws ServerException
      */
     private FactoryDto createFactoryForWorkItem(final FactoryDto parentFactory, final FactoryType factoryType, final String workItemId)
@@ -403,7 +408,9 @@ public class VSTSWebhookService extends BaseWebhookService {
      * @return the webhook configured for given account, host and collection or null if no webhook is configured
      * @throws ServerException
      */
-    private Optional<PullRequestUpdatedWebhook> getPullRequestUpdatedWebhook(final String host, final String account, final String collection)
+    private Optional<PullRequestUpdatedWebhook> getPullRequestUpdatedWebhook(final String host,
+                                                                             final String account,
+                                                                             final String collection)
             throws ServerException {
         final List webhooks = getVSTSWebhooks(PULL_REQUEST_UPDATED_WEBHOOK);
         PullRequestUpdatedWebhook webhook = null;
@@ -480,19 +487,19 @@ public class VSTSWebhookService extends BaseWebhookService {
      * If a webhook with same id already exist it will be replaced.
      *
      * @param pruWebhook
-     *          the webhook to store in webhooks property file
+     *         the webhook to store in webhooks property file
      * @throws ServerException
      */
     private void storePullRequestUpdatedWebhook(final PullRequestUpdatedWebhook pruWebhook) throws ServerException {
         final Set<String> factoriesIDs = pruWebhook.getFactoriesIds();
         String propertyValue = String.format("%s,%s,%s,%s,%s,%s,%s",
-                                                   PULL_REQUEST_UPDATED_WEBHOOK.toString(),
-                                                   pruWebhook.getHost(),
-                                                   pruWebhook.getAccount(),
-                                                   pruWebhook.getCollection(),
-                                                   pruWebhook.getApiVersion(),
-                                                   pruWebhook.getCredentials().first,
-                                                   pruWebhook.getCredentials().second);
+                                             PULL_REQUEST_UPDATED_WEBHOOK.toString(),
+                                             pruWebhook.getHost(),
+                                             pruWebhook.getAccount(),
+                                             pruWebhook.getCollection(),
+                                             pruWebhook.getApiVersion(),
+                                             pruWebhook.getCredentials().first,
+                                             pruWebhook.getCredentials().second);
 
         if (factoriesIDs.size() > 0) {
             final String concatedFactoriesIDs = String.join(";", factoriesIDs);

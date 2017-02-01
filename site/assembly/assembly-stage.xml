@@ -9,7 +9,7 @@
     <fileSets>
       <fileSet> 
         <directory>target/dist/stage</directory>
-        <outputDirectory>/</outputDirectory>
+        <outputDirectory></outputDirectory>
       </fileSet>
     </fileSets>
 </assembly>

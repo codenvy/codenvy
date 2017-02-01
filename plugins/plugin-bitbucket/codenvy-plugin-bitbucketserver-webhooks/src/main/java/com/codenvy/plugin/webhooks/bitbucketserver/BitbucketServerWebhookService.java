@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +43,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/bitbucketserver-webhook")
@@ -57,15 +56,22 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BitbucketServerWebhookService.class);
 
-    private static final String WEBHOOKS_PROPERTIES_FILENAME = "bitbucketserver-webhooks.properties";
+    private static final String WEBHOOK_PROPERTY_PATTERN          = "env.CODENVY_BITBUCKET_SERVER_WEBHOOK_.+";
+    private static final String WEBHOOK_REPOSITORY_URL_SUFFIX     = "_REPOSITORY_URL";
+    private static final String WEBHOOK_FACTORY_ID_SUFFIX_PATTERN = "_FACTORY.+_ID";
 
-    private final String bitbucketEndpoint;
+    private final ConfigurationProperties configurationProperties;
+    private final String                  bitbucketEndpoint;
 
     @Inject
     public BitbucketServerWebhookService(final AuthConnection authConnection,
                                          final FactoryConnection factoryConnection,
-                                         @Named ("bitbucket.endpoint") String bitbucketEndpoint ) {
-        super(authConnection, factoryConnection);
+                                         ConfigurationProperties configurationProperties,
+                                         @Named("integration.factory.owner.username") String username,
+                                         @Named("integration.factory.owner.password") String password,
+                                         @Named("bitbucket.endpoint") String bitbucketEndpoint) {
+        super(authConnection, factoryConnection, configurationProperties, username, password);
+        this.configurationProperties = configurationProperties;
         this.bitbucketEndpoint = bitbucketEndpoint.endsWith("/") ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
                                                                  : bitbucketEndpoint;
     }
@@ -74,13 +80,13 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     @Consumes(APPLICATION_JSON)
     public Response handleWebhookEvent(@Context HttpServletRequest request) throws ServerException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
-
         Response response = Response.noContent().build();
         try (ServletInputStream inputStream = request.getInputStream()) {
             if (inputStream == null) {
                 return response;
             }
             final PushEvent event = DtoFactory.getInstance().createDtoFromJson(inputStream, PushEvent.class);
+            LOG.debug("{}", event);
             for (RefChange refChange : event.getRefChanges()) {
                 Optional<Changeset> changeset = event.getChangesets()
                                                      .getValues()
@@ -131,12 +137,13 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
         String commitId = event.getRefChanges().get(0).getToHash();
         Project project = event.getRepository().getProject();
         String baseRepositoryName = event.getRepository().getName();
-        String baseUrl = computeCloneUrl(source.contains(":") ? source.substring(1, source.indexOf("/")) : project.getOwner().getName(),
+        String headUrl = computeCloneUrl(source.contains(":") ? source.substring(1, source.indexOf("/")) : project.getOwner().getName(),
                                          source.contains(":") ? source.substring(0, source.indexOf("/")) : project.getKey(),
-                                         source.contains(":") ? source.substring(source.indexOf("/") + 1) : baseRepositoryName);
-        String headUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), baseRepositoryName);
+                                         source.contains(":") ? source.substring(source.indexOf("/") + 1, source.indexOf(":"))
+                                                              : baseRepositoryName);
+        String baseUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), baseRepositoryName);
 
-        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(baseUrl), baseUrl, branch)) {
+        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(headUrl), headUrl, branch)) {
             updateFactory(updateProjectInFactory(factory, headUrl, branch, baseUrl, commitId));
         }
     }
@@ -157,34 +164,24 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     }
 
     private Set<String> getFactoriesIDs(final String repositoryUrl) throws ServerException {
-        Optional<BitbucketServerWebhook> optional = getConfiguredWebhooks().stream()
-                                                                           .filter(webhook -> webhook.getRepositoryCloneUrl()
-                                                                                                     .equals(repositoryUrl))
-                                                                           .findFirst();
-        if (optional.isPresent()) {
-            return optional.get().getFactoriesIds();
-        } else {
-            return emptySet();
-        }
-    }
+        Map<String, String> properties = configurationProperties.getProperties(WEBHOOK_PROPERTY_PATTERN);
 
-    private static List<BitbucketServerWebhook> getConfiguredWebhooks() throws ServerException {
-        Properties webhooksProperties = getProperties(WEBHOOKS_PROPERTIES_FILENAME);
-        return webhooksProperties.stringPropertyNames()
-                                 .stream()
-                                 .filter(key -> {
-                                     String value = webhooksProperties.getProperty(key);
-                                     if (!isNullOrEmpty(value)) {
-                                         String[] valueSplit = value.split(",");
-                                         return valueSplit.length == 3 && valueSplit[0].equals("bitbucketserver");
-                                     }
-                                     return false;
-                                 })
-                                 .map(key -> {
-                                     String[] valueSplit = webhooksProperties.getProperty(key).split(",");
-                                     String[] factoriesIDs = valueSplit[2].split(";");
-                                     return new BitbucketServerWebhook(valueSplit[1], factoriesIDs);
-                                 })
-                                 .collect(Collectors.toList());
+        Set<String> webhooks = properties.entrySet()
+                                         .stream()
+                                         .filter(entry -> repositoryUrl.equals(entry.getValue()))
+                                         .map(entry -> entry.getKey()
+                                                            .substring(0, entry.getKey().lastIndexOf(WEBHOOK_REPOSITORY_URL_SUFFIX)))
+                                         .collect(toSet());
+
+        if (webhooks.isEmpty()) {
+            LOG.warn("No BitBucket Server webhooks were registered for repository {}", repositoryUrl);
+        }
+
+        return properties.entrySet()
+                         .stream()
+                         .filter(entry -> webhooks.stream()
+                                                  .anyMatch(webhook -> entry.getKey().matches(webhook + WEBHOOK_FACTORY_ID_SUFFIX_PATTERN)))
+                         .map(Entry::getValue)
+                         .collect(toSet());
     }
 }

@@ -32,10 +32,12 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -45,13 +47,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Api(
@@ -63,12 +65,21 @@ public class GitHubWebhookService extends BaseWebhookService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GitHubWebhookService.class);
 
-    private static final String GITHUB_WEBHOOKS_PROPERTIES_FILENAME = "github-webhooks.properties";
-    private static final String GITHUB_REQUEST_HEADER               = "X-GitHub-Event";
+    private static final String GITHUB_REQUEST_HEADER             = "X-GitHub-Event";
+    private static final String WEBHOOK_PROPERTY_PATTERN          = "env.CODENVY_GITHUB_WEBHOOK_.+";
+    private static final String WEBHOOK_REPOSITORY_URL_SUFFIX     = "_REPOSITORY_URL";
+    private static final String WEBHOOK_FACTORY_ID_SUFFIX_PATTERN = "_FACTORY.+_ID";
+
+    private final ConfigurationProperties configurationProperties;
 
     @Inject
-    public GitHubWebhookService(final AuthConnection authConnection, final FactoryConnection factoryConnection) {
-        super(authConnection, factoryConnection);
+    public GitHubWebhookService(final AuthConnection authConnection,
+                                final FactoryConnection factoryConnection,
+                                final ConfigurationProperties configurationProperties,
+                                @Named("integration.factory.owner.username") String username,
+                                @Named("integration.factory.owner.password") String password) {
+        super(authConnection, factoryConnection, configurationProperties, username, password);
+        this.configurationProperties = configurationProperties;
     }
 
     @ApiOperation(value = "Handle GitHub webhook events",
@@ -95,7 +106,8 @@ public class GitHubWebhookService extends BaseWebhookService {
                             handlePushEvent(pushEvent);
                             break;
                         case "pull_request":
-                            final PullRequestEvent PRevent = DtoFactory.getInstance().createDtoFromJson(inputStream, PullRequestEvent.class);
+                            final PullRequestEvent PRevent =
+                                    DtoFactory.getInstance().createDtoFromJson(inputStream, PullRequestEvent.class);
                             handlePullRequestEvent(PRevent);
                             break;
                         default:
@@ -220,65 +232,26 @@ public class GitHubWebhookService extends BaseWebhookService {
      * @param baseRepositoryHtmlUrl
      *         the URL of the repository for which a webhook is configured
      * @return the factories configured in a webhook and that contain a project that matches given repo and branch
-     * @throws ServerException
      */
-    private Set<String> getWebhookConfiguredFactoriesIDs(final String baseRepositoryHtmlUrl)
-            throws ServerException {
+    private Set<String> getWebhookConfiguredFactoriesIDs(final String baseRepositoryHtmlUrl) {
+        Map<String, String> properties = configurationProperties.getProperties(WEBHOOK_PROPERTY_PATTERN);
 
-        // Get webhook configured for given repository
-        final Optional<GithubWebhook> webhook = getGitHubWebhook(baseRepositoryHtmlUrl);
+        Set<String> webhooks = properties.entrySet()
+                                         .stream()
+                                         .filter(entry -> baseRepositoryHtmlUrl.equals(entry.getValue()))
+                                         .map(entry -> entry.getKey()
+                                                            .substring(0, entry.getKey().lastIndexOf(WEBHOOK_REPOSITORY_URL_SUFFIX)))
+                                         .collect(toSet());
 
-        final GithubWebhook w = webhook.orElseThrow(
-                () -> new ServerException("No webhook configured for repository " + baseRepositoryHtmlUrl));
-
-        // Get factory id's listed into the webhook
-        return w.getFactoriesIds();
-    }
-
-    /**
-     * Get webhook configured for a given repository
-     *
-     * @param repositoryUrl
-     *         the URL of the repository
-     * @return the webhook configured for the repository or null if no webhook is configured for this repository
-     * @throws ServerException
-     */
-    private Optional<GithubWebhook> getGitHubWebhook(String repositoryUrl) throws ServerException {
-        List<GithubWebhook> webhooks = getGitHubWebhooks();
-        GithubWebhook webhook = null;
-        for (GithubWebhook w : webhooks) {
-            String webhookRepositoryUrl = w.getRepositoryUrl();
-            if (repositoryUrl.equals(webhookRepositoryUrl)) {
-                webhook = w;
-            }
+        if (webhooks.isEmpty()) {
+            LOG.warn("No GitHub webhooks were registered for repository {}", baseRepositoryHtmlUrl);
         }
-        return Optional.ofNullable(webhook);
-    }
 
-    /**
-     * Get all configured webhooks
-     *
-     * GitHub webhook: [webhook-name]=[webhook-type],[repository-url],[factory-id];[factory-id];...;[factory-id]
-     *
-     * @return the list of all webhooks contained in GITHUB_WEBHOOKS_PROPERTIES_FILENAME properties fil
-     */
-    private static List<GithubWebhook> getGitHubWebhooks() throws ServerException {
-        List<GithubWebhook> webhooks = new ArrayList<>();
-        Properties webhooksProperties = getProperties(GITHUB_WEBHOOKS_PROPERTIES_FILENAME);
-        Set<String> keySet = webhooksProperties.stringPropertyNames();
-        keySet.stream().forEach(key -> {
-            String value = webhooksProperties.getProperty(key);
-            if (!isNullOrEmpty(value)) {
-                String[] valueSplit = value.split(",");
-                if (valueSplit.length == 3
-                    && valueSplit[0].equals("github")) {
-                    String[] factoriesIDs = valueSplit[2].split(";");
-                    GithubWebhook githubWebhook = new GithubWebhook(valueSplit[1], factoriesIDs);
-                    webhooks.add(githubWebhook);
-                    LOG.debug("new GithubWebhook({})", value);
-                }
-            }
-        });
-        return webhooks;
+        return properties.entrySet()
+                         .stream()
+                         .filter(entry -> webhooks.stream()
+                                                  .anyMatch(webhook -> entry.getKey().matches(webhook + WEBHOOK_FACTORY_ID_SUFFIX_PATTERN)))
+                         .map(Entry::getValue)
+                         .collect(toSet());
     }
 }

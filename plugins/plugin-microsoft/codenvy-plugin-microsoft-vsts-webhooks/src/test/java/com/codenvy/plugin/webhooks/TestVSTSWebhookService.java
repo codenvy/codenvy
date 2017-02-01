@@ -22,6 +22,7 @@ import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +84,12 @@ public class TestVSTSWebhookService {
 
         // Prepare VSTSWebhookService
         fakeVSTSWebhookService =
-                new VSTSWebhookService(mockAuthConnection, mockFactoryConnection, mockUserConnection, mockVSTSConnection);
+                new VSTSWebhookService(mockAuthConnection,
+                                       mockFactoryConnection,
+                                       mockUserConnection,
+                                       mockVSTSConnection, mock(ConfigurationProperties.class),
+                                       "username",
+                                       "password");
     }
 
     @Test
