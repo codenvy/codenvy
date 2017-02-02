@@ -456,6 +456,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
+                    <packagingExcludes>WEB-INF/lib/jsr305*.jar</packagingExcludes>
                     <packagingIncludes>WEB-INF/lib/che-core-commons-lang-*.jar,
                         WEB-INF/classes/org/che/ide/servlet/*,
                         WEB-INF/classes/META-INF/,

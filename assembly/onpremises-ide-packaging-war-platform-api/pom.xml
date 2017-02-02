@@ -478,7 +478,12 @@
                             <targetPath>WEB-INF/lib</targetPath>
                         </resource>
                     </webResources>
-                    <packagingExcludes>WEB-INF/lib/*gwt*.jar,WEB-INF/lib/gin-*.jar,WEB-INF/lib/*codemirror-resources*.jar</packagingExcludes>
+                    <packagingExcludes>
+                        WEB-INF/lib/*gwt*.jar,
+                        WEB-INF/lib/gin-*.jar,
+                        WEB-INF/lib/*codemirror-resources*.jar,
+                        WEB-INF/lib/jsr305*.jar
+                    </packagingExcludes>
                 </configuration>
             </plugin>
         </plugins>
