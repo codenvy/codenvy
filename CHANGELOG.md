@@ -1,5 +1,115 @@
 # Change Log
 
+## [5.2.0](https://github.com/codenvy/codenvy/tree/5.2.0) (2017-02-01)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.2...5.2.0)
+
+**Issues with no labels:**
+
+- Show summary section on Get more RAM popup [\#1659](https://github.com/codenvy/codenvy/issues/1659)
+- Set credit card number input max value [\#1649](https://github.com/codenvy/codenvy/issues/1649)
+- Stop workspace by timeout does not work \(regression\) [\#1631](https://github.com/codenvy/codenvy/issues/1631)
+- Double scroll on billing invoices [\#1629](https://github.com/codenvy/codenvy/issues/1629)
+- Unexpected behavior while setting Workspace Cap and Running Workspace Cap values [\#1622](https://github.com/codenvy/codenvy/issues/1622)
+- Wrong subtitle displayed for delete billing info [\#1616](https://github.com/codenvy/codenvy/issues/1616)
+- Handle Enter keypress for name field to instant team creation [\#1613](https://github.com/codenvy/codenvy/issues/1613)
+- User should be redirected somewhere if it is trying to rich nonexisted team [\#1606](https://github.com/codenvy/codenvy/issues/1606)
+- IDE error message is displayed when click on billing invoices [\#1605](https://github.com/codenvy/codenvy/issues/1605)
+- Restore script fails if ws-machine container without installed sudo. [\#1602](https://github.com/codenvy/codenvy/issues/1602)
+- Create SystemService [\#1568](https://github.com/codenvy/codenvy/issues/1568)
+- Adapt work of the IDE autocomplete according to features of Open JDK [\#1526](https://github.com/codenvy/codenvy/issues/1526)
+- Prepare a mount of the root folder of codenvy image in dockerized version [\#1496](https://github.com/codenvy/codenvy/issues/1496)
+- The Yeoman Alfresco sample from eclipse getting start page does not work \(regression\) [\#914](https://github.com/codenvy/codenvy/issues/914)
+- CLI restart does not work properly [\#1669](https://github.com/codenvy/codenvy/issues/1669)
+- CLI unbound var in some cases [\#1599](https://github.com/codenvy/codenvy/issues/1599)
+- Persist property files for Jenkins/JIRA/webhook capabilities in dockerized Codenvy [\#1597](https://github.com/codenvy/codenvy/issues/1597)
+- Change workspace idle timeout for on-premises installs [\#1592](https://github.com/codenvy/codenvy/issues/1592)
+- Codenvy can't access registry if deployed on AWS and DNS uses external IP [\#1572](https://github.com/codenvy/codenvy/issues/1572)
+- CLI: action command does not work if codenvy not started locally [\#1562](https://github.com/codenvy/codenvy/issues/1562)
+- Upgrade to swarm 1.2.6  [\#1517](https://github.com/codenvy/codenvy/issues/1517)
+- Snapshot isn't deleted from the local docker repository when workspace is stopped and snapshot had been used to start workspace [\#1498](https://github.com/codenvy/codenvy/issues/1498)
+- Running Codenvy in Docker: Workspace Agent Not Responding [\#1495](https://github.com/codenvy/codenvy/issues/1495)
+- Update deprecated dependencies for site  [\#1489](https://github.com/codenvy/codenvy/issues/1489)
+- Limit CPU consumption by build docker image tasks [\#1393](https://github.com/codenvy/codenvy/issues/1393)
+- Delete account does not work in Firefox [\#1193](https://github.com/codenvy/codenvy/issues/1193)
+- Viewing HTML Files [\#1060](https://github.com/codenvy/codenvy/issues/1060)
+
+**Pull requests merged:**
+
+- Add property about che.docker.ip.external with a default null value [\#1652](https://github.com/codenvy/codenvy/pull/1652) ([benoitf](https://github.com/benoitf))
+- Adds permissions filter for system service [\#1646](https://github.com/codenvy/codenvy/pull/1646) ([evoevodin](https://github.com/evoevodin))
+- Add postflight check of swarm nodes [\#1637](https://github.com/codenvy/codenvy/pull/1637) ([TylerJewell](https://github.com/TylerJewell))
+- Update code based on CHE \#3798 updates [\#1636](https://github.com/codenvy/codenvy/pull/1636) ([benoitf](https://github.com/benoitf))
+- improve addon to have own modules [\#1632](https://github.com/codenvy/codenvy/pull/1632) ([riuvshin](https://github.com/riuvshin))
+- \[WIP\] CHE-3920: make rsync agent installation scripts respect environment variables [\#1628](https://github.com/codenvy/codenvy/pull/1628) ([garagatyi](https://github.com/garagatyi))
+- update codenvy.env [\#1627](https://github.com/codenvy/codenvy/pull/1627) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-1060: use host of api endpoint to creating project's links [\#1620](https://github.com/codenvy/codenvy/pull/1620) ([svor](https://github.com/svor))
+- Says how to perform the initial log in. [\#1611](https://github.com/codenvy/codenvy/pull/1611) ([wernight](https://github.com/wernight))
+- increase default ws agent inactive timeout [\#1593](https://github.com/codenvy/codenvy/pull/1593) ([riuvshin](https://github.com/riuvshin))
+- CLI - Adapt to Che CLI changes for custom assembly, faster port check [\#1575](https://github.com/codenvy/codenvy/pull/1575) ([TylerJewell](https://github.com/TylerJewell))
+- Added new PR policy items [\#1573](https://github.com/codenvy/codenvy/pull/1573) ([bmicklea](https://github.com/bmicklea))
+- pick prop value depending on scope [\#1661](https://github.com/codenvy/codenvy/pull/1661) ([riuvshin](https://github.com/riuvshin))
+- remove saas props from onprem [\#1645](https://github.com/codenvy/codenvy/pull/1645) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-1597: Move integration properties from files to common config file [\#1641](https://github.com/codenvy/codenvy/pull/1641) ([vinokurig](https://github.com/vinokurig))
+- allow override flyway db schema in saas [\#1638](https://github.com/codenvy/codenvy/pull/1638) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-2813 update style for popups in Dashboard [\#1626](https://github.com/codenvy/codenvy/pull/1626) ([olexii4](https://github.com/olexii4))
+- add possibility to set extra hosts for codenvy containers [\#1625](https://github.com/codenvy/codenvy/pull/1625) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-1602: Fix restore and backup scripts to add ability start workspaces from docker images without sudo. [\#1619](https://github.com/codenvy/codenvy/pull/1619) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- upgrade swarm to 1.2.6 [\#1618](https://github.com/codenvy/codenvy/pull/1618) ([riuvshin](https://github.com/riuvshin))
+- CODENVY remove beta messages from login page [\#1617](https://github.com/codenvy/codenvy/pull/1617) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- CODENVY-1393: Limit CPU consumption by build docker image tasks [\#1601](https://github.com/codenvy/codenvy/pull/1601) ([mmorhun](https://github.com/mmorhun))
+- CHE-3720: Decouple different agents on different maven modules [\#1598](https://github.com/codenvy/codenvy/pull/1598) ([tolusha](https://github.com/tolusha))
+- \[cli\] Fix \#1564 : Invalid name for sync command [\#1569](https://github.com/codenvy/codenvy/pull/1569) ([benoitf](https://github.com/benoitf))
+- CODENVY-1498: Cleanup snapshots images after workspace start [\#1566](https://github.com/codenvy/codenvy/pull/1566) ([mmorhun](https://github.com/mmorhun))
+- Fix compose containers ordering issue. [\#1559](https://github.com/codenvy/codenvy/pull/1559) ([riuvshin](https://github.com/riuvshin))
+- Rework EnvironmentContext\#getSubject method to not return null subject [\#1558](https://github.com/codenvy/codenvy/pull/1558) ([sleshchenko](https://github.com/sleshchenko))
+- CODENVY-1508 Remove CDEC, CLI and unnecessary assemblies [\#1555](https://github.com/codenvy/codenvy/pull/1555) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Fix \#1495 by not requiring ifconfig alias to start codenvy on Mac/Win [\#1542](https://github.com/codenvy/codenvy/pull/1542) ([benoitf](https://github.com/benoitf))
+- CHE-3492; Add filters for force or disable caching on the given resources paths. [\#1541](https://github.com/codenvy/codenvy/pull/1541) ([mshaposhnik](https://github.com/mshaposhnik))
+- CODENVY-1193 fix delete account exception for Firefox [\#1450](https://github.com/codenvy/codenvy/pull/1450) ([olexii4](https://github.com/olexii4))
+
+## [5.1.2](https://github.com/codenvy/codenvy/tree/5.1.2) (2017-01-24)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.1...5.1.2)
+
+**Issues with no labels:**
+
+- Cant find the localhost address/operations view [\#1591](https://github.com/codenvy/codenvy/issues/1591)
+- Can't input multi-line command [\#1584](https://github.com/codenvy/codenvy/issues/1584)
+- Why don't I have Operations Perspective? [\#1582](https://github.com/codenvy/codenvy/issues/1582)
+- Can't create a factory [\#1580](https://github.com/codenvy/codenvy/issues/1580)
+- Custom Stack -  Parsing of recipe of environment failed [\#1577](https://github.com/codenvy/codenvy/issues/1577)
+- running CLI: Your admin has not accepted the license agreement. [\#1576](https://github.com/codenvy/codenvy/issues/1576)
+- CLI: sync command does not work [\#1564](https://github.com/codenvy/codenvy/issues/1564)
+- Codenvy repository cleanup  [\#1508](https://github.com/codenvy/codenvy/issues/1508)
+- Configuring workspace idle timeout in Codenvy on-prem [\#1500](https://github.com/codenvy/codenvy/issues/1500)
+- Project explorer jumps. [\#1499](https://github.com/codenvy/codenvy/issues/1499)
+- 5.0.0-M8 Milestone Plan [\#1329](https://github.com/codenvy/codenvy/issues/1329)
+- Workspace Creation Display Problem [\#1061](https://github.com/codenvy/codenvy/issues/1061)
+- Release codenvy and saas 5.1.2 [\#1595](https://github.com/codenvy/codenvy/issues/1595)
+
+**Pull requests merged:**
+
+- add new version 5.1.1 [\#1571](https://github.com/codenvy/codenvy/pull/1571) ([riuvshin](https://github.com/riuvshin))
+- CHE-3686: move method to base class [\#1557](https://github.com/codenvy/codenvy/pull/1557) ([garagatyi](https://github.com/garagatyi))
+
+## [5.1.1](https://github.com/codenvy/codenvy/tree/5.1.1) (2017-01-20)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.0...5.1.1)
+
+**Issues with no labels:**
+
+- Did my services tab disappear on my workspace? [\#1563](https://github.com/codenvy/codenvy/issues/1563)
+- Docker command for running codenvy with your assembly [\#1551](https://github.com/codenvy/codenvy/issues/1551)
+- Create CI jobs for docs [\#1429](https://github.com/codenvy/codenvy/issues/1429)
+- Only user with role 'manageSystem' should be able to call  NodeService methods [\#1292](https://github.com/codenvy/codenvy/issues/1292)
+- Error in API che--typescript when opening folder. \(regression\) [\#1205](https://github.com/codenvy/codenvy/issues/1205)
+- Testing stack does not work provide the workspace [\#1560](https://github.com/codenvy/codenvy/issues/1560)
+- Release codenvy and saas 5.1.1 [\#1553](https://github.com/codenvy/codenvy/issues/1553)
+
+**Pull requests merged:**
+
+- Add missing dependencies [\#1567](https://github.com/codenvy/codenvy/pull/1567) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- CODENVY-1489 update dependencies in site [\#1540](https://github.com/codenvy/codenvy/pull/1540) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- CODENVY-1292 Add permission filter for Node Service [\#1295](https://github.com/codenvy/codenvy/pull/1295) ([mkuznyetsov](https://github.com/mkuznyetsov))
+
 ## [5.1.0](https://github.com/codenvy/codenvy/tree/5.1.0) (2017-01-18)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.0.1...5.1.0)
 
@@ -8,8 +118,9 @@
 - Unable to run Docker Codenvy, "please rerun CLI" [\#1538](https://github.com/codenvy/codenvy/issues/1538)
 - CLI for creating organizations and users [\#1537](https://github.com/codenvy/codenvy/issues/1537)
 - Authentication for Preview [\#1535](https://github.com/codenvy/codenvy/issues/1535)
-- Running Codenvy in Docker: Workspace Agent Not Responding [\#1495](https://github.com/codenvy/codenvy/issues/1495)
 - Update Codenvy to Use Renamed Che Docker Images [\#930](https://github.com/codenvy/codenvy/issues/930)
+- 5.1.0 Milestone Overview [\#1666](https://github.com/codenvy/codenvy/issues/1666)
+- Release codenvy and saas 5.1.0 [\#1552](https://github.com/codenvy/codenvy/issues/1552)
 - workspaces does not start from snapshots on codenvy.io [\#1544](https://github.com/codenvy/codenvy/issues/1544)
 - My SQL stack does not start [\#1524](https://github.com/codenvy/codenvy/issues/1524)
 - NPE when creating workspace when there is already running ones [\#1506](https://github.com/codenvy/codenvy/issues/1506)
@@ -378,17 +489,6 @@
 - use images names and versions from manifest file for particular version [\#1157](https://github.com/codenvy/codenvy/pull/1157) ([riuvshin](https://github.com/riuvshin))
 - INFRA-14: Limit number of pids [\#1152](https://github.com/codenvy/codenvy/pull/1152) ([tolusha](https://github.com/tolusha))
 - Prototype of upgrade method [\#1147](https://github.com/codenvy/codenvy/pull/1147) ([mshaposhnik](https://github.com/mshaposhnik))
-- fix cli restart [\#1143](https://github.com/codenvy/codenvy/pull/1143) ([riuvshin](https://github.com/riuvshin))
-- fix backup and restore commands [\#1142](https://github.com/codenvy/codenvy/pull/1142) ([riuvshin](https://github.com/riuvshin))
-- Move CLI Into a Container [\#1140](https://github.com/codenvy/codenvy/pull/1140) ([TylerJewell](https://github.com/TylerJewell))
-- Fix integration test of install Codenvy on-prem AIO and update its config [\#1139](https://github.com/codenvy/codenvy/pull/1139) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add small fixes [\#1138](https://github.com/codenvy/codenvy/pull/1138) ([garagatyi](https://github.com/garagatyi))
-- Minor changes of installation manager [\#1135](https://github.com/codenvy/codenvy/pull/1135) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Hackathon merge [\#1132](https://github.com/codenvy/codenvy/pull/1132) ([garagatyi](https://github.com/garagatyi))
-- Reset clientid and clientsecret for all oauth privders [\#1131](https://github.com/codenvy/codenvy/pull/1131) ([skabashnyuk](https://github.com/skabashnyuk))
-- Docker version check [\#1130](https://github.com/codenvy/codenvy/pull/1130) ([mshaposhnik](https://github.com/mshaposhnik))
-- CODENVY-1112: Add workspces number limit check, when starting workspace from config [\#1128](https://github.com/codenvy/codenvy/pull/1128) ([vinokurig](https://github.com/vinokurig))
-- Fix URL that produce Project API [\#1097](https://github.com/codenvy/codenvy/pull/1097) ([vparfonov](https://github.com/vparfonov))
 - Set up contribution mixins after IDE has been initialized [\#1189](https://github.com/codenvy/codenvy/pull/1189) ([vzhukovskii](https://github.com/vzhukovskii))
 - Allow users with manageCodenvy permission to stop/get info of any workspace [\#1165](https://github.com/codenvy/codenvy/pull/1165) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - Do user logout on user remove event.  [\#1137](https://github.com/codenvy/codenvy/pull/1137) ([skabashnyuk](https://github.com/skabashnyuk))
@@ -485,25 +585,6 @@
 
 **Pull requests merged:**
 
-- Minor fixes of Installation Manager CLI and bootstrap script. [\#1126](https://github.com/codenvy/codenvy/pull/1126) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Prepare default codenvy properties to release Codenvy on-prem 5.0.0-M7 [\#1121](https://github.com/codenvy/codenvy/pull/1121) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- fix Jenkins integration [\#1120](https://github.com/codenvy/codenvy/pull/1120) ([evidolob](https://github.com/evidolob))
-- Replace api.enpoint on che.api in IM integration tests [\#1117](https://github.com/codenvy/codenvy/pull/1117) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix ClassCastException during starting workspace from config [\#1111](https://github.com/codenvy/codenvy/pull/1111) ([sleshchenko](https://github.com/sleshchenko))
-- Work around trailing slash in proxy url and dosker registry mirror url [\#1095](https://github.com/codenvy/codenvy/pull/1095) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Changes according to git refactoring [\#1090](https://github.com/codenvy/codenvy/pull/1090) ([vinokurig](https://github.com/vinokurig))
-- Change limitations of Codenvy on-prem license [\#1085](https://github.com/codenvy/codenvy/pull/1085) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Don't allow to update the workspace while manager checks it's resourc… [\#1075](https://github.com/codenvy/codenvy/pull/1075) ([evoevodin](https://github.com/evoevodin))
-- Restore properties names [\#1072](https://github.com/codenvy/codenvy/pull/1072) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-1058 update property name [\#1059](https://github.com/codenvy/codenvy/pull/1059) ([vkuznyetsov](https://github.com/vkuznyetsov))
-- Exdent LdapSynchronizer functionality [\#1044](https://github.com/codenvy/codenvy/pull/1044) ([evoevodin](https://github.com/evoevodin))
-- CHE-1787: Remove workspace id from websocket connection path to master [\#1043](https://github.com/codenvy/codenvy/pull/1043) ([vinokurig](https://github.com/vinokurig))
-- Fix address of Staging Update Server to updater.codenvy-stg.com [\#1034](https://github.com/codenvy/codenvy/pull/1034) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Create default codenvy properties for Codenvy on-prem 5.0.0-M6 [\#1031](https://github.com/codenvy/codenvy/pull/1031) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \#2459 add maven plugin to generate GWT dyna provider implementation [\#1024](https://github.com/codenvy/codenvy/pull/1024) ([evidolob](https://github.com/evidolob))
-- Add LS, JSON and C\# Plugins to Codenvy [\#1022](https://github.com/codenvy/codenvy/pull/1022) ([vparfonov](https://github.com/vparfonov))
-- CODENVY-792: Add workspace cap limit [\#969](https://github.com/codenvy/codenvy/pull/969) ([vinokurig](https://github.com/vinokurig))
-- CODENVY-863 Add pagging to PermissionService\#getUsersPermissions [\#963](https://github.com/codenvy/codenvy/pull/963) ([sleshchenko](https://github.com/sleshchenko))
 - CODENVY-602 Avoid NPE when ending sessions of stopped workspaces [\#1026](https://github.com/codenvy/codenvy/pull/1026) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - CHE-2015 Rename configuration properties [\#902](https://github.com/codenvy/codenvy/pull/902) ([mkuznyetsov](https://github.com/mkuznyetsov))
 
@@ -562,42 +643,6 @@
 
 **Pull requests merged:**
 
-- CHE-2524: Remove unnecessary cast in AuditManager [\#1021](https://github.com/codenvy/codenvy/pull/1021) ([vinokurig](https://github.com/vinokurig))
-- CODENVY-992 turn email, username to lowercase on login [\#1019](https://github.com/codenvy/codenvy/pull/1019) ([vkuznyetsov](https://github.com/vkuznyetsov))
-- Add connections passivator to prevent badly bind connections to return to the pool; [\#1016](https://github.com/codenvy/codenvy/pull/1016) ([mshaposhnik](https://github.com/mshaposhnik))
-- Change addresses of test proxies for integration tests of IM CLI [\#1013](https://github.com/codenvy/codenvy/pull/1013) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix bootstrap script error of storing docker\_cluster\_advertise property [\#1012](https://github.com/codenvy/codenvy/pull/1012) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix error of setting multi-line codenvy property [\#1006](https://github.com/codenvy/codenvy/pull/1006) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add sorting workspaces by owner flag and by name in Audit report [\#1004](https://github.com/codenvy/codenvy/pull/1004) ([vinokurig](https://github.com/vinokurig))
-- Add missed setPermissions allowed actions for stack and recipe domains [\#1003](https://github.com/codenvy/codenvy/pull/1003) ([sleshchenko](https://github.com/sleshchenko))
-- Fix codemirror version [\#999](https://github.com/codenvy/codenvy/pull/999) ([ashumilova](https://github.com/ashumilova))
-- CODENVY-518: Fix wrong pull request update status [\#993](https://github.com/codenvy/codenvy/pull/993) ([vinokurig](https://github.com/vinokurig))
-- Adapt tests to WorkspaceService\#stop REST method [\#989](https://github.com/codenvy/codenvy/pull/989) ([evoevodin](https://github.com/evoevodin))
-- IM Audit command and test improvements [\#986](https://github.com/codenvy/codenvy/pull/986) ([vinokurig](https://github.com/vinokurig))
-- Fix TestAuditCommand test [\#983](https://github.com/codenvy/codenvy/pull/983) ([vinokurig](https://github.com/vinokurig))
-- Remove not needed GWT modules declaration [\#981](https://github.com/codenvy/codenvy/pull/981) ([vparfonov](https://github.com/vparfonov))
-- Use preRemove event instead of cascade remove for automatically removing of suborganizations [\#980](https://github.com/codenvy/codenvy/pull/980) ([sleshchenko](https://github.com/sleshchenko))
-- Merge integration test of login command into the test of audit command [\#979](https://github.com/codenvy/codenvy/pull/979) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix usage of page [\#978](https://github.com/codenvy/codenvy/pull/978) ([sleshchenko](https://github.com/sleshchenko))
-- Add missed set permissions action to organization domain [\#975](https://github.com/codenvy/codenvy/pull/975) ([sleshchenko](https://github.com/sleshchenko))
-- Move DTO generation to the shared jar [\#974](https://github.com/codenvy/codenvy/pull/974) ([vparfonov](https://github.com/vparfonov))
-- Fix ParseException in Audit tests [\#972](https://github.com/codenvy/codenvy/pull/972) ([vinokurig](https://github.com/vinokurig))
-- CODENVY-906; fix plugin pullrequest presenter initialization [\#971](https://github.com/codenvy/codenvy/pull/971) ([mshaposhnik](https://github.com/mshaposhnik))
-- CODENVY-581: Add Audit IM command [\#967](https://github.com/codenvy/codenvy/pull/967) ([vinokurig](https://github.com/vinokurig))
-- Handle absence of 'eth0' network interface by bootstrap script [\#962](https://github.com/codenvy/codenvy/pull/962) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add check for makes sure that last selected project not null [\#961](https://github.com/codenvy/codenvy/pull/961) ([akorneta](https://github.com/akorneta))
-- Sort parent pom.xml [\#956](https://github.com/codenvy/codenvy/pull/956) ([vinokurig](https://github.com/vinokurig))
-- Fix backup command of IM CLI [\#955](https://github.com/codenvy/codenvy/pull/955) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Organization api fixes [\#954](https://github.com/codenvy/codenvy/pull/954) ([sleshchenko](https://github.com/sleshchenko))
-- CODENVY-924; add range based search by group during sync [\#952](https://github.com/codenvy/codenvy/pull/952) ([mshaposhnik](https://github.com/mshaposhnik))
-- Fix unit tests of backup/restore functions of installation manager [\#945](https://github.com/codenvy/codenvy/pull/945) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix backup command of IM CLI to work with long file names in workspaces [\#941](https://github.com/codenvy/codenvy/pull/941) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix Codenvy project creation in integration tests of IM CLI [\#928](https://github.com/codenvy/codenvy/pull/928) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix test and components related to cascade remove [\#927](https://github.com/codenvy/codenvy/pull/927) ([akorneta](https://github.com/akorneta))
-- Add default properties for Codenvy on-prem 5.0.0-M5 [\#925](https://github.com/codenvy/codenvy/pull/925) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-2369: add a mechanism which checks state of the ws agent [\#817](https://github.com/codenvy/codenvy/pull/817) ([svor](https://github.com/svor))
-- CODENVY-581: Add Audit service [\#731](https://github.com/codenvy/codenvy/pull/731) ([vinokurig](https://github.com/vinokurig))
-- CODENVY-518: Fix pull request created message [\#658](https://github.com/codenvy/codenvy/pull/658) ([vinokurig](https://github.com/vinokurig))
 - CODENVY-1009: fix license legality check [\#1011](https://github.com/codenvy/codenvy/pull/1011) ([ashumilova](https://github.com/ashumilova))
 - CHE-2435: Add component for clean up workspace folder after remove workspace. [\#829](https://github.com/codenvy/codenvy/pull/829) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
 - che-1518: Fix creation zombie prosess when user closes terminal. [\#570](https://github.com/codenvy/codenvy/pull/570) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
@@ -656,29 +701,6 @@
 
 **Pull requests merged:**
 
-- Ldap docs improvement [\#923](https://github.com/codenvy/codenvy/pull/923) ([mshaposhnik](https://github.com/mshaposhnik))
-- Fix recipe search query and  add provider for recipe permission [\#917](https://github.com/codenvy/codenvy/pull/917) ([akorneta](https://github.com/akorneta))
-- Add integration test of login command of IM CLI [\#913](https://github.com/codenvy/codenvy/pull/913) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Minor fix of IM CLI [\#911](https://github.com/codenvy/codenvy/pull/911) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-905: Fix recipe permission getByUserId query [\#907](https://github.com/codenvy/codenvy/pull/907) ([akorneta](https://github.com/akorneta))
-- CODENVY-879: add PHP plugins to the deps [\#904](https://github.com/codenvy/codenvy/pull/904) ([vparfonov](https://github.com/vparfonov))
-- Small fixup of IM CLI [\#900](https://github.com/codenvy/codenvy/pull/900) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix variables inside the Codenvy on-prem patch files to be enclosed i… [\#898](https://github.com/codenvy/codenvy/pull/898) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-687: Сache svn credentials instead of storing them in credentials provider [\#895](https://github.com/codenvy/codenvy/pull/895) ([vinokurig](https://github.com/vinokurig))
-- Fix ldap migration [\#894](https://github.com/codenvy/codenvy/pull/894) ([mshaposhnik](https://github.com/mshaposhnik))
-- Fix bootstrap script to work around new admin name/password properties [\#891](https://github.com/codenvy/codenvy/pull/891) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix unit tests of IM CLI [\#890](https://github.com/codenvy/codenvy/pull/890) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Documentation fixes [\#887](https://github.com/codenvy/codenvy/pull/887) ([mshaposhnik](https://github.com/mshaposhnik))
-- \(\#865\) display update info in the IM CLI install command output [\#884](https://github.com/codenvy/codenvy/pull/884) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- More accurate ldap configuration properties validation [\#882](https://github.com/codenvy/codenvy/pull/882) ([mshaposhnik](https://github.com/mshaposhnik))
-- Set the next version of postgresql driver [\#878](https://github.com/codenvy/codenvy/pull/878) ([akorneta](https://github.com/akorneta))
-- Installation manager fixup. [\#875](https://github.com/codenvy/codenvy/pull/875) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- fix migration script [\#874](https://github.com/codenvy/codenvy/pull/874) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-2214: NodeJs Debugger [\#872](https://github.com/codenvy/codenvy/pull/872) ([tolusha](https://github.com/tolusha))
-- CODENVY-774: fix grammar and typo errors [\#871](https://github.com/codenvy/codenvy/pull/871) ([ashumilova](https://github.com/ashumilova))
-- \(\#845\) prepare migration script and default properties to ship Codenvy on-prem 5.0.0-M4 [\#867](https://github.com/codenvy/codenvy/pull/867) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Resources API [\#854](https://github.com/codenvy/codenvy/pull/854) ([sleshchenko](https://github.com/sleshchenko))
-- CHE-1929. Inject machines links [\#828](https://github.com/codenvy/codenvy/pull/828) ([RomanNikitenko](https://github.com/RomanNikitenko))
 - Use go flags to compile binaries in static mode [\#896](https://github.com/codenvy/codenvy/pull/896) ([benoitf](https://github.com/benoitf))
 - CODENVY-582 Add ability to define free resources limit [\#877](https://github.com/codenvy/codenvy/pull/877) ([sleshchenko](https://github.com/sleshchenko))
 - CODENVY-775: renamings in workspace sharing widget [\#870](https://github.com/codenvy/codenvy/pull/870) ([ashumilova](https://github.com/ashumilova))
@@ -704,15 +726,6 @@
 - Release and ship Codenvy 5.0.0-M4 [\#845](https://github.com/codenvy/codenvy/issues/845)
 - Can not share workspace to another user [\#725](https://github.com/codenvy/codenvy/issues/725)
 - Rewrite the stack and recipe search in accordance with permissions mechanism [\#686](https://github.com/codenvy/codenvy/issues/686)
-
-**Pull requests merged:**
-
-- CHE-2402: fix in accordance with changes in Che [\#855](https://github.com/codenvy/codenvy/pull/855) ([garagatyi](https://github.com/garagatyi))
-- \(\#465\) Support PostgreSQL when performing backup/restore [\#852](https://github.com/codenvy/codenvy/pull/852) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix NPE on getting environment by name [\#851](https://github.com/codenvy/codenvy/pull/851) ([akorneta](https://github.com/akorneta))
-- CODENVY-398; Make it possible to perform integration with customers ldap [\#849](https://github.com/codenvy/codenvy/pull/849) ([mshaposhnik](https://github.com/mshaposhnik))
-- CODENVY-741 rename group id for site [\#838](https://github.com/codenvy/codenvy/pull/838) ([vkuznyetsov](https://github.com/vkuznyetsov))
-- Organization API [\#807](https://github.com/codenvy/codenvy/pull/807) ([sleshchenko](https://github.com/sleshchenko))
 
 ## [5.0.0-M3](https://github.com/codenvy/codenvy/tree/5.0.0-M3) (2016-09-26)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.0.0-M2...5.0.0-M3)
@@ -769,17 +782,6 @@
 
 **Pull requests merged:**
 
-- \[dashboard\] Fix name of the index file [\#831](https://github.com/codenvy/codenvy/pull/831) ([benoitf](https://github.com/benoitf))
-- Use also TypeScript for codenvy dashboard [\#830](https://github.com/codenvy/codenvy/pull/830) ([benoitf](https://github.com/benoitf))
-- \(\#456\) fix Vagrantfile for RHEL OS [\#823](https://github.com/codenvy/codenvy/pull/823) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add default properties for codenvy on-prem 5.0.0-M2 [\#818](https://github.com/codenvy/codenvy/pull/818) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix integration tests [\#811](https://github.com/codenvy/codenvy/pull/811) ([evoevodin](https://github.com/evoevodin))
-- \(\#456\) fix update of hostname of Codenvy on-prem with machine nodes [\#805](https://github.com/codenvy/codenvy/pull/805) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Normalize ldap user identifier [\#794](https://github.com/codenvy/codenvy/pull/794) ([evoevodin](https://github.com/evoevodin))
-- Ldap config cleanup [\#791](https://github.com/codenvy/codenvy/pull/791) ([skabashnyuk](https://github.com/skabashnyuk))
-- CHE-2366: Fix volumes\_from usage in compose environment [\#772](https://github.com/codenvy/codenvy/pull/772) ([garagatyi](https://github.com/garagatyi))
-- CODENVY-742: Enable support for multiple AWS ECR registries per install [\#761](https://github.com/codenvy/codenvy/pull/761) ([mmorhun](https://github.com/mmorhun))
-- CODENVY-601: fix WorkspaceFsBackupSchedulerTest [\#670](https://github.com/codenvy/codenvy/pull/670) ([mmorhun](https://github.com/mmorhun))
 - CODENVY-826: Fix login to Codenvy through IM CLI [\#844](https://github.com/codenvy/codenvy/pull/844) ([akorneta](https://github.com/akorneta))
 - Grant all permissions for user who creates stack [\#840](https://github.com/codenvy/codenvy/pull/840) ([evoevodin](https://github.com/evoevodin))
 - CODENVY-836: fix sharing workspace [\#837](https://github.com/codenvy/codenvy/pull/837) ([ashumilova](https://github.com/ashumilova))
@@ -814,28 +816,6 @@
 - Sample for Compose stack must use only 3GB RAM [\#781](https://github.com/codenvy/codenvy/issues/781)
 - Certain Factories are not working since upgrade to 5.0.0-M1 [\#779](https://github.com/codenvy/codenvy/issues/779)
 
-**Pull requests merged:**
-
-- Add permissions filter for LdapSynchronizerService [\#790](https://github.com/codenvy/codenvy/pull/790) ([evoevodin](https://github.com/evoevodin))
-- Adapt downloaded factories [\#787](https://github.com/codenvy/codenvy/pull/787) ([evoevodin](https://github.com/evoevodin))
-- Add FactoryModule binding [\#778](https://github.com/codenvy/codenvy/pull/778) ([akorneta](https://github.com/akorneta))
-- CHE-2286: fix type of object and dependency [\#777](https://github.com/codenvy/codenvy/pull/777) ([olexii4](https://github.com/olexii4))
-- Use new method to get amount of users in the CodenvyLicenseManager [\#776](https://github.com/codenvy/codenvy/pull/776) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-- Provide contribution mixin before resource has been loaded [\#768](https://github.com/codenvy/codenvy/pull/768) ([vzhukovskii](https://github.com/vzhukovskii))
-- fix IM CLI integration tests [\#765](https://github.com/codenvy/codenvy/pull/765) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- fix installation manager integration tests [\#763](https://github.com/codenvy/codenvy/pull/763) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add admin user creator for ldap [\#760](https://github.com/codenvy/codenvy/pull/760) ([mshaposhnik](https://github.com/mshaposhnik))
-- Mark providerClass as connection config parameter [\#757](https://github.com/codenvy/codenvy/pull/757) ([skabashnyuk](https://github.com/skabashnyuk))
-- CODENVY-734: Fix adding node behind the proxy for default host name [\#754](https://github.com/codenvy/codenvy/pull/754) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-- \(\#730\) fix migration of codenvy license [\#753](https://github.com/codenvy/codenvy/pull/753) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#730\) add patch before update 5.0.0-M1, fix integration tests [\#750](https://github.com/codenvy/codenvy/pull/750) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fixed bug bind users [\#749](https://github.com/codenvy/codenvy/pull/749) ([skabashnyuk](https://github.com/skabashnyuk))
-- Ldap parameters names structured in more logical way [\#748](https://github.com/codenvy/codenvy/pull/748) ([skabashnyuk](https://github.com/skabashnyuk))
-- \(\#730\) add codenvy on-prem 5.0.0-M1 properties [\#747](https://github.com/codenvy/codenvy/pull/747) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Consolidate databases [\#746](https://github.com/codenvy/codenvy/pull/746) ([akorneta](https://github.com/akorneta))
-- Add users/profiles synchronizer [\#745](https://github.com/codenvy/codenvy/pull/745) ([evoevodin](https://github.com/evoevodin))
-- Make login to Codenvy on-prem instance by default from IM CLI [\#740](https://github.com/codenvy/codenvy/pull/740) ([dmytro-ndp](https://github.com/dmytro-ndp))
-
 ## [5.0.0-M1](https://github.com/codenvy/codenvy/tree/5.0.0-M1) (2016-09-14)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.7.2...5.0.0-M1)
 
@@ -861,19 +841,6 @@
 
 **Pull requests merged:**
 
-- \(\#730\) fix codenvy on-prem property 'machine\_server\_extra\_volume' [\#737](https://github.com/codenvy/codenvy/pull/737) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#617\) remove redundant options --systemAdminName and --systemAdminPassword from bootstrap script [\#736](https://github.com/codenvy/codenvy/pull/736) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#730\) prepare to ship Codenvy 5.0.0-M1 [\#733](https://github.com/codenvy/codenvy/pull/733) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add indexes to Workers, Recipe and Stack Permissions [\#726](https://github.com/codenvy/codenvy/pull/726) ([sleshchenko](https://github.com/sleshchenko))
-- \(\#600\) Move Report Sender from Installation Manager server to WS master server [\#720](https://github.com/codenvy/codenvy/pull/720) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-599: Support old Condenvy on-prem 4.x wher LicenseService is absent. [\#719](https://github.com/codenvy/codenvy/pull/719) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-- Separate queries for getting permissions for specific user and public… [\#718](https://github.com/codenvy/codenvy/pull/718) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Add default properties for Codenvy on-prem 4.7.2 [\#717](https://github.com/codenvy/codenvy/pull/717) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-2280 merge new environment model [\#716](https://github.com/codenvy/codenvy/pull/716) ([akorneta](https://github.com/akorneta))
-- \(\#701\) fix regexp of recognition version to test [\#715](https://github.com/codenvy/codenvy/pull/715) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-2331: fix in accordance with changes in Che [\#713](https://github.com/codenvy/codenvy/pull/713) ([garagatyi](https://github.com/garagatyi))
-- CHE-2385: Adds all agents into dev machine [\#712](https://github.com/codenvy/codenvy/pull/712) ([tolusha](https://github.com/tolusha))
-- Codenvy 686 Rewrite the stack and recipe search in accordance with permissions mechanism [\#706](https://github.com/codenvy/codenvy/pull/706) ([mshaposhnik](https://github.com/mshaposhnik))
 - CODENVY-499: Ways to mount folder inside host machine to auxiliary machine [\#728](https://github.com/codenvy/codenvy/pull/728) ([tolusha](https://github.com/tolusha))
 
 ## [4.7.2](https://github.com/codenvy/codenvy/tree/4.7.2) (2016-09-09)
@@ -900,25 +867,6 @@
 - Adapt Docker implementation of multi-machine environments to Codenvy/Saas [\#401](https://github.com/codenvy/codenvy/issues/401)
 - Codenvy Milestone 4.7.1 [\#692](https://github.com/codenvy/codenvy/issues/692)
 - Release and ship Codenvy onprem 4.7.1 [\#688](https://github.com/codenvy/codenvy/issues/688)
-
-**Pull requests merged:**
-
-- \(\#701\) add support of Codenvy on-prem 5.x [\#708](https://github.com/codenvy/codenvy/pull/708) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Used version of dumbster with correct startup implementation [\#703](https://github.com/codenvy/codenvy/pull/703) ([skabashnyuk](https://github.com/skabashnyuk))
-- Fix integration tests to work with Codenvy on-prem 5.x [\#699](https://github.com/codenvy/codenvy/pull/699) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add codenvy properties for 5.0.0-M1-SNAPSHOT [\#698](https://github.com/codenvy/codenvy/pull/698) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-1823: Machine agent implementation [\#691](https://github.com/codenvy/codenvy/pull/691) ([tolusha](https://github.com/tolusha))
-- CODENVY-666: Adapt permissions to '\*' user wildcard [\#685](https://github.com/codenvy/codenvy/pull/685) ([akorneta](https://github.com/akorneta))
-- Turn on post-flight installation check [\#683](https://github.com/codenvy/codenvy/pull/683) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-1818: change link to factory templates to new templates [\#682](https://github.com/codenvy/codenvy/pull/682) ([garagatyi](https://github.com/garagatyi))
-- Enable support for old model objects adaptation [\#681](https://github.com/codenvy/codenvy/pull/681) ([evoevodin](https://github.com/evoevodin))
-- CHE-1818: add new WS environment types for single machine [\#678](https://github.com/codenvy/codenvy/pull/678) ([garagatyi](https://github.com/garagatyi))
-- CODENVY-645; add cascading removal for permissions; [\#675](https://github.com/codenvy/codenvy/pull/675) ([mshaposhnik](https://github.com/mshaposhnik))
-- Installation manager minor fixup [\#671](https://github.com/codenvy/codenvy/pull/671) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-599: Move LicenseService to Codenvy API server [\#665](https://github.com/codenvy/codenvy/pull/665) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-- Migration to 4.7.0 [\#661](https://github.com/codenvy/codenvy/pull/661) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Removed ApiEndpointProvider to avoid duplication [\#649](https://github.com/codenvy/codenvy/pull/649) ([skabashnyuk](https://github.com/skabashnyuk))
-- \[WIP\] CHE-1818: change workspace environment model [\#635](https://github.com/codenvy/codenvy/pull/635) ([garagatyi](https://github.com/garagatyi))
 
 ## [4.7.0](https://github.com/codenvy/codenvy/tree/4.7.0) (2016-08-29)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.7.0-RC1...4.7.0)
@@ -964,22 +912,6 @@
 
 **Pull requests merged:**
 
-- Fix empty factories message [\#639](https://github.com/codenvy/codenvy/pull/639) ([ashumilova](https://github.com/ashumilova))
-- improve list of factories for UD [\#633](https://github.com/codenvy/codenvy/pull/633) ([olexii4](https://github.com/olexii4))
-- \(\#624\) don't change /etc/hosts when changing host\_url of multi-server… [\#626](https://github.com/codenvy/codenvy/pull/626) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Remove change admin password capability from Installation Manager [\#625](https://github.com/codenvy/codenvy/pull/625) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Do not add null profile attributes [\#619](https://github.com/codenvy/codenvy/pull/619) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Update according to the IDE API changes [\#618](https://github.com/codenvy/codenvy/pull/618) ([azatsarynnyy](https://github.com/azatsarynnyy))
-- rework che-lists  for UD [\#615](https://github.com/codenvy/codenvy/pull/615) ([olexii4](https://github.com/olexii4))
-- \(\#479\) add post-flight Codenvy on-prem installation check [\#614](https://github.com/codenvy/codenvy/pull/614) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add Codenvy Admin User creator component [\#609](https://github.com/codenvy/codenvy/pull/609) ([akorneta](https://github.com/akorneta))
-- Add terminal artifact to dependency management section [\#608](https://github.com/codenvy/codenvy/pull/608) ([sleshchenko](https://github.com/sleshchenko))
-- CODENVY-505 Rework permissions mechanism for stacks, recipes and system perms. [\#603](https://github.com/codenvy/codenvy/pull/603) ([mshaposhnik](https://github.com/mshaposhnik))
-- Add needed RPC components to the Guice binding [\#598](https://github.com/codenvy/codenvy/pull/598) ([vparfonov](https://github.com/vparfonov))
-- \[WIP\] Move AdminUserDao functionality to UserDao [\#596](https://github.com/codenvy/codenvy/pull/596) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Fixes related to adding foreign reference on account in Workspace [\#595](https://github.com/codenvy/codenvy/pull/595) ([akorneta](https://github.com/akorneta))
-- CODENVY-537: Rework MachineBackupManager multithreaded tests [\#592](https://github.com/codenvy/codenvy/pull/592) ([mmorhun](https://github.com/mmorhun))
-- Adapt Codenvy to changes in Che [\#571](https://github.com/codenvy/codenvy/pull/571) ([garagatyi](https://github.com/garagatyi))
 - remove che-long-touch behaviour in navbar [\#648](https://github.com/codenvy/codenvy/pull/648) ([akurinnoy](https://github.com/akurinnoy))
 - update dashboard view [\#647](https://github.com/codenvy/codenvy/pull/647) ([akurinnoy](https://github.com/akurinnoy))
 - CHE-2158: simplify boxes' design for Dashboard page [\#630](https://github.com/codenvy/codenvy/pull/630) ([akurinnoy](https://github.com/akurinnoy))
@@ -1006,20 +938,6 @@
 - Create a script for diagnostic and collect needed info for support in case of troubleshooting [\#413](https://github.com/codenvy/codenvy/issues/413)
 - Create migration tool to migrate from LDAP/MongoDB to PostgreSQL [\#397](https://github.com/codenvy/codenvy/issues/397)
 
-**Pull requests merged:**
-
-- Fix codenvy wsagent groupId [\#585](https://github.com/codenvy/codenvy/pull/585) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- \(\#575\) fix unregistering the RHEL system in IM integration tests [\#576](https://github.com/codenvy/codenvy/pull/576) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#547\) fix zabbix admin name in default Codenvy on-prem properties [\#569](https://github.com/codenvy/codenvy/pull/569) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#560\) replace deprecated 'netstat' command by 'ss' [\#568](https://github.com/codenvy/codenvy/pull/568) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix config of installation manager integration tests [\#559](https://github.com/codenvy/codenvy/pull/559) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CODENVY-550 Fix mail server groupId [\#558](https://github.com/codenvy/codenvy/pull/558) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Fix update.sh to use updater.nightly4.codenvy-stg.com [\#556](https://github.com/codenvy/codenvy/pull/556) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Installation manager [\#555](https://github.com/codenvy/codenvy/pull/555) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add default properties and migration script of Codenvy on-prem 4.6.2 [\#553](https://github.com/codenvy/codenvy/pull/553) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Add integration tests for JPA DAOs on PostgreSQL database [\#551](https://github.com/codenvy/codenvy/pull/551) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Makes WorkspaceDAO to respect workers on get by user [\#542](https://github.com/codenvy/codenvy/pull/542) ([mshaposhnik](https://github.com/mshaposhnik))
-
 ## [4.6.2](https://github.com/codenvy/codenvy/tree/4.6.2) (2016-08-09)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.6.1...4.6.2)
 
@@ -1027,13 +945,6 @@
 
 - Import from github [\#528](https://github.com/codenvy/codenvy/issues/528)
 - Timeout for custome stack [\#493](https://github.com/codenvy/codenvy/issues/493)
-
-**Pull requests merged:**
-
-- refactoring of GitException [\#538](https://github.com/codenvy/codenvy/pull/538) ([vinokurig](https://github.com/vinokurig))
-- \(\#459\) fix requesting to Codenvy API throught HTTPS [\#536](https://github.com/codenvy/codenvy/pull/536) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Create WorkerDao implementation on jpa [\#523](https://github.com/codenvy/codenvy/pull/523) ([mshaposhnik](https://github.com/mshaposhnik))
-- CODENVY-453: Add support of AWS ECR dynamic passwords [\#521](https://github.com/codenvy/codenvy/pull/521) ([mmorhun](https://github.com/mmorhun))
 
 ## [4.6.1](https://github.com/codenvy/codenvy/tree/4.6.1) (2016-08-04)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.6.0...4.6.1)
@@ -1049,17 +960,6 @@
 - Validate options of Codenvy bootstrap script [\#404](https://github.com/codenvy/codenvy/issues/404)
 - Convert Chrome Store listing to beta.codenvy.com [\#402](https://github.com/codenvy/codenvy/issues/402)
 - Adding documentation to use alternative IDE [\#369](https://github.com/codenvy/codenvy/issues/369)
-
-**Pull requests merged:**
-
-- \(\#464\) update /etc/hosts when changing Codenvy hostname [\#517](https://github.com/codenvy/codenvy/pull/517) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- CHE-2033 Remove Che Git Provider module [\#513](https://github.com/codenvy/codenvy/pull/513) ([mkuznyetsov](https://github.com/mkuznyetsov))
-- Add ability to store empty codenvy properties [\#511](https://github.com/codenvy/codenvy/pull/511) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix tests to conform ErrorProne rules [\#510](https://github.com/codenvy/codenvy/pull/510) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- remove an old assets [\#506](https://github.com/codenvy/codenvy/pull/506) ([vkuznyetsov](https://github.com/vkuznyetsov))
-- fixup! \(\#404\) validate options of Codenvy bootstrap script [\#503](https://github.com/codenvy/codenvy/pull/503) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#496\) add Codenvy on-prem 4.6.0 properies and migration script [\#497](https://github.com/codenvy/codenvy/pull/497) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- \(\#404\) validate options of Codenvy bootstrap script [\#495](https://github.com/codenvy/codenvy/pull/495) ([dmytro-ndp](https://github.com/dmytro-ndp))
 
 ## [4.6.0](https://github.com/codenvy/codenvy/tree/4.6.0) (2016-08-01)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/4.5.1...4.6.0)
@@ -1101,7 +1001,6 @@
 
 **Pull requests merged:**
 
-- \(\#407\) fix codenvy 3.x integration tests [\#487](https://github.com/codenvy/codenvy/pull/487) ([dmytro-ndp](https://github.com/dmytro-ndp))
 - Updated to support 4.4.x proxy installation [\#441](https://github.com/codenvy/codenvy/pull/441) ([TylerJewell](https://github.com/TylerJewell))
 - CODENVY-572: Add exception to method signature [\#421](https://github.com/codenvy/codenvy/pull/421) ([vinokurig](https://github.com/vinokurig))
 - CODENVY-509: remove current user instead of sending email [\#381](https://github.com/codenvy/codenvy/pull/381) ([ashumilova](https://github.com/ashumilova))
