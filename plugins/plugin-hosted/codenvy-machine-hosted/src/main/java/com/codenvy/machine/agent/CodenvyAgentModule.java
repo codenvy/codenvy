@@ -49,7 +49,6 @@ public class CodenvyAgentModule extends AbstractModule {
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.ExternalRsyncAgentLauncherImpl.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
-        launchers.addBinding().to(org.eclipse.che.api.agent.SshMachineExecAgentLauncher.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.SshAgentLauncher.class);
 
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
@@ -64,7 +63,8 @@ public class CodenvyAgentModule extends AbstractModule {
         agents.addBinding().to(org.eclipse.che.api.agent.LSJsonAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSCSharpAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSTypeScriptAgent.class);
-
+  
+        bind(org.eclipse.che.plugin.machine.ssh.exec.SshMachineExecAgentLauncher.class);  
         bind(String.class).annotatedWith(Names.named("workspace.backup.public_key"))
                           .toProvider(com.codenvy.machine.agent.WorkspaceSyncPublicKeyProvider.class);
     }
