@@ -422,6 +422,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
                     <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
                         <module>com.codenvy.ide.IDE</module>
