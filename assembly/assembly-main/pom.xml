@@ -22,7 +22,7 @@
         <groupId>com.codenvy.onpremises</groupId>
         <version>5.3.0-SNAPSHOT</version>
     </parent>
-    <artifactId>onpremises-ide-packaging-tomcat-codenvy-allinone</artifactId>
+    <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
     <name>Onpremises IDE :: Tomcat :: IDE :: All-in-One</name>
     <dependencies>
@@ -33,32 +33,32 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-dashboard</artifactId>
+            <artifactId>assembly-dashboard-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-factory</artifactId>
+            <artifactId>assembly-factory-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-ide</artifactId>
+            <artifactId>assembly-ide-resources-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-ide-resources</artifactId>
+            <artifactId>assembly-ide-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-platform-api</artifactId>
+            <artifactId>assembly-website-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-war-website-codenvy</artifactId>
+            <artifactId>assembly-wsmaster-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>

@@ -29,16 +29,15 @@
     <packaging>pom</packaging>
     <name>Onpremises IDE :: Parent</name>
     <modules>
-        <module>onpremises-ide-packaging-war-website-codenvy</module>
-        <module>onpremises-ide-packaging-war-factory</module>
-        <module>onpremises-ide-packaging-war-platform-api</module>
-        <module>onpremises-ide-packaging-war-dashboard</module>
-        <module>onpremises-ide-compiling-war-ide</module>
-        <module>onpremises-ide-packaging-war-ide</module>
-        <module>onpremises-ide-packaging-war-ide-resources</module>
-        <module>onpremises-ide-packaging-war-ext-server</module>
-        <module>onpremises-ide-packaging-tomcat-ext-server</module>
-        <module>onpremises-ide-packaging-tomcat-codenvy-allinone</module>
-        <module>onpremises-ide-packaging-zip-terminal</module>
+        <module>assembly-website-war</module>
+        <module>assembly-factory-war</module>
+        <module>assembly-wsmaster-war</module>
+        <module>assembly-dashboard-war</module>
+        <module>compiling-ide-war</module>
+        <module>assembly-ide-war</module>
+        <module>assembly-ide-resources-war</module>
+        <module>assembly-wsagent-war</module>
+        <module>assembly-wsagent-server</module>
+        <module>assembly-main</module>
     </modules>
 </project>

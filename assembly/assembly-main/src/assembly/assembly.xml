@@ -37,7 +37,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>site.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-website-codenvy</include>
+                <include>com.codenvy.onpremises:assembly-website-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -46,7 +46,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ide-resources.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-ide-resources</include>
+                <include>com.codenvy.onpremises:assembly-ide-resources-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -55,7 +55,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-ide</include>
+                <include>com.codenvy.onpremises:assembly-ide-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -64,7 +64,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-dashboard</include>
+                <include>com.codenvy.onpremises:assembly-dashboard-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -82,7 +82,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>factory.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-factory</include>
+                <include>com.codenvy.onpremises:assembly-factory-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -91,7 +91,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>api.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-platform-api</include>
+                <include>com.codenvy.onpremises:assembly-wsmaster-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
