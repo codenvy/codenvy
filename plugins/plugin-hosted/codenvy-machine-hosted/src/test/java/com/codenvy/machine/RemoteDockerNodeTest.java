@@ -16,6 +16,7 @@ package com.codenvy.machine;
 
 import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -26,9 +27,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.fail;
 
 /**
  * @author Igor Vinokur
@@ -72,6 +78,8 @@ public class RemoteDockerNodeTest {
 
     @Test
     public void shouldBackupAndCleanupWSOnNodeUnbinding() throws Exception {
+        remoteDockerNode.bindWorkspace();
+
         //when
         remoteDockerNode.unbindWorkspace();
 
@@ -79,5 +87,44 @@ public class RemoteDockerNodeTest {
         verify(backupManager).backupWorkspaceAndCleanup(eq("WorkspaceId"),
                                                         eq("ContainerId"),
                                                         eq("127.0.0.1"));
+    }
+
+    @Test
+    public void backupIsNotCalledWhenRestoreIsNotCalled() throws ServerException {
+        remoteDockerNode.unbindWorkspace();
+
+        verifyBackupIsNeverCalled();
+    }
+
+    @Test
+    public void backupIsNotCalledWhenRestoreIsFailed() throws ServerException {
+        doThrow(new ServerException("no!"))
+                .when(backupManager)
+                .restoreWorkspaceBackup(anyString(), anyString(), anyString());
+        try {
+            remoteDockerNode.bindWorkspace();
+            fail("Had to throw an exception");
+        } catch (ServerException ignored) {
+            // mocked to behave like this
+        }
+
+        remoteDockerNode.unbindWorkspace();
+
+        verifyBackupIsNeverCalled();
+    }
+
+    @Test
+    public void backupIsNotCalledWhenRestoreIsInProgress() throws Exception {
+        doAnswer(inv -> {
+            remoteDockerNode.unbindWorkspace();
+            verifyBackupIsNeverCalled();
+            return null;
+        }).when(backupManager).restoreWorkspaceBackup(anyString(), anyString(), anyString());
+
+        remoteDockerNode.bindWorkspace();
+    }
+
+    private void verifyBackupIsNeverCalled() throws ServerException {
+        verify(backupManager, never()).backupWorkspaceAndCleanup(anyString(), anyString(), anyString());
     }
 }
