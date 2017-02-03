@@ -18,7 +18,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.rest.RestContext;
@@ -40,7 +39,7 @@ public class ActivityTrackingExtension {
     public ActivityTrackingExtension(final @RestContext String restContext,
                                      final AppContext appContext) {
 
-        ScriptInjector.fromUrl("/ide-resources/_app/activity.js")
+        ScriptInjector.fromUrl("/_app/activity.js")
                       .setWindow(TOP_WINDOW)
                       .setCallback(new Callback<Void, Exception>() {
                           @Override

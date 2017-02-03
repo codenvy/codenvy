@@ -20,9 +20,49 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>Codenvy</title>
     <link rel="shortcut icon" href="/site/images/ico/favicon.ico" />
-    <meta initiator="/ws/_app/Application.jsp" />
+    <meta initiator="/_app/Application.jsp" />
     <meta property="og:title" content="Codenvy | Provision, Share and Scale Developer Workspaces"/>
     <meta property="og:description" content="Industrial-strength Saas Developer Environments for developers and corporate teams with advanced collaboration, security, and enterprise options."/>
+
+    <script type="text/javascript" language="javascript">
+
+        /**This parameter is needed to define sdk mode.*/
+        window.sdk = 1;
+
+        /**
+         * Base IDE object
+         */
+
+        window.IDE = {};
+
+        /**
+         * Initial configuration
+         */
+
+        window.IDE.config = {
+            "restContext": "/api",
+            "cheExtensionPath": "/wsagent/ext"
+        };
+
+        /**
+         * Event handlers
+         */
+
+        window.IDE.eventHandlers = {};
+
+        window.IDE.eventHandlers.initializationFailed = function (message) {
+            if (message) {
+                var err = new Error(message);
+                window.alert(err.stack);
+            } else {
+                window.alert("Unable to initialize IDE");
+            }
+        };
+
+    </script>
+
+    <script type="text/javascript" language="javascript" src="/_app/browserNotSupported.js"></script>
+    <script type="text/javascript" language="javascript" async="true" src="/_app/_app.nocache.js"></script>
 </head>
 <body style="background-color: #373737;">
 <!-- Google Tag Manager -->
@@ -35,12 +75,6 @@
         '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-M69DMB');</script>
 <!-- End Google Tag Manager -->
-    <script type="text/javascript">
-        var po = document.createElement("script");
-        po.type = "text/javascript";
-        po.async = true;
-        po.src = "/ide-resources/initializer/init.js?" + new Date().getTime();
-        document.getElementsByTagName('head')[0].appendChild(po);
-    </script>
+
 </body>
 </html>

@@ -24,7 +24,7 @@
     </parent>
     <artifactId>compiling-ide-war</artifactId>
     <packaging>war</packaging>
-    <name>Onpremises IDE :: WAR :: Compiling App</name>
+    <name>Onpremises IDE :: WAR    :: Compiling App</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <maven.compiler.source>1.7</maven.compiler.source>

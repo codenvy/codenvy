@@ -35,7 +35,6 @@
         <module>assembly-dashboard-war</module>
         <module>compiling-ide-war</module>
         <module>assembly-ide-war</module>
-        <module>assembly-ide-resources-war</module>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>
         <module>assembly-main</module>

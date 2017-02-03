@@ -44,15 +44,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>ide-resources.war</outputFileNameMapping>
-            <includes>
-                <include>com.codenvy.onpremises:assembly-ide-resources-war</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
                 <include>com.codenvy.onpremises:assembly-ide-war</include>

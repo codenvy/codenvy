@@ -186,7 +186,6 @@ services:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/lighttpd/lighttpd.conf:/etc/lighttpd/lighttpd.conf'
 <% if scope.lookupvar('compose::codenvy_repo') == 'on' -%>
       - '<%= scope.lookupvar('compose::codenvy_development_ws_agent') -%>:/data/ws-agent.tar.gz'
-      - '<%= scope.lookupvar('compose::codenvy_development_terminal_agent') -%>:/data/linux_amd64/terminal/websocket-terminal-linux_amd64.tar.gz'
 <% end -%>
 <% if scope.lookupvar('compose::env') != 'production' -%>
     ports:
