@@ -133,6 +133,10 @@
             <artifactId>che-core-ide-app</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-orion-editor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-java-testing-core-ide</artifactId>
         </dependency>
@@ -152,12 +156,6 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-java-testing-testng-ide</artifactId>
         </dependency>
-
-        <dependency>
-                         <groupId>org.eclipse.che.lib</groupId>
-               <artifactId>che-orion-editor</artifactId>
-                    </dependency>
-
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-cpp-lang-ide</artifactId>
