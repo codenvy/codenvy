@@ -204,15 +204,6 @@ cmd_config_post_action() {
     fi
     cp "$(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${WS_AGENT_IN_REPO})" \
         "${CHE_CONTAINER_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}"
-
-    # copy terminal agent assembly to instance folder
-#    if [[ ! -f $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${TERMINAL_AGENT_IN_REPO}) ]]; then
-#      warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} terminal agent assembly."
-#      warning "Have you built ${TERMINAL_AGENT_IN_REPO_MODULE_NAME} with 'mvn clean install'?"
-#      return 2
-#    fi
-#    cp "$(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${TERMINAL_AGENT_IN_REPO})" \
-#        "${CHE_CONTAINER_INSTANCE}/dev/${TERMINAL_AGENT_ASSEMBLY}"
   fi
 }
 
