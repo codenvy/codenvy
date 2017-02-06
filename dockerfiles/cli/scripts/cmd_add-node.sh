@@ -9,6 +9,18 @@
 #   Tyler Jewell - Initial Implementation
 #
 
+help_cmd_add-node() {
+  text "\n"
+  text "USAGE: ${CHE_IMAGE_FULLNAME} add-node\n"
+  text "\n"
+  text "Displays the process for adding a new workspace node to the ${CHE_MINI_PRODUCT_NAME} cluster"
+  text "\n"
+}
+
+pre_cmd_add-node() {
+  true
+}
+
 # Prints command that should be executed on a node to add it to swarm cluster
 cmd_add-node() {
   info "add-node" "1. For the node you want to add, verify that Docker is installed."
