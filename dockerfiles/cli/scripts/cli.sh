@@ -237,7 +237,6 @@ generate_configuration_with_puppet() {
 
   if local_repo; then
     WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}\""
-    WRITE_PARAMETERS+=" -e \"PATH_TO_TERMINAL_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${TERMINAL_AGENT_ASSEMBLY}\""
 
     # add local mounts only if they are present
     if [[ -d "/repo/dockerfiles/init/manifests" ]]; then
