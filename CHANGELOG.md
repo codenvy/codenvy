@@ -6,11 +6,15 @@
 **Pull requests merged:**
 - Fix signup with email and password recovery features. [1695](https://github.com/codenvy/codenvy/pull/1695)
 
+**Codenvy is based on Eclipse Che - [view the changelog for Che](https://github.com/eclipse/che/blob/master/CHANGELOG.md#522-2017-02-04)**
+
 ## [5.2.1](https://github.com/codenvy/codenvy/tree/5.2.1) (2017-02-03)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.0...5.2.1)
 
 **Pull requests merged:**
 - Ensures workspaces are properly backed up even if a subsequent workspace start fails. [1680](https://github.com/codenvy/codenvy/pull/1680)
+
+**Codenvy is based on Eclipse Che - [view the changelog for Che](https://github.com/eclipse/che/blob/master/CHANGELOG.md#521-2017-02-03)**
 
 ## [5.2.0](https://github.com/codenvy/codenvy/tree/5.2.0) (2017-02-01)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.2...5.2.0)
@@ -42,6 +46,8 @@
 - Add CHE_DOCKER_IP_EXTERNAL in shell script for docker for mac/docker for windows [1542](https://github.com/codenvy/codenvy/pull/1542)
 - Add filters for force or disable caching on the given resources paths [1541](https://github.com/codenvy/codenvy/pull/1541)
 - Fix delete account exception for Firefox [1450](https://github.com/codenvy/codenvy/pull/1450)
+
+**Codenvy is based on Eclipse Che - [view the changelog for Che](https://github.com/eclipse/che/blob/master/CHANGELOG.md#520-2017-02-01)**
 
 ## [5.1.2](https://github.com/codenvy/codenvy/tree/5.1.2) (2017-01-24)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.1...5.1.2)
