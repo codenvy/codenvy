@@ -21,6 +21,7 @@ import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.ldap.sync.LdapEntrySelector;
 import com.codenvy.ldap.sync.LdapEntrySelectorProvider;
 import com.codenvy.ldap.sync.LdapSynchronizer;
+import com.codenvy.ldap.sync.LdapSynchronizerPermissionsFilter;
 import com.codenvy.ldap.sync.LdapSynchronizerService;
 import com.codenvy.ldap.sync.DBUserLinker;
 import com.codenvy.ldap.sync.DBUserLinkerProvider;
@@ -56,5 +57,6 @@ public class LdapModule extends AbstractModule {
         bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);
         bind(LdapSynchronizer.class).asEagerSingleton();
         bind(LdapSynchronizerService.class);
+        bind(LdapSynchronizerPermissionsFilter.class);
     }
 }

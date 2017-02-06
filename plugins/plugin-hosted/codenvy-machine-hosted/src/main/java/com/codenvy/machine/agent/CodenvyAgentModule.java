@@ -47,13 +47,11 @@ public class CodenvyAgentModule extends AbstractModule {
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.WsAgentWithAuthLauncherImpl.class);
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
-        launchers.addBinding().to(com.codenvy.machine.agent.launcher.ExternalRsyncAgentLauncherImpl.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.SshAgentLauncher.class);
 
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
         agents.addBinding().to(com.codenvy.machine.agent.MachineInnerRsyncAgent.class);
-        agents.addBinding().to(com.codenvy.machine.agent.ExternalRsyncAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.SshAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.UnisonAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.ExecAgent.class);

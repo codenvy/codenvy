@@ -17,10 +17,10 @@ package com.codenvy.mail.deploy;
 import com.codenvy.mail.MailSender;
 import com.google.inject.AbstractModule;
 
+import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.inject.DynaModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Guice container configuration file. Replaces old REST application composers and servlet context listeners.
@@ -33,5 +33,6 @@ public class CloudIdeMailModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(MailSender.class);
+        install(new CoreRestModule());
     }
 }
