@@ -1,5 +1,11 @@
 # Change Log
 
+## [5.2.1](https://github.com/codenvy/codenvy/tree/5.2.1) (2017-02-03)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.0...5.2.1)
+
+**Pull requests merged:**
+- Ensures workspaces are properly backed up even if a subsequent workspace start fails. [1680](https://github.com/codenvy/codenvy/pull/1680)
+
 ## [5.2.0](https://github.com/codenvy/codenvy/tree/5.2.0) (2017-02-01)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.1.2...5.2.0)
 
