@@ -14,12 +14,12 @@
  */
 package com.codenvy.machine.agent;
 
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.environment.server.InfrastructureProvisioner;
 import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -53,12 +53,12 @@ public class CodenvyInfrastructureProvisioner implements InfrastructureProvision
     }
 
     @Override
-    public void provision(Environment envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
+    public void provision(EnvironmentImpl envConfig, CheServicesEnvironmentImpl internalEnv) throws EnvironmentException {
         environmentBasedInfraProvisioner.provision(envConfig, internalEnv);
     }
 
     @Override
-    public void provision(ExtendedMachine machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
+    public void provision(ExtendedMachineImpl machineConfig, CheServiceImpl internalMachine) throws EnvironmentException {
         environmentBasedInfraProvisioner.provision(machineConfig, internalMachine);
     }
 }

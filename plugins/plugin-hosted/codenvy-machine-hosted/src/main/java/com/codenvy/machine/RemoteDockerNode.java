@@ -36,10 +36,11 @@ import static org.slf4j.LoggerFactory.getLogger;
  * REST client for remote machine node
  *
  * @author Alexander Garagatyi
+ * @author Yevhenii Voevodin
  */
 public class RemoteDockerNode implements DockerNode {
-    private static final Logger  LOG                  = getLogger(RemoteDockerNode.class);
-    private static final Pattern NODE_ADDRESS         = Pattern.compile(
+    private static final Logger  LOG          = getLogger(RemoteDockerNode.class);
+    private static final Pattern NODE_ADDRESS = Pattern.compile(
             "((?<protocol>[a-zA-Z])://)?" +
             // http://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
             "(?<host>(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))" +
@@ -50,6 +51,8 @@ public class RemoteDockerNode implements DockerNode {
     private final String                         containerId;
     private final String                         nodeHost;
     private final String                         nodeIp;
+
+    private volatile boolean isBound;
 
     @Inject
     public RemoteDockerNode(DockerConnector dockerConnector,
@@ -88,20 +91,24 @@ public class RemoteDockerNode implements DockerNode {
 
     @Override
     public void bindWorkspace() throws ServerException {
-        backupManager.restoreWorkspaceBackup(workspaceId,
-                                             containerId,
-                                             nodeHost);
+        backupManager.restoreWorkspaceBackup(workspaceId, containerId, nodeHost);
+        isBound = true;
     }
 
     @Override
     public void unbindWorkspace() throws ServerException {
-        try {
-            backupManager.backupWorkspaceAndCleanup(workspaceId,
-                                                    containerId,
-                                                    nodeHost);
-        } catch (ServerException e) {
-            // TODO do throw it further when it won't brake ws stop
-            LOG.error(e.getLocalizedMessage(), e);
+        if (!isBound) {
+            LOG.warn("The container '{}' in the workspace '{}' won't be backed up. " +
+                     "The reason is that the workspace wasn't restored from backup",
+                     containerId,
+                     workspaceId);
+        } else {
+            try {
+                backupManager.backupWorkspaceAndCleanup(workspaceId, containerId, nodeHost);
+            } catch (ServerException e) {
+                // TODO do throw it further when it won't brake ws stop
+                LOG.error(e.getLocalizedMessage(), e);
+            }
         }
     }
 
