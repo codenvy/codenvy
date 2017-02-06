@@ -1,5 +1,11 @@
 # Change Log
 
+## [5.2.2](https://github.com/codenvy/codenvy/tree/5.2.2) (2017-02-04)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.1...5.2.2)
+
+**Pull requests merged:**
+- Fix signup with email and password recovery features. [1695](https://github.com/codenvy/codenvy/pull/1695)
+
 ## [5.2.1](https://github.com/codenvy/codenvy/tree/5.2.1) (2017-02-03)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.0...5.2.1)
 
