@@ -31,11 +31,10 @@
  */
 package com.codenvy.service.password;
 
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.EmailBean;
+import com.codenvy.mail.MailSender;
 import com.jayway.restassured.response.Response;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
@@ -83,7 +82,7 @@ public class PasswordServiceTest {
     private static final String USER_EMAIL   = "user@mail.com";
 
     @Mock
-    private MailSenderClient mailService;
+    private MailSender mailSender;
 
     @Mock
     private UserManager userManager;
@@ -106,7 +105,7 @@ public class PasswordServiceTest {
 
     @BeforeMethod
     public void setup() throws Exception {
-        passService = new PasswordService(mailService,
+        passService = new PasswordService(mailSender,
                                           userManager,
                                           recoveryStorage,
                                           profileManager,
@@ -238,19 +237,19 @@ public class PasswordServiceTest {
 
         assertEquals(response.statusCode(), 204);
 
-        verify(mailService).sendMail(any(EmailBeanDto.class));
+        verify(mailSender).sendMail(any(EmailBean.class));
     }
 
     @Test
     public void shouldSendEmailToRecoverPassword() throws Exception {
         when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
         when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
-        ArgumentCaptor<EmailBeanDto> argumentCaptor = ArgumentCaptor.forClass(EmailBeanDto.class);
+        ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
 
         given().pathParam("username", USER_EMAIL).post(SERVICE_PATH + "/recover/{username}");
 
-        verify(mailService).sendMail(argumentCaptor.capture());
-        EmailBeanDto argumentCaptorValue = argumentCaptor.getValue();
+        verify(mailSender).sendMail(argumentCaptor.capture());
+        EmailBean argumentCaptorValue = argumentCaptor.getValue();
         assertEquals(argumentCaptorValue.getFrom(), "Codenvy <noreply@codenvy.com>");
         assertEquals(argumentCaptorValue.getSubject(), "Codenvy Password Recovery");
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
@@ -259,20 +258,20 @@ public class PasswordServiceTest {
     }
 
     @Test
-    public void shouldSetResponseStatus404IfUserIsntRegistered() throws Exception {
-        when(userManager.getByEmail(eq(USER_EMAIL))).thenThrow(NotFoundException.class);
+    public void shouldSetResponseStatus404IfUserIsNotRegistered() throws Exception {
+        doThrow(NotFoundException.class).when(userManager).getByEmail(eq(USER_EMAIL));
 
         Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 
         assertEquals(response.statusCode(), 404);
         assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USER_EMAIL + " is not registered in the system.");
-        verifyZeroInteractions(mailService);
+        verifyZeroInteractions(mailSender);
         verifyZeroInteractions(recoveryStorage);
     }
 
     @Test
     public void shouldRespond500IfProblemOnEmailSendingOccurs() throws Exception {
-        doThrow(new ApiException("error")).when(mailService).sendMail(any(EmailBeanDto.class));
+        doThrow(new ServerException("error")).when(mailSender).sendMail(any(EmailBean.class));
 
         Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 

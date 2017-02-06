@@ -22,10 +22,11 @@ import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.AttachmentDto;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.Attachment;
+import com.codenvy.mail.EmailBean;
+import com.codenvy.mail.MailSender;
 import com.google.common.io.Files;
+
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.POST;
@@ -61,8 +61,6 @@ import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
-
 
 /**
  * Service to authenticate users using bearer tokens.
@@ -85,22 +83,22 @@ public class BearerTokenAuthenticationService {
     @Inject
     private   BearerTokenAuthenticationHandler handler;
     @Inject
-    protected MailSenderClient      mailSenderClient;
+    protected MailSender                       mailSender;
     @Inject
-    protected InputDataValidator    inputDataValidator;
+    protected InputDataValidator               inputDataValidator;
     @Inject
-    protected CookieBuilder         cookieBuilder;
+    protected CookieBuilder                    cookieBuilder;
     @Inject
-    protected UserCreationValidator creationValidator;
+    protected UserCreationValidator            creationValidator;
     @Inject
-    protected UserCreator           userCreator;
+    protected UserCreator                      userCreator;
     @Inject
-    protected UserValidator         userNameValidator;
+    protected UserValidator                    userNameValidator;
     @Inject
     @Named("mailsender.application.from.email.address")
-    protected String                mailSender;
+    protected String                           mailFrom;
     @Inject
-    protected SystemLicenseManager  licenseManager;
+    protected SystemLicenseManager             licenseManager;
 
     /**
      * Authenticates user by provided token, than creates the ldap user
@@ -180,13 +178,12 @@ public class BearerTokenAuthenticationService {
      * @param uriInfo
      * @return
      * @throws java.io.IOException
-     * @throws MessagingException
      */
     @POST
     @Path("validate")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validate(ValidationData validationData, @Context UriInfo uriInfo)
-            throws ApiException, MessagingException, IOException {
+            throws ApiException, IOException {
 
         String email = validationData.getEmail();
 
@@ -209,34 +206,33 @@ public class BearerTokenAuthenticationService {
         props.put("com.codenvy.masterhost.url", uriInfo.getBaseUriBuilder().replacePath(null).build().toString());
 
         File logo = new File(this.getClass().getResource(LOGO).getPath());
-        AttachmentDto attachmentDto = newDto(AttachmentDto.class)
+        Attachment attachment = new Attachment()
                 .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
                 .withContentId(LOGO_CID)
                 .withFileName("logo.png");
 
-        EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
+        EmailBean emailBean = new EmailBean()
                 .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + MAIL_TEMPLATE)), props))
-                .withFrom(mailSender)
+                .withFrom(mailFrom)
                 .withTo(email)
                 .withReplyTo(null)
                 .withSubject("Verify Your Codenvy Account")
                 .withMimeType(TEXT_HTML)
-                .withAttachments(Collections.singletonList(attachmentDto));
+                .withAttachments(Collections.singletonList(attachment));
 
-        mailSenderClient.sendMail(emailBeanDto);
+        mailSender.sendMail(emailBean);
 
         LOG.info("Email validation message send to {}", email);
 
         return Response.ok().build();
-
     }
 
     public static class ValidationData {
         private String email;
         private String userName;
 
-        public ValidationData() {
-        }
+        @SuppressWarnings("unused")
+        public ValidationData() {}
 
         public ValidationData(String email, String userName) {
             this.email = email;
@@ -263,8 +259,8 @@ public class BearerTokenAuthenticationService {
     public static class Credentials {
         private String token;
 
-        public Credentials() {
-        }
+        @SuppressWarnings("unused")
+        public Credentials() {}
 
         public Credentials(String username, String token) {
             this.token = token;

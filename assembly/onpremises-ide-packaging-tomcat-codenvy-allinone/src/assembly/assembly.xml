@@ -97,15 +97,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>mail.war</outputFileNameMapping>
-            <includes>
-                <include>com.codenvy.onpremises.wsmaster:codenvy-hosted-mail-server</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
             <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.postgresql:postgresql</include>

@@ -14,10 +14,9 @@
  */
 package com.codenvy.auth.sso.oauth;
 
-
 import com.codenvy.auth.sso.server.InputDataValidator;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
-import com.codenvy.mail.MailSenderClient;
+import com.codenvy.mail.MailSender;
 
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ApiException;
@@ -58,7 +57,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     @Mock
     private ServletConfig                              servletConfig;
     @Mock
-    private MailSenderClient                           mailSenderClient;
+    private MailSender                                 mailSender;
     @Mock
     private OAuthAuthenticatorProvider                 authenticatorProvider;
     @Mock
@@ -74,7 +73,6 @@ public class CreateUserWithCapturedProfileInfoTest {
     @BeforeMethod
     public void setUp() throws Exception {
         // oAuthLoginServlet = new OAuthLoginServlet();
-        System.setProperty("mailsender.application.server.url", "");
         when(servletConfig.getServletContext()).thenReturn(servletContext);
 
         //oAuthLoginServlet.init(servletConfig);

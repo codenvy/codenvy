@@ -20,8 +20,8 @@ import com.codenvy.auth.sso.server.BearerTokenAuthenticationService.ValidationDa
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.MailSender;
+import com.codenvy.mail.EmailBean;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 
@@ -56,7 +56,7 @@ public class BearerTokenAuthenticationServiceTest {
     @Mock
     private BearerTokenAuthenticationHandler handler;
     @Mock
-    private MailSenderClient                 mailSenderClient;
+    private MailSender                       mailSender;
     @Mock
     private InputDataValidator               inputDataValidator;
     @Mock
@@ -76,16 +76,16 @@ public class BearerTokenAuthenticationServiceTest {
 
     @Test
     public void shouldSendEmailToValidateUserEmailAndUserName() throws Exception {
-        bearerTokenAuthenticationService.mailSender = "noreply@host";
-        ArgumentCaptor<EmailBeanDto> argumentCaptor = ArgumentCaptor.forClass(EmailBeanDto.class);
+        bearerTokenAuthenticationService.mailFrom = "noreply@host";
+        ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
         ValidationData validationData = new ValidationData("Email", "UserName");
         when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(true);
         when(licenseManager.canUserBeAdded()).thenReturn(true);
 
-        given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
+        Response post = given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
 
-        verify(mailSenderClient).sendMail(argumentCaptor.capture());
-        EmailBeanDto argumentCaptorValue = argumentCaptor.getValue();
+        verify(mailSender).sendMail(argumentCaptor.capture());
+        EmailBean argumentCaptorValue = argumentCaptor.getValue();
         assertTrue(argumentCaptorValue.getAttachments().size() == 1);
         assertTrue(!argumentCaptorValue.getBody().isEmpty());
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
@@ -95,7 +95,7 @@ public class BearerTokenAuthenticationServiceTest {
 
     @Test
     public void shouldThrowAnExceptionWhenUserBeyondTheLicense() throws Exception {
-        bearerTokenAuthenticationService.mailSender = "noreply@host";
+        bearerTokenAuthenticationService.mailFrom = "noreply@host";
         ValidationData validationData = new ValidationData("Email", "UserName");
         when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(true);
         when(licenseManager.canUserBeAdded()).thenReturn(false);
@@ -105,12 +105,12 @@ public class BearerTokenAuthenticationServiceTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
                      newDto(ServiceError.class).withMessage(SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE));
-        verifyZeroInteractions(mailSenderClient);
+        verifyZeroInteractions(mailSender);
     }
 
     @Test
     public void shouldThrowAnExceptionWhenFairSourceLicenseIsNotAccepted() throws Exception {
-        bearerTokenAuthenticationService.mailSender = "noreply@host";
+        bearerTokenAuthenticationService.mailFrom = "noreply@host";
         ValidationData validationData = new ValidationData("Email", "UserName");
         when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(false);
 
@@ -119,6 +119,6 @@ public class BearerTokenAuthenticationServiceTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
                      newDto(ServiceError.class).withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
-        verifyZeroInteractions(mailSenderClient);
+        verifyZeroInteractions(mailSender);
     }
 }

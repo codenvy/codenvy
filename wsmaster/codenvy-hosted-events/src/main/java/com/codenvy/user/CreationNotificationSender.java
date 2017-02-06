@@ -14,9 +14,9 @@
  */
 package com.codenvy.user;
 
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.AttachmentDto;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.Attachment;
+import com.codenvy.mail.EmailBean;
+import com.codenvy.mail.MailSender;
 import com.codenvy.service.password.RecoveryStorage;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Files;
@@ -40,7 +40,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Sends email notification to users about their registration in Codenvy
@@ -64,10 +63,10 @@ public class CreationNotificationSender {
     @VisibleForTesting
     @Inject
     @Named("mailsender.application.from.email.address")
-    String mailSender;
+    String mailFrom;
 
     @Inject
-    private MailSenderClient mailSenderClient;
+    private MailSender mailSender;
 
     @Inject
     private RecoveryStorage recoveryStorage;
@@ -92,21 +91,21 @@ public class CreationNotificationSender {
 
         File logo = new File(this.getClass().getResource(LOGO).getPath());
 
-        AttachmentDto attachmentDto = newDto(AttachmentDto.class)
+        Attachment attachment = new Attachment()
                 .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
                 .withContentId(LOGO_CID)
                 .withFileName("logo.png");
 
-        EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
+        EmailBean emailBean = new EmailBean()
                 .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + template)), properties))
-                .withFrom(mailSender)
+                .withFrom(mailFrom)
                 .withTo(userEmail)
                 .withReplyTo(null)
                 .withSubject("Welcome To Codenvy")
                 .withMimeType(TEXT_HTML)
-                .withAttachments(Collections.singletonList(attachmentDto));
+                .withAttachments(Collections.singletonList(attachment));
 
-        mailSenderClient.sendMail(emailBeanDto);
+        mailSender.sendMail(emailBean);
 
         LOG.info("User created message send to {}", userEmail);
     }

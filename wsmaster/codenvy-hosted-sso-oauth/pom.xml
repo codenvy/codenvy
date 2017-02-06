@@ -83,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-mail-client</artifactId>
+            <artifactId>codenvy-hosted-mail-sender</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
