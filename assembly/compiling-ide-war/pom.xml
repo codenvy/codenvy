@@ -27,8 +27,6 @@
     <name>Onpremises IDE :: WAR    :: Compiling App</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -422,12 +420,12 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
                     <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
                         <module>com.codenvy.ide.IDE</module>
                     </modules>
                     <logLevel>${gwt.compiler.logLevel}</logLevel>
-                    <enableClosureCompiler>${gwt.compiler.enableClosureCompiler}</enableClosureCompiler>
                 </configuration>
             </plugin>
             <plugin>
@@ -458,6 +456,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
+                    <packagingExcludes>WEB-INF/lib/jsr305*.jar</packagingExcludes>
                     <packagingIncludes>WEB-INF/lib/che-core-commons-lang-*.jar,
                         WEB-INF/classes/org/che/ide/servlet/*,
                         WEB-INF/classes/META-INF/,

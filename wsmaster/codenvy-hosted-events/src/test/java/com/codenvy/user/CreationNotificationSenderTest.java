@@ -14,8 +14,8 @@
  */
 package com.codenvy.user;
 
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.MailSender;
+import com.codenvy.mail.EmailBean;
 import com.codenvy.service.password.RecoveryStorage;
 
 import org.mockito.ArgumentCaptor;
@@ -43,10 +43,10 @@ import static org.testng.Assert.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class CreationNotificationSenderTest {
     @Captor
-    private ArgumentCaptor<EmailBeanDto> argumentCaptor;
+    private ArgumentCaptor<EmailBean> argumentCaptor;
 
     @Mock
-    private MailSenderClient mailSenderClient;
+    private MailSender mailSender;
 
     @Mock
     private RecoveryStorage recoveryStorage;
@@ -57,7 +57,7 @@ public class CreationNotificationSenderTest {
     @BeforeMethod
     public void setUp() {
         notificationSender.apiEndpoint = "http://localhost/api";
-        notificationSender.mailSender = "noreply@host";
+        notificationSender.mailFrom = "noreply@host";
 
         when(recoveryStorage.generateRecoverToken(anyString())).thenReturn("uuid");
     }
@@ -66,14 +66,14 @@ public class CreationNotificationSenderTest {
     public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
         notificationSender.sendNotification("user123", "test@user.com", EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD);
 
-        verify(mailSenderClient).sendMail(argumentCaptor.capture());
+        verify(mailSender).sendMail(argumentCaptor.capture());
 
-        EmailBeanDto emailBeanDto = argumentCaptor.getValue();
-        assertTrue(emailBeanDto.getAttachments().size() == 1);
-        assertTrue(!emailBeanDto.getBody().isEmpty());
-        assertEquals(emailBeanDto.getTo(), "test@user.com");
-        assertEquals(emailBeanDto.getMimeType(), TEXT_HTML);
-        assertEquals(emailBeanDto.getFrom(), "noreply@host");
-        assertEquals(emailBeanDto.getSubject(), "Welcome To Codenvy");
+        EmailBean emailBean = argumentCaptor.getValue();
+        assertTrue(emailBean.getAttachments().size() == 1);
+        assertTrue(!emailBean.getBody().isEmpty());
+        assertEquals(emailBean.getTo(), "test@user.com");
+        assertEquals(emailBean.getMimeType(), TEXT_HTML);
+        assertEquals(emailBean.getFrom(), "noreply@host");
+        assertEquals(emailBean.getSubject(), "Welcome To Codenvy");
     }
 }
