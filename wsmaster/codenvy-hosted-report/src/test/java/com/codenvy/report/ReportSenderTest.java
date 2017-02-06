@@ -16,7 +16,7 @@ package com.codenvy.report;
 
 import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.server.SystemLicenseManager;
-import com.codenvy.mail.MailSenderClient;
+import com.codenvy.mail.MailSender;
 import com.codenvy.report.shared.dto.Ip;
 
 import org.eclipse.che.api.core.ApiException;
@@ -65,7 +65,7 @@ public class ReportSenderTest {
     private ReportSender spyReportSender;
 
     @Mock
-    private MailSenderClient       mockMailClient;
+    private MailSender             mockMailSender;
     @Mock
     private HttpJsonRequestFactory mockHttpJsonRequestFactory;
     @Mock
@@ -83,7 +83,7 @@ public class ReportSenderTest {
 
         spyReportSender = spy(new ReportSender(UPDATE_SERVER_ENDPOINT,
                                                API_ENDPOINT,
-                                               mockMailClient,
+                                               mockMailSender,
                                                mockHttpJsonRequestFactory,
                                                mockLicenseManager,
                                                userManager));
@@ -107,7 +107,7 @@ public class ReportSenderTest {
 
         spyReportSender.sendWeeklyReports();
 
-        verify(mockMailClient)
+        verify(mockMailSender)
                 .sendMail(TEST_SENDER, TEST_RECEIVER, null, TEST_TITLE, MediaType.TEXT_PLAIN, "External IP address: " + CLIENT_IP + "\n"
                                                                                               + "Hostname: " + HOSTNAME + "\n"
                                                                                               + "Number of users: " + USER_NUMBER + "\n");
@@ -119,7 +119,7 @@ public class ReportSenderTest {
 
         spyReportSender.sendWeeklyReports();
 
-        verify(mockMailClient)
+        verify(mockMailSender)
                 .sendMail(TEST_SENDER, TEST_RECEIVER, null, TEST_TITLE, MediaType.TEXT_PLAIN, "External IP address: " + CLIENT_IP + "\n"
                                                                                               + "Hostname: " + HOSTNAME + "\n"
                                                                                               + "Number of users: " + USER_NUMBER + "\n");
@@ -132,7 +132,7 @@ public class ReportSenderTest {
 
         spyReportSender.sendWeeklyReports();
 
-        verify(mockMailClient, never()).sendMail(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(mockMailSender, never()).sendMail(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
         verify(userManager, never()).getAll(30,
                                             0);    // TODO Replace it with UserManager#getTotalCount when codenvy->jpa-integration branch will be merged to master
         verify(mockHttpJsonRequestFactory, never()).fromUrl(REPORT_PARAMETERS_SERVICE);
