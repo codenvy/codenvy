@@ -154,99 +154,63 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-compiling-war-ide</artifactId>
+                <artifactId>assembly-dashboard-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-compiling-war-ide-codenvy</artifactId>
+                <artifactId>assembly-factory-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-tomcat-api</artifactId>
+                <artifactId>assembly-ide-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises</groupId>
+                <artifactId>assembly-main</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-tomcat-codenvy-allinone</artifactId>
+                <artifactId>assembly-website-war</artifactId>
                 <version>${project.version}</version>
-                <type>zip</type>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
+                <artifactId>assembly-wsagent-server</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
+                <artifactId>assembly-wsagent-server</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-admin-dashboard</artifactId>
+                <artifactId>assembly-wsagent-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-dashboard</artifactId>
+                <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-ext-server</artifactId>
+                <artifactId>compiling-ide-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-factory</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-ide</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-ide-resources</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-platform-api</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-webroot-codenvy</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-war-website-codenvy</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises</groupId>
-                <artifactId>onpremises-ide-packaging-zip-terminal</artifactId>
-                <version>${project.version}</version>
-                <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises</groupId>
@@ -408,14 +372,8 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-mail-client</artifactId>
+                <artifactId>codenvy-hosted-mail-sender</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-mail-server</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>

@@ -31,7 +31,7 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>onpremises-ide-packaging-tomcat-ext-server</artifactId>
+            <artifactId>assembly-wsagent-server</artifactId>
             <type>tar.gz</type>
         </dependency>
         <dependency>

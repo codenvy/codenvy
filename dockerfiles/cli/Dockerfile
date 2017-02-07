@@ -20,9 +20,6 @@ FROM eclipse/che-base:nightly
 COPY scripts /scripts/
 COPY version /version/
 
-RUN mkdir /codenvy && chmod +x /scripts/entrypoint.sh
+RUN mkdir /codenvy 
 
 ENTRYPOINT ["/scripts/entrypoint.sh"]
-
-
-

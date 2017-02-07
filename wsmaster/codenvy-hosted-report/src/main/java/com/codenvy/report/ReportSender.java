@@ -15,7 +15,7 @@
 package com.codenvy.report;
 
 import com.codenvy.api.license.server.SystemLicenseManager;
-import com.codenvy.mail.MailSenderClient;
+import com.codenvy.mail.MailSender;
 import com.codenvy.report.shared.dto.Ip;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import javax.mail.MessagingException;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
@@ -51,7 +50,7 @@ import java.net.URL;
 public class ReportSender {
     private static final Logger LOG = LoggerFactory.getLogger(ReportSender.class);
 
-    private final MailSenderClient       mailClient;
+    private final MailSender             mailSender;
     private final HttpJsonRequestFactory httpJsonRequestFactory;
     private final String                 updateServerEndpoint;
     private final SystemLicenseManager   licenseManager;
@@ -61,11 +60,11 @@ public class ReportSender {
     @Inject
     public ReportSender(@Named("report-sender.update_server_endpoint") String updateServerEndpoint,
                         @Named("che.api") String apiEndpoint,
-                        MailSenderClient mailClient,
+                        MailSender mailSender,
                         HttpJsonRequestFactory httpJsonRequestFactory,
                         SystemLicenseManager licenseManager,
                         UserManager userManager) {
-        this.mailClient = mailClient;
+        this.mailSender = mailSender;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.updateServerEndpoint = updateServerEndpoint;
         this.licenseManager = licenseManager;
@@ -77,12 +76,12 @@ public class ReportSender {
     public void sendWeeklyReports() {
         try {
             sendNumberOfUsers();
-        } catch (JsonParseException | IOException | MessagingException | ApiException e) {
+        } catch (JsonParseException | IOException | ApiException e) {
             LOG.error("Error of sending weekly reports.", e);
         }
     }
 
-    private void sendNumberOfUsers() throws IOException, MessagingException, JsonParseException, ApiException {
+    private void sendNumberOfUsers() throws IOException, JsonParseException, ApiException {
         try {
             if (licenseManager.isSystemUsageLegal()) {
                 // do not send a report if codenvy usage is legal.
@@ -102,7 +101,7 @@ public class ReportSender {
         msg.append(String.format("Hostname: %s\n", new URL(apiEndpoint).getHost()));
         msg.append(String.format("Number of users: %s\n", userManager.getTotalCount()));
 
-        mailClient.sendMail(parameters.getSender(), parameters.getReceiver(), null, parameters.getTitle(), MediaType.TEXT_PLAIN,
+        mailSender.sendMail(parameters.getSender(), parameters.getReceiver(), null, parameters.getTitle(), MediaType.TEXT_PLAIN,
                             msg.toString());
     }
 

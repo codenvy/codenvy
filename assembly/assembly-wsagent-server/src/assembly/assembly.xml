@@ -1,0 +1,68 @@
+<!--
+
+     [2012] - [2017] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>tomcat-zip</id>
+    <formats>
+        <format>zip</format>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <unpack>true</unpack>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>org.eclipse.che.lib:che-tomcat8-slf4j-logback</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>false</unpack>
+            <outputDirectory>maven-server</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.plugin:maven-server-impl</include>
+                <include>org.eclipse.che.plugin:maven-server-api</include>
+                <include>log4j:log4j</include>
+                <include>org.jdom:jdom</include>
+                <include>org.eclipse.che.core:che-core-commons-lang</include>
+                <include>org.apache.maven.shared:maven-dependency-tree</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <includes>
+                <include>com.codenvy.onpremises:assembly-wsagent-war</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/webapps</directory>
+            <outputDirectory>webapps</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.basedir}/src/assembly/server.xml</source>
+            <outputDirectory>conf</outputDirectory>
+            <destName>server.xml</destName>
+        </file>
+    </files>
+</assembly>

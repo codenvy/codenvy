@@ -9,7 +9,9 @@
 #   Florent Benoit - Initial Implementation
 
 IMAGE_NAME="codenvy/cli"
-. $(cd "$(dirname "$0")"; pwd)/../build.include
+
+base_dir=$(cd "$(dirname "$0")"; pwd)
+. "${base_dir}"/../build.include
 
 init "$@"
 build "$@"

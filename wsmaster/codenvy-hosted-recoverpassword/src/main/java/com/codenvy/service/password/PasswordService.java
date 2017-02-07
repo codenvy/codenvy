@@ -14,9 +14,9 @@
  */
 package com.codenvy.service.password;
 
-import com.codenvy.mail.MailSenderClient;
-import com.codenvy.mail.shared.dto.AttachmentDto;
-import com.codenvy.mail.shared.dto.EmailBeanDto;
+import com.codenvy.mail.Attachment;
+import com.codenvy.mail.EmailBean;
+import com.codenvy.mail.MailSender;
 import com.google.common.io.Files;
 
 import org.eclipse.che.api.core.ApiException;
@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
-
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
@@ -54,7 +53,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Services for password features
@@ -69,30 +67,30 @@ public class PasswordService {
     private static final String LOGO          = "/email-templates/header.png";
     private static final String LOGO_CID      = "codenvyLogo";
 
-    private final MailSenderClient mailService;
-    private final UserManager      userDao;
-    private final ProfileManager   profileManager;
-    private final RecoveryStorage  recoveryStorage;
-    private final String           mailSender;
-    private final String           recoverMailSubject;
-    private final long             validationMaxAge;
+    private final MailSender      mailService;
+    private final UserManager     userDao;
+    private final ProfileManager  profileManager;
+    private final RecoveryStorage recoveryStorage;
+    private final String          mailFrom;
+    private final String          recoverMailSubject;
+    private final long            validationMaxAge;
 
     @Context
     private UriInfo uriInfo;
 
     @Inject
-    public PasswordService(MailSenderClient mailService,
+    public PasswordService(MailSender mailSender,
                            UserManager userManager,
                            RecoveryStorage recoveryStorage,
                            ProfileManager profileManager,
-                           @Named("mailsender.application.from.email.address") String mailSender,
+                           @Named("mailsender.application.from.email.address") String mailFrom,
                            @Named("password.recovery.mail.subject") String recoverMailSubject,
                            @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;
-        this.mailService = mailService;
+        this.mailService = mailSender;
         this.userDao = userManager;
         this.profileManager = profileManager;
-        this.mailSender = mailSender;
+        this.mailFrom = mailFrom;
         this.recoverMailSubject = recoverMailSubject;
         this.validationMaxAge = validationMaxAge;
     }
@@ -139,21 +137,21 @@ public class PasswordService {
             props.put("com.codenvy.masterhost.url", uriInfo.getBaseUriBuilder().replacePath(null).build().toString());
 
             File logo = new File(this.getClass().getResource(LOGO).getPath());
-            AttachmentDto attachmentDto = newDto(AttachmentDto.class)
+            Attachment attachment = new Attachment()
                     .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
                     .withContentId(LOGO_CID)
                     .withFileName("logo.png");
 
-            EmailBeanDto emailBeanDto = newDto(EmailBeanDto.class)
+            EmailBean emailBean = new EmailBean()
                     .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource(MAIL_TEMPLATE)), props))
-                    .withFrom(mailSender)
+                    .withFrom(mailFrom)
                     .withTo(mail)
                     .withReplyTo(null)
                     .withSubject(recoverMailSubject)
                     .withMimeType(TEXT_HTML)
-                    .withAttachments(Collections.singletonList(attachmentDto));
+                    .withAttachments(Collections.singletonList(attachment));
 
-            mailService.sendMail(emailBeanDto);
+            mailService.sendMail(emailBean);
 
         } catch (NotFoundException e) {
             throw new NotFoundException("User " + mail + " is not registered in the system.");
