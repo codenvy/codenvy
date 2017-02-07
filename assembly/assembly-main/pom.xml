@@ -121,6 +121,8 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <updateOnly>false</updateOnly>
                     <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                    <finalName>codenvy-onpremises-${project.version}</finalName>
+                    <tarLongFileMode>posix</tarLongFileMode>
                 </configuration>
             </plugin>
         </plugins>

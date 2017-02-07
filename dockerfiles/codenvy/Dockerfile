@@ -95,4 +95,4 @@ CMD [ "postfix", "-c", "/etc/postfix", "start" ]
 COPY dockerfiles/codenvy/entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-ADD assembly/onpremises-ide-packaging-tomcat-codenvy-allinone/target/onpremises-ide-packaging-tomcat-codenvy-allinone-*.tar.gz /opt/codenvy-tomcat
+ADD assembly/assembly-main/target/codenvy-onpremises-*.tar.gz /opt/codenvy-tomcat

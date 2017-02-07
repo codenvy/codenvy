@@ -18,7 +18,7 @@ pre_init() {
   CHE_FORMAL_PRODUCT_NAME="Codenvy"
   CHE_CONTAINER_ROOT="/data"
   CHE_ASSEMBLY_IN_REPO_MODULE_NAME="assembly/assembly-main"
-  CHE_ASSEMBLY_IN_REPO="${CHE_ASSEMBLY_IN_REPO_MODULE_NAME}/target/assembly-main-*/"
+  CHE_ASSEMBLY_IN_REPO="${CHE_ASSEMBLY_IN_REPO_MODULE_NAME}/target/codenvy-onpremises-*/"
   WS_AGENT_IN_REPO_MODULE_NAME="assembly/assembly-wsagent-server"
   WS_AGENT_IN_REPO="${WS_AGENT_IN_REPO_MODULE_NAME}/target/assembly-wsagent-server-*.tar.gz"
   WS_AGENT_ASSEMBLY="ws-agent.tar.gz"
