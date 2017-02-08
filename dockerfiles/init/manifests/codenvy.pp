@@ -304,8 +304,12 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 
 ###############################
 # Rsync backup/restore configuration
+# Throughput of rsync connection for workspace files restoring in KiB. Value may include dot, unit suffix, e.g. 1.5m.
   $rsync_restore_bwlimit=getValue("RSYNC_RESTORE_BWLIMIT","7000")
+# Throughput of rsync connection for workspace files backup in KiB.
   $rsync_backup_bwlimit=getValue("RSYNC_BACKUP_BWLIMIT","7000")
+# Sets log level of ssh connection used by rsync for workspace syncing. Value may include dot, unit suffix, e.g. 1.5m.
+# Default value INFO. Possible values: QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG1, DEBUG2, and DEBUG3
   $rsync_ssh_log_level=getValue("RSYNC_SSH_LOG_LEVEL","INFO")
 
 ###############################
