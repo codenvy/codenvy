@@ -48,7 +48,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-war-ext-server</include>
+                <include>com.codenvy.onpremises:assembly-wsagent-war</include>
             </includes>
         </dependencySet>
     </dependencySets>

@@ -28,7 +28,7 @@
             <outputDirectory>agents</outputDirectory>
             <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
             <includes>
-                <include>com.codenvy.onpremises:onpremises-ide-packaging-tomcat-ext-server</include>
+                <include>com.codenvy.onpremises:assembly-wsagent-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
