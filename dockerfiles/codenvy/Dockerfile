@@ -13,18 +13,16 @@
 # use:
 #    docker run codenvy/codenvy:<version>
 
-FROM alpine:3.4
+FROM openjdk:8u111-jdk-alpine
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk \
-    PATH=${PATH}:${JAVA_HOME}/bin \
-    LANG=C.UTF-8 \
+ENV LANG=C.UTF-8 \
     TERM=xterm \
     DOCKER_BUCKET=get.docker.com \
     DOCKER_VERSION=1.6.0
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     apk upgrade --update && \
-    apk add --update curl ca-certificates bash unzip rsync sudo openssh mc postgresql-client postfix openjdk8 && \
+    apk add --update curl bash unzip rsync sudo openssh mc postgresql-client postfix && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
              /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
              /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
