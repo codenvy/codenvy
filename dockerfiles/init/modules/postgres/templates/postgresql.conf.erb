@@ -415,9 +415,10 @@ log_min_duration_statement = 0
 log_checkpoints = on
 log_connections = on
 log_disconnections = on
-#log_duration = off
+log_duration = off
 log_error_verbosity = default		# terse, default, or verbose messages
 #log_hostname = off
+log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d '
 #log_line_prefix = ''			# special values:
 					#   %a = application name
 					#   %u = user name
@@ -439,7 +440,7 @@ log_error_verbosity = default		# terse, default, or verbose messages
 					#   %% = '%'
 					# e.g. '<%u%%%d> '
 log_lock_waits = on			# log lock waits >= deadlock_timeout
-log_statement = 'all'			# none, ddl, mod, all
+log_statement = 'none'			# none, ddl, mod, all
 #log_replication_commands = off
 log_temp_files = 0			# log temporary files equal or larger
 					# than the specified size in kilobytes;
