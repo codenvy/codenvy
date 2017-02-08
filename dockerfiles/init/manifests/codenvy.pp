@@ -303,6 +303,12 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
   $db_schema_flyway_scripts_locations=getValue("DB_SCHEMA_FLYWAY_SCRIPTS_LOCATIONS","classpath:che-schema,classpath:codenvy-schema")
 
 ###############################
+# Rsync backup/restore configuration
+  $rsync_restore_bwlimit=getValue("RSYNC_RESTORE_BWLIMIT","7000")
+  $rsync_backup_bwlimit=getValue("RSYNC_BACKUP_BWLIMIT","7000")
+  $rsync_ssh_log_level=getValue("RSYNC_SSH_LOG_LEVEL","INFO")
+
+###############################
 # Include base module
   include base
 }

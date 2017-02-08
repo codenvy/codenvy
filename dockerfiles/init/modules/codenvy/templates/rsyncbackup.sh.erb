@@ -25,12 +25,16 @@ if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
     chmod 0600 /opt/rsync_key
 fi
 
-RSYNC_COMMAND=$(ssh -i /opt/rsync_key -l ${SRC_USER_NAME} -o StrictHostKeyChecking=no -p ${SRC_PORT} ${SRC_HOST} \
+RSYNC_BACKUP_BWLIMIT=<%= scope.lookupvar('codenvy::rsync_backup_bwlimit') %>
+SSH_LOG_LEVEL=<%= scope.lookupvar('codenvy::rsync_ssh_log_level') %>
+SSH_OPTIONS="-i /opt/rsync_key -l ${SRC_USER_NAME} -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o LogLevel=${SSH_LOG_LEVEL} -p ${SRC_PORT}"
+
+RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${SRC_HOST} \
             "if hash sudo 2>/dev/null;then echo 'sudo rsync';else echo 'rsync';fi")
 
-rsync --quiet --delete --partial --links --safe-links --recursive --times --human-readable --bwlimit=7000 --executability \
+rsync --quiet --delete --partial --links --safe-links --recursive --times --human-readable --bwlimit=${RSYNC_BACKUP_BWLIMIT} --executability \
               --include='.codenvy/' \
               --filter=':- .gitignore' \
-              --rsh="ssh -i /opt/rsync_key -l ${SRC_USER_NAME} -o StrictHostKeyChecking=no -p ${SRC_PORT}" \
+              --rsh="ssh ${SSH_OPTIONS}" \
               --rsync-path="${RSYNC_COMMAND}" \
               ${SRC_HOST}:${SRC_FOLDER} ${DST_FOLDER}
