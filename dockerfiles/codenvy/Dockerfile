@@ -21,7 +21,6 @@ ENV LANG=C.UTF-8 \
     DOCKER_VERSION=1.6.0
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk upgrade --update && \
     apk add --update curl bash unzip rsync sudo openssh mc postgresql-client postfix && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
              /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
