@@ -7,32 +7,35 @@
 #
 
 
-cmd_config_post_action() {
+post_cmd_config() {
   # If this is windows, we need to add a special volume for postgres
   if has_docker_for_windows_client; then
-    sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+    # Only perform this action if it has not been done before.
+    if ! grep -q -F 'external: true' "${REFERENCE_CONTAINER_COMPOSE_FILE}"; then    
+      sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_FILE}"
 
-    echo "" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
-    echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+     echo "" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+      echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+      echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
+      echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_FILE}"
 
-    # This is a post-config creation, so we should also do this to the host version of the file
-    sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+     # This is a post-config creation, so we should also do this to the host version of the file
+      sed "s|^.*postgresql\/data.*$|\ \ \ \ \ \ \-\ \'codenvy-postgresql-volume\:\/var\/lib\/postgresql\/data\:Z\'|" -i "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
 
-    echo "" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
-    echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
-    echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
-    echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+     echo "" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+      echo "volumes:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+      echo "  codenvy-postgresql-volume:" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
+      echo "     external: true" >> "${REFERENCE_CONTAINER_COMPOSE_HOST_FILE}"
 
-    # On Windows, it is not possible to volume mount postgres data folder directly
-    # This creates a named volume which will store postgres data in docker for win VM
-    # TODO - in future, we can write synchronizer utility to copy data from win VM to host
-    log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
-    docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
+     # On Windows, it is not possible to volume mount postgres data folder directly
+      # This creates a named volume which will store postgres data in docker for win VM
+      # TODO - in future, we can write synchronizer utility to copy data from win VM to host
+      log "docker volume create --name=codenvy-postgresql-volume >> \"${LOGS}\""
+      docker volume create --name=codenvy-postgresql-volume >> "${LOGS}"
+    fi
   fi
 
-  if local_repo; then
+ if local_repo; then
     # copy workspace agent assembly to instance folder
     if [[ ! -f $(echo ${CHE_CONTAINER_DEVELOPMENT_REPO}/${WS_AGENT_IN_REPO}) ]]; then
       warning "You volume mounted a valid $CHE_FORMAL_PRODUCT_NAME repo to ':/repo', but we could not find a ${CHE_FORMAL_PRODUCT_NAME} workspace agent assembly."
