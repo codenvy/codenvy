@@ -7,8 +7,7 @@
 # Codenvy Image
 #
 # build:
-#   cd ..\..\ <-- Root of the codenvy source repository
-#   docker build -f dockerfiles/codenvy/Dockerfile -t codenvy/codenvy:<version> .
+#   ./build.sh
 #
 # use:
 #    docker run codenvy/codenvy:<version>
@@ -30,7 +29,7 @@ RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix && \
 
 CMD [ "postfix", "-c", "/etc/postfix", "start" ]
 
-COPY dockerfiles/codenvy/entrypoint.sh /
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-ADD assembly/assembly-main/target/codenvy-onpremises-*.tar.gz /opt/codenvy-tomcat
+ADD codenvy-onpremises.tar.gz /opt/codenvy-tomcat
