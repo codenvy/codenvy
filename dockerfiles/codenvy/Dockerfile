@@ -13,7 +13,7 @@
 # use:
 #    docker run codenvy/codenvy:<version>
 
-FROM openjdk:8u111-jdk-alpine
+FROM openjdk:8u111-jre-alpine
 
 ENV LANG=C.UTF-8 \
     TERM=xterm \
