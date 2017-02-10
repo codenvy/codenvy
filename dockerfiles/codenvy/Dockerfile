@@ -20,8 +20,7 @@ ENV LANG=C.UTF-8 \
     DOCKER_BUCKET=get.docker.com \
     DOCKER_VERSION=1.6.0
 
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk add --update curl bash unzip rsync sudo openssh mc postgresql-client postfix && \
+RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
              /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
              /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
