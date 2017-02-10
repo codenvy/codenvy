@@ -29,6 +29,8 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
     curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
      > /usr/bin/docker; chmod +x /usr/bin/docker
 
+CMD [ "postfix", "-c", "/etc/postfix", "start" ]
+
 COPY dockerfiles/codenvy/entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
