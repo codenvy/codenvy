@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
-import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
@@ -88,29 +88,32 @@ public class WorkspacePermissionsFilterTest {
     private static final EnvironmentFilter  FILTER   = new EnvironmentFilter();
 
     @Mock
-    WorkspaceManager workspaceManager;
-
-    @Mock
-    AccountManager accountManager;
-
-    @Mock
-    AccountImpl account;
-
-    @InjectMocks
-    @Spy
-    WorkspacePermissionsFilter permissionsFilter;
-
-    @Mock
     private static Subject subject;
 
     @Mock
-    WorkspaceService workspaceService;
+    private WorkspaceManager workspaceManager;
 
     @Mock
-    MachineService machineService;
+    private SuperPrivilegesChecker superPrivilegesChecker;
+
+    @InjectMocks
+    @Spy
+    private WorkspacePermissionsFilter permissionsFilter;
 
     @Mock
-    WorkspaceImpl workspace;
+    private AccountManager accountManager;
+
+    @Mock
+    private AccountImpl account;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private MachineService machineService;
+
+    @Mock
+    private WorkspaceImpl workspace;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -142,7 +145,7 @@ public class WorkspacePermissionsFilterTest {
 
     @Test
     public void shouldCheckNamespaceAccessOnFetchingWorkspacesByNamespace() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(false);
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
         doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
 
         final Response response = given().auth()
@@ -152,15 +155,15 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/namespace/userok");
 
         assertEquals(response.getStatusCode(), 200);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByNamespace(any(), eq("userok"));
         verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
     }
 
     @Test
-    public void shouldNotCheckNamespaceAccessIfUserHasManageSystemPermissionOnFetchingWorkspacesByNamespace() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(true);
+    public void shouldNotCheckNamespaceAccessIfUserHasSuperPriviligesOnFetchingWorkspacesByNamespace() throws Exception {
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
         doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
 
         final Response response = given().auth()
@@ -170,7 +173,7 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/namespace/userok");
 
         assertEquals(response.getStatusCode(), 200);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByNamespace(any(), eq("userok"));
         verify(permissionsFilter, never()).checkNamespaceAccess(any(), eq("userok"), anyVararg());
         verifyZeroInteractions(subject);
@@ -348,7 +351,7 @@ public class WorkspacePermissionsFilterTest {
 
     @Test
     public void shouldCheckUserPermissionsOnWorkspaceStopping() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(false);
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
         when(subject.hasPermission("workspace", "workspace123", "run")).thenReturn(true);
 
         final Response response = given().auth()
@@ -359,14 +362,14 @@ public class WorkspacePermissionsFilterTest {
                                          .delete(SECURE_PATH + "/workspace/{id}/runtime");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).stop(eq("workspace123"), any());
         verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasManageSystemPermissionOnWorkspaceStopping() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(true);
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPriviligesOnWorkspaceStopping() throws Exception {
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -376,7 +379,7 @@ public class WorkspacePermissionsFilterTest {
                                          .delete(SECURE_PATH + "/workspace/{id}/runtime");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).stop(eq("workspace123"), any());
         verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
     }
@@ -431,7 +434,7 @@ public class WorkspacePermissionsFilterTest {
 
     @Test
     public void shouldCheckUserPermissionsOnGetWorkspaceByKey() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(false);
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
         when(subject.hasPermission("workspace", "workspace123", "read")).thenReturn(true);
 
         final Response response = given().auth()
@@ -442,14 +445,14 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/{key}");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByKey(eq("workspace123"));
         verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasManageSystemPermissionOnGetWorkspaceByKey() throws Exception {
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)).thenReturn(true);
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPriviligesOnGetWorkspaceByKey() throws Exception {
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -459,7 +462,7 @@ public class WorkspacePermissionsFilterTest {
                                          .get(SECURE_PATH + "/workspace/{key}");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+        verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByKey(eq("workspace123"));
         verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
     }
@@ -660,7 +663,7 @@ public class WorkspacePermissionsFilterTest {
                                                                                           String method,
                                                                                           String action) throws Exception {
         doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
-        when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION))).thenReturn(false);
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
         when(workspace.getNamespace()).thenReturn(USERNAME);
 
         Response response = request(given().auth()
@@ -671,7 +674,6 @@ public class WorkspacePermissionsFilterTest {
                                     method);
         //Successful 2xx
         assertEquals(response.getStatusCode() / 100, 2);
-        verify(subject, never()).hasPermission(not(Matchers.eq(SystemDomain.DOMAIN_ID)), any(), any());
     }
 
     @Test

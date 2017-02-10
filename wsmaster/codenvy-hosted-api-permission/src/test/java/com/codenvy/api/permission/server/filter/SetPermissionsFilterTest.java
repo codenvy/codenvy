@@ -16,6 +16,7 @@ package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
 import com.jayway.restassured.response.Response;
 
@@ -43,6 +44,8 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -60,10 +63,14 @@ public class SetPermissionsFilterTest {
     private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
     @Mock
-    static Subject subject;
+    private static Subject subject;
 
     @Mock
-    private PermissionsService         permissionsService;
+    private PermissionsService permissionsService;
+
+    @Mock
+    private SuperPrivilegesChecker superPrivilegesChecker;
+
     @Mock
     private InstanceParameterValidator instanceValidator;
 
@@ -172,6 +179,27 @@ public class SetPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).storePermissions(any());
         verify(instanceValidator).validate("test", "test123");
+    }
+
+    @Test
+    public void shouldDoChainIfUserDoesNotHavePermissionToSetPermissionsButHasSuperPrivileges() throws Exception {
+        when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
+        when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(DtoFactory.newDto(PermissionsDto.class)
+                                                         .withDomainId("test")
+                                                         .withInstanceId("test123")
+                                                         .withUserId("user123")
+                                                         .withActions(Collections.singletonList("read")))
+                                         .when()
+                                         .post(SECURE_PATH + "/permissions");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).storePermissions(any());
+        verify(superPrivilegesChecker).isPrivilegedToManagePermissions("test");
     }
 
     private static String unwrapError(Response response) {

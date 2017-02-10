@@ -15,6 +15,7 @@
 package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.InstanceParameterValidator;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -47,6 +48,9 @@ public class RemovePermissionsFilter extends CheMethodInvokerFilter {
     private String instance;
 
     @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
+
+    @Inject
     private InstanceParameterValidator instanceValidator;
 
     @Override
@@ -55,6 +59,9 @@ public class RemovePermissionsFilter extends CheMethodInvokerFilter {
         final String methodName = genericResourceMethod.getMethod().getName();
         if (methodName.equals("removePermissions")) {
             instanceValidator.validate(domain, instance);
+            if (superPrivilegesChecker.isPrivilegedToManagePermissions(domain)) {
+                return;
+            }
             if (!EnvironmentContext.getCurrent().getSubject().hasPermission(domain, instance, SET_PERMISSIONS)) {
                 throw new ForbiddenException("User can't edit permissions for this instance");
             }

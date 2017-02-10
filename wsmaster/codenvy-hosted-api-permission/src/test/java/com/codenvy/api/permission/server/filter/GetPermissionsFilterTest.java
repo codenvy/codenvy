@@ -17,6 +17,7 @@ package com.codenvy.api.permission.server.filter;
 import com.codenvy.api.permission.server.InstanceParameterValidator;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.PermissionsService;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.jayway.restassured.response.Response;
 
@@ -47,6 +48,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -68,11 +70,16 @@ public class GetPermissionsFilterTest {
     private static Subject subject;
 
     @Mock
-    private PermissionsManager         permissionsManager;
+    private PermissionsManager permissionsManager;
+
     @Mock
-    private PermissionsService         permissionsService;
+    private PermissionsService permissionsService;
+
     @Mock
     private InstanceParameterValidator instanceValidator;
+
+    @Mock
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @InjectMocks
     private GetPermissionsFilter permissionsFilter;
@@ -132,6 +139,22 @@ public class GetPermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
         verify(instanceValidator).validate("test", "test123");
+    }
+
+    @Test
+    public void shouldDoChainIfUserDoesNotHaveAnyPermissionsForInstanceButHasSuperPrivileges() throws Exception {
+        when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
+        when(permissionsManager.get("user123", "test", "test123")).thenThrow(new NotFoundException("not found"));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .get(SECURE_PATH + "/permissions/test/all?instance=test123");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).getUsersPermissions(eq("test"), eq("test123"), anyInt(), anyInt());
+        verify(superPrivilegesChecker).isPrivilegedToManagePermissions("test");
     }
 
     private static String unwrapError(Response response) {
