@@ -12,12 +12,5 @@
 post_init() {
   GLOBAL_HOST_IP=${GLOBAL_HOST_IP:=$(docker_run --net host ${BOOTSTRAP_IMAGE_CHEIP})}
   DEFAULT_CODENVY_HOST=$GLOBAL_HOST_IP
-
-  if [ -z ${CODENVY_HOST+x} ]; then
-    CHE_HOST_SET_ON_COMMAND_LINE=false
-  else
-    CHE_HOST_SET_ON_COMMAND_LINE=true
-  fi
-
   CODENVY_HOST=${CODENVY_HOST:-${DEFAULT_CODENVY_HOST}}
 }
