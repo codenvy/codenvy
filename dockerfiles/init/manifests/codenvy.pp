@@ -277,6 +277,11 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 
 ###############################
 #
+# System super privileged mode
+  $system_super_privileged_mode = getValue("CODENVY_SYSTEM_SUPER_PRIVILEGED_MODE","false")
+
+###############################
+#
 # Codenvy folders on host machine
   $codenvy_folder = getValue("CHE_INSTANCE","/tmp/codenvy")
 

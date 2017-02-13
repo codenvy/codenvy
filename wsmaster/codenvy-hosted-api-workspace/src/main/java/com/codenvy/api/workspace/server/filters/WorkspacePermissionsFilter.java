@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
-import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 
@@ -58,13 +58,17 @@ import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_
 @Filter
 @Path("/workspace{path:(/.*)?}")
 public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
-    private final WorkspaceManager workspaceManager;
-    private final AccountManager   accountManager;
+    private final WorkspaceManager       workspaceManager;
+    private final AccountManager         accountManager;
+    private final SuperPrivilegesChecker superPrivilegesChecker;
 
     @Inject
-    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager, AccountManager accountManager) {
+    public WorkspacePermissionsFilter(WorkspaceManager workspaceManager,
+                                      AccountManager accountManager,
+                                      SuperPrivilegesChecker superPrivilegesChecker) {
         this.workspaceManager = workspaceManager;
         this.accountManager = accountManager;
+        this.superPrivilegesChecker = superPrivilegesChecker;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 return;
 
             case "getByNamespace": {
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
                     return;
                 }
                 checkManageNamespaceAccess(currentSubject, ((String)arguments[1]));
@@ -107,7 +111,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "stop":
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
                     return;
                 }
             case "startById":
@@ -122,7 +126,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
                 break;
 
             case "getByKey":
-                if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION)) {
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
                     return;
                 }
             case "checkAgentHealth":
