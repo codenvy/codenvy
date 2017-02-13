@@ -62,8 +62,7 @@ error_log                     /var/log/nginx/error.log error;
         #gzip_proxied expired no-cache no-store private auth;
         #gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml;
 
-        resolver                    127.0.0.1 8.8.8.8 ipv6=off;
-
+        resolver                    <% if @dns_resolvers.empty? -%>8.8.8.8<% else -%><%= @dns_resolvers.gsub(',', ' ') %><% end -%> ipv6=off;
 
         # proxy settings
         proxy_redirect              off;
