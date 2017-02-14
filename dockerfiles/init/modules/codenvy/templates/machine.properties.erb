@@ -92,7 +92,7 @@ che.workspace.java_opts=-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urand
 che.workspace.volume=<%= scope.lookupvar('codenvy::machine_server_extra_volume') %>
 
 # dns servers
-che.workspace.dns_resolvers=<%= scope.lookupvar('codenvy::dns_resolvers') %>
+che.dns.resolvers=<%= scope.lookupvar('codenvy::dns_resolvers') %>
 
 # public key for rsync
 workspace.backup.public_key_path=/opt/codenvy-data/conf/ssh/key.pem.pub
