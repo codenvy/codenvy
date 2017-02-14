@@ -1,6 +1,6 @@
 <%
 def dns()
-if @dns_resolvers != 'NULL'
+if ! @dns_resolvers.empty?
 "    dns:" + "\n" + @dns_resolvers.split(",").map { |val| "      - #{val}" }.join("\n")
 end
 end
