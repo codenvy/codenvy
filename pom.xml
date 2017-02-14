@@ -210,6 +210,12 @@
                 <groupId>com.codenvy.onpremises</groupId>
                 <artifactId>compiling-ide-war</artifactId>
                 <version>${project.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises</groupId>
+                <artifactId>compiling-ide-war</artifactId>
+                <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>

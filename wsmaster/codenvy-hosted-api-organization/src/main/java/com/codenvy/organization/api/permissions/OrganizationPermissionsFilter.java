@@ -14,7 +14,7 @@
  */
 package com.codenvy.organization.api.permissions;
 
-import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.OrganizationService;
 import com.codenvy.organization.shared.dto.OrganizationDto;
@@ -45,9 +45,6 @@ import static com.codenvy.organization.api.permissions.OrganizationDomain.MANAGE
 @Filter
 @Path("/organization{path:(?!/resource)(/.*)?}")
 public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
-    // action of system domain for granting admins ability to work with foreign organizations
-    public static final String MANAGE_ORGANIZATIONS_ACTION = "manageOrganizations";
-
     static final String CREATE_METHOD            = "create";
     static final String UPDATE_METHOD            = "update";
     static final String REMOVE_METHOD            = "remove";
@@ -57,7 +54,9 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
     static final String FIND_METHOD              = "find";
 
     @Inject
-    private OrganizationManager manager;
+    private OrganizationManager    manager;
+    @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
 
     @Override
     protected void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException {
@@ -91,16 +90,19 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
             case GET_BY_PARENT_METHOD:
                 organizationId = ((String)arguments[0]);
                 action = OrganizationDomain.MANAGE_SUBORGANIZATIONS;
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
+                    return;
+                }
                 break;
 
             case GET_ORGANIZATIONS_METHOD:
                 final String userId = (String)arguments[0];
                 if (userId != null
                     && !userId.equals(currentSubject.getUserId())
-                    && !currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)) {
+                    && !superPrivilegesChecker.hasSuperPrivileges()) {
                     throw new ForbiddenException("The user is able to specify only his own id");
                 }
-                //user specified his user id or has required permission
+                //user specified his user id or has super privileges
                 return;
 
             //methods accessible to every user
@@ -110,11 +112,6 @@ public class OrganizationPermissionsFilter extends CheMethodInvokerFilter {
 
             default:
                 throw new ForbiddenException("The user does not have permission to perform this operation");
-        }
-
-        if (currentSubject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_ORGANIZATIONS_ACTION)) {
-            //user is admin and he should be able to do anything with any organizations
-            return;
         }
 
         //user is not admin and it is need to check permissions on organization instance level

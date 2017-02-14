@@ -15,6 +15,7 @@
 package com.codenvy.api.permission.server.filter;
 
 import com.codenvy.api.permission.server.InstanceParameterValidator;
+import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.shared.dto.PermissionsDto;
 
 import org.eclipse.che.api.core.BadRequestException;
@@ -41,6 +42,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Path("/permissions/")
 public class SetPermissionsFilter extends CheMethodInvokerFilter {
     @Inject
+    private SuperPrivilegesChecker superPrivilegesChecker;
+
+    @Inject
     private InstanceParameterValidator instanceValidator;
 
     @Override
@@ -52,6 +56,10 @@ public class SetPermissionsFilter extends CheMethodInvokerFilter {
             checkArgument(permissions != null, "Permissions descriptor required");
             checkArgument(!isNullOrEmpty(permissions.getDomainId()), "Domain required");
             instanceValidator.validate(permissions.getDomainId(), permissions.getInstanceId());
+
+            if (superPrivilegesChecker.isPrivilegedToManagePermissions(permissions.getDomainId())) {
+                return;
+            }
 
             if (!EnvironmentContext.getCurrent().getSubject().hasPermission(permissions.getDomainId(),
                                                                             permissions.getInstanceId(),

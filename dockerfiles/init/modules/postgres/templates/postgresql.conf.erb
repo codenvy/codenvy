@@ -395,11 +395,7 @@ log_min_error_statement = error	# values in order of decreasing detail:
 					#   panic (effectively off)
 
 
-<% if scope.lookupvar('postgres::env') == 'production' -%>
-log_min_duration_statement = 2000
-<% else -%>
-log_min_duration_statement = 0
-<% end -%>
+log_min_duration_statement = <%= scope.lookupvar('postgres::pgsql_log_min_duration_statement') %>
 					# -1 is disabled, 0 logs all statements
 					# and their durations, > 0 logs only
 					# statements running at least this number

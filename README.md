@@ -45,7 +45,7 @@ cd onpremises-ide-packaging-tomcat-codenvy-allinone\target\
 # Assembly:
 onpremises-ide-packaging-tomcat-codenvy-allinone-${version}.zip
 
-# Run Codenvy with a custom assembly - volume moutn this codenvy repository
+# Run Codenvy with a custom assembly - volume mount this codenvy repository
 docker run -v /var/run/docker.sock:/var/run/docker.sock -v <path-to-repo>:/repo codenvy/cli start
 ```
 

@@ -15,7 +15,6 @@
 package com.codenvy.api.machine.server.jpa;
 
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
-import com.codenvy.api.permission.server.PermissionsModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,16 +33,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -72,7 +65,7 @@ public class JpaRecipePermissionsDaoTest {
         recipes = new RecipeImpl[] {new RecipeImpl("recipe1", "rc1", null, null, null, null, null),
                                     new RecipeImpl("recipe2", "rc2", null, null, null, null, null)};
 
-        Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule(), new PermissionsModule());
+        Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule());
         manager = injector.getInstance(EntityManager.class);
         dao = injector.getInstance(JpaRecipePermissionsDao.class);
     }

@@ -466,6 +466,7 @@
                         WEB-INF/classes/META-INF/,
                         _app/**</packagingIncludes>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
             <plugin>
