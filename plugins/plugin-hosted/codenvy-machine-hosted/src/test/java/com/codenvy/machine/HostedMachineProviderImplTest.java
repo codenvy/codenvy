@@ -139,7 +139,8 @@ public class HostedMachineProviderImplTest {
                                                  null,
                                                  0,
                                                  0,
-                                                 emptySet());
+                                                 emptySet(),
+                                                 null);
 
         createInstanceFromRecipe();
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
@@ -177,7 +178,8 @@ public class HostedMachineProviderImplTest {
                                                  cpusetCpus,
                                                  cpuPeriod,
                                                  cpuQuota,
-                                                 emptySet());
+                                                 emptySet(),
+                                                 null);
 
         createInstanceFromRecipe();
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);

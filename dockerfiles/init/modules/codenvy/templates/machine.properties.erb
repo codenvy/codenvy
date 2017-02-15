@@ -96,6 +96,9 @@ che.workspace.maven.options=<%= scope.lookupvar('codenvy::workspace_maven_option
 # extra volumes to mount, semicolon separated.
 che.workspace.volume=<%= scope.lookupvar('codenvy::machine_server_extra_volume') %>
 
+# dns servers
+che.dns.resolvers=<%= scope.lookupvar('codenvy::dns_resolvers') %>
+
 # public key for rsync
 workspace.backup.public_key_path=/opt/codenvy-data/conf/ssh/key.pem.pub
 
