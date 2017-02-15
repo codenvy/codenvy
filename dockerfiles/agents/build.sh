@@ -9,7 +9,11 @@ IMAGE_NAME="codenvy/agents"
 DIR=$(cd "$(dirname "$0")"; pwd)
 . ${DIR}/../build.include
 
-mvn clean install -f ${DIR}/pom.xml -U
+MAVEN_FLAGS=""
+if [ $(skip_update "$@") = false ]; then
+MAVEN_FLAGS="-U"
+fi
+mvn clean install -f ${DIR}/pom.xml ${MAVEN_FLAGS}
 
 # build
 init "$@"
