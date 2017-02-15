@@ -14,10 +14,15 @@
  */
 package com.codenvy.api.workspace.server.filters;
 
+import com.codenvy.api.permission.server.PermissionsManager;
+import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
+import com.codenvy.api.workspace.server.stack.StackDomain;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -35,34 +40,45 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 
 import static com.codenvy.api.workspace.server.stack.StackDomain.DELETE;
+import static com.codenvy.api.workspace.server.stack.StackDomain.DOMAIN_ID;
 import static com.codenvy.api.workspace.server.stack.StackDomain.READ;
 import static com.codenvy.api.workspace.server.stack.StackDomain.UPDATE;
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link StackPermissionsFilter}
  *
  * @author Sergii Leschenko
+ * @author Mykola Morhun
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class StackPermissionsFilterTest {
@@ -79,7 +95,14 @@ public class StackPermissionsFilterTest {
     private static Subject subject;
 
     @Mock
-    StackService service;
+    private StackService       service;
+    @Mock
+    private PermissionsManager permissionsManager;
+
+    @BeforeMethod
+    public void beforeMethod() throws Exception {
+        permissionsFilter = spy(new StackPermissionsFilter(permissionsManager));
+    }
 
     @Test
     public void shouldNotCheckPermissionsOnStackCreating() throws Exception {
@@ -242,6 +265,42 @@ public class StackPermissionsFilterTest {
         verifyZeroInteractions(service);
     }
 
+    @Test(dataProvider = "coveredPaths")
+    public void shouldAllowToAdminPerformAnyActionWithPredefinedStack(String path,
+                                                                      String method,
+                                                                      String action) throws Exception {
+        when(subject.hasPermission(eq(StackDomain.DOMAIN_ID), anyString(), anyString())).thenReturn(false);
+        when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), anyString(), anyString())).thenReturn(true);
+        doReturn(true).when(permissionsFilter).isStackPredefined(anyString());
+
+        Response response = request(given().auth()
+                                           .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                           .when(),
+                                    SECURE_PATH + path,
+                                    method);
+
+        assertEquals(response.getStatusCode() / 100, 2);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+    }
+
+    @Test(dataProvider = "coveredPaths")
+    public void shouldNotAllowToAdminPerformAnyActionWithNonPredefinedStack(String path,
+                                                                            String method,
+                                                                            String action) throws Exception {
+        when(subject.hasPermission(eq(StackDomain.DOMAIN_ID), anyString(), anyString())).thenReturn(false);
+        when(subject.hasPermission(eq(SystemDomain.DOMAIN_ID), anyString(), anyString())).thenReturn(true);
+        doReturn(false).when(permissionsFilter).isStackPredefined(anyString());
+
+        Response response = request(given().auth()
+                                           .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                           .when(),
+                                    SECURE_PATH + path,
+                                    method);
+
+        assertEquals(response.getStatusCode(), 403);
+        verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), Matchers.eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+    }
+
     @DataProvider(name = "coveredPaths")
     public Object[][] pathsProvider() {
         return new Object[][] {
@@ -251,6 +310,79 @@ public class StackPermissionsFilterTest {
                 {"/stack/stack123/icon", "get", READ},
                 {"/stack/stack123/icon", "delete", UPDATE}
         };
+    }
+
+    @Test
+    public void shouldRecognizePredefinedStack() throws Exception {
+        final AbstractPermissions stackPermission = mock(AbstractPermissions.class);
+        when(stackPermission.getUserId()).thenReturn("*");
+
+        final Page<AbstractPermissions> permissionsPage = mock(Page.class);
+        when(permissionsPage.getItems()).thenReturn(Collections.singletonList(stackPermission));
+
+        when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt())).thenReturn(permissionsPage);
+
+        assertTrue(permissionsFilter.isStackPredefined("stack123"));
+    }
+
+    @Test
+    public void shouldRecognizeNonPredefinedStack() throws Exception {
+        final AbstractPermissions stackPermission = mock(AbstractPermissions.class);
+        when(stackPermission.getUserId()).thenReturn("userId");
+
+        final Page<AbstractPermissions> permissionsPage = mock(Page.class);
+        when(permissionsPage.getItems()).thenReturn(Collections.singletonList(stackPermission));
+
+        when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt())).thenReturn(permissionsPage);
+
+        assertFalse(permissionsFilter.isStackPredefined("stack123"));
+    }
+
+    @Test
+    public void shouldRecognizePredefinedStackWhenAFewPermissionsPagesIsRetrieved() throws Exception {
+        final String stackId = "stack123";
+
+        final AbstractPermissions privateStackPermission = mock(AbstractPermissions.class);
+        when(privateStackPermission.getUserId()).thenReturn("userId");
+
+        final AbstractPermissions publicStackPermission = mock(AbstractPermissions.class);
+        when(publicStackPermission.getUserId()).thenReturn("*");
+
+        final Page<AbstractPermissions> permissionsPage1 = mock(Page.class);
+        when(permissionsPage1.getItems()).thenReturn(asList(privateStackPermission, privateStackPermission, privateStackPermission));
+        when(permissionsPage1.hasNextPage()).thenReturn(true);
+
+        final Page<AbstractPermissions> permissionsPage2 = mock(Page.class);
+        when(permissionsPage2.getItems()).thenReturn(asList(privateStackPermission, publicStackPermission, privateStackPermission));
+        when(permissionsPage2.hasNextPage()).thenReturn(false);
+
+        doReturn(permissionsPage2).when(permissionsFilter).getNextPermissionsPage(stackId, permissionsPage1);
+        doReturn(null).when(permissionsFilter).getNextPermissionsPage(stackId, permissionsPage2);
+        when(permissionsManager.getByInstance(anyString(), anyString(), anyInt(), anyInt())).thenReturn(permissionsPage1);
+
+        assertTrue(permissionsFilter.isStackPredefined(stackId));
+    }
+
+    @Test
+    public void shouldBeAbleToRetrieveNextPermissionPage() throws Exception {
+        final String stackId = "stack123";
+
+        final Page<AbstractPermissions> currentPage = mock(Page.class);
+        when(currentPage.hasNextPage()).thenReturn(true);
+        when(currentPage.getNextPageRef()).thenReturn(mock(Page.PageRef.class));
+
+        final Page<AbstractPermissions> nextPage = mock(Page.class);
+        when(permissionsManager.getByInstance(eq(DOMAIN_ID), eq(stackId), anyInt(), anyLong())).thenReturn(nextPage);
+
+        assertEquals(permissionsFilter.getNextPermissionsPage(stackId, currentPage), nextPage);
+    }
+
+    @Test
+    public void shouldReturnNullIfNoNextPermissionPage() throws Exception {
+        final Page<AbstractPermissions> currentPage = mock(Page.class);
+        when(currentPage.hasNextPage()).thenReturn(false);
+
+        assertNull(permissionsFilter.getNextPermissionsPage("stack123", currentPage));
     }
 
     private Response request(RequestSpecification request, String path, String method) {
