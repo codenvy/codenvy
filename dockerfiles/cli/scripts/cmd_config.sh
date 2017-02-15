@@ -6,7 +6,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-
 post_cmd_config() {
   # If this is windows, we need to add a special volume for postgres
   if has_docker_for_windows_client; then
@@ -94,6 +93,17 @@ generate_configuration_with_puppet() {
       fi
     fi
   fi
+
+  for element in "${CLI_ENV_ARRAY[@]}" 
+  do
+    var1=$(echo $element | cut -f1 -d=)
+    var2=$(echo $element | cut -f2 -d=)
+
+    if [[ $var1 == CHE_* ]] ||
+       [[ $var1 == ${CHE_PRODUCT_NAME}_* ]]; then
+      WRITE_PARAMETERS+=" -e \"$var1=$var2\""
+    fi
+  done
 
   GENERATE_CONFIG_COMMAND="docker_run \
                   --env-file=\"${REFERENCE_CONTAINER_ENVIRONMENT_FILE}\" \
