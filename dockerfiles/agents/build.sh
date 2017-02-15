@@ -11,7 +11,7 @@ DIR=$(cd "$(dirname "$0")"; pwd)
 
 MAVEN_FLAGS=""
 if [ $(skip_update "$@") = false ]; then
-MAVEN_FLAGS="-U"
+    MAVEN_FLAGS="-U"
 fi
 mvn clean install -f ${DIR}/pom.xml ${MAVEN_FLAGS}
 
