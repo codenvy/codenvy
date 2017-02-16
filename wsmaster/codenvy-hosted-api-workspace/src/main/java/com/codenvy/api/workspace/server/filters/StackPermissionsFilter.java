@@ -46,6 +46,7 @@ import static com.codenvy.api.workspace.server.stack.StackDomain.UPDATE;
  * In case when requested method is unknown filter throws {@link ForbiddenException}
  *
  * @author Sergii Leschenko
+ * @author Mykola Morhun
  */
 @Filter
 @Path("/stack{path:(/.*)?}")
@@ -135,7 +136,7 @@ public class StackPermissionsFilter extends CheMethodInvokerFilter {
                 }
             } while ((permissionsPage = getNextPermissionsPage(stackId, permissionsPage)) != null);
         } catch (NotFoundException e) {
-            // should never happens
+            // should never happen
             throw new ServerException(e);
         }
         return false;
