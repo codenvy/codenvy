@@ -167,7 +167,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         } finally {
             // remove lock in case exception prevent removing it in regular place to prevent resources leak
             // and blocking further WS start
-            removeWorkspaceLock(workspaceId);
+            workspacesBackupLocks.remove(workspaceId);
         }
     }
 
@@ -265,7 +265,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                     srcUserName,
                                     destPath);
             } finally {
-                removeWorkspaceLock(workspaceId);
+                workspacesBackupLocks.remove(workspaceId);
+                lock.unlock();
             }
         } else {
             LOG.warn("Attempt to backup workspace {} after cleanup", workspaceId);
@@ -356,13 +357,6 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
             throw new ServerException(
                     "Backup of workspace " + workspaceId + " filesystem terminated on " + srcAddress + " node. "
                     + e.getLocalizedMessage());
-        }
-    }
-
-    private void removeWorkspaceLock(String workspaceId) {
-        ReentrantLock lock = workspacesBackupLocks.remove(workspaceId);
-        if (lock != null && lock.isLocked()) {
-            lock.unlock();
         }
     }
 
