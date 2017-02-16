@@ -35,7 +35,6 @@ import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -53,7 +52,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.INFRASTRUCTURE_TYPE_PROPERTY;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -80,9 +78,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     private final WorkspaceIdHashLocationFinder        workspaceIdHashLocationFinder;
     private final String                               projectFolderPath;
     private final ConcurrentMap<String, ReentrantLock> workspacesBackupLocks;
-    private final boolean                              syncAgentInMachine;
     private final WorkspaceManager                     workspaceManager;
-    private final WorkspaceFolderPathProvider          workspaceFolderPathProvider;
     private final DockerConnector                      dockerConnector;
 
     @Inject
@@ -92,10 +88,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                           @Named("machine.backup.restore_duration_second") int restoreDurationSec,
                                           @Named("che.user.workspaces.storage") File backupsRootDir,
                                           WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder,
-                                          @Named(INFRASTRUCTURE_TYPE_PROPERTY) String syncStrategy,
                                           @Named("che.workspace.projects.storage") String projectFolderPath,
                                           WorkspaceManager workspaceManager,
-                                          WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                           DockerConnector dockerConnector) {
         this.backupScript = backupScript;
         this.restoreScript = restoreScript;
@@ -105,22 +99,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         this.workspaceIdHashLocationFinder = workspaceIdHashLocationFinder;
         this.projectFolderPath = projectFolderPath;
         this.workspaceManager = workspaceManager;
-        this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.dockerConnector = dockerConnector;
-
-        switch (syncStrategy) {
-            case "native":
-                syncAgentInMachine = false;
-                break;
-            case "in-container":
-                syncAgentInMachine = true;
-                break;
-            default:
-                throw new RuntimeException(format(
-                        "Property '%s' has illegal value '%s'. Valid values: native, in-container",
-                        INFRASTRUCTURE_TYPE_PROPERTY,
-                        syncStrategy));
-        }
 
         workspacesBackupLocks = new ConcurrentHashMap<>();
     }
@@ -141,13 +120,12 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                                                                                   devMachine.getId());
             // machine that is not in running state can be just a stub and should not be casted
             String nodeHost = dockerDevMachine.getNode().getHost();
-            String srcPath = syncAgentInMachine ? projectFolderPath : workspaceFolderPathProvider.getPath(workspaceId);
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             String srcUserName = getUserName(workspaceId, dockerDevMachine.getContainer()).name;
             int syncPort = getSyncPort(dockerDevMachine);
 
             backupInsideLock(workspaceId,
-                             srcPath,
+                             projectFolderPath,
                              nodeHost,
                              syncPort,
                              srcUserName,
@@ -173,21 +151,23 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                           String containerId,
                                           String nodeHost) throws ServerException {
         try {
-            // TODO move to another class to avoid conditional logic here
-            String srcPath = syncAgentInMachine ? projectFolderPath : workspaceFolderPathProvider.getPath(workspaceId);
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             // if sync agent is not in machine port parameter is not used
             int syncPort = getSyncPort(containerId);
             String srcUserName = getUserName(workspaceId, containerId).name;
 
             backupAndCleanupInsideLock(workspaceId,
-                                       srcPath,
+                                       projectFolderPath,
                                        nodeHost,
                                        syncPort,
                                        srcUserName,
                                        destPath);
         } catch (IOException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
+        } finally {
+            // remove lock in case exception prevent removing it in regular place to prevent resources leak
+            // and blocking further WS start
+            removeWorkspaceLock(workspaceId);
         }
     }
 
@@ -208,14 +188,12 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                        String nodeHost) throws ServerException {
         try {
             String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
-            // TODO move to another class to avoid conditional logic here
-            String destPath = syncAgentInMachine ? projectFolderPath : workspaceFolderPathProvider.getPath(workspaceId);
             User user = getUserNameAndIds(workspaceId, containerId);
             int syncPort = getSyncPort(containerId);
 
             restoreBackupInsideLock(workspaceId,
                                     srcPath,
-                                    destPath,
+                                    projectFolderPath,
                                     user.id,
                                     user.groupId,
                                     user.name,
@@ -287,8 +265,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                     srcUserName,
                                     destPath);
             } finally {
-                workspacesBackupLocks.remove(workspaceId);
-                lock.unlock();
+                removeWorkspaceLock(workspaceId);
             }
         } else {
             LOG.warn("Attempt to backup workspace {} after cleanup", workspaceId);
@@ -379,6 +356,13 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
             throw new ServerException(
                     "Backup of workspace " + workspaceId + " filesystem terminated on " + srcAddress + " node. "
                     + e.getLocalizedMessage());
+        }
+    }
+
+    private void removeWorkspaceLock(String workspaceId) {
+        ReentrantLock lock = workspacesBackupLocks.remove(workspaceId);
+        if (lock != null && lock.isLocked()) {
+            lock.unlock();
         }
     }
 
@@ -482,13 +466,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      * @throws ServerException
      *         if port is not found
      */
-    // TODO move to another class to avoid conditional logic here
     private int getSyncPort(String containerId) throws ServerException {
-        if (!syncAgentInMachine) {
-            // in that case port doesn't matter
-            return 0;
-        }
-
         ContainerInfo containerInfo;
         try {
             containerInfo = dockerConnector.inspectContainer(containerId);
@@ -514,14 +492,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      * @throws ServerException
      *         if port is not found
      */
-    // TODO move to another class to avoid conditional logic here
-    // TODO maybe use only version with containerID?
     private int getSyncPort(Machine machine) throws ServerException {
-        if (!syncAgentInMachine) {
-            // in that case port doesn't matter
-            return 0;
-        }
-
         Server server = machine.getRuntime().getServers().get("22/tcp");
         if (server == null) {
             throw new ServerException(
