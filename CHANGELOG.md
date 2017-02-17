@@ -1,5 +1,37 @@
 # Change Log
 
+## [5.3.0](https://github.com/codenvy/codenvy/tree/5.3.0) (2017-02-17)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.2...5.3.0)
+
+**Pull requests merged:**
+The follow are changelogs for codenvy/codenvy:
+- Fix :/assembly volume mouting usage when using codenvy cli [1793](https://github.com/codenvy/codenvy/pull/1793)
+- Fixed workspace restart in case swarm node was forcefully stopped. [1792](https://github.com/codenvy/codenvy/pull/1792)
+- allow to skip maven update during build agents image [1783](https://github.com/codenvy/codenvy/pull/1783)
+- Allow to configure `MAVEN_OPTIONS` and `JAVA_OPTIONS` workspace environment variables from `codenvy.env` [1777](https://github.com/codenvy/codenvy/pull/1777)
+- Add possibility to set DNS resolving servers. [1771](https://github.com/codenvy/codenvy/pull/1771)
+- Add networking progression and configuration to `codenvy.env` [1764](https://github.com/codenvy/codenvy/pull/1764)
+- add missing build.sh scripts to build codenvy images [1760](https://github.com/codenvy/codenvy/pull/1760)
+- Switch to OpenJDK, use official OpenJDK image as parent. [1753](https://github.com/codenvy/codenvy/pull/1753)
+- Allows adjustment of the `log_min_duration_statement` for PostgreSQL query analysis. [1748](https://github.com/codenvy/codenvy/pull/1748)
+- Added 'classes' classifier for IDE war compiling, to allow archetypes make dependency on it. [1746](https://github.com/codenvy/codenvy/pull/1746)
+- Change postgresql configuration to be able to use pgbadger to generate usage reports [1745](https://github.com/codenvy/codenvy/pull/1745)
+- add checks to not append compose file on windows [1744](https://github.com/codenvy/codenvy/pull/1744)
+- Adds logging for project synchronization errors. [1735](https://github.com/codenvy/codenvy/pull/1735)
+- N/A #### Release Notes N/A #### Docs PR N/A PS -- let me know if these "typo" PR's aren't helpful and I'll stop :) [1726](https://github.com/codenvy/codenvy/pull/1726)
+- N/A [1725](https://github.com/codenvy/codenvy/pull/1725)
+- Reverting of changes made by PR #1692 [1722](https://github.com/codenvy/codenvy/pull/1722)
+- Fix assembly-main artifact names. [1714](https://github.com/codenvy/codenvy/pull/1714)
+- Cleanup mail sending code - war is deleted, so mail sending is available now from API war only. [1704](https://github.com/codenvy/codenvy/pull/1704)
+- Adapt CLI for CHE-4006 refactoring [1701](https://github.com/codenvy/codenvy/pull/1701)
+- Try using OpenJDK instead of Oracle JDK but reverted in PR #1722. [1692](https://github.com/codenvy/codenvy/pull/1692)
+- Refactoring of Codenvy assemblies packaging in accordance with Che naming convention. [1691](https://github.com/codenvy/codenvy/pull/1691)
+- Move all JS files of Orion from plugin-orion to the che-lib repository [1684](https://github.com/codenvy/codenvy/pull/1684)
+- [1677](https://github.com/codenvy/codenvy/pull/1677)
+- Only users with _MANAGE_CODENVY_ permissions can call LDAP synchronization from REST API. [1660](https://github.com/codenvy/codenvy/pull/1660)
+- Assembly fix for Json RPC [1486](https://github.com/codenvy/codenvy/pull/1486)
+- Users who have `manageSystem` can getByKey, getByNamespace, stop workspaces and getResourcesInformation, getByParent, getByUser organizations. [1451](https://github.com/codenvy/codenvy/pull/1451)
+
 ## [5.2.2](https://github.com/codenvy/codenvy/tree/5.2.2) (2017-02-04)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.1...5.2.2)
 
