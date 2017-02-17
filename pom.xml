@@ -73,7 +73,6 @@
         <version.license.header.artifactid>codenvy-codenvy-license-resource-bundle</version.license.header.artifactid>
         <version.license.header.groupid>com.codenvy.resources</version.license.header.groupid>
         <version.license.header.version>14</version.license.header.version>
-        <version.selenium>2.53.0</version.selenium>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -833,37 +832,6 @@
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-reflect</artifactId>
                 <version>${org.scala.lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-api</artifactId>
-                <version>${version.selenium}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-firefox-driver</artifactId>
-                <version>${version.selenium}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-java</artifactId>
-                <version>${version.selenium}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>xml-apis</artifactId>
-                        <groupId>xml-apis</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-remote-driver</artifactId>
-                <version>${version.selenium}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-support</artifactId>
-                <version>${version.selenium}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
