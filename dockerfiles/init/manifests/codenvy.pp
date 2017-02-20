@@ -213,6 +213,8 @@ node default {
   $docker_registry_for_workspace_snapshots = getValue("CODENVY_DOCKER_REGISTRY_FOR_WORKSPACE_SNAPSHOTS","$host_url:5000")
   $workspace_auto_snapshot = getValue("CODENVY_WORKSPACE_AUTO_SNAPSHOT","false")
   $workspace_auto_restore = getValue("CODENVY_WORKSPACE_AUTO_RESTORE","false")
+  $workspace_java_options= getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
+  $workspace_maven_options = getValue("CHE_WORKSPACE_MAVEN_OPTIONS", "NULL")
 
 ###############################
 # Codenvy machine configurations
@@ -272,6 +274,10 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 # please leave this as it is if you don't need no_proxy configuration
   $no_proxy_for_codenvy_workspaces = getValue("CODENVY_NO_PROXY_FOR_CODENVY_WORKSPACES","")
 
+################################
+# DNS resolver configuration
+  $dns_resolvers = getValue("CODENVY_DNS_RESOLVERS","")
+
 #license configuration
   $license_manager_public_key = "30820122300d06092a864886f70d01010105000382010f00303032301006072a8648ce3d02002EC311215SHA512withECDSA106052b81040006031e0004d244998b5e3b2ed908cb2eecab6f518c1e113711f1692cfa037d2bf4G82010a02820101009d399542c9b19f90d009554689f6a6ca2230e3587d41bd521281ea7b1e4f5820e2412605f6459ef974b2f41c4fec357090a75e490831cb906610ba7c842c52136ffe805959ff8bdd63cbb688412eae02f80bbf241a23492d8b80e89603RSA4204813SHA512withRSA24b668ad120ffe8ed2382c6e57e5a9ac3dce10679b5bfa9433cfac00b04905bf5c72759ce2d4ca8f2811367d113ef780e41b7a654b94ace166dada925fb64eed8a55fd5737f149f06c3216f90aa71e5862d4f530d599514fd92ec1361d6b65ea1183b8ffdb468500b5645d557105c84e7822f91c1d3b172b0cebe662ae94f5e1d1083549dd09efa595c54fb971d25f692e256bf56bd0b80e4469ab1b4126cc13df251e910203010001"
 
@@ -290,9 +296,9 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 # path to codenvy puppet sources for development mode
   $puppet_src_folder = getValue("CHE_CONFIG","/path/to/codenvy/codenvy/puppet/sources")
 # path to codenvy tomcat for development mode
-  $codenvy_development_tomcat = getValue("PATH_TO_CHE_ASSEMBLY","/path/to/codenvy_tomcat")
+  $codenvy_development_tomcat = getValue("PATH_TO_CHE_ASSEMBLY","NULL")
 # path to codenvy ws agent for development mode
-  $codenvy_development_ws_agent = getValue("PATH_TO_WS_AGENT_ASSEMBLY","/path/to/codenvy_ws_agent")
+  $codenvy_development_ws_agent = getValue("PATH_TO_WS_AGENT_ASSEMBLY","NULL")
 # codenvy debug port
   $codenvy_debug_port = getValue("CODENVY_DEBUG_PORT","8000")
 # codenvy debug suspend

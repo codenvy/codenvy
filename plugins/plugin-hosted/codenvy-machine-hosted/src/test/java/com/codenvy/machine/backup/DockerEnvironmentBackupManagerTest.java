@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -26,11 +27,13 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
+import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
@@ -53,6 +56,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Thread.sleep;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -87,43 +92,40 @@ public class DockerEnvironmentBackupManagerTest {
     private static final int    MAX_BACKUP_DURATION_SEC        = 10;
     private static final int    MAX_RESTORE_DURATION_SEC       = 10;
     private static final String BACKUPS_ROOT_PATH              = "/tmp/che/backups";
-    private static final String SRC_PATH                       = "/some/path/on/docker/node";
     private static final String USER_ID                        = "1234";
     private static final String USER_GID                       = "12345";
     private static final String PATH_TO_WORKSPACE              = "00/00/00/";
     private static final String ABSOLUTE_PATH_TO_WORKSPACE_DIR = BACKUPS_ROOT_PATH + PATH_TO_WORKSPACE + WORKSPACE_ID;
     private static final String NODE_HOST                      = "192.19.20.78";
-    private static final String SYNC_STRATEGY                  = "native";
     private static final String PROJECTS_PATH_IN_CONTAINER     = "/projects-folder";
     private static final String USER_IN_CONTAINER              = "test-user";
+    private static final String PUBLISHED_SSH_PORT             = "32559";
 
     private static final String[] BACKUP_WORKSPACE_COMMAND              = {BACKUP_SCRIPT,
-                                                                           SRC_PATH,
+                                                                           PROJECTS_PATH_IN_CONTAINER,
                                                                            NODE_HOST,
-                                                                           "0",
+                                                                           PUBLISHED_SSH_PORT,
                                                                            ABSOLUTE_PATH_TO_WORKSPACE_DIR,
                                                                            "false",
                                                                            USER_IN_CONTAINER};
     private static final String[] BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND = {BACKUP_SCRIPT,
-                                                                           SRC_PATH,
+                                                                           PROJECTS_PATH_IN_CONTAINER,
                                                                            NODE_HOST,
-                                                                           "0",
+                                                                           PUBLISHED_SSH_PORT,
                                                                            ABSOLUTE_PATH_TO_WORKSPACE_DIR,
                                                                            "true",
                                                                            USER_IN_CONTAINER};
     private static final String[] RESTORE_WORKSPACE_COMMAND             = {RESTORE_SCRIPT,
                                                                            ABSOLUTE_PATH_TO_WORKSPACE_DIR,
-                                                                           SRC_PATH,
+                                                                           PROJECTS_PATH_IN_CONTAINER,
                                                                            NODE_HOST,
-                                                                           "0",
+                                                                           PUBLISHED_SSH_PORT,
                                                                            USER_ID,
                                                                            USER_GID,
                                                                            USER_IN_CONTAINER};
 
     @Mock
     private WorkspaceIdHashLocationFinder workspaceIdHashLocationFinder;
-    @Mock
-    private WorkspaceFolderPathProvider   workspaceFolderPathProvider;
     @Mock
     private DockerConnector               docker;
     @Mock
@@ -156,10 +158,8 @@ public class DockerEnvironmentBackupManagerTest {
                                                                MAX_RESTORE_DURATION_SEC,
                                                                new File(BACKUPS_ROOT_PATH),
                                                                workspaceIdHashLocationFinder,
-                                                               SYNC_STRATEGY,
                                                                PROJECTS_PATH_IN_CONTAINER,
                                                                workspaceManager,
-                                                               workspaceFolderPathProvider,
                                                                docker));
 
         when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
@@ -171,7 +171,9 @@ public class DockerEnvironmentBackupManagerTest {
         when(dockerNode.getHost()).thenReturn(NODE_HOST);
         when(dockerInstance.getContainer()).thenReturn(CONTAINER_ID);
         when(dockerInstance.getRuntime()).thenReturn(machineRuntimeInfo);
-        when(workspaceFolderPathProvider.getPath(WORKSPACE_ID)).thenReturn(SRC_PATH);
+        when(machineRuntimeInfo.getServers())
+                .thenReturn(singletonMap("22/tcp", new ServerImpl("ref", "proto", "127.0.0.1:" + PUBLISHED_SSH_PORT,
+                                                                  null, null)));
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
         doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString());
@@ -203,6 +205,12 @@ public class DockerEnvironmentBackupManagerTest {
 
             return null;
         }).when(docker).startExec(any(StartExecParams.class), Matchers.any());
+        NetworkSettings networkSettings = new NetworkSettings();
+        networkSettings.setPorts(singletonMap("22/tcp",
+                                              singletonList(new PortBinding().withHostPort(PUBLISHED_SSH_PORT))));
+        ContainerInfo containerInfo = new ContainerInfo();
+        containerInfo.setNetworkSettings(networkSettings);
+        when(docker.inspectContainer(eq(CONTAINER_ID))).thenReturn(containerInfo);
 
         executor = Executors.newFixedThreadPool(5);
     }
@@ -250,7 +258,6 @@ public class DockerEnvironmentBackupManagerTest {
                                  dockerNode,
                                  machineRuntimeInfo,
                                  devMachine,
-                                 workspaceFolderPathProvider,
                                  workspaceIdHashLocationFinder);
     }
 
@@ -268,7 +275,6 @@ public class DockerEnvironmentBackupManagerTest {
                                  dockerNode,
                                  workspaceManager,
                                  machineRuntimeInfo,
-                                 workspaceFolderPathProvider,
                                  workspaceIdHashLocationFinder);
     }
 
@@ -288,6 +294,22 @@ public class DockerEnvironmentBackupManagerTest {
         backupManager.backupWorkspace(WORKSPACE_ID);
 
         verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString(), anyString());
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible")
+    public void backupShouldThrowErrorIfMachineDoesNotContainServerWithSshPort() throws Exception {
+        // given
+        when(machineRuntimeInfo.getServers())
+                .thenReturn(singletonMap("23/tcp", new ServerImpl("ref", "proto", "127.0.0.1:" + PUBLISHED_SSH_PORT,
+                                                                  null, null)));
+
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+
+        // when
+        backupManager.backupWorkspace(WORKSPACE_ID);
     }
 
     @Test
@@ -476,6 +498,23 @@ public class DockerEnvironmentBackupManagerTest {
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible")
+    public void restoreShouldThrowErrorIfSshPortIsNotPublishedInContainer() throws Exception {
+        // given
+        NetworkSettings networkSettings = new NetworkSettings();
+        networkSettings.setPorts(singletonMap("23/tcp",
+                                              singletonList(new PortBinding().withHostPort(PUBLISHED_SSH_PORT))));
+        ContainerInfo containerInfo = new ContainerInfo();
+        containerInfo.setNetworkSettings(networkSettings);
+        when(docker.inspectContainer(eq(CONTAINER_ID))).thenReturn(containerInfo);
+
+        // when
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+    }
+
     @Test
     public void shouldIgnoreOthersBackupsAndFailOnRestoresWhileBackupInProgress() throws Exception {
         // given
@@ -593,6 +632,48 @@ public class DockerEnvironmentBackupManagerTest {
                                                 CONTAINER_ID,
                                                 NODE_HOST);
         verify(backupManager, times(2)).executeCommand(anyObject(), anyInt(), eq(NODE_HOST), anyString());
+    }
+
+    @Test
+    public void shouldBeAbleToRestoreAfterBackupWithCleanupWhenExceptionIsThrown() throws Exception {
+        // given
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+        when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), anyString()))
+                .thenThrow(new RuntimeException("some test error"))
+                .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
+        try {
+            backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                    CONTAINER_ID,
+                                                    NODE_HOST);
+        } catch (RuntimeException ignored) {}
+
+        // when
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Sync port is not exposed in ws-machine. Workspace projects syncing is not possible")
+    public void cleanupShouldThrowErrorIfSshPortIsNotPublishedInContainer() throws Exception {
+        // given
+        NetworkSettings networkSettings = new NetworkSettings();
+        networkSettings.setPorts(singletonMap("23/tcp",
+                                              singletonList(new PortBinding().withHostPort(PUBLISHED_SSH_PORT))));
+        ContainerInfo containerInfo = new ContainerInfo();
+        containerInfo.setNetworkSettings(networkSettings);
+        when(docker.inspectContainer(eq(CONTAINER_ID))).thenReturn(containerInfo);
+
+        backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
+                                             CONTAINER_ID,
+                                             NODE_HOST);
+
+        // when
+        backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
+                                                CONTAINER_ID,
+                                                NODE_HOST);
     }
 
     @Test

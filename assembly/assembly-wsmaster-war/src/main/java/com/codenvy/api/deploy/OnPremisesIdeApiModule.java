@@ -462,5 +462,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("che.docker.server_evaluation_strategy"))
                       .to("codenvy");
         install(new WorkspaceInfrastructureModule());
+
+        install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
     }
 }

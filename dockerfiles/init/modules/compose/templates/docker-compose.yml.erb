@@ -1,4 +1,11 @@
 <%
+def dns()
+if ! @dns_resolvers.empty?
+"    dns:" + "\n" + @dns_resolvers.split(",").map { |val| "      - #{val}" }.join("\n")
+end
+end
+-%>
+<%
 def extra_hosts()
 if scope.lookupvar('compose::codenvy_extra_hosts') != 'NULL'
 "    extra_hosts:" + "\n" + scope.lookupvar('compose::codenvy_extra_hosts').split(",").map { |val| "      - \"#{val}\"" }.join("\n")
@@ -35,7 +42,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # HAPROXY
@@ -61,7 +69,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # NGINX
@@ -77,7 +86,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # SOCAT
@@ -95,7 +105,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # SWARM
@@ -123,7 +134,8 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local3"
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # DOCKER REGISTRY
@@ -148,7 +160,8 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local0"
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # POSTGRES
@@ -175,7 +188,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # AGENTS
@@ -184,7 +198,7 @@ services:
     image: <%= ENV["IMAGE_AGENTS"] %>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/lighttpd/lighttpd.conf:/etc/lighttpd/lighttpd.conf'
-<% if scope.lookupvar('compose::codenvy_repo') == 'on' -%>
+<% if scope.lookupvar('compose::codenvy_development_ws_agent') != 'NULL' -%>
       - '<%= scope.lookupvar('compose::codenvy_development_ws_agent') -%>:/data/ws-agent.tar.gz'
 <% end -%>
 <% if scope.lookupvar('compose::env') != 'production' -%>
@@ -197,7 +211,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # CODENVY
@@ -225,7 +240,7 @@ services:
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/che-machines/:/opt/codenvy-data/che-machines/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf:/opt/codenvy-data/conf'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf/server.xml:/opt/codenvy-tomcat/conf/server.xml'
-<% if scope.lookupvar('codenvy::codenvy_repo') == 'on' -%>
+<% if scope.lookupvar('compose::codenvy_development_tomcat') != 'NULL' -%>
        - '<%= scope.lookupvar('compose::codenvy_development_tomcat') -%>:/opt/codenvy-tomcat'
 <% end -%>
     links:
@@ -243,7 +258,8 @@ services:
         soft: 163840
         hard: 163840
     restart: always
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
 
 ########################
 # ZOOKEEPER
@@ -268,4 +284,6 @@ services:
       options:
         syslog-address: "tcp://localhost:5140"
         syslog-facility: "local1"
-<%= extra_hosts() %>
+<%= extra_hosts() -%>
+<%= dns() -%>
+

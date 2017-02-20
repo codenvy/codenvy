@@ -104,7 +104,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Nullable @Named("che.docker.cpuset_cpus") String cpusetCpus,
                                      @Named("che.docker.cpu_period") long cpuPeriod,
                                      @Named("che.docker.cpu_quota") long cpuQuota,
-                                     @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts)
+                                     @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
+                                     @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
             throws IOException {
         super(dockerConnectorProvider,
               dockerCredentials,
@@ -128,7 +129,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               cpuPeriod,
               cpuQuota,
               windowsPathEscaper,
-              additionalHosts);
+              additionalHosts,
+              dnsResolvers);
 
         this.docker = dockerConnectorProvider.get();
         this.dockerCredentials = dockerCredentials;
