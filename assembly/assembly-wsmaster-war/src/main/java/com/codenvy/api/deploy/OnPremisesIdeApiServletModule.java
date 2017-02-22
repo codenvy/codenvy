@@ -56,6 +56,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                                                                  "/recipe/*",
                                                                  "/stack",
                                                                  "/stack/*",
+                                                                 "/creditcard/*",
                                                                  "/ssh/*",
                                                                  "/ssh",
                                                                  "/nodes",
