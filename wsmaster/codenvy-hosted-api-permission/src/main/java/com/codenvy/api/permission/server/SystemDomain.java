@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 public class SystemDomain extends AbstractPermissionsDomain<SystemPermissionsImpl> {
     public static final String SYSTEM_DOMAIN_ACTIONS = "system.domain.actions";
     public static final String DOMAIN_ID             = "system";
-    public static final String MANAGE_SYSTEM_ACTION = "manageSystem";
+    public static final String MANAGE_SYSTEM_ACTION  = "manageSystem";
 
     @Inject
     public SystemDomain(@Named(SYSTEM_DOMAIN_ACTIONS) Set<String> allowedActions) {

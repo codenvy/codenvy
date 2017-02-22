@@ -70,11 +70,11 @@ generate_configuration_with_puppet() {
   WRITE_PARAMETERS=""
 
   if local_repo || local_assembly; then
-    CHE_REPO="on"
     WRITE_PARAMETERS=" -e \"PATH_TO_CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
   fi
 
   if local_repo; then
+    CHE_REPO="on"
     WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/${WS_AGENT_ASSEMBLY}\""
 
     # add local mounts only if they are present

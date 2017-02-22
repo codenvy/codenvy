@@ -296,9 +296,9 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 # path to codenvy puppet sources for development mode
   $puppet_src_folder = getValue("CHE_CONFIG","/path/to/codenvy/codenvy/puppet/sources")
 # path to codenvy tomcat for development mode
-  $codenvy_development_tomcat = getValue("PATH_TO_CHE_ASSEMBLY","/path/to/codenvy_tomcat")
+  $codenvy_development_tomcat = getValue("PATH_TO_CHE_ASSEMBLY","NULL")
 # path to codenvy ws agent for development mode
-  $codenvy_development_ws_agent = getValue("PATH_TO_WS_AGENT_ASSEMBLY","/path/to/codenvy_ws_agent")
+  $codenvy_development_ws_agent = getValue("PATH_TO_WS_AGENT_ASSEMBLY","NULL")
 # codenvy debug port
   $codenvy_debug_port = getValue("CODENVY_DEBUG_PORT","8000")
 # codenvy debug suspend

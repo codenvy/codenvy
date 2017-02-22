@@ -20,12 +20,12 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>5.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.codenvy.onpremises</groupId>
     <artifactId>onpremises-ide-parent</artifactId>
-    <version>5.3.0-SNAPSHOT</version>
+    <version>5.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Onpremises IDE :: Parent</name>
     <modules>
@@ -33,7 +33,6 @@
         <module>assembly-factory-war</module>
         <module>assembly-wsmaster-war</module>
         <module>assembly-dashboard-war</module>
-        <module>compiling-ide-war</module>
         <module>assembly-ide-war</module>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>

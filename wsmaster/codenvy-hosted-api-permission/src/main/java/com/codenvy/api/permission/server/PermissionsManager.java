@@ -155,9 +155,11 @@ public class PermissionsManager {
      *         when any other error occurs during permissions fetching
      */
     @SuppressWarnings("unchecked")
-    public Page<AbstractPermissions> getByInstance(String domainId, String instanceId, int maxItems, int skipCount) throws ServerException,
-                                                                                                                           NotFoundException,
-                                                                                                                           ConflictException {
+    public Page<AbstractPermissions> getByInstance(String domainId,
+                                                   String instanceId,
+                                                   int maxItems,
+                                                   long skipCount) throws ServerException,
+                                                                          NotFoundException {
         return (Page<AbstractPermissions>)getPermissionsDao(domainId).getByInstance(instanceId, maxItems, skipCount);
     }
 

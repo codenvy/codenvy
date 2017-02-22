@@ -198,7 +198,7 @@ services:
     image: <%= ENV["IMAGE_AGENTS"] %>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/lighttpd/lighttpd.conf:/etc/lighttpd/lighttpd.conf'
-<% if scope.lookupvar('compose::codenvy_repo') == 'on' -%>
+<% if scope.lookupvar('compose::codenvy_development_ws_agent') != 'NULL' -%>
       - '<%= scope.lookupvar('compose::codenvy_development_ws_agent') -%>:/data/ws-agent.tar.gz'
 <% end -%>
 <% if scope.lookupvar('compose::env') != 'production' -%>
@@ -240,7 +240,7 @@ services:
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/che-machines/:/opt/codenvy-data/che-machines/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf:/opt/codenvy-data/conf'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/codenvy/conf/server.xml:/opt/codenvy-tomcat/conf/server.xml'
-<% if scope.lookupvar('codenvy::codenvy_repo') == 'on' -%>
+<% if scope.lookupvar('compose::codenvy_development_tomcat') != 'NULL' -%>
        - '<%= scope.lookupvar('compose::codenvy_development_tomcat') -%>:/opt/codenvy-tomcat'
 <% end -%>
     links:

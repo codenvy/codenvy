@@ -11,7 +11,7 @@
 
 pre_init() {
   # This must be incremented when BASE is incremented by an API developer
-  CHE_CLI_API_VERSION=1
+  CHE_CLI_API_VERSION=2
 
   CHE_PRODUCT_NAME="CODENVY"
   CHE_MINI_PRODUCT_NAME="codenvy"
@@ -27,8 +27,7 @@ pre_init() {
   CHE_LICENSE_URL="https://codenvy.com/legal/fair-source/"
   CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
   CHE_IMAGE_FULLNAME="codenvy/cli:<version>"
-  CHE_PORT=80
-  CODENVY_PORT=$CHE_PORT
+  CODENVY_PORT=80
   CHE_MIN_RAM=1.5
   CHE_MIN_DISK=100
   CHE_COMPOSE_PROJECT_NAME=$CHE_MINI_PRODUCT_NAME
