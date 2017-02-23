@@ -184,42 +184,4 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
                               .setParameter("organizationId", instanceId)
                               .getSingleResult();
     }
-
-    @Singleton
-    public static class RemoveMembersBeforeOrganizationRemovedEventSubscriber
-            extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
-        private static final int PAGE_SIZE = 100;
-
-        @Inject
-        private EventService eventService;
-        @Inject
-        private MemberDao    memberDao;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this, BeforeOrganizationRemovedEvent.class);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this, BeforeOrganizationRemovedEvent.class);
-        }
-
-        @Override
-        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws Exception {
-            removeMembers(event.getOrganization().getId(), PAGE_SIZE);
-        }
-
-        @VisibleForTesting
-        void removeMembers(String organizationId, int pageSize) throws ServerException {
-            Page<MemberImpl> membersPage;
-            do {
-                // skip count always equals to 0 because elements will be shifted after removing previous items
-                membersPage = memberDao.getMembers(organizationId, pageSize, 0);
-                for (MemberImpl member : membersPage.getItems()) {
-                    memberDao.remove(member.getUserId(), member.getOrganizationId());
-                }
-            } while (membersPage.hasNextPage());
-        }
-    }
 }

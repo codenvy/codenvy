@@ -15,6 +15,7 @@
 package com.codenvy.organization.api.resource;
 
 import com.codenvy.organization.api.OrganizationManager;
+import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.shared.model.OrganizationDistributedResources;
 import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
@@ -29,7 +30,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -67,6 +70,11 @@ public class OrganizationResourcesDistributor {
         this.usageManager = usageManager;
         this.resourceAggregator = resourceAggregator;
         this.organizationManager = organizationManager;
+    }
+
+    @Inject
+    public void subscribe(EventService eventService) {
+        eventService.subscribe(new RemoveOrganizationDistributedResourcesSubscriber(), BeforeOrganizationRemovedEvent.class);
     }
 
     /**
@@ -288,6 +296,15 @@ public class OrganizationResourcesDistributor {
             return organizationDistributedResourcesDao.get(organizationId).getResources();
         } catch (NotFoundException ignored) {
             return emptyList();
+        }
+    }
+
+    class RemoveOrganizationDistributedResourcesSubscriber extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
+        @Override
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws ServerException {
+            if (event.getOrganization().getParent() != null) {
+                organizationDistributedResourcesDao.remove(event.getOrganization().getId());
+            }
         }
     }
 }

@@ -12,10 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.organization.api.permissions;
+package com.codenvy.organization.api.listener;
 
 import com.codenvy.api.permission.server.jpa.listener.RemovePermissionsOnLastUserRemovedEventSubscriber;
-import com.codenvy.organization.spi.OrganizationDao;
+import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.spi.jpa.JpaMemberDao;
 
 import org.eclipse.che.api.core.ServerException;
@@ -25,8 +25,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Listens for {@link UserImpl} removal events, and checks if the removing user is the last who have "setPermissions"
- * role to particular organization, and if it is, then removes recipe itself.
+ * Listens for {@link UserImpl} removal events, and checks if the removing user is the last who has "setPermissions"
+ * permission to particular organization, and if it is, then removes organization itself.
  *
  * @author Sergii Leschenko
  */
@@ -35,10 +35,10 @@ public class RemoveOrganizationOnLastUserRemovedEventSubscriber
         extends RemovePermissionsOnLastUserRemovedEventSubscriber<JpaMemberDao> {
 
     @Inject
-    private OrganizationDao organizationDao;
+    private OrganizationManager organizationManager;
 
     @Override
     public void remove(String instanceId) throws ServerException {
-        organizationDao.remove(instanceId);
+        organizationManager.remove(instanceId);
     }
 }

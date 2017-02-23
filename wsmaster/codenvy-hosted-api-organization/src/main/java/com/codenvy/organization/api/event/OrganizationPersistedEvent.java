@@ -25,10 +25,10 @@ import org.eclipse.che.core.db.cascade.event.PersistEvent;
  * @author Sergii Leschenko
  */
 @EventOrigin("organization")
-public class PostOrganizationPersistedEvent extends PersistEvent {
+public class OrganizationPersistedEvent extends PersistEvent {
     private final Organization organization;
 
-    public PostOrganizationPersistedEvent(Organization organization) {
+    public OrganizationPersistedEvent(Organization organization) {
         this.organization = organization;
     }
 

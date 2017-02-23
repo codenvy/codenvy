@@ -18,7 +18,6 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
-import com.codenvy.organization.api.permissions.RemoveOrganizationOnLastUserRemovedEventSubscriber;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
@@ -30,8 +29,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
-import static com.codenvy.organization.spi.jpa.JpaOrganizationDistributedResourcesDao.RemoveOrganizationDistributedResourcesSubscriber;
-
 /**
  * @author Sergii Leschenko
  */
@@ -39,12 +36,7 @@ public class OrganizationJpaModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(OrganizationDao.class).to(JpaOrganizationDao.class);
-        bind(JpaOrganizationDao.RemoveSuborganizationsBeforeParentOrganizationRemovedEventSubscriber.class).asEagerSingleton();
-
-        bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
         bind(MemberDao.class).to(JpaMemberDao.class);
-        bind(JpaMemberDao.RemoveMembersBeforeOrganizationRemovedEventSubscriber.class).asEagerSingleton();
-        bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
 
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
@@ -52,6 +44,5 @@ public class OrganizationJpaModule extends AbstractModule {
                    .addBinding().to(JpaMemberDao.class);
 
         bind(OrganizationDistributedResourcesDao.class).to(JpaOrganizationDistributedResourcesDao.class);
-        bind(RemoveOrganizationDistributedResourcesSubscriber.class).asEagerSingleton();
     }
 }
