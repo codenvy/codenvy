@@ -16,7 +16,10 @@ package com.codenvy.organization.api;
 
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
+import com.codenvy.organization.api.event.OrganizationRemovedEvent;
+import com.codenvy.organization.api.event.OrganizationRenamedEvent;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
+import com.codenvy.organization.shared.model.Member;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.OrganizationDao;
@@ -33,15 +36,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -68,6 +76,9 @@ public class OrganizationManagerTest {
     @Captor
     private ArgumentCaptor<BeforeOrganizationRemovedEvent> removeEventCaptor;
 
+    private static final String USER_NAME = "user-name";
+    private static final String USER_ID   = "user-id";
+
     @Mock
     private OrganizationDao organizationDao;
 
@@ -87,11 +98,16 @@ public class OrganizationManagerTest {
                                               new String[] {"reserved"}));
 
         when(eventService.publish(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl(USER_NAME, USER_ID, "userToken", false));
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        EnvironmentContext.reset();
     }
 
     @Test
     public void shouldCreateOrganization() throws Exception {
-        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user-name", "user-id", "token", false));
         final Organization toCreate = createOrganization();
 
         manager.create(toCreate);
@@ -102,7 +118,8 @@ public class OrganizationManagerTest {
         assertEquals(createdOrganization.getParent(), toCreate.getParent());
         verify(eventService).publish(persistEventCaptor.capture());
         assertEquals(persistEventCaptor.getValue().getOrganization(), createdOrganization);
-        verify(memberDao).store(new MemberImpl("user-id", createdOrganization.getId(), OrganizationDomain.getActions()));
+        verify(memberDao)
+                .store(new MemberImpl(USER_ID, createdOrganization.getId(), OrganizationDomain.getActions()));
     }
 
     @Test
@@ -169,17 +186,17 @@ public class OrganizationManagerTest {
     @Test
     public void shouldRemoveOrganization() throws Exception {
         doNothing().when(manager).removeSuborganizations(anyString());
-        doNothing().when(manager).removeMembers(anyString());
+        final List<Member> members = Collections.singletonList(mock(Member.class));
+        doReturn(members).when(manager).removeMembers(anyString());
         OrganizationImpl toRemove = createOrganization();
         when(organizationDao.getById(anyString())).thenReturn(toRemove);
+        when(eventService.publish(any(BeforeOrganizationRemovedEvent.class))).thenReturn(mock(BeforeOrganizationRemovedEvent.class));
 
         manager.remove(toRemove.getId());
 
         verify(organizationDao).remove(toRemove.getId());
         verify(manager).removeMembers(eq(toRemove.getId()));
         verify(manager).removeSuborganizations(eq(toRemove.getId()));
-        verify(eventService).publish(removeEventCaptor.capture());
-        assertEquals(removeEventCaptor.getValue().getOrganization(), toRemove);
     }
 
     @Test

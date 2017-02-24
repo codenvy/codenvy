@@ -51,12 +51,17 @@ import com.codenvy.report.ReportModule;
 import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.service.bitbucket.BitbucketConfigurationService;
 import com.codenvy.service.system.DockerBasedSystemRamInfoProvider;
+import com.codenvy.service.system.HostedSystemService;
 import com.codenvy.service.system.SystemRamInfoProvider;
 import com.codenvy.service.system.SystemRamLimitMessageSender;
-import com.codenvy.service.system.HostedSystemService;
 import com.codenvy.service.system.SystemServicePermissionsFilter;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.HTMLTemplateProcessorImpl;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
@@ -131,6 +136,7 @@ import org.everrest.guice.ServiceBindingHelper;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -464,5 +470,18 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         install(new WorkspaceInfrastructureModule());
 
         install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
+
+        bind(new TypeLiteral<HTMLTemplateProcessor<ThymeleafTemplate>>() {}).to(HTMLTemplateProcessorImpl.class);
+
+        bind(new TypeLiteral<Map<String, String>>() {})
+                .annotatedWith(Names.named("codenvy.email.logos"))
+                .toInstance(ImmutableMap.<String, String>builder()
+                                    .put("codenvy", "/email-templates/logos/logo-codenvy-white.png")
+                                    .put("codenvySmall", "/email-templates/logos/196x196-white.png")
+                                    .put("linkedin", "/email-templates/logos/logo_social_linkedin.png")
+                                    .put("facebook", "/email-templates/logos/logo_social_facebook.png")
+                                    .put("twitter", "/email-templates/logos/logo_social_twitter.png")
+                                    .put("medium", "/email-templates/logos/logo_social_medium.png")
+                                    .build());
     }
 }

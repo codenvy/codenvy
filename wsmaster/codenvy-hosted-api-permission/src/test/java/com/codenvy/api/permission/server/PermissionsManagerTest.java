@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -58,6 +59,8 @@ import static org.testng.Assert.assertTrue;
 public class PermissionsManagerTest {
     @Mock
     private PermissionsDao<TestPermissionsImpl> permissionsDao;
+    @Mock
+    private EventService                        eventService;
 
     private PermissionsManager permissionsManager;
 
@@ -65,7 +68,7 @@ public class PermissionsManagerTest {
     public void setUp() throws Exception {
         when(permissionsDao.getDomain()).thenReturn(new TestDomain());
 
-        permissionsManager = new PermissionsManager(ImmutableSet.of(permissionsDao));
+        permissionsManager = new PermissionsManager(eventService, ImmutableSet.of(permissionsDao));
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -76,7 +79,7 @@ public class PermissionsManagerTest {
         final PermissionsDao anotherStorage = mock(PermissionsDao.class);
         when(anotherStorage.getDomain()).thenReturn(new TestDomain());
 
-        permissionsManager = new PermissionsManager(ImmutableSet.of(permissionsDao, anotherStorage));
+        permissionsManager = new PermissionsManager(eventService, ImmutableSet.of(permissionsDao, anotherStorage));
     }
 
     @Test
@@ -107,8 +110,10 @@ public class PermissionsManagerTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Can't edit permissions because there is not any another user with permission 'setPermissions'")
     public void shouldNotStorePermissionsWhenItRemoveLastSetPermissions() throws Exception {
-        final TestPermissionsImpl foreignPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
-        final TestPermissionsImpl ownPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
+        final TestPermissionsImpl foreignPermissions =
+                new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl ownPermissions =
+                new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
 
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
         doReturn(new Page<>(singletonList(foreignPermissions), 0, 1, 2))
@@ -120,8 +125,10 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldStorePermissionsWhenItRemoveSetPermissionsButThereIsAnotherOne() throws Exception {
-        final TestPermissionsImpl foreignPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("setPermissions"));
-        final TestPermissionsImpl ownPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
+        final TestPermissionsImpl foreignPermissions =
+                new TestPermissionsImpl("user1", "test", "test123", singletonList("setPermissions"));
+        final TestPermissionsImpl ownPermissions =
+                new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
 
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
 
@@ -154,8 +161,10 @@ public class PermissionsManagerTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Can't remove permissions because there is not any another user with permission 'setPermissions'")
     public void shouldNotRemovePermissionsWhenItContainsLastSetPermissionsAction() throws Exception {
-        final TestPermissionsImpl firstPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
-        final TestPermissionsImpl secondPermissions = new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
+        final TestPermissionsImpl firstPermissions =
+                new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl secondPermissions =
+                new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
 
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
         doReturn(new Page<>(singletonList(firstPermissions), 0, 1, 2))
@@ -176,7 +185,8 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldBeAbleToGetPermissionsByUserAndDomainAndInstance() throws Exception {
-        final TestPermissionsImpl permissions = new TestPermissionsImpl("user", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl permissions =
+                new TestPermissionsImpl("user", "test", "test123", singletonList("read"));
         when(permissionsDao.get("user", "test123")).thenReturn(permissions);
 
         final Permissions fetchedPermissions = permissionsManager.get("user", "test", "test123");
@@ -186,8 +196,10 @@ public class PermissionsManagerTest {
 
     @Test
     public void shouldBeAbleToGetPermissionsByInstance() throws Exception {
-        final TestPermissionsImpl firstPermissions = new TestPermissionsImpl("user", "test", "test123", singletonList("read"));
-        final TestPermissionsImpl secondPermissions = new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl firstPermissions =
+                new TestPermissionsImpl("user", "test", "test123", singletonList("read"));
+        final TestPermissionsImpl secondPermissions =
+                new TestPermissionsImpl("user1", "test", "test123", singletonList("read"));
 
         doReturn(new Page<>(asList(firstPermissions, secondPermissions), 1, 2, 4))
                 .when(permissionsDao).getByInstance(anyString(), anyInt(), anyInt());

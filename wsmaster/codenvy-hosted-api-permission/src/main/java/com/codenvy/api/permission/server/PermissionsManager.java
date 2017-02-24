@@ -14,6 +14,8 @@
  */
 package com.codenvy.api.permission.server;
 
+import com.codenvy.api.permission.server.event.PermissionsAddedEvent;
+import com.codenvy.api.permission.server.event.PermissionsRemovedEvent;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
 import com.codenvy.api.permission.shared.model.Permissions;
@@ -24,6 +26,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,11 +51,15 @@ import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PE
 @Singleton
 public class PermissionsManager {
 
+    private final EventService eventService;
+
     private final List<AbstractPermissionsDomain<? extends AbstractPermissions>> domains;
     private final Map<String, PermissionsDao<? extends AbstractPermissions>>     domainToDao;
 
     @Inject
-    public PermissionsManager(Set<PermissionsDao<? extends AbstractPermissions>> daos) throws ServerException {
+    public PermissionsManager(EventService eventService,
+                              Set<PermissionsDao<? extends AbstractPermissions>> daos) throws ServerException {
+        this.eventService = eventService;
         final Map<String, PermissionsDao<? extends AbstractPermissions>> domainToDao = new HashMap<>();
         final List<AbstractPermissionsDomain<? extends AbstractPermissions>> domains = new ArrayList<>();
         for (PermissionsDao<? extends AbstractPermissions> dao : daos) {
@@ -112,6 +120,8 @@ public class PermissionsManager {
         }
 
         dao.store(permission);
+        final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
+        eventService.publish(new PermissionsAddedEvent(initiator, permissions));
     }
 
     /**
@@ -184,7 +194,10 @@ public class PermissionsManager {
         if (userHasLastSetPermissions(permissionsDao, userId, instanceId)) {
             throw new ConflictException("Can't remove permissions because there is not any another user with permission 'setPermissions'");
         }
+        Permissions permissions = permissionsDao.get(userId, instanceId);
         permissionsDao.remove(userId, instanceId);
+        final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
+        eventService.publish(new PermissionsRemovedEvent(initiator, permissions));
     }
 
     /**

@@ -136,6 +136,10 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-template-processor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-workspace-activity</artifactId>
         </dependency>
         <dependency>
@@ -434,6 +438,9 @@
                                 <unzip dest="${project.build.directory}/unzip/site" src="${project.build.directory}/dependency/site-${site.classifier}.zip" />
                                 <copy todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates">
                                     <fileset dir="${project.build.directory}/unzip/site/site/email-templates" />
+                                </copy>
+                                <copy todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates/logos">
+                                    <fileset dir="${project.build.directory}/unzip/site/site/images/mail/logos" />
                                 </copy>
                                 <copy file="${project.build.directory}/unzip/site/site/images/mail/header.png" todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates" />
                             </tasks>

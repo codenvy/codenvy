@@ -14,6 +14,10 @@
  */
 package com.codenvy.organization.api;
 
+import com.codenvy.organization.api.event.OrganizationRemovedEvent;
+import com.codenvy.organization.api.event.OrganizationRenamedEvent;
+import com.codenvy.organization.api.permissions.OrganizationDomain;
+import com.codenvy.organization.shared.model.Member;
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
@@ -38,6 +42,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
@@ -50,6 +56,7 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class OrganizationManager {
+
     private final EventService    eventService;
     private final OrganizationDao organizationDao;
     private final MemberDao       memberDao;
@@ -117,10 +124,16 @@ public class OrganizationManager {
                                                                                   ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         requireNonNull(update, "Required non-null organization");
-        checkNameReservation(update.getName());
+        final String newName = update.getName();
+        checkNameReservation(newName);
         final OrganizationImpl organization = organizationDao.getById(organizationId);
-        organization.setName(update.getName());
+        final String oldName = organization.getName();
+        organization.setName(newName);
         organizationDao.update(organization);
+        if (!newName.equals(oldName)) {
+            final String performerName = EnvironmentContext.getCurrent().getSubject().getUserName();
+            eventService.publish(new OrganizationRenamedEvent(performerName, oldName, newName, organization));
+        }
         return organization;
     }
 
@@ -141,8 +154,10 @@ public class OrganizationManager {
             OrganizationImpl organization = organizationDao.getById(organizationId);
             eventService.publish(new BeforeOrganizationRemovedEvent(organization)).propagateException();
             removeSuborganizations(organizationId);
-            removeMembers(organizationId);
+            final List<Member> members = removeMembers(organizationId);
             organizationDao.remove(organizationId);
+            final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
+            eventService.publish(new OrganizationRemovedEvent(initiator, organization, members));
         } catch (NotFoundException e) {
             // organization is already removed
         }
@@ -225,6 +240,26 @@ public class OrganizationManager {
     }
 
     /**
+     * Gets list of members by specified organization id.
+     *
+     * @param organizationId
+     *         organization identifier
+     * @param maxItems
+     *         the maximum number of members to return
+     * @param skipCount
+     *         the number of members to skip
+     * @return list of members
+     * @throws NullPointerException
+     *         when {@code organizationId} is null
+     * @throws ServerException
+     *         when any other error occurs during organizations fetching
+     */
+    public Page<? extends Member> getMembers(String organizationId, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(organizationId, "Required non-null organization id");
+        return memberDao.getMembers(organizationId, maxItems, skipCount);
+    }
+
+    /**
      * Removes suborganizations of given parent organization page by page
      *
      * @param organizationId
@@ -242,22 +277,19 @@ public class OrganizationManager {
         } while (suborganizationsPage.hasNextPage());
     }
 
-    /**
-     * Removes members of given organization page by page
-     *
-     * @param organizationId
-     *         identified of organization to remove
-     */
     @VisibleForTesting
-    void removeMembers(String organizationId) throws ServerException {
+    List<Member> removeMembers(String organizationId) throws ServerException {
+        List<Member> removed = new ArrayList<>();
         Page<MemberImpl> membersPage;
         do {
             // skip count always equals to 0 because elements will be shifted after removing previous items
             membersPage = memberDao.getMembers(organizationId, 100, 0);
             for (MemberImpl member : membersPage.getItems()) {
+                removed.add(member);
                 memberDao.remove(member.getUserId(), member.getOrganizationId());
             }
         } while (membersPage.hasNextPage());
+        return removed;
     }
 
     /**
