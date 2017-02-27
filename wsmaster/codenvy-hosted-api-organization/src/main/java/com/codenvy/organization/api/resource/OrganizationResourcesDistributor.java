@@ -113,8 +113,8 @@ public class OrganizationResourcesDistributor {
 
         // locking resources by suborganization should lock resources whole organization tree
         // so we can check resource availability for suborganization and parent organization
-        // TODO Rework it to using resourcesLocks.acquiresLock(suborganizationId, parentOrganizationId) when it will be implemented
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(suborganizationId)) {
+        // TODO Rework it to using resourcesLocks.lock(suborganizationId, parentOrganizationId) when it will be implemented
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(suborganizationId)) {
             checkResourcesAvailability(suborganizationId,
                                        getDistributionOrganization(suborganizationId),
                                        getDistributedResources(suborganizationId),
@@ -188,7 +188,7 @@ public class OrganizationResourcesDistributor {
                                                     ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
 
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(organizationId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(organizationId)) {
             checkResourcesAvailability(organizationId,
                                        getDistributionOrganization(organizationId),
                                        getDistributedResources(organizationId),

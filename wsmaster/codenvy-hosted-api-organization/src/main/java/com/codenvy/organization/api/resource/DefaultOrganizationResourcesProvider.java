@@ -17,10 +17,10 @@ package com.codenvy.organization.api.resource;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
-import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.free.DefaultResourcesProvider;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 

@@ -89,7 +89,7 @@ public class OrganizationResourcesDistributorTest {
     @BeforeMethod
     public void setUp() throws Exception {
         doNothing().when(distributor).checkResourcesAvailability(anyString(), anyString(), any(), any());
-        when(resourcesLocks.acquiresLock(anyString())).thenReturn(lock);
+        when(resourcesLocks.lock(anyString())).thenReturn(lock);
 
         when(organizationManager.getById(ORG_ID)).thenReturn(new OrganizationImpl(ORG_ID, ORG_ID + "name", PARENT_ORG_ID));
         when(organizationManager.getById(PARENT_ORG_ID)).thenReturn(new OrganizationImpl(PARENT_ORG_ID, PARENT_ORG_ID + "name", null));
@@ -122,7 +122,7 @@ public class OrganizationResourcesDistributorTest {
                                                        toDistribute);
         verify(distributedResourcesDao).store(new OrganizationDistributedResourcesImpl(ORG_ID,
                                                                                        toDistribute));
-        verify(resourcesLocks).acquiresLock(ORG_ID);
+        verify(resourcesLocks).lock(ORG_ID);
         verify(lock).close();
     }
 
@@ -144,7 +144,7 @@ public class OrganizationResourcesDistributorTest {
                                                        toDistribute);
         verify(distributedResourcesDao).store(new OrganizationDistributedResourcesImpl(ORG_ID,
                                                                                        toDistribute));
-        verify(resourcesLocks).acquiresLock(ORG_ID);
+        verify(resourcesLocks).lock(ORG_ID);
         verify(lock).close();
     }
 
@@ -228,7 +228,7 @@ public class OrganizationResourcesDistributorTest {
                                                        distributedResources.getResources(),
                                                        emptyList());
         verify(distributedResourcesDao).remove(ORG_ID);
-        verify(resourcesLocks).acquiresLock(ORG_ID);
+        verify(resourcesLocks).lock(ORG_ID);
         verify(lock).close();
     }
 
@@ -254,7 +254,7 @@ public class OrganizationResourcesDistributorTest {
                                                        emptyList(),
                                                        emptyList());
         verify(distributedResourcesDao).remove(ORG_ID);
-        verify(resourcesLocks).acquiresLock(ORG_ID);
+        verify(resourcesLocks).lock(ORG_ID);
         verify(lock).close();
     }
 

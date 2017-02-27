@@ -34,6 +34,10 @@
             <artifactId>codenvy-hosted-api-permission</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-resource-shared</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -92,10 +96,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -207,7 +207,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                        <artifactId>codenvy-hosted-api-resource</artifactId>
+                        <artifactId>codenvy-hosted-api-resource-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>

@@ -16,7 +16,6 @@ package com.codenvy.resource.api.type;
 
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.model.ResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import static com.google.common.base.Preconditions.checkArgument;

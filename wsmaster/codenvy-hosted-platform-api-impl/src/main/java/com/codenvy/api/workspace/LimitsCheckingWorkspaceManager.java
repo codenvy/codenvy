@@ -14,10 +14,10 @@
  */
 package com.codenvy.api.workspace;
 
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
-import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.api.usage.ResourcesLocks;
 import com.codenvy.resource.model.Resource;
@@ -47,7 +47,6 @@ import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -116,7 +115,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                   NotFoundException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace);
@@ -131,7 +130,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                 ConflictException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace, attributes);
@@ -147,7 +146,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         WorkspaceImpl workspace = this.getWorkspace(workspaceId);
         String accountId = workspace.getAccount().getId();
 
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, workspace.getNamespace(), workspace.getConfig(), envName);
 
@@ -164,7 +163,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
 
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, namespace, config, null);
@@ -183,7 +182,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         String accountId = workspace.getAccount().getId();
 
         // Workspace must not be updated while the manager checks it's resources to allow start
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             return super.updateWorkspace(id, update);
         }
     }
@@ -292,9 +291,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     void checkWorkspaceResourceAvailability(String accountId) throws NotFoundException, ServerException {
         try {
             resourceUsageManager.checkResourcesAvailability(accountId,
-                                                            Collections.singletonList(new ResourceImpl(WorkspaceResourceType.ID,
-                                                                                                       1,
-                                                                                                       WorkspaceResourceType.UNIT)));
+                                                            singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                                           1,
+                                                                                           WorkspaceResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
             Optional<? extends Resource> workspaceResource = getResource(e.getAvailableResources(),
                                                                          WorkspaceResourceType.ID);
@@ -310,9 +309,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     void checkRuntimeResourceAvailability(String accountId) throws NotFoundException, ServerException {
         try {
             resourceUsageManager.checkResourcesAvailability(accountId,
-                                                            Collections.singletonList(new ResourceImpl(RuntimeResourceType.ID,
-                                                                                                       1,
-                                                                                                       RuntimeResourceType.UNIT)));
+                                                            singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                                                           1,
+                                                                                           RuntimeResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
             Optional<? extends Resource> runtimeResource = getResource(e.getAvailableResources(),
                                                                        RuntimeResourceType.ID);

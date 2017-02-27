@@ -14,7 +14,7 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.shared.dto.ResourceDto;
 import com.google.common.collect.ImmutableSet;
 

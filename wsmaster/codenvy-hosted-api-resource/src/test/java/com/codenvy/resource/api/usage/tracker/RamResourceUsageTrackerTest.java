@@ -58,13 +58,13 @@ import static org.testng.Assert.assertTrue;
 @Listeners(MockitoTestNGListener.class)
 public class RamResourceUsageTrackerTest {
     @Mock
-    private Account          account;
+    private Account                    account;
     @Mock
     private Provider<WorkspaceManager> workspaceManagerProvider;
     @Mock
-    private WorkspaceManager workspaceManager;
+    private WorkspaceManager           workspaceManager;
     @Mock
-    private AccountManager   accountManager;
+    private AccountManager             accountManager;
 
     @InjectMocks
     private RamResourceUsageTracker ramUsageTracker;

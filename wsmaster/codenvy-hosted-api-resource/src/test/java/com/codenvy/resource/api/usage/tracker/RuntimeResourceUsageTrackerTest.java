@@ -83,7 +83,8 @@ public class RuntimeResourceUsageTrackerTest {
         when(accountManager.getById(any())).thenReturn(account);
         when(account.getName()).thenReturn("testAccount");
 
-        when(workspaceManager.getByNamespace(anyString(), anyBoolean())).thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED)));
+        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
+                .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED)));
 
         Optional<ResourceImpl> usedRuntimesOpt = runtimeResourceUsageTracker.getUsedResource("account123");
 
