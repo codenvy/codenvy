@@ -34,12 +34,12 @@ import org.testng.annotations.Test;
 import javax.inject.Provider;
 import java.util.List;
 
-import static com.codenvy.organization.api.resource.OrganizationResourcesReserveTracker.ORGANIZATION_RESOURCES_PER_PAGE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +63,9 @@ public class OrganizationResourcesReserveTrackerTest {
     private ResourceAggregator                         resourceAggregator;
 
     @Mock
-    private Page<OrganizationDistributedResources> distributedResourcesPage;
+    private Page<OrganizationDistributedResources> firstPage;
+    @Mock
+    private Page<OrganizationDistributedResources> secondPage;
     @Mock
     private Page.PageRef                           nextPageRef;
     @Mock
@@ -76,15 +78,20 @@ public class OrganizationResourcesReserveTrackerTest {
     public void setUp() throws Exception {
         when(managerProvider.get()).thenReturn(organizationResourcesDistributor);
 
-        when(nextPageRef.getPageSize()).thenReturn(ORGANIZATION_RESOURCES_PER_PAGE);
+        when(nextPageRef.getPageSize()).thenReturn(1);
         when(nextPageRef.getItemsBefore()).thenReturn(1L);
 
-        when(distributedResourcesPage.getNextPageRef()).thenReturn(nextPageRef);
-        when(distributedResourcesPage.hasNextPage()).thenReturn(true)
-                                                    .thenReturn(false);
-        when(distributedResourcesPage.getItems()).thenReturn(singletonList(distributedResources));
+        when(firstPage.getNextPageRef()).thenReturn(nextPageRef);
+        when(firstPage.hasNextPage()).thenReturn(true);
+        when(firstPage.getItems()).thenReturn(singletonList(distributedResources));
 
-        doReturn(distributedResourcesPage).when(organizationResourcesDistributor).getByParent(any(), anyInt(), anyLong());
+        when(secondPage.getNextPageRef()).thenReturn(nextPageRef);
+        when(secondPage.hasNextPage()).thenReturn(false);
+        when(secondPage.getItems()).thenReturn(singletonList(distributedResources));
+
+        doReturn(firstPage)
+                .doReturn(secondPage)
+                .when(organizationResourcesDistributor).getByParent(any(), anyInt(), anyLong());
     }
 
     @Test
@@ -113,8 +120,8 @@ public class OrganizationResourcesReserveTrackerTest {
         assertTrue(resourcesToAggregate.contains(ramResource2));
         assertTrue(resourcesToAggregate.contains(workspacesResource));
 
-        verify(organizationResourcesDistributor).getByParent("organization123", ORGANIZATION_RESOURCES_PER_PAGE, 0);
-        verify(organizationResourcesDistributor).getByParent("organization123", ORGANIZATION_RESOURCES_PER_PAGE, 1);
+        verify(organizationResourcesDistributor).getByParent(eq("organization123"), anyInt(), eq(0L));
+        verify(organizationResourcesDistributor).getByParent(eq("organization123"), anyInt(), eq(1L));
         assertEquals(reservedResources.size(), 2);
         assertTrue(reservedResources.contains(aggregatedRAM));
         assertTrue(reservedResources.contains(workspacesResource));
