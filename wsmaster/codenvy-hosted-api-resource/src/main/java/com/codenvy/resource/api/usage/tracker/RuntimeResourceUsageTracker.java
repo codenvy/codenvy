@@ -16,6 +16,7 @@ package com.codenvy.resource.api.usage.tracker;
 
 import com.codenvy.resource.api.ResourceUsageTracker;
 import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.account.api.AccountManager;
@@ -48,7 +49,7 @@ public class RuntimeResourceUsageTracker implements ResourceUsageTracker {
     }
 
     @Override
-    public Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException {
+    public Optional<Resource> getUsedResource(String accountId) throws NotFoundException, ServerException {
         final Account account = accountManager.getById(accountId);
         final long currentlyUsedRuntimes = workspaceManagerProvider.get()
                                                                    .getByNamespace(account.getName(), false)

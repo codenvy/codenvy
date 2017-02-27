@@ -14,7 +14,7 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.codenvy.resource.model.Resource;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -38,5 +38,5 @@ public interface ResourceUsageTracker {
      * @throws ServerException
      *         when some exception occurs on used resources fetching
      */
-    Optional<ResourceImpl> getUsedResource(String accountId) throws NotFoundException, ServerException;
+    Optional<Resource> getUsedResource(String accountId) throws NotFoundException, ServerException;
 }
