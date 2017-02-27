@@ -18,13 +18,13 @@ import com.codenvy.organization.api.event.MemberAddedEvent;
 import com.codenvy.organization.api.event.MemberRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationRenamedEvent;
+import com.codenvy.organization.shared.dto.MemberAddedEventDto;
 import com.codenvy.organization.shared.dto.MemberRemovedEventDto;
-import com.codenvy.organization.shared.dto.OrganizationDistributedResourcesDto;
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.dto.OrganizationEventDto;
-import com.codenvy.organization.shared.dto.MemberAddedEventDto;
 import com.codenvy.organization.shared.dto.OrganizationRemovedEventDto;
 import com.codenvy.organization.shared.dto.OrganizationRenamedEventDto;
+import com.codenvy.organization.shared.dto.OrganizationDistributedResourcesDto;
 import com.codenvy.organization.shared.event.OrganizationEvent;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.shared.model.OrganizationDistributedResources;
@@ -52,10 +52,10 @@ public final class DtoConverter {
     public static OrganizationDistributedResourcesDto asDto(OrganizationDistributedResources distributedResources) {
         return DtoFactory.newDto(OrganizationDistributedResourcesDto.class)
                          .withOrganizationId(distributedResources.getOrganizationId())
-                         .withResources(distributedResources.getResources()
-                                                            .stream()
-                                                            .map(com.codenvy.resource.api.DtoConverter::asDto)
-                                                            .collect(Collectors.toList()));
+                         .withResourcesCap(distributedResources.getResourcesCap()
+                                                               .stream()
+                                                               .map(com.codenvy.resource.api.DtoConverter::asDto)
+                                                               .collect(Collectors.toList()));
     }
 
     public static OrganizationRemovedEventDto asDto(OrganizationRemovedEvent event) {

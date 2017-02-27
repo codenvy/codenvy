@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
@@ -87,12 +88,16 @@ public class FreeResourcesProvider implements ResourcesProvider {
             freeResources.putIfAbsent(resource.getType(), resource);
         }
 
-        return singletonList(new ProvidedResourcesImpl(FREE_RESOURCES_PROVIDER,
-                                                       limitId,
-                                                       accountId,
-                                                       -1L,
-                                                       -1L,
-                                                       freeResources.values()));
+        if (!freeResources.isEmpty()) {
+            return singletonList(new ProvidedResourcesImpl(FREE_RESOURCES_PROVIDER,
+                                                           limitId,
+                                                           accountId,
+                                                           -1L,
+                                                           -1L,
+                                                           freeResources.values()));
+        } else {
+            return emptyList();
+        }
     }
 
     private List<ResourceImpl> getDefaultResources(String accountId) throws NotFoundException, ServerException {

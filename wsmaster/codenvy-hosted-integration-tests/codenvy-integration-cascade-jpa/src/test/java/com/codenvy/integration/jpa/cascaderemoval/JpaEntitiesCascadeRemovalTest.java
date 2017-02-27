@@ -58,7 +58,6 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.api.AccountModule;
-import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
@@ -130,6 +129,7 @@ import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.crea
 import static com.codenvy.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
 import static com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
 import static org.mockito.Mockito.when;
@@ -364,7 +364,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertNull(notFoundToNull(() -> freeResourcesLimitDao.get(user2.getId())));
 
         // distributed resources is removed
-        assertTrue(organizationResourcesDistributor.get(childOrganization.getId()).isEmpty());
+        assertNull(notFoundToNull(() -> organizationResourcesDistributor.get(childOrganization.getId())));
 
         //cleanup
         stackDao.remove(stack3.getId());
@@ -399,7 +399,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertNotNull(notFoundToNull(() -> organizationManager.getById(organization.getId())));
         assertNotNull(notFoundToNull(() -> organizationManager.getById(childOrganization.getId())));
         assertNotNull(notFoundToNull(() -> organizationManager.getById(organization2.getId())));
-        assertNotNull(notFoundToNull(() -> organizationResourcesDistributor.get(childOrganization.getId())));
+        assertFalse(organizationResourcesDistributor.getResourcesCaps(childOrganization.getId()).isEmpty());
         wipeTestData();
     }
 
@@ -477,17 +477,18 @@ public class JpaEntitiesCascadeRemovalTest {
         freeResourcesLimitDao.store(freeResourcesLimit = createFreeResourcesLimit(account.getId()));
         freeResourcesLimitDao.store(freeResourcesLimit2 = createFreeResourcesLimit(organization.getId()));
 
-        organizationResourcesDistributor.distribute(childOrganization.getId(), singletonList(new ResourceImpl(RamResourceType.ID,
-                                                                                                              1024,
-                                                                                                              RamResourceType.UNIT)));
+        organizationResourcesDistributor.capResources(childOrganization.getId(),
+                                                      singletonList(new ResourceImpl(RamResourceType.ID,
+                                                                            1024,
+                                                                            RamResourceType.UNIT)));
     }
 
     private void prepareCreator(String userId) {
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl("userok", userId, "", false));
     }
 
-    private void wipeTestData() throws NotFoundException, ConflictException, ServerException {
-        organizationResourcesDistributor.reset(childOrganization.getId());
+    private void wipeTestData() throws ConflictException, ServerException, NotFoundException {
+        organizationResourcesDistributor.capResources(childOrganization.getId(), emptyList());
 
         freeResourcesLimitDao.remove(freeResourcesLimit.getAccountId());
         freeResourcesLimitDao.remove(freeResourcesLimit2.getAccountId());

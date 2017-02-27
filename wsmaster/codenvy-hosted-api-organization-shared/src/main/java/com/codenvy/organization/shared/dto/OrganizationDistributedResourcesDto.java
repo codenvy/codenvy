@@ -34,9 +34,9 @@ public interface OrganizationDistributedResourcesDto extends OrganizationDistrib
     OrganizationDistributedResourcesDto withOrganizationId(String organizationId);
 
     @Override
-    List<ResourceDto> getResources();
+    List<ResourceDto> getResourcesCap();
 
-    void setResources(List<ResourceDto> resources);
+    void setResourcesCap(List<ResourceDto> resourcesCap);
 
-    OrganizationDistributedResourcesDto withResources(List<ResourceDto> resources);
+    OrganizationDistributedResourcesDto withResourcesCap(List<ResourceDto> resourcesCap);
 }
