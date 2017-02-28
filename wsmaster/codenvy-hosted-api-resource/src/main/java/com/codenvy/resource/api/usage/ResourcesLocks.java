@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * <p>It based on {@link StripedLocks} so it can be used in try-with-resources construction.
  *
  * <pre>
- * try (CloseableLock lock = resourceLocks.acquireLock("account123")) {
+ * try (Unlocker u = resourceLocks.lock("account123")) {
  *    // check resources availability and perform operation here
  * }
  * </pre>
@@ -72,8 +72,8 @@ public class ResourcesLocks {
      * @throws ServerException
      *         when any other error occurs
      */
-    public Unlocker acquiresLock(String accountId) throws NotFoundException,
-                                                          ServerException {
+    public Unlocker lock(String accountId) throws NotFoundException,
+                                                  ServerException {
         final Account account = accountManager.getById(accountId);
         final ResourceLockKeyProvider resourceLockKeyProvider = accountTypeToLockProvider.get(account.getType());
         String lockKey;
@@ -88,8 +88,8 @@ public class ResourcesLocks {
         return stripedLocks.writeLock(lockKey);
     }
 
-    public Unlocker acquireLock(String... accountIds) throws NotFoundException,
-                                                                  ServerException {
+    public Unlocker lock(String... accountIds) throws NotFoundException,
+                                                      ServerException {
         // TODO It should be implemented for making possible lock resources by two or more accounts in case of resources redistribution
         throw new UnsupportedOperationException("Not implemented.");
     }

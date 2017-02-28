@@ -14,9 +14,9 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 

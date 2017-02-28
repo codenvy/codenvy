@@ -15,7 +15,7 @@
 package com.codenvy.resource.api.usage.tracker;
 
 import com.codenvy.resource.api.type.WorkspaceResourceType;
-import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.codenvy.resource.model.Resource;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -81,7 +81,7 @@ public class WorkspaceResourceUsageTrackerTest {
 
         when(workspaceManager.getByNamespace(anyString(), anyBoolean())).thenReturn(Collections.emptyList());
 
-        Optional<ResourceImpl> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
+        Optional<Resource> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
 
         assertFalse(usedWorkspacesOpt.isPresent());
     }
@@ -94,10 +94,10 @@ public class WorkspaceResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()));
 
-        Optional<ResourceImpl> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
+        Optional<Resource> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
 
         assertTrue(usedWorkspacesOpt.isPresent());
-        ResourceImpl usedWorkspaces = usedWorkspacesOpt.get();
+        Resource usedWorkspaces = usedWorkspacesOpt.get();
         assertEquals(usedWorkspaces.getType(), WorkspaceResourceType.ID);
         assertEquals(usedWorkspaces.getAmount(), 3);
         assertEquals(usedWorkspaces.getUnit(), WorkspaceResourceType.UNIT);

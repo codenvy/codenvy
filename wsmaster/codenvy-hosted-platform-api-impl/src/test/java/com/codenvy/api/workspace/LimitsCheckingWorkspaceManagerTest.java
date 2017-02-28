@@ -15,10 +15,10 @@
 package com.codenvy.api.workspace;
 
 import com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.WorkspaceCallback;
+import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
-import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.codenvy.service.system.SystemRamInfo;

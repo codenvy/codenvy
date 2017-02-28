@@ -20,7 +20,6 @@ import com.codenvy.resource.api.ResourcesReserveTracker;
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.api.license.AccountLicenseManager;
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -138,9 +137,9 @@ public class ResourceUsageManager {
      *         when some exception occurred while resources fetching
      */
     public List<? extends Resource> getUsedResources(String accountId) throws NotFoundException, ServerException {
-        List<ResourceImpl> usedResources = new ArrayList<>();
+        List<Resource> usedResources = new ArrayList<>();
         for (ResourceUsageTracker usageTracker : usageTrackers) {
-            Optional<ResourceImpl> usedResource = usageTracker.getUsedResource(accountId);
+            Optional<Resource> usedResource = usageTracker.getUsedResource(accountId);
             if (usedResource.isPresent()) {
                 usedResources.add(usedResource.get());
             }

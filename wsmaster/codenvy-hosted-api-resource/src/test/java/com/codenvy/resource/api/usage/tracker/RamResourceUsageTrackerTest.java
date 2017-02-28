@@ -15,7 +15,7 @@
 package com.codenvy.resource.api.usage.tracker;
 
 import com.codenvy.resource.api.type.RamResourceType;
-import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.codenvy.resource.model.Resource;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -58,13 +58,13 @@ import static org.testng.Assert.assertTrue;
 @Listeners(MockitoTestNGListener.class)
 public class RamResourceUsageTrackerTest {
     @Mock
-    private Account          account;
+    private Account                    account;
     @Mock
     private Provider<WorkspaceManager> workspaceManagerProvider;
     @Mock
-    private WorkspaceManager workspaceManager;
+    private WorkspaceManager           workspaceManager;
     @Mock
-    private AccountManager   accountManager;
+    private AccountManager             accountManager;
 
     @InjectMocks
     private RamResourceUsageTracker ramUsageTracker;
@@ -90,7 +90,7 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
-        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
+        Optional<Resource> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
         assertFalse(usedRamOpt.isPresent());
     }
@@ -103,10 +103,10 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.RUNNING, 1000, 500, 500)));
 
-        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
+        Optional<Resource> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
         assertTrue(usedRamOpt.isPresent());
-        ResourceImpl usedRam = usedRamOpt.get();
+        Resource usedRam = usedRamOpt.get();
         assertEquals(usedRam.getType(), RamResourceType.ID);
         assertEquals(usedRam.getAmount(), 2000L);
         assertEquals(usedRam.getUnit(), RamResourceType.UNIT);
@@ -122,7 +122,7 @@ public class RamResourceUsageTrackerTest {
         when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
                 .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED, 1000, 500, 500)));
 
-        Optional<ResourceImpl> usedRamOpt = ramUsageTracker.getUsedResource("account123");
+        Optional<Resource> usedRamOpt = ramUsageTracker.getUsedResource("account123");
 
         assertFalse(usedRamOpt.isPresent());
         verify(accountManager).getById(eq("account123"));
