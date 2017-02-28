@@ -35,6 +35,7 @@ export class CodenvyUser {
     this.remoteUserAPI = this.$resource('/api/user', {}, {
       findByID: {method: 'GET', url: '/api/user/:userId'},
       findByAlias: {method: 'GET', url: '/api/user/find?email=:alias'},
+      findByName: {method: 'GET', url: '/api/user/find?name=:name'},
       inRole: {method: 'GET', url: '/api/user/inrole?role=:role&scope=:scope&scopeId=:scopeId'},
       setPassword: {
         method: 'POST', url: '/api/user/password', isArray: false,
@@ -62,6 +63,9 @@ export class CodenvyUser {
 
     // users by alias
     this.userAliasMap = new Map();
+
+    // users by name
+    this.userNameMap = new Map();
 
     // all users by ID
     this.usersMap = new Map();
@@ -377,6 +381,19 @@ export class CodenvyUser {
 
   getUserByAlias(userAlias) {
     return this.userAliasMap.get(userAlias);
+  }
+
+  fetchUserByName(name: string) {
+    let promise = this.remoteUserAPI.findByName({name: name}).$promise;
+    let resultPromise = promise.then((user: any) => {
+      this.userNameMap.set(name, user);
+    });
+
+    return resultPromise;
+  }
+
+  getUserByName(name: string) {
+    return this.userNameMap.get(name);
   }
 
   setPassword(password) {

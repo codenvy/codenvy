@@ -142,19 +142,14 @@ export class ShareWorkspaceController {
     this.users.push(userItem);
   }
 
-  shareWorkspace() {
+  shareWorkspace(users: Array<string>) {
     let permissionPromises = [];
 
-    this.existingUsers.forEach((user) => {
+    users.forEach((user) => {
       permissionPromises.push(this.storeWorkspacePermissions(user));
     });
 
     this.$q.all(permissionPromises).then(() => {
-      //Clear share input data:
-      this.emails.length = 0;
-      this.existingUsers.clear();
-      this.notExistingUsers.length = 0;
-
       this.refreshWorkspacePermissions();
     }, (error) => {
       this.isLoading = false;
@@ -311,7 +306,11 @@ export class ShareWorkspaceController {
       clickOutsideToClose: true,
       controller: 'AddMemberController',
       controllerAs: 'addMemberController',
-      locals: {callbackController: this},
+      locals: {
+        callbackController: this,
+        namespace: this.namespace,
+        users: this.users
+      },
       parent: parentEl,
       templateUrl: 'app/workspace/share-workspace/add-members/add-members.html'
     });
@@ -334,7 +333,7 @@ export class ShareWorkspaceController {
    */
   storeWorkspacePermissions(user) {
     let permission = {};
-    permission.userId = user.id;
+    permission.userId = user;
     permission.domainId = this.workspaceDomain;
     permission.instanceId = this.workspace.id;
     permission.actions = this.actions;
@@ -364,7 +363,7 @@ export class ShareWorkspaceController {
    * @returns {*}
    */
   handleUserAdding(email) {
-    //Prevents mensioning same users twice:
+    //Prevents mentioning same users twice:
     if (this.existingUsers.has(email)) {
       return null;
     }

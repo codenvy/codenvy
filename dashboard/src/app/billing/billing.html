@@ -1,0 +1,80 @@
+<che-toolbar che-title="Billing">
+  <div class="billing-save-button-placeholder">
+    <che-button-save-flat ng-show="billingController.isSaveButtonVisible()"
+                          ng-disabled="billingController.isSaveButtonDisabled()"
+                          che-button-title="Save" name="saveButton"
+                          ng-click="billingController.saveCard()"></che-button-save-flat>
+  </div>
+</che-toolbar>
+
+<md-progress-linear md-mode="indeterminate" ng-show="billingController.loading"></md-progress-linear>
+
+<md-content md-scroll-y flex
+            class="billing-content" md-theme="default">
+  <md-tabs md-dynamic-height md-stretch-tabs="auto"
+           md-selected="billingController.selectedTabIndex"
+           md-center-tabs="">
+
+    <!-- Summary tab -->
+    <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="fa-ticket" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Summary</span>
+      </md-tab-label>
+      <md-tab-body>
+        <div class="billing-summary">
+          <ram-info account-id="billingController.accountId" ng-if="billingController.accountId"></ram-info>
+          <list-teams account-id="billingController.accountId" ng-if="billingController.accountId"></list-teams>
+        </div>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Card tab -->
+    <md-tab md-on-select="creditCardSelected = true"
+            md-on-deselect="creditCardSelected = false">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-cc-mastercard" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Card</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-description>
+          Having a question about subscriptions and billings in Codenvy - contact us at <a href="mailto:account-help@codenvy.com">account-help@codenvy.com</a>
+        </che-description>
+        <div class="billing-credit-card">
+          <ng-form name="cardInfoForm" ng-if="creditCardSelected">
+            <fieldset ng-disabled="billingController.loading">
+              <card-info ng-init="billingController.onCreditCardSelect(cardInfoForm)"
+                         credit-card="billingController.creditCard"
+                         credit-card-on-change="billingController.creditCardChanged(creditCard)"
+                         credit-card-on-delete="billingController.creditCardDeleted()"></card-info>
+            </fieldset>
+          </ng-form>
+        </div>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Invoices tab -->
+    <md-tab md-on-select="invoicesSelected = true" md-on-deselect="invoicesSelected = false">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-file-text-o" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Invoices</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-description>
+          Having a question about subscriptions and billings in Codenvy - contact us at <a href="mailto:account-help@codenvy.com">account-help@codenvy.com</a>
+        </che-description>
+        <div class="billing-invoices">
+          <list-invoices account-id="billingController.accountId" ng-if="billingController.accountId && invoicesSelected"></list-invoices>
+        </div>
+      </md-tab-body>
+    </md-tab>
+
+  </md-tabs>
+</md-content>
+
+<workspace-edit-mode-overlay ng-if="billingController.isSaveButtonVisible()"
+                             workspace-edit-disable-save-button="billingController.isSaveButtonDisabled()"
+                             workspace-edit-mode-on-save="billingController.saveCard()"
+                             workspace-edit-mode-on-cancel="billingController.cancelCard()"></workspace-edit-mode-overlay>
+
+

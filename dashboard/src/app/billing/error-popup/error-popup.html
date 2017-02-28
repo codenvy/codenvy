@@ -1,0 +1,14 @@
+<che-popup title="Can’t update billing information" on-close="errorPopupController.hide()">
+  <div class="error-popup-content" layout="column">
+
+    <div layout="column">
+      <p ng-repeat="message in errorPopupController.messages">{{message}}</p>
+    </div>
+
+    <div flex layout="column" layout-align="end end">
+      <che-button-cancel-flat che-button-title="Close"
+                              ng-click="errorPopupController.hide()"></che-button-cancel-flat>
+    </div>
+
+  </div>
+</che-popup>

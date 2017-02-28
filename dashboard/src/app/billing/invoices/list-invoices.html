@@ -1,0 +1,69 @@
+<div class>
+  <md-progress-linear md-mode="indeterminate" ng-show="listInvoicesController.isLoading"></md-progress-linear>
+</div>
+<md-content class="invoices-content">
+
+  <div ng-show="!listInvoicesController.isLoading">
+    <che-list-header flex="100"
+                     che-input-placeholder="Search"
+                     che-search-model="listInvoicesController.filter.creationDate"
+                     che-hide-search="listInvoicesController.invoices.length === 0"
+                     che-hide-header="(listInvoicesController.invoices | filter:listInvoicesController.filter).length === 0">
+      <div flex="100" layout="row" layout-align="start stretch" class="che-list-item-row">
+        <div layout="row" layout-align="start center">
+        </div>
+        <div flex hide-xs layout-gt-xs="row" layout-align="start center" class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="40"
+                                  che-sort-value='listInvoicesController.orderBy'
+                                  che-sort-item='creationDate'
+                                  che-column-title='Date'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="40"
+                                  che-sort-value='listInvoicesController.orderBy'
+                                  che-sort-item='totalPrice'
+                                  che-column-title='Price'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="20"
+                                  che-column-title='Actions'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list flex ng-if="listInvoicesController.invoices && listInvoicesController.invoices.length > 0">
+      <che-list-item ng-repeat="invoice in listInvoicesController.invoices | orderBy:listInvoicesController.orderBy | filter:listInvoicesController.filter"
+        flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             class="che-list-item-row user-list-row">
+          <div flex
+               layout-xs="column" layout-gt-xs="row"
+               layout-align-gt-xs="start center"
+               layout-align-xs="start start"
+               class="che-list-item-details">
+            <div flex-gt-xs="40" class="che-list-item-name">
+              <span class="che-xs-header noselect" hide-gt-xs>Date</span>
+              <span>{{invoice.creationDate}}</span>
+            </div>
+            <div flex-gt-xs="40" class="price-details">
+              <span class="che-xs-header noselect" hide-gt-xs>Price</span>
+              <span>${{invoice.totalPrice}}</span>
+            </div>
+            <div flex-gt-xs="20">
+              <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+              <span class="che-list-actions">
+                    <a ng-if="invoice.preview" href="{{invoice.preview.href}}" target="_blank" type="text/html" tooltip="Preview invoice">
+                      <span class="fa fa-chevron-circle-right invoice-action"></span>
+                    </a>
+                  </span>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+
+    <div class="che-list-empty">
+        <span ng-show="listInvoicesController.invoices.length > 0 && (listInvoicesController.invoices | filter:listInvoicesController.filter).length === 0">
+          No invoices found.
+        </span>
+      <span ng-show="listInvoicesController.invoices.length === 0">There are no invoices.</span>
+    </div>
+  </div>
+</md-content>

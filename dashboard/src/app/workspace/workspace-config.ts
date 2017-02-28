@@ -17,6 +17,9 @@
 import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
 import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 
+import {TimeoutInfoController} from './timeout/timeout-info.controller';
+import {TimeoutInfo} from './timeout/timeout-info.directive';
+
 import {UserItem} from './share-workspace/user-item/user-item.directive';
 import {UserItemController} from './share-workspace/user-item/user-item.controller';
 import {AddMemberController} from './share-workspace/add-members/add-members.controller';
@@ -31,5 +34,8 @@ export class WorkspaceConfig {
     register.directive('userItem', UserItem);
 
     register.controller('AddMemberController', AddMemberController);
+
+    register.controller('TimeoutInfoController', TimeoutInfoController);
+    register.directive('timeoutInfo', TimeoutInfo);
   }
 }
