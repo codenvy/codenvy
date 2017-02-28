@@ -42,6 +42,13 @@ public interface OrganizationDto extends Organization, Hyperlinks {
     OrganizationDto withName(String name);
 
     @Override
+    String getQualifiedName();
+
+    void setQualifiedName(String qualifiedName);
+
+    OrganizationDto withQualifiedName(String qualifiedName);
+
+    @Override
     String getParent();
 
     void setParent(String parent);

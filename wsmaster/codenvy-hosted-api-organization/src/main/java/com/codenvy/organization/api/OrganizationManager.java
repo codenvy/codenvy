@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -73,13 +74,15 @@ public class OrganizationManager {
     }
 
     /**
-     * Creates new organization
+     * Creates new organization.
      *
      * @param newOrganization
      *         organization to create
      * @return created organization
      * @throws NullPointerException
      *         when {@code organization} is null
+     * @throws NotFoundException
+     *         when parent organization was not found
      * @throws ConflictException
      *         when organization with such id/name already exists
      * @throws ConflictException
@@ -88,11 +91,21 @@ public class OrganizationManager {
      *         when any other error occurs during organization creation
      */
     @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
-    public Organization create(Organization newOrganization) throws ConflictException, ServerException {
+    public Organization create(Organization newOrganization) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(newOrganization, "Required non-null organization");
-        checkNameReservation(newOrganization.getName());
+        requireNonNull(newOrganization.getName(), "Required non-null organization name");
+
+        String qualifiedName;
+        if (newOrganization.getParent() != null) {
+            final Organization parent = getById(newOrganization.getParent());
+            qualifiedName = parent.getQualifiedName() + "/" + newOrganization.getName();
+        } else {
+            qualifiedName = newOrganization.getName();
+        }
+        checkNameReservation(qualifiedName);
+
         final OrganizationImpl organization = new OrganizationImpl(NameGenerator.generate("organization", 16),
-                                                                   newOrganization.getName(),
+                                                                   qualifiedName,
                                                                    newOrganization.getParent());
         organizationDao.create(organization);
         addFirstMember(organization);
@@ -116,18 +129,28 @@ public class OrganizationManager {
      * @throws ServerException
      *         when any other error occurs organization updating
      */
+    @Transactional(rollbackOn = {RuntimeException.class, ApiException.class})
     public Organization update(String organizationId, Organization update) throws NotFoundException,
                                                                                   ConflictException,
                                                                                   ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
         requireNonNull(update, "Required non-null organization");
-        final String newName = update.getName();
-        checkNameReservation(newName);
+        requireNonNull(update.getName(), "Required non-null organization name");
+
         final OrganizationImpl organization = organizationDao.getById(organizationId);
+        final String oldQualifiedName = organization.getQualifiedName();
         final String oldName = organization.getName();
-        organization.setName(newName);
+
+        final String newName = update.getName();
+        final String newQualifiedName = buildQualifiedName(oldQualifiedName, update.getName());
+
+        checkNameReservation(newQualifiedName);
+        organization.setQualifiedName(newQualifiedName);
+
         organizationDao.update(organization);
         if (!newName.equals(oldName)) {
+            updateSuborganizationsQualifiedNames(oldQualifiedName, organization.getQualifiedName());
+
             final String performerName = EnvironmentContext.getCurrent().getSubject().getUserName();
             eventService.publish(new OrganizationRenamedEvent(performerName, oldName, newName, organization));
         }
@@ -234,6 +257,26 @@ public class OrganizationManager {
     public Page<? extends Organization> getByMember(String userId, int maxItems, int skipCount) throws ServerException {
         requireNonNull(userId, "Required non-null user id");
         return memberDao.getOrganizations(userId, maxItems, skipCount);
+    }
+
+    private String buildQualifiedName(String oldQualifiedName, String newName) {
+        int lastSlashIndex = oldQualifiedName.lastIndexOf("/");
+        if (lastSlashIndex != -1) { //check that it is not root organization
+            return oldQualifiedName.substring(0, lastSlashIndex + 1) + newName;
+        } else {
+            return newName;
+        }
+    }
+
+    private void updateSuborganizationsQualifiedNames(String oldQualifiedName, String newQualifiedName) throws NotFoundException,
+                                                                                                               ConflictException,
+                                                                                                               ServerException {
+        for (OrganizationImpl suborganization : Pages.iterate((maxItems, skipCount) -> organizationDao.getSuborganizations(oldQualifiedName,
+                                                                                                                           maxItems,
+                                                                                                                           skipCount))) {
+            suborganization.setQualifiedName(suborganization.getQualifiedName().replaceFirst(oldQualifiedName, newQualifiedName));
+            organizationDao.update(suborganization);
+        }
     }
 
     /**

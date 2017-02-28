@@ -17,6 +17,7 @@ package com.codenvy.organization.api;
 import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.api.event.OrganizationPersistedEvent;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
+import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.organization.shared.model.Member;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
@@ -30,9 +31,11 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -45,6 +48,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -67,11 +71,9 @@ import static org.testng.Assert.assertNotNull;
 @Listeners(MockitoTestNGListener.class)
 public class OrganizationManagerTest {
     @Captor
-    private ArgumentCaptor<OrganizationImpl>               organizationCaptor;
+    private ArgumentCaptor<OrganizationImpl>           organizationCaptor;
     @Captor
-    private ArgumentCaptor<OrganizationPersistedEvent>     persistEventCaptor;
-    @Captor
-    private ArgumentCaptor<BeforeOrganizationRemovedEvent> removeEventCaptor;
+    private ArgumentCaptor<OrganizationPersistedEvent> persistEventCaptor;
 
     private static final String USER_NAME = "user-name";
     private static final String USER_ID   = "user-id";
@@ -89,6 +91,7 @@ public class OrganizationManagerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         manager = spy(new OrganizationManager(eventService,
                                               organizationDao,
                                               memberDao,
@@ -105,13 +108,33 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldCreateOrganization() throws Exception {
-        final Organization toCreate = createOrganization();
+        final Organization toCreate = DtoFactory.newDto(OrganizationDto.class)
+                                                .withName("newOrg");
 
         manager.create(toCreate);
 
         verify(organizationDao).create(organizationCaptor.capture());
         final OrganizationImpl createdOrganization = organizationCaptor.getValue();
         assertEquals(createdOrganization.getName(), toCreate.getName());
+        assertEquals(createdOrganization.getQualifiedName(), toCreate.getName());
+        assertEquals(createdOrganization.getParent(), toCreate.getParent());
+        verify(eventService).publish(persistEventCaptor.capture());
+        assertEquals(persistEventCaptor.getValue().getOrganization(), createdOrganization);
+        verify(memberDao).store(new MemberImpl(USER_ID, createdOrganization.getId(), OrganizationDomain.getActions()));
+    }
+
+    @Test
+    public void shouldCreateSuborganization() throws Exception {
+        final OrganizationImpl parentOrganization = new OrganizationImpl("org123", "parentOrg", null);
+        when(organizationDao.getById(anyString())).thenReturn(parentOrganization);
+        final Organization toCreate = new OrganizationImpl(null, "orgName", parentOrganization.getId());
+
+        manager.create(toCreate);
+
+        verify(organizationDao).create(organizationCaptor.capture());
+        final OrganizationImpl createdOrganization = organizationCaptor.getValue();
+        assertEquals(createdOrganization.getName(), toCreate.getName());
+        assertEquals(createdOrganization.getQualifiedName(), parentOrganization.getQualifiedName() + "/" + toCreate.getName());
         assertEquals(createdOrganization.getParent(), toCreate.getParent());
         verify(eventService).publish(persistEventCaptor.capture());
         assertEquals(persistEventCaptor.getValue().getOrganization(), createdOrganization);
@@ -120,7 +143,9 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldGenerateIdentifierWhenCreatingOrganization() throws Exception {
-        final Organization organization = createOrganization();
+        final Organization organization = DtoFactory.newDto(OrganizationDto.class)
+                                                    .withName("newOrg")
+                                                    .withId("identifier");
 
         manager.create(organization);
 
@@ -132,7 +157,9 @@ public class OrganizationManagerTest {
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionOnCreationIfOrganizationNameIsReserved() throws Exception {
-        final OrganizationImpl organization = new OrganizationImpl("identifier", "reserved", "parentId");
+        final Organization organization = DtoFactory.newDto(OrganizationDto.class)
+                                                    .withName("reserved")
+                                                    .withParent(null);
 
         manager.create(organization);
     }
@@ -148,25 +175,36 @@ public class OrganizationManagerTest {
     }
 
     @Test
-    public void shouldUpdateOrganizationAndIgnoreIdAndParentFields() throws Exception {
-        final OrganizationImpl existing = mock(OrganizationImpl.class);
+    public void shouldUpdateOrganizationAndIgnoreNewIdAndParentFields() throws Exception {
+        final OrganizationImpl existing = new OrganizationImpl("org123", "oldName", "parent123");
+        final OrganizationImpl expectedExistingToUpdate = new OrganizationImpl(existing);
+        expectedExistingToUpdate.setQualifiedName("newName");
+
+        final OrganizationImpl suborganization = new OrganizationImpl("org321", "oldName/suborgName", "org123");
+        final OrganizationImpl expectedSuborganizationToUpdate = new OrganizationImpl(suborganization);
+        expectedSuborganizationToUpdate.setQualifiedName(expectedExistingToUpdate.getQualifiedName() + "/" + suborganization.getName());
+
         when(organizationDao.getById(any())).thenReturn(existing);
-        final OrganizationImpl update = new OrganizationImpl(existing);
-        update.setId("newId");
-        update.setName("newName");
-        update.setParent("newParent");
+        doReturn(new Page<>(singletonList(suborganization), 0, 1, 1))
+                .when(organizationDao).getSuborganizations(anyString(), anyInt(), anyLong());
+        final OrganizationImpl update = new OrganizationImpl("newId", "newName", "newParentId");
 
         final Organization updated = manager.update("organizationId", update);
 
         verify(organizationDao).getById("organizationId");
-        verify(existing).setName("newName");
-        verify(organizationDao).update(existing);
-        assertEquals(updated, existing);
+        verify(organizationDao, times(2)).update(organizationCaptor.capture());
+        List<OrganizationImpl> updatedOrganizations = organizationCaptor.getAllValues();
+        assertEquals(updatedOrganizations.get(0), expectedExistingToUpdate);
+        assertEquals(updatedOrganizations.get(1), expectedSuborganizationToUpdate);
+        verify(organizationDao).getSuborganizations(eq("oldName"), anyInt(), anyLong());
+        assertEquals(updated, expectedExistingToUpdate);
     }
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionOnUpdatingIfOrganizationNameIsReserved() throws Exception {
-        manager.update("id", new OrganizationImpl("id", "reserved", "parentId"));
+        when(organizationDao.getById("id")).thenReturn(new OrganizationImpl("id", "oldName", null));
+
+        manager.update("id", new OrganizationImpl("id", "reserved", null));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -184,7 +222,7 @@ public class OrganizationManagerTest {
         doNothing().when(manager).removeSuborganizations(anyString());
         final List<Member> members = Collections.singletonList(mock(Member.class));
         doReturn(members).when(manager).removeMembers(anyString());
-        OrganizationImpl toRemove = createOrganization();
+        OrganizationImpl toRemove = new OrganizationImpl("org123", "toRemove", null);
         when(organizationDao.getById(anyString())).thenReturn(toRemove);
         when(eventService.publish(any(BeforeOrganizationRemovedEvent.class))).thenReturn(mock(BeforeOrganizationRemovedEvent.class));
 
@@ -243,7 +281,7 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldGetOrganizationByName() throws Exception {
-        final OrganizationImpl toFetch = createOrganization();
+        final OrganizationImpl toFetch = new OrganizationImpl("org123", "toFetchOrg", "org321");
         when(organizationDao.getByName(eq("org123"))).thenReturn(toFetch);
 
         final Organization fetched = manager.getByName("org123");
@@ -259,7 +297,7 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldGetOrganizationById() throws Exception {
-        final OrganizationImpl toFetch = createOrganization();
+        final OrganizationImpl toFetch = new OrganizationImpl("org123", "toFetchOrg", "org321");
         when(organizationDao.getById(eq("org123"))).thenReturn(toFetch);
 
         final Organization fetched = manager.getById("org123");
@@ -275,7 +313,7 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldGetOrganizationsByParent() throws Exception {
-        final OrganizationImpl toFetch = createOrganization();
+        final OrganizationImpl toFetch = new OrganizationImpl("org321", "toFetchOrg", "org123");
         when(organizationDao.getByParent(eq("org123"), anyInt(), anyInt()))
                 .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
@@ -293,7 +331,7 @@ public class OrganizationManagerTest {
 
     @Test
     public void shouldGetOrganizationsByMember() throws Exception {
-        final OrganizationImpl toFetch = createOrganization();
+        final OrganizationImpl toFetch = new OrganizationImpl("org123", "toFetchOrg", "org321");
         when(memberDao.getOrganizations(eq("org123"), anyInt(), anyInt()))
                 .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
 
@@ -302,9 +340,5 @@ public class OrganizationManagerTest {
         assertEquals(organizations.getItemsCount(), 1);
         assertEquals(organizations.getItems().get(0), toFetch);
         verify(memberDao).getOrganizations("org123", 30, 0);
-    }
-
-    private OrganizationImpl createOrganization() {
-        return new OrganizationImpl("identifier", "orgName", "parentId");
     }
 }

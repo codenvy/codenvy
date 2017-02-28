@@ -45,6 +45,7 @@ public final class DtoConverter {
         return DtoFactory.newDto(OrganizationDto.class)
                          .withId(organization.getId())
                          .withName(organization.getName())
+                         .withQualifiedName(organization.getQualifiedName())
                          .withParent(organization.getParent());
     }
 

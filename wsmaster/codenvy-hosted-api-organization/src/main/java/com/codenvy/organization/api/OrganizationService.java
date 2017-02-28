@@ -78,7 +78,10 @@ public class OrganizationService extends Service {
                                                       "(e.g. The organization with such name already exists)"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam(value = "Organization to create", required = true)
-                           OrganizationDto organization) throws BadRequestException, ConflictException, ServerException {
+                           OrganizationDto organization) throws BadRequestException,
+                                                                NotFoundException,
+                                                                ConflictException,
+                                                                ServerException {
         organizationValidator.checkOrganization(organization);
         return Response.status(201)
                        .entity(linksInjector.injectLinks(asDto(organizationManager.create(organization)), getServiceContext()))
