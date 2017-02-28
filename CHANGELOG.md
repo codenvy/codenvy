@@ -1,5 +1,12 @@
 # Change Log
 
+## [5.3.1](https://github.com/codenvy/codenvy/tree/5.3.1) (2017-02-21)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.3.0...5.3.1)
+
+**Pull requests merged:**
+The follow are changelogs for codenvy/codenvy:
+- Remove readme.io references and replace with internal documentation link. [1794](https://github.com/codenvy/codenvy/pull/1794)
+
 ## [5.3.0](https://github.com/codenvy/codenvy/tree/5.3.0) (2017-02-17)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.2.2...5.3.0)
 

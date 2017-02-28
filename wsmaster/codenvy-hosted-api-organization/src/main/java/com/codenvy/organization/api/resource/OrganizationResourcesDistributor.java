@@ -15,6 +15,7 @@
 package com.codenvy.organization.api.resource;
 
 import com.codenvy.organization.api.OrganizationManager;
+import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.shared.model.OrganizationDistributedResources;
 import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
@@ -29,7 +30,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,6 +72,11 @@ public class OrganizationResourcesDistributor {
         this.organizationManager = organizationManager;
     }
 
+    @Inject
+    public void subscribe(EventService eventService) {
+        eventService.subscribe(new RemoveOrganizationDistributedResourcesSubscriber(), BeforeOrganizationRemovedEvent.class);
+    }
+
     /**
      * Distributes resources for suborganization.
      *
@@ -105,8 +113,8 @@ public class OrganizationResourcesDistributor {
 
         // locking resources by suborganization should lock resources whole organization tree
         // so we can check resource availability for suborganization and parent organization
-        // TODO Rework it to using resourcesLocks.acquiresLock(suborganizationId, parentOrganizationId) when it will be implemented
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(suborganizationId)) {
+        // TODO Rework it to using resourcesLocks.lock(suborganizationId, parentOrganizationId) when it will be implemented
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(suborganizationId)) {
             checkResourcesAvailability(suborganizationId,
                                        getDistributionOrganization(suborganizationId),
                                        getDistributedResources(suborganizationId),
@@ -122,14 +130,17 @@ public class OrganizationResourcesDistributor {
      * @param suborganizationId
      *         suborganization identifier
      * @return distributed resources for given suborganization
-     * @throws NotFoundException
-     *         when organization with specified id doesn't have distributed resources
+     * or empty list when suborganization doesn't have distributed resources
      * @throws ServerException
      *         when any other error occurs
      */
-    public OrganizationDistributedResources get(String suborganizationId) throws NotFoundException, ServerException {
+    public List<? extends Resource> get(String suborganizationId) throws ServerException {
         requireNonNull(suborganizationId, "Required non-null suborganization id");
-        return organizationDistributedResourcesDao.get(suborganizationId);
+        try {
+            return organizationDistributedResourcesDao.get(suborganizationId).getResources();
+        } catch (NotFoundException e) {
+            return emptyList();
+        }
     }
 
     /**
@@ -177,7 +188,7 @@ public class OrganizationResourcesDistributor {
                                                     ServerException {
         requireNonNull(organizationId, "Required non-null organization id");
 
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(organizationId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(organizationId)) {
             checkResourcesAvailability(organizationId,
                                        getDistributionOrganization(organizationId),
                                        getDistributedResources(organizationId),
@@ -288,6 +299,15 @@ public class OrganizationResourcesDistributor {
             return organizationDistributedResourcesDao.get(organizationId).getResources();
         } catch (NotFoundException ignored) {
             return emptyList();
+        }
+    }
+
+    class RemoveOrganizationDistributedResourcesSubscriber extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {
+        @Override
+        public void onCascadeEvent(BeforeOrganizationRemovedEvent event) throws ServerException {
+            if (event.getOrganization().getParent() != null) {
+                organizationDistributedResourcesDao.remove(event.getOrganization().getId());
+            }
         }
     }
 }

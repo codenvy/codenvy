@@ -15,6 +15,7 @@ var gulp = require('gulp'),
     useref = require('gulp-useref'),    //Removes <!-- build:js ... blocks from html
     replaceRevRef = require('gulp-rev-manifest-replace'), //Plugin to replace assets urls based on generated manifest file
     reverse = require('reversible'),
+    watch = require('gulp-watch'),
     del = require('del');               // Remove files and folders
 
 var buildConfig = {
@@ -275,28 +276,21 @@ gulp.task('copy_onprem_se',
 //----------
 //  Set Up LiveReload (port 35729 which LiveReload uses by default)
 
-gulp.task('express', function() {
-  var express = require('express');
-  var app = express();
-  app.use(require('connect-livereload')({port: 4002}));
-  app.use(express.static(__dirname));
-  app.listen(4000);
-});
-
-var tinylr;
-gulp.task('livereload', function() {
-  tinylr = require('tiny-lr')();
-  tinylr.listen(4002);
-});
-
-function notifyLiveReload(event) {
-  var fileName = require('path').relative(__dirname, event.path);
-
-  tinylr.changed({
-    body: {
-      files: [fileName]
-    }
+// This task creates local server
+gulp.task('connect', ['stage'], function() {
+  connect.server({
+    root: paths.dist+"/stage",
+    livereload: true,
+    port: 9000
   });
-}
+});
 
+gulp.task('watch', function() {
+  gulp.watch(paths.src+'/**/*.*', ['stage']);
+  watch(paths.dist+"/stage").pipe(connect.reload());
+});
+// 
+gulp.task('lr',['connect', 'watch'],function(){
+
+});
 // -------------------- Utils ------------------------

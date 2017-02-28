@@ -15,7 +15,6 @@
 package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.ServerException;
 

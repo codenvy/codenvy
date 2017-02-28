@@ -14,20 +14,21 @@
  */
 package org.eclipse.che.security.oauth;
 
-import org.eclipse.che.inject.DynaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-   /**
-     * Setup ProjectLockerOAuthAuthenticator in guice container.
-     *
-     * @author Max Shaposhnik
-     */
+import org.eclipse.che.inject.DynaModule;
+
+/**
+ * Setup ProjectLockerOAuthAuthenticator in guice container.
+ *
+ * @author Max Shaposhnik
+ */
 @DynaModule
 public class ProjectLockerModule extends AbstractModule {
-       @Override
-       protected void configure() {
-           Multibinder<OAuthAuthenticator> oAuthAuthenticators = Multibinder.newSetBinder(binder(), OAuthAuthenticator.class);
-           oAuthAuthenticators.addBinding().to(ProjectLockerOAuthAuthenticator.class);
-       }
+    @Override
+    protected void configure() {
+        Multibinder<OAuthAuthenticator> oAuthAuthenticators = Multibinder.newSetBinder(binder(), OAuthAuthenticator.class);
+        oAuthAuthenticators.addBinding().to(ProjectLockerOAuthAuthenticator.class);
+    }
 }

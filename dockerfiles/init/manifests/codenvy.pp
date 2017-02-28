@@ -191,7 +191,13 @@ node default {
 # Microsoft
   $microsoft_client_id = getValue("CODENVY_MICROSOFT_CLIENT_ID","NULL")
   $microsoft_secret = getValue("CODENVY_MICROSOFT_SECRET","NULL")
-
+# RedHat
+  $redhat_client_id = getValue("CODENVY_REDHAT_CLIENT_ID","NULL")
+  $redhat_secret = getValue("CODENVY_REDHAT_SECRET","NULL")
+# LinkedIn
+  $linkedin_client_id = getValue("CODENVY_LINKEDIN_CLIENT_ID","NULL")
+  $linkedin_secret = getValue("CODENVY_LINKEDIN_SECRET","NULL")
+  
 # Integration
   $integration_factory_owner_username = getValue("CODENVY_INTEGRATION_FACTORY_OWNER_USERNAME","")
   $integration_factory_owner_password = getValue("CODENVY_INTEGRATION_FACTORY_OWNER_PASSWORD","")
@@ -208,6 +214,7 @@ node default {
   $limits_organization_workspaces_ram = getValue("CODENVY_LIMITS_ORGANIZATION_WORKSPACES_RAM","100gb")
   $limits_organization_workspaces_count = getValue("CODENVY_LIMITS_ORGANIZATION_WORKSPACES_COUNT","30")
   $limits_organization_workspaces_run_count = getValue("CODENVY_LIMITS_ORGANIZATION_WORKSPACES_RUN_COUNT","10")
+  $limits_workspace_idle_timeout = getValue("CODENVY_MACHINE_WS_AGENT_INACTIVE_STOP_TIMEOUT_MS","14400000")
   $limits_workspace_env_ram = getValue("CODENVY_LIMITS_WORKSPACE_ENV_RAM","16gb")
 # workspace snapshots
   $docker_registry_for_workspace_snapshots = getValue("CODENVY_DOCKER_REGISTRY_FOR_WORKSPACE_SNAPSHOTS","$host_url:5000")
@@ -220,7 +227,6 @@ node default {
 # Codenvy machine configurations
 #
   $machine_extra_hosts = getValue("CODENVY_MACHINE_EXTRA_HOSTS","NULL")
-  $machine_ws_agent_inactive_stop_timeout_ms = getValue("CODENVY_MACHINE_WS_AGENT_INACTIVE_STOP_TIMEOUT_MS","14400000")
   $machine_default_mem_size_mb = getValue("CODENVY_MACHINE_DEFAULT_MEM_SIZE_MB","1024")
   $machine_ws_agent_max_start_time_ms = getValue("CODENVY_MACHINE_WS_AGENT_MAX_START_TIME_MS","300000")
   $machine_ws_agent_run_command = getValue("CODENVY_MACHINE_WS_AGENT_RUN_COMMAND","~/che/ws-agent/bin/catalina.sh run")

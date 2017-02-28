@@ -14,10 +14,10 @@
  */
 package com.codenvy.api.workspace;
 
-import com.codenvy.resource.api.RamResourceType;
-import com.codenvy.resource.api.RuntimeResourceType;
-import com.codenvy.resource.api.WorkspaceResourceType;
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.api.usage.ResourcesLocks;
 import com.codenvy.resource.model.Resource;
@@ -47,7 +47,6 @@ import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,6 +63,7 @@ import static java.util.Collections.singletonList;
  *
  * @author Yevhenii Voevodin
  * @author Igor Vinokur
+ * @author Sergii Leschenko
  */
 @Singleton
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
@@ -115,7 +115,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                   NotFoundException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace);
@@ -130,7 +130,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                 ConflictException {
         checkMaxEnvironmentRam(config);
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
 
             return super.createWorkspace(config, namespace, attributes);
@@ -146,7 +146,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         WorkspaceImpl workspace = this.getWorkspace(workspaceId);
         String accountId = workspace.getAccount().getId();
 
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, workspace.getNamespace(), workspace.getConfig(), envName);
 
@@ -163,7 +163,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         checkMaxEnvironmentRam(config);
 
         String accountId = accountManager.getByName(namespace).getId();
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             checkWorkspaceResourceAvailability(accountId);
             checkRuntimeResourceAvailability(accountId);
             checkRamResourcesAvailability(accountId, namespace, config, null);
@@ -182,7 +182,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         String accountId = workspace.getAccount().getId();
 
         // Workspace must not be updated while the manager checks it's resources to allow start
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.acquiresLock(accountId)) {
+        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(accountId)) {
             return super.updateWorkspace(id, update);
         }
     }
@@ -272,8 +272,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
             resourceUsageManager.checkResourcesAvailability(accountId, singletonList(ramToUse));
         } catch (NoEnoughResourcesException e) {
             final Resource requiredRam = e.getRequiredResources().get(0);// starting of workspace requires only RAM resource
-            final Resource availableRam = getRamResource(e.getAvailableResources());
-            final Resource usedRam = getRamResource(resourceUsageManager.getUsedResources(accountId));
+            final Resource availableRam = getResourceOrDefault(e.getAvailableResources(),
+                                                               RamResourceType.ID, 0, RamResourceType.UNIT);
+            final Resource usedRam = getResourceOrDefault(resourceUsageManager.getUsedResources(accountId),
+                                                          RamResourceType.ID, 0, RamResourceType.UNIT);
 
             throw new LimitExceededException(format("Workspace %s/%s needs %s to start. Your account has %s and %s in use. " +
                                                     "The workspace can't be start. Stop other workspaces or grant more resources.",
@@ -289,11 +291,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     void checkWorkspaceResourceAvailability(String accountId) throws NotFoundException, ServerException {
         try {
             resourceUsageManager.checkResourcesAvailability(accountId,
-                                                            Collections.singletonList(new ResourceImpl(WorkspaceResourceType.ID,
-                                                                                                       1,
-                                                                                                       WorkspaceResourceType.UNIT)));
+                                                            singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                                                           1,
+                                                                                           WorkspaceResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
-            long totalAvailableWorkspaces = e.getAvailableResources().get(0).getAmount();
+            Optional<? extends Resource> workspaceResource = getResource(e.getAvailableResources(),
+                                                                         WorkspaceResourceType.ID);
+            long totalAvailableWorkspaces = workspaceResource.isPresent() ? workspaceResource.get().getAmount() : 0;
             throw new LimitExceededException(format("You are only allowed to create %d workspace%s.",
                                                     totalAvailableWorkspaces,
                                                     totalAvailableWorkspaces == 1 ? "" : "s"),
@@ -305,11 +309,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     void checkRuntimeResourceAvailability(String accountId) throws NotFoundException, ServerException {
         try {
             resourceUsageManager.checkResourcesAvailability(accountId,
-                                                            Collections.singletonList(new ResourceImpl(RuntimeResourceType.ID,
-                                                                                                       1,
-                                                                                                       RuntimeResourceType.UNIT)));
+                                                            singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                                                           1,
+                                                                                           RuntimeResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
-            long totalAvailableRuntimes = e.getAvailableResources().get(0).getAmount();
+            Optional<? extends Resource> runtimeResource = getResource(e.getAvailableResources(),
+                                                                       RuntimeResourceType.ID);
+            long totalAvailableRuntimes = runtimeResource.isPresent() ? runtimeResource.get().getAmount() : 0;
             throw new LimitExceededException(format("You are only allowed to start %d workspace%s.",
                                                     totalAvailableRuntimes,
                                                     totalAvailableRuntimes == 1 ? "" : "s"));
@@ -317,17 +323,24 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     }
 
     /**
-     * Returns RAM resources from list or RAM resource with 0 amount it list doesn't contain it
+     * Returns resource with specified type from list or resource with specified default amount if list doesn't contain it
      */
-    private Resource getRamResource(List<? extends Resource> resources) {
-        Optional<? extends Resource> ramOpt = resources.stream()
-                                                       .filter(r -> r.getType().equals(RamResourceType.ID))
-                                                       .findAny();
-        if (ramOpt.isPresent()) {
-            return ramOpt.get();
+    private Resource getResourceOrDefault(List<? extends Resource> resources, String resourceType, long defaultAmount, String defaultUnit) {
+        Optional<? extends Resource> resource = getResource(resources, resourceType);
+        if (resource.isPresent()) {
+            return resource.get();
         } else {
-            return new ResourceImpl(RamResourceType.ID, 0, RamResourceType.UNIT);
+            return new ResourceImpl(resourceType, defaultAmount, defaultUnit);
         }
+    }
+
+    /**
+     * Returns resource with specified type from list
+     */
+    private Optional<? extends Resource> getResource(List<? extends Resource> resources, String resourceType) {
+        return resources.stream()
+                        .filter(r -> r.getType().equals(resourceType))
+                        .findAny();
     }
 
     private String printResourceInfo(Resource resource) {

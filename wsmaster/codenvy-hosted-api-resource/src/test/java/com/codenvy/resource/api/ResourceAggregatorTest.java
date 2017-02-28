@@ -16,11 +16,10 @@ package com.codenvy.resource.api;
 
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableSet;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

@@ -14,12 +14,11 @@
  */
 package com.codenvy.organization.api.resource;
 
-import com.codenvy.organization.shared.model.OrganizationDistributedResources;
 import com.codenvy.resource.api.ResourceAggregator;
 import com.codenvy.resource.api.ResourcesReserveTracker;
 import com.codenvy.resource.model.Resource;
 
-import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
@@ -38,8 +37,6 @@ import static com.codenvy.organization.spi.impl.OrganizationImpl.ORGANIZATIONAL_
  */
 @Singleton
 public class OrganizationResourcesReserveTracker implements ResourcesReserveTracker {
-    static final int ORGANIZATION_RESOURCES_PER_PAGE = 100;
-
     private final Provider<OrganizationResourcesDistributor> managerProvider;
     private final ResourceAggregator                         resourceAggregator;
 
@@ -52,37 +49,19 @@ public class OrganizationResourcesReserveTracker implements ResourcesReserveTrac
 
     @Override
     public List<? extends Resource> getReservedResources(String accountId) throws ServerException {
-        Page<? extends OrganizationDistributedResources> resourcesPage = managerProvider.get()
-                                                                                        .getByParent(accountId,
-                                                                                                     ORGANIZATION_RESOURCES_PER_PAGE,
-                                                                                                     0);
-        List<Resource> resources = new ArrayList<>();
-        do {
-            resourcesPage.getItems()
-                         .stream()
-                         .flatMap(distributedResources -> distributedResources.getResources()
-                                                                              .stream())
-                         .collect(Collectors.toCollection(() -> resources));
-        } while ((resourcesPage = getNextPage(resourcesPage, accountId)) != null);
 
-        return new ArrayList<>(resourceAggregator.aggregateByType(resources)
+        List<? extends Resource> toReserve = Pages.stream((maxItems, skipCount) ->
+                                                                  managerProvider.get().getByParent(accountId, maxItems, skipCount))
+                                                  .flatMap(distributedResources -> distributedResources.getResources()
+                                                                                                       .stream())
+                                                  .collect(Collectors.toList());
+
+        return new ArrayList<>(resourceAggregator.aggregateByType(toReserve)
                                                  .values());
     }
 
     @Override
     public String getAccountType() {
         return ORGANIZATIONAL_ACCOUNT;
-    }
-
-    private Page<? extends OrganizationDistributedResources> getNextPage(Page<? extends OrganizationDistributedResources> resourcesPage,
-                                                                         String organizationId) throws ServerException {
-        if (!resourcesPage.hasNextPage()) {
-            return null;
-        }
-
-        final Page.PageRef nextPageRef = resourcesPage.getNextPageRef();
-        return managerProvider.get().getByParent(organizationId,
-                                                 nextPageRef.getPageSize(),
-                                                 nextPageRef.getItemsBefore());
     }
 }

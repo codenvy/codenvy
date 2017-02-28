@@ -14,15 +14,12 @@
  */
 package com.codenvy.organization.spi.tck;
 
-import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
-import com.codenvy.organization.api.event.PostOrganizationPersistedEvent;
 import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -94,26 +91,6 @@ public class OrganizationDaoTest {
         organizationDao.create(organization);
 
         assertEquals(organizationDao.getById(organization.getId()), organization);
-    }
-
-    @Test(dependsOnMethods = "shouldThrowNotFoundExceptionOnGettingNonExistingOrganizationById",
-          expectedExceptions = NotFoundException.class)
-    public void shouldNotCreateUserWhenSubscriberThrowsExceptionOnUserStoring() throws Exception {
-        final OrganizationImpl organization = new OrganizationImpl("organization123",
-                                                                   "Test",
-                                                                   null);
-        CascadeEventSubscriber<PostOrganizationPersistedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, PostOrganizationPersistedEvent.class);
-
-        try {
-            organizationDao.create(organization);
-            fail("OrganizationDao#create had to throw conflict exception");
-        } catch (ConflictException ignored) {
-        }
-
-        eventService.unsubscribe(subscriber, PostOrganizationPersistedEvent.class);
-        organizationDao.getById(organization.getId());
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -188,23 +165,6 @@ public class OrganizationDaoTest {
 
         //then
         assertNull(notFoundToNull(() -> organizationDao.getById(organization.getId())));
-    }
-
-    @Test(dependsOnMethods = "shouldGetOrganizationById")
-    public void shouldNotRemoveUserWhenSubscriberThrowsExceptionOnUserRemoving() throws Exception {
-        final OrganizationImpl organization = organizations[0];
-        CascadeEventSubscriber<BeforeOrganizationRemovedEvent> subscriber = mockCascadeEventSubscriber();
-        doThrow(new ServerException("error")).when(subscriber).onCascadeEvent(any());
-        eventService.subscribe(subscriber, BeforeOrganizationRemovedEvent.class);
-
-        try {
-            organizationDao.remove(organization.getId());
-            fail("OrganizationDao#remove had to throw server exception");
-        } catch (ServerException ignored) {
-        }
-
-        assertEquals(organizationDao.getById(organization.getId()), organization);
-        eventService.unsubscribe(subscriber, BeforeOrganizationRemovedEvent.class);
     }
 
     @Test

@@ -27,6 +27,7 @@
     "gulp-shell": "^0.2.9",
     "gulp-uglify": "^0.3.1",
     "gulp-useref": "^2.1.0",
+    "gulp-watch": "^4.3.11",
     "jshint": "^2.9.4",
     "jshint-stylish": "^2.2.1",
     "reversible": "^0.1.0",

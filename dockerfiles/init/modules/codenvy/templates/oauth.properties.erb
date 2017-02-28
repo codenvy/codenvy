@@ -47,3 +47,18 @@ oauth.microsoft.authuri=https://app.vssps.visualstudio.com/oauth2/authorize
 oauth.microsoft.tokenuri=https://app.vssps.visualstudio.com/oauth2/token
 oauth.microsoft.useruri=https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0
 oauth.microsoft.git.pattern=https://([0-9a-zA-Z-_.%]+)\\.visualstudio\\.com/.*/?_git/.+
+
+oauth.redhat.clientid=<%= scope.lookupvar('codenvy::redhat_client_id') %>
+oauth.redhat.clientsecret=<%= scope.lookupvar('codenvy::redhat_secret') %>
+oauth.redhat.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.redhat.authuri=https://developers.redhat.com/auth/realms/rhd/protocol/openid-connect/auth
+oauth.redhat.tokenuri=https://developers.redhat.com/auth/realms/rhd/protocol/openid-connect/token
+oauth.redhat.useruri=https://developers.redhat.com/auth/realms/rhd/protocol/openid-connect/userinfo
+
+oauth.linkedin.clientid=<%= scope.lookupvar('codenvy::linkedin_client_id') %>
+oauth.linkedin.clientsecret=<%= scope.lookupvar('codenvy::linkedin_secret') %>
+oauth.linkedin.redirecturis=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/api/oauth/callback
+oauth.linkedin.authuri=https://linkedin.com/uas/oauth2/authorization
+oauth.linkedin.tokenuri=https://linkedin.com/uas/oauth2/accessToken
+oauth.linkedin.useruri=https://api.linkedin.com/v1/people/~
+

@@ -80,6 +80,7 @@ public class SsoOAuthAuthenticationService extends OAuthAuthenticationService {
             return Response.temporaryRedirect(
                     UriBuilder.fromUri(redirectAfterLogin)
                               .queryParam("email", userId)
+                              .queryParam("oauth_provider", providerName)
                               .queryParam("oauthbearertoken", authenticationHandler.generateBearerToken(userId, userId, payload))
                               .build())
                            .build();

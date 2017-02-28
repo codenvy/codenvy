@@ -15,7 +15,7 @@
 package com.codenvy.resource.api.free;
 
 import com.codenvy.resource.model.Resource;
-import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.shared.dto.ResourceDto;
 
 import org.eclipse.che.api.core.BadRequestException;
@@ -80,6 +80,10 @@ public class ResourceValidator {
                                               units.stream()
                                                    .collect(Collectors.joining(", ")));
             }
+        }
+
+        if (resource.getAmount() < 0) {
+            throw new BadRequestException("Resources with type '" + resource.getType() + "' has negative amount");
         }
     }
 }

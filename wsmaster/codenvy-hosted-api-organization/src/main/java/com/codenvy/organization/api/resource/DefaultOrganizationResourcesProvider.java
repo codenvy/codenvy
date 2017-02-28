@@ -18,9 +18,10 @@ import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.resource.api.free.DefaultResourcesProvider;
-import com.codenvy.resource.api.RamResourceType;
-import com.codenvy.resource.api.RuntimeResourceType;
-import com.codenvy.resource.api.WorkspaceResourceType;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.TimeoutResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -32,6 +33,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 
@@ -46,12 +48,15 @@ public class DefaultOrganizationResourcesProvider implements DefaultResourcesPro
     private final long                ramPerOrganization;
     private final int                 workspacesPerOrganization;
     private final int                 runtimesPerOrganization;
+    private final long                timeout;
 
     @Inject
     public DefaultOrganizationResourcesProvider(OrganizationManager organizationManager,
                                                 @Named("limits.organization.workspaces.ram") String ramPerOrganization,
                                                 @Named("limits.organization.workspaces.count") int workspacesPerOrganization,
-                                                @Named("limits.organization.workspaces.run.count") int runtimesPerOrganization) {
+                                                @Named("limits.organization.workspaces.run.count") int runtimesPerOrganization,
+                                                @Named("limits.workspace.idle.timeout") long timeout) {
+        this.timeout = TimeUnit.MILLISECONDS.toMinutes(timeout);
         this.organizationManager = organizationManager;
         this.ramPerOrganization = "-1".equals(ramPerOrganization) ? -1 : Size.parseSizeToMegabytes(ramPerOrganization);
         this.workspacesPerOrganization = workspacesPerOrganization;
@@ -68,7 +73,8 @@ public class DefaultOrganizationResourcesProvider implements DefaultResourcesPro
         final Organization organization = organizationManager.getById(accountId);
         // only root organizations should have own resources
         if (organization.getParent() == null) {
-            return asList(new ResourceImpl(RamResourceType.ID, ramPerOrganization, RamResourceType.UNIT),
+            return asList(new ResourceImpl(TimeoutResourceType.ID, timeout, TimeoutResourceType.UNIT),
+                          new ResourceImpl(RamResourceType.ID, ramPerOrganization, RamResourceType.UNIT),
                           new ResourceImpl(WorkspaceResourceType.ID, workspacesPerOrganization, WorkspaceResourceType.UNIT),
                           new ResourceImpl(RuntimeResourceType.ID, runtimesPerOrganization, RuntimeResourceType.UNIT));
         }

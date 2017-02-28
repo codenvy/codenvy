@@ -33,7 +33,6 @@
         <module>assembly-factory-war</module>
         <module>assembly-wsmaster-war</module>
         <module>assembly-dashboard-war</module>
-        <module>compiling-ide-war</module>
         <module>assembly-ide-war</module>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>

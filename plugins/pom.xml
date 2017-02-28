@@ -39,6 +39,8 @@
         <module>plugin-github</module>
         <module>plugin-gitlab</module>
         <module>plugin-microsoft</module>
+        <module>plugin-redhat</module>
+        <module>plugin-linkedin</module>
         <module>plugin-urlfactory</module>
         <module>plugin-product-info</module>
     </modules>

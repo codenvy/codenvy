@@ -14,7 +14,7 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.model.ResourceType;
+import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.shared.dto.ResourceDto;
 import com.google.common.collect.ImmutableSet;
 
@@ -71,6 +71,16 @@ public class ResourceValidatorTest {
         validator.validate(DtoFactory.newDto(ResourceDto.class)
                                      .withType(RESOURCE_TYPE)
                                      .withUnit("kb"));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Resources with type 'test' has negative amount")
+    public void shouldThrowBadRequestExceptionWhenResourceHasNegativeAmount() throws Exception {
+        //when
+        validator.validate(DtoFactory.newDto(ResourceDto.class)
+                                     .withType(RESOURCE_TYPE)
+                                     .withAmount(-1)
+                                     .withUnit("mb"));
     }
 
     @Test

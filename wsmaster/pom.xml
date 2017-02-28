@@ -29,6 +29,7 @@
     <name>Codenvy Master Parent</name>
     <modules>
         <module>codenvy-hosted-mail-sender</module>
+        <module>codenvy-hosted-template-processor</module>
         <module>codenvy-hosted-platform-api-impl</module>
         <module>codenvy-hosted-infra-filters</module>
         <module>codenvy-hosted-recoverpassword</module>
@@ -56,9 +57,11 @@
         <module>codenvy-hosted-report-shared</module>
         <module>codenvy-hosted-report</module>
         <module>codenvy-hosted-api-admin</module>
+        <module>codenvy-hosted-api-resource-shared</module>
+        <module>codenvy-hosted-api-resource</module>
+        <module>codenvy-hosted-api-organization-shared</module>
         <module>codenvy-hosted-api-organization</module>
         <module>codenvy-hosted-system</module>
-        <module>codenvy-hosted-api-resource</module>
         <module>codenvy-hosted-api-audit</module>
         <module>codenvy-sql-schema</module>
     </modules>

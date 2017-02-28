@@ -14,7 +14,6 @@
  */
 package com.codenvy.organization.spi.jpa;
 
-import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
 import com.google.inject.persist.Transactional;
@@ -22,13 +21,7 @@ import com.google.inject.persist.Transactional;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -37,7 +30,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -47,8 +39,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaOrganizationDistributedResourcesDao implements OrganizationDistributedResourcesDao {
-    private static final Logger LOG = LoggerFactory.getLogger(JpaOrganizationDistributedResourcesDao.class);
-
     @Inject
     private Provider<EntityManager> managerProvider;
 
@@ -141,34 +131,5 @@ public class JpaOrganizationDistributedResourcesDao implements OrganizationDistr
             existingDistributedResources.getResources().addAll(distributedResources.getResources());
         }
         manager.flush();
-    }
-
-    @Singleton
-    public static class RemoveOrganizationDistributedResourcesSubscriber implements EventSubscriber<BeforeOrganizationRemovedEvent> {
-        @Inject
-        private EventService                        eventService;
-        @Inject
-        private OrganizationDistributedResourcesDao organizationDistributedResourcesDao;
-
-        @PostConstruct
-        public void subscribe() {
-            eventService.subscribe(this);
-        }
-
-        @PreDestroy
-        public void unsubscribe() {
-            eventService.unsubscribe(this);
-        }
-
-        @Override
-        public void onEvent(BeforeOrganizationRemovedEvent event) {
-            try {
-                organizationDistributedResourcesDao.remove(event.getOrganization().getId());
-            } catch (Exception e) {
-                LOG.error(format("Couldn't reset distributed organization resources before organization '%s' is removed",
-                                 event.getOrganization().getId()),
-                          e);
-            }
-        }
     }
 }

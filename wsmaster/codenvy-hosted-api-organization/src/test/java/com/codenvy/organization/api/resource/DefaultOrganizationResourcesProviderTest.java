@@ -16,9 +16,10 @@ package com.codenvy.organization.api.resource;
 
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.resource.api.RamResourceType;
-import com.codenvy.resource.api.RuntimeResourceType;
-import com.codenvy.resource.api.WorkspaceResourceType;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.TimeoutResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.mockito.Mock;
@@ -54,7 +55,8 @@ public class DefaultOrganizationResourcesProviderTest {
         organizationResourcesProvider = new DefaultOrganizationResourcesProvider(organizationManager,
                                                                                  "2gb",
                                                                                  10,
-                                                                                 5);
+                                                                                 5,
+                                                                                 10 * 60 * 1000);
         when(organizationManager.getById(anyString())).thenReturn(organization);
     }
 
@@ -81,7 +83,10 @@ public class DefaultOrganizationResourcesProviderTest {
 
         //then
         verify(organizationManager).getById("organization123");
-        assertEquals(defaultResources.size(), 3);
+        assertEquals(defaultResources.size(), 4);
+        assertTrue(defaultResources.contains(new ResourceImpl(TimeoutResourceType.ID,
+                                                              10,
+                                                              TimeoutResourceType.UNIT)));
         assertTrue(defaultResources.contains(new ResourceImpl(RamResourceType.ID,
                                                               2048,
                                                               RamResourceType.UNIT)));

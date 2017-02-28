@@ -49,7 +49,9 @@ frontend http-in
     reqidel ^X-Forwarded-Proto:.*
     reqadd X-Forwarded-Proto:\ http
 <% if scope.lookupvar('haproxy::host_protocol') == "https" -%>
-    redirect scheme https
+    acl use_agents_http path_beg -i /agent-binaries
+    redirect scheme https if !use_agents_http
+    use_backend agents_bk if use_agents_http
 
 frontend https-in
     bind *:443 ssl crt /etc/haproxy/cert.pem <% if has_variable?('haproxy::haproxy_https_config') %><%= scope.lookupvar('haproxy::haproxy_https_config') %><% else %>no-sslv3 no-tls-tickets ciphers ALL:-ADH:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP:!RC4:!AECDH<% end %>

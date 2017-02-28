@@ -14,9 +14,10 @@
  */
 package com.codenvy.resource.api.free;
 
-import com.codenvy.resource.api.RamResourceType;
-import com.codenvy.resource.api.RuntimeResourceType;
-import com.codenvy.resource.api.WorkspaceResourceType;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.TimeoutResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -28,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 
@@ -38,15 +40,18 @@ import static java.util.Arrays.asList;
  */
 @Singleton
 public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
+    private final long timeout;
     private final long ramPerUser;
     private final int  workspacesPerUser;
     private final int  runtimesPerUser;
 
     @Inject
-    public DefaultUserResourcesProvider(@Named("limits.user.workspaces.ram") String ramPerUser,
+    public DefaultUserResourcesProvider(@Named("limits.workspace.idle.timeout") long timeout,
+                                        @Named("limits.user.workspaces.ram") String ramPerUser,
                                         @Named("limits.user.workspaces.count") int workspacesPerUser,
                                         @Named("limits.user.workspaces.run.count") int runtimesPerUser) {
-        this.ramPerUser = "-1".equals(ramPerUser) ? -1 : Size.parseSizeToMegabytes(ramPerUser);
+        this.timeout = TimeUnit.MILLISECONDS.toMinutes(timeout);
+        this.ramPerUser = Size.parseSizeToMegabytes(ramPerUser);
         this.workspacesPerUser = workspacesPerUser;
         this.runtimesPerUser = runtimesPerUser;
     }
@@ -58,7 +63,8 @@ public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
 
     @Override
     public List<ResourceImpl> getResources(String accountId) throws ServerException, NotFoundException {
-        return asList(new ResourceImpl(RamResourceType.ID, ramPerUser, RamResourceType.UNIT),
+        return asList(new ResourceImpl(TimeoutResourceType.ID, timeout, TimeoutResourceType.UNIT),
+                      new ResourceImpl(RamResourceType.ID, ramPerUser, RamResourceType.UNIT),
                       new ResourceImpl(WorkspaceResourceType.ID, workspacesPerUser, WorkspaceResourceType.UNIT),
                       new ResourceImpl(RuntimeResourceType.ID, runtimesPerUser, RuntimeResourceType.UNIT));
     }

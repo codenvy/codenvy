@@ -16,7 +16,10 @@ package com.codenvy.organization.api;
 
 import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
-import com.codenvy.organization.api.permissions.OrganizationCreatorPermissionsProvider;
+import com.codenvy.organization.api.listener.MemberEventsPublisher;
+import com.codenvy.organization.api.listener.OrganizationEventsWebsocketBroadcaster;
+import com.codenvy.organization.api.listener.OrganizationNotificationEmailSender;
+import com.codenvy.organization.api.listener.RemoveOrganizationOnLastUserRemovedEventSubscriber;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.api.permissions.OrganizationPermissionsFilter;
 import com.codenvy.organization.api.permissions.OrganizationResourceDistributionServicePermissionsFilter;
@@ -43,8 +46,7 @@ public class OrganizationApiModule extends AbstractModule {
     protected void configure() {
         bind(OrganizationService.class);
         bind(OrganizationPermissionsFilter.class);
-
-        bind(OrganizationCreatorPermissionsProvider.class).asEagerSingleton();
+        bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
 
         Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class)
                    .addBinding().to(DefaultOrganizationResourcesProvider.class);
@@ -64,7 +66,12 @@ public class OrganizationApiModule extends AbstractModule {
         bind(OrganizationResourcesDistributionService.class);
         bind(OrganizationResourceDistributionServicePermissionsFilter.class);
 
-        Multibinder.newSetBinder(binder(), PermissionsDomain.class, Names.named(SuperPrivilegesChecker.SUPER_PRIVILEGED_DOMAINS))
+        bind(OrganizationEventsWebsocketBroadcaster.class).asEagerSingleton();
+        bind(OrganizationNotificationEmailSender.class).asEagerSingleton();
+        bind(MemberEventsPublisher.class).asEagerSingleton();
+
+        Multibinder.newSetBinder(binder(), PermissionsDomain.class,
+                                 Names.named(SuperPrivilegesChecker.SUPER_PRIVILEGED_DOMAINS))
                    .addBinding().to(OrganizationDomain.class);
     }
 }

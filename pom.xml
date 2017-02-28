@@ -67,7 +67,7 @@
         <org.mongodb.version>3.2.1</org.mongodb.version>
         <org.osgi.version>5.0.0</org.osgi.version>
         <org.scala.lang.version>2.10.4</org.scala.lang.version>
-        <org.thymeleaf.version>2.1.4.RELEASE</org.thymeleaf.version>
+        <org.thymeleaf.version>3.0.3.RELEASE</org.thymeleaf.version>
         <site.classifier>onprem-se</site.classifier>
         <version.license-header>codenvy-codenvy-license-resource-bundle</version.license-header>
         <version.license.header.artifactid>codenvy-codenvy-license-resource-bundle</version.license.header.artifactid>
@@ -293,6 +293,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-organization-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-permission</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -317,6 +322,11 @@
                 <artifactId>codenvy-hosted-api-resource</artifactId>
                 <version>${project.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-resource-shared</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
@@ -437,6 +447,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-template-processor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-workspace-activity</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -552,6 +567,11 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-linkedin-oauth2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-microsoft-git-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -613,6 +633,11 @@
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-plugin-pullrequest-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-redhat-oauth2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -832,6 +857,11 @@
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-reflect</artifactId>
                 <version>${org.scala.lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thymeleaf</groupId>
+                <artifactId>thymeleaf</artifactId>
+                <version>${org.thymeleaf.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>

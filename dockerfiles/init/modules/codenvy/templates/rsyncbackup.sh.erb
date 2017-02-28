@@ -1,7 +1,5 @@
 #!/bin/bash
 
-SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
-
 SRC_FOLDER=${1}
 SRC_HOST=${2}
 SRC_PORT=${3}
@@ -9,14 +7,12 @@ DST_FOLDER=${4}
 REMOVE_ON_SUCCESS=${5=false}
 SRC_USER_NAME=${6}
 
-# ensure existing trailing slash to overwrite permissions of destination folder too
-if [[ ${SRC_FOLDER} != */ ]]; then
-   SRC_FOLDER=${SRC_FOLDER}"/"
-fi
-if [[ ${DST_FOLDER} != */ ]]; then
-   DST_FOLDER=${DST_FOLDER}"/"
-fi
-
+# Key for SSH connection to sync files
+SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
+# When Codenvy runs on windows we have issue since key doesn't have permissions 0600.
+# With another permissions on key SSH doesn't work.
+# So we copy key into another place that should be inside of container - so it is Linux and permissions are supported.
+# And apply needed permission to copied file. Copying is performed lazily, so it is skipped when it was done previously.
 # ensure ssh key has correct permissions
 if [[ ! -f /opt/rsync_key ]]; then
     cp $SSH_KEY /opt/rsync_key
@@ -25,16 +21,63 @@ if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
     chmod 0600 /opt/rsync_key
 fi
 
+##### Set by puppet #####
 RSYNC_BACKUP_BWLIMIT=<%= scope.lookupvar('codenvy::rsync_backup_bwlimit') %>
 SSH_LOG_LEVEL=<%= scope.lookupvar('codenvy::rsync_ssh_log_level') %>
-SSH_OPTIONS="-i /opt/rsync_key -l ${SRC_USER_NAME} -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o LogLevel=${SSH_LOG_LEVEL} -p ${SRC_PORT}"
+#########################
 
+##### SSH options #####
+SSH_OPTIONS=""
+# Add SSH connection options
+SSH_OPTIONS+=" -i /opt/rsync_key -l ${SRC_USER_NAME} -p ${SRC_PORT}"
+# Disable password authentication since we use key-based auth
+SSH_OPTIONS+=" -o PasswordAuthentication=no"
+# Disable hosts fingerprint checking because it may fail due to
+# starting different containers on the same ports after some period
+SSH_OPTIONS+=" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+# Set SSH logging level to make it possible to investigate problems
+SSH_OPTIONS+=" -o LogLevel=${SSH_LOG_LEVEL}"
+#######################
+
+# We need root permissions in target container to change ownership of files.
+# If user in that container has access to sudo we use it.
+# Otherwise we use rsync without sudo and if it is possible ownership will be changed.
 RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${SRC_HOST} \
-            "if hash sudo 2>/dev/null;then echo 'sudo rsync';else echo 'rsync';fi")
+            "if hash sudo 2>/dev/null; then echo 'sudo rsync'; else echo 'rsync'; fi")
 
-rsync --quiet --delete --partial --links --safe-links --recursive --times --human-readable --bwlimit=${RSYNC_BACKUP_BWLIMIT} --executability \
-              --include='.codenvy/' \
-              --filter=':- .gitignore' \
-              --rsh="ssh ${SSH_OPTIONS}" \
-              --rsync-path="${RSYNC_COMMAND}" \
-              ${SRC_HOST}:${SRC_FOLDER} ${DST_FOLDER}
+##### Rsync options #####
+RSYNC_OPTIONS=""
+RSYNC_OPTIONS+=" --quiet"
+RSYNC_OPTIONS+=" --recursive"
+# Throughput limit for rsync
+RSYNC_OPTIONS+=" --bwlimit=${RSYNC_BACKUP_BWLIMIT}"
+# Sync modification timestamps to optimise transfer of not modified files.
+RSYNC_OPTIONS+=" --times"
+# Do not remove partially transferred files if transfer is interrupted. Make subsequent transfers faster.
+RSYNC_OPTIONS+=" --partial"
+# Delete files/folders on receiving side if they are not present on sending side.
+RSYNC_OPTIONS+=" --delete"
+# Preserve sym links in a safe way
+RSYNC_OPTIONS+=" --links --safe-links"
+# Transition of ownership and permissions
+RSYNC_OPTIONS+=" --owner --group --numeric-ids --perms"
+#########################
+
+# Previously was used to overwrite permissions of root folders of syncing.
+# Was left for backward compatibility and to prevent possible issues after changing behavior.
+# Ensure existing trailing slash to overwrite permissions of destination folder too.
+if [[ ${SRC_FOLDER} != */ ]]; then
+   SRC_FOLDER=${SRC_FOLDER}"/"
+fi
+if [[ ${DST_FOLDER} != */ ]]; then
+   DST_FOLDER=${DST_FOLDER}"/"
+fi
+
+# Include .codenvy folders and respect .gitignore files.
+# Notice that not all the syntax of .gitignore is supported in rysnc (at least in v3.1.1).
+# TODO consider removing of these options, looks like they are not needed/reliable
+rsync ${RSYNC_OPTIONS} \
+      --rsh="ssh ${SSH_OPTIONS}" \
+      --rsync-path="${RSYNC_COMMAND}" \
+      --include='.codenvy/' --filter=':- .gitignore' \
+      ${SRC_HOST}:${SRC_FOLDER} ${DST_FOLDER}

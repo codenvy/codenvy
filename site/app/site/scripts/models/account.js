@@ -88,6 +88,12 @@
                     case "microsoft":
                         scope = "scope=vso.code_manage vso.code_status";
                         break;
+                    case "redhat":
+                        scope = "scope=user";
+                        break;
+                    case "linkedin":
+                        scope = "scope=r_basicprofile r_emailaddress";
+                        break;
                 }
                 oauthUrl = oauthUrl + scope + redirectAfterLogin;
                 if (typeof callback !== 'undefined') {
