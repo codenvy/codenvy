@@ -43,7 +43,7 @@ SSH_OPTIONS+=" -o LogLevel=${SSH_LOG_LEVEL}"
 # If user in that container has access to sudo we use it.
 # Otherwise we use rsync without sudo and if it is possible ownership will be changed.
 RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${DST_HOST} \
-            "if hash sudo 2>/dev/null;then echo 'sudo rsync';else echo 'rsync';fi")
+            "if hash sudo 2>/dev/null; then echo 'sudo rsync'; else echo 'rsync'; fi")
 
 ##### Rsync options #####
 RSYNC_OPTIONS=""
@@ -53,8 +53,6 @@ RSYNC_OPTIONS+=" --recursive"
 RSYNC_OPTIONS+=" --bwlimit=${RSYNC_RESTORE_BWLIMIT}"
 # Sync modification timestamps to optimise transfer of not modified files.
 RSYNC_OPTIONS+=" --times"
-# Do not remove partially transferred files if transfer is interrupted. Make subsequent transfers faster.
-RSYNC_OPTIONS+=" --partial"
 # Delete files/folders on receiving side if they are not present on sending side.
 RSYNC_OPTIONS+=" --delete"
 # Preserve sym links in a safe way
