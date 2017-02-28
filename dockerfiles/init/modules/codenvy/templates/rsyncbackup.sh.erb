@@ -43,7 +43,7 @@ SSH_OPTIONS+=" -o LogLevel=${SSH_LOG_LEVEL}"
 # If user in that container has access to sudo we use it.
 # Otherwise we use rsync without sudo and if it is possible ownership will be changed.
 RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${SRC_HOST} \
-            "if hash sudo 2>/dev/null;then echo 'sudo rsync';else echo 'rsync';fi")
+            "if hash sudo 2>/dev/null; then echo 'sudo rsync'; else echo 'rsync'; fi")
 
 ##### Rsync options #####
 RSYNC_OPTIONS=""
