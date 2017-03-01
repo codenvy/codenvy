@@ -73,9 +73,11 @@ generate_configuration_with_puppet() {
     WRITE_PARAMETERS=" -e \"PATH_TO_CHE_ASSEMBLY=${CHE_ASSEMBLY}\""
   fi
 
-  if [[ local_assembly && -f $(echo ${CHE_CONTAINER_ASSEMBLY_FULL_PATH}/lib/${WS_AGENT_ASSEMBLY}) ]]; then
-    info "config" "Using ws-agent from main assembly"
-    WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/codenvy-tomcat/lib/${WS_AGENT_ASSEMBLY}\""
+  if local_assembly; then
+    if [[ -f $(echo ${CHE_CONTAINER_ASSEMBLY_FULL_PATH}/lib/${WS_AGENT_ASSEMBLY}) ]]; then
+      info "config" "Using ws-agent from main assembly"
+      WRITE_PARAMETERS+=" -e \"PATH_TO_WS_AGENT_ASSEMBLY=${CHE_HOST_INSTANCE}/dev/codenvy-tomcat/lib/${WS_AGENT_ASSEMBLY}\""
+    fi
   fi
 
   if local_repo; then
