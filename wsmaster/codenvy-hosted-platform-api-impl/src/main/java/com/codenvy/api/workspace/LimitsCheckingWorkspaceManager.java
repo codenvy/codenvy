@@ -295,7 +295,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                            1,
                                                                                            WorkspaceResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
-            Optional<? extends Resource> workspaceResource = getResource(e.getAvailableResources(),
+            Optional<? extends Resource> workspaceResource = getResource(resourceUsageManager.getTotalResources(accountId),
                                                                          WorkspaceResourceType.ID);
             long totalAvailableWorkspaces = workspaceResource.isPresent() ? workspaceResource.get().getAmount() : 0;
             throw new LimitExceededException(format("You are only allowed to create %d workspace%s.",
@@ -313,7 +313,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
                                                                                            1,
                                                                                            RuntimeResourceType.UNIT)));
         } catch (NoEnoughResourcesException e) {
-            Optional<? extends Resource> runtimeResource = getResource(e.getAvailableResources(),
+            Optional<? extends Resource> runtimeResource = getResource(resourceUsageManager.getTotalResources(accountId),
                                                                        RuntimeResourceType.ID);
             long totalAvailableRuntimes = runtimeResource.isPresent() ? runtimeResource.get().getAmount() : 0;
             throw new LimitExceededException(format("You are only allowed to start %d workspace%s.",

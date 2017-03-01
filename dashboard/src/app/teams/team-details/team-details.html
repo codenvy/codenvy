@@ -1,0 +1,190 @@
+<!--
+
+    CODENVY CONFIDENTIAL
+    __________________
+
+     [2015] - [2016] Codenvy, S.A.
+     All Rights Reserved.
+
+    NOTICE:  All information contained herein is, and remains
+    the property of Codenvy S.A. and its suppliers,
+    if any.  The intellectual and technical concepts contained
+    herein are proprietary to Codenvy S.A.
+    and its suppliers and may be covered by U.S. and Foreign Patents,
+    patents in process, and are protected by trade secret or copyright law.
+    Dissemination of this information or reproduction of this material
+    is strictly forbidden unless prior written permission is obtained
+    from Codenvy S.A..
+
+-->
+<che-toolbar che-title="{{teamDetailsController.teamName}}" ng-if="!teamDetailsController.invalidTeam">
+  <div class="save-button-placeholder">
+    <che-button-save-flat ng-show="teamDetailsController.isSaveButtonVisible()"
+                          ng-disabled="teamDetailsController.isSaveButtonDisabled()"
+                          che-button-title="Save" name="saveButton"
+                          ng-click="teamDetailsController.updateTeam()"></che-button-save-flat>
+  </div>
+</che-toolbar>
+<md-content md-scroll-y flex md-theme="default" ng-if="!teamDetailsController.invalidTeam">
+  <md-tabs md-dynamic-height md-stretch-tabs="auto"
+           md-selected="teamDetailsController.selectedTabIndex"
+           md-center-tabs="">
+
+    <!-- Settings Tab -->
+    <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Settings</span>
+      </md-tab-label>
+      <md-tab-body>
+        <div class="team-details-progress">
+          <md-progress-linear md-mode="indeterminate" ng-show="teamDetailsController.isLoading"></md-progress-linear>
+        </div>
+        <div flex layout="column"class="team-details-content">
+          <ng-form name="teamDetailsController.teamForm">
+            <!-- Name -->
+          <che-label-container che-label-name="Name">
+                  <che-input-box che-form="teamDetailsController.teamForm"
+                                 che-name="name"
+                                 aria-label="Name of the team"
+                                 che-place-holder="Name of the team"
+                                 ng-model="teamDetailsController.newName"
+                                 che-readonly="!teamDetailsController.isUserAllowedTo('update')"
+                                 unique-team-name="teamDetailsController.team.name"
+                                 parent-account="teamDetailsController.owner.name"
+                                 required
+                                 ng-maxlength="20"
+                                 ng-pattern="/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i">
+                    <div ng-message="required">A name is required.</div>
+                    <div ng-message="pattern">The name can contain alphanumeric characters or single '-' inside.
+                    </div>
+                    <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+                    <div ng-message="md-maxlength">The name has to be less than 20 characters long.</div>
+                    <div ng-message="uniqueTeamName">This team name is already used.</div>
+                  </che-input-box>
+
+          </che-label-container>
+          <!-- Owner -->
+          <che-label-container che-label-name="Owners" che-label-description="Owners can set permissions and share resources.">
+            <list-team-owners ng-if="teamDetailsController.owner" owner="teamDetailsController.owner"></list-team-owners>
+          </che-label-container>
+
+          <!-- Workspace cap -->
+          <che-label-container che-label-name="Workspace Cap" che-label-description="Maximum number of workspaces for the team.">
+            <che-input-box che-name="workspaceCap" che-form="teamDetailsController.teamForm"
+                           aria-label="workspace cap"
+                           che-place-holder="Total number of workspaces has not been limited."
+                           ng-model="teamDetailsController.limits.workspaceCap"
+                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                           type="number"
+                           che-type-number
+                           min="0"
+                           max="1000">
+              <div ng-message="required">A workspace cap is required.</div>
+              <div ng-message="min">A workspace cap should be greater than 0.</div>
+            </che-input-box>
+          </che-label-container>
+
+          <!-- Running workspace cap -->
+          <che-label-container che-label-name="Running Workspace Cap" che-label-description="Maximum number of running workspaces for each team.">
+            <che-input-box che-name="runtimeCap" che-form="teamDetailsController.teamForm"
+                           aria-label="runtime cap"
+                           che-place-holder="Number of running workspaces has not been limited."
+                           ng-model="teamDetailsController.limits.runtimeCap"
+                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                           type="number"
+                           che-type-number
+                           min="0"
+                           max="1000">
+              <div ng-message="required">A running workspace cap is required.</div>
+              <div ng-message="min">A running workspace cap should be greater than 0.</div>
+            </che-input-box>
+          </che-label-container>
+          <!-- Workspace RAM cap -->
+          <che-label-container che-label-name="Workspace RAM Cap" class="team-ram-cap"
+                               che-label-description="Maximum RAM team workspaces can use.">
+            <che-input-box che-name="workspaceRamCap" che-form="teamDetailsController.teamForm"
+                           aria-label="runtime cap"
+                           che-place-holder="Workspace RAM has not been limited."
+                           ng-model="teamDetailsController.limits.ramCap"
+                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                           type="number"
+                           che-type-number
+                           min="0"
+                           max="1000">
+              <div ng-message="min">A workspace RAM cap should be greater than 0.</div>
+            </che-input-box>
+          </che-label-container>
+          <che-label-container class="team-details-delete-label"
+                               ng-if="teamDetailsController.isUserAllowedTo('delete')"
+                               che-label-name="Delete Team"
+                               che-label-description="This is irreversible. Deleting your team will also destroy team workspaces and stacks.">
+            <che-button-danger che-button-title="Delete"
+                               ng-click="teamDetailsController.deleteTeam($event)"></che-button-danger>
+          </che-label-container>
+          </ng-form>
+        </div>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Developers Tab -->
+    <md-tab md-on-select="developersPageSelected=true" md-on-deselect="developersPageSelected=false">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-group" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Members</span>
+      </md-tab-label>
+      <md-tab-body>
+        <list-team-members ng-if="teamDetailsController.team && teamDetailsController.owner && developersPageSelected"
+                           team="teamDetailsController.team"
+                           owner="teamDetailsController.owner"
+                           editable="teamDetailsController.isUserAllowedTo('setPermissions')"></list-team-members>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Templates Tab -->
+   <!-- <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="fa-briefcase" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Templates</span>
+      </md-tab-label>
+      <md-tab-body>
+      </md-tab-body>
+    </md-tab>-->
+
+    <!-- Stacks Tab -->
+    <!--<md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="fa-archive" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Stacks</span>
+      </md-tab-label>
+      <md-tab-body>
+      </md-tab-body>
+    </md-tab>-->
+
+    <!-- Workspaces Tab -->
+    <md-tab md-on-select="workspacesPageSelected=true" md-on-deselect="workspacesPageSelected=false">
+      <md-tab-label>
+        <md-icon md-font-icon="chefont cheico-workspace" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Workspaces</span>
+      </md-tab-label>
+      <md-tab-body>
+        <list-team-workspaces team="teamDetailsController.team" ng-if="teamDetailsController.team && workspacesPageSelected"></list-team-workspaces>
+      </md-tab-body>
+    </md-tab>
+
+  </md-tabs>
+</md-content>
+<md-content ng-if="teamDetailsController.invalidTeam" flex class="team-error-content" layout="column" layout-align="center center">
+  <div class="error-title">Team <b>{{teamDetailsController.teamName}}</b> not found.</div>
+  <span class="fa fa-group error-image"></span>
+  <div class="error-description">
+    The team could be deleted by its owner or you do not have permissions to access the team.
+  </div>
+
+</md-content>
+
+
+<workspace-edit-mode-overlay ng-if="teamDetailsController.isSaveButtonVisible()"
+                             workspace-edit-disable-save-button="teamDetailsController.isSaveButtonDisabled()"
+                             workspace-edit-mode-on-save="teamDetailsController.updateTeam()"
+                             workspace-edit-mode-on-cancel="teamDetailsController.cancelChanges()"></workspace-edit-mode-overlay>

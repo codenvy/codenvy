@@ -38,6 +38,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link FreeResourcesProvider}
@@ -137,15 +138,21 @@ public class FreeResourcesProviderTest {
         List<ProvidedResources> result = provider.getResources("account123");
 
         //then
-        assertEquals(result.size(), 1);
-        ProvidedResources providedResources = result.get(0);
-        assertEquals(providedResources, new ProvidedResourcesImpl(FreeResourcesProvider.FREE_RESOURCES_PROVIDER,
-                                                                  null,
-                                                                  "account123",
-                                                                  -1L,
-                                                                  -1L,
-                                                                  emptyList()));
-        verify(freeResourcesLimitManager).get("account123");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void shouldNotProvideDefaultResourcesForAccountIfDefaultResourcesProviderProvidesEmptyList() throws Exception {
+        //given
+        when(accountManager.getById(any())).thenReturn(account);
+        when(defaultResourcesProvider.getResources(any())).thenReturn(emptyList());
+        doThrow(new NotFoundException("not found")).when(freeResourcesLimitManager).get(any());
+
+        //when
+        List<ProvidedResources> result = provider.getResources("user123");
+
+        //then
+        assertTrue(result.isEmpty());
     }
 
     @Test

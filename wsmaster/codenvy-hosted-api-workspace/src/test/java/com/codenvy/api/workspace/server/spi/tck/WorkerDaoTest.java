@@ -18,6 +18,7 @@ import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
 import com.codenvy.api.workspace.server.spi.WorkerDao;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -63,6 +64,9 @@ public class WorkerDaoTest {
     private TckRepository<UserImpl> userRepository;
 
     @Inject
+    private TckRepository<AccountImpl> accountRepository;
+
+    @Inject
     private TckRepository<WorkspaceImpl> workspaceRepository;
 
     WorkerImpl[] workers;
@@ -80,10 +84,12 @@ public class WorkerDaoTest {
                                                  new UserImpl("user2", "user2@com.com", "usr2")};
         userRepository.createAll(Arrays.asList(users));
 
+        AccountImpl account = new AccountImpl("account1", "accountName", "test");
+        accountRepository.createAll(Collections.singletonList(account));
         workspaceRepository.createAll(
-                Arrays.asList(new WorkspaceImpl("ws0", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg0", null, null, null)),
-                              new WorkspaceImpl("ws1", users[1].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null)),
-                              new WorkspaceImpl("ws2", users[2].getAccount(), new WorkspaceConfigImpl("", "", "cfg2", null, null, null))));
+                Arrays.asList(new WorkspaceImpl("ws0", account, new WorkspaceConfigImpl("ws-name0", "", "cfg0", null, null, null)),
+                              new WorkspaceImpl("ws1", account, new WorkspaceConfigImpl("ws-name1", "", "cfg1", null, null, null)),
+                              new WorkspaceImpl("ws2", account, new WorkspaceConfigImpl("ws-name2", "", "cfg2", null, null, null))));
 
         workerRepository.createAll(Stream.of(workers)
                                          .map(WorkerImpl::new)
@@ -96,6 +102,7 @@ public class WorkerDaoTest {
         workerRepository.removeAll();
         workspaceRepository.removeAll();
         userRepository.removeAll();
+        accountRepository.removeAll();
     }
 
     /* WorkerDao.store() tests */

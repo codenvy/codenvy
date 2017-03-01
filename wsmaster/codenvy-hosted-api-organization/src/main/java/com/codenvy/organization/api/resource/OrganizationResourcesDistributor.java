@@ -21,6 +21,9 @@ import com.codenvy.organization.spi.OrganizationDistributedResourcesDao;
 import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
 import com.codenvy.resource.api.ResourceAggregator;
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.RuntimeResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.api.usage.ResourcesLocks;
 import com.codenvy.resource.model.Resource;
@@ -36,40 +39,38 @@ import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Facade for organization resources distribution operations.
+ * Facade for organization resources operations.
  *
  * @author Sergii Leschenko
  */
 @Singleton
 public class OrganizationResourcesDistributor {
     private final OrganizationDistributedResourcesDao organizationDistributedResourcesDao;
+    private final OrganizationManager                 organizationManager;
     private final ResourcesLocks                      resourcesLocks;
     private final ResourceUsageManager                usageManager;
     private final ResourceAggregator                  resourceAggregator;
-    private final OrganizationManager                 organizationManager;
 
     @Inject
     public OrganizationResourcesDistributor(OrganizationDistributedResourcesDao organizationDistributedResourcesDao,
+                                            OrganizationManager organizationManager,
                                             ResourcesLocks resourcesLocks,
                                             ResourceUsageManager usageManager,
-                                            ResourceAggregator resourceAggregator,
-                                            OrganizationManager organizationManager) {
+                                            ResourceAggregator resourceAggregator) {
         this.organizationDistributedResourcesDao = organizationDistributedResourcesDao;
+        this.organizationManager = organizationManager;
         this.resourcesLocks = resourcesLocks;
         this.usageManager = usageManager;
         this.resourceAggregator = resourceAggregator;
-        this.organizationManager = organizationManager;
     }
 
     @Inject
@@ -78,73 +79,91 @@ public class OrganizationResourcesDistributor {
     }
 
     /**
-     * Distributes resources for suborganization.
+     * Cap usage of shared resources.
      *
-     * <p>The distributed resources become unavailable for usage by parent organization.
-     *
-     * <p>To initial distributing resources or increasing number of distributed ones parent
-     * organization should have enough available resources.
-     * And vice versa to decrease number of distributed resources suborganization should
-     * have enough available resources (which are not in use and not distributed).
+     * <p>By default suborganization is able to use all parent organization resources
+     * Cap allow to limit usage of shared resources by suborganization.
      *
      * @param suborganizationId
-     *         suborganization identifier
-     * @param resources
-     *         resources to distribute
-     * @throws NullPointerException
-     *         when either {@code suborganizationId} or {@code resources} is null
+     *         suborganization id
+     * @param resourcesCaps
+     *         resources to capped
      * @throws NotFoundException
-     *         when organization with {@code suborganizationId} was not found
+     *         when specified suborganization was not found
      * @throws ConflictException
-     *         when specified {@code suborganizationId} is root organization's identifier
+     *         when organization with specified id is root organization
      * @throws ConflictException
-     *         when parent organization doesn't have enough resources to increase distributed resource amount
-     * @throws ConflictException
-     *         when suborganization doesn't have enough available resources (which are not in use and not distributed).
+     *         when suborganization is currently using more shared resources than should be capped
      * @throws ServerException
      *         when any other error occurs
      */
-    public void distribute(String suborganizationId, List<? extends Resource> resources) throws NotFoundException,
-                                                                                                ConflictException,
-                                                                                                ServerException {
+    public void capResources(String suborganizationId, List<? extends Resource> resourcesCaps) throws NotFoundException,
+                                                                                                      ConflictException,
+                                                                                                      ServerException {
         requireNonNull(suborganizationId, "Required non-null suborganization id");
-        requireNonNull(resources, "Required non-null resources to distribute");
-        checkArgument(!resources.isEmpty(), "Required at least one resource to distribute");
+        requireNonNull(resourcesCaps, "Required non-null resources to capResources");
+        checkIsSuborganization(suborganizationId);
 
         // locking resources by suborganization should lock resources whole organization tree
-        // so we can check resource availability for suborganization and parent organization
-        // TODO Rework it to using resourcesLocks.lock(suborganizationId, parentOrganizationId) when it will be implemented
+        // so we can check resource availability for suborganization organization
         try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(suborganizationId)) {
-            checkResourcesAvailability(suborganizationId,
-                                       getDistributionOrganization(suborganizationId),
-                                       getDistributedResources(suborganizationId),
-                                       resources);
+            if (resourcesCaps.isEmpty()) {
+                organizationDistributedResourcesDao.remove(suborganizationId);
+            } else {
+                checkResourcesAvailability(suborganizationId,
+                                           resourcesCaps);
 
-            organizationDistributedResourcesDao.store(new OrganizationDistributedResourcesImpl(suborganizationId, resources));
+                organizationDistributedResourcesDao.store(new OrganizationDistributedResourcesImpl(suborganizationId, resourcesCaps));
+            }
         }
     }
 
     /**
-     * Returns distributed resources for given suborganization.
+     * Returns resources cap or empty list.
      *
      * @param suborganizationId
-     *         suborganization identifier
-     * @return distributed resources for given suborganization
-     * or empty list when suborganization doesn't have distributed resources
+     *         suborganization id to fetch resources cap
+     * @return resources cap or empty list
+     * @throws NotFoundException
+     *         when specified suborganization was not found
+     * @throws ConflictException
+     *         when organization with specified id is root organization
      * @throws ServerException
      *         when any other error occurs
      */
-    public List<? extends Resource> get(String suborganizationId) throws ServerException {
+    public List<? extends Resource> getResourcesCaps(String suborganizationId) throws NotFoundException,
+                                                                                      ConflictException,
+                                                                                      ServerException {
         requireNonNull(suborganizationId, "Required non-null suborganization id");
+        checkIsSuborganization(suborganizationId);
         try {
-            return organizationDistributedResourcesDao.get(suborganizationId).getResources();
+            return organizationDistributedResourcesDao.get(suborganizationId).getResourcesCap();
         } catch (NotFoundException e) {
             return emptyList();
         }
     }
 
     /**
-     * Returns distributed resources for suborganizations by specified parent organization
+     * Returns distributed resources for specified suborganization.
+     *
+     * @param suborganizationId
+     *         organization id
+     * @return distributed resources for suborganization with specified id
+     * @throws NullPointerException
+     *         when either {@code suborganizationId} is null
+     * @throws NotFoundException
+     *         when there is not distributed resources for specified suborganization
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public OrganizationDistributedResources get(String suborganizationId) throws NotFoundException, ServerException {
+        requireNonNull(suborganizationId, "Required non-null organization id");
+
+        return organizationDistributedResourcesDao.get(suborganizationId);
+    }
+
+    /**
+     * Returns distributed resources for suborganizations by specified parent organization.
      *
      * @param organizationId
      *         organization id
@@ -163,63 +182,12 @@ public class OrganizationResourcesDistributor {
     }
 
     /**
-     * Reset resources distribution.
-     *
-     * <p>When parent organization reset resources distribution for its suborganization resources become available for usage by itself.
-     *
-     * Suborganization should not use resource and it should not be distributed for its
-     * suborganizations in case resetting distributed resource.
-     *
-     * @param organizationId
-     *         organization id
-     * @throws NullPointerException
-     *         when either {@code organizationId} is null
-     * @throws NotFoundException
-     *         when organization with specified id was not found
-     * @throws ConflictException
-     *         when specified {@code suborganizationId} is root organization's identifier
-     * @throws ConflictException
-     *         when suborganization doesn't have enough available resources (which are not in use and not distributed).
-     * @throws ServerException
-     *         when any other error occurs
-     */
-    public void reset(String organizationId) throws NotFoundException,
-                                                    ConflictException,
-                                                    ServerException {
-        requireNonNull(organizationId, "Required non-null organization id");
-
-        try (@SuppressWarnings("unused") Unlocker u = resourcesLocks.lock(organizationId)) {
-            checkResourcesAvailability(organizationId,
-                                       getDistributionOrganization(organizationId),
-                                       getDistributedResources(organizationId),
-                                       emptyList());
-            organizationDistributedResourcesDao.remove(organizationId);
-        }
-    }
-
-    private String getDistributionOrganization(String organizationId) throws NotFoundException, ServerException, ConflictException {
-        String parentOrganization = organizationManager.getById(organizationId).getParent();
-        if (parentOrganization == null) {
-            throw new ConflictException("It is not allowed to distribute resources for root organization.");
-        }
-        return parentOrganization;
-    }
-
-    /**
-     * Checks that parent organization and suborganization have enough available resources to perform resources distribution.
-     *
-     * <p>Parent organization should have enough available resource to distribute it initially or increase number of distributed one.
-     * Suborganization should not use resource and it should not be distributed for its
-     * suborganizations in case decreasing number or resetting of distributed one.
+     * Checks that suborganization is using less resources that new resources cap defines.
      *
      * @param suborganizationId
      *         identifier of suborganization
-     * @param parentOrganizationId
-     *         identifier of parent organization
-     * @param newResources
-     *         resources to distribute
-     * @param existingResources
-     *         resources which are already distributed
+     * @param newResourcesCap
+     *         resources to capResources
      * @throws ConflictException
      *         when parent organization doesn't have enough resources to increase distributed resource amount
      * @throws ConflictException
@@ -230,76 +198,48 @@ public class OrganizationResourcesDistributor {
      */
     @VisibleForTesting
     void checkResourcesAvailability(String suborganizationId,
-                                    String parentOrganizationId,
-                                    List<? extends Resource> existingResources,
-                                    List<? extends Resource> newResources) throws NotFoundException,
-                                                                                  ConflictException,
-                                                                                  ServerException {
-
-        List<Resource> suborganizationResourcesToReset = new ArrayList<>();
-        List<Resource> parentOrganizationResourcesToDistribute = new ArrayList<>();
-
-        final Map<String, Resource> distributedResourceToType = existingResources.stream()
-                                                                                 .collect(Collectors.toMap(Resource::getType,
-                                                                                                           Function.identity()));
-
-        for (Resource newResource : newResources) {
-            final Resource existing = distributedResourceToType.remove(newResource.getType());
-            if (existing != null) {
+                                    List<? extends Resource> newResourcesCap) throws NotFoundException,
+                                                                                     ConflictException,
+                                                                                     ServerException {
+        Map<String, Resource> usedResources = usageManager.getUsedResources(suborganizationId)
+                                                          .stream()
+                                                          .collect(Collectors.toMap(Resource::getType, Function.identity()));
+        for (Resource resourceToCheck : newResourcesCap) {
+            Resource usedResource = usedResources.get(resourceToCheck.getType());
+            if (usedResource != null) {
                 try {
-                    final Resource toReset = resourceAggregator.deduct(existing, newResource);
-                    // distributed resource amount is greater than new one
-                    // we should check availability of difference resource on suborganization level
-                    suborganizationResourcesToReset.add(toReset);
+                    resourceAggregator.deduct(resourceToCheck, usedResource);
                 } catch (NoEnoughResourcesException e) {
-                    // distributed resource amount is less than new one
-                    // we should check availability of difference resource on parent organization level
-                    parentOrganizationResourcesToDistribute.add(e.getMissingResources().get(0));
+                    throw new ConflictException("Resources are currently in use. " + getMessage(e.getMissingResources().get(0).getType()));
                 }
-            } else {
-                // distributed resources doesn't contain this resource
-                // so we should check availability of it on parent organization level
-                parentOrganizationResourcesToDistribute.add(newResource);
-            }
-        }
-
-        // add all resources from distributed resources which were not present in resources to distribute
-        suborganizationResourcesToReset.addAll(distributedResourceToType.values());
-
-        if (!parentOrganizationResourcesToDistribute.isEmpty()) {
-            try {
-                usageManager.checkResourcesAvailability(parentOrganizationId, parentOrganizationResourcesToDistribute);
-            } catch (NoEnoughResourcesException e) {
-                throw new ConflictException("Parent organization doesn't have enough resources. Try to stop resources usage or " +
-                                            "distribute resources in other way.");
-            }
-        }
-
-        if (!suborganizationResourcesToReset.isEmpty()) {
-            try {
-                usageManager.checkResourcesAvailability(suborganizationId, suborganizationResourcesToReset);
-            } catch (NoEnoughResourcesException e) {
-                throw new ConflictException("Resources are currently in use. You can't reallocate and decrease them, while they are " +
-                                            "used. Free resources, by stopping workspaces, before changing the resources distribution.");
             }
         }
     }
 
-    /**
-     * Returns distributed resources or empty list
-     *
-     * @param organizationId
-     *         organization id to fetch resources
-     * @return distributed resources or empty list
-     * @throws ServerException
-     *         when any other error occurs
-     */
-    private List<? extends Resource> getDistributedResources(String organizationId) throws ServerException {
-        try {
-            return organizationDistributedResourcesDao.get(organizationId).getResources();
-        } catch (NotFoundException ignored) {
-            return emptyList();
+    @VisibleForTesting
+    String getMessage(String requiredResourceType) {
+        switch (requiredResourceType) {
+            case RamResourceType.ID:
+                return "You can't decrease RAM CAP, while the resources are in use. " +
+                       "Free resources, by stopping workspaces, before changing the RAM CAP.";
+            case WorkspaceResourceType.ID:
+                return "You can't reduce the workspaces CAP to a value lower than the number of workspaces currently created. " +
+                       "Free resources, by removing workspaces, before changing the workspaces CAP.";
+            case RuntimeResourceType.ID:
+                return "You can't reduce the running workspaces CAP to a value lower than the number of workspaces currently running. " +
+                       "Free resources, by stopping workspaces, before changing the running workspaces CAP.";
+            default:
+                return "You can't reduce them while they are used. " +
+                       "Free resources before changing the resources CAP.";
         }
+    }
+
+    private String checkIsSuborganization(String organizationId) throws NotFoundException, ConflictException, ServerException {
+        String parentOrganization = organizationManager.getById(organizationId).getParent();
+        if (parentOrganization == null) {
+            throw new ConflictException("It is not allowed to cap resources for root organization.");
+        }
+        return parentOrganization;
     }
 
     class RemoveOrganizationDistributedResourcesSubscriber extends CascadeEventSubscriber<BeforeOrganizationRemovedEvent> {

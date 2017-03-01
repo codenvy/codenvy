@@ -30,7 +30,10 @@ public interface OrganizationDistributedResources {
     String getOrganizationId();
 
     /**
-     * Returns resources that can be used.
+     * Returns resources cap that limit usage of parent organization's resources.
+     *
+     * <p>Note that suborganization is not limited to use parent
+     * organization's resources if resource is not capped.
      */
-    List<? extends Resource> getResources();
+    List<? extends Resource> getResourcesCap();
 }

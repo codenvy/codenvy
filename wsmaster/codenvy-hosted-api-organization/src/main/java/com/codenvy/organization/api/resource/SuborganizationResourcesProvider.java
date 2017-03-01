@@ -17,33 +17,37 @@ package com.codenvy.organization.api.resource;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.resource.api.license.ResourcesProvider;
-import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.model.ProvidedResources;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 
 /**
- * Provides resources that are distributed for suborganization by its parent organization.
+ * Provides resources that are shared for suborganization by its parent organization.
  *
- * <p>By default suborganizations are not able to use parent's resources,
- * except timeout resource. Suborganizations inherit timeout resource
- * and parent organization can override inherited timeout value with new one.
+ * <p>By default suborganizations are able to use parent's resources.
+ * Parent organization can limit usage of resources by suborganization by
+ * setting resources caps.
  *
  * @author Sergii Leschenko
  */
@@ -68,41 +72,52 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
     }
 
     @Override
-    public List<ProvidedResources> getResources(String accountId) throws ServerException,
-                                                                         NotFoundException {
+    public List<ProvidedResources> getResources(String accountId) throws NotFoundException,
+                                                                         ServerException {
         final Account account = accountManager.getById(accountId);
-
         String parent;
-        if (OrganizationImpl.ORGANIZATIONAL_ACCOUNT.equals(account.getType())
-            && (parent = organizationManager.getById(accountId).getParent()) != null) {
-            final List<Resource> sharedResources = new ArrayList<>();
 
-            // given account is suborganization's account and can have resources distributed by parent
-            sharedResources.addAll(distributorProvider.get().get(accountId));
+        if (!OrganizationImpl.ORGANIZATIONAL_ACCOUNT.equals(account.getType())
+            || (parent = organizationManager.getById(accountId).getParent()) == null) {
+            return emptyList();
+        }
 
-            Optional<? extends Resource> timeout = findTimeoutResource(sharedResources);
-            // is timeout is not distributed suborganization will reuse parent's one
-            if (!timeout.isPresent()) {
-                List<? extends Resource> parentResources = usageManagerProvider.get().getAvailableResources(parent);
-                findTimeoutResource(parentResources).ifPresent(sharedResources::add);
-            }
+        // given account is suborganization's account and can have resources provided by parent
+        List<? extends Resource> parentResources = usageManagerProvider.get().getTotalResources(parent);
 
-            if (!sharedResources.isEmpty()) {
+        if (!parentResources.isEmpty()) {
+            try {
+                List<? extends Resource> resourcesCaps = distributorProvider.get().getResourcesCaps(accountId);
+
                 return singletonList(new ProvidedResourcesImpl(PARENT_RESOURCES_PROVIDER,
                                                                null,
                                                                accountId,
                                                                -1L,
                                                                -1L,
-                                                               sharedResources));
+                                                               cap(parentResources,
+                                                                   resourcesCaps)));
+            } catch (ConflictException e) {
+                throw new ServerException(e.getLocalizedMessage());
             }
         }
 
         return emptyList();
     }
 
-    private Optional<? extends Resource> findTimeoutResource(List<? extends Resource> resources) {
-        return resources.stream()
-                        .filter(resource -> resource.getType().equals(TimeoutResourceType.ID))
-                        .findAny();
+    private List<ResourceImpl> cap(Collection<? extends Resource> source, List<? extends Resource> caps) {
+        final Map<String, Resource> resourcesCaps = caps.stream()
+                                                        .collect(toMap(Resource::getType,
+                                                                       Function.identity()));
+        return source.stream()
+                     .map(resource -> {
+                         Resource resourceCap = resourcesCaps.get(resource.getType());
+                         if (resourceCap != null &&
+                             resourceCap.getAmount() < resource.getAmount()) {
+                             return resourceCap;
+                         }
+                         return resource;
+                     })
+                     .map(ResourceImpl::new)
+                     .collect(Collectors.toList());
     }
 }

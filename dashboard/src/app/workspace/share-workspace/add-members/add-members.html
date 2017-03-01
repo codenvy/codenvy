@@ -17,37 +17,67 @@
     from Codenvy S.A..
 
 -->
-<che-popup title="Add developers" on-close="addMemberController.abort()">
-  <ng-form name="workspaceUsersForm" class="add-workspace-members">
-    <div class="form-input-fields">
-      <md-chips flex class="share-user-input"
-                name="emails"
-                ng-model="addMemberController.callbackController.emails"
-                md-separator-keys="addMemberController.callbackController.separators"
-                md-transform-chip="addMemberController.callbackController.handleUserAdding($chip)"
-                md-on-remove="addMemberController.callbackController.onRemoveEmail($chip)"
-                secondary-placeholder="Enter comma-separated email list of developers to invite">
-        <md-chip-template>
-          <div>{{$chip}}
-            <span class="material-design icon-ic_done_24px user-exists-checked"
-                  ng-if="addMemberController.callbackController.isUserExists($chip)"></span>
+<che-popup title="{{addMemberController.members.length > 0 ? 'Select developers to invite' : 'No members in team'}}"
+           on-close="addMemberController.abort()" ng-if="!addMemberController.isLoading">
+  <div layout="column" class="add-workspace-members">
+
+    <che-list-header che-hide-header="!addMemberController.members || addMemberController.members.length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row" layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Member list"
+                         ng-checked="addMemberController.isBulkChecked"
+                         ng-click="addMemberController.changeBulkSelection()"></md-checkbox>
           </div>
-        </md-chip-template>
-      </md-chips>
-      <div ng-show="addMemberController.callbackController.notExistingUsers.length > 0" class="user-not-found">
-        User<span ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span> with email<span
-        ng-if="addMemberController.callbackController.notExistingUsers.length > 1">s</span>
-        <b>{{addMemberController.callbackController.getNotExistingEmails()}}</b> not found. Workspaces can be shared
-        with registered users
-        only.
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="60"
+                                  che-sort-value='addMemberController.memberOrderBy'
+                                  che-sort-item='name'
+                                  che-column-title='Name'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="40"
+                                  che-sort-value='addMemberController.memberOrderBy'
+                                  che-sort-item='email'
+                                  che-column-title='Email'></che-list-header-column>
+        </div>
       </div>
+    </che-list-header>
+    <che-list ng-show="addMemberController.members.length > 0" class="members-list">
+      <member-item
+        ng-repeat="member in addMemberController.members"
+        ng-model="addMemberController.membersSelectedStatus[member.userId]"
+        che-selectable="true"
+        che-display-labels="false"
+        che-on-checkbox-click="addMemberController.updateSelectedStatus()"
+        callback="addMemberController"
+        editable="true"
+        hide-details="true"
+        is-owner="false"
+        member="member"></member-item>
+    </che-list>
+    <div class="message-panel" ng-if="(!addMemberController.members || addMemberController.members.length === 0) && (!addMemberController.users || addMemberController.users.length === 0)">
+      There are no members in team {{addMemberController.team ? addMemberController.namespace : addMemberController.team.name}}.
+    <a href="#/team/{{addMemberController.namespace}}" ng-click="addMemberController.abort()">Invite team members.</a>
     </div>
-    <che-button-notice che-button-title="Close"
-                       ng-click="addMemberController.abort()">
-    </che-button-notice>
-    <che-button-primary
-      ng-disabled="addMemberController.callbackController.existingUsers.size === 0 || addMemberController.callbackController.isLoading"
-      che-button-title="Share" name="shareButton"
-      ng-click="addMemberController.shareWorkspace()"></che-button-primary>
-  </ng-form>
+    <div class="message-panel" ng-if="(!addMemberController.members || addMemberController.members.length === 0) && (addMemberController.users && addMemberController.users.length > 0)">
+      The workspace is already shared with all members of the team {{addMemberController.team ? addMemberController.namespace : addMemberController.team.name}}.
+    </div>
+
+    <div layout="row" layout-align="end center" class="buttons-panel">
+      <che-button-notice che-button-title="Close"
+                         ng-click="addMemberController.abort()">
+      </che-button-notice>
+      <che-button-primary
+        ng-disabled="addMemberController.isNoSelected || addMemberController.isLoading"
+        che-button-title="Share" name="shareButton"
+        ng-click="addMemberController.shareWorkspace()"></che-button-primary>
+    </div>
+  </div>
 </che-popup>

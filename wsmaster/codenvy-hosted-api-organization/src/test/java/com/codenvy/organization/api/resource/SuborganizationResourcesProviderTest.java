@@ -16,11 +16,11 @@ package com.codenvy.organization.api.resource;
 
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.shared.model.Organization;
-import com.codenvy.organization.spi.impl.OrganizationDistributedResourcesImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.model.ProvidedResources;
+import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ProvidedResourcesImpl;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
@@ -33,6 +33,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Provider;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -118,20 +119,23 @@ public class SuborganizationResourcesProviderTest {
     }
 
     @Test
-    public void shouldProvideResourcesForOrganizationalAccount() throws Exception {
+    public void shouldProvideResourcesForSuborganizationalAccount() throws Exception {
         //given
         when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
         when(organization.getParent()).thenReturn("parentOrg");
-        final ResourceImpl testResource = new ResourceImpl("test",
-                                                           1234,
-                                                           "unit");
-        final ResourceImpl timeoutResource = new ResourceImpl(TimeoutResourceType.ID,
-                                                              20,
-                                                              TimeoutResourceType.UNIT);
-        OrganizationDistributedResourcesImpl distributedResources = new OrganizationDistributedResourcesImpl("organization123",
-                                                                                                             asList(testResource,
-                                                                                                                    timeoutResource));
-        doReturn(distributedResources.getResources()).when(resourcesDistributor).get(any());
+        final ResourceImpl parentTestResource = new ResourceImpl("test",
+                                                                 1234,
+                                                                 "unit");
+        final ResourceImpl parentTimeoutResource = new ResourceImpl(TimeoutResourceType.ID,
+                                                                    20,
+                                                                    TimeoutResourceType.UNIT);
+        doReturn(Arrays.asList(parentTestResource, parentTimeoutResource))
+                .when(resourceUsageManager).getTotalResources(anyString());
+        final ResourceImpl timeoutResourceCap = new ResourceImpl(TimeoutResourceType.ID,
+                                                                 10,
+                                                                 TimeoutResourceType.UNIT);
+        List<? extends Resource> resourcesCap = singletonList(timeoutResourceCap);
+        doReturn(resourcesCap).when(resourcesDistributor).getResourcesCaps(any());
 
         //when
         final List<ProvidedResources> providedResources = suborganizationResourcesProvider.getResources("organization123");
@@ -143,11 +147,11 @@ public class SuborganizationResourcesProviderTest {
                                                                          "organization123",
                                                                          -1L,
                                                                          -1L,
-                                                                         asList(testResource, timeoutResource)));
+                                                                         asList(parentTestResource, timeoutResourceCap)));
         verify(accountManager).getById("organization123");
         verify(organizationManager).getById("organization123");
-        verify(resourcesDistributor).get("organization123");
-        verify(resourceUsageManager, never()).getAvailableResources("parentOrg");
+        verify(resourcesDistributor).getResourcesCaps("organization123");
+        verify(resourceUsageManager).getTotalResources("parentOrg");
     }
 
     @Test
@@ -155,8 +159,8 @@ public class SuborganizationResourcesProviderTest {
         //given
         when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
         when(organization.getParent()).thenReturn("parentOrg");
-        doReturn(emptyList()).when(resourcesDistributor).get(any());
-        doReturn(emptyList()).when(resourceUsageManager).getAvailableResources(anyString());
+        doReturn(emptyList()).when(resourcesDistributor).getResourcesCaps(any());
+        doReturn(emptyList()).when(resourceUsageManager).getTotalResources(anyString());
 
         //when
         final List<ProvidedResources> providedResources = suborganizationResourcesProvider.getResources("organization123");
@@ -165,8 +169,8 @@ public class SuborganizationResourcesProviderTest {
         assertTrue(providedResources.isEmpty());
         verify(accountManager).getById("organization123");
         verify(organizationManager).getById("organization123");
-        verify(resourcesDistributor).get("organization123");
-        verify(resourceUsageManager).getAvailableResources("parentOrg");
+        verify(resourcesDistributor, never()).getResourcesCaps("organization123");
+        verify(resourceUsageManager).getTotalResources("parentOrg");
     }
 
     @Test
@@ -174,12 +178,12 @@ public class SuborganizationResourcesProviderTest {
         //given
         when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
         when(organization.getParent()).thenReturn("parentOrg");
-        doReturn(emptyList()).when(resourcesDistributor).get(any());
+        doReturn(emptyList()).when(resourcesDistributor).getResourcesCaps(any());
         ResourceImpl parentTimeout = new ResourceImpl(TimeoutResourceType.ID,
                                                       10,
                                                       TimeoutResourceType.UNIT);
         doReturn(singletonList(parentTimeout))
-                .when(resourceUsageManager).getAvailableResources(anyString());
+                .when(resourceUsageManager).getTotalResources(anyString());
 
         //when
         final List<ProvidedResources> providedResources = suborganizationResourcesProvider.getResources("organization123");
@@ -194,7 +198,7 @@ public class SuborganizationResourcesProviderTest {
                                                                          singletonList(parentTimeout)));
         verify(accountManager).getById("organization123");
         verify(organizationManager).getById("organization123");
-        verify(resourcesDistributor).get("organization123");
-        verify(resourceUsageManager).getAvailableResources("parentOrg");
+        verify(resourcesDistributor).getResourcesCaps("organization123");
+        verify(resourceUsageManager).getTotalResources("parentOrg");
     }
 }

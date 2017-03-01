@@ -17,6 +17,7 @@ package com.codenvy.organization.api.permissions;
 import com.codenvy.api.permission.server.SuperPrivilegesChecker;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributionService;
+import com.codenvy.organization.shared.model.Organization;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -40,9 +41,9 @@ import javax.ws.rs.Path;
 @Filter
 @Path("/organization/resource{path:(/.*)?}")
 public class OrganizationResourceDistributionServicePermissionsFilter extends CheMethodInvokerFilter {
-    static final String DISTRIBUTE_RESOURCES_METHOD      = "distribute";
-    static final String GET_DISTRIBUTED_RESOURCES_METHOD = "getDistributedResources";
-    static final String RESET_DISTRIBUTED_RESOURCES      = "reset";
+    static final String CAP_RESOURCES_METHOD      = "capResources";
+    static final String GET_RESOURCES_CAP_METHOD  = "getResourcesCap";
+    static final String GET_DISTRIBUTED_RESOURCES = "getDistributedResources";
 
     @Inject
     private OrganizationManager    organizationManager;
@@ -56,17 +57,22 @@ public class OrganizationResourceDistributionServicePermissionsFilter extends Ch
         final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         String organizationId;
         switch (methodName) {
-            case DISTRIBUTE_RESOURCES_METHOD:
-            case RESET_DISTRIBUTED_RESOURCES:
+            case GET_RESOURCES_CAP_METHOD:
+                if (superPrivilegesChecker.hasSuperPrivileges()) {
+                    //user is able to see information about all organizations
+                    return;
+                }
+            case CAP_RESOURCES_METHOD:
                 //we should check permissions on parent organization level
-                organizationId = organizationManager.getById((String)arguments[0]).getParent();
+                Organization organization = organizationManager.getById((String)arguments[0]);
+                organizationId = organization.getParent();
                 if (organizationId == null) {
                     // requested organization is root so manager should throw exception
                     return;
                 }
                 break;
 
-            case GET_DISTRIBUTED_RESOURCES_METHOD:
+            case GET_DISTRIBUTED_RESOURCES:
                 organizationId = (String)arguments[0];
                 // get organization to ensure that organization exists
                 organizationManager.getById(organizationId);

@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.free;
+package com.codenvy.api.account.personal;
 
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
@@ -20,7 +20,6 @@ import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,7 +47,7 @@ public class DefaultUserResourcesProviderTest {
         final String accountType = resourcesProvider.getAccountType();
 
         //then
-        assertEquals(accountType, UserImpl.PERSONAL_ACCOUNT);
+        assertEquals(accountType, OnpremisesUserManager.PERSONAL_ACCOUNT);
     }
 
     @Test

@@ -103,7 +103,7 @@ public interface OrganizationDao {
      * Gets child organizations by given parent.
      *
      * @param parent
-     *         id of parent organizations
+     *         id of parent organization
      * @param maxItems
      *         the maximum number of organizations to return
      * @param skipCount
@@ -115,4 +115,23 @@ public interface OrganizationDao {
      *         when any other error occurs during organizations fetching
      */
     Page<OrganizationImpl> getByParent(String parent, int maxItems, long skipCount) throws ServerException;
+
+    /**
+     * Gets all child organizations by specified parent qualified name.
+     *
+     * <p>Note that the result will includes all direct and nested suborganizations.
+     *
+     * @param parentQualifiedName
+     *         qualified name of parent organization
+     * @param maxItems
+     *         the maximum number of organizations to return
+     * @param skipCount
+     *         the number of organizations to skip
+     * @return list of children organizations
+     * @throws NullPointerException
+     *         when {@code parentQualifiedName} is null
+     * @throws ServerException
+     *         when any other error occurs during organizations fetching
+     */
+    Page<OrganizationImpl> getSuborganizations(String parentQualifiedName, int maxItems, long skipCount) throws ServerException;
 }

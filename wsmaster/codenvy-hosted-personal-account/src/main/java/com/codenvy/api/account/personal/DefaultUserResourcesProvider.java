@@ -12,8 +12,9 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.resource.api.free;
+package com.codenvy.api.account.personal;
 
+import com.codenvy.resource.api.free.DefaultResourcesProvider;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
 import com.codenvy.resource.api.type.TimeoutResourceType;
@@ -22,7 +23,6 @@ import com.codenvy.resource.spi.impl.ResourceImpl;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.lang.Size;
 
 import javax.inject.Inject;
@@ -58,7 +58,7 @@ public class DefaultUserResourcesProvider implements DefaultResourcesProvider {
 
     @Override
     public String getAccountType() {
-        return UserImpl.PERSONAL_ACCOUNT;
+        return OnpremisesUserManager.PERSONAL_ACCOUNT;
     }
 
     @Override

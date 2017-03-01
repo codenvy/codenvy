@@ -191,12 +191,9 @@ public class OrganizationServiceTest {
 
     @Test
     public void shouldGetOrganizationById() throws Exception {
-        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
-                                                  .withId("organization123")
-                                                  .withName("MyOrganization")
-                                                  .withParent("parentOrg123");
+        final OrganizationDto toFetch = createOrganization();
 
-        when(orgManager.getById(eq("organization123"))).thenReturn(new OrganizationImpl(toFetch));
+        when(orgManager.getById(eq("organization123"))).thenReturn(toFetch);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -214,12 +211,9 @@ public class OrganizationServiceTest {
 
     @Test
     public void shouldFindOrganizationByName() throws Exception {
-        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
-                                                  .withId("organization123")
-                                                  .withName("MyOrganization")
-                                                  .withParent("parentOrg123");
+        final OrganizationDto toFetch = createOrganization();
 
-        when(orgManager.getByName(eq("MyOrganization"))).thenReturn(new OrganizationImpl(toFetch));
+        when(orgManager.getByName(eq("subOrg"))).thenReturn(toFetch);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -227,11 +221,11 @@ public class OrganizationServiceTest {
                                          .when()
                                          .expect()
                                          .statusCode(200)
-                                         .get(SECURE_PATH + "/organization/find?name=MyOrganization");
+                                         .get(SECURE_PATH + "/organization/find?name=subOrg");
 
         final OrganizationDto fetchedOrganization = unwrapDto(response, OrganizationDto.class);
         assertEquals(fetchedOrganization, toFetch);
-        verify(orgManager).getByName(eq("MyOrganization"));
+        verify(orgManager).getByName(eq("subOrg"));
         verify(linksInjector).injectLinks(any(), any());
     }
 
@@ -248,12 +242,9 @@ public class OrganizationServiceTest {
 
     @Test
     public void shouldGetChildOrganizations() throws Exception {
-        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
-                                                  .withId("organization123")
-                                                  .withName("MyOrganization")
-                                                  .withParent("parentOrg123");
+        final OrganizationDto toFetch = createOrganization();
 
-        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+        doReturn(new Page<>(singletonList(toFetch), 0, 1, 1))
                 .when(orgManager).getByParent(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
@@ -273,12 +264,9 @@ public class OrganizationServiceTest {
 
     @Test
     public void shouldGetOrganizationsByCurrentUserIfParameterIsNotSpecified() throws Exception {
-        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
-                                                  .withId("organization123")
-                                                  .withName("MyOrganization")
-                                                  .withParent("parentOrg123");
+        final OrganizationDto toFetch = createOrganization();
 
-        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+        doReturn(new Page<>(singletonList(toFetch), 0, 1, 1))
                 .when(orgManager).getByMember(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
@@ -298,12 +286,9 @@ public class OrganizationServiceTest {
 
     @Test
     public void shouldGetOrganizationsBySpecifiedUser() throws Exception {
-        final OrganizationDto toFetch = DtoFactory.newDto(OrganizationDto.class)
-                                                  .withId("organization123")
-                                                  .withName("MyOrganization")
-                                                  .withParent("parentOrg123");
+        final OrganizationDto toFetch = createOrganization();
 
-        doReturn(new Page<>(singletonList(new OrganizationImpl(toFetch)), 0, 1, 1))
+        doReturn(new Page<>(singletonList(toFetch), 0, 1, 1))
                 .when(orgManager).getByMember(anyString(), anyInt(), anyInt());
 
         final Response response = given().auth()
@@ -334,7 +319,8 @@ public class OrganizationServiceTest {
     private OrganizationDto createOrganization() {
         return DtoFactory.newDto(OrganizationDto.class)
                          .withId("organization123")
-                         .withName("MyOrganization")
+                         .withName("subOrg")
+                         .withQualifiedName("parentOrg/subOrg")
                          .withParent("parentOrg123");
     }
 

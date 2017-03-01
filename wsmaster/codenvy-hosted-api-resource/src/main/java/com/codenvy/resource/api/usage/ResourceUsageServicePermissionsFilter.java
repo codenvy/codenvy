@@ -15,6 +15,8 @@
 package com.codenvy.resource.api.usage;
 
 import com.codenvy.api.permission.server.SystemDomain;
+import com.codenvy.api.permission.server.account.AccountOperation;
+import com.codenvy.api.permission.server.account.AccountPermissionsChecker;
 
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -30,8 +32,8 @@ import javax.inject.Inject;
 import javax.ws.rs.Path;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -49,16 +51,16 @@ public class ResourceUsageServicePermissionsFilter extends CheMethodInvokerFilte
     static final String GET_AVAILABLE_RESOURCES_METHOD = "getAvailableResources";
     static final String GET_USED_RESOURCES_METHOD      = "getUsedResources";
 
-    private final AccountManager                           accountManager;
-    private final Map<String, ResourcesPermissionsChecker> permissionsCheckers;
+    private final AccountManager                         accountManager;
+    private final Map<String, AccountPermissionsChecker> permissionsCheckers;
 
     @Inject
     public ResourceUsageServicePermissionsFilter(AccountManager accountManager,
-                                                 Set<ResourcesPermissionsChecker> permissionsCheckers) {
+                                                 Set<AccountPermissionsChecker> permissionsCheckers) {
         this.accountManager = accountManager;
         this.permissionsCheckers = permissionsCheckers.stream()
-                                                      .collect(toMap(ResourcesPermissionsChecker::getAccountType,
-                                                                     Function.identity()));
+                                                      .collect(toMap(AccountPermissionsChecker::getAccountType,
+                                                                     identity()));
     }
 
     @Override
@@ -82,9 +84,9 @@ public class ResourceUsageServicePermissionsFilter extends CheMethodInvokerFilte
         }
         final Account account = accountManager.getById(accountId);
 
-        final ResourcesPermissionsChecker resourcesPermissionsChecker = permissionsCheckers.get(account.getType());
+        final AccountPermissionsChecker resourcesPermissionsChecker = permissionsCheckers.get(account.getType());
         if (resourcesPermissionsChecker != null) {
-            resourcesPermissionsChecker.checkResourcesVisibility(accountId);
+            resourcesPermissionsChecker.checkPermissions(accountId, AccountOperation.SEE_RESOURCE_INFORMATION);
         } else {
             throw new ForbiddenException("User is not authorized to perform given operation");
         }

@@ -14,6 +14,7 @@
  */
 'use strict';
 
+import {BillingConfig} from './billing/billing-config';
 import {CodenvyNavbarConfig} from './navbar/navbar-config';
 import {Register} from './utils/register';
 import {CodenvyComponentsConfig} from '../components/components-config';
@@ -25,6 +26,7 @@ import {AdminConfig} from './admin/admin-config';
 import {AccountConfig} from './account/details/account-config';
 import {CodenvyOnpremConfig} from './onprem/onprem-config';
 import {WorkspaceConfig} from './workspace/workspace-config';
+import {TeamsConfig} from './teams/teams-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
   'ngResource', 'ngRoute', 'ngPasswordStrength', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
@@ -110,7 +112,8 @@ initModule.run(['$rootScope', '$routeParams', 'licenseMessagesService', 'cheUIEl
       }
     });
 
-    workspaceDetailsService.addSection('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
+    workspaceDetailsService.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
+    workspaceDetailsService.addSection('Idle timeout', 'The time period during which the workspace may be not used, before being stopped.', '<timeout-info></timeout-info>');
     $rootScope.$on('$viewContentLoaded', () => {
       licenseMessagesService.fetchMessages();
       cheUIElementsInjectorService.addElementForInjection('dashboardPageContent', 'recentFactories', '<cdvy-last-factories></cdvy-last-factories>');
@@ -240,6 +243,7 @@ angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServic
 
 
 var instanceRegister = new Register(initModule);
+new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
@@ -247,3 +251,4 @@ new AdminConfig(instanceRegister);
 new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
+new TeamsConfig(instanceRegister);

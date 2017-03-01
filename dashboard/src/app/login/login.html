@@ -43,14 +43,6 @@
         <div ng-message="required">A password is required.</div>
       </che-input>
 
-      <che-label-container che-label-name="Mode">
-
-        <che-toggle ng-model="loginCtrl.usermode" >
-          <che-toggle-button che-font-icon="fa fa-user" che-title="User"></che-toggle-button>
-          <che-toggle-button che-font-icon="material-design icon-ic_verified_user_24px" che-title="Admin"></che-toggle-button>
-        </che-toggle>
-      </che-label-container>
-
       <che-button-primary ng-click="loginCtrl.submit()" che-button-title="Login"></che-button-primary>
       <div layout="column" layout-align="center center">
         <md-progress-circular ng-show="loginCtrl.loginInProgress" class="md-hue-2"  md-mode="indeterminate" md-theme="default"></md-progress-circular>

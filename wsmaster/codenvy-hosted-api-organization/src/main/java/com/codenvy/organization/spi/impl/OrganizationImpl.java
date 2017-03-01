@@ -46,10 +46,18 @@ import java.util.Objects;
                             query = "SELECT o " +
                                     "FROM Organization o " +
                                     "WHERE o.parent = :parent "),
-                @NamedQuery(name = "Organization.getSuborganizationsCount",
+                @NamedQuery(name = "Organization.getByParentCount",
                             query = "SELECT COUNT(o) " +
                                     "FROM Organization o " +
                                     "WHERE o.parent = :parent "),
+                @NamedQuery(name = "Organization.getSuborganizations",
+                            query = "SELECT o " +
+                                    "FROM Organization o " +
+                                    "WHERE o.account.name LIKE :qualifiedName "),
+                @NamedQuery(name = "Organization.getSuborganizationsCount",
+                            query = "SELECT COUNT(o) " +
+                                    "FROM Organization o " +
+                                    "WHERE o.account.name LIKE :qualifiedName ")
         }
 )
 
@@ -78,16 +86,17 @@ public class OrganizationImpl implements Organization {
 
     public OrganizationImpl(Organization organization) {
         this(organization.getId(),
-             organization.getName(),
+             organization.getQualifiedName(),
              organization.getParent());
     }
 
-    public OrganizationImpl(String id, String name, String parent) {
+    public OrganizationImpl(String id, String qualifiedName, String parent) {
         this.id = id;
-        this.account = new AccountImpl(id, name, ORGANIZATIONAL_ACCOUNT);
+        this.account = new AccountImpl(id, qualifiedName, ORGANIZATIONAL_ACCOUNT);
         this.parent = parent;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -96,25 +105,47 @@ public class OrganizationImpl implements Organization {
         this.id = id;
     }
 
+    @Override
     public String getName() {
+        String qualifiedName = getQualifiedName();
+        if (qualifiedName == null) {
+            return null;
+        }
+
+        int lastSlashIndex = qualifiedName.lastIndexOf("/");
+
+        if (lastSlashIndex == -1) {
+            return qualifiedName;
+        }
+
+        return qualifiedName.substring(lastSlashIndex + 1);
+    }
+
+    @Override
+    public String getQualifiedName() {
         if (account != null) {
             return account.getName();
         }
         return null;
     }
 
-    public void setName(String name) {
+    public void setQualifiedName(String qualifiedName) {
         if (account != null) {
-            account.setName(name);
+            account.setName(qualifiedName);
         }
     }
 
+    @Override
     public String getParent() {
         return parent;
     }
 
     public void setParent(String parent) {
         this.parent = parent;
+    }
+
+    public AccountImpl getAccount() {
+        return account;
     }
 
     @Override
@@ -136,6 +167,7 @@ public class OrganizationImpl implements Organization {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(getName());
+        hash = 31 * hash + Objects.hashCode(getQualifiedName());
         hash = 31 * hash + Objects.hashCode(parent);
         return hash;
     }
@@ -145,6 +177,7 @@ public class OrganizationImpl implements Organization {
         return "OrganizationImpl{" +
                "id='" + id + '\'' +
                ", name='" + getName() + '\'' +
+               ", qualifiedName='" + getQualifiedName() + '\'' +
                ", parent='" + parent + '\'' +
                '}';
     }

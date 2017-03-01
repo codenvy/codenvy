@@ -58,7 +58,7 @@ public class AccountLicenseService {
                    @ApiResponse(code = 404, message = "Account with specified id was not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public AccountLicenseDto getLicense(@ApiParam("Account id")
-                                 @PathParam("accountId") String accountId) throws NotFoundException, ServerException {
+                                        @PathParam("accountId") String accountId) throws NotFoundException, ServerException {
         return asDto(accountAccountLicenseManager.getByAccount(accountId));
     }
 }
