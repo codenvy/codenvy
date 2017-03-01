@@ -1,5 +1,30 @@
 # Change Log
 
+## [5.4.0](https://github.com/codenvy/codenvy/tree/5.4.0) (2017-02-28)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.3.1...5.4.0)
+
+**Pull requests merged:**
+The follow are changelogs for codenvy/codenvy:
+- fixes CLI error in non dev mode [1849](https://github.com/codenvy/codenvy/pull/1849)
+- [UD] fixes for "Get More RAM" widget and Billing info tab.[1848](https://github.com/codenvy/codenvy/pull/1848)
+- Add qualified name to make suborganizations' names unique per parent organization [1846](https://github.com/codenvy/codenvy/pull/1846)
+- Rework organization distribution service to cap resource usage. [1845](https://github.com/codenvy/codenvy/pull/1845)
+- Added Team capabilities and Billing stuff to user dashboard. [1844](https://github.com/codenvy/codenvy/pull/1844)
+- Added support for older versions of rsync from 3.0.9 and higher. [1843](https://github.com/codenvy/codenvy/pull/1843)
+- This reverts PR https://github.com/codenvy/codenvy/pull/1766 [1842](https://github.com/codenvy/codenvy/pull/1842)
+- Internal refactoring for resource API [1841](https://github.com/codenvy/codenvy/pull/1841)
+- The CLI can now use the ws-agent from a mounted assembly. [1835](https://github.com/codenvy/codenvy/pull/1835)
+- Move organization events publishing from dao to manager [1830](https://github.com/codenvy/codenvy/pull/1830)
+- Remove unnecessary `CHE_PORT` in [cli] [1800](https://github.com/codenvy/codenvy/pull/1800)
+- clean up selenium dependencies [1798](https://github.com/codenvy/codenvy/pull/1798)
+- Added oAuth2 authentication via LinkedIn. [1791](https://github.com/codenvy/codenvy/pull/1791)
+- Added ability to configure workspace idle timeout per account. [1789](https://github.com/codenvy/codenvy/pull/1789)
+- allows download agents via http [1772](https://github.com/codenvy/codenvy/pull/1772)
+- Permissions granted to admins to perform `update` and `delete` action with predefined stacks. [1768](https://github.com/codenvy/codenvy/pull/1768)
+- Simplified packaging by removing compiling ide assembly module. Reverted back by https://github.com/codenvy/codenvy/pull/1842 [1766](https://github.com/codenvy/codenvy/pull/1766)
+- Cleaned up outdated API servlet module bindings. [1755](https://github.com/codenvy/codenvy/pull/1755)
+- Add personal account for team capabilitities [1600](https://github.com/codenvy/codenvy/pull/1600)
+
 ## [5.3.1](https://github.com/codenvy/codenvy/tree/5.3.1) (2017-02-21)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.3.0...5.3.1)
 
