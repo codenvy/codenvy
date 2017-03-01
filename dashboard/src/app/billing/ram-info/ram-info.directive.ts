@@ -37,9 +37,19 @@ export class RamInfo {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
+  constructor (private $document: ng.IDocumentService) {
     this.scope = {
       accountId: '='
     };
+  }
+
+  link($scope: ng.IScope): void {
+    // in "Get More RAM" popup
+    // set focus to visible input which is RAM value
+    $scope.$watch(() => { return this.$document.find('.get-more-ram-input input:visible').length; }, (visibleNumber: number) => {
+      if (visibleNumber === 1) {
+        this.$document.find('.get-more-ram-input input').focus();
+      }
+    });
   }
 }
