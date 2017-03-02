@@ -45,13 +45,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.codenvy.api.license.shared.model.Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED;
 import static com.codenvy.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -187,6 +190,32 @@ public class SystemLicenseLoginFilterTest {
 
         //then
         verify(request, times(1)).request();
+    }
+
+    @Test
+    public void shouldCheckLicenseEachTimeWhenLicenceIsNotAccepted() throws Exception {
+        //given
+        final IssueDto issue = mock(IssueDto.class);
+        final ArrayList<IssueDto> issues = new ArrayList<>();
+        issues.add(issue);
+        
+        when(servletRequest.getRequestURI()).thenReturn("/api/user");
+        when(requestFactory.fromUrl(anyString())).thenReturn(request);
+        when(request.useGetMethod()).thenReturn(request);
+        when(request.request()).thenReturn(response);
+        when(response.asDto(LegalityDto.class)).thenReturn(legalityDto);
+        when(legalityDto.getIssues()).thenReturn(issues);
+        when(issue.getStatus()).thenReturn(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED);
+
+        //when
+        filter.doFilter(servletRequest, servletResponse, chain);
+        filter.doFilter(servletRequest, servletResponse, chain);
+        filter.doFilter(servletRequest, servletResponse, chain);
+        filter.doFilter(servletRequest, servletResponse, chain);
+        filter.doFilter(servletRequest, servletResponse, chain);
+
+        //then
+        verify(request, times(5)).request();
     }
 
     private Runnable verifySendRedirection(String url) {
