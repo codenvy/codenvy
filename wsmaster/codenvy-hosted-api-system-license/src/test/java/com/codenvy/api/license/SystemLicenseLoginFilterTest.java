@@ -104,6 +104,9 @@ public class SystemLicenseLoginFilterTest {
     public void setup() throws IOException {
         EnvironmentContext.reset();
         EnvironmentContext.getCurrent().setSubject(subject);
+        filter =new SystemLicenseLoginFilter();
+        filter.requestFilter = requestFilter;
+        filter.requestFactory = requestFactory;
 
         when(filterConfig.getServletContext()).thenReturn(servletContext);
         setFieldValue(filter, "apiEndpoint", API_ENDPOINT);
@@ -198,7 +201,7 @@ public class SystemLicenseLoginFilterTest {
         final IssueDto issue = mock(IssueDto.class);
         final ArrayList<IssueDto> issues = new ArrayList<>();
         issues.add(issue);
-        
+
         when(servletRequest.getRequestURI()).thenReturn("/api/user");
         when(requestFactory.fromUrl(anyString())).thenReturn(request);
         when(request.useGetMethod()).thenReturn(request);
