@@ -22,7 +22,7 @@
     <md-progress-linear md-mode="indeterminate" ng-hide="codenvyNavbarController.email"></md-progress-linear>
     <div ng-show="codenvyNavbarController.email" layout="column" flex>
 
-      <div layout="row" layout-align="start center">
+      <div flex="none" layout="row" layout-align="start center">
         <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left"
                  ng-include="branding.logoText">
         </section>
@@ -68,7 +68,7 @@
               <md-button nav-bar-selected flex che-reload-href
                          href="{{codenvyNavbarController.menuItemUrl.stacks}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
-                  <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
+                  <i class="fa fa-archive navbar-icon" aria-hidden="true"></i>
                   <span>Stacks</span>
                 </div>
               </md-button>
@@ -124,6 +124,7 @@
       </div>
 
       <navbar-recent-workspaces></navbar-recent-workspaces>
+      <navbar-teams flex layout="column" layout-aling="start strength"></navbar-teams>
 
       <div ng-show="codenvyNavbarController.isAdminServiceAvailable" class="admin-navbar-menu"
            ng-init="configMenuIsExpand=true">
@@ -152,15 +153,14 @@
         </section>
       </div>
 
-      <div flex layout="column" layout-align="end start"
-           class="admin-navbar-menu">
+      <div class="admin-navbar-menu">
         <section class="left-sidebar-menu navbar-account-section">
           <md-list layout="column" flex>
 
-            <md-list-item flex class="navbar-subsection-item">
+            <md-list-item class="navbar-subsection-item">
               <navbar-dropdown-menu flex
                                     navbar-dropdown-items="codenvyNavbarController.accountItems"
-                                    navbar-dropdown-offset="15 -45">
+                                    navbar-dropdown-offset="15 -85">
                 <md-button ng-href="" layout-align="left">
                   <div class="navbar-item navbar-identity" layout="row" layout-align="start center">
 

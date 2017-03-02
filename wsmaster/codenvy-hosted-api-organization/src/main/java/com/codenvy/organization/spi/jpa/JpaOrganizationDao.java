@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
 import javax.inject.Inject;
@@ -45,12 +44,10 @@ import static java.util.Objects.requireNonNull;
 public class JpaOrganizationDao implements OrganizationDao {
 
     private final Provider<EntityManager> managerProvider;
-    private final EventService            eventService;
 
     @Inject
-    public JpaOrganizationDao(Provider<EntityManager> managerProvider, EventService eventService) {
+    public JpaOrganizationDao(Provider<EntityManager> managerProvider) {
         this.managerProvider = managerProvider;
-        this.eventService = eventService;
     }
 
     @Override
@@ -131,8 +128,31 @@ public class JpaOrganizationDao implements OrganizationDao {
                                                          .setMaxResults(maxItems)
                                                          .setFirstResult((int)skipCount)
                                                          .getResultList();
-            final Long suborganizationsCount = manager.createNamedQuery("Organization.getSuborganizationsCount", Long.class)
+            final Long suborganizationsCount = manager.createNamedQuery("Organization.getByParentCount", Long.class)
                                                       .setParameter("parent", parent)
+                                                      .getSingleResult();
+
+            return new Page<>(result, skipCount, maxItems, suborganizationsCount);
+        } catch (RuntimeException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<OrganizationImpl> getSuborganizations(String parentQualifiedName, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(parentQualifiedName, "Required non-null parent");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
+        try {
+            final EntityManager manager = managerProvider.get();
+            List<OrganizationImpl> result = manager.createNamedQuery("Organization.getSuborganizations", OrganizationImpl.class)
+                                                   .setParameter("qualifiedName", parentQualifiedName + "/%")
+                                                   .setMaxResults(maxItems)
+                                                   .setFirstResult((int)skipCount)
+                                                   .getResultList();
+
+            final long suborganizationsCount = manager.createNamedQuery("Organization.getSuborganizationsCount", Long.class)
+                                                      .setParameter("qualifiedName", parentQualifiedName + "/%")
                                                       .getSingleResult();
 
             return new Page<>(result, skipCount, maxItems, suborganizationsCount);

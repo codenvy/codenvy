@@ -1,0 +1,86 @@
+<div class="card-info">
+  <!-- Credit card -->
+  <div>
+    <che-label-container che-label-name="Credit Card"></che-label-container>
+  </div>
+  <!-- add new card -->
+  <div ng-if="!cardInfoController.creditCard.token">
+    <ng-form name="cardInfoForm">
+      <add-credit-card credit-card="cardInfoController.creditCard"></add-credit-card>
+    </ng-form>
+  </div>
+  <!-- show existing card -->
+  <div ng-if="cardInfoController.creditCard.token">
+    <div class="card-info-cardholder">{{cardInfoController.creditCard.cardholder}}</div>
+    <div>{{cardInfoController.creditCard.type}}&nbsp;&hellip;{{cardInfoController.creditCard.number.slice(-4)}}&nbsp;({{cardInfoController.creditCard.expirationDate}})</div>
+  </div>
+
+  <!-- Billing information -->
+  <div>
+    <che-label-container che-label-name="Billing Information"></che-label-container>
+  </div>
+  <ng-form name="cardInfoForm">
+    <!-- street address -->
+    <che-input che-form="cardInfoForm"
+               che-label-name="Street Address"
+               che-name="streetAddress"
+               che-place-holder=""
+               aria-label="Street address"
+               ng-model="cardInfoController.creditCard.streetAddress"
+               ng-change="cardInfoController.infoChanged(cardInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A street address is required.</div>
+      <div ng-message="maxlength">The street address has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- city -->
+    <che-input che-form="cardInfoForm"
+               che-label-name="City"
+               che-name="city"
+               che-place-holder=""
+               che-type-city
+               aria-label="City"
+               ng-model="cardInfoController.creditCard.city"
+               ng-change="cardInfoController.infoChanged(cardInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A city name is required.</div>
+      <div ng-message="maxlength">The city name has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- state -->
+    <che-input che-form="cardInfoForm"
+               che-label-name="State"
+               che-name="state"
+               che-place-holder=""
+               che-type-city
+               aria-label="State"
+               ng-model="cardInfoController.creditCard.state"
+               ng-change="cardInfoController.infoChanged(cardInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A state name is required.</div>
+      <div ng-message="maxlength">The state name has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- country -->
+    <che-select che-form="cardInfoForm"
+                che-name="country"
+                che-label-name="Country"
+                che-place-holder=""
+                ng-change="cardInfoController.infoChanged(cardInfoForm.$valid)"
+                ng-model="cardInfoController.creditCard.country"
+                che-value="cardInfoController.creditCard.country"
+                che-option-values="cardInfoController.countries"
+                required>
+      <div ng-message="required">A country is required.</div>
+    </che-select>
+  </ng-form>
+
+  <!-- Delete credit card -->
+  <che-label-container ng-if="cardInfoController.creditCard.token"
+                       class="card-info-delete-label"
+                       che-label-name="Delete Billing Info"
+                       che-label-description="This is irreversible.">
+    <che-button-danger che-button-title="Delete"
+                       ng-click="cardInfoController.deleteCard($event)"></che-button-danger>
+  </che-label-container>
+</div>

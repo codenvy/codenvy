@@ -15,6 +15,9 @@
 package com.codenvy.api.workspace.server.filters;
 
 import com.codenvy.api.permission.server.SuperPrivilegesChecker;
+import com.codenvy.api.permission.server.account.AccountOperation;
+import com.codenvy.api.permission.server.account.AccountPermissionsChecker;
+import com.google.common.collect.ImmutableSet;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 
@@ -25,7 +28,6 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.environment.server.MachineService;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -37,10 +39,8 @@ import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
 import org.everrest.core.resource.GenericResourceMethod;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -58,17 +58,16 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -81,11 +80,12 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class WorkspacePermissionsFilterTest {
-    private static final String             USERNAME = "userok";
+    private static final String             USERNAME          = "userok";
+    private static final String             TEST_ACCOUNT_TYPE = "test";
     @SuppressWarnings("unused")
-    private static final ApiExceptionMapper MAPPER   = new ApiExceptionMapper();
+    private static final ApiExceptionMapper MAPPER            = new ApiExceptionMapper();
     @SuppressWarnings("unused")
-    private static final EnvironmentFilter  FILTER   = new EnvironmentFilter();
+    private static final EnvironmentFilter  FILTER            = new EnvironmentFilter();
 
     @Mock
     private static Subject subject;
@@ -96,8 +96,6 @@ public class WorkspacePermissionsFilterTest {
     @Mock
     private SuperPrivilegesChecker superPrivilegesChecker;
 
-    @InjectMocks
-    @Spy
     private WorkspacePermissionsFilter permissionsFilter;
 
     @Mock
@@ -113,23 +111,32 @@ public class WorkspacePermissionsFilterTest {
     private MachineService machineService;
 
     @Mock
+    private AccountPermissionsChecker accountPermissionsChecker;
+
+    @Mock
     private WorkspaceImpl workspace;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        doThrow(new ForbiddenException("")).when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
-
         when(subject.getUserName()).thenReturn(USERNAME);
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
         when(workspace.getNamespace()).thenReturn("namespace");
         when(workspace.getId()).thenReturn("workspace123");
 
         when(accountManager.getByName(any())).thenReturn(account);
+        when(account.getType()).thenReturn(TEST_ACCOUNT_TYPE);
+
+        permissionsFilter = spy(new WorkspacePermissionsFilter(workspaceManager,
+                                                               accountManager,
+                                                               ImmutableSet.of(accountPermissionsChecker),
+                                                               superPrivilegesChecker));
+
+        doThrow(new ForbiddenException("")).when(permissionsFilter).checkAccountPermissions(anyString(), any());
     }
 
     @Test
-    public void shouldCheckNamespaceAccessOnWorkspaceCreation() throws Exception {
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+    public void shouldAccountPermissionsAccessOnWorkspaceCreation() throws Exception {
+        doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -139,14 +146,14 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(workspaceService).create(any(), any(), any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
+        verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
         verifyZeroInteractions(subject);
     }
 
     @Test
-    public void shouldCheckNamespaceAccessOnFetchingWorkspacesByNamespace() throws Exception {
+    public void shouldAccountPermissionsOnFetchingWorkspacesByNamespace() throws Exception {
         when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+        doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -157,14 +164,14 @@ public class WorkspacePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 200);
         verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByNamespace(any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
+        verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.MANAGE_WORKSPACES);
         verifyZeroInteractions(subject);
     }
 
     @Test
-    public void shouldNotCheckNamespaceAccessIfUserHasSuperPriviligesOnFetchingWorkspacesByNamespace() throws Exception {
+    public void shouldNotCheckAccountPermissionsIfUserHasSuperPrivilegesOnFetchingWorkspacesByNamespace() throws Exception {
         when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+        doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -175,13 +182,13 @@ public class WorkspacePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 200);
         verify(superPrivilegesChecker).hasSuperPrivileges();
         verify(workspaceService).getByNamespace(any(), eq("userok"));
-        verify(permissionsFilter, never()).checkNamespaceAccess(any(), eq("userok"), anyVararg());
+        verify(permissionsFilter, never()).checkAccountPermissions("userok", AccountOperation.MANAGE_WORKSPACES);
         verifyZeroInteractions(subject);
     }
 
     @Test
-    public void shouldCheckNamespaceAccessOnStaringWorkspaceFromConfig() throws Exception {
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+    public void shouldCheckAccountPermissionsOnStartingWorkspaceFromConfig() throws Exception {
+        doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -191,7 +198,7 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(workspaceService).startFromConfig(any(), any(), eq("userok"));
-        verify(permissionsFilter).checkNamespaceAccess(any(), eq("userok"), anyVararg());
+        verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
         verifyZeroInteractions(subject);
     }
 
@@ -205,11 +212,12 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(workspaceService).getSettings();
+        verify(permissionsFilter, never()).checkAccountPermissions(anyString(), any());
         verifyZeroInteractions(subject);
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnWorkspacesGetting() throws Exception {
+    public void shouldNotCheckPermissionsPermissionsOnWorkspacesGetting() throws Exception {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
@@ -218,6 +226,7 @@ public class WorkspacePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(workspaceService).getWorkspaces(any(), anyInt(), anyString());
+        verify(permissionsFilter, never()).checkAccountPermissions(anyString(), any());
         verifyZeroInteractions(subject);
     }
 
@@ -368,7 +377,7 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPriviligesOnWorkspaceStopping() throws Exception {
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPrivilegesOnWorkspaceStopping() throws Exception {
         when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
 
         final Response response = given().auth()
@@ -451,7 +460,7 @@ public class WorkspacePermissionsFilterTest {
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPriviligesOnGetWorkspaceByKey() throws Exception {
+    public void shouldNotCheckPermissionsOnWorkspaceDomainIfUserHasSuperPrivilegesOnGetWorkspaceByKey() throws Exception {
         when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
 
         final Response response = given().auth()
@@ -642,7 +651,7 @@ public class WorkspacePermissionsFilterTest {
                                                                                                String method,
                                                                                                String action) throws Exception {
         when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(false);
-        doThrow(new ForbiddenException("")).when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+        doThrow(new ForbiddenException("")).when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
         Response response = request(given().auth()
                                            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -662,7 +671,7 @@ public class WorkspacePermissionsFilterTest {
     public void shouldNotCheckWorkspacePermissionsWhenWorkspaceBelongToHisPersonalAccount(String path,
                                                                                           String method,
                                                                                           String action) throws Exception {
-        doNothing().when(permissionsFilter).checkNamespaceAccess(any(), any(), anyVararg());
+        doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
         when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
         when(workspace.getNamespace()).thenReturn(USERNAME);
 
@@ -678,25 +687,27 @@ public class WorkspacePermissionsFilterTest {
 
     @Test
     public void shouldNotThrowExceptionWhenNamespaceIsNullOnNamespaceAccessChecking() throws Exception {
-        doCallRealMethod().when(permissionsFilter).checkNamespaceAccess(any(), any());
+        doCallRealMethod().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
-        permissionsFilter.checkNamespaceAccess(subject, null);
-    }
+        permissionsFilter.checkAccountPermissions(null, AccountOperation.MANAGE_WORKSPACES);
 
-    @Test
-    public void shouldNotThrowExceptionWhenNamespaceEqualsToPersonalAccountNameOfUserOnNamespaceAccessChecking() throws Exception {
-        when(account.getName()).thenReturn(USERNAME);
-        when(account.getType()).thenReturn(UserImpl.PERSONAL_ACCOUNT);
-        doCallRealMethod().when(permissionsFilter).checkNamespaceAccess(any(), any());
-
-        permissionsFilter.checkNamespaceAccess(subject, USERNAME);
+        verify(accountPermissionsChecker, never()).checkPermissions(anyString(), any());
     }
 
     @Test(expectedExceptions = ForbiddenException.class)
-    public void shouldThrowForbiddenExceptionWhenNamespaceIsNotNullAndDoesNotEqualToUserNameOnNamespaceAccessChecking() throws Exception {
-        doCallRealMethod().when(permissionsFilter).checkNamespaceAccess(any(), any());
+    public void shouldThrowForbiddenExceptionWhenPermissionsCheckerForCorrespondingAccountTypeThrowsForbiddenException() throws Exception {
+        doCallRealMethod().when(permissionsFilter).checkAccountPermissions(anyString(), any());
+        doThrow(new ForbiddenException("")).when(accountPermissionsChecker).checkPermissions(anyString(), any());
 
-        permissionsFilter.checkNamespaceAccess(subject, "namespace");
+        permissionsFilter.checkAccountPermissions("account1", AccountOperation.MANAGE_WORKSPACES);
+    }
+
+    @Test(expectedExceptions = ForbiddenException.class)
+    public void shouldThrowForbiddenExceptionWhenThereIsNoPermissionsCheckerForSpecifiedAccount() throws Exception {
+        doCallRealMethod().when(permissionsFilter).checkAccountPermissions(anyString(), any());
+        when(account.getType()).thenReturn("unknown");
+
+        permissionsFilter.checkAccountPermissions("account1", AccountOperation.MANAGE_WORKSPACES);
     }
 
     @DataProvider(name = "coveredPaths")

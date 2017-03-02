@@ -44,6 +44,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.commons.lang.Size.parseSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -170,12 +171,14 @@ public class LimitsCheckingWorkspaceManagerTest {
           expectedExceptionsMessageRegExp = "You are only allowed to create 5 workspaces.")
     public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableWorkspaceResource() throws Exception {
         //given
-        doThrow(new NoEnoughResourcesException(singletonList(new ResourceImpl(WorkspaceResourceType.ID,
-                                                                              5,
-                                                                              WorkspaceResourceType.UNIT)),
+        doThrow(new NoEnoughResourcesException(emptyList(),
                                                emptyList(),
                                                emptyList()))
                 .when(resourceUsageManager).checkResourcesAvailability(any(), any());
+        doReturn(singletonList(new ResourceImpl(WorkspaceResourceType.ID,
+                                                5,
+                                                WorkspaceResourceType.UNIT)))
+                .when(resourceUsageManager).getTotalResources(anyString());
         LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
                                                                  .build();
 
@@ -202,12 +205,14 @@ public class LimitsCheckingWorkspaceManagerTest {
           expectedExceptionsMessageRegExp = "You are only allowed to start 5 workspaces.")
     public void shouldThrowLimitExceedExceptionIfAccountDoesNotHaveEnoughAvailableRuntimeResource() throws Exception {
         //given
-        doThrow(new NoEnoughResourcesException(singletonList(new ResourceImpl(RuntimeResourceType.ID,
-                                                                              5,
-                                                                              RuntimeResourceType.UNIT)),
+        doThrow(new NoEnoughResourcesException(emptyList(),
                                                emptyList(),
                                                emptyList()))
                 .when(resourceUsageManager).checkResourcesAvailability(any(), any());
+        doReturn(singletonList(new ResourceImpl(RuntimeResourceType.ID,
+                                                5,
+                                                RuntimeResourceType.UNIT)))
+                .when(resourceUsageManager).getTotalResources(anyString());
         LimitsCheckingWorkspaceManager manager = managerBuilder().setResourceUsageManager(resourceUsageManager)
                                                                  .build();
 

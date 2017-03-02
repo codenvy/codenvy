@@ -14,8 +14,6 @@
  */
 package com.codenvy.resource.api;
 
-import com.codenvy.resource.api.free.DefaultResourcesProvider;
-import com.codenvy.resource.api.free.DefaultUserResourcesProvider;
 import com.codenvy.resource.api.free.FreeResourcesLimitService;
 import com.codenvy.resource.api.free.FreeResourcesLimitServicePermissionsFilter;
 import com.codenvy.resource.api.free.FreeResourcesProvider;
@@ -23,17 +21,15 @@ import com.codenvy.resource.api.license.AccountLicenseService;
 import com.codenvy.resource.api.license.LicenseServicePermissionsFilter;
 import com.codenvy.resource.api.license.ResourcesProvider;
 import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.api.type.RuntimeResourceType;
 import com.codenvy.resource.api.type.TimeoutResourceType;
 import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.api.usage.ResourceUsageService;
 import com.codenvy.resource.api.usage.ResourceUsageServicePermissionsFilter;
-import com.codenvy.resource.api.usage.ResourcesPermissionsChecker;
-import com.codenvy.resource.api.usage.UserResourcesPermissionsChecker;
 import com.codenvy.resource.api.usage.tracker.RamResourceUsageTracker;
 import com.codenvy.resource.api.usage.tracker.RuntimeResourceUsageTracker;
 import com.codenvy.resource.api.usage.tracker.WorkspaceResourceUsageTracker;
-import com.codenvy.resource.api.type.ResourceType;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.AbstractModule;
@@ -56,9 +52,6 @@ public class ResourceModule extends AbstractModule {
         bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
         bind(FreeResourcesLimitServicePermissionsFilter.class);
 
-        Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class)
-                   .addBinding().to(DefaultUserResourcesProvider.class);
-
         Multibinder.newSetBinder(binder(), ResourcesProvider.class)
                    .addBinding().to(FreeResourcesProvider.class);
 
@@ -67,9 +60,6 @@ public class ResourceModule extends AbstractModule {
         resourcesTypesBinder.addBinding().to(WorkspaceResourceType.class);
         resourcesTypesBinder.addBinding().to(RuntimeResourceType.class);
         resourcesTypesBinder.addBinding().to(TimeoutResourceType.class);
-
-        Multibinder.newSetBinder(binder(), ResourcesPermissionsChecker.class)
-                   .addBinding().to(UserResourcesPermissionsChecker.class);
 
         Multibinder<ResourceUsageTracker> usageTrackersBinder = Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
         usageTrackersBinder.addBinding().to(RamResourceUsageTracker.class);

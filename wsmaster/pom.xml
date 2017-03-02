@@ -63,6 +63,7 @@
         <module>codenvy-hosted-api-organization</module>
         <module>codenvy-hosted-system</module>
         <module>codenvy-hosted-api-audit</module>
+        <module>codenvy-hosted-personal-account</module>
         <module>codenvy-sql-schema</module>
     </modules>
 </project>

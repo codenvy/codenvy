@@ -127,8 +127,8 @@ public class JpaOrganizationDistributedResourcesDao implements OrganizationDistr
         if (existingDistributedResources == null) {
             manager.persist(distributedResources);
         } else {
-            existingDistributedResources.getResources().clear();
-            existingDistributedResources.getResources().addAll(distributedResources.getResources());
+            existingDistributedResources.getResourcesCap().clear();
+            existingDistributedResources.getResourcesCap().addAll(distributedResources.getResourcesCap());
         }
         manager.flush();
     }

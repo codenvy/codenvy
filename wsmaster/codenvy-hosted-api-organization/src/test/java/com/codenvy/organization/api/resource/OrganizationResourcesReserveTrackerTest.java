@@ -14,9 +14,12 @@
  */
 package com.codenvy.organization.api.resource;
 
-import com.codenvy.organization.shared.model.OrganizationDistributedResources;
+import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 import com.codenvy.resource.api.ResourceAggregator;
+import com.codenvy.resource.api.type.RamResourceType;
+import com.codenvy.resource.api.type.WorkspaceResourceType;
+import com.codenvy.resource.api.usage.ResourceUsageManager;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableMap;
@@ -32,13 +35,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.inject.Provider;
+import java.util.Arrays;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -53,78 +57,62 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(MockitoTestNGListener.class)
 public class OrganizationResourcesReserveTrackerTest {
+    private static String PARENT_ID = "organization123";
+    private static String SUBORG_ID = "organization321";
     @Captor
-    private ArgumentCaptor<List<? extends Resource>>   resourcesToAggregateCaptor;
+    private ArgumentCaptor<List<? extends Resource>> resourcesToAggregateCaptor;
     @Mock
-    private Provider<OrganizationResourcesDistributor> managerProvider;
+    private Provider<ResourceUsageManager>           managerProvider;
     @Mock
-    private OrganizationResourcesDistributor           organizationResourcesDistributor;
+    private ResourceUsageManager                     resourceUsageManager;
     @Mock
-    private ResourceAggregator                         resourceAggregator;
-
+    private ResourceAggregator                       resourceAggregator;
     @Mock
-    private Page<OrganizationDistributedResources> firstPage;
-    @Mock
-    private Page<OrganizationDistributedResources> secondPage;
-    @Mock
-    private Page.PageRef                           nextPageRef;
-    @Mock
-    private OrganizationDistributedResources       distributedResources;
+    private OrganizationManager                      organizationManager;
 
     @InjectMocks
     private OrganizationResourcesReserveTracker resourcesReserveTracker;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(managerProvider.get()).thenReturn(organizationResourcesDistributor);
-
-        when(nextPageRef.getPageSize()).thenReturn(1);
-        when(nextPageRef.getItemsBefore()).thenReturn(1L);
-
-        when(firstPage.getNextPageRef()).thenReturn(nextPageRef);
-        when(firstPage.hasNextPage()).thenReturn(true);
-        when(firstPage.getItems()).thenReturn(singletonList(distributedResources));
-
-        when(secondPage.getNextPageRef()).thenReturn(nextPageRef);
-        when(secondPage.hasNextPage()).thenReturn(false);
-        when(secondPage.getItems()).thenReturn(singletonList(distributedResources));
-
-        doReturn(firstPage)
-                .doReturn(secondPage)
-                .when(organizationResourcesDistributor).getByParent(any(), anyInt(), anyLong());
+        when(managerProvider.get()).thenReturn(resourceUsageManager);
     }
 
     @Test
-    public void shouldReturnSumOfSuborganizationsDistributedResourcesWhenGettingReservedResources() throws Exception {
+    public void shouldReturnSumOfSuborganizationsUsedAndReservedResourcesWhenGettingReservedResources() throws Exception {
         //given
-        final ResourceImpl workspacesResource = new ResourceImpl("workspaces", 1, "unit");
-        final ResourceImpl ramResource1 = new ResourceImpl("RAM", 1200, "mb");
-        final ResourceImpl ramResource2 = new ResourceImpl("RAM", 800, "mb");
-        final ResourceImpl aggregatedRAM = new ResourceImpl("RAM", 2000, "mb");
+        doReturn(new Page<>(singletonList(new OrganizationImpl(SUBORG_ID, "suborgname", PARENT_ID)), 0, 10, 1))
+                .when(organizationManager).getByParent(anyString(), anyInt(), anyLong());
 
-        doReturn(ImmutableMap.of("RAM", aggregatedRAM,
-                                 "workspaces", workspacesResource))
+        final ResourceImpl usedWorkspaceResource = new ResourceImpl(WorkspaceResourceType.ID, 1, WorkspaceResourceType.UNIT);
+        final ResourceImpl usedRamResource = new ResourceImpl(RamResourceType.ID, 1200, RamResourceType.UNIT);
+        final ResourceImpl reservedRamResource = new ResourceImpl(RamResourceType.ID, 800, RamResourceType.UNIT);
+        final ResourceImpl aggregatedRAM = new ResourceImpl(RamResourceType.ID, 2000, RamResourceType.UNIT);
+
+        doReturn(ImmutableMap.of(RamResourceType.ID, aggregatedRAM,
+                                 WorkspaceResourceType.ID, usedWorkspaceResource))
                 .when(resourceAggregator).aggregateByType(any());
-        doReturn(singletonList(ramResource1))
-                .doReturn(asList(ramResource2,
-                                 workspacesResource))
-                .when(distributedResources).getResources();
+        doReturn(Arrays.asList(usedWorkspaceResource, usedRamResource))
+                .when(resourceUsageManager).getUsedResources(anyString());
+        doReturn(Arrays.asList(reservedRamResource))
+                .when(resourceUsageManager).getReservedResources(anyString());
 
         //when
-        final List<? extends Resource> reservedResources = resourcesReserveTracker.getReservedResources("organization123");
+        final List<? extends Resource> reservedResources = resourcesReserveTracker.getReservedResources(PARENT_ID);
 
         //then
         verify(resourceAggregator).aggregateByType(resourcesToAggregateCaptor.capture());
         final List<? extends Resource> resourcesToAggregate = resourcesToAggregateCaptor.getValue();
-        assertTrue(resourcesToAggregate.contains(ramResource1));
-        assertTrue(resourcesToAggregate.contains(ramResource2));
-        assertTrue(resourcesToAggregate.contains(workspacesResource));
+        assertTrue(resourcesToAggregate.contains(usedRamResource));
+        assertTrue(resourcesToAggregate.contains(reservedRamResource));
+        assertTrue(resourcesToAggregate.contains(usedWorkspaceResource));
 
-        verify(organizationResourcesDistributor).getByParent(eq("organization123"), anyInt(), eq(0L));
-        verify(organizationResourcesDistributor).getByParent(eq("organization123"), anyInt(), eq(1L));
+        verify(resourceUsageManager).getUsedResources(SUBORG_ID);
+        verify(resourceUsageManager).getReservedResources(SUBORG_ID);
         assertEquals(reservedResources.size(), 2);
+        assertTrue(reservedResources.contains(usedWorkspaceResource));
         assertTrue(reservedResources.contains(aggregatedRAM));
-        assertTrue(reservedResources.contains(workspacesResource));
+        verify(organizationManager).getByParent(eq(PARENT_ID), anyInt(), anyLong());
     }
 
     @Test

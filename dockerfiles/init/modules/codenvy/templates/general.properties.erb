@@ -47,7 +47,7 @@ limits.workspace.start.throughput=5
 # workspace proxy configuration
 che.workspace.http_proxy=<%= scope.lookupvar('codenvy::http_proxy_for_codenvy_workspaces') %>
 che.workspace.https_proxy=<%= scope.lookupvar('codenvy::https_proxy_for_codenvy_workspaces') %>
-che.workspace.no_proxy=<%= scope.lookupvar('codenvy::no_proxy_for_codenvy_workspaces') %>
+che.workspace.no_proxy=<%= scope.lookupvar('codenvy::no_proxy_for_codenvy_workspaces').split(",").uniq.join(",") %>
 
 # During the stop of the workspace automatically creates a snapshot if the value is {true},
 # otherwise just stops the workspace.

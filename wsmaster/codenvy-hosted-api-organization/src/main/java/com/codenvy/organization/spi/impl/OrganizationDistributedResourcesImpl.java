@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
                                     "WHERE r.organization.parent = :parent")
         }
 )
-@Table(name =  "organization_distributed_resources")
+@Table(name = "organization_distributed_resources")
 public class OrganizationDistributedResourcesImpl implements OrganizationDistributedResources {
     @Id
     @Column(name = "organization_id")
@@ -69,23 +69,23 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
     @JoinTable(name = "organization_distributed_resources_resource",
                joinColumns = @JoinColumn(name = "organization_distributed_resources_id"),
                inverseJoinColumns = @JoinColumn(name = "resource_id"))
-    private List<ResourceImpl> resources;
+    private List<ResourceImpl> resourcesCap;
 
     public OrganizationDistributedResourcesImpl() {
     }
 
     public OrganizationDistributedResourcesImpl(OrganizationDistributedResources organizationDistributedResource) {
         this(organizationDistributedResource.getOrganizationId(),
-             organizationDistributedResource.getResources());
+             organizationDistributedResource.getResourcesCap());
     }
 
     public OrganizationDistributedResourcesImpl(String organizationId,
-                                                List<? extends Resource> resources) {
+                                                List<? extends Resource> resourcesCap) {
         this.organizationId = organizationId;
-        if (resources != null) {
-            this.resources = resources.stream()
-                                      .map(ResourceImpl::new)
-                                      .collect(Collectors.toList());
+        if (resourcesCap != null) {
+            this.resourcesCap = resourcesCap.stream()
+                                            .map(ResourceImpl::new)
+                                            .collect(Collectors.toList());
         }
     }
 
@@ -95,11 +95,11 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
     }
 
     @Override
-    public List<ResourceImpl> getResources() {
-        if (resources == null) {
-            resources = new ArrayList<>();
+    public List<ResourceImpl> getResourcesCap() {
+        if (resourcesCap == null) {
+            resourcesCap = new ArrayList<>();
         }
-        return resources;
+        return resourcesCap;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
         final OrganizationDistributedResourcesImpl that = (OrganizationDistributedResourcesImpl)obj;
         return Objects.equals(organizationId, that.organizationId)
                && Objects.equals(organization, that.organization)
-               && getResources().equals(that.getResources());
+               && getResourcesCap().equals(that.getResourcesCap());
     }
 
     @Override
@@ -121,7 +121,7 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(organizationId);
         hash = 31 * hash + Objects.hashCode(organization);
-        hash = 31 * hash + getResources().hashCode();
+        hash = 31 * hash + getResourcesCap().hashCode();
         return hash;
     }
 
@@ -130,7 +130,7 @@ public class OrganizationDistributedResourcesImpl implements OrganizationDistrib
         return "OrganizationDistributedResourcesImpl{" +
                "organizationId='" + organizationId + '\'' +
                ", organization=" + organization +
-               ", resources=" + resources +
+               ", resourcesCaps=" + getResourcesCap() +
                '}';
     }
 }

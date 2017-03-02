@@ -22,6 +22,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -58,13 +60,16 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
     private WorkspaceImpl workspace;
     private WorkerImpl[]  workers;
     private UserImpl[]    users;
+    private Account       account;
 
     @BeforeClass
     public void setupEntities() throws Exception {
+        account = new AccountImpl("account1", "accountName", "test");
+
         users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
                                 new UserImpl("user2", "user2@com.com", "usr2")};
 
-        workspace = new WorkspaceImpl("ws1", users[0].getAccount(), new WorkspaceConfigImpl("", "", "cfg1", null, null, null));
+        workspace = new WorkspaceImpl("ws1", account, new WorkspaceConfigImpl("", "", "cfg1", null, null, null));
 
         workers = new WorkerImpl[] {new WorkerImpl("ws1", "user1", Arrays.asList("read", "use", "run")),
                                     new WorkerImpl("ws1", "user2", Arrays.asList("read", "use"))};
@@ -81,6 +86,7 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
     @BeforeMethod
     public void setUp() throws Exception {
         manager.getTransaction().begin();
+        manager.persist(account);
         manager.persist(workspace);
         Stream.of(users).forEach(manager::persist);
         Stream.of(workers).forEach(manager::persist);
@@ -101,6 +107,10 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
                .forEach(manager::remove);
 
         manager.createQuery("SELECT u FROM Usr u", UserImpl.class)
+               .getResultList()
+               .forEach(manager::remove);
+
+        manager.createQuery("SELECT a FROM Account a", AccountImpl.class)
                .getResultList()
                .forEach(manager::remove);
         manager.getTransaction().commit();

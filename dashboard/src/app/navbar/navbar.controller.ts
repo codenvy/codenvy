@@ -42,7 +42,8 @@ export class CodenvyNavBarController {
     {
       name: 'Profile & Account',
       url: '#/account'
-    }, {
+    },
+    {
       name: 'Administration',
       url: '#/administration'
     }, {
@@ -60,6 +61,7 @@ export class CodenvyNavBarController {
   onpremAdminExpanded: boolean;
   isAdminServiceAvailable: boolean;
   isFactoryServiceAvailable: boolean;
+  isBillingServiceAvailable: boolean;
   isAdminPluginServiceAvailable: boolean;
 
   private $scope: ng.IScope;
@@ -83,7 +85,10 @@ export class CodenvyNavBarController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav: ng.material.ISidenavService, $scope: ng.IScope, $location: ng.ILocationService, $route: ng.route.IRouteService, userDashboardConfig: any, cheAPI: any, codenvyAPI: CodenvyAPI, $rootScope: ng.IRootScopeService, $http: ng.IHttpService, $window: ng.IWindowService, $cookies: ng.cookies.ICookiesService, $resource: ng.resource.IResourceService) {
+  constructor($mdSidenav: ng.material.ISidenavService, $scope: ng.IScope, $location: ng.ILocationService,
+              $route: ng.route.IRouteService, userDashboardConfig: any, cheAPI: any, codenvyAPI: CodenvyAPI,
+              $rootScope: ng.IRootScopeService, $http: ng.IHttpService, $window: ng.IWindowService,
+              $cookies: ng.cookies.ICookiesService, $resource: ng.resource.IResourceService) {
     this.$mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
@@ -107,6 +112,13 @@ export class CodenvyNavBarController {
     let promiseService = this.cheAPI.getService().fetchServices();
     promiseService.then(() => {
       this.isFactoryServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getFactory().getFactoryServicePath());
+      let isBillingServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getPayment().getPaymentServicePath());
+      if (isBillingServiceAvailable) {
+        this.accountItems.splice(1, 0, {
+          name: 'Billing',
+          url: '#/billing'
+        });
+      }
     });
 
     let promiseAdminService = this.cheAPI.getAdminService().fetchServices();

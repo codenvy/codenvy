@@ -15,7 +15,6 @@
 package com.codenvy.organization.api.permissions;
 
 import com.codenvy.api.permission.server.SuperPrivilegesChecker;
-import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributionService;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
@@ -45,11 +44,11 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
@@ -110,17 +109,17 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
         final List<String> collect = Stream.of(OrganizationResourcesDistributionService.class.getDeclaredMethods())
                                            .filter(method -> Modifier.isPublic(method.getModifiers()))
                                            .map(Method::getName)
-                                           .collect(Collectors.toList());
+                                           .collect(toList());
 
         //then
         assertEquals(collect.size(), 3);
-        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.DISTRIBUTE_RESOURCES_METHOD));
-        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.GET_DISTRIBUTED_RESOURCES_METHOD));
-        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.RESET_DISTRIBUTED_RESOURCES));
+        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.CAP_RESOURCES_METHOD));
+        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.GET_RESOURCES_CAP_METHOD));
+        assertTrue(collect.contains(OrganizationResourceDistributionServicePermissionsFilter.GET_DISTRIBUTED_RESOURCES));
     }
 
     @Test
-    public void shouldCheckManageResourcesPermissionsOnDistributingResourcesForSuborganization() throws Exception {
+    public void shouldCheckManageResourcesPermissionsOnResourcesCappingForSuborganization() throws Exception {
         List<ResourceDto> resources = Collections.singletonList(DtoFactory.newDto(ResourceDto.class)
                                                                           .withType("test")
                                                                           .withAmount(123)
@@ -132,14 +131,14 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
                .expect()
                .statusCode(204)
                .when()
-               .post(SECURE_PATH + "/organization/resource/" + SUBORGANIZATION);
+               .post(SECURE_PATH + "/organization/resource/" + SUBORGANIZATION + "/cap");
 
-        verify(service).distribute(SUBORGANIZATION, resources);
+        verify(service).capResources(SUBORGANIZATION, resources);
         verify(subject).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
     }
 
     @Test
-    public void shouldNotCheckPermissionsOnDistributingResourcesForRootOrganization() throws Exception {
+    public void shouldNotCheckPermissionsOnResourcesCappingForRootOrganization() throws Exception {
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                .contentType(MediaType.APPLICATION_JSON)
@@ -147,35 +146,9 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
                .expect()
                .statusCode(204)
                .when()
-               .post(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION);
+               .post(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION + "/cap");
 
-        verify(service).distribute(PARENT_ORGANIZATION, emptyList());
-        verify(subject, never()).hasPermission(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    public void shouldCheckManageResourcesPermissionsOnResettingDistributedResourcesForSuborganization() throws Exception {
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .expect()
-               .statusCode(204)
-               .when()
-               .delete(SECURE_PATH + "/organization/resource/" + SUBORGANIZATION);
-
-        verify(service).reset(SUBORGANIZATION);
-        verify(subject).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
-    }
-
-    @Test
-    public void shouldNotCheckPermissionsOnResettingDistributedResourcesForRootOrganization() throws Exception {
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .expect()
-               .statusCode(204)
-               .when()
-               .delete(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION);
-
-        verify(service).reset(PARENT_ORGANIZATION);
+        verify(service).capResources(PARENT_ORGANIZATION, emptyList());
         verify(subject, never()).hasPermission(anyString(), anyString(), anyString());
     }
 
@@ -207,6 +180,36 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
                .get(SECURE_PATH + "/organization/resource/" + PARENT_ORGANIZATION);
 
         verify(service).getDistributedResources(eq(PARENT_ORGANIZATION), anyInt(), anyLong());
+        verify(subject, never()).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
+        verify(superPrivilegesChecker).hasSuperPrivileges();
+    }
+
+    @Test
+    public void shouldCheckManageResourcesPermissionsOnGettingResourcesCapWhenUserDoesNotHaveSuperPrivileges() throws Exception {
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .expect()
+               .statusCode(200)
+               .when()
+               .get(SECURE_PATH + "/organization/resource/" + SUBORGANIZATION + "/cap");
+
+        verify(service).getResourcesCap(SUBORGANIZATION);
+        verify(subject).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
+        verify(superPrivilegesChecker).hasSuperPrivileges();
+    }
+
+    @Test
+    public void shouldNotCheckManageResourcesPermissionsOnGettingResourcesCapWhenUserHasSuperPrivileges() throws Exception {
+        when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(true);
+
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .expect()
+               .statusCode(200)
+               .when()
+               .get(SECURE_PATH + "/organization/resource/" + SUBORGANIZATION + "/cap");
+
+        verify(service).getResourcesCap(SUBORGANIZATION);
         verify(subject, never()).hasPermission(OrganizationDomain.DOMAIN_ID, PARENT_ORGANIZATION, OrganizationDomain.MANAGE_RESOURCES);
         verify(superPrivilegesChecker).hasSuperPrivileges();
     }

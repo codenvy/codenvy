@@ -32,9 +32,17 @@ public interface Organization {
 
     /**
      * Returns name of organization.
-     * The name is unique, mandatory and updatable.
+     * The name is mandatory and updatable.
+     * The name is unique per parent organization.
      */
     String getName();
+
+    /**
+     * Returns the qualified name that includes all parent's names and
+     * the name of current organization separated by '/' symbol e.g. "parentOrgName/subOrgName/subSubOrgName".
+     * The qualified name is unique.
+     */
+    String getQualifiedName();
 
     /**
      * Returns id of parent organization.

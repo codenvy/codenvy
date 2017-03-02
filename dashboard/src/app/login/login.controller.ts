@@ -20,8 +20,6 @@ export class LoginCtrl {
 
     this.username = '';
     this.password = '';
-    this.usermode = 'User';
-
 
     this.$http = $http;
     this.$cookies = $cookies;
@@ -41,12 +39,8 @@ export class LoginCtrl {
       this.error = null;
       this.loginInProgress = true;
 
-      var loginData;
-      if (this.usermode === 'Admin') {
-        loginData = {'username': this.username, 'password': this.password, 'realm': 'sysldap'};
-      } else {
-        loginData = {'username': this.username, 'password': this.password};
-      }
+      let loginData = {'username': this.username, 'password': this.password};
+
       this.$http({
         url: '/api/auth/login',
         method: 'POST',

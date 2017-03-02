@@ -1,0 +1,82 @@
+<che-popup title="Get More RAM" on-close="moreRamController.hide()">
+  <ng-form name="ramForm">
+    <div class="more-ram-dialog-content" layout="column">
+      <div layout="column"
+           ng-if="moreRamController.currentStep === moreRamController.step.ONE">
+        <div>
+          In a team, the first {{moreRamController.freeRAM}} GB RAM is free.
+          <span ng-show="moreRamController.ramPackage">Additional RAM costs ${{moreRamController.price}} / month / {{moreRamController.amount}}.
+          </span>
+        </div>
+        <div class="title">
+          Your account settings
+        </div>
+        <div>
+          Your account currently has {{moreRamController.totalRAM | cheNumberRoundFilter:0}} GB RAM and {{moreRamController.usedRAM | cheNumberRoundFilter:0}} GB in use.
+          <span ng-show="moreRamController.ramPackage">You can add more RAM to the account.</span>
+        </div>
+
+        <div ng-show="moreRamController.ramPackage">
+          <div class="title">
+            Do you want to add more RAM to the account?
+          </div>
+          <div class="get-more-ram-input">I need
+            <input ng-model="moreRamController.value"
+                   ng-form="ramForm"
+                   class="value"
+                   type="number"
+                   ng-disabled="moreRamController.isLoading"
+                   required
+                   che-type-number
+                   min="{{moreRamController.minValue}}"
+                   ng-min="moreRamController.minValue"
+                   max="{{moreRamController.maxValue}}"
+                   ng-max="moreRamController.maxValue"/> GB more RAM.
+          </div>
+          <div>
+            <div class="error-label">
+              <div ng-show="ramForm.$invalid">The RAM value should be from {{moreRamController.minValue | cheNumberRoundFilter:0}} GB to
+                {{moreRamController.maxValue | cheNumberRoundFilter:0}} GB
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div ng-show="!moreRamController.ramPackage" class="warning-label">
+          <i class="fa-exclamation-triangle fa fa-2x"></i>
+          The RAM tariffs package is not defined. Please, contact system admin.
+        </div>
+        <div ng-if="moreRamController.ramPackage && ramForm.$valid && moreRamController.value">
+          <div ng-show="moreRamController.ramPackage" class="info-label">
+            Your workspaces will have a {{moreRamController.timeout}} hour idle timeout.
+          </div>
+
+          Your request will cost ${{moreRamController.calcRequestMonthlyCost() | cheNumberRoundFilter:2}} / month / {{moreRamController.value | cheNumberRoundFilter:0}} GB.<br/>
+          You will be charged ${{moreRamController.calcChargedAmount() | cheNumberRoundFilter:2}} now for the remainder of the current month.<br/>
+          You will be charged ${{moreRamController.calcNextMonthChargeAmount() | cheNumberRoundFilter:2}}
+          on {{moreRamController.nextMonthChargeDate | date:'dd-MMM-yyyy'}}
+          for {{moreRamController.totalRAM + moreRamController.value | cheNumberRoundFilter:0}} GB RAM for the next month.
+        </div>
+      </div>
+
+      <div layout="column"
+           ng-if="moreRamController.currentStep === moreRamController.step.TWO">
+        <div>Add your billing information to your account:</div>
+        <card-info credit-card="moreRamController.creditCard"
+                   credit-card-on-change="moreRamController.creditCardChanged(creditCard)"></card-info>
+      </div>
+
+      <div flex layout="column" layout-align="end end">
+        <div layout="row" layout-align="end center" class="buttons-layout">
+          <che-button-primary che-button-title="Continue"
+                              ng-disabled="ramForm.$invalid || moreRamController.isLoading || !moreRamController.ramPackage"
+                              ng-click="moreRamController.getMoreRAM()"></che-button-primary>
+          <che-button-cancel-flat che-button-title="Cancel"
+                                  ng-click="moreRamController.hide()"
+                                  ng-disabled="moreRamController.isLoading"
+                                  tabindex="0"></che-button-cancel-flat>
+        </div>
+      </div>
+    </div>
+  </ng-form>
+</che-popup>

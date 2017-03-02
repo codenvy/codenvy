@@ -20,6 +20,7 @@ import com.codenvy.resource.spi.impl.ResourceImpl;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -46,6 +47,10 @@ import static java.util.Arrays.asList;
  * @author Yevhenii Voevodin
  */
 public final class TestObjectsFactory {
+
+    public static AccountImpl createAccount(String id) {
+        return new AccountImpl(id, id + "_name", "test");
+    }
 
     public static UserImpl createUser(String id) {
         return new UserImpl(id,
