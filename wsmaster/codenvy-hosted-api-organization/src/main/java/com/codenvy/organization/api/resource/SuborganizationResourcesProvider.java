@@ -83,7 +83,7 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
         }
 
         // given account is suborganization's account and can have resources provided by parent
-        List<? extends Resource> parentResources = usageManagerProvider.get().getTotalResources(parent);
+        List<? extends Resource> parentResources = usageManagerProvider.get().getAvailableResources(parent);
 
         if (!parentResources.isEmpty()) {
             try {
