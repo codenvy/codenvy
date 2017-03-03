@@ -90,7 +90,8 @@ public class ResourceUsageManager {
             return resourceAggregator.deduct(licenseResources,
                                              reservedResources);
         } catch (NoEnoughResourcesException e) {
-            LOG.error("Number of reserved resources is greater than resources provided by license.", e);
+            LOG.warn("Account with id {} is reserving more resources {} than he has {}.", accountId, format(reservedResources),
+                     format(licenseResources));
             return deductWithSkippingMissed(licenseResources, reservedResources, e.getMissingResources());
         }
     }
@@ -135,7 +136,7 @@ public class ResourceUsageManager {
             return resourceAggregator.deduct(totalResources,
                                              usedResources);
         } catch (NoEnoughResourcesException e) {
-            LOG.error("Number of used resources more than total resources", e);
+            LOG.warn("Account with id {} uses more resources {} than he has {}.", accountId, format(usedResources), format(totalResources));
             return deductWithSkippingMissed(totalResources, usedResources, e.getMissingResources());
         }
     }
@@ -203,5 +204,16 @@ public class ResourceUsageManager {
             // should not happen
             throw new ServerException(e.getLocalizedMessage(), e);
         }
+    }
+
+    /**
+     * Returns formatted string for list of resources.
+     */
+    private static String format(List<? extends Resource> resources) {
+        return '[' +
+               resources.stream()
+                        .map(resource -> resource.getAmount() + resource.getUnit() + " of " + resource.getType())
+                        .collect(Collectors.joining(", "))
+               + ']';
     }
 }
