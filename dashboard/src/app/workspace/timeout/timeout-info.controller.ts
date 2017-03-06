@@ -38,6 +38,8 @@ export class TimeoutInfoController {
   usedRAM: number;
   freeRAM: number;
   timeoutValue: string;
+  timeout: string;
+  accountId: string;
 
   /**
    * @ngInject for Dependency injection
@@ -52,6 +54,7 @@ export class TimeoutInfoController {
     this.lodash = lodash;
 
     this.fetchTeamDetails($route.current.params.namespace);
+    this.getPackages();
   }
 
   /**
@@ -100,20 +103,55 @@ export class TimeoutInfoController {
     let timeout = this.lodash.find(resources, (resource: any) => {
       return resource.type === CodenvyResourceLimits.TIMEOUT;
     });
-    this.timeoutValue =  timeout ? (timeout.amount < 60 ? (timeout.amount + ' minutes') : (timeout.amount / 60 + ' hours')) : '';
+    this.timeoutValue =  timeout ? (timeout.amount < 60 ? (timeout.amount + ' minute') : (timeout.amount / 60 + ' hour')) : '';
+  }
+
+  /**
+   * Fetches the list of packages.
+   */
+  getPackages(): void {
+    this.codenvySubscription.fetchPackages().then(() => {
+      this.processPackages(this.codenvySubscription.getPackages());
+    }, (error: any) => {
+      if (error.status === 304) {
+        this.processPackages(this.codenvySubscription.getPackages());
+      }
+    });
+  }
+
+  /**
+   * Processes packages to get RAM resources details.
+   *
+   * @param packages list of packages
+   */
+  processPackages(packages: Array<any>): void {
+    let ramPackage = this.lodash.find(packages, (pack: any) => {
+      return pack.type === CodenvyResourceLimits.RAM;
+    });
+
+    if (!ramPackage) {
+      this.timeout = '4 hour';
+      return;
+    }
+
+    let timeoutResource = this.lodash.find(ramPackage.resources, (resource: any) => {
+      return resource.type === CodenvyResourceLimits.TIMEOUT;
+    });
+
+    this.timeout = timeoutResource ? (timeoutResource.amount < 60 ? (timeoutResource.amount + ' minute') : (timeoutResource.amount / 60 + ' hour')) : '4 hour';
   }
 
   /**
    * Retrieves RAM information.
    */
   getRamInfo() {
-    let accountId = this.team.parent || this.team.id;
+    this.accountId = this.team.parent || this.team.id;
 
-    this.codenvySubscription.fetchLicense(accountId).then(() => {
-      this.processLicense(this.codenvySubscription.getLicense(accountId));
+    this.codenvySubscription.fetchLicense(this.accountId).then(() => {
+      this.processLicense(this.codenvySubscription.getLicense(this.accountId));
     }, (error: any) => {
       if (error.status === 304) {
-        this.processLicense(this.codenvySubscription.getLicense(accountId));
+        this.processLicense(this.codenvySubscription.getLicense(this.accountId));
       }
     });
   }
@@ -138,17 +176,18 @@ export class TimeoutInfoController {
 
     this.totalRAM = this.getRamValue(license.totalResources);
 
-    this.codenvyResourcesDistribution.fetchUsedTeamResources(this.team.id).then(() => {
-      let resources = this.codenvyResourcesDistribution.getUsedTeamResources(this.team.id);
-      this.usedRAM = this.getRamValue(resources);
+    this.codenvyResourcesDistribution.fetchAvailableTeamResources(this.accountId).then(() => {
+      let resources = this.codenvyResourcesDistribution.getAvailableTeamResources(this.accountId);
+      this.usedRAM = this.totalRAM - this.getRamValue(resources);
       this.getMoreRAM();
     }, (error: any) => {
       if (error.status === 304) {
-        let resources = this.codenvyResourcesDistribution.getUsedTeamResources(this.team.id);
-        this.usedRAM = this.getRamValue(resources);
+        let resources = this.codenvyResourcesDistribution.getAvailableTeamResources(this.accountId);
+        this.usedRAM = this.totalRAM - this.getRamValue(resources);
         this.getMoreRAM();
       }
     });
+
   }
 
   /**
@@ -170,14 +209,13 @@ export class TimeoutInfoController {
    * Shows popup.
    */
   getMoreRAM(): void {
-    let accountId = this.team.parent || this.team.id;
     this.$mdDialog.show({
       controller: 'MoreRamController',
       controllerAs: 'moreRamController',
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
-        accountId: accountId,
+        accountId: this.accountId,
         totalRAM: this.totalRAM,
         usedRAM: this.usedRAM,
         freeRAM: this.freeRAM,

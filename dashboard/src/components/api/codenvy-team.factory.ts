@@ -233,6 +233,10 @@ export class CodenvyTeam {
    * @returns {any} team or <code>null</code> if not found
    */
   getTeamByName(name: string): any {
+    if (this.personalAccount && this.personalAccount.qualifiedName === name) {
+      return this.personalAccount;
+    }
+
     for (let i = 0; i < this.teams.length; i++) {
       if (this.teams[i].qualifiedName === name) {
         return this.teams[i];
