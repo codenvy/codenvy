@@ -27,6 +27,7 @@ import {AccountConfig} from './account/details/account-config';
 import {CodenvyOnpremConfig} from './onprem/onprem-config';
 import {WorkspaceConfig} from './workspace/workspace-config';
 import {TeamsConfig} from './teams/teams-config';
+import {MainDashboardConfig} from './dashboard/main-dashboard-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
   'ngResource', 'ngRoute', 'ngPasswordStrength', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
@@ -116,7 +117,6 @@ initModule.run(['$rootScope', '$routeParams', 'licenseMessagesService', 'cheUIEl
     workspaceDetailsService.addSection('Idle timeout', 'The time period during which the workspace may be not used, before being stopped.', '<timeout-info></timeout-info>');
     $rootScope.$on('$viewContentLoaded', () => {
       licenseMessagesService.fetchMessages();
-      cheUIElementsInjectorService.addElementForInjection('dashboardPageContent', 'recentFactories', '<cdvy-last-factories></cdvy-last-factories>');
     });
   }]);
 
@@ -243,6 +243,7 @@ angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServic
 
 
 var instanceRegister = new Register(initModule);
+new MainDashboardConfig(instanceRegister);
 new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
@@ -252,3 +253,4 @@ new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
 new TeamsConfig(instanceRegister);
+
