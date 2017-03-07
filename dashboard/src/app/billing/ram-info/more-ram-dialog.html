@@ -63,6 +63,7 @@
            ng-if="moreRamController.currentStep === moreRamController.step.TWO">
         <div>Add your billing information to your account:</div>
         <card-info credit-card="moreRamController.creditCard"
+                   credit-card-show-widget="true"
                    credit-card-on-change="moreRamController.creditCardChanged(creditCard)"></card-info>
       </div>
 

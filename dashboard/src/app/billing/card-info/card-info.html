@@ -4,7 +4,7 @@
     <che-label-container che-label-name="Credit Card"></che-label-container>
   </div>
   <!-- add new card -->
-  <div ng-if="!cardInfoController.creditCard.token">
+  <div ng-if="!cardInfoController.creditCard.token && cardInfoController.creditCardShowWidget">
     <ng-form name="cardInfoForm">
       <add-credit-card credit-card="cardInfoController.creditCard"></add-credit-card>
     </ng-form>

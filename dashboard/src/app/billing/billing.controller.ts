@@ -186,13 +186,11 @@ export class BillingController {
 
   /**
    * Registers card info form
-   * Gets a credit card
    *
    * @param form {ng.IFormController}
    */
-  onCreditCardSelect(form: ng.IFormController): void {
+  registerCardInfoForm(form: ng.IFormController): void {
     this.cardInfoForm = form;
-    this.getCreditCard();
   }
 
   /**

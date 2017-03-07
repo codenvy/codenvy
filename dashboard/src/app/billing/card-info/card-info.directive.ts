@@ -39,6 +39,7 @@ export class CardInfo {
   constructor () {
     this.scope = {
       creditCard: '=',
+      creditCardShowWidget: '=',
       creditCardOnChange: '&?',
       creditCardOnDelete: '&?'
     };
