@@ -220,6 +220,7 @@ node default {
   $docker_registry_for_workspace_snapshots = getValue("CODENVY_DOCKER_REGISTRY_FOR_WORKSPACE_SNAPSHOTS","$host_url:5000")
   $workspace_auto_snapshot = getValue("CODENVY_WORKSPACE_AUTO_SNAPSHOT","false")
   $workspace_auto_restore = getValue("CODENVY_WORKSPACE_AUTO_RESTORE","false")
+  $workspace_auto_start = getValue("CODENVY_WORKSPACE_AUTO_START","true")
   $workspace_java_options= getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
   $workspace_maven_options = getValue("CHE_WORKSPACE_MAVEN_OPTIONS", "NULL")
 
