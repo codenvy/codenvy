@@ -64,7 +64,7 @@ public class MachineServiceAuthLinksInjectorTest {
     private ServerDto              serverDtoMock;
     private HttpJsonRequest        requestMock;
 
-    private MachineServiceAuthLinksInjector machineLinksInjector;
+    private MachineAuthLinksInjector machineLinksInjector;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -72,7 +72,7 @@ public class MachineServiceAuthLinksInjectorTest {
         uriBuilder.uri(URI_BASE);
         requestMock  = mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(requestFactoryMock.fromUrl(anyString())).thenReturn(requestMock);
-        machineLinksInjector = new MachineServiceAuthLinksInjector(API_ENDPOINT, requestFactoryMock);
+        machineLinksInjector = new MachineAuthLinksInjector(API_ENDPOINT, requestFactoryMock);
         when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
         when(serverDtoMock.getRef()).thenReturn(TERMINAL_REFERENCE);
         when(serverDtoMock.getUrl()).thenReturn(URI_BASE);

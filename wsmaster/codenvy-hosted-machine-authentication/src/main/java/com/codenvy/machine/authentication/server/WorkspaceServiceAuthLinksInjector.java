@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
+import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -66,7 +66,7 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
     @Inject
     public WorkspaceServiceAuthLinksInjector(@Named("che.api") String apiEndpoint,
                                              HttpJsonRequestFactory httpJsonRequestFactory,
-                                             MachineServiceLinksInjector machineLinksInjector) {
+                                             MachineLinksInjector machineLinksInjector) {
         super(machineLinksInjector);
         this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
         this.httpJsonRequestFactory = httpJsonRequestFactory;

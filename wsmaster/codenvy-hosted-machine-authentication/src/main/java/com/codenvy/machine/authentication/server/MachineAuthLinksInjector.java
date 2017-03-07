@@ -21,8 +21,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.environment.server.MachineService;
-import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
+import org.eclipse.che.api.environment.server.MachineLinksInjector;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.slf4j.Logger;
@@ -41,25 +40,26 @@ import static org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 
 /**
- * Helps to inject {@link MachineService} related links.
+ * Helps to inject Machine related links.
  *
  * @author Anton Korneta
  */
-public class MachineServiceAuthLinksInjector extends MachineServiceLinksInjector {
-    private static final Logger LOG                  = LoggerFactory.getLogger(MachineServiceAuthLinksInjector.class);
-    private static final String MACHINE_SERVICE_PATH = "/machine/token/";
+public class MachineAuthLinksInjector extends MachineLinksInjector {
+    private static final Logger LOG                        = LoggerFactory.getLogger(MachineAuthLinksInjector.class);
+    private static final String MACHINE_TOKEN_SERVICE_PATH = "/machine/token/";
 
     private final String                 tokenServiceBaseUrl;
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public MachineServiceAuthLinksInjector(@Named("che.api") String apiEndpoint,
-                                           HttpJsonRequestFactory httpJsonRequestFactory) {
-        this.tokenServiceBaseUrl = apiEndpoint + MACHINE_SERVICE_PATH;
+    public MachineAuthLinksInjector(@Named("che.api") String apiEndpoint,
+                                    HttpJsonRequestFactory httpJsonRequestFactory) {
+        this.tokenServiceBaseUrl = apiEndpoint + MACHINE_TOKEN_SERVICE_PATH;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }
 
     @VisibleForTesting
+    @Override
     protected void injectTerminalLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
         if (machine.getRuntime() != null) {
             final String machineToken = getMachineToken(machine);
@@ -81,6 +81,7 @@ public class MachineServiceAuthLinksInjector extends MachineServiceLinksInjector
     }
 
 
+    @Override
     protected void injectExecAgentLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
         final String scheme = serviceContext.getBaseUriBuilder().build().getScheme();
         if (machine.getRuntime() != null) {
