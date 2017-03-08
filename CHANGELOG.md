@@ -5,16 +5,23 @@
 
 **Pull requests merged:**
 The follow are changelogs for codenvy/codenvy:
-- fixes CLI error in non dev mode [1849](https://github.com/codenvy/codenvy/pull/1849)
-- [UD] fixes for "Get More RAM" widget and Billing info tab.[1848](https://github.com/codenvy/codenvy/pull/1848)
+The follow are changelogs for codenvy/codenvy:
+- Fix error messages when account doesn't have enough resources to perform operation [1870](https://github.com/codenvy/codenvy/pull/1870)
+- Remove duplicate entries in no_proxy because it may cause issues [1857](https://github.com/codenvy/codenvy/pull/1857)
+- Team email notification fixes [1856](https://github.com/codenvy/codenvy/pull/1856)
+- Fixes CLI error in non dev mode [1849](https://github.com/codenvy/codenvy/pull/1849)
+- [UD] make inputs on "Get More RAM" widget and Billing info tab to allow to enter only valid symbols [1848](https://github.com/codenvy/codenvy/pull/1848)
 - Add qualified name to make suborganizations' names unique per parent organization [1846](https://github.com/codenvy/codenvy/pull/1846)
 - Rework organization distribution service to cap resource usage. [1845](https://github.com/codenvy/codenvy/pull/1845)
 - Added Team capabilities and Billing stuff to user dashboard. [1844](https://github.com/codenvy/codenvy/pull/1844)
-- Added support for older versions of rsync from 3.0.9 and higher. [1843](https://github.com/codenvy/codenvy/pull/1843)
+- Added support for older versions of rsync from 3.0.9 and higher. Changed rsync scripts to save true ownership and to set all permissions. Improved rsync over ssh host key checking. [1843](https://github.com/codenvy/codenvy/pull/1843)
 - This reverts PR https://github.com/codenvy/codenvy/pull/1766 [1842](https://github.com/codenvy/codenvy/pull/1842)
 - Internal refactoring for resource API [1841](https://github.com/codenvy/codenvy/pull/1841)
 - The CLI can now use the ws-agent from a mounted assembly. [1835](https://github.com/codenvy/codenvy/pull/1835)
 - Move organization events publishing from dao to manager [1830](https://github.com/codenvy/codenvy/pull/1830)
+- Publish events and send email notifications for any organization changes. [1811](https://github.com/codenvy/codenvy/pull/1811)
+- Allows dashboard styles to be overridden by modifying a single CSS file. [1809](https://github.com/codenvy/codenvy/pull/1809)
+- Added oAuth2 authentication with the Red Hat Developer Network. [1808](https://github.com/codenvy/codenvy/pull/1808)
 - Remove unnecessary `CHE_PORT` in [cli] [1800](https://github.com/codenvy/codenvy/pull/1800)
 - clean up selenium dependencies [1798](https://github.com/codenvy/codenvy/pull/1798)
 - Added oAuth2 authentication via LinkedIn. [1791](https://github.com/codenvy/codenvy/pull/1791)
