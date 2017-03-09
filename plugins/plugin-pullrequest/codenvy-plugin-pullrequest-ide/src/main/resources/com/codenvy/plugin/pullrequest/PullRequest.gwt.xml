@@ -22,7 +22,7 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Api"/>
-    <inherits name="org.eclipse.che.ide.ext.git.Git"/>
+    <inherits name="org.eclipse.che.plugin.git.Git"/>
 
     <source path="client"/>
     <source path="shared"/>

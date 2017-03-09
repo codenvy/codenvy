@@ -190,7 +190,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-server</artifactId>
+            <artifactId>che-plugin-java-lang-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -254,7 +254,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-server</artifactId>
+            <artifactId>che-plugin-svn-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

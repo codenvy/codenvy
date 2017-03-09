@@ -29,7 +29,7 @@ import static com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitPresent
 import static com.codenvy.plugin.pullrequest.client.dialogs.commit.CommitPresenter.CommitActionHandler.CommitAction.OK;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.git.client.GitUtil.isUnderGit;
+import static org.eclipse.che.plugin.git.ide.GitUtil.isUnderGit;
 
 /**
  * This presenter provides base functionality to commit project changes or not before cloning or generating a factory url.
