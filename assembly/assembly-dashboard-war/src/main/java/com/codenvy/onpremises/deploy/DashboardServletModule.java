@@ -14,19 +14,19 @@
  */
 package com.codenvy.onpremises.deploy;
 
-import com.codenvy.api.license.SystemLicenseLoginFilter;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.auth.sso.client.TokenHandler;
 import com.codenvy.onpremises.maintenance.MaintenanceStatusServlet;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
+
 import org.eclipse.che.inject.DynaModule;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.api.license.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 
 /** Servlet module composer for user dashboard war. */
 @DynaModule
@@ -55,7 +55,7 @@ public class DashboardServletModule extends ServletModule {
 
         filterRegex("/(?!_sso/).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
 
-        filterRegex("/(?!_sso/).*$").through(SystemLicenseLoginFilter.class);
+        filterRegex("/(?!_sso/).*$").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
 
         serve("/scheduled").with(MaintenanceStatusServlet.class);
 

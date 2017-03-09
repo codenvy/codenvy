@@ -12,8 +12,10 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license.server;
+package com.codenvy.api.license.server.filter;
 
+import com.codenvy.api.license.server.SystemLicenseService;
+import com.codenvy.api.license.server.filter.SystemLicenseServicePermissionsFilter;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
 
@@ -117,6 +119,7 @@ public class SystemLicenseServicePermissionsFilterTest {
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
+        @Override
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext.getCurrent().setSubject(subject);
         }

@@ -31,8 +31,8 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static com.codenvy.api.license.server.SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
-import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
+import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;

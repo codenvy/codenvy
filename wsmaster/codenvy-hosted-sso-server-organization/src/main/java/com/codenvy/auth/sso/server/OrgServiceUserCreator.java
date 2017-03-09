@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.codenvy.api.license.server.SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
+import static com.codenvy.api.license.shared.model.Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
 
 /**
  * @author Sergii Kabashniuk

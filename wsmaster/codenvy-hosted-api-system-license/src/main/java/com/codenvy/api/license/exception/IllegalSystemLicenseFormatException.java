@@ -22,7 +22,4 @@ public class IllegalSystemLicenseFormatException extends InvalidSystemLicenseExc
         super(message);
     }
 
-    public IllegalSystemLicenseFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

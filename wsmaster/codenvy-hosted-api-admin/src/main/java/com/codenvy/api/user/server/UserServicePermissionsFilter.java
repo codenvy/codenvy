@@ -30,7 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Path;
 
-import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static java.lang.String.format;
 import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALLOWED;
 
@@ -72,7 +72,7 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
                     //it is available to create user from token without permissions
                     if (!userSelfCreationAllowed && !subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
                         throw new ForbiddenException(
-                            "Currently only admins can create accounts. Please contact our Admin Team for further info.");
+                                "Currently only admins can create accounts. Please contact our Admin Team for further info.");
                     }
 
                     checkIfUserCanBeAdded(subject);
@@ -101,8 +101,9 @@ public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
     private void checkIfUserCanBeAdded(Subject subject) throws ServerException, ForbiddenException {
         if (!licenseManager.canUserBeAdded()) {
             if (subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
-                throw new ForbiddenException(format("The user cannot be added. You have %s users in Codenvy which is the maximum allowed by your current license.",
-                                                    licenseManager.getAllowedUserNumber()));
+                throw new ForbiddenException(
+                        format("The user cannot be added. You have %s users in Codenvy which is the maximum allowed by your current license.",
+                               licenseManager.getAllowedUserNumber()));
             } else {
                 throw new ForbiddenException(UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE);
             }

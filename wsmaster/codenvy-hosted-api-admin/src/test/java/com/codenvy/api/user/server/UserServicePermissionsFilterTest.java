@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import static com.codenvy.api.license.server.SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
+import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_USERS_ACTION;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;

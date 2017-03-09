@@ -22,6 +22,7 @@ import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.dto.IssueDto;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.swarm.client.SwarmDockerConnector;
@@ -64,19 +65,6 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     private final SystemLicenseStorage               systemLicenseStorage;
     private final SystemLicenseActivator             systemLicenseActivator;
     private final List<SystemLicenseManagerObserver> observers;
-
-    public static final String LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION = "Your user license has reached its limit. You cannot add more users.";
-    public static final String LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE    = "The Codenvy license has reached its user limit - "
-                                                                                             + "you can access the user dashboard but not the IDE.";
-    public static final String UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE    = "Unable to add your account. The Codenvy license has reached its user limit.";
-
-    public static final String FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE = "Your admin has not accepted the license agreement.";
-
-    public static final String LICENSE_EXPIRING_MESSAGE_TEMPLATE           = "License expired. Codenvy will downgrade to a %s user Fair Source license in %s days.";
-
-    public static final String LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE = "There are currently %s users registered in Codenvy but your license only allows %s. "
-                                                                                       + "Users cannot start workspaces.";
-    public static final String LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN      = "The Codenvy license is expired - you can access the user dashboard but not the IDE.";
 
     @Inject
     public SystemLicenseManager(SystemLicenseFactory licenseFactory,
@@ -225,12 +213,12 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
 
         if (!canUserBeAdded()) {
             issues.add(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                             .withMessage(LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION));
+                                             .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION));
         }
 
         if (!isFairSourceLicenseAccepted()) {
             issues.add(newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
-                                             .withMessage(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
+                                             .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
         }
 
         try {
@@ -289,7 +277,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      * Returns error message for the case when license expired but there is additional time for renew it.
      */
     public String getMessageForLicenseExpiring() {
-        return format(LICENSE_EXPIRING_MESSAGE_TEMPLATE,
+        return format(Constants.LICENSE_EXPIRING_MESSAGE_TEMPLATE,
                       SystemLicense.MAX_NUMBER_OF_FREE_USERS,
                       load().daysBeforeTimeForRenewExpires());
     }
@@ -301,11 +289,11 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      */
     public String getMessageForLicenseCompletelyExpired() throws ServerException {
         if (isAdmin()) {
-            return format(LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
+            return format(Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
                           userManager.getTotalCount(),
                           SystemLicense.MAX_NUMBER_OF_FREE_USERS);
         } else {
-                return LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN;
+                return Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN;
         }
     }
 
@@ -327,11 +315,11 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
 
         // when license absent, invalid or non-completely-expired
         if (isAdmin()) {
-            return format(LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
+            return format(Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
                           userManager.getTotalCount(),
                           SystemLicense.MAX_NUMBER_OF_FREE_USERS);
         } else {
-            return LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE;
+            return Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE;
         }
     }
 

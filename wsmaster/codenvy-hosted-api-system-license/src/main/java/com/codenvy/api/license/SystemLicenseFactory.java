@@ -46,7 +46,6 @@ public class SystemLicenseFactory {
     }
 
     /** For testing purpose only */
-    @Deprecated
     SystemLicenseFactory(char[] productId, String publicKey) {
         this.productId = productId;
         this.publicKey = publicKey;

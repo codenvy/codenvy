@@ -15,6 +15,8 @@
 package com.codenvy.api.license.server;
 
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
+import com.codenvy.api.license.server.filter.SystemLicenseServicePermissionsFilter;
+import com.codenvy.api.license.server.filter.SystemLicenseWorkspaceFilter;
 import com.codenvy.api.license.server.jpa.JpaSystemLicenseActionDao;
 import com.google.inject.AbstractModule;
 
@@ -27,6 +29,7 @@ public class SystemLicenseModule extends AbstractModule {
     protected void configure() {
         bind(SystemLicenseService.class);
         bind(SystemLicenseServicePermissionsFilter.class);
+        bind(SystemLicenseWorkspaceFilter.class);
         bind(SystemLicenseActionDao.class).to(JpaSystemLicenseActionDao.class);
         bind(SystemLicenseActionHandler.class).asEagerSingleton();
     }

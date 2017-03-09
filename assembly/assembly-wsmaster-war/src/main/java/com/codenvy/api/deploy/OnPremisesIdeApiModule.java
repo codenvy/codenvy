@@ -17,7 +17,6 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.audit.server.AuditService;
 import com.codenvy.api.audit.server.AuditServicePermissionsFilter;
-import com.codenvy.api.license.SystemLicenseWorkspaceFilter;
 import com.codenvy.api.license.server.SystemLicenseModule;
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
 import com.codenvy.api.permission.server.PermissionChecker;
@@ -139,7 +138,7 @@ import org.flywaydb.core.internal.util.PlaceholderReplacer;
 import javax.sql.DataSource;
 import java.util.Map;
 
-import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
@@ -455,8 +454,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         // install system license verification stuff
         bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(true);
         install(new SystemLicenseModule());
-
-        bind(SystemLicenseWorkspaceFilter.class);
 
         MapBinder<String, org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy> strategies =
                 MapBinder.newMapBinder(binder(),

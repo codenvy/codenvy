@@ -16,6 +16,7 @@ package com.codenvy.auth.sso.server;
 
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.auth.sso.server.BearerTokenAuthenticationService.ValidationData;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
@@ -104,7 +105,7 @@ public class BearerTokenAuthenticationServiceTest {
 
         assertEquals(response.getStatusCode(), 403);
         assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
-                     newDto(ServiceError.class).withMessage(SystemLicenseManager.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE));
+                     newDto(ServiceError.class).withMessage(Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE));
         verifyZeroInteractions(mailSender);
     }
 
@@ -118,7 +119,7 @@ public class BearerTokenAuthenticationServiceTest {
 
         assertEquals(response.getStatusCode(), 403);
         assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
-                     newDto(ServiceError.class).withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
+                     newDto(ServiceError.class).withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
         verifyZeroInteractions(mailSender);
     }
 }

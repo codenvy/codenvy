@@ -75,7 +75,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistLicense(LICENSE_TEXT);
 
         assertTrue(Files.exists(licenseFile));
-        assertEquals(LICENSE_TEXT.getBytes(), Files.readAllBytes(licenseFile));
+        assertEquals(LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(licenseFile));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistLicense(NEW_LICENSE_TEXT);
 
         assertTrue(Files.exists(licenseFile));
-        assertEquals(NEW_LICENSE_TEXT.getBytes(), Files.readAllBytes(licenseFile));
+        assertEquals(NEW_LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(licenseFile));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistLicense(LICENSE_TEXT);
 
         assertTrue(Files.exists(licenseFile));
-        assertEquals(LICENSE_TEXT.getBytes(), Files.readAllBytes(licenseFile));
+        assertEquals(LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(licenseFile));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistActivatedLicense(ACTIVATED_LICENSE_TEXT);
 
         assertTrue(Files.exists(activatedLicenseFile));
-        assertEquals(ACTIVATED_LICENSE_TEXT.getBytes(), Files.readAllBytes(activatedLicenseFile));
+        assertEquals(ACTIVATED_LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(activatedLicenseFile));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistActivatedLicense(NEW_ACTIVATED_LICENSE_TEXT);
 
         assertTrue(Files.exists(activatedLicenseFile));
-        assertEquals(NEW_ACTIVATED_LICENSE_TEXT.getBytes(), Files.readAllBytes(activatedLicenseFile));
+        assertEquals(NEW_ACTIVATED_LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(activatedLicenseFile));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class SystemLicenseStorageTest {
         licenseStorage.persistActivatedLicense(ACTIVATED_LICENSE_TEXT);
 
         assertTrue(Files.exists(activatedLicenseFile));
-        assertEquals(ACTIVATED_LICENSE_TEXT.getBytes(), Files.readAllBytes(activatedLicenseFile));
+        assertEquals(ACTIVATED_LICENSE_TEXT.getBytes("UTF-8"), Files.readAllBytes(activatedLicenseFile));
     }
 
     @Test

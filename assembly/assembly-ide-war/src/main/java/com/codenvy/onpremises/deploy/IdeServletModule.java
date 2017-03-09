@@ -14,16 +14,16 @@
  */
 package com.codenvy.onpremises.deploy;
 
-import com.codenvy.api.license.SystemLicenseLoginFilter;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
+
 import org.eclipse.che.inject.DynaModule;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.api.license.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseLoginFilter.NO_USER_INTERACTION;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
+import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 
 /**
  * Servlet module composer for ide war.
@@ -40,7 +40,7 @@ public class IdeServletModule extends ServletModule {
         filterRegex("^.*\\.nocache\\..*$", "^.*/_app/.*$").through(com.xemantic.tadedon.servlet.CacheDisablingFilter.class);
         filterRegex("^.*\\.cache\\..*$").through(com.xemantic.tadedon.servlet.CacheForcingFilter.class);
         filter("/*").through(com.codenvy.auth.sso.client.LoginFilter.class);
-        filter("/*").through(SystemLicenseLoginFilter.class);
+        filter("/*").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
         filter("/*").through(com.codenvy.onpremises.DashboardRedirectionFilter.class);
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
 

@@ -21,13 +21,14 @@ import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.dto.IssueDto;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.collect.ImmutableList;
+
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
@@ -44,15 +45,12 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_SERVERS;
 import static com.codenvy.api.license.SystemLicense.MAX_NUMBER_OF_FREE_USERS;
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
-import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
-import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -334,9 +332,9 @@ public class SystemLicenseManagerTest {
         doReturn("License expiring").when(licenseManager).getMessageForLicenseExpiring();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
-                                                            .withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
+                                                            .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
                                                             .withMessage("License expiring")));
     }
@@ -351,9 +349,9 @@ public class SystemLicenseManagerTest {
         doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(SystemLicenseManager.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
-                                                            .withMessage(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
+                                                            .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
                                                             .withMessage("License expired")));
     }

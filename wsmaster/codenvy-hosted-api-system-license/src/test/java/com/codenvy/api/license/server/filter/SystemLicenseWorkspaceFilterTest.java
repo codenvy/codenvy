@@ -12,9 +12,11 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.api.license.server.filter;
 
 import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.api.license.server.filter.SystemLicenseWorkspaceFilter;
+
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceService;

@@ -50,7 +50,6 @@ public class SystemLicenseActivator {
     /**
      * For testing purpose.
      */
-    @Deprecated
     SystemLicenseActivator(SystemLicenseStorage systemLicenseStorage, String publicKey, char[] productId) {
         this.systemLicenseStorage = systemLicenseStorage;
         this.publicKey = publicKey;

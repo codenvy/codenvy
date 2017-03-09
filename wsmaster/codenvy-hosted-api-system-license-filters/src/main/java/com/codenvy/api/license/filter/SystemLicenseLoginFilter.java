@@ -12,17 +12,17 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.api.license.filter;
 
-import com.codenvy.api.license.server.SystemLicenseManager;
-import com.codenvy.api.license.server.SystemLicenseService;
 import com.codenvy.api.license.shared.dto.LegalityDto;
+import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.auth.sso.client.filter.RequestFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -33,7 +33,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
 
-import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -46,6 +45,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.codenvy.api.license.shared.model.Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED;
 
@@ -64,10 +65,10 @@ public class SystemLicenseLoginFilter implements Filter {
     public static final String ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL                = "license.system.accept_fair_source_license_page_url";
     public static final String FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL = "license.system.fair_source_license_is_not_accepted_error_page_url";
 
-    public static final ImmutableList<String> URIS_TO_SKIP = ImmutableList.of("/api/permissions",
-                                                                              "/api/user/settings",
-                                                                              "/api/license/system/legality",
-                                                                              "/api/license/system/fair-source-license");
+    public static final List<String> URIS_TO_SKIP = Arrays.asList("/api/permissions",
+                                                                  "/api/user/settings",
+                                                                  "/api/license/system/legality",
+                                                                  "/api/license/system/fair-source-license");
 
     @Inject
     protected RequestFilter          requestFilter;
@@ -130,7 +131,8 @@ public class SystemLicenseLoginFilter implements Filter {
         response.setContentType(MediaType.APPLICATION_JSON);
         try (PrintWriter writer = response.getWriter()) {
             writer.write(DtoFactory.getInstance()
-                                   .toJson(new UnauthorizedException(SystemLicenseManager.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE).getServiceError()));
+                                   .toJson(new UnauthorizedException(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE)
+                                                   .getServiceError()));
         }
     }
 
@@ -150,10 +152,7 @@ public class SystemLicenseLoginFilter implements Filter {
                                                      NotFoundException,
                                                      ServerException, UnauthorizedException {
         if (fairSourceLicenseNotAccepted) {
-            LegalityDto legality = requestFactory.fromUrl(UriBuilder.fromUri(apiEndpoint)
-                                                                    .path(SystemLicenseService.class)
-                                                                    .path(SystemLicenseService.class,
-                                                                          "isSystemUsageLegal").build().toString())
+            LegalityDto legality = requestFactory.fromUrl(apiEndpoint + "/license/system/legality")
                                                  .useGetMethod()
                                                  .request()
                                                  .asDto(LegalityDto.class);

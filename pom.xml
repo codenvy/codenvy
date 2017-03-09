@@ -346,6 +346,16 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-system-license-filters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-system-license-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-workspace</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.api.license;
+package com.codenvy.api.license.server.filter;
 
 import com.codenvy.api.license.server.SystemLicenseManager;
 import org.eclipse.che.api.core.ForbiddenException;
