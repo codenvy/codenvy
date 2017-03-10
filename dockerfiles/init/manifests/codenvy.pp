@@ -119,6 +119,12 @@ node default {
   $mail_smtp_auth_password = getValue("CODENVY_MAIL_SMTP_AUTH_PASSWORD","smtp_password")
 
 ################################
+# Email properties
+#
+  $workspace_email_invite_subject = getValue("CODENVY_WORKSPACE_EMAIL_INVITE_SUBJECT","Join My Workspace")
+  $organization_email_invite_subject = getValue("CODENVY_ORGANIZATION_EMAIL_INVITE_SUBJECT","Join My Organization")
+
+################################
 # Error reports
 # Logback reports configuration
 #
@@ -162,6 +168,12 @@ node default {
 #
 # (Optional) enter custom xmx value, default value is 1g
   $codenvy_server_xmx = getValue("CODENVY_SERVER_XMX","2048")
+
+###############################
+# Auth configurations
+#
+  $auth_sso_access_ticket_lifetime_seconds = getValue("CODENVY_AUTH_SSO_ACCESS_TICKET_LIFETIME","259200")
+  $auth_sso_bearer_ticket_lifetime_seconds = getValue("CODENVY_AUTH_SSO_BEARER_TICKET_LIFETIME","3600")
 
 ###############################
 # oAuth configurations

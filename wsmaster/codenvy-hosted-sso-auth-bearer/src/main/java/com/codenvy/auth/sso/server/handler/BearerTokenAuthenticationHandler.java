@@ -14,9 +14,13 @@
  */
 package com.codenvy.auth.sso.server.handler;
 
-import org.eclipse.che.api.auth.AuthenticationException;
 import com.codenvy.api.dao.authentication.TokenGenerator;
 
+import org.eclipse.che.api.auth.AuthenticationException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.UserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +32,13 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static java.lang.String.valueOf;
 
 /**
  * Class provide ability to login user with one-time tokens.
@@ -52,6 +59,8 @@ public class BearerTokenAuthenticationHandler {
     private       int                                        ticketLifeTimeSeconds;
     @Inject
     private       TokenGenerator                             tokenGenerator;
+    @Inject
+    private       UserManager                                userManager;
 
 
     public BearerTokenAuthenticationHandler() {
@@ -118,6 +127,17 @@ public class BearerTokenAuthenticationHandler {
     }
 
     /**
+     * Generate new token for given user.
+     *
+     * @param email
+     *         email of the user.
+     * @return token for one time authentication.
+     */
+    public String generateBearerToken(String email, Map<String, String> payload) throws ServerException {
+        return generateBearerToken(email, findAvailableUsername(email), payload);
+    }
+
+    /**
      * Get token payload.
      *
      * @param bearerToken
@@ -166,4 +186,21 @@ public class BearerTokenAuthenticationHandler {
         return false;
     }
 
+    private String findAvailableUsername(String email) throws ServerException {
+        String candidate = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
+        int count = 1;
+        while (getUserByName(candidate).isPresent()) {
+            candidate = candidate.concat(valueOf(count++));
+        }
+        return candidate;
+    }
+
+    private Optional<User> getUserByName(String name) throws ServerException {
+        try {
+            User user = userManager.getByName(name);
+            return Optional.of(user);
+        } catch (NotFoundException e) {
+            return Optional.empty();
+        }
+    }
 }

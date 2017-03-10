@@ -35,20 +35,21 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
- * Validates email and workspace name.
+ * Validates email.
  *
  * @author Alexander Garagatyi
  * @author Sergey Kabashniuk
  */
 @Singleton
-public class InputDataValidator {
+public class EmailValidator {
+    private static final Logger LOG = LoggerFactory.getLogger(EmailValidator.class);
 
-    public static final  String      EMAIL_BLACKLIST_FILE        = "emailvalidator.blacklistfile";
-    private static final Logger      LOG                         = LoggerFactory.getLogger(InputDataValidator.class);
-    private              Set<String> emailBlackList              = Collections.emptySet();
+    public static final String EMAIL_BLACKLIST_FILE = "emailvalidator.blacklistfile";
+
+    private Set<String> emailBlackList = Collections.emptySet();
 
     @Inject
-    public InputDataValidator(@Named(EMAIL_BLACKLIST_FILE) String emailBlacklistFile) {
+    public EmailValidator(@Named(EMAIL_BLACKLIST_FILE) String emailBlacklistFile) {
         try {
             this.emailBlackList = readBlacklistFile(emailBlacklistFile);
         } catch (FileNotFoundException e) {

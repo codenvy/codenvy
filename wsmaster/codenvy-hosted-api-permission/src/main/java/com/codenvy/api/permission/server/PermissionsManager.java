@@ -109,30 +109,6 @@ public class PermissionsManager {
         }
     }
 
-    private <T extends AbstractPermissions> void store(PermissionsDao<T> dao,
-                                                       String userId,
-                                                       String instanceId,
-                                                       Permissions permissions) throws ConflictException,
-                                                                                       ServerException {
-        final AbstractPermissionsDomain<T> permissionsDomain = dao.getDomain();
-        final T permission = permissionsDomain.newInstance(userId, instanceId, permissions.getActions());
-
-        final Set<String> allowedActions = new HashSet<>(permissionsDomain.getAllowedActions());
-        final Set<String> unsupportedActions = permission.getActions()
-                                                         .stream()
-                                                         .filter(action -> !allowedActions.contains(action))
-                                                         .collect(Collectors.toSet());
-        if (!unsupportedActions.isEmpty()) {
-            throw new ConflictException("Domain with id '" + permissions.getDomainId() + "' doesn't support following action(s): " +
-                                        unsupportedActions.stream()
-                                                          .collect(Collectors.joining(", ")));
-        }
-
-        dao.store(permission);
-        final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
-        eventService.publish(new PermissionsAddedEvent(initiator, permissions));
-    }
-
     /**
      * Returns user's permissions for specified instance
      *
@@ -226,7 +202,7 @@ public class PermissionsManager {
      *         action name
      * @return true if the permission exists
      * @throws NotFoundException
-     *         when given domainId is unsupported
+     *         when given domain is unsupported
      * @throws ServerException
      *         when any other error occurs during permission existence checking
      */
@@ -235,6 +211,22 @@ public class PermissionsManager {
                                                                                                    ConflictException {
         return getDomain(domainId).getAllowedActions().contains(action)
                && getPermissionsDao(domainId).exists(userId, instanceId, action);
+    }
+
+    /**
+     * Checks supporting all specified actions by domain with specified id.
+     *
+     * @param domainId
+     *         domain id to check supporting
+     * @param actions
+     *         actions to check
+     * @throws NotFoundException
+     *         when domain with specified id is unsupported
+     * @throws ConflictException
+     *         when actions contain unsupported value
+     */
+    public void checkActionsSupporting(String domainId, List<String> actions) throws NotFoundException, ConflictException {
+        checkActionsSupporting(getDomain(domainId), actions);
     }
 
     /**
@@ -252,6 +244,31 @@ public class PermissionsManager {
      */
     public AbstractPermissionsDomain<? extends AbstractPermissions> getDomain(String domain) throws NotFoundException {
         return getPermissionsDao(domain).getDomain();
+    }
+
+    private <T extends AbstractPermissions> void store(PermissionsDao<T> dao,
+                                                       String userId,
+                                                       String instanceId,
+                                                       Permissions permissions) throws ConflictException,
+                                                                                       ServerException {
+        final AbstractPermissionsDomain<T> permissionsDomain = dao.getDomain();
+        final T permission = permissionsDomain.newInstance(userId, instanceId, permissions.getActions());
+        checkActionsSupporting(permissionsDomain, permission.getActions());
+        dao.store(permission);
+        final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
+        eventService.publish(new PermissionsAddedEvent(initiator, permissions));
+    }
+
+    private void checkActionsSupporting(AbstractPermissionsDomain<?> domain, List<String> actions) throws ConflictException {
+        final Set<String> allowedActions = new HashSet<>(domain.getAllowedActions());
+        final Set<String> unsupportedActions = actions.stream()
+                                                      .filter(action -> !allowedActions.contains(action))
+                                                      .collect(Collectors.toSet());
+        if (!unsupportedActions.isEmpty()) {
+            throw new ConflictException("Domain with id '" + domain.getId() + "' doesn't support following action(s): " +
+                                        unsupportedActions.stream()
+                                                          .collect(Collectors.joining(", ")));
+        }
     }
 
     private PermissionsDao<? extends AbstractPermissions> getPermissionsDao(String domain) throws NotFoundException {

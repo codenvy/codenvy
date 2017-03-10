@@ -46,6 +46,9 @@ import com.codenvy.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
+import com.codenvy.spi.invite.InviteDao;
+import com.codenvy.api.invite.InviteImpl;
+import com.codenvy.spi.invite.jpa.JpaInviteDao;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
@@ -238,6 +241,9 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(SystemLicenseActionDao.class).to(JpaSystemLicenseActionDao.class);
         //api-resource
         bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
+        //api-invite
+        bind(new TypeLiteral<TckRepository<InviteImpl>>() {}).toInstance(new JpaTckRepository<>(InviteImpl.class));
+        bind(InviteDao.class).to(JpaInviteDao.class);
 
         // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
         bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);

@@ -72,7 +72,9 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                                                                  "/organization/*",
                                                                  "/system/*",
                                                                  "/license/account/*",
-                                                                 "/resource/*");
+                                                                 "/resource/*",
+                                                                 "/invite",
+                                                                 "/invite/*");
 
     @Override
     protected void configureServlets() {

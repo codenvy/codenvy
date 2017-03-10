@@ -59,7 +59,7 @@ public class BearerTokenAuthenticationServiceTest {
     @Mock
     private MailSender                       mailSender;
     @Mock
-    private InputDataValidator               inputDataValidator;
+    private EmailValidator                   emailValidator;
     @Mock
     private CookieBuilder                    cookieBuilder;
     @Mock
