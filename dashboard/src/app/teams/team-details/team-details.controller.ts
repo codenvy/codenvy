@@ -104,6 +104,8 @@ export class TeamDetailsController {
 
   private teamForm: ng.IFormController;
 
+  private hasTeamAccess: boolean;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
@@ -167,20 +169,23 @@ export class TeamDetailsController {
       this.codenvyTeamEventsManager.removeDeleteHandler(deleteHandler);
     });
 
+    this.isLoading = true;
+    this.hasTeamAccess = true;
+
     this.team = teamDetailsService.getTeam();
     this.owner = teamDetailsService.getOwner();
+
     if (this.team) {
       this.newName = angular.copy(this.team.name);
       if (this.owner) {
-        this.fetchLimits();
         this.fetchUserPermissions();
       } else {
         teamDetailsService.fetchOwnerByTeamName(this.teamName).then((owner: any) => {
           this.owner = owner;
         }, (error: any) => {
+          this.isLoading = false;
           cheNotification.showError(error && error.data && error.data.message !== null ? error.data.message : 'Failed to find team owner.');
         }).finally(() => {
-          this.fetchLimits();
           this.fetchUserPermissions();
         });
       }
@@ -193,11 +198,17 @@ export class TeamDetailsController {
   fetchUserPermissions(): void {
     this.codenvyPermissions.fetchTeamPermissions(this.team.id).then(() => {
       this.allowedUserActions = this.processUserPermissions();
+      this.fetchLimits();
     }, (error: any) => {
       this.isLoading = false;
       if (error.status === 304) {
         this.allowedUserActions = this.processUserPermissions();
+        this.fetchLimits();
+      } else if (error.status === 403) {
+        this.allowedUserActions = [];
+        this.hasTeamAccess = false;
       }
+      this.isLoading = false;
     });
   }
 

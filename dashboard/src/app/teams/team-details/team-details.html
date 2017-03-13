@@ -25,7 +25,8 @@
                           ng-click="teamDetailsController.updateTeam()"></che-button-save-flat>
   </div>
 </che-toolbar>
-<md-content md-scroll-y flex md-theme="default" ng-if="teamDetailsController.team">
+<md-content md-scroll-y flex md-theme="default"
+            ng-if="teamDetailsController.team && teamDetailsController.hasTeamAccess">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="teamDetailsController.selectedTabIndex"
            md-center-tabs="">
@@ -65,7 +66,7 @@
 
           </che-label-container>
           <!-- Owner -->
-          <che-label-container che-label-name="Owners" che-label-description="Owners can set permissions and share resources.">
+          <che-label-container che-label-name="Owner" che-label-description="Owner can set permissions and share resources.">
             <list-team-owners ng-if="teamDetailsController.owner"></list-team-owners>
           </che-label-container>
 
@@ -134,7 +135,7 @@
         <span class="che-tab-label-title">Members</span>
       </md-tab-label>
       <md-tab-body>
-        <list-team-members  ng-if="teamDetailsController.owner"
+        <list-team-members ng-if="teamDetailsController.owner && (!teamDetailsController.isLoading && teamDetailsController.hasTeamAccess)"
                             editable="teamDetailsController.isUserAllowedTo('setPermissions')"></list-team-members>
       </md-tab-body>
     </md-tab>
@@ -166,7 +167,7 @@
         <span class="che-tab-label-title">Workspaces</span>
       </md-tab-label>
       <md-tab-body>
-        <list-team-workspaces></list-team-workspaces>
+        <list-team-workspaces ng-if="!teamDetailsController.isLoading && teamDetailsController.hasTeamAccess"></list-team-workspaces>
       </md-tab-body>
     </md-tab>
 
@@ -177,6 +178,15 @@
   <span class="fa fa-group error-image"></span>
   <div class="error-description">
     The team could be deleted by its owner or you do not have permissions to access the team.
+  </div>
+
+</md-content>
+
+<md-content ng-if="teamDetailsController.team && !teamDetailsController.hasTeamAccess" flex class="team-error-content" layout="column" layout-align="center center">
+  <div class="error-title">Access to team <b>{{teamDetailsController.teamName}}</b> denied.</div>
+  <span class="fa fa-group error-image"></span>
+  <div class="error-description">
+    You do not have permissions to access the team.
   </div>
 
 </md-content>

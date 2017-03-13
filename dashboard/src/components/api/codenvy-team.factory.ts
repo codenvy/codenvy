@@ -44,6 +44,10 @@ export class CodenvyTeam {
    */
   private teamsMap : Map<string, any> = new Map();
   /**
+   * Teams map by team's name.
+   */
+  private teamsByNameMap : Map<string, any> = new Map();
+  /**
    * Array of teams.
    */
   private teams : any = [];
@@ -228,11 +232,7 @@ export class CodenvyTeam {
   fetchTeamByName(name: string): ng.IPromise<any> {
     let promise = this.remoteTeamAPI.findTeam({'teamName' : name}).$promise;
     let resultPromise = promise.then((team: any) => {
-      if (!this.getTeamByName(name)) {
-        let teams = angular.copy(this.teams);
-        teams.push(team);
-        this.processTeams(teams, this.codenvyUser.getUser());
-      }
+      this.teamsByNameMap.set(team.qualifiedName, team);
       return team;
     }, (error: any) => {
       if (error.status === 304) {
@@ -253,6 +253,10 @@ export class CodenvyTeam {
   getTeamByName(name: string): any {
     if (this.personalAccount && this.personalAccount.qualifiedName === name) {
       return this.personalAccount;
+    }
+
+    if (this.teamsByNameMap.has(name)) {
+      return this.teamsByNameMap.get(name);
     }
 
     for (let i = 0; i < this.teams.length; i++) {
