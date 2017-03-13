@@ -329,22 +329,30 @@ export class TeamDetailsController {
 
     resources = angular.copy(resources);
 
-    if (this.limits.ramCap) {
+    let resourcesToRemove = [CodenvyResourceLimits.TIMEOUT];
+
+    if (this.limits.ramCap !== null && this.limits.ramCap !== undefined) {
       resources = this.codenvyResourcesDistribution.setTeamResourceLimitByType(resources, CodenvyResourceLimits.RAM, (this.limits.ramCap * 1024));
+    } else {
+      resourcesToRemove.push(CodenvyResourceLimits.RAM);
     }
 
-    if (this.limits.workspaceCap) {
+    if (this.limits.workspaceCap !== null && this.limits.workspaceCap !== undefined) {
       resources = this.codenvyResourcesDistribution.setTeamResourceLimitByType(resources, CodenvyResourceLimits.WORKSPACE, this.limits.workspaceCap);
+    } else {
+      resourcesToRemove.push(CodenvyResourceLimits.WORKSPACE);
     }
 
-    if (this.limits.runtimeCap) {
+    if (this.limits.runtimeCap !== null && this.limits.runtimeCap !== undefined) {
       resources = this.codenvyResourcesDistribution.setTeamResourceLimitByType(resources, CodenvyResourceLimits.RUNTIME, this.limits.runtimeCap);
+    } else {
+      resourcesToRemove.push(CodenvyResourceLimits.RUNTIME);
     }
 
     // if the timeout resource will be send in this case - it will set the timeout for the current team, and the updating timeout of
     // parent team will not affect the current team, so to avoid this - remove timeout resource if present:
     this.lodash.remove(resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.TIMEOUT;
+      return resourcesToRemove.indexOf(resource.type) >= 0;
     });
 
 
