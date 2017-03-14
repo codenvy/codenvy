@@ -324,6 +324,24 @@ public class OrganizationManagerTest {
         verify(organizationDao).getByParent("org123", 30, 0);
     }
 
+    @Test
+    public void shouldGetSuborganizations() throws Exception {
+        final OrganizationImpl toFetch = new OrganizationImpl("org321", "parent/toFetchOrg", "org123");
+        when(organizationDao.getSuborganizations(eq("parent"), anyInt(), anyInt()))
+                .thenReturn(new Page<>(singletonList(toFetch), 0, 1, 1));
+
+        final Page<? extends Organization> organizations = manager.getSuborganizations("parent", 30, 0);
+
+        assertEquals(organizations.getItemsCount(), 1);
+        assertEquals(organizations.getItems().get(0), toFetch);
+        verify(organizationDao).getSuborganizations("parent", 30, 0);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeOnGettingSuborganizationsByNullParentQualifiedName() throws Exception {
+        manager.getSuborganizations(null, 30, 0);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenGettingOrganizationsByNullUserId() throws Exception {
         manager.getByMember(null, 30, 0);

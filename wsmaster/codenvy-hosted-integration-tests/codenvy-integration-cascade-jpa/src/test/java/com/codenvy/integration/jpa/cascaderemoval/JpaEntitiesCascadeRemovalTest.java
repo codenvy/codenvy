@@ -35,9 +35,9 @@ import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.codenvy.resource.api.AvailableResourcesProvider;
 import com.codenvy.resource.api.ResourceLockKeyProvider;
 import com.codenvy.resource.api.ResourceUsageTracker;
-import com.codenvy.resource.api.ResourcesReserveTracker;
 import com.codenvy.resource.api.license.ResourcesProvider;
 import com.codenvy.resource.api.type.RamResourceType;
 import com.codenvy.resource.api.type.ResourceType;
@@ -52,6 +52,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
@@ -264,7 +265,7 @@ public class JpaEntitiesCascadeRemovalTest {
 
                 Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
-                Multibinder.newSetBinder(binder(), ResourcesReserveTracker.class);
+                MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceType.class)
                            .addBinding().to(RamResourceType.class);
                 Multibinder.newSetBinder(binder(), ResourcesProvider.class)
@@ -479,8 +480,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
         organizationResourcesDistributor.capResources(childOrganization.getId(),
                                                       singletonList(new ResourceImpl(RamResourceType.ID,
-                                                                            1024,
-                                                                            RamResourceType.UNIT)));
+                                                                                     1024,
+                                                                                     RamResourceType.UNIT)));
     }
 
     private void prepareCreator(String userId) {

@@ -16,32 +16,30 @@ package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.Resource;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
 
 /**
- * Provides information about resources which are not available for usage by account owner.
+ * Provides resources which are available for usage by account.
  *
  * <p>It can be used for example for implementing resources sharing between accounts or
  * resources usage limitation when limit should be less than account's license has.
  *
  * @author Sergii Leschenko
  */
-public interface ResourcesReserveTracker {
+public interface AvailableResourcesProvider {
     /**
-     * Returns resources that are not available for usage by account with specified id.
+     * Returns resources that are available for usage by account with specified id.
      *
      * @param accountId
      *         account identifier
-     * @return resources that are not available for usage by account with specified id.
+     * @return resources that are available for usage by account with specified id.
+     * @throws NotFoundException
+     *         when account with specified id was not found
      * @throws ServerException
      *         when some exception occurs
      */
-    List<? extends Resource> getReservedResources(String accountId) throws ServerException;
-
-    /**
-     * Returns account type for which this class tracks resources reserve.
-     */
-    String getAccountType();
+    List<? extends Resource> getAvailableResources(String accountId) throws NotFoundException, ServerException;
 }

@@ -33,6 +33,7 @@ import com.codenvy.resource.api.usage.tracker.WorkspaceResourceUsageTracker;
 import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 
 /**
@@ -54,6 +55,8 @@ public class ResourceModule extends AbstractModule {
 
         Multibinder.newSetBinder(binder(), ResourcesProvider.class)
                    .addBinding().to(FreeResourcesProvider.class);
+
+        MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
 
         Multibinder<ResourceType> resourcesTypesBinder = Multibinder.newSetBinder(binder(), ResourceType.class);
         resourcesTypesBinder.addBinding().to(RamResourceType.class);

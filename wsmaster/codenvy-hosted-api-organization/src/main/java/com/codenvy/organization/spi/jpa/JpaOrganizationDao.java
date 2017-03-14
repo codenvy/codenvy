@@ -141,7 +141,7 @@ public class JpaOrganizationDao implements OrganizationDao {
     @Override
     @Transactional
     public Page<OrganizationImpl> getSuborganizations(String parentQualifiedName, int maxItems, long skipCount) throws ServerException {
-        requireNonNull(parentQualifiedName, "Required non-null parent");
+        requireNonNull(parentQualifiedName, "Required non-null parent qualified name");
         checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {
             final EntityManager manager = managerProvider.get();

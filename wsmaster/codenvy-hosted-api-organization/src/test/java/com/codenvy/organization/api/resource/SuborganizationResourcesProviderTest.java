@@ -130,7 +130,7 @@ public class SuborganizationResourcesProviderTest {
                                                                     20,
                                                                     TimeoutResourceType.UNIT);
         doReturn(Arrays.asList(parentTestResource, parentTimeoutResource))
-                .when(resourceUsageManager).getAvailableResources(anyString());
+                .when(resourceUsageManager).getTotalResources(anyString());
         final ResourceImpl timeoutResourceCap = new ResourceImpl(TimeoutResourceType.ID,
                                                                  10,
                                                                  TimeoutResourceType.UNIT);
@@ -151,7 +151,7 @@ public class SuborganizationResourcesProviderTest {
         verify(accountManager).getById("organization123");
         verify(organizationManager).getById("organization123");
         verify(resourcesDistributor).getResourcesCaps("organization123");
-        verify(resourceUsageManager).getAvailableResources("parentOrg");
+        verify(resourceUsageManager).getTotalResources("parentOrg");
     }
 
     @Test
@@ -170,6 +170,6 @@ public class SuborganizationResourcesProviderTest {
         verify(accountManager).getById("organization123");
         verify(organizationManager).getById("organization123");
         verify(resourcesDistributor, never()).getResourcesCaps("organization123");
-        verify(resourceUsageManager).getAvailableResources("parentOrg");
+        verify(resourceUsageManager).getTotalResources("parentOrg");
     }
 }

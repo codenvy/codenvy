@@ -240,6 +240,28 @@ public class OrganizationManager {
     }
 
     /**
+     * Gets all child organizations by specified parent qualified name.
+     *
+     * <p>Note that the result will includes all direct and nested suborganizations.
+     *
+     * @param parentQualifiedName
+     *         qualified name of parent organization
+     * @param maxItems
+     *         the maximum number of organizations to return
+     * @param skipCount
+     *         the number of organizations to skip
+     * @return list of children organizations
+     * @throws NullPointerException
+     *         when {@code parentQualifiedName} is null
+     * @throws ServerException
+     *         when any other error occurs during organizations fetching
+     */
+    public Page<OrganizationImpl> getSuborganizations(String parentQualifiedName, int maxItems, long skipCount) throws ServerException {
+        requireNonNull(parentQualifiedName, "Required non-null parent qualified name");
+        return organizationDao.getSuborganizations(parentQualifiedName, maxItems, skipCount);
+    }
+
+    /**
      * Gets list organizations where user is member.
      *
      * @param userId

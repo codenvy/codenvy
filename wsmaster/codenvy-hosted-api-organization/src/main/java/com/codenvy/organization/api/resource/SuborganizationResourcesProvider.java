@@ -83,9 +83,9 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
         }
 
         // given account is suborganization's account and can have resources provided by parent
-        List<? extends Resource> parentResources = usageManagerProvider.get().getAvailableResources(parent);
+        List<? extends Resource> parentTotalResources = usageManagerProvider.get().getTotalResources(parent);
 
-        if (!parentResources.isEmpty()) {
+        if (!parentTotalResources.isEmpty()) {
             try {
                 List<? extends Resource> resourcesCaps = distributorProvider.get().getResourcesCaps(accountId);
 
@@ -94,7 +94,7 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
                                                                accountId,
                                                                -1L,
                                                                -1L,
-                                                               cap(parentResources,
+                                                               cap(parentTotalResources,
                                                                    resourcesCaps)));
             } catch (ConflictException e) {
                 throw new ServerException(e.getLocalizedMessage());

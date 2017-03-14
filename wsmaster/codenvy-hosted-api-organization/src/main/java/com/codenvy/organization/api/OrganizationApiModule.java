@@ -28,13 +28,15 @@ import com.codenvy.organization.api.permissions.OrganizationalAccountPermissions
 import com.codenvy.organization.api.resource.DefaultOrganizationResourcesProvider;
 import com.codenvy.organization.api.resource.OrganizationResourceLockKeyProvider;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributionService;
-import com.codenvy.organization.api.resource.OrganizationResourcesReserveTracker;
+import com.codenvy.organization.api.resource.OrganizationalAccountAvailableResourcesProvider;
 import com.codenvy.organization.api.resource.SuborganizationResourcesProvider;
+import com.codenvy.organization.spi.impl.OrganizationImpl;
+import com.codenvy.resource.api.AvailableResourcesProvider;
 import com.codenvy.resource.api.ResourceLockKeyProvider;
-import com.codenvy.resource.api.ResourcesReserveTracker;
 import com.codenvy.resource.api.free.DefaultResourcesProvider;
 import com.codenvy.resource.api.license.ResourcesProvider;
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -54,8 +56,8 @@ public class OrganizationApiModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), ResourcesProvider.class)
                    .addBinding().to(SuborganizationResourcesProvider.class);
 
-        Multibinder.newSetBinder(binder(), ResourcesReserveTracker.class)
-                   .addBinding().to(OrganizationResourcesReserveTracker.class);
+        MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class)
+                 .addBinding(OrganizationImpl.ORGANIZATIONAL_ACCOUNT).to(OrganizationalAccountAvailableResourcesProvider.class);
 
         Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class)
                    .addBinding().to(OrganizationResourceLockKeyProvider.class);
