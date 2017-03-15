@@ -42,7 +42,7 @@ public class CodenvyAgentModule extends AbstractModule {
                           "-enable-auth " +
                           "-enable-activity-tracking");
         bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
-                      .to("$HOME/che/exec-agent/che-websocket-terminal " +
+                      .to("$HOME/che/exec-agent/che-exec-agent " +
                           "-addr :4412 " +
                           "-cmd ${SHELL_INTERPRETER} " +
                           "-path '/[^/]+' " +
