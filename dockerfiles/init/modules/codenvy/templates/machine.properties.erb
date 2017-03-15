@@ -70,8 +70,6 @@ machine.proxy_terminal_server_url_template=<%= scope.lookupvar('codenvy::host_pr
 # If true, then all docker machines will start in privilege mode.
 che.docker.privileged=<%= scope.lookupvar('codenvy::machine_docker_privileged') %>
 
-machine.docker.server.terminal.run_command=mkdir -p ~/che && cp /mnt/che/terminal -R ~/che && ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/ -path '/[^/]+'
-
 # Allows to use registry for machine docker snapshots, you should set this property to {true},
 # otherwise workspace snapshots would be saved locally.
 che.docker.registry_for_snapshots=true
