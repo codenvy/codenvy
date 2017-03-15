@@ -146,9 +146,14 @@ public class WorkspaceServiceAuthLinksInjector extends WorkspaceServiceLinksInje
                                                                .build()
                                                                .toString(),
                                                      TERMINAL_REFERENCE));
+                       });
+                servers.stream()
+                       .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
+                       .findAny()
+                       .ifPresent(exec -> {
                            devMachine.getLinks()
                                      .add(createLink("GET",
-                                                     UriBuilder.fromUri(terminal.getUrl())
+                                                     UriBuilder.fromUri(exec.getUrl())
                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                                .queryParam(MACHINE_TOKEN, machineToken)
                                                                .path("/connect")

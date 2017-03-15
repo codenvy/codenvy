@@ -418,6 +418,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                        com.codenvy.machine.MachineServerProxyTransformer.class);
         mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE)
                  .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
+        mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE)
+                 .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
         mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE)
                  .to(com.codenvy.machine.WsAgentServerProxyTransformer.class);
 

@@ -20,13 +20,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
- * Modifies websocket terminal machine server to proxy requests to it.
+ * Modifies websocket terminal/exec machine servers to proxy requests to them.
  *
  * @author Alexander Garagatyi
  */
 public class TerminalServerProxyTransformer extends UriTemplateServerProxyTransformer {
     @Inject
-    public TerminalServerProxyTransformer(@Named("machine.proxy_terminal_server_url_template") String serverUrlTemplate, @Named("codenvy.host") String codenvyHost, @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal) {
+    public TerminalServerProxyTransformer(@Named("machine.proxy_terminal_server_url_template") String serverUrlTemplate,
+                                          @Named("codenvy.host") String codenvyHost,
+                                          @Nullable @Named("che.docker.ip.external") String cheDockerIpExternal) {
         super(serverUrlTemplate, codenvyHost, cheDockerIpExternal);
     }
 }
