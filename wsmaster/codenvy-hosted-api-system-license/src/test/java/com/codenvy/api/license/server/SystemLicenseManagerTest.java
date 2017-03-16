@@ -129,7 +129,7 @@ public class SystemLicenseManagerTest {
                                                       systemLicenseActionDao,
                                                       systemLicenseStorage,
                                                       systemLicenseActivator));
-
+        licenseManager.init();
         doReturn(license).when(licenseManager).load();
 
         EnvironmentContext.getCurrent().setSubject(subject);
