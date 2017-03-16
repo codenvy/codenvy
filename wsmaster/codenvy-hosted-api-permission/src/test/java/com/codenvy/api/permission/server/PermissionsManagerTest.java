@@ -138,8 +138,8 @@ public class PermissionsManagerTest {
 
         permissionsManager.storePermission(new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
 
-        verify(permissionsDao).getByInstance("test123", 30, 0);
-        verify(permissionsDao).getByInstance("test123", 30, 30);
+        verify(permissionsDao).getByInstance(eq("test123"), anyInt(), eq(0L));
+        verify(permissionsDao).getByInstance(eq("test123"), anyInt(), eq(30L));
     }
 
     @Test
