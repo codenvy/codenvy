@@ -218,6 +218,7 @@ node default {
   $limits_workspace_env_ram = getValue("CODENVY_LIMITS_WORKSPACE_ENV_RAM","16gb")
 # workspace snapshots
   $docker_registry_for_workspace_snapshots = getValue("CODENVY_DOCKER_REGISTRY_FOR_WORKSPACE_SNAPSHOTS","$host_url:5000")
+  $docker_registry_namespace = getValue("CODENVY_DOCKER_REGISTRY_NAMESPACE","NULL")
   $workspace_auto_snapshot = getValue("CODENVY_WORKSPACE_AUTO_SNAPSHOT","false")
   $workspace_auto_restore = getValue("CODENVY_WORKSPACE_AUTO_RESTORE","false")
   $workspace_auto_start = getValue("CODENVY_WORKSPACE_AUTO_START","true")
