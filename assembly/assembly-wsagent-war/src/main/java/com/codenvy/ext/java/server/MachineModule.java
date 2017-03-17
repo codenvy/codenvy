@@ -22,7 +22,6 @@ import com.google.gson.JsonParser;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.EventBusURLProvider;
@@ -48,9 +47,7 @@ import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.project.server.ProjectServiceLinksInjector;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.ide.ext.microsoft.server.inject.MicrosoftModule;
@@ -116,8 +113,6 @@ public class MachineModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url"))
                       .to("/site/error/error-cookies-disabled");
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
-
-        bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
 
