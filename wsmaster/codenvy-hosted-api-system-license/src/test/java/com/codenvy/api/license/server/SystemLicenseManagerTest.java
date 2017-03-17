@@ -129,7 +129,7 @@ public class SystemLicenseManagerTest {
                                                       systemLicenseActionDao,
                                                       systemLicenseStorage,
                                                       systemLicenseActivator));
-
+        licenseManager.init();
         doReturn(license).when(licenseManager).load();
 
         EnvironmentContext.getCurrent().setSubject(subject);
@@ -163,7 +163,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testIfFairSourceLicenseIsNotAccepted() throws Exception {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-            .thenThrow(new NotFoundException("System license not found"));
+                .thenThrow(new NotFoundException("System license not found"));
 
         assertFalse(licenseManager.isFairSourceLicenseAccepted());
     }
@@ -171,7 +171,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testIfFairSourceLicenseIsAccepted() throws Exception {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-            .thenReturn(mock(SystemLicenseActionImpl.class));
+                .thenReturn(mock(SystemLicenseActionImpl.class));
 
         assertTrue(licenseManager.isFairSourceLicenseAccepted());
     }
@@ -198,7 +198,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIsSystemFreeUsageLegal() throws IOException, ServerException {
-        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
+        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - USER_NUMBER);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
@@ -215,7 +215,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIsCodenvyFreeUsageNotLegal() throws IOException, ServerException {
-        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS + 1);
+        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS + 1 - USER_NUMBER);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
@@ -273,7 +273,6 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToLicense() throws ServerException {
-        when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
         doReturn(true).when(license).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
         assertTrue(licenseManager.canUserBeAdded());
@@ -281,7 +280,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
-        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS - 1);
+        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - 1 - USER_NUMBER);
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
         assertTrue(licenseManager.canUserBeAdded());
@@ -289,7 +288,6 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToLicense() throws ServerException {
-        when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
         doReturn(false).when(license).isLicenseUsageLegal(USER_NUMBER + 1, 0);
 
         assertFalse(licenseManager.canUserBeAdded());
@@ -297,8 +295,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
-        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
-
+        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - USER_NUMBER);
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
         assertFalse(licenseManager.canUserBeAdded());
@@ -332,7 +329,8 @@ public class SystemLicenseManagerTest {
         doReturn("License expiring").when(licenseManager).getMessageForLicenseExpiring();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(
+                                                                    Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
                                                             .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
@@ -349,7 +347,8 @@ public class SystemLicenseManagerTest {
         doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(
+                                                                    Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
                                                             .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
@@ -459,7 +458,8 @@ public class SystemLicenseManagerTest {
         String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
-        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+        assertEquals(result,
+                     "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
     }
 
     @Test
@@ -485,7 +485,8 @@ public class SystemLicenseManagerTest {
         String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
-        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+        assertEquals(result,
+                     "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
     }
 
     @Test
