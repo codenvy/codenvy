@@ -81,7 +81,9 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
         services.put("non-dev", cheService);
         services.put(DEV_MACHINE_NAME, devCheService);
         internalEnv.setServices(services);
-        devExtendedMachine.setAgents(asList("org.eclipse.che.terminal", "org.eclipse.che.ws-agent"));
+        devExtendedMachine.setAgents(asList("org.eclipse.che.exec",
+                                            "org.eclipse.che.terminal",
+                                            "org.eclipse.che.ws-agent"));
         extendedMachine.setAgents(asList("org.eclipse.che.ws-agent2",
                                          "not.che.ws-agent",
                                          "org.eclipse.che.terminal"));
@@ -118,7 +120,8 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
         environment.setMachines(singletonMap("machine1", extendedMachine));
         extendedMachine.setAgents(asList("org.eclipse.che.ws-agent2",
                                          "not.che.ws-agent",
-                                         "org.eclipse.che.terminal"));
+                                         "org.eclipse.che.terminal",
+                                         "org.eclipse.che.exec"));
 
         provisioner.provision(environment, internalEnv);
     }
@@ -152,8 +155,11 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
 
     @Test
     public void shouldAddRsyncAgentBeforeWsAgentInDevMachineOnEnvProvision() throws Exception {
-        devExtendedMachine.setAgents(asList("org.eclipse.che.terminal", "org.eclipse.che.ws-agent"));
-        List<String> expectedAgents = asList("org.eclipse.che.terminal",
+        devExtendedMachine.setAgents(asList("org.eclipse.che.exec",
+                                            "org.eclipse.che.terminal",
+                                            "org.eclipse.che.ws-agent"));
+        List<String> expectedAgents = asList("org.eclipse.che.exec",
+                                             "org.eclipse.che.terminal",
                                              "com.codenvy.rsync_in_machine",
                                              "org.eclipse.che.ws-agent");
 
