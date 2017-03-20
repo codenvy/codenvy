@@ -389,7 +389,7 @@ public class JpaEntitiesCascadeRemovalTest {
         // Remove the user, all entries must be rolled back after fail
         try {
             userManager.remove(user2.getId());
-            fail("UserDao#remove had to throw exception");
+            fail("UserManager#remove had to throw exception");
         } catch (Exception ignored) {
         }
 

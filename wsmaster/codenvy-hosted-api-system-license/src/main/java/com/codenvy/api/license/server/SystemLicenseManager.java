@@ -387,17 +387,23 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     }
 
     private long getTotalUsersNumber() throws ServerException {
-        return totalNumberRef.updateAndGet(currentUsersNumber -> {
-            try {
-                if (currentUsersNumber == INVALIDATED_TOTAL_USERS_NUMBER) {
+        long totalNumber = totalNumberRef.updateAndGet(currentUsersNumber -> {
+            if (currentUsersNumber == INVALIDATED_TOTAL_USERS_NUMBER) {
+                try {
                     return userManager.getTotalCount();
-                } else {
-                    return currentUsersNumber;
+                } catch (ServerException e) {
+                    LOG.error("Can't get total users number. License checking might be inconsistent.", e);
+                    return INVALIDATED_TOTAL_USERS_NUMBER;
                 }
-            } catch (ServerException e) {
-                LOG.error("Can't get total users number. License checking might be inconsistent.", e);
+            } else {
                 return currentUsersNumber;
             }
         });
+
+        if (totalNumber == INVALIDATED_TOTAL_USERS_NUMBER) {
+            throw new ServerException("It is impossible to perform system license checking because the total number of users is unknown.");
+        }
+
+        return totalNumber;
     }
 }
