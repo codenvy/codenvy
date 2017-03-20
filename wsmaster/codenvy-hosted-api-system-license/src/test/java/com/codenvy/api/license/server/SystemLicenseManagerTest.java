@@ -31,11 +31,11 @@ import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -81,29 +81,29 @@ public class SystemLicenseManagerTest {
     private static final int    NODES_NUMBER           = 2;
 
     @Mock
-    private SystemLicense                           license;
+    private SystemLicense           license;
     @Mock
-    private SystemLicense                           newSystemLicense;
+    private SystemLicense           newSystemLicense;
     @Mock
-    private SystemLicenseFactory                    licenseFactory;
+    private SystemLicenseFactory    licenseFactory;
     @Mock
-    private SwarmDockerConnector                    swarmDockerConnector;
+    private SwarmDockerConnector    swarmDockerConnector;
     @Mock
-    private UserManager                             userManager;
+    private UserManager             userManager;
     @Mock
-    private List<DockerNode>                        dockerNodes;
+    private List<DockerNode>        dockerNodes;
     @Mock
-    private SystemLicenseActionDao                  systemLicenseActionDao;
+    private SystemLicenseActionDao  systemLicenseActionDao;
     @Mock
-    private SystemLicenseActionImpl                 systemLicenseAction;
+    private SystemLicenseActionImpl systemLicenseAction;
     @Mock
-    private SystemLicenseStorage                    systemLicenseStorage;
+    private SystemLicenseStorage    systemLicenseStorage;
     @Mock
-    private SystemLicenseActivator                  systemLicenseActivator;
+    private SystemLicenseActivator  systemLicenseActivator;
     @Mock
-    private Subject                                 subject;
-    @Captor
-    private ArgumentCaptor<SystemLicenseActionImpl> actionCaptor;
+    private Subject                 subject;
+    @Mock
+    private EventService            eventService;
 
     private SystemLicenseManager licenseManager;
 
@@ -120,6 +120,7 @@ public class SystemLicenseManagerTest {
         when(newSystemLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
         when(systemLicenseAction.getLicenseId()).thenReturn(LICENSE_ID);
+        when(eventService.publish(UserCreatedEvent.class)).thenReturn(UserCreatedEvent.class);
 
         setSizeOfAdditionalNodes(NODES_NUMBER);
 
@@ -128,8 +129,8 @@ public class SystemLicenseManagerTest {
                                                       swarmDockerConnector,
                                                       systemLicenseActionDao,
                                                       systemLicenseStorage,
-                                                      systemLicenseActivator));
-        licenseManager.init();
+                                                      systemLicenseActivator,
+                                                      eventService));
         doReturn(license).when(licenseManager).load();
 
         EnvironmentContext.getCurrent().setSubject(subject);
@@ -198,7 +199,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIsSystemFreeUsageLegal() throws IOException, ServerException {
-        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS);
 
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
@@ -215,7 +216,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void testIsCodenvyFreeUsageNotLegal() throws IOException, ServerException {
-        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS + 1 - USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS + 1);
         setSizeOfAdditionalNodes(MAX_NUMBER_OF_FREE_SERVERS + 1);
 
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
@@ -280,7 +281,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldConfirmThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
-        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - 1 - USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS - 1);
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
         assertTrue(licenseManager.canUserBeAdded());
@@ -295,7 +296,7 @@ public class SystemLicenseManagerTest {
 
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
-        licenseManager.onUsersNumberChanged(MAX_NUMBER_OF_FREE_USERS - USER_NUMBER);
+        when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
         assertFalse(licenseManager.canUserBeAdded());

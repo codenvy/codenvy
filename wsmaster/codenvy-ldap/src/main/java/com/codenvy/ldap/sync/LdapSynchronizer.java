@@ -23,13 +23,13 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.core.db.DBInitializer;
 import org.ldaptive.Connection;
 import org.ldaptive.ConnectionFactory;
@@ -90,8 +90,8 @@ public class LdapSynchronizer {
     private final Function<LdapEntry, UserImpl>    userMapper;
     private final LdapEntrySelector                selector;
     private final ConnectionFactory                connFactory;
-    private final UserDao                          userDao;
-    private final ProfileDao                       profileDao;
+    private final UserManager                      userManager;
+    private final ProfileManager                   profileManager;
     private final ScheduledExecutorService         scheduler;
     private final AtomicBoolean                    isSyncing;
     private final LdapUserIdNormalizer             idNormalizer;
@@ -105,10 +105,10 @@ public class LdapSynchronizer {
      *         one connection per one synchronization
      * @param selector
      *         selector used to query users for synchronization
-     * @param userDao
-     *         data access object for storing users
-     * @param profileDao
-     *         data access object for storing profiles
+     * @param userManager
+     *         the user manager
+     * @param profileManager
+     *         the profile manager
      * @param syncPeriodMs
      *         period of synchronization in milliseconds, if it is <=0 then
      *         synchronization won't be periodical and can be performed only
@@ -142,8 +142,8 @@ public class LdapSynchronizer {
     @Inject
     public LdapSynchronizer(ConnectionFactory connFactory,
                             LdapEntrySelector selector,
-                            UserDao userDao,
-                            ProfileDao profileDao,
+                            UserManager userManager,
+                            ProfileManager profileManager,
                             LdapUserIdNormalizer idNormalizer,
                             DBInitializer dbInitializer,
                             @Named("ldap.sync.period_ms") long syncPeriodMs,
@@ -159,8 +159,8 @@ public class LdapSynchronizer {
             throw new IllegalArgumentException("'ldap.sync.initial_delay_ms' must be >= 0, the actual value is " + initDelayMs);
         }
         this.connFactory = connFactory;
-        this.userDao = userDao;
-        this.profileDao = profileDao;
+        this.userManager = userManager;
+        this.profileManager = profileManager;
         this.syncPeriodMs = syncPeriodMs;
         this.initDelayMs = initDelayMs;
         this.selector = selector;
@@ -237,10 +237,10 @@ public class LdapSynchronizer {
             for (String linkingId : linkingIds) {
                 try {
                     final User user = linker.findUser(linkingId);
-                    userDao.remove(user.getId());
+                    userManager.remove(user.getId());
                     syncResult.removed++;
                     LOG.debug("Removed user '{}'", user.getId());
-                } catch (NotFoundException | ServerException x) {
+                } catch (NotFoundException | ConflictException | ServerException x) {
                     LOG.info(format("Couldn't remove user '%s' due to occurred error", linkingId), x);
                     syncResult.failed++;
                 }
@@ -278,7 +278,7 @@ public class LdapSynchronizer {
             }
 
             final User dbUser = linker.findUser(linkingId);
-            final ProfileImpl dbProfile = profileDao.getById(dbUser.getId());
+            final Profile dbProfile = profileManager.getById(dbUser.getId());
             // user identifier in database is always 'id', which means
             // that if linking attribute is different from 'id' then
             // update may update the different user entity or fail.
@@ -307,9 +307,9 @@ public class LdapSynchronizer {
     }
 
     @Transactional
-    protected void createUserAndProfile(UserImpl user, ProfileImpl profile) throws ConflictException, ServerException {
-        userDao.create(user);
-        profileDao.create(profile);
+    protected void createUserAndProfile(UserImpl user, ProfileImpl profile) throws ConflictException, NotFoundException, ServerException {
+        userManager.create(user, false);
+        profileManager.update(profile);
     }
 
     @Transactional
@@ -321,11 +321,11 @@ public class LdapSynchronizer {
                                                                            ConflictException {
         boolean updated = false;
         if (!dbUser.equals(ldapUser)) {
-            userDao.update(ldapUser);
+            userManager.update(ldapUser);
             updated = true;
         }
         if (!dbProfile.equals(ldapProfile)) {
-            profileDao.update(ldapProfile);
+            profileManager.update(ldapProfile);
             updated = true;
         }
         return updated;

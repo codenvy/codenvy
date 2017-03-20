@@ -67,22 +67,20 @@ public class AdminUserCreatorTest {
     private static final String EMAIL    = "admin@rb.com";
 
     @Mock
-    private UserManager userManager;
-
-    @Mock
     private PermissionsManager permissionsManager;
+
+    private UserImpl user;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        user = new UserImpl("qwe", "qwe", "qwe", "qwe", emptyList());
+
         final AbstractPermissionsDomain mock = mock(AbstractPermissionsDomain.class);
-        final UserImpl user = new UserImpl("qwe", "qwe", "qwe", "qwe", emptyList());
         doNothing().when(permissionsManager).storePermission(any(SystemPermissionsImpl.class));
         when(permissionsManager.getDomain(anyString())).thenReturn(cast(mock));
         when(mock.getAllowedActions()).thenReturn(emptyList());
         when(mock.newInstance(anyString(), anyString(), anyListOf(String.class))).then(
                 invocation -> new SystemPermissionsImpl((String)invocation.getArguments()[0], (List<String>)invocation.getArguments()[2]));
-        when(userManager.getByName(anyString())).thenReturn(user);
-        when(userManager.create(any(UserImpl.class), anyBoolean())).thenReturn(user);
     }
 
     @SuppressWarnings("unchecked")
@@ -92,8 +90,10 @@ public class AdminUserCreatorTest {
 
     @Test
     public void shouldCreateAdminUser() throws Exception {
-        when(userManager.getByName(NAME)).thenThrow(new NotFoundException("nfex"));
         Injector injector = Guice.createInjector(new OrgModule());
+        UserManager userManager = injector.getInstance(UserManager.class);
+        when(userManager.getByName(NAME)).thenThrow(new NotFoundException("nfex"));
+        when(userManager.create(any(UserImpl.class), anyBoolean())).thenReturn(user);
         injector.getInstance(AdminUserCreator.class);
 
         verify(userManager).getByName(NAME);
@@ -109,8 +109,9 @@ public class AdminUserCreatorTest {
     @Test
     public void shouldNotCreateAdminWhenItAlreadyExists() throws Exception {
         final UserImpl user = new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList());
-        when(userManager.getById(NAME)).thenReturn(user);
         Injector injector = Guice.createInjector(new OrgModule());
+        UserManager userManager = injector.getInstance(UserManager.class);
+        when(userManager.getByName(NAME)).thenReturn(user);
         injector.getInstance(AdminUserCreator.class);
 
         verify(userManager).getByName(NAME);
@@ -120,6 +121,9 @@ public class AdminUserCreatorTest {
     @Test
     public void shouldAddSystemPermissionsInLdapMode() throws Exception {
         Injector injector = Guice.createInjector(new LdapModule());
+        UserManager userManager = injector.getInstance(UserManager.class);
+        when(userManager.getByName(anyString())).thenReturn(user);
+        when(userManager.create(any(UserImpl.class), anyBoolean())).thenReturn(user);
         AdminUserCreator creator = injector.getInstance(AdminUserCreator.class);
         creator.onEvent(new PostUserPersistedEvent(new UserImpl(NAME, EMAIL, NAME, PASSWORD, emptyList())));
         verify(permissionsManager).storePermission(argThat(new ArgumentMatcher<SystemPermissionsImpl>() {
@@ -153,11 +157,11 @@ public class AdminUserCreatorTest {
             install(new JpaPersistModule("test"));
             bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
             bind(DBInitializer.class).asEagerSingleton();
-            bind(UserManager.class).toInstance(userManager);
             bindConstant().annotatedWith(Names.named("codenvy.admin.name")).to(NAME);
             bindConstant().annotatedWith(Names.named("codenvy.admin.initial_password")).to(PASSWORD);
             bindConstant().annotatedWith(Names.named("codenvy.admin.email")).to(EMAIL);
             bind(PermissionsManager.class).toInstance(permissionsManager);
+            bind(UserManager.class).toInstance(mock(UserManager.class));
         }
     }
 
