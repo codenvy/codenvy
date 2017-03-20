@@ -55,14 +55,13 @@ public class SystemLicenseTest {
     }
 
     @Test(dataProvider = "getDataToTestIsLicenseUsageLegal")
-    public void testIsLicenseUsageLegal(String type, String expiration, int users, long actualUsers, int actualServers,
-                                        boolean isLicenseUsageLegal) {
+    public void testIsLicenseUsageLegal(String type, String expiration, int userSeats, long actualUsers, boolean isLicenseUsageLegal) {
         Map<SystemLicenseFeature, String> features = ImmutableMap.of(SystemLicenseFeature.TYPE, type,
                                                                      SystemLicenseFeature.EXPIRATION, expiration,
-                                                                     SystemLicenseFeature.USERS, String.valueOf(users));
+                                                                     SystemLicenseFeature.USERS, String.valueOf(userSeats));
         SystemLicense systemLicense = new SystemLicense(license4j, features);
 
-        boolean result = systemLicense.isLicenseUsageLegal(actualUsers, actualServers);
+        boolean result = systemLicense.isLicenseUsageLegal(actualUsers);
         assertEquals(result, isLicenseUsageLegal);
     }
 
@@ -70,64 +69,41 @@ public class SystemLicenseTest {
     public Object[][] getDataToTestIsLicenseUsageLegal() {
         return new Object[][]{
                 // expired product key
-                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, true},
+                {PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, false},
 
                 // non-expired product key
-                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
-                 SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, true},
+                {PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1, false},
 
                 // expired evaluation product key
-                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_USERS, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS, true},
+                {EVALUATION_PRODUCT_KEY.toString(), EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, false},
 
                 // non-expired evaluation product key
-                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, 0, true},
-                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS,
-                 SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, true},
-                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1,
-                 SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, 0, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, true},
+                {EVALUATION_PRODUCT_KEY.toString(), NON_EXPIRED_DATE, LICENSED_USERS, LICENSED_USERS + 1, false},
                 };
     }
 
     @Test(dataProvider = "getDataToTestIsFreeUsageLegal")
-    public void testIsFreeUsageLegal(long actualUsers, int actualServers, boolean isLicenseUsageLegal) {
-        boolean result = SystemLicense.isFreeUsageLegal(actualUsers, actualServers);
+    public void testIsFreeUsageLegal(long actualUsers, boolean isLicenseUsageLegal) {
+        boolean result = SystemLicense.isFreeUsageLegal(actualUsers);
         assertEquals(result, isLicenseUsageLegal);
     }
 
     @DataProvider
     public Object[][] getDataToTestIsFreeUsageLegal() {
         return new Object[][]{
-                {0, 0, true},
-                {SystemLicense.MAX_NUMBER_OF_FREE_USERS, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS, true},
-                {SystemLicense.MAX_NUMBER_OF_FREE_USERS, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
-                {SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS, false},
-                {SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, SystemLicense.MAX_NUMBER_OF_FREE_SERVERS + 1, false},
+                {0, true},
+                {SystemLicense.MAX_NUMBER_OF_FREE_USERS, true},
+                {SystemLicense.MAX_NUMBER_OF_FREE_USERS + 1, false},
                 };
-    }
-
-    @Test(dataProvider = "getDataToTestIsLegalToAddNode")
-    public void testIsLegalToAddNode(String type, String expiration, int actualServers, boolean isAddNodeLegal) {
-        Map<SystemLicenseFeature, String> features = ImmutableMap.of(SystemLicenseFeature.TYPE, type,
-                                                                     SystemLicenseFeature.EXPIRATION, expiration);
-        SystemLicense systemLicense = new SystemLicense(license4j, features);
-
-        boolean result = systemLicense.isLicenseNodesUsageLegal(actualServers);
-        assertEquals(result, isAddNodeLegal);
     }
 
     @DataProvider

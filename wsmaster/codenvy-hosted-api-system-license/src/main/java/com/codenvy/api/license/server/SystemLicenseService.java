@@ -14,17 +14,18 @@
  */
 package com.codenvy.api.license.server;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import com.codenvy.api.license.SystemLicense;
 import com.codenvy.api.license.SystemLicenseFeature;
 import com.codenvy.api.license.exception.InvalidSystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseException;
 import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.codenvy.api.license.shared.dto.LegalityDto;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -40,7 +41,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -171,24 +171,6 @@ public class SystemLicenseService {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServerException("Failed to check if Codenvy usage matches system License constraints.", e);
-        }
-    }
-
-    @GET
-    @Path("/legality/node")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Checks if Codenvy machine node usage matches system License constraints, or free usage rules.",
-                  notes = "If nodeNumber parameter is absent then actual number of machine nodes will be validated")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
-                           @ApiResponse(code = 500, message = "Server error")})
-    public LegalityDto isMachineNodesUsageLegal(@ApiParam("Node number for legality validation")
-                                                @QueryParam("nodeNumber")
-                                                Integer nodeNumber) throws ApiException {
-        try {
-            return newDto(LegalityDto.class).withIsLegal(licenseManager.isSystemNodesUsageLegal(nodeNumber));
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServerException("Failed to check if Codenvy nodes usage matches system License constraints. ", e);
         }
     }
 
