@@ -1,5 +1,22 @@
 # Change Log
 
+## [5.5.0](https://github.com/codenvy/codenvy/tree/5.5.0) (2017-03-15)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.4.1...5.5.0)
+
+**Pull requests merged:**
+- Fixed providing resources for suborganizations. [1914](https://github.com/codenvy/codenvy/pull/1914)
+- Fix team details when user is requesting non-existing team or team with no access. Fix ability to set zero resource CAPs or remove them [1910](https://github.com/codenvy/codenvy/pull/1910)
+- Split codenvy-hosted-api-system-license module [1906](https://github.com/codenvy/codenvy/pull/1906)
+- Add version for angular-aria dependency in dashboard. [1904](https://github.com/codenvy/codenvy/pull/1904)
+- Fix login filter mapping for machine token service [1903](https://github.com/codenvy/codenvy/pull/1903)
+- [UD] fixed changing tabs after reloading the "Billing" page. [1895](https://github.com/codenvy/codenvy/pull/1895)
+- Refactoring exec-agent to go-agents. [1894](https://github.com/codenvy/codenvy/pull/1894)
+- Fixed tabs flickering on billing page in dashboard [1892](https://github.com/codenvy/codenvy/pull/1892)
+- add property to enable/disable ws autostart [1891](https://github.com/codenvy/codenvy/pull/1891)
+- The Machine API has been removed in this release. [1890](https://github.com/codenvy/codenvy/pull/1890)
+- Fixed flickering when changing tabs in team's details [1885](https://github.com/codenvy/codenvy/pull/1885)
+- Used Gwt xml generator from eclipse/che [1882](https://github.com/codenvy/codenvy/pull/1882)
+
 ## [5.4.1](https://github.com/codenvy/codenvy/tree/5.4.1) (2017-03-06)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.4.0...5.4.1)
 

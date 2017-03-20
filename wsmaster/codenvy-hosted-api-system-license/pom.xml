@@ -34,10 +34,6 @@
             <artifactId>codenvy-hosted-api-system-license-shared</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-machine-hosted</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>

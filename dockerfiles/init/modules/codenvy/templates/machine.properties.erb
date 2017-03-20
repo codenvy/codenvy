@@ -9,7 +9,7 @@ che.workspace.logs=/opt/codenvy-data/che-machines-logs
 # docker registry for snapshots
 che.docker.registry=<%= scope.lookupvar('codenvy::docker_registry_for_workspace_snapshots') %>
 # namespace for snapshots
-che.docker.namespace=NULL
+che.docker.namespace=<%= scope.lookupvar('codenvy::docker_registry_namespace') %>
 che.docker.cleanup_period_min=60
 
 # swarm

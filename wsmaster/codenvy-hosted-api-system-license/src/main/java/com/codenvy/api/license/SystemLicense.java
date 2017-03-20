@@ -38,7 +38,6 @@ public class SystemLicense {
     private static final Pattern    LICENSE_ID_PATTERN                = Pattern.compile(".*\\(id: ([0-9]+)\\)");
     public static final  DateFormat EXPIRATION_DATE_FORMAT            = new SimpleDateFormat("yyyy/MM/dd");
     public static final  long       MAX_NUMBER_OF_FREE_USERS          = 3;
-    public static final  int        MAX_NUMBER_OF_FREE_SERVERS        = Integer.MAX_VALUE - 1;  // (-1) for testing propose only
     public static final  int        ADDITIONAL_DAYS_FOR_LICENSE_RENEW = 15;
 
     private final Map<SystemLicenseFeature, String> features;
@@ -136,20 +135,13 @@ public class SystemLicense {
     }
 
     /**
-     * Returns true if user have order to create new node.
-     */
-    public boolean isLicenseNodesUsageLegal(int actualServers) {
-        return true;
-    }
-
-    /**
      * @return true:
      * 1) if (EVALUATION_PRODUCT_KEY IS NOT expired) AND (actual number of users <= allowed by license)
      * 2) if (PRODUCT_KEY            IS NOT expired) AND (actual number of users <= allowed by license)
-     * 3) if (EVALUATION_PRODUCT_KEY IS     expired) AND ((actual number of users <= MAX_NUMBER_OF_FREE_USERS) AND (number of nodes <= MAX_NUMBER_OF_FREE_SERVERS))
+     * 3) if (EVALUATION_PRODUCT_KEY IS     expired) AND (actual number of users <= MAX_NUMBER_OF_FREE_USERS)
      * 4) if (PRODUCT_KEY            IS     expired) AND (actual number of users <= MAX_NUMBER_OF_FREE_USERS)
      */
-    public boolean isLicenseUsageLegal(long actualUsers, int actualServers) {
+    public boolean isLicenseUsageLegal(long actualUsers) {
         if (isTimeForRenewExpired()) {
             switch (getLicenseType()) {
                 case EVALUATION_PRODUCT_KEY:
@@ -157,7 +149,7 @@ public class SystemLicense {
                     return actualUsers <= MAX_NUMBER_OF_FREE_USERS;   // don't take into account minimal free number of servers
 
                 default:
-                    return isFreeUsageLegal(actualUsers, actualServers);
+                    return isFreeUsageLegal(actualUsers);
             }
         }
 
@@ -174,9 +166,8 @@ public class SystemLicense {
     /**
      * @return false if (actual number of users > MAX_NUMBER_OF_FREE_USERS) OR (actual number of nodes > MAX_NUMBER_OF_FREE_SERVERS)
      */
-    public static boolean isFreeUsageLegal(long actualUsers, int actualServers) {
-        return actualUsers <= MAX_NUMBER_OF_FREE_USERS
-               && actualServers <= MAX_NUMBER_OF_FREE_SERVERS;
+    public static boolean isFreeUsageLegal(long actualUsers) {
+        return actualUsers <= MAX_NUMBER_OF_FREE_USERS;
     }
 
     /**

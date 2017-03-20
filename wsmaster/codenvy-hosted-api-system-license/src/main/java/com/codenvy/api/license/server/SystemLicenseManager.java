@@ -25,7 +25,6 @@ import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.permission.server.SystemDomain;
-import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.che.api.core.ApiException;
@@ -68,7 +67,6 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     private static final int    INVALIDATED_TOTAL_USERS_NUMBER = -1;
 
     private final SystemLicenseFactory               licenseFactory;
-    private final SwarmDockerConnector               dockerConnector;
     private final SystemLicenseActionDao             systemLicenseActionDao;
     private final SystemLicenseStorage               systemLicenseStorage;
     private final SystemLicenseActivator             systemLicenseActivator;
@@ -83,19 +81,17 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     @Inject
     public SystemLicenseManager(SystemLicenseFactory licenseFactory,
                                 UserManager userManager,
-                                SwarmDockerConnector dockerConnector,
                                 SystemLicenseActionDao systemLicenseActionDao,
                                 SystemLicenseStorage systemLicenseStorage,
                                 SystemLicenseActivator systemLicenseActivator,
                                 EventService eventService) {
         this.licenseFactory = licenseFactory;
-        this.dockerConnector = dockerConnector;
+        this.userManager = userManager;
         this.systemLicenseActionDao = systemLicenseActionDao;
         this.systemLicenseStorage = systemLicenseStorage;
         this.systemLicenseActivator = systemLicenseActivator;
         this.observers = new LinkedList<>();
         this.totalNumberRef = new AtomicLong(INVALIDATED_TOTAL_USERS_NUMBER);
-        this.userManager = userManager;
 
         eventService.subscribe(e -> invalidateTotalUsersNumber(), UserCreatedEvent.class);
         eventService.subscribe(e -> invalidateTotalUsersNumber(), UserRemovedEvent.class);
@@ -169,32 +165,13 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      * Return true if only Codenvy usage meets the constrains of license properties or free usage properties.
      **/
     public boolean isSystemUsageLegal() throws ServerException, IOException {
-        int actualServers = dockerConnector.getAvailableNodes().size();
-        try {
-            SystemLicense systemLicense = load();
-            return systemLicense.isLicenseUsageLegal(getTotalUsersNumber(), actualServers);
-        } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(getTotalUsersNumber(), actualServers);
-        }
-    }
-
-    /**
-     * Return true if only node number meets the constrains of license properties or free usage properties.
-     * If nodeNumber == null, uses actual number of machine nodes.
-     *
-     * @param nodeNumber
-     *         number of machine nodes.
-     */
-    public boolean isSystemNodesUsageLegal(Integer nodeNumber) throws IOException {
-        if (nodeNumber == null) {
-            nodeNumber = dockerConnector.getAvailableNodes().size();
-        }
+        long actualUsers = getTotalUsersNumber();
 
         try {
             SystemLicense systemLicense = load();
-            return systemLicense.isLicenseNodesUsageLegal(nodeNumber);
+            return systemLicense.isLicenseUsageLegal(actualUsers);
         } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(0, nodeNumber);  // user number doesn't matter
+            return SystemLicense.isFreeUsageLegal(actualUsers);
         }
     }
 
@@ -352,9 +329,9 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     boolean isLicenseUsageLegal(long userNumber) throws ServerException {
         try {
             SystemLicense systemLicense = load();
-            return systemLicense.isLicenseUsageLegal(userNumber, 0);
+            return systemLicense.isLicenseUsageLegal(userNumber);
         } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(userNumber, 0);
+            return SystemLicense.isFreeUsageLegal(userNumber);
         }
     }
 
