@@ -15,7 +15,6 @@
 package com.codenvy.api.license.server.filter;
 
 import com.codenvy.api.license.server.SystemLicenseService;
-import com.codenvy.api.license.server.filter.SystemLicenseServicePermissionsFilter;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
 
@@ -78,18 +77,6 @@ public class SystemLicenseServicePermissionsFilterTest {
 
         assertEquals(response.getStatusCode(), 204);
         verify(systemLicenseService).isSystemUsageLegal();
-        verifyZeroInteractions(subject);
-    }
-
-    @Test
-    public void shouldNotCheckPermissionsOnLicenseNodeChecking() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .get(SECURE_PATH + "/license/system/legality/node?nodeNumber=1");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(systemLicenseService).isMachineNodesUsageLegal(1);
         verifyZeroInteractions(subject);
     }
 

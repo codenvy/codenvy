@@ -44,6 +44,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -76,7 +77,7 @@ public class RemovePermissionsFilterTest {
 
     @BeforeMethod
     public void setUp() {
-        when(subject.getUserId()).thenReturn("user123");
+        when(subject.getUserId()).thenReturn("user321");
     }
 
     @Test
@@ -126,6 +127,23 @@ public class RemovePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 204);
         verify(permissionsService).removePermissions(eq("test"), eq("test123"), eq("user123"));
         verify(instanceValidator).validate("test", "test123");
+    }
+
+    @Test
+    public void shouldDoChainIfUserTriesToRemoveOwnPermissionsForInstance() throws Exception {
+        when(subject.getUserId()).thenReturn("user123");
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .when()
+                                         .delete(SECURE_PATH + "/permissions/test?instance=test123&user=user123");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(permissionsService).removePermissions(eq("test"), eq("test123"), eq("user123"));
+        verify(instanceValidator).validate("test", "test123");
+        verify(subject, never()).checkPermission(anyString(), anyString(), anyString());
+        verify(superPrivilegesChecker, never()).isPrivilegedToManagePermissions(anyString());
     }
 
     @Test

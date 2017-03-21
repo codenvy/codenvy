@@ -39,7 +39,7 @@ public class SystemLicenseServicePermissionsFilter extends CheMethodInvokerFilte
     @Override
     protected void filter(GenericResourceMethod GenericResourceMethod, Object[] arguments) throws ApiException {
         String methodName = GenericResourceMethod.getMethod().getName();
-        if (methodName.equals("isSystemUsageLegal") || methodName.equals("isMachineNodesUsageLegal")) {
+        if (methodName.equals("isSystemUsageLegal")) {
             //public method
             return;
         }

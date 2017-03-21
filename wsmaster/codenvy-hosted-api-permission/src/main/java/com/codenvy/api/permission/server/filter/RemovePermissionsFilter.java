@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
@@ -47,6 +48,9 @@ public class RemovePermissionsFilter extends CheMethodInvokerFilter {
     @QueryParam("instance")
     private String instance;
 
+    @QueryParam("user")
+    private String user;
+
     @Inject
     private SuperPrivilegesChecker superPrivilegesChecker;
 
@@ -59,10 +63,12 @@ public class RemovePermissionsFilter extends CheMethodInvokerFilter {
         final String methodName = genericResourceMethod.getMethod().getName();
         if (methodName.equals("removePermissions")) {
             instanceValidator.validate(domain, instance);
-            if (superPrivilegesChecker.isPrivilegedToManagePermissions(domain)) {
+            Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+            if (currentSubject.getUserId().equals(user)
+                || superPrivilegesChecker.isPrivilegedToManagePermissions(domain)) {
                 return;
             }
-            if (!EnvironmentContext.getCurrent().getSubject().hasPermission(domain, instance, SET_PERMISSIONS)) {
+            if (!currentSubject.hasPermission(domain, instance, SET_PERMISSIONS)) {
                 throw new ForbiddenException("User can't edit permissions for this instance");
             }
         }

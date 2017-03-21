@@ -25,9 +25,12 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.StripedLocks;
+import org.eclipse.che.commons.lang.concurrent.Unlocker;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 /**
  * Facade for Permissions related operations.
@@ -55,6 +59,7 @@ public class PermissionsManager {
 
     private final List<AbstractPermissionsDomain<? extends AbstractPermissions>> domains;
     private final Map<String, PermissionsDao<? extends AbstractPermissions>>     domainToDao;
+    private final StripedLocks                                                   updateLocks;
 
     @Inject
     public PermissionsManager(EventService eventService,
@@ -73,6 +78,7 @@ public class PermissionsManager {
         }
         this.domains = ImmutableList.copyOf(domains);
         this.domainToDao = ImmutableMap.copyOf(domainToDao);
+        this.updateLocks = new StripedLocks(16);
     }
 
     /**
@@ -92,12 +98,15 @@ public class PermissionsManager {
         final String instanceId = permissions.getInstanceId();
         final String userId = permissions.getUserId();
 
-        final PermissionsDao<? extends AbstractPermissions> permissionsDao = getPermissionsDao(domainId);
-        if (!permissions.getActions().contains(SET_PERMISSIONS)
-            && userHasLastSetPermissions(permissionsDao, userId, instanceId)) {
-            throw new ConflictException("Can't edit permissions because there is not any another user with permission 'setPermissions'");
+        try (@SuppressWarnings("unused") Unlocker unlocker = updateLocks.writeLock(firstNonNull(instanceId, domainId))) {
+            final PermissionsDao<? extends AbstractPermissions> permissionsDao = getPermissionsDao(domainId);
+            if (!permissions.getActions().contains(SET_PERMISSIONS)
+                && userHasLastSetPermissions(permissionsDao, userId, instanceId)) {
+                throw new ConflictException("Can't edit permissions because there is not any another user " +
+                                            "with permission 'setPermissions'");
+            }
+            store(permissionsDao, userId, instanceId, permissions);
         }
-        store(permissionsDao, userId, instanceId, permissions);
     }
 
     private <T extends AbstractPermissions> void store(PermissionsDao<T> dao,
@@ -191,11 +200,15 @@ public class PermissionsManager {
      */
     public void remove(String userId, String domainId, String instanceId) throws ConflictException, ServerException, NotFoundException {
         final PermissionsDao<? extends AbstractPermissions> permissionsDao = getPermissionsDao(domainId);
-        if (userHasLastSetPermissions(permissionsDao, userId, instanceId)) {
-            throw new ConflictException("Can't remove permissions because there is not any another user with permission 'setPermissions'");
+        Permissions permissions;
+        try (@SuppressWarnings("unused") Unlocker unlocker = updateLocks.writeLock(firstNonNull(instanceId, domainId))) {
+            if (userHasLastSetPermissions(permissionsDao, userId, instanceId)) {
+                throw new ConflictException("Can't remove permissions because there is not any another user " +
+                                            "with permission 'setPermissions'");
+            }
+            permissions = permissionsDao.get(userId, instanceId);
+            permissionsDao.remove(userId, instanceId);
         }
-        Permissions permissions = permissionsDao.get(userId, instanceId);
-        permissionsDao.remove(userId, instanceId);
         final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
         eventService.publish(new PermissionsRemovedEvent(initiator, permissions));
     }
@@ -249,33 +262,23 @@ public class PermissionsManager {
         return permissionsStorage;
     }
 
-    private boolean userHasLastSetPermissions(PermissionsDao<? extends AbstractPermissions> permissionsStorage,
+    private boolean userHasLastSetPermissions(PermissionsDao<? extends AbstractPermissions> storage,
                                               String userId,
                                               String instanceId) throws ServerException,
                                                                         ConflictException,
                                                                         NotFoundException {
-        if (!permissionsStorage.exists(userId, instanceId, SET_PERMISSIONS)) {
+        if (!storage.exists(userId, instanceId, SET_PERMISSIONS)) {
             return false;
         }
 
-        Page<? extends AbstractPermissions> page = permissionsStorage.getByInstance(instanceId, 30, 0);
-        boolean hasForeignSetPermission;
-        while (!(hasForeignSetPermission = hasForeignSetPermission(page.getItems(), userId))
-               && page.hasNextPage()) {
-
-            final Page.PageRef nextPageRef = page.getNextPageRef();
-            page = permissionsStorage.getByInstance(instanceId, nextPageRef.getPageSize(), (int)nextPageRef.getItemsBefore());
-        }
-        return !hasForeignSetPermission;
-    }
-
-    private boolean hasForeignSetPermission(List<? extends AbstractPermissions> permissions, String userId) {
-        for (AbstractPermissions permission : permissions) {
-            if (!permission.getUserId().equals(userId)
-                && permission.getActions().contains(SET_PERMISSIONS)) {
-                return true;
+        for (AbstractPermissions permissions : Pages.iterateLazily((maxItems, skipCount) -> storage.getByInstance(instanceId,
+                                                                                                                  maxItems,
+                                                                                                                  skipCount))) {
+            if (!permissions.getUserId().equals(userId)
+                && permissions.getActions().contains(SET_PERMISSIONS)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

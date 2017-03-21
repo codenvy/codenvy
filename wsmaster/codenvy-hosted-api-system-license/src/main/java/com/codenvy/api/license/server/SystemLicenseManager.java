@@ -25,7 +25,6 @@ import com.codenvy.api.license.shared.dto.IssueDto;
 import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.api.license.shared.model.Issue;
 import com.codenvy.api.permission.server.SystemDomain;
-import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.che.api.core.ApiException;
@@ -60,7 +59,6 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
 
     private final SystemLicenseFactory               licenseFactory;
     private final UserManager                        userManager;
-    private final SwarmDockerConnector               dockerConnector;
     private final SystemLicenseActionDao             systemLicenseActionDao;
     private final SystemLicenseStorage               systemLicenseStorage;
     private final SystemLicenseActivator             systemLicenseActivator;
@@ -69,13 +67,11 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     @Inject
     public SystemLicenseManager(SystemLicenseFactory licenseFactory,
                                 UserManager userManager,
-                                SwarmDockerConnector dockerConnector,
                                 SystemLicenseActionDao systemLicenseActionDao,
                                 SystemLicenseStorage systemLicenseStorage,
                                 SystemLicenseActivator systemLicenseActivator) {
         this.licenseFactory = licenseFactory;
         this.userManager = userManager;
-        this.dockerConnector = dockerConnector;
         this.systemLicenseActionDao = systemLicenseActionDao;
         this.systemLicenseStorage = systemLicenseStorage;
         this.systemLicenseActivator = systemLicenseActivator;
@@ -151,33 +147,12 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      **/
     public boolean isSystemUsageLegal() throws ServerException, IOException {
         long actualUsers = userManager.getTotalCount();
-        int actualServers = dockerConnector.getAvailableNodes().size();
 
         try {
             SystemLicense systemLicense = load();
-            return systemLicense.isLicenseUsageLegal(actualUsers, actualServers);
+            return systemLicense.isLicenseUsageLegal(actualUsers);
         } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(actualUsers, actualServers);
-        }
-    }
-
-    /**
-     * Return true if only node number meets the constrains of license properties or free usage properties.
-     * If nodeNumber == null, uses actual number of machine nodes.
-     *
-     * @param nodeNumber
-     *         number of machine nodes.
-     */
-    public boolean isSystemNodesUsageLegal(Integer nodeNumber) throws IOException {
-        if (nodeNumber == null) {
-            nodeNumber = dockerConnector.getAvailableNodes().size();
-        }
-
-        try {
-            SystemLicense systemLicense = load();
-            return systemLicense.isLicenseNodesUsageLegal(nodeNumber);
-        } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(0, nodeNumber);  // user number doesn't matter
+            return SystemLicense.isFreeUsageLegal(actualUsers);
         }
     }
 
@@ -335,9 +310,9 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     boolean isLicenseUsageLegal(long userNumber) throws ServerException {
         try {
             SystemLicense systemLicense = load();
-            return systemLicense.isLicenseUsageLegal(userNumber, 0);
+            return systemLicense.isLicenseUsageLegal(userNumber);
         } catch (SystemLicenseException e) {
-            return SystemLicense.isFreeUsageLegal(userNumber, 0);
+            return SystemLicense.isFreeUsageLegal(userNumber);
         }
     }
 
