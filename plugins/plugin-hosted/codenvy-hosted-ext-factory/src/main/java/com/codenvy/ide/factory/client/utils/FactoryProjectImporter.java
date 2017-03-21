@@ -42,8 +42,8 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.subversion.Credentials;
-import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.ide.api.user.Credentials;
+import org.eclipse.che.ide.api.user.AskCredentialsDialog;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -85,7 +85,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     private static final String CHANNEL = "git:checkout:";
 
     private final MessageBusProvider          messageBusProvider;
-    private final SubversionCredentialsDialog subversionCredentialsDialog;
+    private final AskCredentialsDialog        subversionCredentialsDialog;
     private final FactoryLocalizationConstant locale;
     private final NotificationManager         notificationManager;
     private final String                      restContext;
@@ -99,7 +99,7 @@ public class FactoryProjectImporter extends AbstractImporter {
     @Inject
     public FactoryProjectImporter(AppContext appContext,
                                   NotificationManager notificationManager,
-                                  SubversionCredentialsDialog subversionCredentialsDialog,
+                                  AskCredentialsDialog subversionCredentialsDialog,
                                   FactoryLocalizationConstant locale,
                                   ImportProjectNotificationSubscriberFactory subscriberFactory,
                                   @RestContext String restContext,
