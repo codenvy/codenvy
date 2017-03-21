@@ -17,4 +17,6 @@ FROM alpine:3.4
 RUN  apk add --update "rsyslog=8.18.0-r0" \
   && rm -rf /var/cache/apk/*
 
-ENTRYPOINT [ "rsyslogd", "-n" ]
+COPY entrypoint.sh /
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
