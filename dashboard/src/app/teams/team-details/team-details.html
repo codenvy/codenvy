@@ -117,6 +117,13 @@
             </che-input-box>
           </che-label-container>
           <che-label-container class="team-details-delete-label"
+                                 ng-if="teamDetailsController.canLeaveTeam()"
+                                 che-label-name="Leave Team"
+                                 che-label-description="This is irreversible. By leaving a team, you will not have access to the team workspaces anymore.">
+              <che-button-danger che-button-title="Leave"
+                                 ng-click="teamDetailsController.leaveTeam()"></che-button-danger>
+          </che-label-container>
+          <che-label-container class="team-details-delete-label"
                                ng-if="teamDetailsController.isUserAllowedTo('delete')"
                                che-label-name="Delete Team"
                                che-label-description="This is irreversible. Deleting your team will also destroy team workspaces and stacks.">
