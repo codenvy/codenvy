@@ -40,6 +40,7 @@ export class TeamItem {
       isChecked: '=cdvyChecked',
       isSelect: '=?ngModel',
       onCheckboxClick: '&?cdvyOnCheckboxClick',
+      selectable: '=cdvyIsSelectable',
       onUpdate: '&?onUpdate'
     };
   }

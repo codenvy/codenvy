@@ -38,7 +38,8 @@ export class ListTeams implements ng.IDirective {
   bindToController: boolean = true;
 
   scope: any = {
-    accountId: '='
+    accountId: '=',
+    readonly: '='
   };
 
   constructor () {
