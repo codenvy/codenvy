@@ -30,10 +30,9 @@ import org.apache.directory.shared.ldap.entry.ServerEntry;
 import org.apache.directory.shared.ldap.entry.client.ClientModification;
 import org.apache.directory.shared.ldap.entry.client.DefaultClientAttribute;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.jpa.JpaProfileDao;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -61,7 +60,7 @@ import static org.testng.Assert.assertEquals;
 public class LdapSynchronizationFlowTest {
 
     private LdapSynchronizer   synchronizer;
-    private UserDao            userDao;
+    private UserManager        userManager;
     private EmbeddedLdapServer server;
 
     @BeforeClass
@@ -69,17 +68,16 @@ public class LdapSynchronizationFlowTest {
         (server = EmbeddedLdapServer.newDefaultServer()).start();
         final Injector injector = Guice.createInjector(new Module(server));
         synchronizer = injector.getInstance(LdapSynchronizer.class);
-        userDao = injector.getInstance(UserDao.class);
-        injector.getInstance(JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber.class).subscribe();
+        userManager = injector.getInstance(UserManager.class);
     }
 
     @AfterClass
     public void cleanUp() throws Exception {
         server.shutdown();
-        final long totalCount = (int)userDao.getTotalCount();
+        final long totalCount = (int)userManager.getTotalCount();
         if (totalCount > 0) {
-            for (UserImpl user : userDao.getAll((int)totalCount, 0).getItems()) {
-                userDao.remove(user.getId());
+            for (UserImpl user : userManager.getAll((int)totalCount, 0).getItems()) {
+                userManager.remove(user.getId());
             }
         }
     }
@@ -98,8 +96,8 @@ public class LdapSynchronizationFlowTest {
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getFetched(), 3);
-        assertEquals(userDao.getTotalCount(), 3);
-        assertEquals(userDao.getAll(3, 0).fill(new HashSet<>()), new HashSet<>(asList(user1, user2, user3)));
+        assertEquals(userManager.getTotalCount(), 3);
+        assertEquals(userManager.getAll(3, 0).fill(new HashSet<>()), new HashSet<>(asList(user1, user2, user3)));
 
         // add a new ldap user
         final UserImpl user4 = asUser(server.addDefaultLdapUser(4));
@@ -112,7 +110,7 @@ public class LdapSynchronizationFlowTest {
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getFetched(), 4);
-        assertEquals(user4, userDao.getById(user4.getId()));
+        assertEquals(user4, userManager.getById(user4.getId()));
 
         // remove user from ldap
         server.removeEntry("uid", user1.getId());
@@ -125,7 +123,7 @@ public class LdapSynchronizationFlowTest {
         assertEquals(syncResult.getRemoved(), 1);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getFetched(), 3);
-        assertEquals(userDao.getAll(3, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3, user4)));
+        assertEquals(userManager.getAll(3, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3, user4)));
 
         // modify ldap user
         server.modify("uid", user2.getId(), replaceMod("cn", "new-name"));
@@ -177,7 +175,7 @@ public class LdapSynchronizationFlowTest {
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getFetched(), 2);
-        assertEquals(userDao.getAll(2, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3)));
+        assertEquals(userManager.getAll(2, 0).fill(new HashSet<>()), new HashSet<>(asList(user2, user3)));
 
 
         // cleanup ldap user entries
@@ -213,6 +211,7 @@ public class LdapSynchronizationFlowTest {
 
             install(new JpaPersistModule("test"));
             install(new UserJpaModule());
+            bind(String[].class).annotatedWith(Names.named("che.auth.reserved_user_names")).toInstance(new String[0]);
 
             // configure synchronizer
             bind(LdapEntrySelector.class).toProvider(LdapEntrySelectorProvider.class);

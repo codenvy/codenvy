@@ -29,11 +29,11 @@ import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -73,28 +73,27 @@ public class SystemLicenseManagerTest {
     private static final String NEW_LICENSE_TEXT       = "# (id: 2)\nnew license text";
     private static final String LICENSE_ID             = "1";
     private static final long   USER_NUMBER            = 4;
-    private static final int    NODES_NUMBER           = 2;
 
     @Mock
-    private SystemLicense                           license;
+    private SystemLicense           license;
     @Mock
-    private SystemLicense                           newSystemLicense;
+    private SystemLicense           newSystemLicense;
     @Mock
-    private SystemLicenseFactory                    licenseFactory;
+    private SystemLicenseFactory    licenseFactory;
     @Mock
-    private UserManager                             userManager;
+    private UserManager             userManager;
     @Mock
-    private SystemLicenseActionDao                  systemLicenseActionDao;
+    private SystemLicenseActionDao  systemLicenseActionDao;
     @Mock
-    private SystemLicenseActionImpl                 systemLicenseAction;
+    private SystemLicenseActionImpl systemLicenseAction;
     @Mock
-    private SystemLicenseStorage                    systemLicenseStorage;
+    private SystemLicenseStorage    systemLicenseStorage;
     @Mock
-    private SystemLicenseActivator                  systemLicenseActivator;
+    private SystemLicenseActivator  systemLicenseActivator;
     @Mock
-    private Subject                                 subject;
-    @Captor
-    private ArgumentCaptor<SystemLicenseActionImpl> actionCaptor;
+    private Subject                 subject;
+    @Mock
+    private EventService            eventService;
 
     private SystemLicenseManager licenseManager;
 
@@ -111,13 +110,14 @@ public class SystemLicenseManagerTest {
         when(newSystemLicense.getLicenseText()).thenReturn(NEW_LICENSE_TEXT);
         when(userManager.getTotalCount()).thenReturn(USER_NUMBER);
         when(systemLicenseAction.getLicenseId()).thenReturn(LICENSE_ID);
+        when(eventService.publish(UserCreatedEvent.class)).thenReturn(UserCreatedEvent.class);
 
         licenseManager = spy(new SystemLicenseManager(licenseFactory,
                                                       userManager,
                                                       systemLicenseActionDao,
                                                       systemLicenseStorage,
-                                                      systemLicenseActivator));
-
+                                                      systemLicenseActivator,
+                                                      eventService));
         doReturn(license).when(licenseManager).load();
 
         EnvironmentContext.getCurrent().setSubject(subject);
@@ -151,7 +151,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testIfFairSourceLicenseIsNotAccepted() throws Exception {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-            .thenThrow(new NotFoundException("System license not found"));
+                .thenThrow(new NotFoundException("System license not found"));
 
         assertFalse(licenseManager.isFairSourceLicenseAccepted());
     }
@@ -159,7 +159,7 @@ public class SystemLicenseManagerTest {
     @Test
     public void testIfFairSourceLicenseIsAccepted() throws Exception {
         when(systemLicenseActionDao.getByLicenseTypeAndAction(eq(FAIR_SOURCE_LICENSE), eq(ACCEPTED)))
-            .thenReturn(mock(SystemLicenseActionImpl.class));
+                .thenReturn(mock(SystemLicenseActionImpl.class));
 
         assertTrue(licenseManager.isFairSourceLicenseAccepted());
     }
@@ -236,7 +236,6 @@ public class SystemLicenseManagerTest {
     @Test
     public void shouldDisproveThatUserCanBeAddedDueToFreeUsageTerms() throws ServerException {
         when(userManager.getTotalCount()).thenReturn(MAX_NUMBER_OF_FREE_USERS);
-
         doThrow(SystemLicenseNotFoundException.class).when(licenseManager).load();
 
         assertFalse(licenseManager.canUserBeAdded());
@@ -270,7 +269,8 @@ public class SystemLicenseManagerTest {
         doReturn("License expiring").when(licenseManager).getMessageForLicenseExpiring();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(
+                                                                    Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
                                                             .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
@@ -287,7 +287,8 @@ public class SystemLicenseManagerTest {
         doReturn("License expired").when(licenseManager).getMessageForLicenseCompletelyExpired();
         assertEquals(licenseManager.getLicenseIssues(),
                      ImmutableList.of(newDto(IssueDto.class).withStatus(Issue.Status.USER_LICENSE_HAS_REACHED_ITS_LIMIT)
-                                                            .withMessage(Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
+                                                            .withMessage(
+                                                                    Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_REGISTRATION),
                                       newDto(IssueDto.class).withStatus(Issue.Status.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED)
                                                             .withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE),
                                       newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
@@ -397,7 +398,8 @@ public class SystemLicenseManagerTest {
         String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
-        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+        assertEquals(result,
+                     "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
     }
 
     @Test
@@ -423,7 +425,8 @@ public class SystemLicenseManagerTest {
         String result = licenseManager.getMessageWhenUserCannotStartWorkspace();
 
         // then
-        assertEquals(result, "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
+        assertEquals(result,
+                     "There are currently 4 users registered in Codenvy but your license only allows 3. Users cannot start workspaces.");
     }
 
     @Test

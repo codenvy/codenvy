@@ -26,7 +26,6 @@ import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
@@ -80,7 +79,6 @@ public class MachineTokenInterceptorTest {
                 bind(WorkspaceRuntimes.class).toInstance(mock(WorkspaceRuntimes.class));
                 bind(EventService.class).toInstance(mock(EventService.class));
                 bind(MachineProcessManager.class).toInstance(mock(MachineProcessManager.class));
-                bind(UserManager.class).toInstance(mock(UserManager.class));
                 bind(AccountDao.class).toInstance(mock(AccountDao.class));
                 bindConstant().annotatedWith(Names.named("che.workspace.auto_restore")).to(false);
                 bindConstant().annotatedWith(Names.named("che.workspace.auto_snapshot")).to(false);
@@ -94,10 +92,9 @@ public class MachineTokenInterceptorTest {
                 //Main injection
                 install(new InterceptorModule());
 
-//                 To prevent real methods of manager calling
+                // To prevent real methods of manager calling
                 bindInterceptor(subclassesOf(WorkspaceManager.class), names("stopWorkspace"), invocation -> null);
-                bindInterceptor(subclassesOf(WorkspaceManager.class), names("startWorkspace"),
-                                invocation -> workspaceImpl);
+                bindInterceptor(subclassesOf(WorkspaceManager.class), names("startWorkspace"), invocation -> workspaceImpl);
             }
         };
 

@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
@@ -49,8 +50,9 @@ public class OnpremisesUserManager extends UserManager {
                                  ProfileDao profileDao,
                                  PreferenceDao preferencesDao,
                                  @Named("che.auth.reserved_user_names") String[] reservedNames,
-                                 AccountManager accountManager) {
-        super(userDao, profileDao, preferencesDao, reservedNames);
+                                 AccountManager accountManager,
+                                 EventService eventService) {
+        super(userDao, profileDao, preferencesDao, eventService, reservedNames);
         this.accountManager = accountManager;
     }
 

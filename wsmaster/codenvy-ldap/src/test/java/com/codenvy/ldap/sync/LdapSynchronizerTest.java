@@ -20,10 +20,10 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.ldaptive.Connection;
 import org.ldaptive.ConnectionFactory;
@@ -46,6 +46,7 @@ import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -79,13 +80,13 @@ public class LdapSynchronizerTest {
     private LdapUserIdNormalizer idNormalizer;
 
     @Mock
-    private UserDao userDao;
+    private UserManager userManager;
 
     @Mock
     private DBUserLinker userFinder;
 
     @Mock
-    private ProfileDao profileDao;
+    private ProfileManager profileManager;
 
     private LdapSynchronizer synchronizer;
     private Set<String>      existingIds;
@@ -95,8 +96,8 @@ public class LdapSynchronizerTest {
     public void setUp() throws Exception {
         synchronizer = new LdapSynchronizer(connFactory,
                                             entrySelector,
-                                            userDao,
-                                            profileDao,
+                                            userManager,
+                                            profileManager,
                                             idNormalizer,
                                             null,
                                             0,
@@ -134,8 +135,8 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getRemoved(), 0);
         assertEquals(syncResult.getSkipped(), 0);
         assertEquals(syncResult.getFetched(), 3);
-        verify(userDao, times(3)).create(anyObject());
-        verify(profileDao, times(3)).create(anyObject());
+        verify(userManager, times(3)).create(anyObject(), anyBoolean());
+        verify(profileManager, times(3)).update(anyObject());
     }
 
     @Test
@@ -158,9 +159,9 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getSkipped(), 0);
         assertEquals(syncResult.getFetched(), 2);
-        verify(userDao, times(2)).create(anyObject());
-        verify(profileDao, times(2)).create(anyObject());
-        verify(userDao).remove("missed-in-selection");
+        verify(userManager, times(2)).create(anyObject(), anyBoolean());
+        verify(profileManager, times(2)).update(anyObject());
+        verify(userManager).remove("missed-in-selection");
     }
 
     @Test
@@ -170,7 +171,7 @@ public class LdapSynchronizerTest {
         users.put("user234", createUserEntry("user234"));
         users.put("user345", createUserEntry("user345"));
         when(entrySelector.select(anyObject())).thenReturn(users.values());
-        when(profileDao.getById(any())).thenAnswer(inv -> {
+        when(profileManager.getById(any())).thenAnswer(inv -> {
             final String id = inv.getArguments()[0].toString();
             return new ProfileImpl(id, ImmutableMap.of("firstName", "firstName-" + id));
         });
@@ -194,10 +195,9 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getSkipped(), 0);
         assertEquals(syncResult.getFetched(), 3);
-        verify(userDao).create(anyObject());
-        verify(profileDao).create(anyObject());
-        verify(userDao, never()).update(anyObject());
-        verify(profileDao, never()).update(anyObject());
+        verify(userManager).create(anyObject(), anyBoolean());
+        verify(profileManager).update(anyObject());
+        verify(userManager, never()).update(anyObject());
     }
 
     @Test
@@ -207,7 +207,7 @@ public class LdapSynchronizerTest {
         users.put("user234", createUserEntry("user234"));
         when(entrySelector.select(anyObject())).thenReturn(users.values());
 
-        when(profileDao.getById(any())).thenAnswer(inv -> {
+        when(profileManager.getById(any())).thenAnswer(inv -> {
             final String id = inv.getArguments()[0].toString();
             return new ProfileImpl(id, ImmutableMap.of("firstName", "new-firstName-" + id));
         });
@@ -230,16 +230,16 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getUpdated(), 2);
         assertEquals(syncResult.getFailed(), 0);
         assertEquals(syncResult.getSkipped(), 0);
-        verify(userDao, never()).update(anyObject());
-        verify(profileDao, times(2)).update(anyObject());
+        verify(userManager, never()).update(anyObject());
+        verify(profileManager, times(2)).update(anyObject());
     }
 
     @Test
     public void skipsUsersIfTheyAlreadyExistAndUpdateIfExistsAttributeIsSetToFalse() throws Exception {
         synchronizer = new LdapSynchronizer(connFactory,
                                             entrySelector,
-                                            userDao,
-                                            profileDao,
+                                            userManager,
+                                            profileManager,
                                             idNormalizer,
                                             null,
                                             0,
@@ -280,12 +280,12 @@ public class LdapSynchronizerTest {
             }
             return existingUser;
         });
-        when(profileDao.getById(existingUser.getId())).thenReturn(mock(ProfileImpl.class));
+        when(profileManager.getById(existingUser.getId())).thenReturn(mock(ProfileImpl.class));
 
         synchronizer = new LdapSynchronizer(connFactory,
                                             entrySelector,
-                                            userDao,
-                                            profileDao,
+                                            userManager,
+                                            profileManager,
                                             idNormalizer,
                                             null,
                                             0,
@@ -318,7 +318,7 @@ public class LdapSynchronizerTest {
         assertEquals(syncResult.getFetched(), 2);
 
         ArgumentCaptor<UserImpl> userCaptor = ArgumentCaptor.forClass(UserImpl.class);
-        verify(userDao).update(userCaptor.capture());
+        verify(userManager).update(userCaptor.capture());
         UserImpl user = userCaptor.getValue();
         assertEquals(user.getId(), existingUser.getId(), "id must be taken from existing user");
         assertEquals(user.getName(), "different-name", "name must be updated");

@@ -31,9 +31,15 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.event.UserCreatedEvent;
+import org.eclipse.che.api.user.server.event.UserRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.core.db.DBInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
@@ -56,26 +63,38 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 @Singleton
 public class SystemLicenseManager implements SystemLicenseManagerObservable {
+    private static final Logger LOG                            = LoggerFactory.getLogger(SystemLicenseManager.class);
+    private static final int    INVALIDATED_TOTAL_USERS_NUMBER = -1;
 
     private final SystemLicenseFactory               licenseFactory;
-    private final UserManager                        userManager;
     private final SystemLicenseActionDao             systemLicenseActionDao;
     private final SystemLicenseStorage               systemLicenseStorage;
     private final SystemLicenseActivator             systemLicenseActivator;
     private final List<SystemLicenseManagerObserver> observers;
+    private final AtomicLong                         totalNumberRef;
+    private final UserManager                        userManager;
+
+    @Inject
+    @SuppressWarnings("unused")
+    private DBInitializer dbInitializer;
 
     @Inject
     public SystemLicenseManager(SystemLicenseFactory licenseFactory,
                                 UserManager userManager,
                                 SystemLicenseActionDao systemLicenseActionDao,
                                 SystemLicenseStorage systemLicenseStorage,
-                                SystemLicenseActivator systemLicenseActivator) {
+                                SystemLicenseActivator systemLicenseActivator,
+                                EventService eventService) {
         this.licenseFactory = licenseFactory;
         this.userManager = userManager;
         this.systemLicenseActionDao = systemLicenseActionDao;
         this.systemLicenseStorage = systemLicenseStorage;
         this.systemLicenseActivator = systemLicenseActivator;
         this.observers = new LinkedList<>();
+        this.totalNumberRef = new AtomicLong(INVALIDATED_TOTAL_USERS_NUMBER);
+
+        eventService.subscribe(e -> invalidateTotalUsersNumber(), UserCreatedEvent.class);
+        eventService.subscribe(e -> invalidateTotalUsersNumber(), UserRemovedEvent.class);
     }
 
     /**
@@ -146,7 +165,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      * Return true if only Codenvy usage meets the constrains of license properties or free usage properties.
      **/
     public boolean isSystemUsageLegal() throws ServerException, IOException {
-        long actualUsers = userManager.getTotalCount();
+        long actualUsers = getTotalUsersNumber();
 
         try {
             SystemLicense systemLicense = load();
@@ -161,7 +180,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      * @throws ServerException
      */
     public boolean canUserBeAdded() throws ServerException {
-        return isLicenseUsageLegal(userManager.getTotalCount() + 1);
+        return isLicenseUsageLegal(getTotalUsersNumber() + 1);
     }
 
     /**
@@ -200,7 +219,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
             if (isPaidLicenseExpiring()) {
                 issues.add(newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRING)
                                                  .withMessage(getMessageForLicenseExpiring()));
-            } else if (isTimeForPaidLicenseRenewExpired() && ! isSystemUsageLegal()) {
+            } else if (isTimeForPaidLicenseRenewExpired() && !isSystemUsageLegal()) {
                 issues.add(newDto(IssueDto.class).withStatus(Issue.Status.LICENSE_EXPIRED)
                                                  .withMessage(getMessageForLicenseCompletelyExpired()));
             }
@@ -265,10 +284,10 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
     public String getMessageForLicenseCompletelyExpired() throws ServerException {
         if (isAdmin()) {
             return format(Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
-                          userManager.getTotalCount(),
+                          getTotalUsersNumber(),
                           SystemLicense.MAX_NUMBER_OF_FREE_USERS);
         } else {
-                return Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN;
+            return Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_NON_ADMIN;
         }
     }
 
@@ -291,7 +310,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
         // when license absent, invalid or non-completely-expired
         if (isAdmin()) {
             return format(Constants.LICENSE_COMPLETELY_EXPIRED_MESSAGE_FOR_ADMIN_TEMPLATE,
-                          userManager.getTotalCount(),
+                          getTotalUsersNumber(),
                           SystemLicense.MAX_NUMBER_OF_FREE_USERS);
         } else {
             return Constants.LICENSE_HAS_REACHED_ITS_USER_LIMIT_MESSAGE_FOR_WORKSPACE;
@@ -303,7 +322,7 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
      * @throws ServerException
      */
     public boolean canStartWorkspace() throws ServerException {
-        return isLicenseUsageLegal(userManager.getTotalCount());
+        return isLicenseUsageLegal(getTotalUsersNumber());
     }
 
     @VisibleForTesting
@@ -338,5 +357,30 @@ public class SystemLicenseManager implements SystemLicenseManagerObservable {
         return EnvironmentContext.getCurrent().getSubject().hasPermission(SystemDomain.DOMAIN_ID,
                                                                           null,
                                                                           SystemDomain.MANAGE_SYSTEM_ACTION);
+    }
+
+    private void invalidateTotalUsersNumber() {
+        totalNumberRef.set(INVALIDATED_TOTAL_USERS_NUMBER);
+    }
+
+    private long getTotalUsersNumber() throws ServerException {
+        long totalNumber = totalNumberRef.updateAndGet(currentUsersNumber -> {
+            if (currentUsersNumber == INVALIDATED_TOTAL_USERS_NUMBER) {
+                try {
+                    return userManager.getTotalCount();
+                } catch (ServerException e) {
+                    LOG.error("Can't get total users number. License checking might be inconsistent.", e);
+                    return INVALIDATED_TOTAL_USERS_NUMBER;
+                }
+            } else {
+                return currentUsersNumber;
+            }
+        });
+
+        if (totalNumber == INVALIDATED_TOTAL_USERS_NUMBER) {
+            throw new ServerException("It is impossible to perform system license checking because the total number of users is unknown.");
+        }
+
+        return totalNumber;
     }
 }

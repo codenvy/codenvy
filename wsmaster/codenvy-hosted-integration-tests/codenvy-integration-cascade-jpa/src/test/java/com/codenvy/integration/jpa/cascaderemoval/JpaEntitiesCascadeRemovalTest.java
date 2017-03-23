@@ -76,6 +76,7 @@ import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -152,7 +153,9 @@ public class JpaEntitiesCascadeRemovalTest {
     private EventService                     eventService;
     private PreferenceDao                    preferenceDao;
     private AccountDao                       accountDao;
+    private AccountManager                   accountManager;
     private UserDao                          userDao;
+    private UserManager                      userManager;
     private ProfileDao                       profileDao;
     private WorkspaceDao                     workspaceDao;
     private SnapshotDao                      snapshotDao;
@@ -283,7 +286,9 @@ public class JpaEntitiesCascadeRemovalTest {
 
         eventService = injector.getInstance(EventService.class);
         accountDao = injector.getInstance(AccountDao.class);
+        accountManager = injector.getInstance(AccountManager.class);
         userDao = injector.getInstance(UserDao.class);
+        userManager = injector.getInstance(UserManager.class);
         preferenceDao = injector.getInstance(PreferenceDao.class);
         profileDao = injector.getInstance(ProfileDao.class);
         sshDao = injector.getInstance(SshDao.class);
@@ -321,9 +326,9 @@ public class JpaEntitiesCascadeRemovalTest {
         createTestData();
 
         // Remove the user, all entries must be removed along with the user
-        accountDao.remove(account.getId());
-        userDao.remove(user.getId());
-        userDao.remove(user2.getId());
+        accountManager.remove(account.getId());
+        userManager.remove(user.getId());
+        userManager.remove(user2.getId());
 
         // Check all the entities are removed
         assertNull(notFoundToNull(() -> userDao.getById(user.getId())));
@@ -383,8 +388,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
         // Remove the user, all entries must be rolled back after fail
         try {
-            userDao.remove(user2.getId());
-            fail("UserDao#remove had to throw exception");
+            userManager.remove(user2.getId());
+            fail("UserManager#remove had to throw exception");
         } catch (Exception ignored) {
         }
 
