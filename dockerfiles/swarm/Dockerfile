@@ -19,6 +19,5 @@ RUN apk --update add ca-certificates wget \
 
 ENV SWARM_HOST :2375
 EXPOSE 2375
-VOLUME /.swarm
 
 ENTRYPOINT ["/swarm_entrypoint.sh"]
