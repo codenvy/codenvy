@@ -1,10 +1,10 @@
 IMAGE_HAPROXY=haproxy:1.5.18-alpine
 IMAGE_NGINX=nginx:1.10-alpine
-IMAGE_SWARM=swarm:1.2.6
 IMAGE_REGISTRY=registry:2.5.0
 IMAGE_POSTGRES=postgres:9.5.4
 IMAGE_COMPOSE=docker/compose:1.8.1
 IMAGE_ZOOKEEPER=zookeeper:3.4.9
+IMAGE_SWARM=codenvy/swarm:latest
 IMAGE_SOCAT=codenvy/socat:latest
 IMAGE_INIT=codenvy/init:latest
 IMAGE_AGENTS=codenvy/agents:latest
