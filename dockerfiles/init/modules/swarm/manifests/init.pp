@@ -8,5 +8,10 @@ class swarm {
     ensure  => "present",
     content => template("swarm/node_list.erb"),
     mode    => '644',
+  } ->
+  file { "/opt/codenvy/config/swarm/swarm_entrypoint.sh":
+    ensure  => "present",
+    content => template("swarm/swarm_entrypoint.sh.erb"),
+    mode    => '755',
   }
 }
