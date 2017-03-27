@@ -20,7 +20,7 @@
            layout="row"
            layout-align="start stretch"
            class="che-list-item-row">
-        <div layout="column" layout-gt-xs="row"
+        <div layout="column" layout-gt-xs="row" ng-if="!listTeamsController.readonly"
              layout-align="start center"
              class="che-checkbox-area">
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
@@ -51,7 +51,7 @@
                  team="team"
                  members="listTeamsController.getMembersCount(team.id)"
                  ram-cap="listTeamsController.getRamCap(team.id)"
-                 cdvy-is-selectable="true"
+                 cdvy-is-selectable="!listTeamsController.readonly"
                  ng-model="listTeamsController.teamsSelectedStatus[team.id]"
                  on-update="listTeamsController.fetchTeams()"
                  cdvy-on-checkbox-click="listTeamsController.updateSelectedStatus()">
@@ -59,7 +59,7 @@
     </che-list>
   </div>
   <!-- Buttons -->
-  <div layout="row" flex>
+  <div layout="row" flex ng-if="!listTeamsController.readonly">
     <div flex>
       <che-button-default class="che-list-add-button"
                           che-button-title="Create Team" name="createTeamButton"

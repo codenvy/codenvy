@@ -26,7 +26,7 @@ import {AddMemberController} from './share-workspace/add-members/add-members.con
 
 export class WorkspaceConfig {
 
-  constructor(register) {
+  constructor(register: che.IRegisterService) {
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
 

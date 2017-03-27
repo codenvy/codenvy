@@ -22,9 +22,10 @@
        layout="row"
        layout-align="start stretch"
        class="che-list-item-row">
-    <div layout="row"
-         layout-align="start center"
-         class="che-checkbox-area">
+    <div ng-if="teamItemController.selectable"
+       layout="row"
+       layout-align="start center"
+       class="che-checkbox-area">
       <che-list-item-checked ng-model="teamItemController.isSelect"
                              che-aria-label-checkbox="Team {{teamItemController.team.name}}"
                              ng-click="teamItemController.onCheckboxClick()"></che-list-item-checked>

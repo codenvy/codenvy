@@ -60,7 +60,7 @@ export class TimeoutInfoController {
   /**
    * Fetches the team's details by it's name.
    */
-  fetchTeamDetails(name): void {
+  fetchTeamDetails(name: string): void {
     this.team  = this.codenvyTeam.getTeamByName(name);
     if (!this.team) {
       this.codenvyTeam.fetchTeamByName(name).then((team: any) => {
@@ -115,6 +115,8 @@ export class TimeoutInfoController {
     }, (error: any) => {
       if (error.status === 304) {
         this.processPackages(this.codenvySubscription.getPackages());
+      } else {
+        this.timeout = null;
       }
     });
   }
@@ -155,7 +157,6 @@ export class TimeoutInfoController {
       }
     });
   }
-
 
   /**
    * Processes license, retrieves free resources info.

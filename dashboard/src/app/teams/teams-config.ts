@@ -122,7 +122,8 @@ export class TeamsConfig {
       controller: 'TeamDetailsController',
       controllerAs: 'teamDetailsController',
       resolve: {
-        check: ['$q', 'teamDetailsService', '$route', checkTeamDetails]
+        checkPersonal: ['$q', 'codenvyTeam', checkPersonalTeam],
+        checkTeamDetails: ['$q', 'teamDetailsService', '$route', checkTeamDetails]
       }
     };
 
