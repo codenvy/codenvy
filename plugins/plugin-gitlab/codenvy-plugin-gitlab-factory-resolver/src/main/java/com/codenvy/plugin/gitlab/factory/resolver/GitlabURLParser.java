@@ -14,6 +14,8 @@
  */
 package com.codenvy.plugin.gitlab.factory.resolver;
 
+import org.eclipse.che.plugin.urlfactory.URLParser;
+
 import javax.validation.constraints.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +25,7 @@ import java.util.regex.Pattern;
  *
  * @author Florent Benoit
  */
-public class GitlabUrlParser {
+public class GitlabURLParser implements URLParser<GitlabUrl> {
 
     /**
      * Regexp to find repository details (repository name, project name and branch and subfolder)
@@ -34,24 +36,12 @@ public class GitlabUrlParser {
             "^(?:http)(?:s)?(?:\\:\\/\\/)gitlab.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)(?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)?$");
 
 
-    /**
-     * Check if the provided URL is a valid Github url or not
-     *
-     * @param url
-     *         a not null string representation of URL
-     * @return true if the given URL is a github URL
-     */
+    @Override
     public boolean isValid(@NotNull String url) {
         return GITLAB_PATTERN.matcher(url).matches();
     }
 
-    /**
-     * Provides a github URL object allowing to extract some part of the URL.
-     *
-     * @param url
-     *         URL to transform into a managed object
-     * @return managed github url {@link GitlabUrl}.
-     */
+    @Override
     public GitlabUrl parse(String url) {
         // Apply github url to the regexp
         Matcher matcher = GITLAB_PATTERN.matcher(url);
@@ -61,8 +51,12 @@ public class GitlabUrlParser {
                     url));
         }
 
-        return new GitlabUrl().username(matcher.group("repoUser")).repository(matcher.group("repoName")).branch(matcher.group("branchName"))
-                              .subfolder(matcher.group("subFolder"));
+        return new GitlabUrl().withUsername(matcher.group("repoUser"))
+                              .withRepository(matcher.group("repoName"))
+                              .withBranch(matcher.group("branchName"))
+                              .withSubfolder(matcher.group("subFolder"))
+                              .withDockerfileFilename(".factory.dockerfile")
+                              .withFactoryFilename(".factory.json");
 
     }
 }

@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.plugin.urlfactory.CreateFactoryParams;
 import org.eclipse.che.plugin.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.plugin.urlfactory.URLFactoryBuilder;
 
@@ -44,7 +43,7 @@ public class GitlabFactoryParametersResolver implements FactoryParametersResolve
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Inject
-    private GitlabUrlParser gitlabUrlParser;
+    private GitlabURLParser gitlabUrlParser;
 
     /**
      * Builder allowing to build objects from gitlab URL.
@@ -91,21 +90,20 @@ public class GitlabFactoryParametersResolver implements FactoryParametersResolve
         final GitlabUrl gitlabUrl = gitlabUrlParser.parse(factoryParameters.get("url"));
 
         // create factory from the following location if location exists, else create default factory
-        FactoryDto factory = urlFactoryBuilder.createFactory(CreateFactoryParams.create().jsonFileLocation(
-                gitlabUrl.codenvyFactoryJsonFileLocation()));
+        FactoryDto factory = urlFactoryBuilder.createFactory(gitlabUrl.factoryJsonFileLocation());
 
         // add workspace configuration if not defined
         if (factory.getWorkspace() == null) {
-            factory.setWorkspace(urlFactoryBuilder.buildWorkspaceConfig(gitlabUrl.repository(),
-                                                                        gitlabUrl.username(),
-                                                                        gitlabUrl.codenvyDockerFileLocation()));
+            factory.setWorkspace(urlFactoryBuilder.buildWorkspaceConfig(gitlabUrl.getRepository(),
+                                                                        gitlabUrl.getUsername(),
+                                                                        gitlabUrl.dockerFileLocation()));
         }
 
         // Compute project configuration
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class).withSource(gitlabSourceStorageBuilder.build(gitlabUrl))
-                                                                          .withName(gitlabUrl.repository())
+                                                                          .withName(gitlabUrl.getRepository())
                                                                           .withType("blank")
-                                                                          .withPath("/".concat(gitlabUrl.repository()));
+                                                                          .withPath("/".concat(gitlabUrl.getRepository()));
 
         // apply merging operation from existing and computed settings
         return projectConfigDtoMerger.merge(factory, projectConfigDto);
