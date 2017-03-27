@@ -18,6 +18,8 @@ import com.codenvy.api.permission.shared.event.EventType;
 import com.codenvy.api.permission.shared.event.PermissionsEvent;
 import com.codenvy.api.permission.shared.model.Permissions;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import static com.codenvy.api.permission.shared.event.EventType.PERMISSIONS_REMOVED;
 
 /**
@@ -45,6 +47,8 @@ public class PermissionsRemovedEvent implements PermissionsEvent {
         return permissions;
     }
 
+    @Nullable
+    @Override
     public String getInitiator() {
         return initiator;
     }

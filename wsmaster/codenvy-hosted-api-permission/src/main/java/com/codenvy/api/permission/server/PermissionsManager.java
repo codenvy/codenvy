@@ -14,7 +14,7 @@
  */
 package com.codenvy.api.permission.server;
 
-import com.codenvy.api.permission.server.event.PermissionsAddedEvent;
+import com.codenvy.api.permission.server.event.PermissionsCreatedEvent;
 import com.codenvy.api.permission.server.event.PermissionsRemovedEvent;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.server.spi.PermissionsDao;
@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.StripedLocks;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
+import org.eclipse.che.commons.subject.Subject;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -254,9 +256,12 @@ public class PermissionsManager {
         final AbstractPermissionsDomain<T> permissionsDomain = dao.getDomain();
         final T permission = permissionsDomain.newInstance(userId, instanceId, permissions.getActions());
         checkActionsSupporting(permissionsDomain, permission.getActions());
-        dao.store(permission);
-        final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
-        eventService.publish(new PermissionsAddedEvent(initiator, permissions));
+        final Optional<T> existing = dao.store(permission);
+        if (!existing.isPresent()) {
+            Subject subject = EnvironmentContext.getCurrent().getSubject();
+            final String initiator = subject.isAnonymous() ? null : subject.getUserName();
+            eventService.publish(new PermissionsCreatedEvent(initiator, permissions));
+        }
     }
 
     private void checkActionsSupporting(AbstractPermissionsDomain<?> domain, List<String> actions) throws ConflictException {

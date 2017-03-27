@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Defines data access object contract for {@link WorkerImpl}.
@@ -34,12 +35,13 @@ public interface WorkerDao {
      *
      * @param worker
      *         worker to store
+     * @return optional with updated worker, other way empty optional must be returned
      * @throws NullPointerException
      *         when {@code worker} is null
      * @throws ServerException
      *         when any other error occurs during worker storing
      */
-    void store(WorkerImpl worker) throws ServerException;
+    Optional<WorkerImpl> store(WorkerImpl worker) throws ServerException;
 
     /**
      * Gets worker by user and workspace

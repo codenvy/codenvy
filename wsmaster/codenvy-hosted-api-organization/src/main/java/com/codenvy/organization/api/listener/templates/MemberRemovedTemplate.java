@@ -23,14 +23,14 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
  */
 public class MemberRemovedTemplate extends ThymeleafTemplate {
 
-    public MemberRemovedTemplate(String teamName, String initiator) {
-        context.setVariable("teamName", teamName);
+    public MemberRemovedTemplate(String organizationName, String initiator) {
+        context.setVariable("organizationName", organizationName);
         context.setVariable("initiator", initiator);
     }
 
     @Override
     public String getPath() {
-        return "/email-templates/user_removed_from_team";
+        return "/email-templates/user_removed_from_organization";
     }
 
 }

@@ -16,6 +16,8 @@ package com.codenvy.api.permission.shared.event;
 
 import com.codenvy.api.permission.shared.model.Permissions;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * The base interface for all events related to permissions.
  *
@@ -23,8 +25,19 @@ import com.codenvy.api.permission.shared.model.Permissions;
  */
 public interface PermissionsEvent {
 
+    /**
+     * Returns the permissions related to this event.
+     */
     Permissions getPermissions();
 
+    /**
+     * Returns concrete event type, see {@link EventType}.
+     */
     EventType getType();
 
+    /**
+     * Returns name of user who acted with permission or null if user is undefined.
+     */
+    @Nullable
+    String getInitiator();
 }

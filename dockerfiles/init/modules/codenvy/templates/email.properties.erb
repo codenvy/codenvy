@@ -11,11 +11,10 @@ workspace.email.removed.member.enabled=true
 # sender email address
 mailsender.application.from.email.address=<%= scope.lookupvar('codenvy::email_from') %>
 
-# Configuration of teams email notifications
-team.email.member.added.subject=You’ve been added to a Codenvy team
-team.email.member.removed.subject=You’ve been removed from a Codenvy team
-team.email.renamed.subject=Codenvy Team renamed
-team.email.removed.subject=Codenvy Team deleted
-
+# Configuration of email notifications
 workspace.email.invite.subject=<%= scope.lookupvar('codenvy::workspace_email_invite_subject') %>
 organization.email.invite.subject=<%= scope.lookupvar('codenvy::organization_email_invite_subject') %>
+organization.email.member.added.subject=<%= scope.lookupvar('codenvy::organization_email_member_added_subject') %>
+organization.email.member.removed.subject=<%= scope.lookupvar('codenvy::organization_email_member_removed_subject') %>
+organization.email.renamed.subject=<%= scope.lookupvar('codenvy::organization_email_renamed_subject') %>
+organization.email.removed.subject=<%= scope.lookupvar('codenvy::organization_email_removed_subject') %>

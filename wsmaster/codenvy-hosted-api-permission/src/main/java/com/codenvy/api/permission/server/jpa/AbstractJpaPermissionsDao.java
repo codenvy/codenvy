@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,10 +54,10 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
     }
 
     @Override
-    public void store(T permissions) throws ServerException {
+    public Optional<T> store(T permissions) throws ServerException {
         requireNonNull(permissions, "Permissions instance required");
         try {
-            doCreate(permissions);
+            return doCreate(permissions);
         } catch (RuntimeException e) {
             throw new ServerException(e.getMessage(), e);
         }
@@ -104,16 +105,22 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions> i
     protected abstract T getEntity(String userId, String instanceId) throws NotFoundException;
 
     @Transactional
-    protected void doCreate(T permissions) throws ServerException {
+    protected Optional<T> doCreate(T permissions) throws ServerException {
         EntityManager manager = managerProvider.get();
         try {
             final T result = getEntity(wildcardToNull(permissions.getUserId()), permissions.getInstanceId());
+            final T existing = getDomain().newInstance(result.getUserId(),
+                                                       result.getInstanceId(),
+                                                       result.getActions());
             result.getActions().clear();
             result.getActions().addAll(permissions.getActions());
+            manager.flush();
+            return Optional.of(existing);
         } catch (NotFoundException n) {
             manager.persist(permissions);
+            manager.flush();
+            return Optional.empty();
         }
-        manager.flush();
     }
 
     @Transactional
