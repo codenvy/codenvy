@@ -32,7 +32,16 @@ define(["jquery","underscore","views/accountformbase","models/account"],
                })
                 .fail();
                 this.getBranding.then(function(Branding){
-                    $('.support-link')[0].setAttribute('href', Branding.supportLink);
+                    try {
+                        if (Branding.supportLink.length > 0){
+                            $('#bottom-ul').prepend('<li><a class="support-link" href="http://helpdesk.codenvy.com">Feedback and Support</a></li>');
+                            $('.support-link')[0].setAttribute('href', Branding.supportLink);
+                        }else{
+                            throw false;
+                        }
+                    }catch(error){
+                        window.console.warn('Branding: Support href link is wrong or not configured in product.json');
+                    }
                 });
             },
 
