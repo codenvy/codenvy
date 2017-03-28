@@ -22,6 +22,7 @@ import {TimeoutInfo} from './timeout/timeout-info.directive';
 
 import {UserItem} from './share-workspace/user-item/user-item.directive';
 import {UserItemController} from './share-workspace/user-item/user-item.controller';
+import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
 import {AddMemberController} from './share-workspace/add-members/add-members.controller';
 
 export class WorkspaceConfig {
@@ -33,6 +34,7 @@ export class WorkspaceConfig {
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
 
+    register.controller('AddDeveloperController', AddDeveloperController);
     register.controller('AddMemberController', AddMemberController);
 
     register.controller('TimeoutInfoController', TimeoutInfoController);

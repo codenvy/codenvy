@@ -39,18 +39,11 @@ interface ISystemPermissions {
  * @author Oleksii Orel
  */
 export class CodenvyPermissions {
-  $q: ng.IQService;
-  $resource: ng.resource.IResourceService;
-  remotePermissionsAPI: ICodenvyPermissionsResource<any>;
-  userServices: IUserServices;
-  workspacePermissions: Map<string, string>;
-  systemPermissions: ISystemPermissions;
 
   /**
    * Angular promise service.
    */
   private $q: ng.IQService;
-
   /**
    * Angular Resource service.
    */
@@ -71,7 +64,6 @@ export class CodenvyPermissions {
    * Available system permissions.
    */
   private systemPermissions: any;
-
   /**
    * Client to make remote permissions API calls.
    */
@@ -203,14 +195,14 @@ export class CodenvyPermissions {
   fetchSystemPermissions(): ng.IPromise<any> {
     let promise: ng.IPromise<any> = this.remotePermissionsAPI.getSystemPermissions().$promise;
     promise.then((systemPermissions: ISystemPermissions) => {
-      this._updateUserServices(systemPermissions);
+      this.updateUserServices(systemPermissions);
       this.systemPermissions = systemPermissions;
     });
 
     return promise;
   }
 
-  _updateUserServices(systemPermissions: ISystemPermissions): void {
+  private updateUserServices(systemPermissions: ISystemPermissions): void {
     let isManageUsers: boolean = systemPermissions && systemPermissions.actions.includes('manageUsers');
     let isManageSystem: boolean = systemPermissions && systemPermissions.actions.includes('manageSystem');
 
