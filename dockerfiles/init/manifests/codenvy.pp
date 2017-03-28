@@ -20,6 +20,7 @@ node default {
 # swarm nodes management
 # coma separated list of <IP>:<PORT>
   $swarm_nodes = getValue("CODENVY_SWARM_NODES","172.17.0.1:2375")
+  $expose_swarm_port = getValue("CODENVY_EXPOSE_SWARM_PORT","true")
 
 ###############################
 #
@@ -197,7 +198,7 @@ node default {
 # LinkedIn
   $linkedin_client_id = getValue("CODENVY_LINKEDIN_CLIENT_ID","NULL")
   $linkedin_secret = getValue("CODENVY_LINKEDIN_SECRET","NULL")
-  
+
 # Integration
   $integration_factory_owner_username = getValue("CODENVY_INTEGRATION_FACTORY_OWNER_USERNAME","")
   $integration_factory_owner_password = getValue("CODENVY_INTEGRATION_FACTORY_OWNER_PASSWORD","")
@@ -332,6 +333,10 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 # Default value INFO. Possible values: QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG1, DEBUG2, and DEBUG3
   $rsync_ssh_log_level=getValue("RSYNC_SSH_LOG_LEVEL","INFO")
 
+###############################
+# socat
+#
+  $expose_socat_port = getValue("CODENVY_EXPOSE_SOCAT_PORT","true")
 ###############################
 # Include base module
   include base
