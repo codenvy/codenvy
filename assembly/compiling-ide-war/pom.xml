@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-bitbucket-ext-bitbucket</artifactId>
+            <artifactId>codenvy-plugin-bitbucket-ext-bitbucket-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>

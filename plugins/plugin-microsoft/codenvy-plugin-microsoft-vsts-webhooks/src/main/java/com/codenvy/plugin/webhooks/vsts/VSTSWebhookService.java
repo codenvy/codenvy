@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import static com.codenvy.plugin.webhooks.CloneUrlMatcher.DEFAULT_CLONE_URL_MATCHER;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static com.codenvy.plugin.webhooks.FactoryType.DEVELOP;
@@ -293,7 +294,10 @@ public class VSTSWebhookService extends BaseWebhookService {
             final String repositoryNameUrl = vstsConnection.getRepositoryNameUrl(repositoryIdUrl, apiVersion, credentials);
 
             // Get factories that contain a project for given repository and branch
-            final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoryIDs, repositoryNameUrl, sourceBranch);
+            final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoryIDs,
+                                                                                  repositoryNameUrl,
+                                                                                  sourceBranch,
+                                                                                  DEFAULT_CLONE_URL_MATCHER);
             if (factories.isEmpty()) {
                 LOG.error("No factory found for branch {}", sourceBranch);
                 throw new ServerException("No factory found for branch " + sourceBranch);

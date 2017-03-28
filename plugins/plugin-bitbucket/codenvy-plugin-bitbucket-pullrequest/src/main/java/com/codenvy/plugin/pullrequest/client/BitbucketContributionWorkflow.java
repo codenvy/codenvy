@@ -16,6 +16,7 @@ package com.codenvy.plugin.pullrequest.client;
 
 import com.codenvy.plugin.pullrequest.client.steps.AddHttpForkRemoteStep;
 import com.codenvy.plugin.pullrequest.client.steps.AddReviewFactoryLinkStep;
+import com.codenvy.plugin.pullrequest.client.steps.AddSshForkRemoteStep;
 import com.codenvy.plugin.pullrequest.client.steps.AuthorizeCodenvyOnVCSHostStep;
 import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
 import com.codenvy.plugin.pullrequest.client.steps.CreateForkStep;
@@ -43,6 +44,8 @@ import javax.inject.Inject;
  */
 public class BitbucketContributionWorkflow implements ContributionWorkflow {
 
+    private static final String BITBUCKET_HOSTED_ENDPOINT = "https://bitbucket.org";
+
     private final InitializeWorkflowContextStep   initializeWorkflowContextStep;
     private final DefineWorkBranchStep            defineWorkBranchStep;
     private final CommitWorkingTreeStep           commitWorkingTreeStep;
@@ -51,6 +54,7 @@ public class BitbucketContributionWorkflow implements ContributionWorkflow {
     private final DetermineUpstreamRepositoryStep determineUpstreamRepositoryStep;
     private final CreateForkStep                  createForkStep;
     private final AddHttpForkRemoteStep           addHttpForkRemoteStep;
+    private final AddSshForkRemoteStep            addSshForkRemoteStep;
     private final PushBranchOnForkStep            pushBranchOnForkStep;
     private final PushBranchOnOriginStep          pushBranchOnOriginStep;
     private final GenerateReviewFactoryStep       generateReviewFactoryStep;
@@ -70,6 +74,7 @@ public class BitbucketContributionWorkflow implements ContributionWorkflow {
                                          DetectPullRequestStep detectPullRequestStep,
                                          CreateForkStep createForkStep,
                                          AddHttpForkRemoteStep addHttpForkRemoteStep,
+                                         AddSshForkRemoteStep addSshForkRemoteStep,
                                          PushBranchOnForkStep pushBranchOnForkStep,
                                          PushBranchOnOriginStep pushBranchOnOriginStep,
                                          GenerateReviewFactoryStep generateReviewFactoryStep,
@@ -85,6 +90,7 @@ public class BitbucketContributionWorkflow implements ContributionWorkflow {
         this.detectPullRequestStep = detectPullRequestStep;
         this.createForkStep = createForkStep;
         this.addHttpForkRemoteStep = addHttpForkRemoteStep;
+        this.addSshForkRemoteStep = addSshForkRemoteStep;
         this.pushBranchOnForkStep = pushBranchOnForkStep;
         this.pushBranchOnOriginStep = pushBranchOnOriginStep;
         this.generateReviewFactoryStep = generateReviewFactoryStep;
@@ -114,7 +120,8 @@ public class BitbucketContributionWorkflow implements ContributionWorkflow {
                                           }
                                       },
                                       StepsChain.first(createForkStep)
-                                                .then(addHttpForkRemoteStep)
+                                                .then(BITBUCKET_HOSTED_ENDPOINT.equals(context.getVcsHostingService().getHost())
+                                                      ? addHttpForkRemoteStep : addSshForkRemoteStep)
                                                 .then(pushBranchOnForkStep),
                                       StepsChain.first(pushBranchOnOriginStep))
                          .then(generateReviewFactoryStep)
@@ -138,7 +145,8 @@ public class BitbucketContributionWorkflow implements ContributionWorkflow {
                                               return context.isForkAvailable();
                                           }
                                       },
-                                      StepsChain.first(addHttpForkRemoteStep)
+                                      StepsChain.first(BITBUCKET_HOSTED_ENDPOINT.equals(context.getVcsHostingService().getHost())
+                                                       ? addHttpForkRemoteStep : addSshForkRemoteStep)
                                                 .then(pushBranchOnForkStep),
                                       StepsChain.first(pushBranchOnOriginStep))
                          .then(updatePullRequestStep);

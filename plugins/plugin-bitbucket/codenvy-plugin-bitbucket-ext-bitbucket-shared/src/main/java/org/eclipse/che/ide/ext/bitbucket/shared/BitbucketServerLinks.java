@@ -12,41 +12,18 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.plugin.webhooks.bitbucketserver.shared;
+package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Represents a Bitbucket Server repository.
+ * Represents a link in Bitbucket Server rest API.
  *
  * @author Igor Vinokur
  */
 @DTO
-public interface Repository {
-    /**
-     * Returns the repository's slug.
-     */
-    String getSlug();
+public interface BitbucketServerLinks {
+    BitbucketServerCloneLink getClone();
 
-    void setSlug(String slug);
-
-    Repository withSlug(String slug);
-
-    /**
-     * Returns the repository's name.
-     */
-    String getName();
-
-    void setName(String name);
-
-    Repository withName(String name);
-
-    /**
-     * Returns {@link Project} object of the repository's project.
-     */
-    Project getProject();
-
-    void setProject(Project project);
-
-    Repository withProject(Project project);
+    void setClone(BitbucketServerCloneLink clone);
 }

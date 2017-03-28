@@ -29,7 +29,9 @@
     <modules>
         <module>codenvy-plugin-bitbucket-oauth</module>
         <module>codenvy-plugin-bitbucket-git-provider</module>
-        <module>codenvy-plugin-bitbucket-ext-bitbucket</module>
+        <module>codenvy-plugin-bitbucket-ext-bitbucket-client</module>
+        <module>codenvy-plugin-bitbucket-ext-bitbucket-server</module>
+        <module>codenvy-plugin-bitbucket-ext-bitbucket-shared</module>
         <module>codenvy-plugin-bitbucket-configuration</module>
         <module>codenvy-plugin-bitbucket-pullrequest</module>
         <module>codenvy-plugin-bitbucketserver-webhooks</module>

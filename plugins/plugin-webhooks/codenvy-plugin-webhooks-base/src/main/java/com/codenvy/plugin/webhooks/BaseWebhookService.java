@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.codenvy.plugin.webhooks.CloneUrlMatcher.DEFAULT_CLONE_URL_MATCHER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -91,7 +92,8 @@ public abstract class BaseWebhookService extends Service {
      * @return list of factories that contain a project for given repository and branch
      */
     protected List<FactoryDto> getFactoriesForRepositoryAndBranch(final Set<String> factoryIDs, final String headRepositoryUrl,
-                                                                  final String headBranch) throws ServerException {
+                                                                  final String headBranch,
+                                                                  final CloneUrlMatcher matcher) throws ServerException {
         List<FactoryDto> factories = new ArrayList<>();
         for (String factoryID : factoryIDs) {
             factories.add(factoryConnection.getFactory(factoryID));
@@ -101,7 +103,7 @@ public abstract class BaseWebhookService extends Service {
                         .filter(f -> (f != null)
                                      && (f.getWorkspace().getProjects()
                                           .stream()
-                                          .anyMatch(p -> isProjectMatching(p, headRepositoryUrl, headBranch))))
+                                          .anyMatch(p -> matcher.isCloneUrlMatching(p, headRepositoryUrl, headBranch))))
                         .collect(toList());
     }
 
@@ -125,12 +127,13 @@ public abstract class BaseWebhookService extends Service {
                                                 final String headRepositoryUrl,
                                                 final String headBranch,
                                                 final String baseRepositoryUrl,
-                                                final String headCommitId) throws ServerException {
+                                                final String headCommitId,
+                                                final CloneUrlMatcher matcher) throws ServerException {
         // Get projects in factory
         final List<ProjectConfigDto> factoryProjects = factory.getWorkspace().getProjects();
 
         factoryProjects.stream()
-                       .filter(project -> isProjectMatching(project, headRepositoryUrl, headBranch))
+                       .filter(project -> matcher.isCloneUrlMatching(project, headRepositoryUrl, headBranch))
                        .forEach(project -> {
                            // Update repository and commitId
                            final SourceStorageDto source = project.getSource();
@@ -163,7 +166,7 @@ public abstract class BaseWebhookService extends Service {
      */
     protected FactoryDto updateProjectInFactory(final FactoryDto factory, final String repositoryUrl, final String headBranch,
                                                 final String headCommitId) throws ServerException {
-        return updateProjectInFactory(factory, repositoryUrl, headBranch, repositoryUrl, headCommitId);
+        return updateProjectInFactory(factory, repositoryUrl, headBranch, repositoryUrl, headCommitId, DEFAULT_CLONE_URL_MATCHER);
     }
 
     protected void updateFactory(final FactoryDto factory) throws ServerException {
@@ -263,42 +266,6 @@ public abstract class BaseWebhookService extends Service {
             LOG.error(e.getLocalizedMessage());
             throw new ServerException(e.getLocalizedMessage());
         }
-    }
-
-    /**
-     * Whether or not a given project matches given repository and branch
-     *
-     * @param project
-     *         the project to check
-     * @param repositoryUrl
-     *         the repo that the project source location has to match
-     * @param branch
-     *         the branch that the project has to match
-     * @return the {@link java.util.function.Predicate} that matches relevant project(s)
-     */
-    private boolean isProjectMatching(final ProjectConfigDto project, final String repositoryUrl, final String branch) {
-
-        if (isNullOrEmpty(repositoryUrl) || isNullOrEmpty(branch)) {
-            return false;
-        }
-
-        final SourceStorageDto source = project.getSource();
-        if (source == null) {
-            return false;
-        }
-
-        final String projectType = source.getType();
-        final String projectLocation = source.getLocation();
-        final String projectBranch = source.getParameters().get("branch");
-
-        if (isNullOrEmpty(projectType) || isNullOrEmpty(projectLocation)) {
-            return false;
-        }
-        return (repositoryUrl.equals(projectLocation)
-                || (repositoryUrl + ".git").equals(projectLocation))
-               && ("master".equals(branch)
-                   || (!isNullOrEmpty(projectBranch)
-                       && branch.equals(projectBranch)));
     }
 
     /**
