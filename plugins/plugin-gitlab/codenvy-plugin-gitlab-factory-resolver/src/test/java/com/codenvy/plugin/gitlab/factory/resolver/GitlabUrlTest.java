@@ -36,7 +36,7 @@ public class GitlabUrlTest {
      * Parser used to create the url.
      */
     @InjectMocks
-    private GitlabURLParser gitlabUrlParser;
+    private GitlabURLParserImpl gitlabUrlParser;
 
     /**
      * Instance of the url created

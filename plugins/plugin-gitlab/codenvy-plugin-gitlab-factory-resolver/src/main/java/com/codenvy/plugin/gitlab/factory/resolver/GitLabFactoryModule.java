@@ -17,7 +17,6 @@ package com.codenvy.plugin.gitlab.factory.resolver;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.urlfactory.URLParser;
 
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
@@ -26,6 +25,6 @@ import org.eclipse.che.plugin.urlfactory.URLParser;
 public class GitLabFactoryModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(URLParser.class).to(LegacyGitlabURLParser.class);
+        bind(GitlabURLParser.class).to(LegacyGitlabURLParser.class);
     }
 }

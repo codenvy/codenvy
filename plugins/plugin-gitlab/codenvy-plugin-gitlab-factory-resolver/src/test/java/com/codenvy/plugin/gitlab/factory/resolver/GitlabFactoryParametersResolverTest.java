@@ -57,7 +57,7 @@ public class GitlabFactoryParametersResolverTest {
      * Parser which will allow to check validity of URLs and create objects.
      */
     @Spy
-    private GitlabURLParser gitlabUrlParser = new GitlabURLParser();
+    private GitlabURLParserImpl gitlabUrlParser = new GitlabURLParserImpl();
 
     /**
      * Converter allowing to convert gitlab URL to other objects.
