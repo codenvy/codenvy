@@ -13,4 +13,12 @@ if [ ! -d  /var/log/registry ]; then
     mkdir -p /var/log/registry
 fi
 
-exec /bin/registry serve /etc/docker/registry/config.yml >>/var/log/registry/registry.log 2>&1
+exec /bin/registry serve /etc/docker/registry/config.yml 2>&1 | tee -a /var/log/registry/registry.log &
+
+pid=`pidof registry`
+trap "echo 'Stopping PID $pid'; kill -SIGTERM $pid" SIGINT SIGTERM
+# A signal emitted while waiting will make the wait command return code > 128
+# Let's wrap it in a loop that doesn't end before the process is indeed stopped
+while kill -0 $pid > /dev/null 2>&1; do
+    wait
+done
