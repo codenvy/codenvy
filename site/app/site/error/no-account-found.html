@@ -1,14 +1,14 @@
 ---
     layout : error-page
-    title: Codenvy
+    title: No Account Found
 ---
-    <div class="light">
-        <h1><i class="fa fa-exclamation"></i>No Account Found</h1>
+    <div class="light hidden">
+        <h1 class="header"><i class="fa fa-exclamation"></i>No Account Found</h1>
 
         <hr class="subtitle-line">
-
-		<p>Looks like you tried to log in with oAuth, but we could not find an account for you.</p>
-		<p>Self-service account creation is disabled.</p>
-        <p>Please contact your administrator to have an account created.</p>
-
+        <div class="message">
+			<p>Looks like you tried to log in with oAuth, but we could not find an account for you.</p>
+			<p>Self-service account creation is disabled.</p>
+			<p>Please contact your administrator to have an account created.</p>
+        </div>
     </div>

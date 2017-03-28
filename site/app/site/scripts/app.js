@@ -25,7 +25,7 @@ define(["jquery","config",
         "views/factory-usage-notification",
         "views/login",
         "views/accept-fair-source-license",
-        "views/fair-source-license-is-not-accepted-error"
+        "views/errors/branding-pages"
         ],
 
     function($,Config,
@@ -37,7 +37,7 @@ define(["jquery","config",
         FactoryUsageNotification,
         MainPage,
         AcceptLicensePage,
-        FSLNotAcceptedErrorPage){
+        BrandingPages){
 
         function modernize(){
             Modernizr.load({
@@ -57,9 +57,22 @@ define(["jquery","config",
                 $(document).ready(function(){
 
                     modernize();
-                    var uvOptions = {}; //UserVoice object
-                    
-                    if (uvOptions){}
+                    var brandingPages = {// product.json file contains branding data for these pages. pageName is used as the key.
+                        1:{class:".400",pageName:"error400"},
+                        2:{class:".401",pageName:"error401"},
+                        3:{class:".403",pageName:"error403"},
+                        4:{class:".404",pageName:"error404"},
+                        5:{class:".405",pageName:"error405"},
+                        6:{class:".500",pageName:"error500"},
+                        7:{class:".503",pageName:"error503"},
+                        8:{class:".504",pageName:"error504"},
+                        9:{class:".browser-not-supported",pageName:"BrowserNotSupported"},
+                        10:{class:".error-cookies-disabled",pageName:"YourCookiesAreDisabled"},
+                        11:{class:".error-factory-creation",pageName:"FactoryWorkspaceCreationFailed"},
+                        12:{class:".error-tenant-name",pageName:"WorkspaceDoesNotExist"},
+                        13:{class:".maintenance",pageName:"Maintenance"},
+                        14:{class:".fair-source-license-is-not-accepted-error",pageName:"AccessRequiresLicenseAcceptance"}
+                    };
                     var forgotPasswordForm = $(".forgotpassword-form"),
                         resetPasswordForm = $(".resetpassword-form"),
                         errorContainer = $(".error-container"),
@@ -67,19 +80,16 @@ define(["jquery","config",
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
                         mainpage = $(".main-page"),
-                        acceptLicensePage = $(".accept-license-form"),
-                        fslNotAcceptedPage = $(".fair-source-license-is-not-accepted-error");
+                        acceptLicensePage = $(".accept-license-form");
 
-                    if(fslNotAcceptedPage.length !== 0){
-                        (function(){
-                            var form = FSLNotAcceptedErrorPage.get(fslNotAcceptedPage),
-                            errorReport = ErrorReport.get(errorContainer);
-                            form.on("invalid", function(field,message){
-                                errorReport.show(message);
-                            });
-                        }());
-
-                    }
+                    $.each(brandingPages, function(i,val){
+                        var page = $(val.class);
+                        if (page.length !== 0) {
+                            (function(){
+                                BrandingPages.get(page, val.pageName);
+                            }());
+                        }
+                    });
 
                     if(acceptLicensePage.length !== 0){
                         (function(){

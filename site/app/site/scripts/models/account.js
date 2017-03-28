@@ -367,6 +367,22 @@
                 return (/^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*).{8,100}$/).test(value);
             },
 
+            getBrandingInfo: function() {
+                return $.getJSON("/site/branding/product.json")
+                .fail(function(error){
+                    switch (error.status) {
+                        case 404:
+                            window.console.error('Branding: product.json not found.');
+                            break;
+                        case 200:
+                            window.console.error('JSON parse error. Valid product.json needed.');
+                            break;
+                        default:
+                            window.console.error('Branding error. Something went wrong');
+                    }
+                });
+            },
+
             isUserAuthenticated: function() {
                 return getProfilePrefs()
                     .then(function(prefs){

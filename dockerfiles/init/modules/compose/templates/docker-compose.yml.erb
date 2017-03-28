@@ -27,13 +27,7 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/rsyslog.conf:/etc/rsyslog.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/haproxy.conf:/etc/rsyslog.d/haproxy.conf'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/registry.conf:/etc/rsyslog.d/registry.conf'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/swarm.conf:/etc/rsyslog.d/swarm.conf'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/rsyslog/zookeeper.conf:/etc/rsyslog.d/zookeeper.conf'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/haproxy/:/var/log/haproxy'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/registry/:/var/log/registry'
-      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/zookeeper/:/var/log/zookeeper'
     ports:
       - '5140:514'
     ulimits:
@@ -115,7 +109,9 @@ services:
     image: <%= ENV["IMAGE_SWARM"] %>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/swarm/node_list:/node_list'
-    command: manage -H 0.0.0.0:2375 file:///node_list
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/swarm/swarm_entrypoint.sh:/swarm_entrypoint.sh'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
+    entrypoint: "/swarm_entrypoint.sh"
     ports:
         - "127.0.0.1:23751:2375"
     links:
@@ -127,13 +123,7 @@ services:
         hard: 163840
     restart: always
     depends_on:
-      - rsyslog
       - zookeeper
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:5140"
-        syslog-facility: "local3"
 <%= extra_hosts() -%>
 <%= dns() -%>
 
@@ -145,21 +135,17 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/registry:/var/lib/registry'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/registry/config.yml:/etc/docker/registry/config.yml'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/registry/registry_entrypoint.sh:/registry_entrypoint.sh'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/registry/:/var/log/registry'
     ports:
       - '5000:5000'
+    entrypoint: "/registry_entrypoint.sh"
     ulimits:
       nproc: 163840
       nofile:
         soft: 163840
         hard: 163840
     restart: always
-    depends_on:
-       - rsyslog
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:5140"
-        syslog-facility: "local0"
 <%= extra_hosts() -%>
 <%= dns() -%>
 
@@ -235,6 +221,7 @@ services:
        - '<%= scope.lookupvar('compose::puppet_src_folder') -%>:/puppet-configuration'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/:/opt/codenvy-data/logs/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/codenvy/che-machines-logs/:/opt/codenvy-data/che-machines-logs/'
+       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/dumps:/opt/codenvy-data/dumps'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/fs/:/opt/codenvy-data/fs/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/license/:/opt/codenvy-data/license/'
        - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/codenvy/che-machines/:/opt/codenvy-data/che-machines/'
@@ -269,21 +256,17 @@ services:
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/data/:/data'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/data/zookeeper/datalog/:/datalog'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/zookeeper/:/home/zookeeper/logs/'
     ports:
       - '2181:2181'
+    environment:
+      - "ZOO_LOG_DIR=/home/zookeeper/logs"
+      - "ZOO_LOG4J_PROP=INFO, ROLLINGFILE"
     ulimits:
       nproc: 163840
       nofile:
         soft: 163840
         hard: 163840
     restart: always
-    depends_on:
-      - rsyslog
-    logging:
-      driver: syslog
-      options:
-        syslog-address: "tcp://localhost:5140"
-        syslog-facility: "local1"
 <%= extra_hosts() -%>
 <%= dns() -%>
-

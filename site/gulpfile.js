@@ -117,6 +117,7 @@ gulp.task('copy_stage',['copy_src','stage_cfg','css_stage','jekyll_stage'], func
     paths.prod+'**/*.ico',
     paths.stage+'**/*.png',
     paths.stage+'**/*.svg',
+    paths.stage+'**/*.json',
     paths.stage+'**/*.woff',
     paths.stage+'**/*.woff2',
     paths.stage+'**/*.ttf',
@@ -138,6 +139,7 @@ gulp.task('onprem_se',
   'jekyll_onprem_se', //building pages
   'rjs_se', //buld amd-app.js file
   'rev-se', //versioning amd-app.js
+  'copy_branding',//copy branding folder
   'copy_onprem_se'], //copy onprem-se site to /dist/onprem-se
   function(){
 
@@ -238,7 +240,11 @@ gulp.task('rmbuild-se', ['copy_src','css_onprem_se','rjs_se','jekyll_onprem_se',
   .pipe(gulp.dest(paths.onpremSE));
 
 });
-
+// copy branding folder
+gulp.task('copy_branding', ['copy_onprem_se'], function(){
+  gulp.src([paths.onpremSE+'site/branding/**/*.* '])
+  .pipe(gulp.dest(paths.dist+'onprem-se/site/branding/'));
+});
 gulp.task('copy_onprem_se',
   ['copy_src',
   'onprem_se_cfg',

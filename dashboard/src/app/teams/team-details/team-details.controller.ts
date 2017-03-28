@@ -245,6 +245,15 @@ export class TeamDetailsController {
   }
 
   /**
+   * Returns whether current user can leave team (owner of the team is not allowed to leave it).
+   *
+   * @returns {boolean} <code>true</code> if can leave team
+   */
+  canLeaveTeam(): boolean {
+    return (this.codenvyTeam.getPersonalAccount() && this.team) ? this.codenvyTeam.getPersonalAccount().id !== this.team.parent : false;
+  }
+
+  /**
    * Fetches defined team's limits (workspace, runtime, RAM caps, etc).
    */
   fetchLimits(): void {
@@ -290,10 +299,29 @@ export class TeamDetailsController {
     promise.then(() => {
       let promise = this.codenvyTeam.deleteTeam(this.team.id);
       promise.then(() => {
-        this.$location.path('/workspaces');
+        this.$location.path('/');
         this.codenvyTeam.fetchTeams();
       }, (error: any) => {
         this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Team deletion failed.');
+      });
+    });
+  }
+
+  /**
+   * Confirms and performs removing user from current team.
+   *
+   */
+  leaveTeam(): void {
+    let promise = this.confirmDialogService.showConfirmDialog('Leave team',
+      'Would you like to leave team \'' + this.team.name + '\'?', 'Leave');
+
+    promise.then(() => {
+      let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, this.codenvyUser.getUser().id);
+      promise.then(() => {
+        this.$location.path('/');
+        this.codenvyTeam.fetchTeams();
+      }, (error: any) => {
+        this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Leave team failed.');
       });
     });
   }

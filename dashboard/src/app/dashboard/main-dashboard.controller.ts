@@ -45,10 +45,10 @@ export class MainDashboardController {
    */
   fetchAccountId(): ng.IPromise<any> {
     return this.codenvyTeam.fetchTeams().then(() => {
-      this.accountId = this.codenvyTeam.getPersonalAccount().id;
+      this.accountId = this.codenvyTeam.getPersonalAccount() ? this.codenvyTeam.getPersonalAccount().id : null;
     }, (error: any) => {
       if (error.status === 304) {
-        this.accountId = this.codenvyTeam.getPersonalAccount().id;
+        this.accountId = this.codenvyTeam.getPersonalAccount() ? this.codenvyTeam.getPersonalAccount().id : null;
       }
     });
   }

@@ -1,0 +1,59 @@
+/*Error Page*/
+.fa-exclamation { /* error page exclamation*/
+/*	background-color:#2C3E7F;
+	color: #fff;*/
+}
+/*Horizontal Line*/
+.light hr {
+/*    border: solid 1px #e3e4e7;
+    margin: 30px auto;*/
+}
+/*header*/
+.signup-page h1, .error-page h1{
+	/*color: #cccccc;*/
+}
+/*message*/
+.light p {
+}
+
+/*SignUp Page, Error Page*/
+.signup-page, .error-page{
+	/*background:#1B2B57!important;*/
+}
+/*header*/
+.signup-page h2, .error-page h2{
+	/*color: #cccccc;*/
+}
+
+/*links*/
+.signup-page li a{
+	/*color:#fff;*/
+}
+.signup-page ul li a:hover{
+}
+
+/*Input Text Field*/
+.signup-page input[type="text"],.signup-page input[type="email"],.signup-page input[type="password"]{
+/*	background:#2D407D!important;
+	color:#fff!important;*/
+}
+
+/*Form Submit Button*/
+.signup-page input[type="submit"]{
+/*	background:#4BAEFF;
+	color:#fff;*/
+}
+.signup-page input[type="submit"]:hover{
+	/*background:#4A90E2;*/
+}
+
+/*Logo*/
+.signup-page .logo, .error-page .logo{
+	/*margin:20px 0px 21px 0px;*/
+}
+
+/*Error Container*/
+.error-container {
+ /*   color: rgb(255, 255, 255);
+    background: rgb(215, 52, 45);*/
+}

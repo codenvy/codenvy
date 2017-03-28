@@ -21,11 +21,20 @@ define(["jquery", "underscore", "backbone", "models/account", "validation"],
     function($,_,Backbone,Account){
 
         var Form = Backbone.View.extend({
+
             initialize : function(){
                 Account.isApiAvailable()
                 .then(function(apiAvailable){
                     if (!apiAvailable){
                         window.location = "/site/maintenance";
+                    }
+                });
+                this.getBranding = Account.getBrandingInfo()
+                .done(function(Branding){
+                    try{
+                        document.title = Branding.title + ' | ' + document.title;
+                    }catch(err){
+                        window.console.error('Branding error. Missing title in product.json');
                     }
                 });
                 $(this.el).on('submit', function(e){

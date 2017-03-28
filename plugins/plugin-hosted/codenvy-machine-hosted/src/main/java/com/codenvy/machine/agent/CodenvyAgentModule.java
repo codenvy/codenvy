@@ -38,16 +38,22 @@ public class CodenvyAgentModule extends AbstractModule {
                       .to("$HOME/che/terminal/che-websocket-terminal " +
                           "-addr :4411 " +
                           "-cmd ${SHELL_INTERPRETER} " +
-                          "-static $HOME/che/terminal/ " +
                           "-path '/[^/]+' " +
                           "-enable-auth " +
-                          "-enable-activity-tracking  " +
+                          "-enable-activity-tracking");
+        bindConstant().annotatedWith(Names.named("machine.exec_agent.run_command"))
+                      .to("$HOME/che/exec-agent/che-exec-agent " +
+                          "-addr :4412 " +
+                          "-cmd ${SHELL_INTERPRETER} " +
+                          "-path '/[^/]+' " +
+                          "-enable-auth " +
                           "-logs-dir $HOME/che/exec-agent/logs");
 
         Multibinder<AgentLauncher> launchers = Multibinder.newSetBinder(binder(), AgentLauncher.class);
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.WsAgentWithAuthLauncherImpl.class);
         launchers.addBinding().to(com.codenvy.machine.agent.launcher.MachineInnerRsyncAgentLauncherImpl.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.ExecAgentLauncher.class);
+        launchers.addBinding().to(org.eclipse.che.api.agent.TerminalAgentLauncher.class);
         launchers.addBinding().to(org.eclipse.che.api.agent.SshAgentLauncher.class);
 
         Multibinder<Agent> agents = Multibinder.newSetBinder(binder(), Agent.class);
@@ -55,6 +61,7 @@ public class CodenvyAgentModule extends AbstractModule {
         agents.addBinding().to(org.eclipse.che.api.agent.SshAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.UnisonAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.ExecAgent.class);
+        agents.addBinding().to(org.eclipse.che.api.agent.TerminalAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.WsAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSPhpAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSPythonAgent.class);

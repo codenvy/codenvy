@@ -1,14 +1,13 @@
 ---
     layout : error-page
-    title: Codenvy
+    title: Websocket Connection Error
 ---
-
-    <div class="light">
-        <h1><i class="fa fa-exclamation"></i>Websocket Connection Error</h1>
+    <div class="light hidden">
+        <h1 class="header"><i class="fa fa-exclamation"></i>Websocket Connection Error</h1>
 
         <hr class="subtitle-line">
-
-        <p>We are getting network errors with Web Sockets. Web Sockets are a fundamental part of our communications. These errors are usually caused by firewalls. Please contact your system administrators for more information.</p>
-        <p>Test your connection <a style="color: #60AFD9;" href="http://websocketstest.com">here</a>.</p>
-
+        <div class="message">
+	        <p>We are getting network errors with Web Sockets. Web Sockets are a fundamental part of our communications. These errors are usually caused by firewalls. Please contact your system administrators for more information.</p>
+	        <p>Test your connection <a style="color: #60AFD9;" href="http://websocketstest.com">here</a>.</p>
+        </div>
     </div>

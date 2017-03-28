@@ -1,0 +1,91 @@
+{
+  "title": "Codenvy",
+  "name": "Codenvy",
+  "logoFile": "codenvy-logo.svg",
+  "supportEmail": "wish@codenvy.com",
+  "supportLink": "http://helpdesk.codenvy.com",
+  "oauthDocs": "Please contact your administrator.",
+  "errorpage": {
+    "error400": {
+      "title":"Codenvy | 400",
+      "header":"<i class='fa fa-exclamation'></i>This is really embarrassing, but something unplanned happened",
+      "message":"<p>400: This is a bad request.</p>"
+    },
+    "error401": {
+      "title":"Codenvy | 401",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>401: You are unauthorized to view this page.</p>"
+    },
+    "error403": {
+      "title":"Codenvy | 403",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>403: This page is forbidden.</p>"
+    },
+    "error404": {
+      "title":"Codenvy | 404",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>404: The resource your requested is not available.</p>"
+    },
+    "error405": {
+      "title":"Codenvy | 405",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>405: This method is not allowed.</p>"
+    },
+    "error500": {
+      "title":"Codenvy | 500",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>500: We're having an internal server error. Please try again in a few minutes.</p>"
+    },
+    "error503": {
+      "title":"Codenvy | 503",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>503: The service is temporarily unavailable.</p>"
+    },
+    "error504": {
+      "title":"Codenvy | 504",
+      "header":"<i class='fa fa-exclamation'></i>Something went wrong",
+      "message":"<p>504: The service is overloaded at the moment. Please try again in a few minutes.</p>"
+    },
+    "BrowserNotSupported": {
+      "title":"Codenvy | Browser Not Supported",
+      "header":"<i class='fa fa-exclamation'></i>Browser Not Supported",
+      "message":"<p>To use Codenvy, we recommend using the latest version of <a href='http://www.google.com/intl/en/chrome/browser/'>Chrome</a>, <a href='http://www.mozilla.org/firefox/new/'>Firefox</a> or <a href='http://www.apple.com/safari/'>Safari.</a></p>"
+    },
+    "YourCookiesAreDisabled": {
+      "title":"Codenvy | Your Cookies Are Disabled",
+      "header":"<i class='fa fa-exclamation'></i>Your Cookies Are Disabled",
+      "message":"<p>Your cookies are disabled on your browser. Turn on them and retry.</p>"
+    },
+    "FactoryWorkspaceCreationFailed": {
+      "title":"Codenvy | Oops, Something Went Wrong",
+      "header":"<i class='fa fa-exclamation'></i>Oops, Something Went Wrong",
+      "message":"<p>We are unable to create a workspace dedicated to the factory URL you clicked on. Sorry for inconvenience.</p><p>Please try again or contact support.</p>"
+    },
+    "WorkspaceDoesNotExist": {
+      "title":"Codenvy | Workspace Does Not Exist",
+      "header":"<i class='fa fa-exclamation'></i>Workspace Does Not Exist",
+      "message":"<p>Please, make sure you entered a correct workspace name or <a href='/dashboard'>proceed to User Dashboard</a></p>"
+    },
+    "AccessRequiresLicenseAcceptance": {
+      "title":"Codenvy | Access Requires License Acceptance",
+      "header":"<i class='fa fa-exclamation'></i>Access Requires License Acceptance",
+      "message":"<p>Your admin has not accepted the license agreement.</p>"
+    },
+
+    "NoAccountFound": {
+      "title":"Codenvy | No Account Found",
+      "header":"<i class='fa fa-exclamation'></i>No Account Found",
+      "message":"<p>Looks like you tried to log in with oAuth, but we could not find an account for you.</p><p>Self-service account creation is disabled.</p><p>Please contact your administrator to have an account created.</p>"
+    },
+    "WebsocketConnectionError": {
+      "title":"Codenvy | Websocket Connection Error",
+      "header":"<i class='fa fa-exclamation'></i>Websocket Connection Error",
+      "message":"<p>We are getting network errors with Web Sockets. Web Sockets are a fundamental part of our communications. These errors are usually caused by firewalls. Please contact your system administrators for more information.</p><p>Test your connection <a style='color: #60AFD9;' href='http://websocketstest.com'>here</a>.</p>"
+    },
+    "Maintenance": {
+      "title":"Codenvy | Maintenance",
+      "header":"<i class='fa fa-exclamation'></i>Codenvy Maintenance",
+      "message":"<p id='first'>The system is undergoing maintenance and will be available shortly.</p>"
+    }
+   }
+}

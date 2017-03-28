@@ -22,6 +22,17 @@ define(["underscore", "views/accountformbase","models/account"],
 
         var ResetPasswordForm = AccountFormBase.extend({
 
+            initialize: function(){
+                Account.getBrandingInfo()
+                .done(function(Branding){
+                    try{
+                        document.title = Branding.title + ' | ' + document.title;
+                    }catch(err){
+                        window.console.error('Branding error. Missing title in product.json');
+                    }
+                });
+            },
+
             resolveUserEmail : function(){
                 Account.verfySetupPasswordId(
                     _.bind(function(errors){

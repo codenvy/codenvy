@@ -88,11 +88,11 @@ public class MachineAuthLinksInjector extends MachineLinksInjector {
             final String machineToken = getMachineToken(machine);
             final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
             servers.stream()
-                   .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+                   .filter(server -> EXEC_AGENT_REFERENCE.equals(server.getRef()))
                    .findAny()
-                   .ifPresent(terminal ->
+                   .ifPresent(exec ->
                                       links.add(createLink("GET",
-                                                           UriBuilder.fromUri(terminal.getUrl())
+                                                           UriBuilder.fromUri(exec.getUrl())
                                                                      .scheme("https".equals(scheme) ? "wss" : "ws")
                                                                      .queryParam("token", machineToken)
                                                                      .path("/connect")

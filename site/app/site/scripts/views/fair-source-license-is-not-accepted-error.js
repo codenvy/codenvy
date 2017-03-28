@@ -16,13 +16,31 @@
  * from Codenvy S.A..
  */
  
-define(["models/account", "backbone"],
+define(["jquery", "models/account", "backbone"],
 
-    function(Account, Backbone){
+    function($, Account, Backbone){
         var FSLnotAcceptedPage = Backbone.View.extend({
 
         	initialize : function(){
         		Account.logout();
+                Account.getBrandingInfo()
+                .done(function(Branding){
+                    try{
+                        document.title = Branding.errorpage.error503.title;
+                    }catch(err){
+                        window.console.error('Branding error. Missing title in product.json');
+                    }
+                    try{
+                        $('.header').html(Branding.errorpage.error503.header);
+                    }catch(err){
+                        window.console.error('Branding error. Missing header for 503-error in product.json');
+                    }
+                    try{
+                        $('.message').html(Branding.errorpage.error503.message);
+                    }catch(err){
+                        window.console.error('Branding error. Missing error message for 503-error in product.json');
+                    }
+                });
         	}
         });
 

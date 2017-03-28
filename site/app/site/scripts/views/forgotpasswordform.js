@@ -31,6 +31,9 @@ define(["jquery","underscore","views/accountformbase","models/account"],
                     }
                })
                 .fail();
+                this.getBranding.then(function(Branding){
+                    $('.support-link')[0].setAttribute('href', Branding.supportLink);
+                });
             },
 
             __submit : function(){
