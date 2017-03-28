@@ -13,4 +13,4 @@ if [ ! -d  /var/log/swarm ]; then
     mkdir -p /var/log/swarm
 fi
 
-exec /swarm manage -H 0.0.0.0:2375 file:///node_list 2>&1 | tee -a /var/log/swarm/swarm.log
+exec /swarm manage -H 0.0.0.0:2375 file:///node_list >>/var/log/swarm/swarm.log 2>&1

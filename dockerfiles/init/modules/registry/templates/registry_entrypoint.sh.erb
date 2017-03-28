@@ -13,4 +13,4 @@ if [ ! -d  /var/log/registry ]; then
     mkdir -p /var/log/registry
 fi
 
-exec /bin/registry serve /etc/docker/registry/config.yml 2>&1 | tee -a /var/log/registry/registry.log
+exec /bin/registry serve /etc/docker/registry/config.yml >>/var/log/registry/registry.log 2>&1
