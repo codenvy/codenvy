@@ -482,5 +482,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                     .put("twitter", "/email-templates/logos/logo_social_twitter.png")
                                     .put("medium", "/email-templates/logos/logo_social_medium.png")
                                     .build());
+
+        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
+        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
     }
 }
