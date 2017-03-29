@@ -9,13 +9,13 @@
 
 set -e
 
-if [ ! -d  /var/log/registry ]; then
-    mkdir -p /var/log/registry
+if [ ! -d  /var/log/swarm ]; then
+    mkdir -p /var/log/swarm
 fi
 
-exec /bin/registry serve /etc/docker/registry/config.yml 2>&1 | tee -a /var/log/registry/registry.log &
+exec /swarm manage -H 0.0.0.0:2375 file:///node_list 2>&1 | tee -a /var/log/swarm/swarm.log &
 
-pid=`pidof registry`
+pid=`pidof swarm`
 trap "echo 'Stopping PID $pid'; kill -SIGTERM $pid" SIGINT SIGTERM
 # A signal emitted while waiting will make the wait command return code > 128
 # Let's wrap it in a loop that doesn't end before the process is indeed stopped
