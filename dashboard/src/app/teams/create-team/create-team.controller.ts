@@ -16,6 +16,7 @@
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
 import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
+import {CodenvyInvite} from '../../../components/api/codenvy-invite.factory';
 
 /**
  * @ngdoc controller
@@ -28,6 +29,10 @@ export class CreateTeamController {
    * Team API interaction.
    */
   private codenvyTeam: CodenvyTeam;
+  /**
+   * Invite API interaction.
+   */
+  private codenvyInvite: CodenvyInvite;
   /**
    * User API interaction.
    */
@@ -81,10 +86,11 @@ export class CreateTeamController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(codenvyTeam: CodenvyTeam, codenvyUser: CodenvyUser, codenvyPermissions: CodenvyPermissions, cheNotification: any,
+  constructor(codenvyTeam: CodenvyTeam, codenvyInvite: CodenvyInvite, codenvyUser: CodenvyUser, codenvyPermissions: CodenvyPermissions, cheNotification: any,
               $location: ng.ILocationService, $q: ng.IQService, lodash: any, $log: ng.ILogService) {
     this.codenvyTeam = codenvyTeam;
     this.codenvyUser = codenvyUser;
+    this.codenvyInvite = codenvyInvite;
     this.codenvyPermissions = codenvyPermissions;
     this.cheNotification = cheNotification;
     this.$location = $location;
@@ -141,8 +147,8 @@ export class CreateTeamController {
   addPermissions(team: any, members: Array<any>) {
     let promises = [];
     members.forEach((member: any) => {
+      let actions = this.codenvyTeam.getActionsFromRoles(member.roles);
       if (member.id) {
-        let actions = this.codenvyTeam.getActionsFromRoles(member.roles);
         let permissions = {
           instanceId: team.id,
           userId: member.id,
@@ -151,6 +157,9 @@ export class CreateTeamController {
         };
 
         let promise = this.codenvyPermissions.storePermissions(permissions);
+        promises.push(promise);
+      } else {
+        let promise = this.codenvyInvite.inviteToTeam(team.id, member.email, actions);
         promises.push(promise);
       }
     });
