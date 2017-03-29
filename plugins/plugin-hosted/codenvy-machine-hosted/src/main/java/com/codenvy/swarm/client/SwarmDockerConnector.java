@@ -17,18 +17,25 @@ package com.codenvy.swarm.client;
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.base.Strings;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.json.ExecInfo;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,6 +48,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.primitives.Ints.tryParse;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Swarm implementation of {@link DockerConnector} that can be used on distributed system
@@ -50,6 +58,7 @@ import static com.google.common.primitives.Ints.tryParse;
  */
 @Singleton
 public class SwarmDockerConnector extends DockerConnector {
+    private static final Logger LOG = getLogger(SwarmDockerConnector.class);
 
     private final NodeSelectionStrategy   strategy;
     //TODO should it be done in other way?
@@ -110,6 +119,33 @@ public class SwarmDockerConnector extends DockerConnector {
             }
             throw decorateMessage(e);
         }
+    }
+
+    @Override
+    public void startExec(StartExecParams params, @Nullable MessageProcessor<LogMessage> execOutputProcessor)
+            throws IOException {
+        try {
+            super.startExec(params, execOutputProcessor);
+        } catch (ExecNotFoundException e) {
+            // Sometimes swarm returns this error for unknown reason, see https://github.com/docker/swarm/issues/2664
+            // Log additional info to find out if this endpoint knows about exec at exactly that time
+            logMissingExecInfo(params.getExecId());
+            try {
+                // Wait in case swarm needs some time to find exec
+                Thread.sleep(1000);
+                super.startExec(params, execOutputProcessor);
+            } catch (InterruptedException ie) {
+                // throw original error
+                throw new IOException(e);
+            }
+        }
+    }
+
+    private void logMissingExecInfo(String execId) {
+        try {
+            ExecInfo execInfo = super.getExecInfo(execId);
+            LOG.error("Exec not found problem appeared. Exec: " + execInfo);
+        } catch (IOException ignored) {}
     }
 
     private DockerException decorateMessage(DockerException e) {
