@@ -232,8 +232,8 @@ public class StackPermissionsDaoTest {
         }
 
         @Override
-        protected StackPermissionsImpl doCreateInstance(String userId, String instanceId, List allowedActions) {
-            return null;
+        protected StackPermissionsImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
+            return new StackPermissionsImpl(userId, instanceId, allowedActions);
         }
     }
 }

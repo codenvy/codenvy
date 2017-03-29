@@ -221,8 +221,8 @@ public class WorkerDaoTest {
         }
 
         @Override
-        protected WorkerImpl doCreateInstance(String userId, String instanceId, List allowedActions) {
-            return null;
+        protected WorkerImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
+            return new WorkerImpl(userId, instanceId, allowedActions);
         }
     }
 }

@@ -18,8 +18,6 @@ import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
 import com.codenvy.api.permission.shared.model.PermissionsDomain;
 import com.google.common.collect.ImmutableList;
 
-import org.eclipse.che.api.core.ConflictException;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +31,7 @@ import java.util.Set;
  * @author Sergii Leschenko
  */
 public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> implements PermissionsDomain {
-    public static final String SET_PERMISSIONS  = "setPermissions";
+    public static final String SET_PERMISSIONS = "setPermissions";
 
     private final String       id;
     private final List<String> allowedActions;
@@ -68,10 +66,14 @@ public abstract class AbstractPermissionsDomain<T extends AbstractPermissions> i
 
     /**
      * Creates new instance of the entity related to this domain.
+     *
+     * @return new entity instance related to this domain
+     * @throws IllegalArgumentException
+     *         when instance id is null when it's required
      */
-    public T newInstance(String userId, String instanceId, List<String> allowedActions) throws ConflictException {
+    public T newInstance(String userId, String instanceId, List<String> allowedActions) {
         if (isInstanceRequired() && instanceId == null) {
-            throw new ConflictException("Given domain requires non nullable value for instanceId");
+            throw new IllegalArgumentException("Given domain requires non nullable value for instanceId");
         }
         return doCreateInstance(userId, instanceId, allowedActions);
     }

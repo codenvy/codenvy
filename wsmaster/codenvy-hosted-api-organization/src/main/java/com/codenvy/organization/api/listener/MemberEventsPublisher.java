@@ -14,8 +14,6 @@
  */
 package com.codenvy.organization.api.listener;
 
-import com.codenvy.api.permission.server.event.PermissionsAddedEvent;
-import com.codenvy.api.permission.server.event.PermissionsRemovedEvent;
 import com.codenvy.api.permission.shared.event.PermissionsEvent;
 import com.codenvy.api.permission.shared.model.Permissions;
 import com.codenvy.organization.api.OrganizationManager;
@@ -68,14 +66,14 @@ public class MemberEventsPublisher implements EventSubscriber<PermissionsEvent> 
             try {
                 switch (event.getType()) {
                     case PERMISSIONS_ADDED: {
-                        final String initiator = ((PermissionsAddedEvent)event).getInitiator();
+                        final String initiator = event.getInitiator();
                         final User addedMember = userManager.getById(permissions.getUserId());
                         final Organization org = organizationManager.getById(permissions.getInstanceId());
                         eventService.publish(new MemberAddedEvent(initiator, addedMember, org));
                         break;
                     }
                     case PERMISSIONS_REMOVED: {
-                        final String initiator = ((PermissionsRemovedEvent)event).getInitiator();
+                        final String initiator = event.getInitiator();
                         final User removedMember = userManager.getById(permissions.getUserId());
                         final Organization org = organizationManager.getById(permissions.getInstanceId());
                         eventService.publish(new MemberRemovedEvent(initiator, removedMember, org));

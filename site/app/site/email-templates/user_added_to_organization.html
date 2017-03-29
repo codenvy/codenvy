@@ -1,7 +1,7 @@
 ---
 layout : email-template
 title: Codenvy
-header: YOU HAVE BEEN ADDED TO A CODENVY TEAM
+header: YOU HAVE BEEN ADDED TO A CODENVY ORGANIZATION
 ---
 <table style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; width: 100%; margin: 0; text-align: left; padding: 7px 25px 10px 10px;" width="100%" cellpadding="0" cellspacing="0">
     <tr>
@@ -15,9 +15,9 @@ header: YOU HAVE BEEN ADDED TO A CODENVY TEAM
                             </p>
                             <h4 style="font-family: 'Roboto Condensed'; font-size: 18px; margin: 30px 0px 8px 0px;"></h4>
                             <p style="font-size: 16px; margin: 2px 0px;">
-                                <span th:text="${initiator}"></span> added you to a Codenvy team called <span th:text="${teamName}"></span>.
+                                <span th:text="${initiator}"></span> added you to a Codenvy organization called <span th:text="${organizationName}"></span>.
                                 <br/>
-                                Access the team here <a th:href="@{${teamLink}}">link</a>.
+                                Access the organization here <a th:href="@{${dashboardEndpoint} + '/#/organization/' + ${orgQualifiedName}}">link</a>.
                             </p>
                             <h4 style="font-family: 'Roboto Condensed'; font-size: 18px; margin: 30px 0px 8px 0px;"></h4>
                             <p style="font-size: 16px; margin: 2px 0px;">

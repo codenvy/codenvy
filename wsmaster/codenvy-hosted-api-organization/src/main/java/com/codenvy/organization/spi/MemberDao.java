@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Defines data access object for {@link MemberImpl}
@@ -34,6 +35,7 @@ public interface MemberDao {
      *
      * @param member
      *         member to store
+     * @return optional with updated member, other way empty optional must be returned
      * @throws NullPointerException
      *         when {@code member} is null
      * @throws ServerException
@@ -41,7 +43,7 @@ public interface MemberDao {
      * @throws ServerException
      *         when any other error occurs during member storing
      */
-    void store(MemberImpl member) throws ServerException;
+    Optional<MemberImpl> store(MemberImpl member) throws ServerException;
 
     /**
      * Removes member with given organization and user

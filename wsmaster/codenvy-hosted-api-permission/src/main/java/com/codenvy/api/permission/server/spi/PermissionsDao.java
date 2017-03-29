@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * General contract of storage for permissions.
@@ -46,10 +47,11 @@ public interface PermissionsDao<T extends AbstractPermissions> {
      *
      * @param permissions
      *         permission to store
+     * @return optional with updated permissions, other way empty optional must be returned
      * @throws ServerException
      *         when any other error occurs during permissions storing
      */
-    void store(T permissions) throws ServerException;
+    Optional<T> store(T permissions) throws ServerException;
 
     /**
      * @param userId
