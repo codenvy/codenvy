@@ -76,7 +76,11 @@ export class MemberItemController {
     let promise = this.confirmDialogService.showConfirmDialog('Remove member', 'Would you like to remove member  ' + this.member.email + ' ?', 'Delete');
 
     promise.then(() => {
-      this.callback.removePermissions(this.member);
+      if (this.member.isPending) {
+        this.callback.deleteInvitation(this.member);
+      } else {
+        this.callback.removePermissions(this.member);
+      }
     });
   }
 

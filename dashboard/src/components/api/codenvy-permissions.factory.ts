@@ -39,7 +39,6 @@ interface ISystemPermissions {
  * @author Oleksii Orel
  */
 export class CodenvyPermissions {
-
   /**
    * Angular promise service.
    */
