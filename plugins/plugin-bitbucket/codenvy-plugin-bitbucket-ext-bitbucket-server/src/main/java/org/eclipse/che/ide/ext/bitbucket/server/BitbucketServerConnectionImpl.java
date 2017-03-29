@@ -45,6 +45,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.eclipse.che.commons.json.JsonHelper.toJson;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketPullRequest;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketRepository;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketServerPullRequest;
@@ -181,7 +182,10 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
                                                                                 BitbucketException,
                                                                                 ServerException {
         final String url = urlTemplates.repositoryUrl(owner, repositorySlug);
-        final String response = postJson(this, url, CREATED.getStatusCode(), "{\"name\" : \"" + forkName + "\"}");
+        final String response = postJson(this,
+                                         url,
+                                         CREATED.getStatusCode(),
+                                         toJson(newDto(BitbucketServerRepository.class).withName(forkName)));
         return parseJsonResponse(response, BitbucketRepositoryFork.class);
     }
 

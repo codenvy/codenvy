@@ -24,6 +24,18 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface BitbucketServerRepository extends BitbucketRepository{
 
+    String getName();
+
+    void setName(String name);
+
+    BitbucketServerRepository withName(String name);
+
+    String getSlug();
+
+    void setSlug(String slug);
+
+    BitbucketServerRepository withSlug(String slug);
+
     BitbucketServerRepository getOrigin();
 
     void setOrigin(BitbucketServerRepository parent);
@@ -35,10 +47,4 @@ public interface BitbucketServerRepository extends BitbucketRepository{
     void setProject(BitbucketServerProject project);
 
     BitbucketServerRepository withProject(BitbucketServerProject project);
-
-    String getSlug();
-
-    void setSlug(String slug);
-
-    BitbucketServerRepository withSlug(String slug);
 }
