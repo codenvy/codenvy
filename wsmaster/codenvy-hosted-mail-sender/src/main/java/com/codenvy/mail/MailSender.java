@@ -15,14 +15,17 @@
 package com.codenvy.mail;
 
 import com.google.common.io.Files;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -35,20 +38,29 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Provides email sending capability
  *
  * @author Alexander Garagatyi
  */
+@Singleton
 public class MailSender {
     private static final Logger LOG = LoggerFactory.getLogger(MailSender.class);
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder   sessionHolder;
+    private final ExecutorService executor;
 
     @Inject
     public MailSender(SessionHolder sessionHolder) {
         this.sessionHolder = sessionHolder;
+        this.executor = newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors(),
+                                           new ThreadFactoryBuilder().setNameFormat("MailNotificationsPool-%d")
+                                                                     .setDaemon(false)
+                                                                     .build());
     }
 
     public void sendMail(String from, String to, String replyTo, String subject, String mimeType,
@@ -68,6 +80,19 @@ public class MailSender {
                 .withMimeType(mimeType);
 
         sendMail(emailBean);
+    }
+
+    public void sendAsync(EmailBean emailBean) {
+        executor.submit(() -> {
+            try {
+                sendMail(emailBean);
+            } catch (Exception ex) {
+                LOG.warn("Failed to send email notification for {} with subject {}. Cause: '{}'",
+                         emailBean.getTo(),
+                         emailBean.getSubject(),
+                         ex.getLocalizedMessage());
+            }
+        });
     }
 
     public void sendMail(EmailBean emailBean) throws ServerException {

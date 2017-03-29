@@ -31,7 +31,7 @@ public class BearerSecurityModule extends AbstractModule {
     protected void configure() {
         bind(com.codenvy.auth.sso.server.BearerTokenAuthenticationService.class);
         bind(BearerTokenAuthenticationHandler.class);
-        bind(com.codenvy.auth.sso.server.InputDataValidator.class);
-        bindConstant().annotatedWith(Names.named(InputDataValidator.EMAIL_BLACKLIST_FILE)).to("cloud-ide-user-mail-blacklist.txt");
+        bind(EmailValidator.class);
+        bindConstant().annotatedWith(Names.named(EmailValidator.EMAIL_BLACKLIST_FILE)).to("cloud-ide-user-mail-blacklist.txt");
     }
 }

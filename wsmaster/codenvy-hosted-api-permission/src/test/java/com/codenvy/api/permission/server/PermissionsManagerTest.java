@@ -33,6 +33,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
@@ -244,6 +245,17 @@ public class PermissionsManagerTest {
           expectedExceptionsMessageRegExp = "Requested unsupported domain 'unsupported'")
     public void shouldThrowExceptionWhenRequestedUnsupportedDomain() throws Exception {
         permissionsManager.getDomain("unsupported");
+    }
+
+    @Test
+    public void shouldDoNothingOnActionSupportingCheckingWhenListDoesNotContainUnsupportedAction() throws Exception {
+        permissionsManager.checkActionsSupporting("test", Arrays.asList("write", "use"));
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Domain with id 'test' doesn't support following action\\(s\\): unsupported")
+    public void shouldThrowConflictExceptionOnActionSupportingCheckingWhenListContainsUnsupportedAction() throws Exception {
+        permissionsManager.checkActionsSupporting("test", Arrays.asList("write", "use", "unsupported"));
     }
 
     public class TestDomain extends AbstractPermissionsDomain<TestPermissionsImpl> {

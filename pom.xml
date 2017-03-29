@@ -261,6 +261,22 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-invite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-invite</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
+                <artifactId>codenvy-hosted-api-invite-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-hosted-api-machine</artifactId>
                 <version>${project.version}</version>
             </dependency>

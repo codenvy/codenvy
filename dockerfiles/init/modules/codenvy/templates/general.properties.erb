@@ -60,6 +60,8 @@ che.workspace.auto_start=<%= scope.lookupvar('codenvy::workspace_auto_start') %>
 
 # Reserved names that cannot be used as account names
 che.auth.reserved_user_names=api,dashboard,factory,ide-resources,main,site,swagger,ws,f,update,install-single,install-multi,install-codenvy,blog,im,codenvy,che,root
+auth.sso.access_ticket_lifetime_seconds=<%= scope.lookupvar('codenvy::auth_sso_access_ticket_lifetime_seconds') %>
+auth.sso.bearer_ticket_lifetime_seconds=<%= scope.lookupvar('codenvy::auth_sso_bearer_ticket_lifetime_seconds') %>
 
 # SSO
 auth.sso.client_allow_anonymous=false

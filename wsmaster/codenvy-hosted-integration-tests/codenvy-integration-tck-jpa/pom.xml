@@ -35,6 +35,15 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-invite</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-invite</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-machine</artifactId>
         </dependency>
         <dependency>
@@ -242,6 +251,7 @@
                                         codenvy-hosted-api-resource,
                                         codenvy-hosted-api-permission,
                                         codenvy-hosted-api-system-license,
+                                        codenvy-hosted-api-invite,
                                         che-core-api-factory</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                 </configuration>
