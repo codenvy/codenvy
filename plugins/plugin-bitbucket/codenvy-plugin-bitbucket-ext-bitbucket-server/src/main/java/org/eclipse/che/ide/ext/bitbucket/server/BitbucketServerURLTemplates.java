@@ -47,8 +47,8 @@ public class BitbucketServerURLTemplates implements URLTemplates {
     }
 
     @Override
-    public String updatePullRequestUrl(String owner, String repositorySlug, int pullrequestId) {
-        return format(restUrl + REPOSITORY + "/pull-requests/%d", owner, repositorySlug, pullrequestId);
+    public String updatePullRequestUrl(String owner, String repositorySlug, int pullRequestId) {
+        return format(restUrl + REPOSITORY + "/pull-requests/%d", owner, repositorySlug, pullRequestId);
     }
 
     @Override
