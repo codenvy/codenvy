@@ -25,9 +25,9 @@ public interface URLTemplates {
 
     String userUrl();
 
-    String pullrequestUrl(String owner, String repositorySlug);
+    String pullRequestUrl(String owner, String repositorySlug);
 
-    String updatePullrequestUrl(String owner, String repositorySlug, int pullrequestId);
+    String updatePullRequestUrl(String owner, String repositorySlug, int pullrequestId);
 
     String forksUrl(String owner, String repositorySlug);
 

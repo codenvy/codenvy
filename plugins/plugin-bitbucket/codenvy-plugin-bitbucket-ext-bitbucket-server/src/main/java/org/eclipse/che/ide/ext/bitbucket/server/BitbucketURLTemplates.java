@@ -36,12 +36,12 @@ public class BitbucketURLTemplates implements URLTemplates {
     }
 
     @Override
-    public String pullrequestUrl(String owner, String repositorySlug) {
+    public String pullRequestUrl(String owner, String repositorySlug) {
         return BITBUCKET_2_0_API_URL + "/repositories/" + owner + "/" + repositorySlug + "/pullrequests";
     }
 
     @Override
-    public String updatePullrequestUrl(String owner, String repositorySlug, int pullrequestId) {
+    public String updatePullRequestUrl(String owner, String repositorySlug, int pullrequestId) {
         return BITBUCKET_2_0_API_URL + "/repositories/" + owner + "/" + repositorySlug + "/pullrequests/" + pullrequestId;
     }
 

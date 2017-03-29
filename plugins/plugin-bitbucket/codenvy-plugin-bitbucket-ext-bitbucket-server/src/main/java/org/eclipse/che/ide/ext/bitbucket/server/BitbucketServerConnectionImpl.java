@@ -41,9 +41,7 @@ import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.OK;
 import static org.eclipse.che.commons.json.JsonHelper.toJson;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.ide.ext.bitbucket.server.BitbucketServerDTOConverter.convertToBitbucketPullRequest;
@@ -77,11 +75,11 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
     public BitbucketUser getUser() throws ServerException, IOException, BitbucketException {
         //Need to check if user has permissions to retrieve full information from Bitbucket Server rest API.
         //Other requests will not fail with 403 error, but may return empty data.
-        doRequest(this, GET, bitbucketEndpoint + "/rest/api/latest/users", OK.getStatusCode(), null, null);
+        doRequest(this, GET, bitbucketEndpoint + "/rest/api/latest/users", null, null);
 
         //Bitbucket Server does not have direct API method to retrieve authenticated user.
         //Authenticated user exists in http clone url of any repository (http://<user>@bitbucketserver.com/scm/project/repository.git).
-        String response = getJson(this, bitbucketEndpoint + "/rest/api/latest/repos", OK.getStatusCode());
+        String response = getJson(this, bitbucketEndpoint + "/rest/api/latest/repos");
         Optional<BitbucketLink> optional =
                 parseJsonResponse(response, BitbucketServerRepositoriesPage.class).getValues()
                                                                                   .get(0)
@@ -93,7 +91,7 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
         if (optional.isPresent()) {
             String href = optional.get().getHref();
             String user = href.substring(href.indexOf("://") + 3, href.indexOf("@"));
-            final String userResponse = getJson(this, urlTemplates.userUrl() + user, OK.getStatusCode());
+            final String userResponse = getJson(this, urlTemplates.userUrl() + user);
             return convertToBitbucketUser(parseJsonResponse(userResponse, BitbucketServerUser.class));
         } else {
             throw new BitbucketException(NOT_FOUND.getStatusCode(), "Failed to retrieve authorized user", TEXT_PLAIN);
@@ -104,7 +102,7 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
     public BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException,
                                                                                          BitbucketException,
                                                                                          ServerException {
-        final String response = getJson(this, urlTemplates.repositoryUrl(owner, repositorySlug), OK.getStatusCode());
+        final String response = getJson(this, urlTemplates.repositoryUrl(owner, repositorySlug));
         return convertToBitbucketRepository(parseJsonResponse(response, BitbucketServerRepository.class));
     }
 
@@ -116,7 +114,7 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
         BitbucketServerPullRequestsPage pullRequestsPage = null;
 
         do {
-            final String url = urlTemplates.pullrequestUrl(owner, repositorySlug) +
+            final String url = urlTemplates.pullRequestUrl(owner, repositorySlug) +
                                (pullRequestsPage != null ? "?start=" + valueOf(pullRequestsPage.getNextPageStart()) : "");
 
             pullRequestsPage = getBitbucketPage(this, url, BitbucketServerPullRequestsPage.class);
@@ -136,8 +134,8 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
                                                 BitbucketPullRequest pullRequest) throws ServerException,
                                                                                          IOException,
                                                                                          BitbucketException {
-        final String url = urlTemplates.pullrequestUrl(owner, repositorySlug);
-        final String response = postJson(this, url, CREATED.getStatusCode(), toJson(convertToBitbucketServerPullRequest(pullRequest)));
+        final String url = urlTemplates.pullRequestUrl(owner, repositorySlug);
+        final String response = postJson(this, url, toJson(convertToBitbucketServerPullRequest(pullRequest)));
         return convertToBitbucketPullRequest(parseJsonResponse(response, BitbucketServerPullRequest.class));
     }
 
@@ -147,8 +145,8 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
                                                   BitbucketPullRequest pullRequest) throws ServerException,
                                                                                            IOException,
                                                                                            BitbucketException {
-        final String url = urlTemplates.updatePullrequestUrl(owner, repositorySlug, pullRequest.getId());
-        String response = doRequest(this, PUT, url, OK.getStatusCode(), APPLICATION_JSON, toJson(pullRequest));
+        final String url = urlTemplates.updatePullRequestUrl(owner, repositorySlug, pullRequest.getId());
+        String response = doRequest(this, PUT, url, APPLICATION_JSON, toJson(pullRequest));
         return convertToBitbucketPullRequest(parseJsonResponse(response, BitbucketServerPullRequest.class));
     }
 
@@ -184,7 +182,6 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
         final String url = urlTemplates.repositoryUrl(owner, repositorySlug);
         final String response = postJson(this,
                                          url,
-                                         CREATED.getStatusCode(),
                                          toJson(newDto(BitbucketServerRepository.class).withName(forkName)));
         return parseJsonResponse(response, BitbucketRepositoryFork.class);
     }

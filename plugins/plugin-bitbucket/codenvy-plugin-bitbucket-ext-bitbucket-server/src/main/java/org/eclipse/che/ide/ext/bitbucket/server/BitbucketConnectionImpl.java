@@ -36,8 +36,6 @@ import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.OK;
 import static org.eclipse.che.commons.json.JsonHelper.toJson;
 import static org.eclipse.che.commons.json.JsonNameConventions.CAMEL_UNDERSCORE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -64,13 +62,13 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
 
     @Override
     public BitbucketUser getUser() throws ServerException, IOException, BitbucketException {
-        final String response = getJson(this, urlTemplates.userUrl(), OK.getStatusCode());
+        final String response = getJson(this, urlTemplates.userUrl());
         return parseJsonResponse(response, BitbucketUser.class);
     }
 
     @Override
     public BitbucketRepository getRepository(String owner, String repositorySlug) throws IOException, BitbucketException, ServerException {
-        final String response = getJson(this, urlTemplates.repositoryUrl(owner, repositorySlug), OK.getStatusCode());
+        final String response = getJson(this, urlTemplates.repositoryUrl(owner, repositorySlug));
         return parseJsonResponse(response, BitbucketRepository.class);
     }
 
@@ -84,7 +82,7 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
 
         do {
             final String nextPageUrl = pullRequestsPage.getNext();
-            final String url = nextPageUrl == null ? urlTemplates.pullrequestUrl(owner, repositorySlug) : nextPageUrl;
+            final String url = nextPageUrl == null ? urlTemplates.pullRequestUrl(owner, repositorySlug) : nextPageUrl;
 
             pullRequestsPage = getBitbucketPage(this, url, BitbucketPullRequestsPage.class);
             pullRequests.addAll(pullRequestsPage.getValues());
@@ -97,8 +95,8 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
     public BitbucketPullRequest openPullRequest(String owner,
                                                 String repositorySlug,
                                                 BitbucketPullRequest pullRequest) throws ServerException, IOException, BitbucketException {
-        final String url = urlTemplates.pullrequestUrl(owner, repositorySlug);
-        final String response = postJson(this, url, CREATED.getStatusCode(), toJson(pullRequest, CAMEL_UNDERSCORE));
+        final String url = urlTemplates.pullRequestUrl(owner, repositorySlug);
+        final String response = postJson(this, url, toJson(pullRequest, CAMEL_UNDERSCORE));
         return parseJsonResponse(response, BitbucketPullRequest.class);
     }
 
@@ -108,8 +106,8 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
                                                   BitbucketPullRequest pullRequest) throws ServerException,
                                                                                            IOException,
                                                                                            BitbucketException {
-        final String url = urlTemplates.updatePullrequestUrl(owner, repositorySlug, pullRequest.getId());
-        String response = doRequest(this, PUT, url, OK.getStatusCode(), APPLICATION_JSON, toJson(pullRequest));
+        final String url = urlTemplates.updatePullRequestUrl(owner, repositorySlug, pullRequest.getId());
+        String response = doRequest(this, PUT, url, APPLICATION_JSON, toJson(pullRequest));
         return parseJsonResponse(response, BitbucketPullRequest.class);
     }
 
@@ -138,7 +136,7 @@ public class BitbucketConnectionImpl implements BitbucketConnection {
                                                   boolean isForkPrivate) throws IOException, BitbucketException, ServerException {
         final String url = urlTemplates.forkRepositoryUrl(owner, repositorySlug);
         final String data = "name=" + encode(forkName, "UTF-8") + "&is_private=" + isForkPrivate;
-        final String response = doRequest(this, POST, url, OK.getStatusCode(), APPLICATION_FORM_URLENCODED, data);
+        final String response = doRequest(this, POST, url, APPLICATION_FORM_URLENCODED, data);
         return parseJsonResponse(response, BitbucketRepositoryFork.class);
     }
 

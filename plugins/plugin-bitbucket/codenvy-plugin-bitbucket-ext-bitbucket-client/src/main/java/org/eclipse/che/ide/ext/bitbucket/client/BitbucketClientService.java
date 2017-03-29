@@ -84,7 +84,6 @@ public class BitbucketClientService {
 
     /**
      * Returns the promise which resolves authorized user information or rejects with an error.
-     *
      */
     public Promise<BitbucketUser> getUser() {
         final String requestUrl = getBaseUrl() + USER;

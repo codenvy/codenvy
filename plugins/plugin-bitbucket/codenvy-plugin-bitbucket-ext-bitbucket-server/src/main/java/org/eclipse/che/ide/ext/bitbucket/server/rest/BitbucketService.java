@@ -152,7 +152,7 @@ public class BitbucketService extends Service {
         final String host = "bitbucket.org";
         SshPair sshPair = null;
         try {
-            sshPair = sshServiceClient.getPair("git", host);
+            sshPair = sshServiceClient.getPair("vcs", host);
         } catch (NotFoundException ignored) {
         }
 

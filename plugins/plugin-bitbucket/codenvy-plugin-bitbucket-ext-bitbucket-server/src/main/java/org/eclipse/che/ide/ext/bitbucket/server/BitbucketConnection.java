@@ -52,7 +52,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repository owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @return {@link BitbucketRepository} object that describes received repository
      * @throws ServerException
      *         if any error occurs when parse Json response
@@ -69,7 +69,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repositories owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @return {@link BitbucketPullRequests} object that describes received pull requests
      * @throws ServerException
      *         if any error occurs when parse Json response
@@ -88,7 +88,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repository owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @param pullRequest
      *         {@link BitbucketPullRequest} object that describes pull request parameters
      * @return {@link BitbucketPullRequest} object that describes opened pull request.
@@ -109,7 +109,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repository owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @param pullRequest
      *         {@link BitbucketPullRequest} object that describes pull request parameters to be updated
      * @return {@link BitbucketPullRequest} object that describes updated pull request
@@ -130,7 +130,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repository owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @return {@link BitbucketRepositories} object that describes received forks
      * @throws ServerException
      *         if any error occurs when parse Json response
@@ -149,7 +149,7 @@ public interface BitbucketConnection {
      * @param owner
      *         the repository owner
      * @param repositorySlug
-     *         the repository name
+     *         url compatible repository name
      * @param forkName
      *         the fork name
      * @param isForkPrivate

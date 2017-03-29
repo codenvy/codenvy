@@ -62,7 +62,7 @@ public class BitbucketRequestUtils {
     public static <T> T getBitbucketPage(BitbucketConnection connection, String url, Class<T> pageClass) throws IOException,
                                                                                                                 BitbucketException,
                                                                                                                 ServerException {
-        final String response = getJson(connection, url, OK.getStatusCode());
+        final String response = getJson(connection, url);
         return parseJsonResponse(response, pageClass);
     }
 
@@ -73,15 +73,13 @@ public class BitbucketRequestUtils {
      *         {@link BitbucketConnection} connection object to authorize the HTTP request
      * @param url
      *         request url
-     * @param success
-     *         expected success status code
      * @throws IOException
      *         if any i/o errors occurs
      * @throws BitbucketException
      *         if Bitbucket returned unexpected or error status for request
      */
-    public static String getJson(BitbucketConnection connection, String url, int success) throws IOException, BitbucketException {
-        return doRequest(connection, GET, url, success, null, null);
+    public static String getJson(BitbucketConnection connection, String url) throws IOException, BitbucketException {
+        return doRequest(connection, GET, url, null, null);
     }
 
     /**
@@ -91,16 +89,14 @@ public class BitbucketRequestUtils {
      *         {@link BitbucketConnection} connection object to authorize the HTTP request
      * @param url
      *         request url
-     * @param success
-     *         expected success status code
      * @throws IOException
      *         if any i/o errors occurs
      * @throws BitbucketException
      *         if Bitbucket returned unexpected or error status for request
      */
-    public static String postJson(BitbucketConnection connection, String url, int success, String data) throws IOException,
+    public static String postJson(BitbucketConnection connection, String url, String data) throws IOException,
                                                                                                                BitbucketException {
-        return doRequest(connection, POST, url, success, APPLICATION_JSON, data);
+        return doRequest(connection, POST, url, APPLICATION_JSON, data);
     }
 
     /**
@@ -112,8 +108,6 @@ public class BitbucketRequestUtils {
      *         HTTP request method
      * @param url
      *         request url
-     * @param success
-     *         expected success status code
      * @throws IOException
      *         if any i/o errors occurs
      * @throws BitbucketException
@@ -122,7 +116,6 @@ public class BitbucketRequestUtils {
     public static String doRequest(BitbucketConnection connection,
                                    String requestMethod,
                                    String url,
-                                   int success,
                                    String contentType,
                                    String data) throws IOException, BitbucketException {
         HttpURLConnection http = null;
@@ -145,7 +138,7 @@ public class BitbucketRequestUtils {
                 }
             }
 
-            if (http.getResponseCode() != success) {
+            if (http.getResponseCode() / 100 != 2) {
                 throw fault(http);
             }
 

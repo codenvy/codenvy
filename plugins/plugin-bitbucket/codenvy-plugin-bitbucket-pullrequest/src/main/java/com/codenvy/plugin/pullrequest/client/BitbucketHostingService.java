@@ -152,8 +152,8 @@ public class BitbucketHostingService implements VcsHostingService {
                                                  if (author != null && source != null) {
                                                      final BitbucketPullRequestBranch branch = source.getBranch();
                                                      //Bitbucket Server adds '~' to authenticated user, need to substring it.
-                                                     String userName = username.startsWith("~") ? username.substring(1) : username;
-                                                     if (userName.equals(author.getUsername()) && branchName.equals(branch.getName())) {
+                                                     String name = username.startsWith("~") ? username.substring(1) : username;
+                                                     if (name.equals(author.getUsername()) && branchName.equals(branch.getName())) {
                                                          return Promises.resolve(valueOf(pullRequest));
                                                      }
                                                  }
