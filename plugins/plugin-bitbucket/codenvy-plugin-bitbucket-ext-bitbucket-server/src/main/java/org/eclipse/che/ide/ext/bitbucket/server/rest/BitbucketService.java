@@ -159,15 +159,15 @@ public class BitbucketService extends Service {
         if (sshPair != null) {
             if (sshPair.getPublicKey() == null) {
                 try {
-                    sshServiceClient.removePair("git", host);
+                    sshServiceClient.removePair("vcs", host);
                 } catch (NotFoundException ignored) {
                 }
 
-                sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("git")
+                sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("vcs")
                                                                                             .withName(host));
             }
         } else {
-            sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("git")
+            sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("vcs")
                                                                                         .withName(host));
         }
 
