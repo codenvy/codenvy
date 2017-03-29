@@ -94,8 +94,7 @@ public class BitbucketRequestUtils {
      * @throws BitbucketException
      *         if Bitbucket returned unexpected or error status for request
      */
-    public static String postJson(BitbucketConnection connection, String url, String data) throws IOException,
-                                                                                                               BitbucketException {
+    public static String postJson(BitbucketConnection connection, String url, String data) throws IOException, BitbucketException {
         return doRequest(connection, POST, url, APPLICATION_JSON, data);
     }
 

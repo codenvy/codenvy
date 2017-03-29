@@ -20,7 +20,7 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * Matcher that checks clone url to be related to given project and branch.
+ * Matcher that checks specified project to be related to given clone url and branch.
  *
  * @author Igor Vinokur
  */
@@ -39,15 +39,11 @@ public interface CloneUrlMatcher {
             return false;
         }
 
-        final String projectType = source.getType();
         final String projectLocation = source.getLocation();
         final String projectBranch = source.getParameters().get("branch");
 
-        if (isNullOrEmpty(projectType) || isNullOrEmpty(projectLocation)) {
-            return false;
-        }
         return (repositoryUrl.equals(projectLocation) || (repositoryUrl + ".git").equals(projectLocation)) &&
-               ("master".equals(branch) || (!isNullOrEmpty(projectBranch) && branch.equals(projectBranch)));
+               ("master".equals(branch) || branch.equals(projectBranch));
     };
 
     /**
@@ -60,5 +56,5 @@ public interface CloneUrlMatcher {
      * @param branch
      *         the branch that the project has to match
      */
-    boolean isCloneUrlMatching(final ProjectConfigDto project, final String cloneUrl, final String branch);
+    boolean isCloneUrlMatching(ProjectConfigDto project, String cloneUrl, String branch);
 }
