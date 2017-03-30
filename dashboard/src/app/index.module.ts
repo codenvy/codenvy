@@ -77,7 +77,7 @@ initModule.config(['$routeProvider', ($routeProvider) => {
 // Development mode is set to TRUE
 // the build assembly (pom.xml) will replace this mode by false when building the application
 // so distribution will have development mode turned off
-var DEV = true;
+var DEV = false;
 
 // and setup controllers
 initModule.controller('LoginCtrl', LoginCtrl);
