@@ -132,7 +132,7 @@ public class SwarmDockerConnector extends DockerConnector {
             logMissingExecInfo(params.getExecId());
             try {
                 // Wait in case swarm needs some time to find exec
-                Thread.sleep(1000);
+                Thread.sleep(3000);
                 super.startExec(params, execOutputProcessor);
             } catch (InterruptedException ie) {
                 // throw original error
