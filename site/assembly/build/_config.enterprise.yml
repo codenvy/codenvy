@@ -12,3 +12,4 @@ paragraph_style: "font-family: 'New Century Schoolbook', 'Crimson Text'; color:b
 link_style: "font-family: 'Roboto Condensed'; font-weight: 900; color: #000; font-size: 15px;text-decoration:none;"
 button_style: "background: #00ff8c; padding: 5px 20px;"
 button_text_style: "font-family: 'Roboto Condensed'; font-weight: 900; color: #000; font-size: 15px;text-decoration:none;"
+docs_url: "https://codenvy.com/docs/"
