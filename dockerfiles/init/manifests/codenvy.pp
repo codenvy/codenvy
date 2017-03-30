@@ -119,6 +119,12 @@ node default {
   $mail_smtp_auth_password = getValue("CODENVY_MAIL_SMTP_AUTH_PASSWORD","smtp_password")
 
 ################################
+# Email properties
+#
+  $workspace_email_invite_subject = getValue("CODENVY_WORKSPACE_EMAIL_INVITE_SUBJECT","Join My Workspace")
+  $organization_email_invite_subject = getValue("CODENVY_ORGANIZATION_EMAIL_INVITE_SUBJECT","Join My Organization")
+
+################################
 # Error reports
 # Logback reports configuration
 #
@@ -128,6 +134,14 @@ node default {
   $email_subject = getValue("CODENVY_EMAIL_SUBJECT","Codenvy codenvy.onprem error: %logger{20} - %m")
   $codenvy_logback_smtp_host = getValue("CODENVY_LOGBACK_SMTP_HOST","localhost")
   $codenvy_logback_smtp_port = getValue("CODENVY_LOGBACK_SMTP_PORT","25")
+
+# Configuration of organization email notifications
+#
+  $organization_email_member_added_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_ADDED_SUBJECT","You’ve been added to a Codenvy Organization")
+  $organization_email_member_removed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_REMOVED_SUBJECT","You’ve been removed from a Codenvy Organization")
+  $organization_email_renamed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_RENAMED_SUBJECT","Codenvy Organization renamed")
+  $organization_email_removed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_REMOVED_SUBJECT","Codenvy Organization deleted")
+
 
 ###############################
 # PGSQL Server, used as back-end for billing
@@ -162,6 +176,12 @@ node default {
 #
 # (Optional) enter custom xmx value, default value is 1g
   $codenvy_server_xmx = getValue("CODENVY_SERVER_XMX","2048")
+
+###############################
+# Auth configurations
+#
+  $auth_sso_access_ticket_lifetime_seconds = getValue("CODENVY_AUTH_SSO_ACCESS_TICKET_LIFETIME","259200")
+  $auth_sso_bearer_ticket_lifetime_seconds = getValue("CODENVY_AUTH_SSO_BEARER_TICKET_LIFETIME","3600")
 
 ###############################
 # oAuth configurations

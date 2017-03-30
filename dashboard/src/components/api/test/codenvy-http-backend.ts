@@ -13,6 +13,7 @@
  * from Codenvy S.A..
  */
 'use strict';
+import {CodenvyAPIBuilder} from '../builder/codenvy-api-builder.factory';
 
 
 /**
@@ -21,11 +22,20 @@
  * @author Oleksii Orel
  */
 export class CodenvyHttpBackend {
+  private httpBackend: ng.IHttpBackendService;
+  private defaultBranding: any;
+  private defaultUser: any;
+  private userIdMap: Map<string, any>;
+  private userEmailMap: Map<string, any>;
+  private factoriesMap: Map<string, any>;
+  private teamsMap: Map<string, any>;
+  private pageMaxItem: number;
+  private pageSkipCount: number;
 
   /**
    * Constructor to use
    */
-  constructor($httpBackend, codenvyAPIBuilder) {
+  constructor($httpBackend: ng.IHttpBackendService, codenvyAPIBuilder: CodenvyAPIBuilder) {
     this.httpBackend = $httpBackend;
 
     this.defaultBranding = {};
@@ -35,6 +45,8 @@ export class CodenvyHttpBackend {
     this.userEmailMap = new Map();
 
     this.factoriesMap = new Map();
+
+    this.teamsMap = new Map();
 
     this.pageMaxItem = 5;
     this.pageSkipCount = 0;
@@ -165,5 +177,33 @@ export class CodenvyHttpBackend {
   getHttpBackend() {
     return this.httpBackend;
   }
+
+  /**
+   * Setup Backend for teams
+   */
+  teamsBackendSetup() {
+    let allTeams = [];
+
+    let teamsKeys = this.teamsMap.keys();
+    for (let key of teamsKeys) {
+      let team = this.teamsMap.get(key);
+      this.httpBackend.when('GET', '/api/organization/' + team.id).respond(team);
+      this.httpBackend.when('DELETE', '/api/organization/' + team.id).respond(() => {
+        return [200, {success: true, errors: []}];
+      });
+      allTeams.push(team);
+    }
+
+    this.httpBackend.when('GET', '/api/organization').respond(allTeams);
+  }
+
+  /**
+   * Add the given team to teamsMap
+   * @param team
+   */
+  addTeamById(team) {
+    this.teamsMap.set(team.id, team);
+  }
+
 }
 

@@ -14,6 +14,9 @@
  */
 'use strict';
 
+
+import {CodenvyTeamBuilder} from './codenvy-team-builder';
+
 /**
  * This class is providing the entry point for accessing the builders
  * @author Florent Benoit
@@ -26,5 +29,13 @@ export class CodenvyAPIBuilder {
    * @ngInject for Dependency injection
    */
   constructor () {
+  }
+
+  /***
+   * The Codenvy Team builder
+   * @returns {CodenvyTeamBuilder}
+   */
+  getTeamBuilder() {
+    return new CodenvyTeamBuilder();
   }
 }

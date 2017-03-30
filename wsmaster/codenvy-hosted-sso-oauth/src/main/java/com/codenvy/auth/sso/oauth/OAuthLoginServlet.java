@@ -14,7 +14,7 @@
  */
 package com.codenvy.auth.sso.oauth;
 
-import com.codenvy.auth.sso.server.InputDataValidator;
+import com.codenvy.auth.sso.server.EmailValidator;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 
 import org.eclipse.che.api.auth.AuthenticationException;
@@ -60,7 +60,7 @@ public class OAuthLoginServlet extends HttpServlet {
     @Inject
     private BearerTokenAuthenticationHandler handler;
     @Inject
-    private InputDataValidator               inputDataValidator;
+    private EmailValidator                   emailValidator;
     @Named("auth.sso.create_workspace_page_url")
     @Inject
     private String                           createWorkspacePage;
@@ -148,17 +148,17 @@ public class OAuthLoginServlet extends HttpServlet {
             profileInfo.put("initiator", oauthProvider);
 
             try {
-                inputDataValidator.validateUserMail(email);
+                emailValidator.validateUserMail(email);
 
                 URI uri =
                         UriBuilder.fromUri(createWorkspacePage).replaceQuery(req.getQueryString())
                                   .replaceQueryParam("signature")
                                   .replaceQueryParam("oauth_provider")
                                   .replaceQueryParam("bearertoken",
-                                                     handler.generateBearerToken(email, findAvailableUsername(email), profileInfo)).build();
+                                                     handler.generateBearerToken(email, profileInfo)).build();
 
                 resp.sendRedirect(uri.toString());
-            } catch (BadRequestException e) {
+            } catch (ServerException | BadRequestException e) {
                 throw new ServletException(e.getLocalizedMessage(), e);
             }
         }
@@ -167,26 +167,6 @@ public class OAuthLoginServlet extends HttpServlet {
     private Optional<User> getUserByEmail(String email) throws IOException {
         try {
             User user = userManager.getByEmail(email);
-            return Optional.of(user);
-        } catch (NotFoundException e) {
-            return Optional.empty();
-        } catch (ServerException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private String findAvailableUsername(String email) throws IOException {
-        String candidate = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
-        int count = 1;
-        while (getUserByName(candidate).isPresent()) {
-            candidate = candidate.concat(String.valueOf(count++));
-        }
-        return candidate;
-    }
-
-    private Optional<User> getUserByName(String name) throws IOException {
-        try {
-            User user = userManager.getByName(name);
             return Optional.of(user);
         } catch (NotFoundException e) {
             return Optional.empty();

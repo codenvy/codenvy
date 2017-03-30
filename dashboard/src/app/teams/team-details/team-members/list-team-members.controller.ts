@@ -16,6 +16,7 @@
 import {CodenvyTeam} from '../../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../../components/api/codenvy-permissions.factory';
 import {TeamDetailsService} from '../team-details.service';
+import {CodenvyInvite} from '../../../../components/api/codenvy-invite.factory';
 
 /**
  * @ngdoc controller
@@ -33,6 +34,10 @@ export class ListTeamMembersController {
    * Team API interaction.
    */
   private codenvyTeam: CodenvyTeam;
+  /**
+   * Invite API interaction.
+   */
+  private codenvyInvite: CodenvyInvite;
   /**
    * User API interaction.
    */
@@ -101,15 +106,20 @@ export class ListTeamMembersController {
    * Current team's owner (comes from directive's scope).
    */
   private owner: any;
+  /**
+   * The editable (whether current user can edit members list and see invitations) state of the members (comes from outside).
+   */
+  private editable: any;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyTeam: CodenvyTeam, codenvyPermissions: CodenvyPermissions, cheUser: any, cheProfile: any,
+  constructor(codenvyTeam: CodenvyTeam, codenvyPermissions: CodenvyPermissions, codenvyInvite: CodenvyInvite, cheUser: any, cheProfile: any,
               confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
               lodash: _.LoDashStatic, $location: ng.ILocationService, teamDetailsService: TeamDetailsService) {
     this.codenvyTeam = codenvyTeam;
+    this.codenvyInvite = codenvyInvite;
     this.codenvyPermissions = codenvyPermissions;
     this.cheProfile = cheProfile;
     this.cheUser = cheUser;
@@ -132,23 +142,41 @@ export class ListTeamMembersController {
     this.owner = teamDetailsService.getOwner();
     this.team  = teamDetailsService.getTeam();
 
-    this.fetchMembers();
+    this.refreshData(true, true);
+  }
+
+  /**
+   * Refreshes both list of members and invitations based on provided parameters.
+   *
+   * @param fetchMembers if <code>true</code> need to refresh members
+   * @param fetchInvitations if <code>true</code> need to refresh invitations
+   */
+  refreshData(fetchMembers: boolean, fetchInvitations: boolean): void {
+    this.members = [];
+    if (!this.team || !this.owner) {
+      return;
+    }
+
+    if (fetchMembers) {
+      this.fetchMembers();
+    } else {
+      this.formUserList();
+    }
+
+    // can fetch invites only admin or owner of the team:
+    if (this.editable) {
+      if (fetchInvitations) {
+        this.fetchInvitations();
+      } else {
+        this.formInvitationList();
+      }
+    }
   }
 
   /**
    * Fetches the list of team members.
    */
   fetchMembers(): void {
-    if (!this.team || !this.owner) {
-      return;
-    }
-    let permissions = this.codenvyPermissions.getTeamPermissions(this.team.id);
-    if (permissions && permissions.length) {
-      this.isLoading = false;
-      this.formUserList();
-    } else {
-      this.isLoading = true;
-    }
     this.codenvyPermissions.fetchTeamPermissions(this.team.id).then(() => {
       this.isLoading = false;
       this.formUserList();
@@ -156,6 +184,8 @@ export class ListTeamMembersController {
       this.isLoading = false;
       if (error.status !== 304) {
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve team permissions.');
+      } else {
+        this.formUserList();
       }
     });
   }
@@ -165,7 +195,6 @@ export class ListTeamMembersController {
    */
   formUserList(): void {
     let permissions = this.codenvyPermissions.getTeamPermissions(this.team.id);
-    this.members = [];
 
     let noOwnerPermissions = true;
 
@@ -210,6 +239,31 @@ export class ListTeamMembersController {
     let userItem = angular.copy(user);
     userItem.permissions = permissions;
     this.members.push(userItem);
+  }
+
+  /**
+   * Fetches the list of team's invitations.
+   */
+  fetchInvitations(): void {
+    this.codenvyInvite.fetchTeamInvitations(this.team.id).then((data: any) => {
+      this.isLoading = false;
+      this.formInvitationList();
+    }, (error: any) => {
+      this.isLoading = false;
+      this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve team invitations.');
+    });
+  }
+
+  /**
+   * Prepares invitations list to be displayed.
+   */
+  formInvitationList(): void {
+    let invites = this.codenvyInvite.getTeamInvitations(this.team.id);
+
+    invites.forEach((invite: any) => {
+      let user = {userId: invite.email, name: 'Pending invitation', email: invite.email, permissions: invite, isPending: true};
+      this.members.push(user);
+    });
   }
 
   /**
@@ -314,10 +368,13 @@ export class ListTeamMembersController {
   addMembers(members: Array<any>, roles: Array<any>): void {
     let promises = [];
     let unregistered = [];
+    let isInvite = false;
+    let isAddMember = false;
 
     members.forEach((member: any) => {
+      let actions = this.codenvyTeam.getActionsFromRoles(roles);
       if (member.id) {
-        let actions = this.codenvyTeam.getActionsFromRoles(roles);
+        isAddMember = true;
         let permissions = {
           instanceId: this.team.id,
           userId: member.id,
@@ -327,17 +384,21 @@ export class ListTeamMembersController {
         let promise = this.codenvyPermissions.storePermissions(permissions);
         promises.push(promise);
       } else {
+        isInvite = true;
+        let promise = this.codenvyInvite.inviteToTeam(this.team.id, member.email, actions);
+        promises.push(promise);
         unregistered.push(member.email);
       }
     });
 
     this.isLoading = true;
     this.$q.all(promises).then(() => {
-      this.fetchMembers();
+      this.refreshData(isAddMember, isInvite);
     }).finally(() => {
       this.isLoading = false;
       if (unregistered.length > 0) {
-        this.cheNotification.showError('User' + (unregistered.length > 1 ? 's ' : ' ') + unregistered.join(', ') + (unregistered.length > 1 ? ' are' : ' is') + ' not registered in the system.');
+        this.cheNotification.showInfo('User' + (unregistered.length > 1 ? 's ' : ' ') + unregistered.join(', ')
+          + (unregistered.length > 1 ? ' are' : ' is') + ' not registered in the system. The email invitations were sent.');
       }
     });
   }
@@ -357,10 +418,18 @@ export class ListTeamMembersController {
    * @param member member to update permissions
    */
   updateMember(member: any): void {
-    if (member.permissions.actions.length > 0) {
-      this.storePermissions(member.permissions);
+    if (member.isPending) {
+      if (member.permissions.actions.length > 0) {
+        this.updateInvitation(member.permissions);
+      } else {
+        this.deleteInvitation(member);
+      }
     } else {
-      this.removePermissions(member);
+      if (member.permissions.actions.length > 0) {
+        this.storePermissions(member.permissions);
+      } else {
+        this.removePermissions(member);
+      }
     }
   }
 
@@ -372,10 +441,34 @@ export class ListTeamMembersController {
   storePermissions(permissions: any): void {
     this.isLoading = true;
     this.codenvyPermissions.storePermissions(permissions).then(() => {
-      this.fetchMembers();
+      this.refreshData(true, false);
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Set user permissions failed.');
+    });
+  }
+
+  /**
+   * Updates the team's invitaion.
+   *
+   * @param member member's invitation to be updated
+   */
+  updateInvitation(member: any): void {
+    this.codenvyInvite.inviteToTeam(this.team.id, member.email, member.actions);
+  }
+
+  /**
+   * Deletes send invitation to the team.
+   *
+   * @param member member to delete invitation
+   */
+  deleteInvitation(member: any): void {
+    this.isLoading = true;
+    this.codenvyInvite.deleteTeamInvitation(this.team.id, member.email).then(() => {
+      this.refreshData(false, true);
+    }, (error: any) => {
+      this.isLoading = false;
+      this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to remove invite send to ' + member.email + '.');
     });
   }
 
@@ -407,13 +500,26 @@ export class ListTeamMembersController {
       let removalError;
       let removeMembersPromises = [];
       let currentUserPromise;
+      let deleteInvite = false;
+      let deleteMember = false;
+
       for (let i = 0; i < checkedKeys.length; i++) {
         let id = checkedKeys[i];
         this.membersSelectedStatus[id] = false;
+        let member = this.getMemberById(id);
+        if (member && member.isPending) {
+          deleteInvite = true;
+          let promise = this.codenvyInvite.deleteTeamInvitation(this.team.id, member.email);
+          removeMembersPromises.push(promise);
+          continue;
+        }
+
+        deleteMember = true;
         if (id === this.cheUser.getUser().id) {
           currentUserPromise = this.codenvyPermissions.removeTeamPermissions(this.team.id, id);
           continue;
         }
+
         let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, id).then(() => {
             ng.noop();
           },
@@ -431,7 +537,7 @@ export class ListTeamMembersController {
         if (currentUserPromise) {
           this.processCurrentUserRemoval();
         } else {
-          this.fetchMembers();
+          this.refreshData(deleteMember, deleteInvite);
         }
 
         this.updateSelectedStatus();
@@ -439,6 +545,18 @@ export class ListTeamMembersController {
           this.cheNotification.showError(removalError.data && removalError.data.message ? removalError.data.message : 'User removal failed.');
         }
       });
+    });
+  }
+
+  /**
+   * Finds member by it's id.
+   *
+   * @param id
+   * @returns {any}
+   */
+  getMemberById(id: string): any {
+    return this.lodash.find(this.members, (member: any) => {
+      return member.userId === id;
     });
   }
 
@@ -461,7 +579,7 @@ export class ListTeamMembersController {
       if (user.userId === this.cheUser.getUser().id) {
         this.processCurrentUserRemoval();
       } else {
-        this.fetchMembers();
+        this.refreshData(true, false);
       }
     }, (error: any) => {
       this.isLoading = false;

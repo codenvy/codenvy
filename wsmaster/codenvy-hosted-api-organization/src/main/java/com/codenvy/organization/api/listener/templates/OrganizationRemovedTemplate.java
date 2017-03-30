@@ -23,13 +23,13 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
  */
 public class OrganizationRemovedTemplate extends ThymeleafTemplate {
 
-    public OrganizationRemovedTemplate(String teamName) {
-        context.setVariable("teamName", teamName);
+    public OrganizationRemovedTemplate(String organizationName) {
+        context.setVariable("organizationName", organizationName);
     }
 
     @Override
     public String getPath() {
-        return "/email-templates/team_deleted";
+        return "/email-templates/organization_deleted";
     }
 
 }

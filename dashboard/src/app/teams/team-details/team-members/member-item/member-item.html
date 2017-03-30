@@ -38,13 +38,16 @@
          class="che-list-item-details">
       <div flex-gt-xs="{{memberItemController.hideDetails ? 60 : 25}}"
            class="che-list-item-name">
-        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
-        <span class="member-email che-hover">{{memberItemController.member.name}}</span>
+        <span class="che-xs-header noselect" hide-gt-xs>Email</span>
+        <span class="member-email che-hover">{{memberItemController.member.email}}</span>
       </div>
       <div flex-gt-xs="{{memberItemController.hideDetails ? 40 : 25}}"
            class="che-list-item-secondary">
-        <span class="che-xs-header noselect" hide-gt-xs>Email</span>
-        <span class="member-email che-hover ">{{memberItemController.member.email}}</span>
+        <span class="che-xs-header noselect" hide-gt-xs>Info</span>
+        <span class="member-email che-hover ">
+          <md-icon md-font-icon="fa-clock-o" class="fa member-pending-icon" ng-if="memberItemController.member.isPending"></md-icon>
+          {{memberItemController.member.name}}
+        </span>
       </div>
       <div flex-gt-xs="35" class="che-list-item-secondary" ng-if="!memberItemController.hideDetails">
         <span class="che-xs-header noselect" hide-gt-xs>Roles</span>

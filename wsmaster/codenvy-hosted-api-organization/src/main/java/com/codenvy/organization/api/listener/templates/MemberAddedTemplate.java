@@ -25,14 +25,16 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 public class MemberAddedTemplate extends ThymeleafTemplate {
 
     public String getPath() {
-        return "/email-templates/user_added_to_team";
+        return "/email-templates/user_added_to_organization";
     }
 
-    public MemberAddedTemplate(String teamName,
-                               String teamLink,
+    public MemberAddedTemplate(String organizationName,
+                               String dashboardEndpoint,
+                               String orgQualifiedName,
                                String initiator) {
-        context.setVariable("teamName", teamName);
-        context.setVariable("teamLink", teamLink);
+        context.setVariable("organizationName", organizationName);
+        context.setVariable("dashboardEndpoint", dashboardEndpoint);
+        context.setVariable("orgQualifiedName", orgQualifiedName);
         context.setVariable("initiator", initiator);
     }
 

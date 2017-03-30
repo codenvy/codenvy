@@ -18,6 +18,8 @@ import com.codenvy.api.permission.shared.event.EventType;
 import com.codenvy.api.permission.shared.event.PermissionsEvent;
 import com.codenvy.api.permission.shared.model.Permissions;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import static com.codenvy.api.permission.shared.event.EventType.PERMISSIONS_ADDED;
 
 /**
@@ -25,12 +27,12 @@ import static com.codenvy.api.permission.shared.event.EventType.PERMISSIONS_ADDE
  *
  * @author Anton Korneta
  */
-public class PermissionsAddedEvent implements PermissionsEvent {
+public class PermissionsCreatedEvent implements PermissionsEvent {
 
     private final String      initiator;
     private final Permissions permissions;
 
-    public PermissionsAddedEvent(String initiator, Permissions permissions) {
+    public PermissionsCreatedEvent(String initiator, Permissions permissions) {
         this.initiator = initiator;
         this.permissions = permissions;
     }
@@ -45,6 +47,8 @@ public class PermissionsAddedEvent implements PermissionsEvent {
         return permissions;
     }
 
+    @Nullable
+    @Override
     public String getInitiator() {
         return initiator;
     }

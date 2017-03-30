@@ -85,7 +85,7 @@ public class BearerTokenAuthenticationService {
     @Inject
     protected MailSender                       mailSender;
     @Inject
-    protected InputDataValidator               inputDataValidator;
+    protected EmailValidator                   emailValidator;
     @Inject
     protected CookieBuilder                    cookieBuilder;
     @Inject
@@ -187,7 +187,7 @@ public class BearerTokenAuthenticationService {
 
         String email = validationData.getEmail();
 
-        inputDataValidator.validateUserMail(email);
+        emailValidator.validateUserMail(email);
         creationValidator.ensureUserCreationAllowed(email, validationData.getUsername());
 
         if (!licenseManager.isFairSourceLicenseAccepted()) {

@@ -16,6 +16,8 @@ package com.codenvy.organization.shared.event;
 
 import com.codenvy.organization.shared.model.Organization;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * The base interface for organization event.
  *
@@ -23,9 +25,19 @@ import com.codenvy.organization.shared.model.Organization;
  */
 public interface OrganizationEvent {
 
+    /**
+     * Returns organization related to this event.
+     */
     Organization getOrganization();
 
-    /** Returns type of this event. */
+    /**
+     * Returns type of this event.
+     */
     EventType getType();
 
+    /**
+     * Returns name of user who acted with organization or null if user is undefined.
+     */
+    @Nullable
+    String getInitiator();
 }

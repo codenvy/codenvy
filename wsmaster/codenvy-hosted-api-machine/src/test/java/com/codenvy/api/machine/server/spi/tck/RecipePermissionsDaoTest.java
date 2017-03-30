@@ -238,8 +238,8 @@ public class RecipePermissionsDaoTest {
         }
 
         @Override
-        protected RecipePermissionsImpl doCreateInstance(String userId, String instanceId, List allowedActions) {
-            return null;
+        protected RecipePermissionsImpl doCreateInstance(String userId, String instanceId, List<String> allowedActions) {
+            return new RecipePermissionsImpl(userId, instanceId, allowedActions);
         }
     }
 }

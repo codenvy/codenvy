@@ -61,6 +61,8 @@ export class AddMemberController {
    */
   private isAllSelected: boolean;
 
+  private codenvyTeam: CodenvyTeam;
+
   /**
    * Default constructor.
    * @ngInject for Dependency injection
@@ -70,6 +72,7 @@ export class AddMemberController {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
+    this.codenvyTeam = codenvyTeam;
 
     this.codenvyPermissions = codenvyPermissions;
     this.cheProfile = cheProfile;
@@ -160,7 +163,7 @@ export class AddMemberController {
 
     Object.keys(this.membersSelectedStatus).forEach((key) => {
       if (this.membersSelectedStatus[key] === true) {
-        checkedUsers.push(key);
+        checkedUsers.push({userId: key, isTeamAdmin: this.isTeamAdmin(key)});
       }
     });
 
@@ -171,6 +174,30 @@ export class AddMemberController {
     });
   }
 
+  /**
+   * Returns true if user is team administrator.
+   *
+   * @param {string} userId user ID
+   * @return {boolean}
+   */
+  isTeamAdmin(userId: string): boolean {
+    let member = this.members.find((_member: any) => {
+      return _member.userId === userId;
+    });
+
+    if (!member || !member.permissions) {
+      return false;
+    }
+
+    let roles = this.codenvyTeam.getRolesFromActions(member.permissions.actions);
+    if (!roles || roles.length === 0) {
+      return false;
+    }
+
+    return roles.some((role: any) => {
+      return /admin/i.test(role.title);
+    });
+  }
 
   /**
    * Return <code>true</code> if all members in list are checked.

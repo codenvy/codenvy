@@ -20,11 +20,11 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.6.0-SNAPSHOT</version>
+        <version>5.7.0-SNAPSHOT</version>
     </parent>
     <groupId>com.codenvy.onpremises.wsmaster</groupId>
     <artifactId>codenvy-master-parent</artifactId>
-    <version>5.6.0-SNAPSHOT</version>
+    <version>5.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Codenvy Master Parent</name>
     <modules>
@@ -43,14 +43,16 @@
         <module>codenvy-hosted-sso-oauth</module>
         <module>codenvy-hosted-sso-server-organization</module>
         <module>codenvy-hosted-workspace-activity</module>
+        <module>codenvy-hosted-api-permission-shared</module>
         <module>codenvy-hosted-api-permission</module>
+        <module>codenvy-hosted-api-invite-shared</module>
+        <module>codenvy-hosted-api-invite</module>
         <module>codenvy-hosted-api-node</module>
         <module>codenvy-hosted-api-node-shared</module>
         <module>codenvy-hosted-api-machine</module>
         <module>codenvy-hosted-api-workspace</module>
         <module>codenvy-hosted-authorization</module>
         <module>codenvy-hosted-api-factory</module>
-        <module>codenvy-hosted-api-permission-shared</module>
         <module>codenvy-hosted-integration-tests</module>
         <module>codenvy-ldap</module>
         <module>codenvy-hosted-api-system-license</module>

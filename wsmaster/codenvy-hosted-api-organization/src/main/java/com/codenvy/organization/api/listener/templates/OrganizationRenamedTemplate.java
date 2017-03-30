@@ -24,13 +24,13 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 public class OrganizationRenamedTemplate extends ThymeleafTemplate {
 
     public OrganizationRenamedTemplate(String oldName, String newName) {
-        context.setVariable("teamOldName", oldName);
-        context.setVariable("teamNewName", newName);
+        context.setVariable("orgOldName", oldName);
+        context.setVariable("orgNewName", newName);
     }
 
     @Override
     public String getPath() {
-        return "/email-templates/team_renamed";
+        return "/email-templates/organization_renamed";
     }
 
 }

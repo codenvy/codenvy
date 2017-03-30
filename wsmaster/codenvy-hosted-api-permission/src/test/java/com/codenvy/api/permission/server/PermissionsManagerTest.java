@@ -33,11 +33,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -89,6 +92,8 @@ public class PermissionsManagerTest {
                                                   .withDomainId("test")
                                                   .withInstanceId("test123")
                                                   .withActions(singletonList(SET_PERMISSIONS));
+        when(permissionsDao.store(any(TestPermissionsImpl.class))).thenReturn(Optional.empty());
+
         permissionsManager.storePermission(permissions);
 
         verify(permissionsDao).store(new TestDomain().doCreateInstance(permissions.getUserId(),
@@ -131,7 +136,7 @@ public class PermissionsManagerTest {
                 new TestPermissionsImpl("user", "test", "test123", asList("read", "setPermissions"));
 
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(true);
-
+        when(permissionsDao.store(any(TestPermissionsImpl.class))).thenReturn(Optional.empty());
         doReturn(new Page<>(singletonList(ownPermissions), 0, 30, 31))
                 .doReturn(new Page<>(singletonList(foreignPermissions), 1, 30, 31))
                 .when(permissionsDao).getByInstance(anyString(), anyInt(), anyInt());
@@ -145,6 +150,7 @@ public class PermissionsManagerTest {
     @Test
     public void shouldNotCheckExistingSetPermissionsIfUserDoesNotHaveItAtAllOnStoring() throws Exception {
         when(permissionsDao.exists("user", "test123", SET_PERMISSIONS)).thenReturn(false);
+        when(permissionsDao.store(any(TestPermissionsImpl.class))).thenReturn(Optional.empty());
 
         permissionsManager.storePermission(new TestPermissionsImpl("user", "test", "test123", singletonList("delete")));
 
@@ -244,6 +250,17 @@ public class PermissionsManagerTest {
           expectedExceptionsMessageRegExp = "Requested unsupported domain 'unsupported'")
     public void shouldThrowExceptionWhenRequestedUnsupportedDomain() throws Exception {
         permissionsManager.getDomain("unsupported");
+    }
+
+    @Test
+    public void shouldDoNothingOnActionSupportingCheckingWhenListDoesNotContainUnsupportedAction() throws Exception {
+        permissionsManager.checkActionsSupporting("test", Arrays.asList("write", "use"));
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Domain with id 'test' doesn't support following action\\(s\\): unsupported")
+    public void shouldThrowConflictExceptionOnActionSupportingCheckingWhenListContainsUnsupportedAction() throws Exception {
+        permissionsManager.checkActionsSupporting("test", Arrays.asList("write", "use", "unsupported"));
     }
 
     public class TestDomain extends AbstractPermissionsDomain<TestPermissionsImpl> {

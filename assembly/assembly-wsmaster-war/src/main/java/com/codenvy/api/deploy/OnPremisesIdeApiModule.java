@@ -228,6 +228,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(AccountDao.class).to(JpaAccountDao.class);
         install(new OrganizationApiModule());
         install(new OrganizationJpaModule());
+        install(new com.codenvy.api.invite.InviteApiModule());
+        install(new com.codenvy.spi.invite.jpa.InviteJpaModule());
         install(new ResourceModule());
         bind(FactoryDao.class).to(JpaFactoryDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
@@ -294,8 +296,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named("auth.jaas.realm")).to("default_realm");
         bindConstant().annotatedWith(Names.named("auth.sso.access_cookie_path")).to("/api/internal/sso/server");
-        bindConstant().annotatedWith(Names.named("auth.sso.access_ticket_lifetime_seconds")).to(259200);
-        bindConstant().annotatedWith(Names.named("auth.sso.bearer_ticket_lifetime_seconds")).to(3600);
         bindConstant().annotatedWith(Names.named("auth.sso.create_workspace_page_url")).to("/site/auth/create");
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
         bindConstant().annotatedWith(Names.named("che.auth.access_denied_error_page")).to("/site/login");
@@ -482,5 +482,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                     .put("twitter", "/email-templates/logos/logo_social_twitter.png")
                                     .put("medium", "/email-templates/logos/logo_social_medium.png")
                                     .build());
+
+        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
+        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
     }
 }

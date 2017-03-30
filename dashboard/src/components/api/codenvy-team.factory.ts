@@ -122,29 +122,32 @@ export class CodenvyTeam {
   fetchTeams(): ng.IPromise<any> {
     let defer = this.$q.defer();
 
-    let promise = this.remoteTeamAPI.getTeams().$promise;
+    let userPromise = this.cheUser.fetchUser();
 
-    // process the result into map and array:
-    promise.then((teams: any) => {
-      this.cheUser.fetchUser().then(() => {
-        this.processTeams(teams, this.cheUser.getUser());
-        defer.resolve();
-      }, (error: any) => {
-        if (error.status === 304) {
-          this.processTeams(teams, this.cheUser.getUser());
-          defer.resolve();
-        } else {
-          defer.reject();
-        }
-      });
+    let teamsPromise = userPromise.then(() => {
+      return this.remoteTeamAPI.getTeams().$promise;
     }, (error: any) => {
-      defer.reject(error);
+      if (error.status === 304) {
+        return this.remoteTeamAPI.getTeams().$promise;
+      }
+      return this.$q.reject(error);
     });
 
-    return defer.promise.then((teams: any) => {
-      this.fetchTeamsDefer.resolve();
-      return teams;
+    teamsPromise.then((teams: any[]) => {
+      this.processTeams(teams, this.cheUser.getUser());
+      defer.resolve();
     }, (error: any) => {
+      if (error.status === 304) {
+        defer.resolve();
+      } else {
+        defer.reject(error);
+      }
+    });
+
+    return defer.promise.then(() => {
+      this.fetchTeamsDefer.resolve();
+    }, (error: any) => {
+      this.fetchTeamsDefer.reject();
       return this.$q.reject(error);
     });
   }

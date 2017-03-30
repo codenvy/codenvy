@@ -66,8 +66,8 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     private final String                                   apiEndpoint;
     private final String                                   memberAddedSubject;
     private final String                                   memberRemovedSubject;
-    private final String                                   teamRenamedSubject;
-    private final String                                   teamRemovedSubject;
+    private final String                                   orgRenamedSubject;
+    private final String                                   orgRemovedSubject;
     private final Map<String, String>                      logos;
     private final String                                   mailFrom;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
@@ -78,10 +78,10 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     @Inject
     public OrganizationNotificationEmailSender(@Named("mailsender.application.from.email.address") String mailFrom,
                                                @Named("che.api") String apiEndpoint,
-                                               @Named("team.email.member.added.subject") String memberAddedSubject,
-                                               @Named("team.email.member.removed.subject") String memberRemovedSubject,
-                                               @Named("team.email.renamed.subject") String teamRenamedSubject,
-                                               @Named("team.email.removed.subject") String teamRemovedSubject,
+                                               @Named("organization.email.member.added.subject") String memberAddedSubject,
+                                               @Named("organization.email.member.removed.subject") String memberRemovedSubject,
+                                               @Named("organization.email.renamed.subject") String orgRenamedSubject,
+                                               @Named("organization.email.removed.subject") String orgRemovedSubject,
                                                @Named("codenvy.email.logos") Map<String, String> logos,
                                                HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
                                                MailSender mailSender,
@@ -91,8 +91,8 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
         this.apiEndpoint = apiEndpoint;
         this.memberAddedSubject = memberAddedSubject;
         this.memberRemovedSubject = memberRemovedSubject;
-        this.teamRenamedSubject = teamRenamedSubject;
-        this.teamRemovedSubject = teamRemovedSubject;
+        this.orgRenamedSubject = orgRenamedSubject;
+        this.orgRemovedSubject = orgRemovedSubject;
         this.logos = logos;
         this.mailSender = mailSender;
         this.thymeleaf = thymeleaf;
@@ -108,24 +108,27 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     @Override
     public void onEvent(OrganizationEvent event) {
         try {
-            if (event.getOrganization() != null) {
-                try {
-                    // checks whether personal organization or not
-                    userManager.getByName(event.getOrganization().getName());
-                } catch (NotFoundException ignore) {
-                    switch (event.getType()) {
-                        case MEMBER_ADDED:
-                            send((MemberAddedEvent)event);
-                            break;
-                        case MEMBER_REMOVED:
-                            send((MemberRemovedEvent)event);
-                            break;
-                        case ORGANIZATION_REMOVED:
-                            send((OrganizationRemovedEvent)event);
-                            break;
-                        case ORGANIZATION_RENAMED:
-                            send((OrganizationRenamedEvent)event);
+            if (event.getInitiator() != null) {
+                if (event.getOrganization().getParent() == null) {
+                    try {
+                        userManager.getByName(event.getOrganization().getName());
+                        return;
+                    } catch (NotFoundException ex) {
+                        //it is not personal organization
                     }
+                }
+                switch (event.getType()) {
+                    case MEMBER_ADDED:
+                        send((MemberAddedEvent)event);
+                        break;
+                    case MEMBER_REMOVED:
+                        send((MemberRemovedEvent)event);
+                        break;
+                    case ORGANIZATION_REMOVED:
+                        send((OrganizationRemovedEvent)event);
+                        break;
+                    case ORGANIZATION_RENAMED:
+                        send((OrganizationRenamedEvent)event);
                 }
             }
         } catch (Exception ex) {
@@ -134,19 +137,23 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     }
 
     private void send(MemberAddedEvent event) throws Exception {
-        final String teamName = event.getOrganization().getName();
+        final String orgName = event.getOrganization().getName();
         final String emailTo = event.getMember().getEmail();
         final String initiator = event.getInitiator();
-        final String teamLink = apiEndpoint.replace("api", "dashboard/#/team/" + initiator + '/' + teamName);
-        final String processed = thymeleaf.process(new MemberAddedTemplate(teamName, teamLink, initiator));
+        final String dashboardEndpoint = apiEndpoint.replace("api", "dashboard");
+        final String orgQualifiedName = event.getOrganization().getQualifiedName();
+        final String processed = thymeleaf.process(new MemberAddedTemplate(orgName,
+                                                                           dashboardEndpoint,
+                                                                           orgQualifiedName,
+                                                                           initiator));
         send(new EmailBean().withBody(processed).withSubject(memberAddedSubject), emailTo);
     }
 
     private void send(MemberRemovedEvent event) throws Exception {
-        final String teamName = event.getOrganization().getName();
+        final String organizationName = event.getOrganization().getName();
         final String initiator = event.getInitiator();
         final String emailTo = event.getMember().getEmail();
-        final String processed = thymeleaf.process(new MemberRemovedTemplate(teamName, initiator));
+        final String processed = thymeleaf.process(new MemberRemovedTemplate(organizationName, initiator));
         send(new EmailBean().withBody(processed).withSubject(memberRemovedSubject), emailTo);
     }
 
@@ -156,7 +163,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
         for (Member member : event.getMembers()) {
             final String emailTo = userManager.getById(member.getUserId()).getEmail();
             try {
-                send(new EmailBean().withBody(processed).withSubject(teamRemovedSubject), emailTo);
+                send(new EmailBean().withBody(processed).withSubject(orgRemovedSubject), emailTo);
             } catch (Exception ignore) {
             }
         }
@@ -172,7 +179,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
             for (Member member : members.getItems()) {
                 final String emailTo = userManager.getById(member.getUserId()).getEmail();
                 try {
-                    send(new EmailBean().withBody(processed).withSubject(teamRenamedSubject), emailTo);
+                    send(new EmailBean().withBody(processed).withSubject(orgRenamedSubject), emailTo);
                 } catch (Exception ignore) {
                 }
             }
@@ -189,10 +196,10 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
                                             .withContentId(entry.getKey())
                                             .withFileName(entry.getKey()));
         }
-        mailSender.sendMail(emailBean.withFrom(mailFrom)
-                                     .withReplyTo(mailFrom)
-                                     .withTo(mailTo)
-                                     .withMimeType(TEXT_HTML)
-                                     .withAttachments(attachments));
+        mailSender.sendAsync(emailBean.withFrom(mailFrom)
+                                      .withReplyTo(mailFrom)
+                                      .withTo(mailTo)
+                                      .withMimeType(TEXT_HTML)
+                                      .withAttachments(attachments));
     }
 }
