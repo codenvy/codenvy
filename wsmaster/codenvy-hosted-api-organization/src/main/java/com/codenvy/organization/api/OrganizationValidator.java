@@ -48,7 +48,7 @@ public class OrganizationValidator {
             throw new BadRequestException("Organization name required");
         }
         if (!accountValidator.isValidName(organization.getName())) {
-            throw new BadRequestException("Organization name must contain only letters and digits");
+            throw new BadRequestException("Organization name may only contain alphanumeric characters or single hyphens inside");
         }
     }
 }
