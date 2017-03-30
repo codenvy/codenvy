@@ -22,7 +22,8 @@ define(["underscore", "views/accountformbase","models/account"],
 
         var ResetPasswordForm = AccountFormBase.extend({
 
-            initialize: function(){
+            initialize: function(attributes){
+                AccountFormBase.prototype.initialize.apply(this,attributes);
                 Account.getBrandingInfo()
                 .done(function(Branding){
                     try{
