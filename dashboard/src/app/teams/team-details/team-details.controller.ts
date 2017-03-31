@@ -316,7 +316,7 @@ export class TeamDetailsController {
       'Would you like to leave team \'' + this.team.name + '\'?', 'Leave');
 
     promise.then(() => {
-      let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, this.codenvyUser.getUser().id);
+      let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, this.cheUser.getUser().id);
       promise.then(() => {
         this.$location.path('/');
         this.codenvyTeam.fetchTeams();

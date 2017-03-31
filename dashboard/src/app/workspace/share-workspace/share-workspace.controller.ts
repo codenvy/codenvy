@@ -14,7 +14,6 @@
  */
 'use strict';
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
 
 /**
