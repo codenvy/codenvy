@@ -7,6 +7,10 @@ class base {
   file { $dirs:
     ensure  => "directory",
     mode    => "755",
+  }->
+  file { "/opt/codenvy/logs/zookeeper":
+    ensure  => "directory",
+    mode    => "777",
   }
   include haproxy
   include nginx
