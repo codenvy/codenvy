@@ -2,48 +2,18 @@
 
 SRC_FOLDER=${1}
 DST_FOLDER=${2}
-DST_HOST=${3}
-DST_PORT=${4}
+HOST=${3}
+PORT=${4}
 DST_USR_ID=${5}
 DST_GRP_ID=${6}
-SRC_USER_NAME=${7}
-
-# Key for SSH connection to sync files
-SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
-# When Codenvy runs on windows we have issue since key doesn't have permissions 0600.
-# With another permissions on key SSH doesn't work.
-# So we copy key into another place that should be inside of container - so it is Linux and permissions are supported.
-# And apply needed permission to copied file. Copying is performed lazily, so it is skipped when it was done previously.
-if [[ ! -f /opt/rsync_key ]]; then
-    cp $SSH_KEY /opt/rsync_key
-fi
-if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
-    chmod 0600 /opt/rsync_key
-fi
+USER_NAME=${7}
 
 ##### Set by puppet #####
 RSYNC_RESTORE_BWLIMIT=<%= scope.lookupvar('codenvy::rsync_restore_bwlimit') %>
 SSH_LOG_LEVEL=<%= scope.lookupvar('codenvy::rsync_ssh_log_level') %>
 #########################
 
-##### SSH options #####
-SSH_OPTIONS=""
-# Add SSH connection options
-SSH_OPTIONS+=" -i /opt/rsync_key -l ${SRC_USER_NAME} -p ${DST_PORT}"
-# Disable password authentication since we use key-based auth
-SSH_OPTIONS+=" -o PasswordAuthentication=no"
-# Disable hosts fingerprint checking because it may fail due to
-# starting different containers on the same ports after some period
-SSH_OPTIONS+=" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-# Set SSH logging level to make it possible to investigate problems
-SSH_OPTIONS+=" -o LogLevel=${SSH_LOG_LEVEL}"
-#######################
-
-# We need root permissions in target container to change ownership of files.
-# If user in that container has access to sudo we use it.
-# Otherwise we use rsync without sudo and if it is possible ownership will be changed.
-RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${DST_HOST} \
-            "if hash sudo 2>/dev/null; then echo 'sudo rsync'; else echo 'rsync'; fi")
+source /opt/codenvy-data/conf/rsyncbase.sh
 
 ##### Rsync options #####
 RSYNC_OPTIONS=""
@@ -78,4 +48,4 @@ rsync ${RSYNC_OPTIONS} \
       --rsh="ssh ${SSH_OPTIONS}" \
       --rsync-path="${RSYNC_COMMAND}" \
       --include='.codenvy/' --filter=':- .gitignore' \
-      ${SRC_FOLDER} ${DST_HOST}:${DST_FOLDER}
+      ${SRC_FOLDER} ${HOST}:${DST_FOLDER}

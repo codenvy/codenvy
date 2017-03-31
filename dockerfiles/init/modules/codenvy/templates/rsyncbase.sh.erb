@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Key for SSH connection to sync files
+SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
+# When Codenvy runs on windows we have issue since key doesn't have permissions 0600.
+# With another permissions on key SSH doesn't work.
+# So we copy key into another place that should be inside of container - so it is Linux and permissions are supported.
+# And apply needed permission to copied file. Copying is performed lazily, so it is skipped when it was done previously.
+# ensure ssh key has correct permissions
+if [[ ! -f /opt/rsync_key ]]; then
+    cp $SSH_KEY /opt/rsync_key
+fi
+if [[ $(stat -c %a /opt/rsync_key) != 600 ]]; then
+    chmod 0600 /opt/rsync_key
+fi
+
+##### SSH options #####
+SSH_OPTIONS=""
+# Add SSH connection options
+SSH_OPTIONS+=" -i /opt/rsync_key -l ${USER_NAME} -p ${PORT}"
+# Disable password authentication since we use key-based auth
+SSH_OPTIONS+=" -o PasswordAuthentication=no"
+# Disable hosts fingerprint checking because it may fail due to
+# starting different containers on the same ports after some period
+SSH_OPTIONS+=" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+# Set SSH logging level to make it possible to investigate problems
+SSH_OPTIONS+=" -o LogLevel=${SSH_LOG_LEVEL}"
+#######################
+
+# We need root permissions in target container to change ownership of files.
+# If user in that container has access to sudo we use it.
+# Otherwise we use rsync without sudo and if it is possible ownership will be changed.
+checkFile="/tmp/codenvy_sudo_test_$(date +%s)"
+createCheckFile="sh -c 'echo 1 > $checkFile' 2>/dev/null"
+checkSudo="$createCheckFile; hash sudo 2>/dev/null && sudo chown 1000 $checkFile 2>/dev/null"
+GET_RSYNC_COMMAND='if [ "$(id -u)" != "0" ]; then '$checkSudo' && echo "sudo rsync" && exit; fi; echo "rsync"'
+RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${HOST} $(echo "$GET_RSYNC_COMMAND"))

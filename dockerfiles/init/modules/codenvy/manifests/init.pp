@@ -124,6 +124,14 @@ class codenvy {
     require => File[$config_dirs],
   }
 
+# creating rsyncbase.sh
+  file { "/opt/codenvy/config/codenvy/conf/rsyncbase.sh":
+    ensure  => "present",
+    content => template("codenvy/rsyncbase.sh.erb"),
+    mode    => "755",
+    require => File[$config_dirs],
+  }
+
 # creating rsyncbackup.sh
   file { "/opt/codenvy/config/codenvy/conf/rsyncbackup.sh":
     ensure  => "present",
