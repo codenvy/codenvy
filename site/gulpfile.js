@@ -108,7 +108,6 @@ gulp.task('jekyll_stage',['copy_src','stage_cfg'], function () {
 
 gulp.task('copy_stage',['copy_src','stage_cfg','css_stage','jekyll_stage'], function(){
   gulp.src([paths.stage+'/**/*.html', // all HTML
-    '!'+paths.stage+'site/custom_pages/**/*.html',
     '!'+paths.stage+'site/admin.html',
     '!'+paths.stage+'site/email-templates_onpremises/*.html',
     paths.stage+'**/*.js',
@@ -256,7 +255,6 @@ gulp.task('copy_onprem_se',
   'rmbuild-se'
   ], function(){
   gulp.src([paths.onpremSE+'**/*.html', // all HTML
-    '!'+paths.onpremSE+'site/custom_pages/**/*.html',
     '!'+paths.onpremSE+'site/admin.html',
     paths.onpremSE+'**/amd-app-*.js', // minified JS
     paths.onpremSE+'**/*-*.css', // minified CSS

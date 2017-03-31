@@ -454,7 +454,6 @@
                                 <copy todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates/logos">
                                     <fileset dir="${project.build.directory}/unzip/site/site/images/mail/logos" />
                                 </copy>
-                                <copy file="${project.build.directory}/unzip/site/site/images/mail/header.png" todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates" />
                             </tasks>
                         </configuration>
                     </execution>
