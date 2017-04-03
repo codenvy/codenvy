@@ -17,6 +17,7 @@ package com.codenvy.api.invite.email;
 import com.codenvy.api.invite.event.InviteCreatedEvent;
 import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
@@ -79,9 +80,11 @@ public class EmailInviteSenderTest {
     private EventService                             eventService;
 
     @Mock
-    private User    initiator;
+    private User                         initiator;
     @Mock
-    private Profile initiatorProfile;
+    private Profile                      initiatorProfile;
+    @Mock
+    private DefaultEmailResourceResolver resourceResolver;
 
     private EmailInviteSender emailSender;
 
@@ -91,7 +94,7 @@ public class EmailInviteSenderTest {
                                                 MAIL_FROM,
                                                 WORKSPACE_INVITE_SUBJECT,
                                                 ORGANIZATION_INVITE_SUBJECT,
-                                                Collections.emptyMap(),
+                                                resourceResolver,
                                                 mailSender,
                                                 userManager,
                                                 profileManager,
@@ -176,6 +179,7 @@ public class EmailInviteSenderTest {
             throws Exception {
         when(emailSender.getInitiatorInfo("userok")).thenReturn("INITIATOR");
         when(tokenHandler.generateBearerToken(anyString(), any())).thenReturn("token123");
+        when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
         when(thymeleaf.process(any())).thenReturn("invitation");
 
         emailSender.sendEmail(USER_INITIATOR_ID, DtoFactory.newDto(InviteDto.class)

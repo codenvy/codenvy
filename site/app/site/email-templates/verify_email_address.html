@@ -17,7 +17,7 @@ header:
 							<h4 style="{{site.h4_style}}"></h4>
                             <p style="{{site.paragraph_style}}">
                                 <span style="{{site.button_style}}">
-                                    <a href="${com.codenvy.masterhost.url}/site/auth/create?bearertoken=${bearertoken}&${additional.query.params}" style="{{site.button_text_style}}">
+                                    <a th:href="@{${masterEndpoint} + '/site/auth/create'(bearertoken=${bearertoken})} + '&' + ${additionalQueryParameters}" style="{{site.button_text_style}}">
     									Verify Email
     								</a>
                                 </span>
