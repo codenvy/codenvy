@@ -69,9 +69,6 @@ frontend https-in
     acl use_nginx path_reg ^/[0-9]+_.+$
     acl use_agents path_beg -i /agent-binaries
 
-    # forward requests from /f to /factory
-    reqrep ^([^\ :]*)\ /f(?!actory)(.*)     \1\ /factory\2 if { path /f /f/ }
-
     # redirect /site/login to /site/create_account if no cookie logged_in
     reqrep ^([^\ :]*)\ /site/login(.*)     \1\ /site/create-account\2 if url_login !is_logged_in url_factory
     redirect prefix / code 302 if url_login !is_logged_in url_factory
