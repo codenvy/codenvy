@@ -18,8 +18,8 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
+import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 
@@ -29,7 +29,7 @@ import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REF
  * @author Anton Korneta
  */
 @Singleton
-public class CodenvyMachineLinksModifier implements WsAgentURLModifier {
+public class CodenvyMachineLinksModifier extends CheWsAgentLinksModifier {
     private static final String MACHINE_TOKEN = "token";
 
     private String machineToken;

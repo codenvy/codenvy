@@ -20,7 +20,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 
 /**
@@ -34,6 +34,6 @@ public class MachineAuthGinModule extends AbstractGinModule {
         bind(AsyncRequestFactory.class).to(com.codenvy.machine.authentication.ide.MachineAsyncRequestFactory.class);
         bind(MachineTokenServiceClient.class).to(com.codenvy.machine.authentication.ide.MachineTokenServiceClientImpl.class)
                                              .in(Singleton.class);
-        bind(WsAgentURLModifier.class).to(com.codenvy.machine.authentication.ide.CodenvyMachineLinksModifier.class);
+        bind(CheWsAgentLinksModifier.class).to(com.codenvy.machine.authentication.ide.CodenvyMachineLinksModifier.class);
     }
 }

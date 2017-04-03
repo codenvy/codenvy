@@ -17,6 +17,7 @@ package com.codenvy.plugin.product.info.client;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.ProductInfoDataProviderImpl;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ import javax.inject.Inject;
  * @author Oleksii Orel
  */
 @Singleton
-public class CodenvyProductInfoDataProvider implements ProductInfoDataProvider {
+public class CodenvyProductInfoDataProvider extends ProductInfoDataProviderImpl {
     private final CodenvyLocalizationConstant locale;
     private final CodenvyResources            resources;
 
