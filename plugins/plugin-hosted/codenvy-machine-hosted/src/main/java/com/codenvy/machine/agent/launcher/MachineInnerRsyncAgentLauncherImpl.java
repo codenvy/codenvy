@@ -14,6 +14,7 @@
  */
 package com.codenvy.machine.agent.launcher;
 
+import org.eclipse.che.api.agent.server.exception.AgentStartException;
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLaunchingChecker;
 import org.eclipse.che.api.agent.server.launcher.CommandExistsAgentChecker;
@@ -60,7 +61,7 @@ public class MachineInnerRsyncAgentLauncherImpl extends AbstractAgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws ServerException {
+    public void launch(Instance machine, Agent agent) throws ServerException, AgentStartException {
         super.launch(machine, agent);
 
         DockerNode node = (DockerNode)machine.getNode();

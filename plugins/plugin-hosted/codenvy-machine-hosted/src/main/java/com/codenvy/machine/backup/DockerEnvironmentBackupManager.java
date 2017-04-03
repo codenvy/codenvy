@@ -116,9 +116,9 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                 // may happen if WS is no longer in RUNNING state
                 return;
             }
+            // machine that is not in running state can be just a stub and should not be casted
             DockerInstance dockerDevMachine = (DockerInstance)workspaceManager.getMachineInstance(workspaceId,
                                                                                                   devMachine.getId());
-            // machine that is not in running state can be just a stub and should not be casted
             String nodeHost = dockerDevMachine.getNode().getHost();
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             String srcUserName = getUserName(workspaceId, dockerDevMachine.getContainer()).name;

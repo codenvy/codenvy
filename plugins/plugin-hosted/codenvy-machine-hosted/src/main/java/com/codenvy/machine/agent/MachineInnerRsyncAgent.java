@@ -109,7 +109,8 @@ public class MachineInnerRsyncAgent extends AgentImpl {
               "    exit 1\n" +
               "fi\n\n" +
               "mkdir -p ~/.ssh\n" +
-              "echo ${CODENVY_SYNC_PUB_KEY} >> ~/.ssh/authorized_keys",
+              "echo ${CODENVY_SYNC_PUB_KEY} >> ~/.ssh/authorized_keys" +
+              "echo \"Rsync agent installed\"",
               null);
     }
 }
