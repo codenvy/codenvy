@@ -12,7 +12,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
-package com.codenvy.plugin.webhooks.bitbucketserver.shared;
+package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
@@ -22,31 +22,29 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Igor Vinokur
  */
 @DTO
-public interface Repository {
-    /**
-     * Returns the repository's slug.
-     */
-    String getSlug();
+public interface BitbucketServerRepository extends BitbucketRepository{
 
-    void setSlug(String slug);
-
-    Repository withSlug(String slug);
-
-    /**
-     * Returns the repository's name.
-     */
     String getName();
 
     void setName(String name);
 
-    Repository withName(String name);
+    BitbucketServerRepository withName(String name);
 
-    /**
-     * Returns {@link Project} object of the repository's project.
-     */
-    Project getProject();
+    String getSlug();
 
-    void setProject(Project project);
+    void setSlug(String slug);
 
-    Repository withProject(Project project);
+    BitbucketServerRepository withSlug(String slug);
+
+    BitbucketServerRepository getOrigin();
+
+    void setOrigin(BitbucketServerRepository parent);
+
+    BitbucketServerRepository withOrigin(BitbucketServerRepository parent);
+
+    BitbucketServerProject getProject();
+
+    void setProject(BitbucketServerProject project);
+
+    BitbucketServerRepository withProject(BitbucketServerProject project);
 }

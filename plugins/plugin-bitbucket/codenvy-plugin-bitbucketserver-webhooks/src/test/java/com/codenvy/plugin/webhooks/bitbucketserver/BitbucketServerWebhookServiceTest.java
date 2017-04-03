@@ -92,7 +92,7 @@ public class BitbucketServerWebhookServiceTest {
                                                         configurationProperties,
                                                         "username",
                                                         "password",
-                                                        "http://bitbucketserver.host/"));
+                                                        "http://bitbucketserver.host"));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class BitbucketServerWebhookServiceTest {
                                                                           .withOwner(DtoFactory.newDto(User.class)
                                                                                                .withName("owner"))
                                                                           .withKey("projectkey"))
-                                                   .withName("repository"))
+                                                   .withSlug("repository"))
                          .withRefChanges(singletonList(DtoFactory.newDto(RefChange.class)
                                                                  .withToHash("hash commit")
                                                                  .withType("UPDATE")

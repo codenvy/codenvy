@@ -25,7 +25,7 @@ schedule.core_pool_size=10
 # GIT
 git.server.uri.prefix=git
 
-bitbucket.endpoint=<%= scope.lookupvar('codenvy::bitbucket_endpoint') %>
+bitbucket.endpoint=<%= scope.lookupvar('codenvy::bitbucket_endpoint').gsub(/\/$/, '') %>
 
 # Integration
 integration.factory.owner.username=<%= scope.lookupvar('codenvy::integration_factory_owner_username') %>

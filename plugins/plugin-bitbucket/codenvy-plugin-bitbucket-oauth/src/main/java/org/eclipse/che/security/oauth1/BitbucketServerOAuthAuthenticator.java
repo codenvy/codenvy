@@ -32,9 +32,9 @@ public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
                                              @Named("bitbucket.endpoint") String bitbucketEndpoint,
                                              @Named("che.api") String apiEndpoint) {
         super(consumerKey,
-              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/request-token",
-              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/access-token",
-              normalizeUrl(bitbucketEndpoint) + "/plugins/servlet/oauth/authorize",
+              bitbucketEndpoint + "/plugins/servlet/oauth/request-token",
+              bitbucketEndpoint + "/plugins/servlet/oauth/access-token",
+              bitbucketEndpoint + "/plugins/servlet/oauth/authorize",
               apiEndpoint + "/oauth/1.0/callback",
               null,
               privateKey);
@@ -44,9 +44,5 @@ public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
     @Override
     public final String getOAuthProvider() {
         return "bitbucket-server";
-    }
-
-    private static String normalizeUrl(String endpoint) {
-        return endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
     }
 }

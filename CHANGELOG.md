@@ -1,5 +1,31 @@
 # Change Log
 
+## [5.6.0](https://github.com/codenvy/codenvy/tree/5.6.0) (2017-03-30)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.5.0...5.6.0)
+
+**Pull requests merged:**
+- [UD] added sending team invitations to unregistered users and display pending members for admin of the team. [2009](https://github.com/codenvy/codenvy/pull/2009)
+- Restored the ability to share personal workspaces with users registered in the Codenvy system. [2001](https://github.com/codenvy/codenvy/pull/2001)
+- Add missing filter bindings [1999](https://github.com/codenvy/codenvy/pull/1999)
+- Fix very slow codenvy cli stop operation. [1997](https://github.com/codenvy/codenvy/pull/1997)
+- Fixed email templates for codenvy organizations [1994](https://github.com/codenvy/codenvy/pull/1994)
+- Hide support link if it is not configured in product.json [1993](https://github.com/codenvy/codenvy/pull/1993)
+- Add ability to customize a site. [1987](https://github.com/codenvy/codenvy/pull/1987)
+- save java heap dumps when oom happen [1982](https://github.com/codenvy/codenvy/pull/1982)
+- Use new `.factory.dockerfile` and `.factory.properties` for repo URL based factories. [1979](https://github.com/codenvy/codenvy/pull/1979)
+- Added ability to invite unredistered users to organization and workspace. [1978](https://github.com/codenvy/codenvy/pull/1978)
+- Change agents usage after changes in Che [1977](https://github.com/codenvy/codenvy/pull/1977)
+- Fix bug where some containers became inaccessible after rebooting [1975](https://github.com/codenvy/codenvy/pull/1975)
+- [UD] Added Teams list on dashboard page [1973](https://github.com/codenvy/codenvy/pull/1973)
+- Fix FactoryProjectImporter according to che#4447 [1972](https://github.com/codenvy/codenvy/pull/1972)
+- add rsyslog entrypoint [1964](https://github.com/codenvy/codenvy/pull/1964)
+- Don't take into account node number when check license usage legality [1959](https://github.com/codenvy/codenvy/pull/1959)
+- Reduce the number of requests to the storage to retrieve the total number of users [1957](https://github.com/codenvy/codenvy/pull/1957)
+- Removed the deprecated RemotePreferenceDao. [1938](https://github.com/codenvy/codenvy/pull/1938)
+- Added ability for users to remove their own permissions. [1935](https://github.com/codenvy/codenvy/pull/1935)
+- Add possibility to configure docker namespace for pushing snapshots [1931](https://github.com/codenvy/codenvy/pull/1931)
+- Adaptation to other pull request N/A [1929](https://github.com/codenvy/codenvy/pull/1929)
+
 ## [5.5.0](https://github.com/codenvy/codenvy/tree/5.5.0) (2017-03-15)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.4.1...5.5.0)
 

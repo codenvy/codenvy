@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import static com.codenvy.plugin.webhooks.CloneUrlMatcher.DEFAULT_CLONE_URL_MATCHER;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -150,7 +151,10 @@ public class GitHubWebhookService extends BaseWebhookService {
         final Set<String> factoriesIDs = getWebhookConfiguredFactoriesIDs(contribRepositoryHtmlUrl);
 
         // Get factories that contain a project for given repository and branch
-        final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoriesIDs, contribRepositoryHtmlUrl, contribBranch);
+        final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoriesIDs,
+                                                                              contribRepositoryHtmlUrl,
+                                                                              contribBranch,
+                                                                              DEFAULT_CLONE_URL_MATCHER);
         if (factories.isEmpty()) {
             throw new ServerException("No factory found for repository " + contribRepositoryHtmlUrl + " and branch " + contribBranch);
         }
@@ -208,7 +212,10 @@ public class GitHubWebhookService extends BaseWebhookService {
         final Set<String> factoriesIDs = getWebhookConfiguredFactoriesIDs(prBaseRepositoryHtmlUrl);
 
         // Get factories that contain a project for given repository and branch
-        final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoriesIDs, prHeadRepositoryHtmlUrl, prHeadBranch);
+        final List<FactoryDto> factories = getFactoriesForRepositoryAndBranch(factoriesIDs,
+                                                                              prHeadRepositoryHtmlUrl,
+                                                                              prHeadBranch,
+                                                                              DEFAULT_CLONE_URL_MATCHER);
         if (factories.isEmpty()) {
             throw new ServerException("No factory found for branch " + prHeadBranch);
         }
@@ -216,7 +223,12 @@ public class GitHubWebhookService extends BaseWebhookService {
         for (FactoryDto f : factories) {
             // Update project into the factory with given repository and branch
             final FactoryDto updatedfactory =
-                    updateProjectInFactory(f, prHeadRepositoryHtmlUrl, prHeadBranch, prBaseRepositoryHtmlUrl, prHeadCommitId);
+                    updateProjectInFactory(f,
+                                           prHeadRepositoryHtmlUrl,
+                                           prHeadBranch,
+                                           prBaseRepositoryHtmlUrl,
+                                           prHeadCommitId,
+                                           DEFAULT_CLONE_URL_MATCHER);
 
             // Persist updated factory
             updateFactory(updatedfactory);

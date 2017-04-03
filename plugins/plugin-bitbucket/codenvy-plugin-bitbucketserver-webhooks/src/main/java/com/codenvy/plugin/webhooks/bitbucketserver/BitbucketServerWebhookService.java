@@ -17,6 +17,7 @@ package com.codenvy.plugin.webhooks.bitbucketserver;
 import com.codenvy.plugin.webhooks.AuthConnection;
 import com.codenvy.plugin.webhooks.FactoryConnection;
 import com.codenvy.plugin.webhooks.BaseWebhookService;
+import com.codenvy.plugin.webhooks.CloneUrlMatcher;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changeset;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Project;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.PushEvent;
@@ -27,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
@@ -48,6 +50,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -61,6 +64,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     private static final String WEBHOOK_FACTORY_ID_SUFFIX_PATTERN = "_FACTORY.+_ID";
 
     private final ConfigurationProperties configurationProperties;
+    private final CloneUrlMatcher         urlMatcher;
     private final String                  bitbucketEndpoint;
 
     @Inject
@@ -72,8 +76,25 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                                          @Named("bitbucket.endpoint") String bitbucketEndpoint) {
         super(authConnection, factoryConnection, configurationProperties, username, password);
         this.configurationProperties = configurationProperties;
-        this.bitbucketEndpoint = bitbucketEndpoint.endsWith("/") ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
-                                                                 : bitbucketEndpoint;
+        this.bitbucketEndpoint = bitbucketEndpoint;
+
+        urlMatcher = (project, repositoryUrl, branch) -> {
+            if (isNullOrEmpty(repositoryUrl) || isNullOrEmpty(branch)) {
+                return false;
+            }
+
+            final SourceStorageDto source = project.getSource();
+            if (source == null) {
+                return false;
+            }
+
+            //Bitbucket Server adds user's name to repository's clone url, but there is no user in received webhook.
+            //So need to remove '<username>@' from repository's clone url in given project source.
+            final String projectLocation = source.getLocation().replaceAll("://.+@", "://");
+            final String projectBranch = source.getParameters().get("branch");
+
+            return repositoryUrl.equals(projectLocation) && branch.equals(projectBranch);
+        };
     }
 
     @POST
@@ -118,9 +139,9 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     void handlePushEvent(PushEvent event, String branch) throws ServerException {
         Repository repository = event.getRepository();
         Project project = repository.getProject();
-        String cloneUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), repository.getName());
+        String cloneUrl = computeCloneUrl(project.getKey(), repository.getSlug());
 
-        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(cloneUrl), cloneUrl, branch)) {
+        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(cloneUrl), cloneUrl, branch, urlMatcher)) {
             Link factoryLink = factory.getLink(FACTORY_URL_REL);
             if (factoryLink == null) {
                 LOG.warn("Factory " + factory.getId() + " do not contain mandatory \'" + FACTORY_URL_REL + "\' link");
@@ -136,28 +157,24 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
         String branch = source.contains(":") ? source.substring(source.indexOf(":") + 1) : source;
         String commitId = event.getRefChanges().get(0).getToHash();
         Project project = event.getRepository().getProject();
-        String baseRepositoryName = event.getRepository().getName();
-        String headUrl = computeCloneUrl(source.contains(":") ? source.substring(1, source.indexOf("/")) : project.getOwner().getName(),
-                                         source.contains(":") ? source.substring(0, source.indexOf("/")) : project.getKey(),
+        String baseRepositorySlug = event.getRepository().getSlug();
+        String headUrl = computeCloneUrl(source.contains(":") ? source.substring(0, source.indexOf("/")) : project.getKey(),
                                          source.contains(":") ? source.substring(source.indexOf("/") + 1, source.indexOf(":"))
-                                                              : baseRepositoryName);
-        String baseUrl = computeCloneUrl(project.getOwner().getName(), project.getKey(), baseRepositoryName);
+                                                              : baseRepositorySlug);
+        String baseUrl = computeCloneUrl(project.getKey(), baseRepositorySlug);
 
-        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(headUrl), headUrl, branch)) {
-            updateFactory(updateProjectInFactory(factory, headUrl, branch, baseUrl, commitId));
+        for (FactoryDto factory : getFactoriesForRepositoryAndBranch(getFactoriesIDs(headUrl), headUrl, branch, urlMatcher)) {
+            updateFactory(updateProjectInFactory(factory, headUrl, branch, baseUrl, commitId, urlMatcher));
         }
     }
 
-    private String computeCloneUrl(String owner, String projectKey, String repositoryName) {
+    private String computeCloneUrl(String projectKey, String repositorySlug) {
         StringBuilder sb = new StringBuilder();
-        sb.append(bitbucketEndpoint.substring(0, bitbucketEndpoint.indexOf("://") + 3))
-          .append(owner)
-          .append("@")
-          .append(bitbucketEndpoint.substring(bitbucketEndpoint.indexOf("://") + 3))
+        sb.append(bitbucketEndpoint)
           .append("/scm/")
           .append(projectKey)
           .append("/")
-          .append(repositoryName)
+          .append(repositorySlug)
           .append(".git");
 
         return sb.toString().toLowerCase();
@@ -168,7 +185,9 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
 
         Set<String> webhooks = properties.entrySet()
                                          .stream()
-                                         .filter(entry -> repositoryUrl.equals(entry.getValue()))
+                                         //Bitbucket Server adds user's name to repository's clone url, but there is no user in received webhook.
+                                         //So need to remove '<username>@' from repository's clone url in given factory source.
+                                         .filter(entry -> repositoryUrl.equals(entry.getValue().replaceAll("://.+@", "://")))
                                          .map(entry -> entry.getKey()
                                                             .substring(0, entry.getKey().lastIndexOf(WEBHOOK_REPOSITORY_URL_SUFFIX)))
                                          .collect(toSet());
