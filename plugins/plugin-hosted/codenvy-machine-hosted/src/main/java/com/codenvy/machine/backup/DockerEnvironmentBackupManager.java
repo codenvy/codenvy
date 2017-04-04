@@ -312,14 +312,15 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                     "Restoring of workspace " + workspaceId + " filesystem terminated due to timeout on "
                     + destAddress + " node.");
         } catch (InterruptedException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+            Thread.currentThread().interrupt();
             throw new ServerException(
                     "Restoring of workspace " + workspaceId + " filesystem interrupted on " + destAddress + " node.");
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new ServerException(
-                    "Restoring of workspace " + workspaceId + " filesystem terminated on " + destAddress + " node. "
-                    + e.getLocalizedMessage());
+            String error = "Restoring of workspace " + workspaceId +
+                           " filesystem terminated on " + destAddress + " node. "
+                           + e.getLocalizedMessage();
+            LOG.error(error, e);
+            throw new ServerException(error);
         } finally {
             lock.unlock();
             if (!restored) {
