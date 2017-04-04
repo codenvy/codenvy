@@ -17,7 +17,7 @@ package com.codenvy.api.invite.email;
 import com.codenvy.api.invite.event.InviteCreatedEvent;
 import com.codenvy.api.workspace.server.WorkspaceDomain;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
-import com.codenvy.mail.Attachment;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
 import com.codenvy.organization.api.permissions.OrganizationDomain;
@@ -39,16 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.api.client.repackaged.com.google.common.base.Strings.nullToEmpty;
-import static com.google.common.io.Files.toByteArray;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
@@ -69,20 +63,19 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
     private final ProfileManager                           profileManager;
     private final BearerTokenAuthenticationHandler         tokenHandler;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
-    private final Map<String, String>                      logos;
+    private final DefaultEmailResourceResolver             resourceResolver;
 
     @Inject
     public EmailInviteSender(@Named("che.api") String apiEndpoint,
                              @Named("mailsender.application.from.email.address") String mailFrom,
                              @Named("workspace.email.invite.subject") String workspaceInviteSubject,
                              @Named("organization.email.invite.subject") String organizationInviteSubject,
-                             @Named("codenvy.email.logos") Map<String, String> logos,
+                             DefaultEmailResourceResolver resourceResolver,
                              MailSender mailSender,
                              UserManager userManager,
                              ProfileManager profileManager,
                              BearerTokenAuthenticationHandler tokenHandler,
                              HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf) {
-        this.logos = logos;
         this.apiEndpoint = apiEndpoint;
         this.mailFrom = mailFrom;
         this.workspaceInviteSubject = workspaceInviteSubject;
@@ -92,6 +85,7 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
         this.profileManager = profileManager;
         this.tokenHandler = tokenHandler;
         this.thymeleaf = thymeleaf;
+        this.resourceResolver = resourceResolver;
     }
 
     @Inject
@@ -150,14 +144,12 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
             default:
                 throw new ServerException(format("There is no configured template for specified %s domain", invite.getDomainId()));
         }
-
-        mailSender.sendAsync(new EmailBean().withSubject(subject)
-                                            .withBody(thymeleaf.process(template))
-                                            .withFrom(mailFrom)
-                                            .withReplyTo(mailFrom)
-                                            .withTo(email)
-                                            .withMimeType(TEXT_HTML)
-                                            .withAttachments(getLogosAttachments()));
+        mailSender.sendAsync(resourceResolver.resolve(new EmailBean().withSubject(subject)
+                                                                     .withBody(thymeleaf.process(template))
+                                                                     .withFrom(mailFrom)
+                                                                     .withReplyTo(mailFrom)
+                                                                     .withTo(email)
+                                                                     .withMimeType(TEXT_HTML)));
     }
 
     @VisibleForTesting
@@ -182,20 +174,4 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
         }
     }
 
-    private List<Attachment> getLogosAttachments() throws ServerException {
-        final List<Attachment> attachments = new ArrayList<>(logos.size());
-        for (Map.Entry<String, String> entry : logos.entrySet()) {
-            final File logo = new File(getClass().getResource(entry.getValue()).getPath());
-            final String encoded;
-            try {
-                encoded = Base64.getEncoder().encodeToString(toByteArray(logo));
-            } catch (IOException e) {
-                throw new ServerException(e.getLocalizedMessage(), e);
-            }
-            attachments.add(new Attachment().withContent(encoded)
-                                            .withContentId(entry.getKey())
-                                            .withFileName(entry.getKey()));
-        }
-        return attachments;
-    }
 }

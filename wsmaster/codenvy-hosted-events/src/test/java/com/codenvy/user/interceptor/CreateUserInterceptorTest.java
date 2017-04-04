@@ -31,8 +31,6 @@ import org.testng.annotations.Test;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.Method;
 
-import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD;
-import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -89,7 +87,7 @@ public class CreateUserInterceptorTest {
 
         interceptor.invoke(invocation);
 
-        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD));
+        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(false));
     }
 
     @Test
@@ -108,6 +106,6 @@ public class CreateUserInterceptorTest {
 
         interceptor.invoke(invocation);
 
-        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD));
+        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(true));
     }
 }

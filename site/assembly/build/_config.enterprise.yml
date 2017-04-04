@@ -1,5 +1,0 @@
-# jekyll configuration used for the enterprise build
-
-port: 4000
-destination: ../enterprise
-profile: enterprise

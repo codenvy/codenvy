@@ -19,13 +19,15 @@ import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.dao.authentication.TokenGenerator;
 import com.codenvy.api.license.server.SystemLicenseManager;
+import com.codenvy.auth.sso.server.email.template.VerifyEmailTemplate;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.mail.Attachment;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
-import com.google.common.io.Files;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
@@ -33,7 +35,6 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserValidator;
-import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +50,13 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.codenvy.api.license.shared.model.Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
 import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.commons.lang.IoUtil.getResource;
-import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 /**
  * Service to authenticate users using bearer tokens.
@@ -71,34 +67,50 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 @Path("internal/token")
 public class BearerTokenAuthenticationService {
 
-    private static final Logger LOG           = LoggerFactory.getLogger(BearerTokenAuthenticationService.class);
-    // TODO made this configurable
-    private static final String MAIL_TEMPLATE = "email-templates/verify_email_address.html";
-    private static final String LOGO          = "/email-templates/header.png";
-    private static final String LOGO_CID      = "codenvyLogo";
+    private static final Logger LOG = LoggerFactory.getLogger(BearerTokenAuthenticationService.class);
+
+    private final TicketManager                            ticketManager;
+    private final TokenGenerator                           uniqueTokenGenerator;
+    private final BearerTokenAuthenticationHandler         handler;
+    private final MailSender                               mailSender;
+    private final EmailValidator                           emailValidator;
+    private final CookieBuilder                            cookieBuilder;
+    private final UserCreationValidator                    creationValidator;
+    private final UserCreator                              userCreator;
+    private final UserValidator                            userNameValidator;
+    private final SystemLicenseManager                     licenseManager;
+    private final DefaultEmailResourceResolver             resourceResolver;
+    private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+    private final String                                   mailFrom;
+
     @Inject
-    protected TicketManager                    ticketManager;
-    @Inject
-    protected TokenGenerator                   uniqueTokenGenerator;
-    @Inject
-    private   BearerTokenAuthenticationHandler handler;
-    @Inject
-    protected MailSender                       mailSender;
-    @Inject
-    protected EmailValidator                   emailValidator;
-    @Inject
-    protected CookieBuilder                    cookieBuilder;
-    @Inject
-    protected UserCreationValidator            creationValidator;
-    @Inject
-    protected UserCreator                      userCreator;
-    @Inject
-    protected UserValidator                    userNameValidator;
-    @Inject
-    @Named("mailsender.application.from.email.address")
-    protected String                           mailFrom;
-    @Inject
-    protected SystemLicenseManager             licenseManager;
+    public BearerTokenAuthenticationService(TicketManager ticketManager,
+                                            TokenGenerator uniqueTokenGenerator,
+                                            BearerTokenAuthenticationHandler handler,
+                                            MailSender mailSender,
+                                            EmailValidator emailValidator,
+                                            CookieBuilder cookieBuilder,
+                                            UserCreationValidator creationValidator,
+                                            UserCreator userCreator,
+                                            UserValidator userNameValidator,
+                                            SystemLicenseManager licenseManager,
+                                            DefaultEmailResourceResolver resourceResolver,
+                                            HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
+                                            @Named("mailsender.application.from.email.address") String mailFrom) {
+        this.ticketManager = ticketManager;
+        this.uniqueTokenGenerator = uniqueTokenGenerator;
+        this.handler = handler;
+        this.mailSender = mailSender;
+        this.emailValidator = emailValidator;
+        this.cookieBuilder = cookieBuilder;
+        this.creationValidator = creationValidator;
+        this.userCreator = userCreator;
+        this.userNameValidator = userNameValidator;
+        this.licenseManager = licenseManager;
+        this.resourceResolver = resourceResolver;
+        this.thymeleaf = thymeleaf;
+        this.mailFrom = mailFrom;
+    }
 
     /**
      * Authenticates user by provided token, than creates the ldap user
@@ -197,31 +209,20 @@ public class BearerTokenAuthenticationService {
         if (!licenseManager.canUserBeAdded()) {
             throw new ForbiddenException(UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE);
         }
-
-        Map<String, String> props = new HashMap<>();
-        props.put("logo.cid", "codenvyLogo");
-        props.put("bearertoken", handler.generateBearerToken(email, validationData.getUsername(),
-                                                             Collections.singletonMap("initiator", "email")));
-        props.put("additional.query.params", uriInfo.getRequestUri().getQuery());
-        props.put("com.codenvy.masterhost.url", uriInfo.getBaseUriBuilder().replacePath(null).build().toString());
-
-        File logo = new File(this.getClass().getResource(LOGO).getPath());
-        Attachment attachment = new Attachment()
-                .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
-                .withContentId(LOGO_CID)
-                .withFileName("logo.png");
-
-        EmailBean emailBean = new EmailBean()
-                .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + MAIL_TEMPLATE)), props))
-                .withFrom(mailFrom)
-                .withTo(email)
-                .withReplyTo(null)
-                .withSubject("Verify Your Codenvy Account")
-                .withMimeType(TEXT_HTML)
-                .withAttachments(Collections.singletonList(attachment));
-
-        mailSender.sendMail(emailBean);
-
+        final String bearerToken = handler.generateBearerToken(email,
+                                                               validationData.getUsername(),
+                                                               Collections.singletonMap("initiator", "email"));
+        final String additionalParams = uriInfo.getRequestUri().getQuery();
+        final String masterEndpoint = uriInfo.getBaseUriBuilder().replacePath(null).build().toString();
+        final VerifyEmailTemplate emailTemplate = new VerifyEmailTemplate(bearerToken,
+                                                                          additionalParams,
+                                                                          masterEndpoint);
+        mailSender.sendMail(resourceResolver.resolve(new EmailBean().withBody(thymeleaf.process(emailTemplate))
+                                                                    .withFrom(mailFrom)
+                                                                    .withTo(email)
+                                                                    .withReplyTo(null)
+                                                                    .withSubject("Verify Your Codenvy Account")
+                                                                    .withMimeType(TEXT_HTML)));
         LOG.info("Email validation message send to {}", email);
 
         return Response.ok().build();

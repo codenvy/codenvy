@@ -14,7 +14,7 @@
  */
 package com.codenvy.organization.api.listener;
 
-import com.codenvy.mail.Attachment;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
 import com.codenvy.organization.api.OrganizationManager;
@@ -43,14 +43,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
 
-import static com.google.common.io.Files.toByteArray;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 /**
@@ -68,12 +62,12 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     private final String                                   memberRemovedSubject;
     private final String                                   orgRenamedSubject;
     private final String                                   orgRemovedSubject;
-    private final Map<String, String>                      logos;
     private final String                                   mailFrom;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
     private final MailSender                               mailSender;
     private final OrganizationManager                      organizationManager;
     private final UserManager                              userManager;
+    private final DefaultEmailResourceResolver resourceResolver;
 
     @Inject
     public OrganizationNotificationEmailSender(@Named("mailsender.application.from.email.address") String mailFrom,
@@ -82,7 +76,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
                                                @Named("organization.email.member.removed.subject") String memberRemovedSubject,
                                                @Named("organization.email.renamed.subject") String orgRenamedSubject,
                                                @Named("organization.email.removed.subject") String orgRemovedSubject,
-                                               @Named("codenvy.email.logos") Map<String, String> logos,
+                                               DefaultEmailResourceResolver resourceResolver,
                                                HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
                                                MailSender mailSender,
                                                OrganizationManager organizationManager,
@@ -93,7 +87,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
         this.memberRemovedSubject = memberRemovedSubject;
         this.orgRenamedSubject = orgRenamedSubject;
         this.orgRemovedSubject = orgRemovedSubject;
-        this.logos = logos;
+        this.resourceResolver = resourceResolver;
         this.mailSender = mailSender;
         this.thymeleaf = thymeleaf;
         this.organizationManager = organizationManager;
@@ -187,19 +181,10 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
         } while (members.hasNextPage());
     }
 
-    private void send(EmailBean emailBean, String mailTo) throws IOException, ServerException {
-        final List<Attachment> attachments = new ArrayList<>(logos.size());
-        for (Map.Entry<String, String> entry : logos.entrySet()) {
-            final File logo = new File(this.getClass().getResource(entry.getValue()).getPath());
-            final String encoded = Base64.getEncoder().encodeToString(toByteArray(logo));
-            attachments.add(new Attachment().withContent(encoded)
-                                            .withContentId(entry.getKey())
-                                            .withFileName(entry.getKey()));
-        }
-        mailSender.sendAsync(emailBean.withFrom(mailFrom)
-                                      .withReplyTo(mailFrom)
-                                      .withTo(mailTo)
-                                      .withMimeType(TEXT_HTML)
-                                      .withAttachments(attachments));
+    private void send(EmailBean emailBean, String emailTo) throws IOException, ServerException {
+        mailSender.sendAsync(resourceResolver.resolve(emailBean.withFrom(mailFrom)
+                                                               .withReplyTo(mailFrom)
+                                                               .withTo(emailTo)
+                                                               .withMimeType(TEXT_HTML)));
     }
 }

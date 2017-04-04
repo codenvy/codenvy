@@ -31,8 +31,11 @@
  */
 package com.codenvy.service.password;
 
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -86,15 +89,16 @@ public class PasswordServiceTest {
 
     @Mock
     private UserManager userManager;
-
     @Mock
     private ProfileManager profileManager;
-
     @Mock
     private RecoveryStorage recoveryStorage;
-
     @Mock
     private ProfileImpl profile;
+    @Mock
+    private DefaultEmailResourceResolver resourceResolver;
+    @Mock
+    private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
 
     private User user;
 
@@ -109,8 +113,10 @@ public class PasswordServiceTest {
                                           userManager,
                                           recoveryStorage,
                                           profileManager,
+                                          resourceResolver,
                                           "Codenvy <noreply@codenvy.com>",
                                           "Codenvy Password Recovery",
+                                          thymeleaf,
                                           1);
         user = spy(new UserImpl(UUID, USER_EMAIL, USER_EMAIL));
 
@@ -130,8 +136,10 @@ public class PasswordServiceTest {
         when(profileManager.getById(eq("userId"))).thenReturn(profile);
         when(profile.getAttributes()).thenReturn(Collections.<String, String>emptyMap());
 
-        Response response =
-                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
+        Response response =  given().formParam("uuid", UUID)
+                                    .formParam("password", NEW_PASSWORD)
+                                    .when()
+                                    .post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 204);
 
@@ -152,7 +160,8 @@ public class PasswordServiceTest {
         }});
 
         Response response =
-                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
+                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when()
+                       .post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 204);
 
@@ -169,7 +178,8 @@ public class PasswordServiceTest {
                 given().formParam("uuid", UUID).formParam("password", "newpass").when().post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 403);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Setup password token is incorrect or has expired");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
+                     "Setup password token is incorrect or has expired");
 
         verify(recoveryStorage, times(1)).remove(UUID);
         verifyZeroInteractions(userManager);
@@ -182,10 +192,12 @@ public class PasswordServiceTest {
         doThrow(new NotFoundException(USER_EMAIL)).when(userManager).getByEmail(USER_EMAIL);
 
         Response response =
-                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
+                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when()
+                       .post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 404);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USER_EMAIL + " is not registered in the system.");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
+                     "User " + USER_EMAIL + " is not registered in the system.");
         verify(recoveryStorage, times(1)).remove(UUID);
         verify(userManager, never()).update(eq(user));
     }
@@ -198,7 +210,8 @@ public class PasswordServiceTest {
         doThrow(new ServerException("test")).when(userManager).update(any(User.class));
 
         Response response =
-                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when().post(SERVICE_PATH + "/setup");
+                given().formParam("uuid", UUID).formParam("password", NEW_PASSWORD).when()
+                       .post(SERVICE_PATH + "/setup");
 
         assertEquals(response.statusCode(), 500);
         assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
@@ -225,7 +238,8 @@ public class PasswordServiceTest {
         Response response = given().pathParam("uuid", UUID).when().get(SERVICE_PATH + "/verify/{uuid}");
 
         assertEquals(response.statusCode(), 403);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Setup password token is incorrect or has expired");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
+                     "Setup password token is incorrect or has expired");
         verify(recoveryStorage).remove(UUID);
     }
 
@@ -244,17 +258,20 @@ public class PasswordServiceTest {
     public void shouldSendEmailToRecoverPassword() throws Exception {
         when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
         when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
+        when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
+        when(thymeleaf.process(any())).thenReturn("body");
         ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
 
         given().pathParam("username", USER_EMAIL).post(SERVICE_PATH + "/recover/{username}");
 
         verify(mailSender).sendMail(argumentCaptor.capture());
+        verify(resourceResolver, times(1)).resolve(any());
+        verify(thymeleaf, times(1)).process(any());
         EmailBean argumentCaptorValue = argumentCaptor.getValue();
         assertEquals(argumentCaptorValue.getFrom(), "Codenvy <noreply@codenvy.com>");
         assertEquals(argumentCaptorValue.getSubject(), "Codenvy Password Recovery");
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
         assertTrue(!argumentCaptorValue.getBody().isEmpty());
-        assertTrue(argumentCaptorValue.getAttachments().size() == 1);
     }
 
     @Test
@@ -264,7 +281,8 @@ public class PasswordServiceTest {
         Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
 
         assertEquals(response.statusCode(), 404);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "User " + USER_EMAIL + " is not registered in the system.");
+        assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
+                     "User " + USER_EMAIL + " is not registered in the system.");
         verifyZeroInteractions(mailSender);
         verifyZeroInteractions(recoveryStorage);
     }

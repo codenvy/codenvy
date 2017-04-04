@@ -3,3 +3,13 @@
 port: 4000
 destination: ../stage
 profile: stage
+#email templates style
+top_banner_style: "background-color: black; color: white; height: 110px; vertical-align: top; font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0;"
+bottom_banner_style: "background-color: black; color: white; height: 70px; vertical-align: top; font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0; vertical-align:middle;"
+header_style: "font-family: 'Roboto Condensed'; font-size: 32px; font-weight: 900; margin: 0px 0px 12px 15px;"
+h4_style: "font-family: 'Roboto Condensed'; font-size: 18px; margin: 30px 0px 8px 0px; color: #000;"
+paragraph_style: "font-family: 'New Century Schoolbook', 'Crimson Text'; color:black; font-size: 16px; margin: 2px 0px;"
+link_style: "font-family: 'Roboto Condensed'; font-weight: 900; font-size: 16px; text-decoration: underline;"
+button_style: "background: #00ff8c; padding: 5px 20px;"
+button_text_style: "font-family: 'Roboto Condensed'; font-weight: 900; color: #000; font-size: 15px;text-decoration:none;"
+docs_url: "https://codenvy.com/docs/"
