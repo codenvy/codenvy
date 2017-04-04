@@ -16,7 +16,6 @@
 
 import {CodenvyTeamRoles} from './codenvy-team-roles';
 import {CodenvyTeamEventsManager} from './codenvy-team-events-manager.factory';
-import {CodenvyUser} from './codenvy-user.factory';
 
 interface ITeamsResource<T> extends ng.resource.IResourceClass<T> {
   getTeams(): ng.resource.IResource<T>;
@@ -58,7 +57,7 @@ export class CodenvyTeam {
   /**
    * The Codenvy user API.
    */
-  private codenvyUser : CodenvyUser;
+  private cheUser : any;
   /**
    * The Codenvy Team notifications.
    */
@@ -80,13 +79,13 @@ export class CodenvyTeam {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: any, cheNamespaceRegistry: any, codenvyUser: CodenvyUser,
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: any, cheNamespaceRegistry: any, cheUser: any,
               codenvyTeamEventsManager: CodenvyTeamEventsManager) {
     this.$resource = $resource;
     this.$q = $q;
     this.lodash = lodash;
     this.cheNamespaceRegistry = cheNamespaceRegistry;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.teamEventsManager = codenvyTeamEventsManager;
 
     this.remoteTeamAPI = <ITeamsResource<any>>$resource('/api/organization', {}, {
@@ -123,7 +122,7 @@ export class CodenvyTeam {
   fetchTeams(): ng.IPromise<any> {
     let defer = this.$q.defer();
 
-    let userPromise = this.codenvyUser.fetchUser();
+    let userPromise = this.cheUser.fetchUser();
 
     let teamsPromise = userPromise.then(() => {
       return this.remoteTeamAPI.getTeams().$promise;
@@ -135,7 +134,7 @@ export class CodenvyTeam {
     });
 
     teamsPromise.then((teams: any[]) => {
-      this.processTeams(teams, this.codenvyUser.getUser());
+      this.processTeams(teams, this.cheUser.getUser());
       defer.resolve();
     }, (error: any) => {
       if (error.status === 304) {
@@ -161,6 +160,7 @@ export class CodenvyTeam {
    * @param user
    */
   processTeams(teams: Array<any>, user: any): void {
+    debugger;
     this.teamsMap = new Map();
     this.teams = [];
     this.cheNamespaceRegistry.getNamespaces().length = 0;
@@ -235,8 +235,8 @@ export class CodenvyTeam {
   fetchTeamByName(name: string): ng.IPromise<any> {
     let promise = this.remoteTeamAPI.findTeam({'teamName' : name}).$promise;
     let resultPromise = promise.then((team: any) => {
-      this.teamsByNameMap.set(team.qualifiedName, team);
-      return team;
+    this.teamsByNameMap.set(team.qualifiedName, team);
+    return team;
     }, (error: any) => {
       if (error.status === 304) {
         return this.getTeamByName(name);

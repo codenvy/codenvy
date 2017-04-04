@@ -58,7 +58,7 @@ export class TeamItemController {
   }
 
   /**
-   * Redirect to factory details.
+   * Redirect to team details.
    */
   redirectToTeamDetails(page: string) {
     this.$location.path('/team/' + this.team.qualifiedName + (page ? '/page/' + page : ''));

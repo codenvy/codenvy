@@ -14,7 +14,7 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
 
 /**
  * Templates for GitHub constants.

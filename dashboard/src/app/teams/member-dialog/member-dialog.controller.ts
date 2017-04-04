@@ -13,7 +13,6 @@
  * from Codenvy S.A..
  */
 'use strict';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 import {CodenvyTeamRoles} from '../../../components/api/codenvy-team-roles';
 
@@ -31,7 +30,7 @@ export class MemberDialogController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Service for displaying dialogs.
    */
@@ -98,10 +97,10 @@ export class MemberDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: angular.material.IDialogService, codenvyTeam: CodenvyTeam, codenvyUser: CodenvyUser, $q: ng.IQService, lodash: any) {
+  constructor($mdDialog: angular.material.IDialogService, codenvyTeam: CodenvyTeam, cheUser: any, $q: ng.IQService, lodash: any) {
     this.$mdDialog = $mdDialog;
     this.codenvyTeam = codenvyTeam;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.$q = $q;
     this.lodash = lodash;
 
@@ -195,7 +194,7 @@ export class MemberDialogController {
 
   processUser(email: string, users : Array<any>): ng.IPromise<any> {
     let deferred = this.$q.defer();
-    let user = this.codenvyUser.getUserByAlias(email);
+    let user = this.cheUser.getUserByAlias(email);
     if (user) {
       users.push(user);
       deferred.resolve();
@@ -203,8 +202,8 @@ export class MemberDialogController {
       user = {};
       user.email = email;
       this.isProcessing = true;
-      this.codenvyUser.fetchUserByAlias(email).then(() => {
-        users.push(this.codenvyUser.getUserByAlias(email));
+      this.cheUser.fetchUserByAlias(email).then(() => {
+        users.push(this.cheUser.getUserByAlias(email));
         deferred.resolve();
       }, (error: any) => {
         users.push(user);

@@ -23,5 +23,5 @@
     <inherits name="com.google.gwt.inject.Inject"/>
 
     <inherits name="org.eclipse.che.ide.ext.bitbucket.Bitbucket"/>
-    <inherits name="com.codenvy.plugin.pullrequest.PullRequest"/>
+    <inherits name="org.eclipse.che.plugin.pullrequest.PullRequest"/>
 </module>

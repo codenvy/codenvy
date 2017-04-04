@@ -28,7 +28,6 @@
     <packaging>pom</packaging>
     <name>Codenvy Plugin :: Hosted :: Parent</name>
     <modules>
-        <module>codenvy-hosted-ext-factory</module>
         <module>codenvy-hosted-ext-support-help</module>
         <module>codenvy-hosted-ext-profile</module>
         <module>codenvy-hosted-ext-hosted</module>

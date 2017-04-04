@@ -14,15 +14,16 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
-import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
-import com.codenvy.plugin.pullrequest.client.steps.CheckBranchToPush;
-import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.IssuePullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
-import com.codenvy.plugin.pullrequest.client.steps.UpdatePullRequestStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Context;
-import com.codenvy.plugin.pullrequest.client.workflow.Step;
+import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
+import org.eclipse.che.plugin.pullrequest.client.parts.contribute.StagesProvider;
+import org.eclipse.che.plugin.pullrequest.client.steps.CheckBranchToPush;
+import org.eclipse.che.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.DetectPullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.IssuePullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.UpdatePullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
+import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import com.google.common.collect.ImmutableSet;
 
 import javax.inject.Inject;

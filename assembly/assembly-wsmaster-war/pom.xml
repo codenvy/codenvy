@@ -180,10 +180,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-github-factory-resolver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-github-webhooks</artifactId>
         </dependency>
         <dependency>
@@ -209,10 +205,6 @@
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-redhat-oauth2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-url-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
@@ -332,6 +324,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-factory-resolver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-github-oauth2</artifactId>
         </dependency>
         <dependency>
@@ -345,6 +341,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ssh-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-url-factory</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
@@ -454,7 +454,6 @@
                                 <copy todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates/logos">
                                     <fileset dir="${project.build.directory}/unzip/site/site/images/mail/logos" />
                                 </copy>
-                                <copy file="${project.build.directory}/unzip/site/site/images/mail/header.png" todir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/classes/email-templates" />
                             </tasks>
                         </configuration>
                     </execution>

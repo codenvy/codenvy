@@ -14,7 +14,7 @@
  */
 'use strict';
 import {LicenseMessagesService} from '../../onprem/license-messages/license-messages.service';
-import {CodenvyAPI} from '../../../components/api/codenvy-api.factory';
+import {CodenvyLicense} from '../../../components/api/codenvy-license.factory';
 
 
 /**
@@ -25,7 +25,8 @@ export class AdminsUserManagementCtrl {
   $q: ng.IQService;
   $log: ng.ILogService;
   $mdDialog: ng.material.IDialogService;
-  codenvyAPI: CodenvyAPI;
+  cheUser: any;
+  codenvyLicense: CodenvyLicense;
   licenseMessagesService: LicenseMessagesService;
   cheNotification: any;
   pagesInfo: any;
@@ -47,11 +48,13 @@ export class AdminsUserManagementCtrl {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, codenvyAPI: CodenvyAPI, cheNotification: any, licenseMessagesService: LicenseMessagesService, confirmDialogService: any) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheUser: any, codenvyLicense: CodenvyLicense,
+              cheNotification: any, licenseMessagesService: LicenseMessagesService, confirmDialogService: any) {
     this.$q = $q;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
-    this.codenvyAPI = codenvyAPI;
+    this.cheUser = cheUser;
+    this.codenvyLicense = codenvyLicense;
     this.cheNotification = cheNotification;
     this.licenseMessagesService = licenseMessagesService;
     this.confirmDialogService = confirmDialogService;
@@ -62,7 +65,7 @@ export class AdminsUserManagementCtrl {
     this.skipCount = 0;
 
     this.users = [];
-    this.usersMap = codenvyAPI.getUser().getUsersMap();
+    this.usersMap = this.cheUser.getUsersMap();
 
     this.userOrderBy = 'name';
     this.userFilter = {name: ''};
@@ -75,7 +78,7 @@ export class AdminsUserManagementCtrl {
       this.updateUsers();
     } else {
       this.isLoading = true;
-      codenvyAPI.getUser().fetchUsers(this.maxItems, this.skipCount).then(() => {
+      this.cheUser.fetchUsers(this.maxItems, this.skipCount).then(() => {
         this.isLoading = false;
         this.updateUsers();
       }, (error: any) => {
@@ -86,7 +89,7 @@ export class AdminsUserManagementCtrl {
       });
     }
 
-    this.pagesInfo = codenvyAPI.getUser().getPagesInfo();
+    this.pagesInfo = this.cheUser.getPagesInfo();
   }
 
   /**
@@ -157,9 +160,10 @@ export class AdminsUserManagementCtrl {
 
     promise.then(() => {
       this.isLoading = true;
-      let promise = this.codenvyAPI.getUser().deleteUserById(user.id);
+      let promise = this.cheUser.deleteUserById(user.id);
       promise.then(() => {
         this.isLoading = false;
+        this.codenvyLicense.fetchLicenseLegality();//fetch license legality
         this.updateUsers();
         this.licenseMessagesService.fetchMessages();
       }, (error: any) => {
@@ -206,7 +210,7 @@ export class AdminsUserManagementCtrl {
         currentUserId = userId;
         this.usersSelectedStatus[userId] = false;
 
-        let promise = this.codenvyAPI.getUser().deleteUserById(userId);
+        let promise = this.cheUser.deleteUserById(userId);
         promise.then(() => {
           queueLength--;
         }, (error: any) => {
@@ -218,12 +222,13 @@ export class AdminsUserManagementCtrl {
 
       this.$q.all(deleteUserPromises).finally(() => {
         this.isLoading = true;
-        let promise = this.codenvyAPI.getUser().fetchUsersPage(this.pagesInfo.currentPageNumber);
+        let promise = this.cheUser.fetchUsersPage(this.pagesInfo.currentPageNumber);
 
         promise.then(() => {
           this.isLoading = false;
           this.updateUsers();
           this.updateSelectedStatus();
+          this.codenvyLicense.fetchLicenseLegality();//fetch license legality
           this.licenseMessagesService.fetchMessages();
         }, (error: any) => {
           this.isLoading = false;
@@ -275,7 +280,7 @@ export class AdminsUserManagementCtrl {
    */
   fetchUsersPage(pageKey: string): void {
     this.isLoading = true;
-    let promise = this.codenvyAPI.getUser().fetchUsersPage(pageKey);
+    let promise = this.cheUser.fetchUsersPage(pageKey);
 
     promise.then(() => {
       this.isLoading = false;

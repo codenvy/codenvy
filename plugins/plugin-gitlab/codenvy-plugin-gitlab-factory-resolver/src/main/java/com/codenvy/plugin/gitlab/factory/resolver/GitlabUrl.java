@@ -16,6 +16,8 @@ package com.codenvy.plugin.gitlab.factory.resolver;
 
 import com.google.common.base.Strings;
 
+import java.util.StringJoiner;
+
 /**
  * Representation of a github URL, allowing to get details from it.
  * <p> like
@@ -29,7 +31,7 @@ public class GitlabUrl {
     /**
      * Gitlab prefix.
      */
-    private static final String GITLAB_PREFIX = "https://gitlab.com/";
+    private static final String GITLAB_PREFIX = "https://gitlab.com";
 
     /**
      * Master branch is the default.
@@ -52,9 +54,19 @@ public class GitlabUrl {
     private String branch = DEFAULT_BRANCH_NAME;
 
     /**
-     * subfolder if any
+     * Subfolder if any
      */
     private String subfolder;
+
+    /**
+     * Dockerfile filename
+     */
+    private String dockerfileFilename;
+
+    /**
+     * Factory json filename
+     */
+    private String factoryFilename;
 
     /**
      * Creation of this instance is made by the parser so user may not need to create a new instance directly
@@ -68,11 +80,11 @@ public class GitlabUrl {
      *
      * @return the username part
      */
-    public String username() {
+    public String getUsername() {
         return this.username;
     }
 
-    public GitlabUrl username(String userName) {
+    public GitlabUrl withUsername(String userName) {
         this.username = userName;
         return this;
     }
@@ -82,11 +94,11 @@ public class GitlabUrl {
      *
      * @return the repository part
      */
-    public String repository() {
+    public String getRepository() {
         return this.repository;
     }
 
-    protected GitlabUrl repository(String repository) {
+    protected GitlabUrl withRepository(String repository) {
         this.repository = repository;
         return this;
     }
@@ -96,11 +108,11 @@ public class GitlabUrl {
      *
      * @return the branch part
      */
-    public String branch() {
+    public String getBranch() {
         return this.branch;
     }
 
-    protected GitlabUrl branch(String branch) {
+    protected GitlabUrl withBranch(String branch) {
         if (!Strings.isNullOrEmpty(branch)) {
             this.branch = branch;
         }
@@ -108,11 +120,11 @@ public class GitlabUrl {
     }
 
     /**
-     * Gets subfolder of this github url
+     * Gets subfolder of this gitlab url
      *
      * @return the subfolder part
      */
-    public String subfolder() {
+    public String getSubfolder() {
         return this.subfolder;
     }
 
@@ -123,8 +135,36 @@ public class GitlabUrl {
      *         path inside the repository
      * @return current github instance
      */
-    protected GitlabUrl subfolder(String subfolder) {
+    protected GitlabUrl withSubfolder(String subfolder) {
         this.subfolder = subfolder;
+        return this;
+    }
+
+    /**
+     * Gets dockerfile file name of this github url
+     *
+     * @return the dockerfile file name
+     */
+    public String getDockerfileFilename() {
+        return this.dockerfileFilename;
+    }
+
+    protected GitlabUrl withDockerfileFilename(String dockerfileFilename) {
+        this.dockerfileFilename = dockerfileFilename;
+        return this;
+    }
+
+    /**
+     * Gets factory file name of this github url
+     *
+     * @return the factory file name
+     */
+    public String getFactoryFilename() {
+        return this.factoryFilename;
+    }
+
+    protected GitlabUrl withFactoryFilename(String factoryFilename) {
+        this.factoryFilename = factoryFilename;
         return this;
     }
 
@@ -133,8 +173,14 @@ public class GitlabUrl {
      *
      * @return location of dockerfile in a repository
      */
-    protected String codenvyDockerFileLocation() {
-        return GITLAB_PREFIX + this.username + "/" + this.repository + "/raw/" + this.branch() + "/.codenvy.dockerfile";
+    protected String dockerFileLocation() {
+        return new StringJoiner("/").add(GITLAB_PREFIX)
+                                    .add(username)
+                                    .add(repository)
+                                    .add("raw")
+                                    .add(branch)
+                                    .add(dockerfileFilename)
+                                    .toString();
     }
 
     /**
@@ -142,8 +188,14 @@ public class GitlabUrl {
      *
      * @return location of codenvy factory json file in a repository
      */
-    protected String codenvyFactoryJsonFileLocation() {
-        return GITLAB_PREFIX + this.username + "/" + this.repository + "/raw/" + this.branch() + "/.codenvy.json";
+    protected String factoryJsonFileLocation() {
+        return new StringJoiner("/").add(GITLAB_PREFIX)
+                                    .add(username)
+                                    .add(repository)
+                                    .add("raw")
+                                    .add(branch)
+                                    .add(factoryFilename)
+                                    .toString();
     }
 
     /**
@@ -152,7 +204,7 @@ public class GitlabUrl {
      * @return location of the repository.
      */
     protected String repositoryLocation() {
-        return GITLAB_PREFIX + this.username + "/" + this.repository + ".git";
+        return GITLAB_PREFIX + "/" + this.username + "/" + this.repository + ".git";
     }
 
 

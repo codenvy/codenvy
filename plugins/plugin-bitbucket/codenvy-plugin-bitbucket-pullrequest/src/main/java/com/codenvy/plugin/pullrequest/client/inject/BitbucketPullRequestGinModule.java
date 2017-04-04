@@ -15,9 +15,9 @@
 package com.codenvy.plugin.pullrequest.client.inject;
 
 import com.codenvy.plugin.pullrequest.client.BitbucketHostingService;
-import com.codenvy.plugin.pullrequest.client.parts.contribute.StagesProvider;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.client.workflow.ContributionWorkflow;
+import org.eclipse.che.plugin.pullrequest.client.parts.contribute.StagesProvider;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
+import org.eclipse.che.plugin.pullrequest.client.workflow.ContributionWorkflow;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;

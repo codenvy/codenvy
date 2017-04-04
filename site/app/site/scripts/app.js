@@ -71,8 +71,10 @@ define(["jquery","config",
                         11:{class:".error-factory-creation",pageName:"FactoryWorkspaceCreationFailed"},
                         12:{class:".error-tenant-name",pageName:"WorkspaceDoesNotExist"},
                         13:{class:".maintenance",pageName:"Maintenance"},
-                        14:{class:".fair-source-license-is-not-accepted-error",pageName:"AccessRequiresLicenseAcceptance"}
-                    };
+                        14:{class:".fair-source-license-is-not-accepted-error",pageName:"AccessRequiresLicenseAcceptance"},
+                        15:{class:".no-account-found", pageName:"NoAccountFound"},
+                        16:{class:".websocket-connection-error", pageName:"WebsocketConnectionError"}};
+
                     var forgotPasswordForm = $(".forgotpassword-form"),
                         resetPasswordForm = $(".resetpassword-form"),
                         errorContainer = $(".error-container"),

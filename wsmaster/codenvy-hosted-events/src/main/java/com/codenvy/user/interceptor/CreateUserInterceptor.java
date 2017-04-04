@@ -28,9 +28,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.Response;
 
-import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD;
-import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD;
-
 /**
  * Intercepts {@link UserService#create(UserDto, String, Boolean)} method.
  *
@@ -58,17 +55,8 @@ public class CreateUserInterceptor implements MethodInterceptor {
             final UserDto createdUser = (UserDto)response.getEntity();
             userName = createdUser.getName();
             userEmail = createdUser.getEmail();
-
-            String template;
-            String token = (String)invocation.getArguments()[1];
-            if (token == null) {
-                //user was created from entity with password
-                template = EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD;
-            } else {
-                template = EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD;
-            }
-
-            notificationSender.sendNotification(userName, userEmail, template);
+            final String token = (String)invocation.getArguments()[1];
+            notificationSender.sendNotification(userName, userEmail, token == null);
         } catch (Exception e) {
             LOG.warn("Unable to send creation notification email", e);
         }

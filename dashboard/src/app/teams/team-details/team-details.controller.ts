@@ -17,7 +17,6 @@ import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 import {CodenvyResourcesDistribution} from '../../../components/api/codenvy-resources-distribution.factory';
 import {CodenvyResourceLimits} from '../../../components/api/codenvy-resource-limits';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 import {CodenvyTeamEventsManager} from '../../../components/api/codenvy-team-events-manager.factory';
 import {TeamDetailsService} from './team-details.service';
 
@@ -48,7 +47,7 @@ export class TeamDetailsController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Notifications service.
    */
@@ -111,14 +110,14 @@ export class TeamDetailsController {
    * @ngInject for Dependency injection
    */
   constructor(codenvyTeam: CodenvyTeam, codenvyResourcesDistribution: CodenvyResourcesDistribution, codenvyPermissions: CodenvyPermissions,
-              codenvyUser: CodenvyUser, $route: ng.route.IRouteService, $location: ng.ILocationService, $rootScope: che.IRootScopeService,
+              cheUser: any, $route: ng.route.IRouteService, $location: ng.ILocationService, $rootScope: che.IRootScopeService,
               $scope: ng.IScope, confirmDialogService: any, codenvyTeamEventsManager: CodenvyTeamEventsManager, cheNotification: any,
               lodash: any, teamDetailsService: TeamDetailsService) {
     this.codenvyTeam = codenvyTeam;
     this.codenvyResourcesDistribution = codenvyResourcesDistribution;
     this.codenvyPermissions = codenvyPermissions;
     this.codenvyTeamEventsManager = codenvyTeamEventsManager;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.teamName = $route.current.params.teamName;
     this.$location = $location;
     this.confirmDialogService = confirmDialogService;
@@ -218,7 +217,7 @@ export class TeamDetailsController {
    * @returns {Array} current user allowed actions
    */
   processUserPermissions(): Array<string> {
-    let userId = this.codenvyUser.getUser().id;
+    let userId = this.cheUser.getUser().id;
     let permissions = this.codenvyPermissions.getTeamPermissions(this.team.id);
     let userPermissions = this.lodash.find(permissions, (permission: any) => {
       return permission.userId === userId;
@@ -317,7 +316,7 @@ export class TeamDetailsController {
       'Would you like to leave team \'' + this.team.name + '\'?', 'Leave');
 
     promise.then(() => {
-      let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, this.codenvyUser.getUser().id);
+      let promise = this.codenvyPermissions.removeTeamPermissions(this.team.id, this.cheUser.getUser().id);
       promise.then(() => {
         this.$location.path('/');
         this.codenvyTeam.fetchTeams();

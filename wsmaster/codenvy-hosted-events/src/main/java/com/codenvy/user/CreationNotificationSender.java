@@ -14,99 +14,88 @@
  */
 package com.codenvy.user;
 
-import com.codenvy.mail.Attachment;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
 import com.codenvy.service.password.RecoveryStorage;
-import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.Files;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.codenvy.user.email.template.CreateUserWithPasswordTemplate;
+import com.codenvy.user.email.template.CreateUserWithoutPasswordTemplate;
 
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.commons.lang.IoUtil.getResource;
-import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 /**
  * Sends email notification to users about their registration in Codenvy
  *
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
+@Singleton
 public class CreationNotificationSender {
     private static final Logger LOG = LoggerFactory.getLogger(CreationNotificationSender.class);
 
-    public static final String EMAIL_TEMPLATE_USER_CREATED_WITH_PASSWORD    = "email-templates/user_created_with_password.html";
-    public static final String EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD = "email-templates/user_created_without_password.html";
-
-    private static final String LOGO     = "/email-templates/header.png";
-    private static final String LOGO_CID = "codenvyLogo";
-
-    @VisibleForTesting
-    @Inject
-    @Named("che.api")
-    String apiEndpoint;
-
-    @VisibleForTesting
-    @Inject
-    @Named("mailsender.application.from.email.address")
-    String mailFrom;
+    private final String                                   apiEndpoint;
+    private final String                                   mailFrom;
+    private final MailSender                               mailSender;
+    private final RecoveryStorage                          recoveryStorage;
+    private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+    private final DefaultEmailResourceResolver             resourceResolver;
 
     @Inject
-    private MailSender mailSender;
-
-    @Inject
-    private RecoveryStorage recoveryStorage;
-
-    @VisibleForTesting
-    public void sendNotification(String userName, String userEmail, String template) throws IOException, ApiException {
-        final URL urlEndpoint = new URL(apiEndpoint);
-
-        String uuid = recoveryStorage.generateRecoverToken(userEmail);
-
-        UriBuilder resetPasswordLinkUriBuilder = UriBuilder.fromUri(urlEndpoint.getProtocol() + "://" + urlEndpoint.getHost())
-                                                           .path("site/setup-password")
-                                                           .queryParam("id", uuid);
-        String resetPasswordLink = resetPasswordLinkUriBuilder.build(userEmail).toString();
-
-        Map<String, String> properties = new HashMap<>();
-        properties.put("logo.cid", "codenvyLogo");
-        properties.put("user.name", userName);
-        properties.put("user.mail", userEmail);
-        properties.put("setup.password.link", resetPasswordLink);
-        properties.put("com.codenvy.masterhost.url", urlEndpoint.getProtocol() + "://" + urlEndpoint.getHost());
-
-        File logo = new File(this.getClass().getResource(LOGO).getPath());
-
-        Attachment attachment = new Attachment()
-                .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
-                .withContentId(LOGO_CID)
-                .withFileName("logo.png");
-
-        EmailBean emailBean = new EmailBean()
-                .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource("/" + template)), properties))
-                .withFrom(mailFrom)
-                .withTo(userEmail)
-                .withReplyTo(null)
-                .withSubject("Welcome To Codenvy")
-                .withMimeType(TEXT_HTML)
-                .withAttachments(Collections.singletonList(attachment));
-
-        mailSender.sendMail(emailBean);
-
-        LOG.info("User created message send to {}", userEmail);
+    public CreationNotificationSender(@Named("che.api") String apiEndpoint,
+                                      @Named("mailsender.application.from.email.address") String mailFrom,
+                                      RecoveryStorage recoveryStorage,
+                                      MailSender mailSender,
+                                      HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
+                                      DefaultEmailResourceResolver resourceResolver) {
+        this.apiEndpoint = apiEndpoint;
+        this.mailFrom = mailFrom;
+        this.recoveryStorage = recoveryStorage;
+        this.mailSender = mailSender;
+        this.thymeleaf = thymeleaf;
+        this.resourceResolver = resourceResolver;
     }
+
+    public void sendNotification(String userName,
+                                 String userEmail,
+                                 boolean withPassword) throws IOException, ApiException {
+        final URL urlEndpoint = new URL(apiEndpoint);
+        final String masterEndpoint = urlEndpoint.getProtocol() + "://" + urlEndpoint.getHost();
+        final ThymeleafTemplate template = withPassword ? templateWithPassword(masterEndpoint, userEmail, userName)
+                                                        : templateWithoutPassword(masterEndpoint, userName);
+        final EmailBean emailBean = new EmailBean().withBody(thymeleaf.process(template))
+                                                   .withFrom(mailFrom)
+                                                   .withTo(userEmail)
+                                                   .withReplyTo(null)
+                                                   .withSubject("Welcome To Codenvy")
+                                                   .withMimeType(TEXT_HTML);
+        mailSender.sendMail(resourceResolver.resolve(emailBean));
+    }
+
+    private ThymeleafTemplate templateWithPassword(String masterEndpoint, String userEmail, String userName) {
+        final String uuid = recoveryStorage.generateRecoverToken(userEmail);
+        final String resetPasswordLink = UriBuilder.fromUri(masterEndpoint)
+                                                   .path("site/setup-password")
+                                                   .queryParam("id", uuid)
+                                                   .build(userEmail)
+                                                   .toString();
+        return new CreateUserWithPasswordTemplate(masterEndpoint, resetPasswordLink, userName);
+    }
+
+    private ThymeleafTemplate templateWithoutPassword(String masterEndpoint, String userName) {
+        return new CreateUserWithoutPasswordTemplate(masterEndpoint, userName);
+    }
+
 }

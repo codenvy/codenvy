@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.codenvy.user.CreationNotificationSender.EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD;
 
 /**
  * Intercepts {@link UserCreator#createUser(String, String, String, String)} method.
@@ -68,7 +67,7 @@ public class UserCreatorInterceptor implements MethodInterceptor {
             final User createdUser = (User)proceed;
             notificationSender.sendNotification(createdUser.getName(),
                                                 createdUser.getEmail(),
-                                                EMAIL_TEMPLATE_USER_CREATED_WITHOUT_PASSWORD);
+                                                false);
         } catch (Exception e) {
             LOG.warn("Unable to send creation notification email", e);
         }

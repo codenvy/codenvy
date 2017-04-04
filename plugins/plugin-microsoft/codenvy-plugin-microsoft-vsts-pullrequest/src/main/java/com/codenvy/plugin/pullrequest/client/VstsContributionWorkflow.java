@@ -14,21 +14,22 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
-import com.codenvy.plugin.pullrequest.client.steps.AddReviewFactoryLinkStep;
-import com.codenvy.plugin.pullrequest.client.steps.AuthorizeCodenvyOnVCSHostStep;
-import com.codenvy.plugin.pullrequest.client.steps.CheckBranchToPush;
-import com.codenvy.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
-import com.codenvy.plugin.pullrequest.client.steps.DefineWorkBranchStep;
-import com.codenvy.plugin.pullrequest.client.steps.DetectPullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.DetermineUpstreamRepositoryStep;
-import com.codenvy.plugin.pullrequest.client.steps.GenerateReviewFactoryStep;
-import com.codenvy.plugin.pullrequest.client.steps.InitializeWorkflowContextStep;
-import com.codenvy.plugin.pullrequest.client.steps.IssuePullRequestStep;
-import com.codenvy.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
-import com.codenvy.plugin.pullrequest.client.steps.UpdatePullRequestStep;
-import com.codenvy.plugin.pullrequest.client.workflow.Context;
-import com.codenvy.plugin.pullrequest.client.workflow.ContributionWorkflow;
-import com.codenvy.plugin.pullrequest.client.workflow.StepsChain;
+import org.eclipse.che.plugin.pullrequest.client.steps.AddReviewFactoryLinkStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.AuthorizeCodenvyOnVCSHostStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.CheckBranchToPush;
+import org.eclipse.che.plugin.pullrequest.client.steps.CommitWorkingTreeStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.DefineWorkBranchStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.DetectPullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.DetermineUpstreamRepositoryStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.GenerateReviewFactoryStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.InitializeWorkflowContextStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.IssuePullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.PushBranchOnOriginStep;
+import org.eclipse.che.plugin.pullrequest.client.steps.UpdatePullRequestStep;
+import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
+import org.eclipse.che.plugin.pullrequest.client.workflow.ContributionWorkflow;
+import org.eclipse.che.plugin.pullrequest.client.workflow.StepsChain;
+
 import com.google.common.base.Supplier;
 
 import javax.inject.Inject;

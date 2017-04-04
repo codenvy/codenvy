@@ -14,16 +14,16 @@
  */
 package com.codenvy.plugin.pullrequest.client;
 
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
-import com.codenvy.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import com.codenvy.plugin.pullrequest.shared.dto.HostUser;
-import com.codenvy.plugin.pullrequest.shared.dto.PullRequest;
-import com.codenvy.plugin.pullrequest.shared.dto.Repository;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.HostingServiceTemplates;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoCommitsInPullRequestException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoPullRequestException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.NoUserForkException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.PullRequestAlreadyExistsException;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.ServiceUtil;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
+import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
+import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
+import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
 import com.google.gwt.user.client.Window;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;

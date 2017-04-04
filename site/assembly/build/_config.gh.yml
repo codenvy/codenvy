@@ -1,5 +1,0 @@
-# jekyll configuration used for the github pages build
-
-port: 4000
-destination: ../gh
-profile: gh

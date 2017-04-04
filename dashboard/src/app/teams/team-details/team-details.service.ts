@@ -14,7 +14,6 @@
  */
 'use strict';
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 
 /**
  * This class is fetch and handling the data for team details
@@ -34,7 +33,7 @@ export class TeamDetailsService {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Route service.
    */
@@ -52,12 +51,11 @@ export class TeamDetailsService {
   /**
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, codenvyUser: CodenvyUser, codenvyTeam: CodenvyTeam, $route: ng.route.IRouteService) {
+  constructor($q: ng.IQService, cheUser: any, codenvyTeam: CodenvyTeam, $route: ng.route.IRouteService) {
     this.$q = $q;
     this.codenvyTeam = codenvyTeam;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.$route = $route;
-
   }
 
   /**
@@ -93,7 +91,7 @@ export class TeamDetailsService {
     let parts = teamName.split('/');
     let accountName = (parts && parts.length > 0) ? parts[0] : '';
 
-    this.codenvyUser.fetchUserByName(accountName).then((owner: any) => {
+    this.cheUser.fetchUserByName(accountName).then((owner: any) => {
       this.owner = owner;
       deferred.resolve(owner);
     }, (error: any) => {

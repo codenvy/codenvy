@@ -18,7 +18,6 @@ import {BillingConfig} from './billing/billing-config';
 import {CodenvyNavbarConfig} from './navbar/navbar-config';
 import {Register} from './utils/register';
 import {CodenvyComponentsConfig} from '../components/components-config';
-import {FactoryConfig} from './factories/factories-config';
 
 import {LoginCtrl} from './login/login.controller';
 
@@ -247,7 +246,6 @@ new MainDashboardConfig(instanceRegister);
 new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
-new FactoryConfig(instanceRegister);
 new AdminConfig(instanceRegister);
 new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);

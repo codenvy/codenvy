@@ -27,5 +27,5 @@
     <inherits name="org.eclipse.che.security.OAuth"/>
 
     <inherits name="org.eclipse.che.ide.ext.microsoft.Microsoft"/>
-    <inherits name="com.codenvy.plugin.pullrequest.PullRequest"/>
+    <inherits name="org.eclipse.che.plugin.pullrequest.PullRequest"/>
 </module>

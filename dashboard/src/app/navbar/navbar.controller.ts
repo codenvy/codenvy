@@ -14,7 +14,6 @@
  */
 'use strict';
 import {CodenvyAPI} from '../../components/api/codenvy-api.factory';
-import {CodenvyUser} from '../../components/api/codenvy-user.factory';
 import {CodenvyPermissions} from '../../components/api/codenvy-permissions.factory';
 
 interface IUserServices {
@@ -74,7 +73,7 @@ export class CodenvyNavBarController {
   private $mdSidenav: ng.material.ISidenavService;
   private userServices: IUserServices;
   private codenvyAPI: CodenvyAPI;
-  private codenvyUser: CodenvyUser;
+  private cheFactory: any;
   private codenvyPermissions: CodenvyPermissions;
   private cheAPI: any;
   private profile: any;
@@ -95,7 +94,7 @@ export class CodenvyNavBarController {
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.codenvyAPI = codenvyAPI;
-    this.codenvyUser = codenvyAPI.getUser();
+    this.cheFactory = cheAPI.getFactory();
     this.codenvyPermissions = codenvyAPI.getPermissions();
     this.$rootScope = $rootScope;
     this.$window = $window;
@@ -111,7 +110,7 @@ export class CodenvyNavBarController {
     this.displayLoginItem = userDashboardConfig.developmentMode;
     let promiseService = this.cheAPI.getService().fetchServices();
     promiseService.then(() => {
-      this.isFactoryServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getFactory().getFactoryServicePath());
+      this.isFactoryServiceAvailable = cheAPI.getService().isServiceAvailable(this.cheFactory.getFactoryServicePath());
       let isBillingServiceAvailable = cheAPI.getService().isServiceAvailable(codenvyAPI.getPayment().getPaymentServicePath());
       if (isBillingServiceAvailable) {
         this.accountItems.splice(1, 0, {
@@ -181,8 +180,8 @@ export class CodenvyNavBarController {
   }
 
   getFactoriesNumber(): number {
-    let pagesInfo = this.codenvyAPI.getFactory().getPagesInfo();
-    return pagesInfo && pagesInfo.count ? pagesInfo.count : this.codenvyAPI.getFactory().factoriesById.size;
+    let pagesInfo = this.cheFactory.getPagesInfo();
+    return pagesInfo && pagesInfo.count ? pagesInfo.count : this.cheFactory.factoriesById.size;
   }
 
   openLinkInNewTab(url: string): void {

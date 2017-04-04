@@ -35,7 +35,5 @@
     </licenses>
     <modules>
         <module>codenvy-plugin-github-webhooks</module>
-        <module>codenvy-plugin-github-pullrequest</module>
-        <module>codenvy-plugin-github-factory-resolver</module>
     </modules>
 </project>

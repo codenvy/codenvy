@@ -13,8 +13,6 @@
  * from Codenvy S.A..
  */
 'use strict';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
-
 /**
  * @ngdoc controller
  * @name account.profile.controller:AccountProfileController
@@ -25,7 +23,7 @@ export class AccountDeleteController {
 
   private $location: ng.ILocationService;
   private $mdDialog: ng.material.IDialogService;
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   private cheNotification: any;
   private confirmDialogService: any;
 
@@ -33,10 +31,10 @@ export class AccountDeleteController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $mdDialog: ng.material.IDialogService, codenvyUser: CodenvyUser, cheNotification: any, confirmDialogService: any) {
+  constructor($location: ng.ILocationService, $mdDialog: ng.material.IDialogService, cheUser: any, cheNotification: any, confirmDialogService: any) {
     this.$location = $location;
     this.$mdDialog = $mdDialog;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
   }
@@ -49,8 +47,8 @@ export class AccountDeleteController {
     let promise = this.confirmDialogService.showConfirmDialog('Remove account', content, 'Delete');
 
     promise.then(() => {
-      this.codenvyUser.deleteCurrentUser().then(() => {
-        this.codenvyUser.logout().then(() => {
+      this.cheUser.deleteCurrentUser().then(() => {
+        this.cheUser.logout().then(() => {
           this.$location.path('/site/account-deleted');
         });
       }, (error: any) => {

@@ -14,8 +14,8 @@
  */
 'use strict';
 import {LicenseMessagesService} from '../../../onprem/license-messages/license-messages.service';
-import {CodenvyUser} from '../../../../components/api/codenvy-user.factory';
 import {AdminsUserManagementCtrl} from '../user-management.controller';
+import {CodenvyLicense} from '../../../../components/api/codenvy-license.factory';
 
 
 /**
@@ -25,7 +25,8 @@ import {AdminsUserManagementCtrl} from '../user-management.controller';
 export class AdminsAddUserController {
   $mdDialog: ng.material.IDialogService;
   cheNotification: any;
-  codenvyUser: CodenvyUser;
+  cheUser: any;
+  codenvyLicense: CodenvyLicense;
   callbackController: AdminsUserManagementCtrl;
   licenseMessagesService: LicenseMessagesService;
   newUserName: string;
@@ -36,9 +37,10 @@ export class AdminsAddUserController {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, codenvyUser: CodenvyUser, cheNotification: any, licenseMessagesService: LicenseMessagesService) {
+  constructor($mdDialog: ng.material.IDialogService, cheUser: any, codenvyLicense: CodenvyLicense, cheNotification: any,
+              licenseMessagesService: LicenseMessagesService) {
     this.$mdDialog = $mdDialog;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.cheNotification = cheNotification;
     this.licenseMessagesService = licenseMessagesService;
   }
@@ -54,9 +56,10 @@ export class AdminsAddUserController {
    * Callback of the add button of the dialog(create new user).
    */
   createUser(): void {
-    let promise = this.codenvyUser.createUser(this.newUserName, this.newUserEmail, this.newUserPassword);
+    let promise = this.cheUser.createUser(this.newUserName, this.newUserEmail, this.newUserPassword);
 
     promise.then(() => {
+      this.codenvyLicense.fetchLicenseLegality();//fetch license legality
       this.$mdDialog.hide();
       this.callbackController.updateUsers();
       this.cheNotification.showInfo('User successfully created.');

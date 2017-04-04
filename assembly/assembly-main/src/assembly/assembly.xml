@@ -71,15 +71,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>factory.war</outputFileNameMapping>
-            <includes>
-                <include>com.codenvy.onpremises:assembly-factory-war</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>api.war</outputFileNameMapping>
             <includes>
                 <include>com.codenvy.onpremises:assembly-wsmaster-war</include>

@@ -15,9 +15,7 @@
 'use strict';
 
 
-import {CodenvyUserBuilder} from './codenvy-user-builder';
 import {CodenvyTeamBuilder} from './codenvy-team-builder';
-import {CodenvyFactoryBuilder} from './codenvy-factory-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -34,26 +32,10 @@ export class CodenvyAPIBuilder {
   }
 
   /***
-   * The Codenvy User builder
-   * @returns {CodenvyUserBuilder}
-   */
-  getUserBuilder() {
-    return new CodenvyUserBuilder();
-  }
-
-  /***
    * The Codenvy Team builder
    * @returns {CodenvyTeamBuilder}
    */
   getTeamBuilder() {
     return new CodenvyTeamBuilder();
-  }
-
-  /***
-   * The Codenvy Factory builder
-   * @returns {CodenvyFactoryBuilder}
-   */
-  getFactoryBuilder() {
-    return new CodenvyFactoryBuilder();
   }
 }

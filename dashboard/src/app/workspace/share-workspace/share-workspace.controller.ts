@@ -14,7 +14,6 @@
  */
 'use strict';
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
 
 /**
@@ -33,7 +32,7 @@ export class ShareWorkspaceController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Permissions API interaction.
    */
@@ -99,11 +98,11 @@ export class ShareWorkspaceController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace: any, codenvyUser: CodenvyUser, codenvyPermissions: CodenvyPermissions, cheNotification: any, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, $mdConstant: any, $route: ng.route.IRouteService, $q: ng.IQService, lodash: any, confirmDialogService: any, codenvyTeam: CodenvyTeam, $log: ng.ILogService) {
+  constructor(cheWorkspace: any, cheUser: any, codenvyPermissions: CodenvyPermissions, cheNotification: any, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, $mdConstant: any, $route: ng.route.IRouteService, $q: ng.IQService, lodash: any, confirmDialogService: any, codenvyTeam: CodenvyTeam, $log: ng.ILogService) {
     "ngInject";
 
     this.cheWorkspace = cheWorkspace;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.codenvyPermissions = codenvyPermissions;
     this.cheNotification = cheNotification;
     this.$mdDialog = $mdDialog;
@@ -207,12 +206,12 @@ export class ShareWorkspaceController {
 
     permissions.forEach((permission: any) => {
       let userId = permission.userId;
-      let user = this.codenvyUser.getUserFromId(userId);
+      let user = this.cheUser.getUserFromId(userId);
       if (user) {
         this.formUserItem(user, permission);
       } else {
-        this.codenvyUser.fetchUserId(userId).then(() => {
-          this.formUserItem(this.codenvyUser.getUserFromId(userId), permission);
+        this.cheUser.fetchUserId(userId).then(() => {
+          this.formUserItem(this.cheUser.getUserFromId(userId), permission);
         });
       }
     });
@@ -514,14 +513,14 @@ export class ShareWorkspaceController {
     }
 
     //Displays user name instead of email
-    if (this.codenvyUser.getUserByAlias(email)) {
-      let user = this.codenvyUser.getUserByAlias(email);
+    if (this.cheUser.getUserByAlias(email)) {
+      let user = this.cheUser.getUserByAlias(email);
       this.existingUsers.set(email, user.id);
       return email;
     }
 
-    let findUser = this.codenvyUser.fetchUserByAlias(email).then(() => {
-      let user = this.codenvyUser.getUserByAlias(email);
+    let findUser = this.cheUser.fetchUserByAlias(email).then(() => {
+      let user = this.cheUser.getUserByAlias(email);
       this.existingUsers.set(email, user.id);
     }, (error: any) => {
       this.notExistingUsers.push(email);
@@ -550,7 +549,7 @@ export class ShareWorkspaceController {
    * @returns {user.name|*} user's name
    */
   getUserName(email: string): string {
-    let user = this.codenvyUser.getUserByAlias(email);
+    let user = this.cheUser.getUserByAlias(email);
     return user ? user.name : email;
   }
 
@@ -561,7 +560,7 @@ export class ShareWorkspaceController {
    * @returns {boolean}
    */
   isUserExists(email: string): boolean {
-    return (this.codenvyUser.getUserByAlias(email) !== undefined);
+    return (this.cheUser.getUserByAlias(email) !== undefined);
   }
 
 }

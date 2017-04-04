@@ -32,7 +32,6 @@
         <module>plugin-google</module>
         <module>plugin-wso2</module>
         <module>plugin-projectlocker</module>
-        <module>plugin-pullrequest</module>
         <module>plugin-hosted</module>
         <module>plugin-webhooks</module>
         <module>plugin-bitbucket</module>
@@ -41,7 +40,6 @@
         <module>plugin-microsoft</module>
         <module>plugin-redhat</module>
         <module>plugin-linkedin</module>
-        <module>plugin-urlfactory</module>
         <module>plugin-product-info</module>
     </modules>
 </project>

@@ -13,7 +13,6 @@
  * from Codenvy S.A..
  */
 'use strict';
-import {CodenvyUser} from './codenvy-user.factory';
 
 enum TEAM_EVENTS {MEMBER_ADDED, MEMBER_REMOVED, ORGANIZATION_REMOVED, ORGANIZATION_RENAMED}
 
@@ -24,7 +23,7 @@ enum TEAM_EVENTS {MEMBER_ADDED, MEMBER_REMOVED, ORGANIZATION_REMOVED, ORGANIZATI
  * @author Ann Shumilova
  */
 export class CodenvyTeamEventsManager {
-  codenvyUser: CodenvyUser;
+  cheUser: any;
   $log: ng.ILogService;
   cheWebsocket: any;
   applicationNotifications: any;
@@ -39,8 +38,8 @@ export class CodenvyTeamEventsManager {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWebsocket: any, applicationNotifications: any, $log: ng.ILogService, codenvyUser: CodenvyUser) {
-    this.codenvyUser = codenvyUser;
+  constructor(cheWebsocket: any, applicationNotifications: any, $log: ng.ILogService, cheUser: any) {
+    this.cheUser = cheUser;
     this.cheWebsocket = cheWebsocket;
     this.applicationNotifications = applicationNotifications;
     this.$log = $log;
@@ -77,7 +76,7 @@ export class CodenvyTeamEventsManager {
   }
 
   fetchUser(): void {
-    this.codenvyUser.fetchUser().then(() => {
+    this.cheUser.fetchUser().then(() => {
       this.subscribeTeamMemberNotifications();
     }, (error: any) => {
       if (error.status === 304) {
@@ -90,7 +89,7 @@ export class CodenvyTeamEventsManager {
    * Subscribe team member changing events.
    */
   subscribeTeamMemberNotifications(): void {
-    let id = this.codenvyUser.getUser().id;
+    let id = this.cheUser.getUser().id;
     let bus = this.cheWebsocket.getBus();
     bus.subscribe(this.TEAM_MEMBER_CHANNEL + id, (message: any) => {
       switch (TEAM_EVENTS[message.type]) {
@@ -250,6 +249,6 @@ export class CodenvyTeamEventsManager {
    * @returns {boolean}
    */
   isCurrentUser(name: string): boolean {
-    return name === this.codenvyUser.getUser().name;
+    return name === this.cheUser.getUser().name;
   }
 }

@@ -14,10 +14,12 @@
  */
 package com.codenvy.service.password;
 
-import com.codenvy.mail.Attachment;
+import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
-import com.google.common.io.Files;
+import com.codenvy.service.password.email.template.PasswordRecoveryTemplate;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
@@ -28,7 +30,6 @@ import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,16 +44,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.commons.lang.IoUtil.getResource;
-import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 /**
  * Services for password features
@@ -64,16 +57,16 @@ public class PasswordService {
 
     private static final Logger LOG           = LoggerFactory.getLogger(PasswordService.class);
     private static final String MAIL_TEMPLATE = "/email-templates/password_recovery.html";
-    private static final String LOGO          = "/email-templates/header.png";
-    private static final String LOGO_CID      = "codenvyLogo";
 
-    private final MailSender      mailService;
-    private final UserManager     userDao;
-    private final ProfileManager  profileManager;
-    private final RecoveryStorage recoveryStorage;
-    private final String          mailFrom;
-    private final String          recoverMailSubject;
-    private final long            validationMaxAge;
+    private final MailSender                               mailService;
+    private final UserManager                              userDao;
+    private final ProfileManager                           profileManager;
+    private final RecoveryStorage                          recoveryStorage;
+    private final DefaultEmailResourceResolver             resourceResolver;
+    private final String                                   mailFrom;
+    private final String                                   recoverMailSubject;
+    private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+    private final long                                     validationMaxAge;
 
     @Context
     private UriInfo uriInfo;
@@ -83,15 +76,19 @@ public class PasswordService {
                            UserManager userManager,
                            RecoveryStorage recoveryStorage,
                            ProfileManager profileManager,
+                           DefaultEmailResourceResolver resourceResolver,
                            @Named("mailsender.application.from.email.address") String mailFrom,
                            @Named("password.recovery.mail.subject") String recoverMailSubject,
+                           HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
                            @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;
         this.mailService = mailSender;
         this.userDao = userManager;
         this.profileManager = profileManager;
+        this.resourceResolver = resourceResolver;
         this.mailFrom = mailFrom;
         this.recoverMailSubject = recoverMailSubject;
+        this.thymeleaf = thymeleaf;
         this.validationMaxAge = validationMaxAge;
     }
 
@@ -122,40 +119,28 @@ public class PasswordService {
      */
     @POST
     @Path("recover/{usermail}")
-    public void recoverPassword(@PathParam("usermail") String mail)
-            throws ServerException, NotFoundException {
+    public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException {
         try {
             //check if user exists
             userDao.getByEmail(mail);
-
-            String uuid = recoveryStorage.generateRecoverToken(mail);
-
-            Map<String, String> props = new HashMap<>();
-            props.put("logo.cid", LOGO_CID);
-            props.put("id", uuid);
-            props.put("validation.token.age.message", String.valueOf(validationMaxAge) + " hour");
-            props.put("com.codenvy.masterhost.url", uriInfo.getBaseUriBuilder().replacePath(null).build().toString());
-
-            File logo = new File(this.getClass().getResource(LOGO).getPath());
-            Attachment attachment = new Attachment()
-                    .withContent(Base64.getEncoder().encodeToString(Files.toByteArray(logo)))
-                    .withContentId(LOGO_CID)
-                    .withFileName("logo.png");
-
-            EmailBean emailBean = new EmailBean()
-                    .withBody(Deserializer.resolveVariables(readAndCloseQuietly(getResource(MAIL_TEMPLATE)), props))
-                    .withFrom(mailFrom)
-                    .withTo(mail)
-                    .withReplyTo(null)
-                    .withSubject(recoverMailSubject)
-                    .withMimeType(TEXT_HTML)
-                    .withAttachments(Collections.singletonList(attachment));
-
-            mailService.sendMail(emailBean);
-
+            final String masterEndpoint = uriInfo.getBaseUriBuilder()
+                                                 .replacePath(null)
+                                                 .build()
+                                                 .toString();
+            final String tokenAgeMessage = String.valueOf(validationMaxAge) + " hour";
+            final String uuid = recoveryStorage.generateRecoverToken(mail);
+            final String body = thymeleaf.process(new PasswordRecoveryTemplate(tokenAgeMessage,
+                                                                               masterEndpoint,
+                                                                               uuid));
+            mailService.sendMail(resourceResolver.resolve(new EmailBean().withBody(body)
+                                                                         .withFrom(mailFrom)
+                                                                         .withTo(mail)
+                                                                         .withReplyTo(null)
+                                                                         .withSubject(recoverMailSubject)
+                                                                         .withMimeType(TEXT_HTML)));
         } catch (NotFoundException e) {
             throw new NotFoundException("User " + mail + " is not registered in the system.");
-        } catch (ApiException | IOException e) {
+        } catch (ApiException e) {
             LOG.error("Error during setting user's password", e);
             throw new ServerException("Unable to recover password. Please contact support or try later.");
         }

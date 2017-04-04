@@ -13,9 +13,6 @@
  * from Codenvy S.A..
  */
 'use strict';
-import {CodenvyFactory} from './codenvy-factory.factory';
-import {CodenvyFactoryTemplate} from './codenvy-factory-template.factory';
-import {CodenvyUser} from './codenvy-user.factory';
 import {CodenvyPermissions} from './codenvy-permissions.factory';
 import {CodenvySystem} from './codenvy-system.factory';
 import {CodenvyTeam} from './codenvy-team.factory';
@@ -30,9 +27,6 @@ import {CodenvyInvoices} from './codenvy-invoices.factory';
  * @author Florent Benoit
  */
 export class CodenvyAPI {
-  codenvyFactory: CodenvyFactory;
-  codenvyFactoryTemplate: CodenvyFactoryTemplate;
-  codenvyUser: CodenvyUser;
   codenvyPermissions: CodenvyPermissions;
   codenvySystem: CodenvySystem;
   codenvyLicense: CodenvyLicense;
@@ -44,10 +38,7 @@ export class CodenvyAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyFactory, codenvyFactoryTemplate, codenvyUser, codenvyPermissions, codenvySystem, codenvyLicense, codenvyTeam, codenvyPayment, codenvyInvoices) {
-    this.codenvyFactory = codenvyFactory;
-    this.codenvyFactoryTemplate = codenvyFactoryTemplate;
-    this.codenvyUser = codenvyUser;
+  constructor(codenvyPermissions, codenvySystem, codenvyLicense, codenvyTeam, codenvyPayment, codenvyInvoices) {
     this.codenvyPermissions = codenvyPermissions;
     this.codenvySystem = codenvySystem;
     this.codenvyLicense = codenvyLicense;
@@ -65,36 +56,12 @@ export class CodenvyAPI {
   }
 
   /**
-   * The Codenvy Factory API
-   * @returns {CodenvyFactory|*}
-   */
-  getFactory(): CodenvyFactory {
-    return this.codenvyFactory;
-  }
-
-  /**
-   * The Codenvy Factory Template API
-   * @returns {CodenvyFactoryTemplate|*}
-   */
-  getFactoryTemplate(): CodenvyFactoryTemplate {
-    return this.codenvyFactoryTemplate;
-  }
-
-  /**
    * The System License API interaction service.
    *
    * @returns {CodenvyLicense}
    */
   getLicense(): CodenvyLicense {
     return this.codenvyLicense;
-  }
-
-  /**
-   * The Codenvy User API
-   * @returns {CodenvyUser|*}
-   */
-  getUser(): CodenvyUser {
-    return this.codenvyUser;
   }
 
   /**

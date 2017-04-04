@@ -14,5 +14,6 @@
     from Codenvy S.A..
 
 -->
-<Context path="/ws" docBase="ws"  crossContext="false">
+<Context path="/" crossContext="false">
+    <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
 </Context>

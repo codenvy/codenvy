@@ -38,11 +38,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises</groupId>
-            <artifactId>assembly-factory-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises</groupId>
             <artifactId>assembly-ide-war</artifactId>
             <type>war</type>
         </dependency>

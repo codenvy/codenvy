@@ -4,22 +4,22 @@
         <meta name="viewport" content="width=device-width"/>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Crimson+Text|Roboto+Condensed">
-        <title>Codenvy</title>
+        <title>{{ page.title }}</title>
     </head>
     <body style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.4; margin: 0; padding: 0;">
         <table style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; width: 100%; margin: 0; padding: 0;">
             <tr>
-                <td style="font-f   amily: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0;">
+                <td style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0;">
                     <div style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; max-width: 770px; display: block; margin: 0 auto; padding: 10px;">
                         <table style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; border-radius: 30px; background: #fff; margin: 0; padding: 0; box-shadow: 0 2px 4px #e5e5e5; width: 100%; margin: 0; padding: 0;" width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0;">
                                     <table style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; width: 100%; margin: 0; padding: 0;">
                                         <tr>
-                                            <td style="background-color: black; color: white; height: 110px; vertical-align: top; font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0;">
+                                            <td style="{{site.top_banner_style}}">
                                                 <div style="height: 100%;">
                                                     <img style="top: 0px; width: 130px; margin: 25px 0px 55px 15px; max-width: 100%;" th:src="${codenvy} ? @{${codenvy}} : 'cid:codenvy'" alt="Codenvy"/>
-                                                    <div style="font-family: 'Roboto Condensed'; font-size: 32px; font-weight: 900; margin: 0px 0px 12px 15px;">
+                                                    <div style="{{site.header_style}}">
                                                         {{page.header}}
                                                     </div>
                                                 </div>
@@ -29,7 +29,7 @@
                                     {{ content }}
                                     <table style="font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; width: 100%; margin: 0; padding: 0;">
                                         <tr>
-                                            <td style="background-color: black; color: white; height: 70px; vertical-align: top; font-family: 'New Century Schoolbook', 'Crimson Text'; box-sizing: border-box; font-size: 13px; vertical-align: top; max-width: 520px !important; clear: both !important; margin: 0 auto; padding: 0; vertical-align:middle;">
+                                            <td style="{{site.bottom_banner_style}}">
                                                 <div style="display: inline-block">
                                                     <img style="top: 0px; width: 35px; margin: 10px 0px 0px 20px; max-width: 100%;" th:src="${codenvySmall} ? @{${codenvySmall}} : 'cid:codenvySmall'" alt="Codenvy logo"/>
                                                 </div>

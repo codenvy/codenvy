@@ -30,9 +30,14 @@ describe('CodenvyTeam', () => {
   let userFactory;
 
   /**
-   * API builder.
+   * che API builder.
    */
-  let apiBuilder;
+  let cheAPIBuilder;
+
+  /**
+   * codenvy API builder.
+   */
+  let codenvyAPIBuilder;
 
   /**
    * Backend for handling http operations
@@ -52,10 +57,11 @@ describe('CodenvyTeam', () => {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject((codenvyTeam, codenvyUser, codenvyAPIBuilder, codenvyHttpBackend) => {
+  beforeEach(inject((codenvyTeam, cheUser, _cheAPIBuilder_, _codenvyAPIBuilder_, codenvyHttpBackend) => {
     factory = codenvyTeam;
-    userFactory = codenvyUser;
-    apiBuilder = codenvyAPIBuilder;
+    userFactory = cheUser;
+    cheAPIBuilder = _cheAPIBuilder_;
+    codenvyAPIBuilder = _codenvyAPIBuilder_;
     codenvyBackend = codenvyHttpBackend;
     httpBackend = codenvyHttpBackend.getHttpBackend();
   }));
@@ -81,7 +87,7 @@ describe('CodenvyTeam', () => {
       let userId = 'idTestUser';
       let email = 'eclipseCodenvy@eclipse.org';
 
-      testUser = apiBuilder.getUserBuilder().withId(userId).withEmail(email).build();
+      testUser = cheAPIBuilder.getUserBuilder().withId(userId).withEmail(email).build();
 
       // providing request
       // add test user on Http backend
@@ -96,7 +102,7 @@ describe('CodenvyTeam', () => {
       let teamId = 'idTestTeam';
       let teamName = 'testTeam';
 
-      let testTeam = apiBuilder.getTeamBuilder().withId(teamId).withName(teamName).build();
+      let testTeam = codenvyAPIBuilder.getTeamBuilder().withId(teamId).withName(teamName).build();
 
       // add test team on Http backend
       codenvyBackend.addTeamById(testTeam);

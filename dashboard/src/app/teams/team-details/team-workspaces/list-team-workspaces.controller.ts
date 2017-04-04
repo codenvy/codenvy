@@ -15,7 +15,6 @@
 'use strict';
 import {CodenvyTeam} from '../../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../../components/api/codenvy-permissions.factory';
-import {CodenvyUser} from '../../../../components/api/codenvy-user.factory';
 import {TeamDetailsService} from '../team-details.service';
 /**
  * @ngdoc controller
@@ -32,7 +31,7 @@ export class ListTeamWorkspacesController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Permissions API interaction.
    */
@@ -92,14 +91,14 @@ export class ListTeamWorkspacesController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyTeam: CodenvyTeam, codenvyPermissions: CodenvyPermissions, codenvyUser: CodenvyUser, cheWorkspace: any,
+  constructor(codenvyTeam: CodenvyTeam, codenvyPermissions: CodenvyPermissions, cheUser: any, cheWorkspace: any,
               cheNotification: any, lodash: _.LoDashStatic, $mdDialog: angular.material.IDialogService, $q: ng.IQService,
               teamDetailsService: TeamDetailsService) {
     this.codenvyTeam = codenvyTeam;
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
     this.codenvyPermissions = codenvyPermissions;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.$mdDialog = $mdDialog;
     this.$q = $q;
     this.lodash = lodash;
@@ -135,7 +134,7 @@ export class ListTeamWorkspacesController {
   processPermissions(): void {
     let permissions = this.codenvyPermissions.getTeamPermissions(this.team.id);
     let currentUserPermissions = this.lodash.find(permissions, (permission: any) => {
-      return permission.userId === this.codenvyUser.getUser().id;
+      return permission.userId === this.cheUser.getUser().id;
     });
 
     if (currentUserPermissions && currentUserPermissions.actions.indexOf('manageWorkspaces') >= 0) {

@@ -21,9 +21,8 @@ export class AccountCtrl {
    * @ngInject for Dependency injection
    * @author Oleksii Orel
    */
-  constructor($routeParams, $location, cheAPI, codenvyAPI, cheNotification, $rootScope, $timeout, $scope) {
+  constructor($routeParams, $location, cheAPI, cheNotification, $rootScope, $timeout, $scope) {
     this.cheAPI = cheAPI;
-    this.codenvyAPI = codenvyAPI;
     this.cheNotification = cheNotification;
 
     this.profile = this.cheAPI.getProfile().getProfile();
@@ -118,7 +117,7 @@ export class AccountCtrl {
       return;
     }
 
-    let promise = this.codenvyAPI.getUser().setPassword(password);
+    let promise = this.cheAPI.getUser().setPassword(password);
 
     promise.then(() => {
       this.cheNotification.showInfo('Password successfully updated.');

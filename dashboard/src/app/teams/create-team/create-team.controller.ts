@@ -15,7 +15,6 @@
 'use strict';
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
-import {CodenvyUser} from '../../../components/api/codenvy-user.factory';
 import {CodenvyInvite} from '../../../components/api/codenvy-invite.factory';
 
 /**
@@ -36,7 +35,7 @@ export class CreateTeamController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * Permissions API interaction.
    */
@@ -86,11 +85,11 @@ export class CreateTeamController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(codenvyTeam: CodenvyTeam, codenvyInvite: CodenvyInvite, codenvyUser: CodenvyUser, codenvyPermissions: CodenvyPermissions, cheNotification: any,
+  constructor(codenvyTeam: CodenvyTeam, codenvyInvite: CodenvyInvite, cheUser: any, codenvyPermissions: CodenvyPermissions, cheNotification: any,
               $location: ng.ILocationService, $q: ng.IQService, lodash: any, $log: ng.ILogService) {
     this.codenvyTeam = codenvyTeam;
-    this.codenvyUser = codenvyUser;
     this.codenvyInvite = codenvyInvite;
+    this.cheUser = cheUser;
     this.codenvyPermissions = codenvyPermissions;
     this.cheNotification = cheNotification;
     this.$location = $location;
@@ -102,19 +101,19 @@ export class CreateTeamController {
     this.isLoading = true;
     this.members = [];
 
-    if (codenvyUser.getUser()) {
-      this.owner = codenvyUser.getUser().email;
-      this.accountName = codenvyUser.getUser().name;
+    if (cheUser.getUser()) {
+      this.owner = cheUser.getUser().email;
+      this.accountName = cheUser.getUser().name;
       this.isLoading = false;
     } else {
-      codenvyUser.fetchUser().then(() => {
-        this.owner = codenvyUser.getUser().email;
-        this.accountName = codenvyUser.getUser().name;
+      cheUser.fetchUser().then(() => {
+        this.owner = cheUser.getUser().email;
+        this.accountName = cheUser.getUser().name;
         this.isLoading = false;
       }, (error: any) => {
         if (error.status === 304) {
-          this.owner = codenvyUser.getUser().email;
-          this.accountName = codenvyUser.getUser().name;
+          this.owner = cheUser.getUser().email;
+          this.accountName = cheUser.getUser().name;
           this.isLoading = false;
         } else {
           this.$log.error('Failed to retrieve current user:', error);

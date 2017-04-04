@@ -15,7 +15,6 @@
 'use strict';
 import {CodenvyTeam} from '../../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../../components/api/codenvy-permissions.factory';
-import {CodenvyUser} from '../../../../components/api/codenvy-user.factory';
 import {TeamDetailsService} from '../team-details.service';
 
 /**
@@ -32,7 +31,7 @@ export class ListTeamOwnersController {
   /**
    * User API interaction.
    */
-  private codenvyUser: CodenvyUser;
+  private cheUser: any;
   /**
    * User profile API interaction.
    */
@@ -66,9 +65,10 @@ export class ListTeamOwnersController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyTeam: CodenvyTeam, codenvyUser: CodenvyUser, codenvyPermissions: CodenvyPermissions, cheProfile: any, cheNotification: any, lodash: any, teamDetailsService: TeamDetailsService) {
+  constructor(codenvyTeam: CodenvyTeam, cheUser: any, codenvyPermissions: CodenvyPermissions, cheProfile: any, cheNotification: any,
+              lodash: any, teamDetailsService: TeamDetailsService) {
     this.codenvyTeam = codenvyTeam;
-    this.codenvyUser = codenvyUser;
+    this.cheUser = cheUser;
     this.codenvyPermissions = codenvyPermissions;
     this.cheProfile = cheProfile;
     this.cheNotification = cheNotification;
