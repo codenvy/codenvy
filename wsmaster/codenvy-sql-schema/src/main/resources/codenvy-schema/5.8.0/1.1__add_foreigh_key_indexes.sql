@@ -19,5 +19,3 @@ CREATE INDEX index_stackpermissions_actions_stackpermissionsid ON stackpermissio
 CREATE INDEX index_systempermissions_actions_systempermissionsid ON systempermissions_actions (systempermissions_id);
 CREATE INDEX index_member_actions_memberid ON member_actions (member_id);
 CREATE INDEX index_recipepermissions_actions_recipepermissionsid ON recipepermissions_actions (recipepermissions_id);
-
-
