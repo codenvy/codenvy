@@ -31,6 +31,6 @@ public interface BitBucketTemplates extends HostingServiceTemplates {
     @DefaultMessage("https://bitbucket.org/{0}/{1}/pull-request/{2}")
     String pullRequestUrlTemplate(String username, String repository, String pullRequestNumber);
 
-    @DefaultMessage("[![Review]({0}//{1}/factory/resources/codenvy-review.svg)]({2})")
+    @DefaultMessage("[![Review]({0}//{1}/factory/resources/factory-review.svg)]({2})")
     String formattedReviewFactoryUrlTemplate(String protocol, String host, String reviewFactoryUrl);
 }
