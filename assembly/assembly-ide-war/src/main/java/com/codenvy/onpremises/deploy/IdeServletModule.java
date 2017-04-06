@@ -39,8 +39,8 @@ public class IdeServletModule extends ServletModule {
         bind(com.xemantic.tadedon.servlet.CacheForcingFilter.class).in(Singleton.class);
         filterRegex("^.*\\.nocache\\..*$", "^.*/_app/.*$").through(com.xemantic.tadedon.servlet.CacheDisablingFilter.class);
         filterRegex("^.*\\.cache\\..*$").through(com.xemantic.tadedon.servlet.CacheForcingFilter.class);
-        filter("/*").through(com.codenvy.auth.sso.client.LoginFilter.class);
-        filter("/*").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
+        filterRegex("^/(?!_app/.*.svg).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
+        filterRegex("^/(?!_app/.*.svg).*$").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
         filter("/*").through(com.codenvy.onpremises.DashboardRedirectionFilter.class);
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
 
