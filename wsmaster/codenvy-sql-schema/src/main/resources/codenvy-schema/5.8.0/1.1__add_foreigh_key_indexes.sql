@@ -13,7 +13,6 @@
 -- from Codenvy S.A..
 --
 
-CREATE INDEX index_action_properties_entityid ON action_properties (action_entityid);
 CREATE INDEX index_member_actions_memberid ON member_actions (member_id);
 CREATE INDEX index_worker_actions_workerid ON worker_actions (worker_id);
 CREATE INDEX index_stackpermissions_actions_stackpermissionsid ON stackpermissions_actions (stackpermissions_id);
