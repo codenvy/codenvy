@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>codenvy-plugin-redhat-parent</artifactId>

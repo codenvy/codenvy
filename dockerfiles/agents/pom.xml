@@ -20,12 +20,12 @@
     <parent>
         <artifactId>onpremises-assembly-parent</artifactId>
         <groupId>com.codenvy.onpremises</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>com.codenvy.dockerfiles</groupId>
     <artifactId>dockerfiles-agents</artifactId>
-    <version>5.7.0-SNAPSHOT</version>
+    <version>5.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Dockerfiles :: Agents</name>
     <dependencies>

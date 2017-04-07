@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-bitbucket-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-bitbucket-ext-bitbucket-shared</artifactId>
     <packaging>jar</packaging>

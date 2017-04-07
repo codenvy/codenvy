@@ -20,7 +20,7 @@
     <parent>
         <artifactId>codenvy-plugin-webhooks-parent</artifactId>
         <groupId>com.codenvy.plugin</groupId>
-        <version>5.7.0-SNAPSHOT</version>
+        <version>5.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-plugin-webhooks-base</artifactId>
     <name>Codenvy Plugin :: Webhooks :: Base</name>
