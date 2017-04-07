@@ -22,4 +22,5 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name="com.google.gwt.inject.Inject"/>
+    <inherits name="org.eclipse.che.ide.Core"/>
 </module>

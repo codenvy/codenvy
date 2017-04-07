@@ -18,7 +18,9 @@ import com.codenvy.ide.hosted.client.HostedLocalizationConstant;
 import com.codenvy.ide.hosted.client.notifier.BadConnectionNotifierView;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.ConnectionClosedInformer;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_ABNORMAL;
@@ -40,24 +42,21 @@ import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_VI
  * @author Roman Nikitenko
  * @author Anton Korneta
  */
-public class HostedEnvConnectionClosedInformer implements ConnectionClosedInformer {
+public class HostedEnvConnectionClosedInformer extends ConnectionClosedInformerImpl {
 
     private BadConnectionNotifierView  badConnectionInfoView;
     private HostedLocalizationConstant localizationConstant;
 
     @Inject
-    HostedEnvConnectionClosedInformer(final BadConnectionNotifierView badConnectionInfoView,
+    HostedEnvConnectionClosedInformer(final DialogFactory dialogFactory,
+                                      final CoreLocalizationConstant corelocalizationConstant,
+                                      final BadConnectionNotifierView badConnectionInfoView,
                                       final HostedLocalizationConstant localizationConstant) {
+        super(dialogFactory, corelocalizationConstant);
         this.badConnectionInfoView = badConnectionInfoView;
         this.localizationConstant = localizationConstant;
 
-        badConnectionInfoView.setDelegate(new BadConnectionNotifierView.ActionDelegate() {
-
-            @Override
-            public void onOkClicked() {
-                badConnectionInfoView.close();
-            }
-        });
+        badConnectionInfoView.setDelegate(() -> badConnectionInfoView.close());
     }
 
     @Override

@@ -23,8 +23,8 @@ import com.codenvy.ide.hosted.client.workspace.WorkspaceNotRunningView;
 import com.codenvy.ide.hosted.client.workspace.WorkspaceNotRunningViewImpl;
 import com.google.gwt.inject.client.AbstractGinModule;
 
-import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.client.ConnectionClosedInformerImpl;
 
 /**
  * @author Vitaly Parfonov
@@ -33,7 +33,7 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 public class HostedEnvironmentGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
-        bind(ConnectionClosedInformer.class).to(HostedEnvConnectionClosedInformer.class).in(javax.inject.Singleton.class);
+        bind(ConnectionClosedInformerImpl.class).to(HostedEnvConnectionClosedInformer.class).in(javax.inject.Singleton.class);
         bind(PromptToLoginView.class).to(PromptToLoginViewImpl.class);
         bind(BadConnectionNotifierView.class).to(BadConnectionNotifierViewImpl.class);
         bind(WorkspaceNotRunningView.class).to(WorkspaceNotRunningViewImpl.class);
