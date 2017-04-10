@@ -73,10 +73,6 @@
             <classifier>classes</classifier>
             <exclusions>
                 <exclusion>
-                    <artifactId>che-plugin-sdk-env-local</artifactId>
-                    <groupId>org.eclipse.che.plugin</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>che-plugin-product-info</artifactId>
                     <groupId>org.eclipse.che.plugin</groupId>
                 </exclusion>
