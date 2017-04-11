@@ -16,6 +16,7 @@ package com.codenvy.onpremises.deploy;
 
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.auth.sso.client.TokenHandler;
+import com.codenvy.onpremises.FactoryRedirectServlet;
 import com.codenvy.onpremises.maintenance.MaintenanceStatusServlet;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
@@ -58,6 +59,7 @@ public class DashboardServletModule extends ServletModule {
         filterRegex("/(?!_sso/).*$").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
 
         serve("/scheduled").with(MaintenanceStatusServlet.class);
+        serve("/factory").with(FactoryRedirectServlet.class);
 
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
     }
