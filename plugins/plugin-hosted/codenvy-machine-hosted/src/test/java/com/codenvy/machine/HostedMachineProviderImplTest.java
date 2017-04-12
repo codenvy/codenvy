@@ -17,7 +17,7 @@ package com.codenvy.machine;
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
 
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
-import org.eclipse.che.api.core.util.JsonRpcEndpointIdsHolder;
+import org.eclipse.che.api.core.util.JsonRpcEndpointToMachineNameHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
@@ -77,7 +77,7 @@ public class HostedMachineProviderImplTest {
     @Mock
     private RequestTransmitter                            requestTransmitter;
     @Mock
-    private JsonRpcEndpointIdsHolder                      endpointIdsHolder;
+    private JsonRpcEndpointToMachineNameHolder            endpointIdsHolder;
     @Mock
     private DockerNode                                    dockerNode;
     @Mock
