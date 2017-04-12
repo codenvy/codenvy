@@ -75,7 +75,7 @@
                     }
                 });
                 var pageUrl = "&page_url=" + window.location.pathname;
-                var redirectAfterLogin = "&redirect_after_login=" + encodeURIComponent(window.location.origin + "/api/oauth?" + window.location.search.substring(1) + encodeURIComponent(window.location.hash) + (window.location.search ? '&' : '') + 'oauth_provider=' + provider.name + pageUrl + window.location.hash);
+                var redirectAfterLogin = "&redirect_after_login=" + encodeURIComponent(window.location.origin + "/api/oauth?" + window.location.search.substring(1) + (window.location.search ? '&' : '') + 'oauth_provider=' + provider.name + pageUrl + window.location.hash);
                 switch (provider.name) {
                     case "google":
                         _gaq.push(['_trackEvent', 'Regisration', 'Google registration', page]);

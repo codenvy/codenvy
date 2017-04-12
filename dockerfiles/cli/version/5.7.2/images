@@ -1,0 +1,12 @@
+IMAGE_HAPROXY=haproxy:1.5.18-alpine
+IMAGE_NGINX=nginx:1.10-alpine
+IMAGE_REGISTRY=registry:2.5.0
+IMAGE_POSTGRES=postgres:9.5.4
+IMAGE_COMPOSE=docker/compose:1.8.1
+IMAGE_ZOOKEEPER=zookeeper:3.4.9
+IMAGE_SWARM=codenvy/swarm:5.7.2
+IMAGE_SOCAT=codenvy/socat:5.7.2
+IMAGE_INIT=codenvy/init:5.7.2
+IMAGE_AGENTS=codenvy/agents:5.7.2
+IMAGE_CODENVY=codenvy/codenvy:5.7.2
+IMAGE_RSYSLOG=codenvy/rsyslog:5.7.2
