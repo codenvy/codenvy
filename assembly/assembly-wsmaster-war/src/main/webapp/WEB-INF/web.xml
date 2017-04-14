@@ -64,10 +64,6 @@
     <listener>
         <listener-class>org.everrest.websockets.WSConnectionTracker</listener-class>
     </listener>
-    <listener>
-        <listener-class>com.codenvy.service.http.Slf4jLoggerListener</listener-class>
-    </listener>
-
 
     <session-config>
         <session-timeout>180</session-timeout>
