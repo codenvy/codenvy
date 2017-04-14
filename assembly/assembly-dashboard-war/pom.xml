@@ -24,7 +24,7 @@
     </parent>
     <artifactId>assembly-dashboard-war</artifactId>
     <packaging>war</packaging>
-    <name>Onpremises IDE :: WAR :: Dashboard</name>
+    <name>Onpremises IDE :: WAR    :: Dashboard</name>
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
