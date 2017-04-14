@@ -24,7 +24,7 @@
     </parent>
     <artifactId>assembly-dashboard-war</artifactId>
     <packaging>war</packaging>
-    <name>Onpremises IDE :: WAR    :: Dashboard</name>
+    <name>Onpremises IDE :: WAR :: Dashboard</name>
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -75,18 +75,6 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
@@ -130,6 +118,20 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoredDependency>ch.qos.logback:logback-classic</ignoredDependency>
+                            </ignoredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
