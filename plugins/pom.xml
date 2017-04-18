@@ -33,6 +33,7 @@
         <module>plugin-wso2</module>
         <module>plugin-projectlocker</module>
         <module>plugin-hosted</module>
+        <module>plugin-jenkins</module>
         <module>plugin-webhooks</module>
         <module>plugin-bitbucket</module>
         <module>plugin-github</module>

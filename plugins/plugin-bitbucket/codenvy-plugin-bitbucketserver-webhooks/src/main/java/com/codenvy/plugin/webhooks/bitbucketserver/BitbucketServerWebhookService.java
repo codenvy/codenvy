@@ -136,7 +136,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     }
 
     @VisibleForTesting
-    void handlePushEvent(PushEvent event, String branch) throws ServerException {
+    void handlePushEvent(PushEvent event, String branch) throws ServerException, IOException {
         Repository repository = event.getRepository();
         Project project = repository.getProject();
         String cloneUrl = computeCloneUrl(project.getKey(), repository.getSlug());
@@ -147,7 +147,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                 LOG.warn("Factory " + factory.getId() + " do not contain mandatory \'" + FACTORY_URL_REL + "\' link");
                 continue;
             }
-            getConnectors(factory.getId()).forEach(connector -> connector.addFactoryLink(factoryLink.getHref()));
+            addFactoryLinkToCiJobsDescription(factory.getId(), factoryLink.getHref());
         }
     }
 

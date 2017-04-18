@@ -23,7 +23,6 @@ import io.swagger.annotations.ApiResponses;
 import com.codenvy.plugin.webhooks.AuthConnection;
 import com.codenvy.plugin.webhooks.FactoryConnection;
 import com.codenvy.plugin.webhooks.BaseWebhookService;
-import com.codenvy.plugin.webhooks.connectors.Connector;
 import com.codenvy.plugin.webhooks.github.shared.PullRequestEvent;
 import com.codenvy.plugin.webhooks.github.shared.PushEvent;
 
@@ -136,7 +135,7 @@ public class GitHubWebhookService extends BaseWebhookService {
      * HTTP 202 response if event was processed partially
      * @throws ServerException
      */
-    private void handlePushEvent(PushEvent contribution) throws ServerException {
+    private void handlePushEvent(PushEvent contribution) throws ServerException, IOException {
         LOG.debug("{}", contribution);
 
         // Set current Codenvy user
@@ -166,11 +165,8 @@ public class GitHubWebhookService extends BaseWebhookService {
                 throw new ServerException("Factory " + f.getId() + " do not contain mandatory \'" + FACTORY_URL_REL + "\' link");
             }
 
-            // Get connectors configured for the factory
-            final List<Connector> connectors = getConnectors(f.getId());
-
             // Add factory link within third-party services
-            connectors.forEach(connector -> connector.addFactoryLink(factoryLink.getHref()));
+            addFactoryLinkToCiJobsDescription(f.getId(), factoryLink.getHref());
         }
     }
 

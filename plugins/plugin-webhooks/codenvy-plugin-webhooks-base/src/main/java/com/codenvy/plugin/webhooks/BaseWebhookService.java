@@ -14,8 +14,9 @@
  */
 package com.codenvy.plugin.webhooks;
 
-import com.codenvy.plugin.webhooks.connectors.Connector;
-import com.codenvy.plugin.webhooks.connectors.JenkinsConnector;
+import com.codenvy.plugin.jenkins.webhooks.JenkinsConnector;
+import com.codenvy.plugin.jenkins.webhooks.JenkinsConnectorFactory;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.auth.shared.dto.Token;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -34,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -67,6 +69,9 @@ public abstract class BaseWebhookService extends Service {
     private final ConfigurationProperties configurationProperties;
     private final String                  username;
     private final String                  password;
+
+    @Inject
+    private JenkinsConnectorFactory jenkinsConnectorFactory;
 
     public BaseWebhookService(final AuthConnection authConnection,
                               final FactoryConnection factoryConnection,
@@ -181,41 +186,58 @@ public abstract class BaseWebhookService extends Service {
     }
 
     /**
-     * Get all configured connectors
+     * Add factory link to configured ci jobs description.
      *
      * @param factoryId
-     * @return the list of all configured connectors
+     *         Id of the factory
+     * @param factoryUrl
+     *         Url of the factory
      */
-    protected List<Connector> getConnectors(String factoryId) throws ServerException {
+    protected void addFactoryLinkToCiJobsDescription(String factoryId, String factoryUrl) throws ServerException, IOException {
+        for (JenkinsConnector connector : getConnectors(factoryId)) {
+            connector.addHeadFactoryLink(factoryUrl);
+        }
+    }
+
+    /**
+     * Get all configured ci connectors
+     *
+     * @param factoryId
+     *         Id of the factory
+     * @return the list of all configured ci connectors
+     */
+    private Set<JenkinsConnector> getConnectors(String factoryId) throws ServerException {
 
         Map<String, String> properties = configurationProperties.getProperties(JENKINS_CONNECTOR_PREFIX_PATTERN);
 
-        Set<String> connectors = properties.entrySet()
-                                           .stream()
-                                           .filter(entry -> entry.getValue().equals(factoryId))
-                                           .map(entry -> entry.getKey()
-                                                              .substring(0,
-                                                                         entry.getKey().lastIndexOf(JENKINS_CONNECTOR_FACTORY_ID_SUFFIX)))
-                                           .collect(Collectors.toSet());
+        Set<String> connectorProperties =
+                properties.entrySet()
+                          .stream()
+                          .filter(entry -> entry.getValue().equals(factoryId))
+                          .map(entry -> entry.getKey()
+                                             .substring(0, entry.getKey().lastIndexOf(JENKINS_CONNECTOR_FACTORY_ID_SUFFIX)))
+                          .collect(Collectors.toSet());
 
-        if (connectors.isEmpty()) {
-            LOG.error("No connectors was registered for factory {}", factoryId);
+        if (connectorProperties.isEmpty()) {
+            LOG.error("No connectors were registered for factory {}", factoryId);
         }
 
-        return connectors.stream()
-                         .map(connector -> createJenkinsConnector(properties, connector))
-                         .collect(toList());
+        Set<JenkinsConnector> connectors = new HashSet<>();
+        for (String connectorProperty : connectorProperties) {
+            connectors.add(createJenkinsConnector(properties, connectorProperty));
+        }
+        return connectors;
     }
 
-    private JenkinsConnector createJenkinsConnector(Map<String, String> properties, String connector) {
+    private JenkinsConnector createJenkinsConnector(Map<String, String> properties, String connector) throws ServerException {
         String url = properties.get(connector + JENKINS_CONNECTOR_URL_SUFFIX);
         String jobName = properties.get(connector + JENKINS_CONNECTOR_JOB_NAME_SUFFIX);
 
         checkArgument(!isNullOrEmpty(url) && !isNullOrEmpty(jobName),
                       format("No repository url or job name was not registered for jenkins connector '%s'", connector));
 
-        return new JenkinsConnector(properties.get(connector + JENKINS_CONNECTOR_URL_SUFFIX),
-                                    properties.get(connector + JENKINS_CONNECTOR_JOB_NAME_SUFFIX));
+        return jenkinsConnectorFactory.create(properties.get(connector + JENKINS_CONNECTOR_URL_SUFFIX),
+                                              properties.get(connector + JENKINS_CONNECTOR_JOB_NAME_SUFFIX));
     }
 
     /**
