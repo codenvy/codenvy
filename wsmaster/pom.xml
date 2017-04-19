@@ -31,7 +31,6 @@
         <module>codenvy-hosted-mail-sender</module>
         <module>codenvy-hosted-template-processor</module>
         <module>codenvy-hosted-platform-api-impl</module>
-        <module>codenvy-hosted-infra-filters</module>
         <module>codenvy-hosted-recoverpassword</module>
         <module>codenvy-hosted-events</module>
         <module>codenvy-hosted-machine-authentication-shared</module>
