@@ -6,9 +6,22 @@
         <meta name="description" content="Developer workspaces to modify, run and debug code in the cloud or on-premises.">
         <meta name="keywords" content="Codenvy, Cloud IDE, Java IDE, online IDE, web IDE, development environment, IDE, cloud, JavaScript, Java, Spring, Groovy, Ruby, PHP, code, deploy">
         <meta name="author" content="Codenvy">
-        <link rel="shortcut icon" href="/site/images/ico/favicon.ico">
         <link href="/site/images/ico/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <link href="/site/images/ico/favicon.ico" rel="icon" type="image/x-icon">
+<script>
+  var _gaq = _gaq || [];
+  if (window.location.hostname == 'localhost'){//patch for tracking localhost in chrome
+    _gaq.push(['_setDomainName', 'none']);
+  }
+  _gaq.push(
+    ['_setAccount', "UA-37306001-1"], // codenvy account
+    ['_trackPageview'],
+    ['exo._setAccount', "UA-1292368-18"], // eXo account
+    ['exo._trackPageview']
+  );
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+  s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
         <script src="{{'/site/scripts/vendor/modernizr.custom.29458.js' | resource }}"></script>
         <title>{{ page.title }}</title>
 
@@ -39,7 +52,6 @@
 
         {% if site.profile != "enterprise" %}
             <!-- Including Codenvy Trackers -->
-            {% include google-analytics.html %}
             {% include marketo.html %}
             {% include act-on.html %}
         {% endif %}
