@@ -22,7 +22,7 @@ The `codenvy` repository is where we do development. Your license grants you acc
 - [Review the docs](https://codenvy.com/docs/) and make improvements
 
 ### License
-Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users or support, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/docs/terms-of-service.pdf).
+Codenvy [is free for 3 users](https://codenvy.com/legal/fair-source/). For additional users or support, [please purchase](https://codenvy.com/contact/download/) a [Codenvy enterprise license](https://codenvy.com/legal/end-user-license-agreement.pdf).
 
 ### Customiziing 
 There are many ways to customize Codenvy. Codenvy is customized using Eclipse Che including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md). 
