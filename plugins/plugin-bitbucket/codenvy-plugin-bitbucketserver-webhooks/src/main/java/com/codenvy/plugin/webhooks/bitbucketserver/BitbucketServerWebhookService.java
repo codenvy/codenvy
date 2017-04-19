@@ -25,6 +25,7 @@ import com.codenvy.plugin.webhooks.bitbucketserver.shared.RefChange;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Repository;
 import com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -99,7 +100,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
 
     @POST
     @Consumes(APPLICATION_JSON)
-    public Response handleWebhookEvent(@Context HttpServletRequest request) throws ServerException {
+    public Response handleWebhookEvent(@Context HttpServletRequest request) throws ApiException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         Response response = Response.noContent().build();
         try (ServletInputStream inputStream = request.getInputStream()) {
@@ -129,7 +130,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
             }
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage());
-            throw new ServerException(e.getLocalizedMessage());
+            throw new ApiException(e.getLocalizedMessage());
         }
 
         return response;
