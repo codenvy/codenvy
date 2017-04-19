@@ -11,6 +11,9 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
+sshRetries=2
+sshDelayBeforeRetrySec=2
+
 # Key for SSH connection to sync files
 SSH_KEY=/opt/codenvy-data/conf/ssh/key.pem
 # When Codenvy runs on windows we have issue since key doesn't have permissions 0600.
@@ -45,4 +48,20 @@ checkFile="/tmp/codenvy_sudo_test_$(date +%s)"
 createCheckFile="sh -c 'echo 1 > $checkFile' 2>/dev/null"
 checkSudo="$createCheckFile; hash sudo 2>/dev/null && sudo chown 1000 $checkFile 2>/dev/null"
 GET_RSYNC_COMMAND='if [ "$(id -u)" != "0" ]; then '$checkSudo' && echo "sudo rsync" && exit; fi; echo "rsync"'
-RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${HOST} $(echo "$GET_RSYNC_COMMAND"))
+
+function getRsyncCommand {
+  RSYNC_COMMAND=$(ssh ${SSH_OPTIONS} ${HOST} $(echo "$GET_RSYNC_COMMAND"))
+  sshErrCode=$?
+}
+
+getRsyncCommand
+# Check whether ssh was successful and retries a few times if not
+# This is needed when some unexpected error happens, for example, network problems, etc.
+if [ $sshErrCode -ne 0 ]; then
+  sshRetryNumber=1
+  while [ $sshErrCode -ne 0 ] && [ $sshRetryNumber -le $sshRetries ]; do
+    sleep $sshDelayBeforeRetrySec
+    getRsyncCommand
+    ((sshRetryNumber++))
+  done
+fi
