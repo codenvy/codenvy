@@ -138,10 +138,9 @@ public class JenkinsConnector {
         Node descriptionNode = configDocument.getDocumentElement().getElementsByTagName("description").item(0);
         String content = descriptionNode.getTextContent();
         if (!content.contains(factoryUrl)) {
-            String startPoint = "<br>Dev Workspace (Failed Build):";
+            String startPoint = "<br>Dev Workspace (Failed Build): <a href=\"";
             content = content.contains(startPoint) ? content.substring(0, content.indexOf(startPoint)) : content;
-            descriptionNode
-                    .setTextContent(content + "<br>Dev Workspace (Failed Build): <a href=\"" + factoryUrl + "\">" + factoryUrl + "</a>");
+            descriptionNode.setTextContent(content + startPoint + factoryUrl + "\">" + factoryUrl + "</a>");
             updateJenkinsJobDescription(factoryUrl, configDocument);
         } else {
             LOG.debug(String.format(FACTORY_LINK_DISPLAYED_MESSAGE, factoryUrl, jobName));
