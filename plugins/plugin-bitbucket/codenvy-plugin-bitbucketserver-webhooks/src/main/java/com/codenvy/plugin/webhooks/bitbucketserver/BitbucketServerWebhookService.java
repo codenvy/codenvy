@@ -103,7 +103,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                                                  .getValues()
                                                  .stream()
                                                  .filter(changeSet -> changeSet.getToCommit().getId().equals(refChange.getToHash()))
-                                                 .findFirst();
+                                                 .findAny();
             if (!changeset.isPresent()) {
                 continue;
             }
