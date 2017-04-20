@@ -128,8 +128,10 @@ initModule.factory('AuthInterceptor', ($window, $cookies, $q, $location, $log) =
         config.url = config.url.substring('https://codenvy.com'.length);
       }
 
-      //Do not add token on auth login
-      if (config.url.indexOf('/api/auth/login') === -1 && config.url.indexOf('api/') !== -1 && $window.sessionStorage['codenvyToken']) {
+      let authHeader = config.headers['Authorization'];
+
+      // do not add token on auth login
+      if (config.url.indexOf('/api/auth/login') === -1 && config.url.indexOf('api/') !== -1 && $window.sessionStorage['codenvyToken'] && (!authHeader || authHeader.length === 0)) {
         config.params = config.params || {};
         angular.extend(config.params, {token: $window.sessionStorage['codenvyToken']});
       }
@@ -182,7 +184,7 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
 
   function getWorkspaceId(url) {
     let workspaceId;
-    // In case of injection 'cheWorkspace' we will get an error with 'circular dependency found' message,
+    // in case of injection 'cheWorkspace' we will get an error with 'circular dependency found' message,
     // so to avoid this we need to use injector.get() directly.
     $injector.get('cheWorkspace').getWorkspaceAgents().forEach((value, key) => {
       if (url.startsWith(value.workspaceAgentData.path)) {
@@ -194,10 +196,6 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
 
   return {
     request: (config) => {
-      if (config.url.indexOf("/ext/") === -1) {
-        return config || $q.when(config);
-      }
-
       let workspaceId = getWorkspaceId(config.url);
       if (!workspaceId) {
         return config || $q.when(config);
@@ -207,16 +205,17 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
         .then((token) => {
           config.headers['Authorization'] = token;
           return config;
-        })
+        });
     },
 
     responseError: (rejection) => {
-      if (rejection && rejection.config.url.indexOf("/ext/") !== -1 && (rejection.status === 401 || rejection.status === 503)) {
-        delete tokens[getWorkspaceId(rejection.config.url)];
+      let workspaceId = getWorkspaceId(rejection.config.url);
+      if (rejection && workspaceId && (rejection.status === 401 || rejection.status === 503)) {
+        delete tokens[workspaceId];
       }
       return $q.reject(rejection);
     }
-  }
+  };
 });
 
 initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
