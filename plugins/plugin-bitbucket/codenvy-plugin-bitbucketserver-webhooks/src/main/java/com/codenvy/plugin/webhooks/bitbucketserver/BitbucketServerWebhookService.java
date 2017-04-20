@@ -39,7 +39,6 @@ import javax.inject.Named;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -95,7 +94,7 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
 
     @POST
     @Consumes(APPLICATION_JSON)
-    public Response handleWebhookEvent(PushEvent event) throws ServerException {
+    public void handleWebhookEvent(PushEvent event) throws ServerException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         LOG.debug("{}", event);
         for (RefChange refChange : event.getRefChanges()) {
@@ -122,8 +121,6 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                 }
             }
         }
-
-        return Response.noContent().build();
     }
 
     @VisibleForTesting
