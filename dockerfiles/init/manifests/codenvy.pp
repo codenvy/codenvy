@@ -20,6 +20,7 @@ node default {
 # swarm nodes management
 # coma separated list of <IP>:<PORT>
   $swarm_nodes = getValue("CODENVY_SWARM_NODES","172.17.0.1:2375")
+  $swarm_log_level = getValue("CODENVY_SWARM_LOG_LEVEL","info")
 
 ###############################
 #

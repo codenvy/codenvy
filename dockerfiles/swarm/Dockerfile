@@ -20,6 +20,5 @@ RUN apk --update add ca-certificates wget \
 ENV SWARM_HOST :2375
 EXPOSE 2375
 
-COPY entrypoint.sh /
-RUN chmod +x entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/swarm"]
+CMD ["--help"]
