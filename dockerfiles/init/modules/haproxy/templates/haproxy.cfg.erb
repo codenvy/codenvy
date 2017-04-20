@@ -35,6 +35,9 @@ backend tomcat_bk
 
 backend nginx_bk
     mode http
+    http-request del-header token-access-key
+    http-request del-header session-access-key
+    http-request del-header logged_in
     server nginx_bk codenvy-nginx:81 check
 
 backend agents_bk
