@@ -6,21 +6,15 @@
         <meta name="description" content="Developer workspaces to modify, run and debug code in the cloud or on-premises.">
         <meta name="keywords" content="Codenvy, Cloud IDE, Java IDE, online IDE, web IDE, development environment, IDE, cloud, JavaScript, Java, Spring, Groovy, Ruby, PHP, code, deploy">
         <meta name="author" content="Codenvy">
-        <link rel="shortcut icon" href="/site/images/ico/favicon.ico">
         <link href="/site/images/ico/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <link href="/site/images/ico/favicon.ico" rel="icon" type="image/x-icon">
         <script src="{{'/site/scripts/vendor/modernizr.custom.29458.js' | resource }}"></script>
         <title>{{ page.title }}</title>
-
         <!-- Bootstrap core CSS -->
         <link rel="stylesheet" href="/site/styles/bootstrap.css" >
-        
         <link rel="stylesheet" href="/site/lib/font-awesome-4.2.0/css/font-awesome.min.css"/>
-
         <!-- Custom styles for this template -->
         <link href="/site/styles/style.css" rel="stylesheet">
         <link href="/site/branding/branding.css" rel="stylesheet">
-            
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="js/html5shiv.js"></script>
@@ -38,11 +32,8 @@
             <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
         <![endif]-->
         {% include application-script.html %}
-
-        {% if site.profile != "enterprise" %}
-            <!-- Including Codenvy Trackers -->
-            {% include marketo.html %}
-            {% include act-on.html %}
-        {% endif %}
+        <!-- Including Trackers -->
+        {% include marketo.html %}
+        {% include act-on.html %}
      </body>
 </html>
