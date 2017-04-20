@@ -76,7 +76,7 @@ public class JenkinsWebhookManager {
      * @throws ServerException
      *         when error occurs during handling failed job event
      */
-    void handleFailedJobEvent(JenkinsEventDto jenkinsEvent) throws ServerException {
+    public void handleFailedJobEvent(JenkinsEventDto jenkinsEvent) throws ServerException {
         JenkinsConnector jenkinsConnector = jenkinsConnectorFactory.create(jenkinsEvent.getJenkinsUrl(), jenkinsEvent.getJobName())
                                                                    .updateUrlWithCredentials();
         try {

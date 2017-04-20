@@ -97,29 +97,33 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
     public void handleWebhookEvent(PushEvent event) throws ServerException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
         LOG.debug("{}", event);
-        for (RefChange refChange : event.getRefChanges()) {
-            Optional<Changeset> changeset = event.getChangesets()
-                                                 .getValues()
-                                                 .stream()
-                                                 .filter(changeSet -> changeSet.getToCommit().getId().equals(refChange.getToHash()))
-                                                 .findAny();
-            if (!changeset.isPresent()) {
-                continue;
-            }
-            String commitMessage = changeset.get().getToCommit().getMessage();
-            if (commitMessage.startsWith("Merge pull request #")) {
-                handleMergeEvent(event, commitMessage);
-                continue;
-            }
-            String eventType = refChange.getType().toLowerCase();
-            if ("update".equals(eventType) || "add".equals(eventType)) {
-                try {
+        try {
+            for (RefChange refChange : event.getRefChanges()) {
+                Optional<Changeset> changeset = event.getChangesets()
+                                                     .getValues()
+                                                     .stream()
+                                                     .filter(changeSet -> changeSet.getToCommit().getId().equals(refChange.getToHash()))
+                                                     .findAny();
+                if (!changeset.isPresent()) {
+                    continue;
+                }
+                String commitMessage = changeset.get().getToCommit().getMessage();
+                if (commitMessage.startsWith("Merge pull request #")) {
+                    handleMergeEvent(event, commitMessage);
+                    continue;
+                }
+                String eventType = refChange.getType().toLowerCase();
+                if ("update".equals(eventType) || "add".equals(eventType)) {
+
                     handlePushEvent(event, refChange.getRefId().substring(11));
-                } catch (IOException e) {
-                    LOG.warn(e.getLocalizedMessage());
-                    throw new ServerException(e.getLocalizedMessage());
+
                 }
             }
+        } catch (IOException e) {
+            LOG.warn(e.getLocalizedMessage());
+            throw new ServerException(e.getLocalizedMessage());
+        } finally {
+            EnvironmentContext.reset();
         }
     }
 

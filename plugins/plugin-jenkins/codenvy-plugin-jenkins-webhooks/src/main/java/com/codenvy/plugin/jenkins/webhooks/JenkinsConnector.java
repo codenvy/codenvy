@@ -90,7 +90,7 @@ public class JenkinsConnector {
     /**
      * Returns {@link JenkinsConnector} object with updated url from connector url property that contains credentials inside.
      */
-    JenkinsConnector updateUrlWithCredentials() throws ServerException {
+    public JenkinsConnector updateUrlWithCredentials() throws ServerException {
         Optional<String> propertyPrefixOptional = getJenkinsConnectorPropertyPrefix();
         if (propertyPrefixOptional.isPresent()) {
             Map<String, String> properties = configurationProperties.getProperties(JENKINS_CONNECTOR_PREFIX_PATTERN);
@@ -99,19 +99,6 @@ public class JenkinsConnector {
             throw new ServerException(String.format(PROPERTY_NOT_FOUND_ERROR_MESSAGE, url, jobName));
         }
         return this;
-    }
-
-    /**
-     * Returns related factory Id, configured for current connector by connector properties.
-     */
-    String getFactoryId() throws ServerException {
-        Optional<String> propertyPrefixOptional = getJenkinsConnectorPropertyPrefix();
-        if (propertyPrefixOptional.isPresent()) {
-            Map<String, String> properties = configurationProperties.getProperties(JENKINS_CONNECTOR_PREFIX_PATTERN);
-            return properties.get(propertyPrefixOptional.get() + JENKINS_CONNECTOR_FACTORY_ID_SUFFIX);
-        } else {
-            throw new ServerException(String.format(PROPERTY_NOT_FOUND_ERROR_MESSAGE, url, jobName));
-        }
     }
 
     /**
@@ -176,6 +163,19 @@ public class JenkinsConnector {
         String request = doRequest(GET, requestUrl, APPLICATION_XML, null);
         //It is not possible to use Gson parser here because the given JSON contains objects in camel-case and upper-case at he same time.
         return request.substring(request.indexOf("SHA1") + 7).substring(0, 40);
+    }
+
+    /**
+     * Returns related factory Id, configured for current connector by connector properties.
+     */
+    String getFactoryId() throws ServerException {
+        Optional<String> propertyPrefixOptional = getJenkinsConnectorPropertyPrefix();
+        if (propertyPrefixOptional.isPresent()) {
+            Map<String, String> properties = configurationProperties.getProperties(JENKINS_CONNECTOR_PREFIX_PATTERN);
+            return properties.get(propertyPrefixOptional.get() + JENKINS_CONNECTOR_FACTORY_ID_SUFFIX);
+        } else {
+            throw new ServerException(String.format(PROPERTY_NOT_FOUND_ERROR_MESSAGE, url, jobName));
+        }
     }
 
     private Optional<String> getJenkinsConnectorPropertyPrefix() {

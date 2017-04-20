@@ -94,7 +94,7 @@ public class GitHubWebhookService extends BaseWebhookService {
     public Response handleGithubWebhookEvent(@ApiParam(value = "New contribution", required = true)
                                              @Context HttpServletRequest request) throws ServerException {
 
-        Response response = Response.ok().build();
+        Response response = Response.noContent().build();
         try (ServletInputStream inputStream = request.getInputStream()) {
             if (inputStream != null) {
                 String githubHeader = request.getHeader(GITHUB_REQUEST_HEADER);
@@ -120,6 +120,8 @@ public class GitHubWebhookService extends BaseWebhookService {
         } catch (IOException e) {
             LOG.warn(e.getLocalizedMessage());
             throw new ServerException(e.getLocalizedMessage());
+        } finally {
+            EnvironmentContext.reset();
         }
 
         return response;
