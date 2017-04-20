@@ -232,7 +232,7 @@ public class ResourceAggregatorTest {
     }
 
     @Test
-    public void shouldNotReturnResourceAsExcessiveWhenDeductedAmountEqualsTo0() throws Exception {
+    public void shouldNotReturnResourceAsExcessiveWhenResourcesHaveTheSameAmount() throws Exception {
         //given
         final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
         final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
@@ -244,7 +244,7 @@ public class ResourceAggregatorTest {
 
         //then
         assertTrue(excess.isEmpty());
-        verify(aResourceType).deduct(sourceAResource, toCompareAResource);
+        verify(aResourceType, never()).deduct(any(), any());
     }
 
     @Test

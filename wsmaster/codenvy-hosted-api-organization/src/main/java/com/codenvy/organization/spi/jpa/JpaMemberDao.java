@@ -16,21 +16,15 @@ package com.codenvy.organization.spi.jpa;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.api.permission.server.jpa.AbstractJpaPermissionsDao;
-import com.codenvy.organization.api.event.BeforeOrganizationRemovedEvent;
 import com.codenvy.organization.spi.MemberDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
@@ -135,14 +129,15 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
 
     @Override
     @Transactional
-    public Page<OrganizationImpl> getOrganizations(String userId, int maxItems, int skipCount) throws ServerException {
+    public Page<OrganizationImpl> getOrganizations(String userId, int maxItems, long skipCount) throws ServerException {
         requireNonNull(userId, "Required non-null user id");
+        checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {
             final EntityManager manager = managerProvider.get();
             final List<OrganizationImpl> result = manager.createNamedQuery("Member.getOrganizations", OrganizationImpl.class)
                                                          .setParameter("userId", userId)
                                                          .setMaxResults(maxItems)
-                                                         .setFirstResult(skipCount)
+                                                         .setFirstResult((int)skipCount)
                                                          .getResultList();
             final Long organizationsCount = manager.createNamedQuery("Member.getOrganizationsCount", Long.class)
                                                    .setParameter("userId", userId)

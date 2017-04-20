@@ -141,13 +141,43 @@ public class InviteManagerTest {
     }
 
     @Test
-    public void shouldReturnInvitesByEmail() throws Exception {
-        doReturn(invitesPage).when(inviteDao).getInvites(anyString(), anyLong(), anyInt());
+    public void shouldReturnInvite() throws Exception {
+        InviteImpl toBeReturned = new InviteImpl("user@test.com", OrganizationDomain.DOMAIN_ID, "test123", singletonList("read"));
+        doReturn(toBeReturned)
+                .when(inviteDao).getInvite(anyString(), anyString(), anyString());
 
-        Page<? extends Invite> fetchedPage = inviteManager.getInvites("user@test.com", 5, 10);
+        Invite fetchedInvite = inviteManager.getInvite(OrganizationDomain.DOMAIN_ID, "test123", "user@test.com");
+
+        assertEquals(fetchedInvite, toBeReturned);
+        verify(inviteDao).getInvite(OrganizationDomain.DOMAIN_ID, "test123", "user@test.com");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+          expectedExceptionsMessageRegExp = "Required non-null domain id")
+    public void shouldThrowOnFetchingInviteByNullDomain() throws Exception {
+        inviteManager.getInvite(null, "test123", "user@test.com");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+          expectedExceptionsMessageRegExp = "Required non-null instance id")
+    public void shouldThrowOnFetchingInviteByNullInstance() throws Exception {
+        inviteManager.getInvite("test", null, "user@test.com");
+    }
+
+    @Test(expectedExceptions = NullPointerException.class,
+          expectedExceptionsMessageRegExp = "Required non-null email")
+    public void shouldThrowOnFetchingInviteByNullEmail() throws Exception {
+        inviteManager.getInvite("test", "test123", null);
+    }
+
+    @Test
+    public void shouldReturnInvitesByEmail() throws Exception {
+        doReturn(invitesPage).when(inviteDao).getInvites(anyString(), anyInt(), anyLong());
+
+        Page<? extends Invite> fetchedPage = inviteManager.getInvites("user@test.com", 10, 5);
 
         assertEquals(fetchedPage, invitesPage);
-        verify(inviteDao).getInvites("user@test.com", 5, 10);
+        verify(inviteDao).getInvites("user@test.com", 10, 5);
     }
 
     @Test(expectedExceptions = NullPointerException.class,

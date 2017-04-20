@@ -61,7 +61,7 @@ public class JpaInviteDao implements InviteDao {
 
     @Transactional
     @Override
-    public Page<InviteImpl> getInvites(String email, long skipCount, int maxItems) throws ServerException {
+    public Page<InviteImpl> getInvites(String email, int maxItems, long skipCount) throws ServerException {
         requireNonNull(email, "Required non-null email");
         checkArgument(skipCount <= Integer.MAX_VALUE, "The number of items to skip can't be greater than " + Integer.MAX_VALUE);
         try {

@@ -84,13 +84,13 @@ public class InviteToPermissionsConverterTest {
         Permissions expectedPermission2 = convert(invite2);
         doReturn(new Page<>(singletonList(invite1), 0, 1, 2))
                 .doReturn(new Page<>(singletonList(invite2), 1, 1, 2))
-                .when(inviteManager).getInvites(anyString(), anyLong(), anyInt());
+                .when(inviteManager).getInvites(anyString(), anyInt(), anyLong());
 
         converter.onEvent(new UserCreatedEvent(DtoFactory.newDto(UserDto.class)
                                                          .withEmail(USER_EMAIL)
                                                          .withId(USER_ID)));
 
-        verify(inviteManager, times(2)).getInvites(eq(USER_EMAIL), anyLong(), anyInt());
+        verify(inviteManager, times(2)).getInvites(eq(USER_EMAIL), anyInt(), anyLong());
         verify(inviteManager).remove(invite1.getDomainId(), invite1.getInstanceId(), USER_EMAIL);
         verify(inviteManager).remove(invite2.getDomainId(), invite2.getInstanceId(), USER_EMAIL);
         verify(permissionsManager).storePermission(expectedPermission1);
@@ -104,7 +104,7 @@ public class InviteToPermissionsConverterTest {
         Permissions expectedPermission2 = convert(invite2);
         doReturn(new Page<>(singletonList(invite1), 0, 1, 2))
                 .doReturn(new Page<>(singletonList(invite2), 1, 1, 2))
-                .when(inviteManager).getInvites(anyString(), anyLong(), anyInt());
+                .when(inviteManager).getInvites(anyString(), anyInt(), anyLong());
         doThrow(new ConflictException(""))
                 .doNothing()
                 .when(permissionsManager).storePermission(any());
@@ -113,7 +113,7 @@ public class InviteToPermissionsConverterTest {
                                                          .withEmail(USER_EMAIL)
                                                          .withId(USER_ID)));
 
-        verify(inviteManager, times(2)).getInvites(eq(USER_EMAIL), anyLong(), anyInt());
+        verify(inviteManager, times(2)).getInvites(eq(USER_EMAIL), anyInt(), anyLong());
         verify(inviteManager).remove(invite2.getDomainId(), invite2.getInstanceId(), USER_EMAIL);
         verify(permissionsManager).storePermission(expectedPermission2);
     }

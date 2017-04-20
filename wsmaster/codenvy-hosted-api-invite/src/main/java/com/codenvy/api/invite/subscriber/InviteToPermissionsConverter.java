@@ -64,7 +64,7 @@ public class InviteToPermissionsConverter implements EventSubscriber<UserCreated
         final String createdUserId = event.getUser().getId();
         final String email = event.getUser().getEmail();
         try {
-            for (Invite invite : Pages.iterate((maxItems, skipCount) -> inviteManager.getInvites(email, skipCount, maxItems))) {
+            for (Invite invite : Pages.iterate((maxItems, skipCount) -> inviteManager.getInvites(email, maxItems, skipCount))) {
                 try {
                     permissionsManager.storePermission(DtoFactory.newDto(PermissionsDto.class)
                                                                  .withUserId(createdUserId)

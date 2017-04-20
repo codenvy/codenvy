@@ -96,6 +96,28 @@ public class InviteManager {
     }
 
     /**
+     * Returns invite for specified email and instance.
+     *
+     * @param domainId
+     *         domain id
+     * @param instanceId
+     *         instance id
+     * @param email
+     *         email
+     * @return invite for specified email and instance
+     * @throws NotFoundException
+     *         when invite for specified email and instance does not exist
+     * @throws ServerException
+     *         when any other exception occur on invite fetching
+     */
+    public Invite getInvite(String domainId, String instanceId, String email) throws NotFoundException, ServerException {
+        requireNonNull(domainId, "Required non-null domain id");
+        requireNonNull(instanceId, "Required non-null instance id");
+        requireNonNull(email, "Required non-null email");
+        return inviteDao.getInvite(domainId, instanceId, email);
+    }
+
+    /**
      * Returns invites for specified email.
      *
      * @param email
@@ -108,9 +130,9 @@ public class InviteManager {
      * @throws ServerException
      *         when any other error occurs during invites fetching
      */
-    public Page<? extends Invite> getInvites(String email, long skipCount, int maxItems) throws ServerException {
+    public Page<? extends Invite> getInvites(String email, int maxItems, long skipCount) throws ServerException {
         requireNonNull(email, "Required non-null email");
-        return inviteDao.getInvites(email, skipCount, maxItems);
+        return inviteDao.getInvites(email, maxItems, skipCount);
     }
 
     /**

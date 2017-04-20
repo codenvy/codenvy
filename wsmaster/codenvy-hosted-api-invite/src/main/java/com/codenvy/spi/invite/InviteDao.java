@@ -53,7 +53,7 @@ public interface InviteDao {
      * @throws ServerException
      *         when any other error occurs during invites fetching
      */
-    Page<InviteImpl> getInvites(String email, long skipCount, int maxItems) throws ServerException;
+    Page<InviteImpl> getInvites(String email, int maxItems, long skipCount) throws ServerException;
 
     /**
      * Returns invites for specified instance.

@@ -134,7 +134,7 @@ public class InviteDaoTest {
     @Test
     public void shouldReturnInvitesByEmail() throws Exception {
         List<InviteImpl> email1Invitations = Pages.stream((maxItems, skipCount) ->
-                                                                  inviteDao.getInvites(EMAIL_1, skipCount, maxItems),
+                                                                  inviteDao.getInvites(EMAIL_1, maxItems, skipCount),
                                                           1)
                                                   .collect(Collectors.toList());
 
@@ -145,7 +145,7 @@ public class InviteDaoTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNPEOnGettingInvitesByNullEmail() throws Exception {
-        inviteDao.getInvites(null, 0, 1);
+        inviteDao.getInvites(null, 1, 0);
     }
 
     @Test

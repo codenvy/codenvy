@@ -151,6 +151,11 @@ public class ResourceAggregator {
             String resourceType = toCompare.getType();
             final Resource sourceResource = result.get(resourceType);
             if (sourceResource != null) {
+                if (sourceResource.getAmount() == toCompare.getAmount()) {
+                    // source resource doesn't have excessive amount
+                    result.remove(resourceType);
+                    continue;
+                }
                 try {
                     Resource excess = deduct(sourceResource, toCompare);
                     if (excess.getAmount() == 0) {

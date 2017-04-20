@@ -119,5 +119,5 @@ public interface MemberDao {
      * @throws ServerException
      *         when any other error occurs during organizations fetching
      */
-    Page<OrganizationImpl> getOrganizations(String userId, int maxItems, int skipCount) throws ServerException;
+    Page<OrganizationImpl> getOrganizations(String userId, int maxItems, long skipCount) throws ServerException;
 }
