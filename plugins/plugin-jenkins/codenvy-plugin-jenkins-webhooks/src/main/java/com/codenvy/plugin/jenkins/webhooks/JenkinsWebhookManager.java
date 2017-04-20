@@ -14,7 +14,7 @@
  */
 package com.codenvy.plugin.jenkins.webhooks;
 
-import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEvent;
+import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEventDto;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -53,11 +53,11 @@ public class JenkinsWebhookManager {
     private final String                  username;
 
     @Inject
-    JenkinsWebhookManager(FactoryManager factoryManager,
-                          UserManager userManager,
-                          JenkinsConnectorFactory jenkinsConnectorFactory,
-                          @Named("che.api") String apiUrl,
-                          @Named("integration.factory.owner.username") String username) {
+    public JenkinsWebhookManager(FactoryManager factoryManager,
+                                 UserManager userManager,
+                                 JenkinsConnectorFactory jenkinsConnectorFactory,
+                                 @Named("che.api") String apiUrl,
+                                 @Named("integration.factory.owner.username") String username) {
         this.factoryManager = factoryManager;
         this.userManager = userManager;
         this.jenkinsConnectorFactory = jenkinsConnectorFactory;
@@ -72,17 +72,17 @@ public class JenkinsWebhookManager {
      * 2. Update Jenkins job description with build failed factory url.
      *
      * @param jenkinsEvent
-     *         {@link JenkinsEvent} object that contains information about failed Jenkins build
+     *         {@link JenkinsEventDto} object that contains information about failed Jenkins build
      * @throws ServerException
      *         when error occurs during handling failed job event
      */
-    void handleFailedJobEvent(JenkinsEvent jenkinsEvent) throws ServerException {
+    void handleFailedJobEvent(JenkinsEventDto jenkinsEvent) throws ServerException {
         JenkinsConnector jenkinsConnector = jenkinsConnectorFactory.create(jenkinsEvent.getJenkinsUrl(), jenkinsEvent.getJobName())
                                                                    .updateUrlWithCredentials();
         try {
             String commitId = jenkinsConnector.getCommitId(jenkinsEvent.getBuildId());
             String repositoryUrl = jenkinsEvent.getRepositoryUrl();
-            Optional<Factory> existingFailedFactory = getExistingFailedFactoryIfPresent(repositoryUrl, commitId);
+            Optional<Factory> existingFailedFactory = findExistingFailedFactory(repositoryUrl, commitId);
             Factory failedFactory = existingFailedFactory.isPresent() ? existingFailedFactory.get() :
                                     createFailedFactory(jenkinsConnector.getFactoryId(),
                                                         repositoryUrl,
@@ -94,8 +94,7 @@ public class JenkinsWebhookManager {
         }
     }
 
-    private Optional<Factory> getExistingFailedFactoryIfPresent(String repositoryUrl, String commitId) throws NotFoundException,
-                                                                                                              ServerException {
+    private Optional<Factory> findExistingFailedFactory(String repositoryUrl, String commitId) throws NotFoundException, ServerException {
         return getUserFactories().stream()
                                  .filter(f -> f.getWorkspace()
                                                .getProjects()
@@ -104,20 +103,19 @@ public class JenkinsWebhookManager {
                                                                     commitId.equals(project.getSource()
                                                                                            .getParameters()
                                                                                            .get("commitId"))))
-                                 .findFirst();
+                                 .findAny();
     }
 
     private List<Factory> getUserFactories() throws NotFoundException, ServerException {
         List<Factory> factories = new ArrayList<>();
-        List<Factory> request;
+        List<Factory> factoriesPage;
+        String userId = userManager.getByName(username).getId();
         int skipCount = 0;
         do {
-            request = factoryManager.getByAttribute(30,
-                                                    skipCount,
-                                                    singletonList(Pair.of("creator.userId", userManager.getByName(username).getId())));
-            factories.addAll(request);
-            skipCount += request.size();
-        } while (request.size() == 30);
+            factoriesPage = factoryManager.getByAttribute(30, skipCount, singletonList(Pair.of("creator.userId", userId)));
+            factories.addAll(factoriesPage);
+            skipCount += factoriesPage.size();
+        } while (factoriesPage.size() == 30);
         return factories;
     }
 

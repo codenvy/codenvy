@@ -22,28 +22,28 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Igor Vinokur
  */
 @DTO
-public interface JenkinsEvent {
+public interface JenkinsEventDto {
     String getJobName();
 
     void setJobName(String jobName);
 
-    JenkinsEvent withJobName(String jobName);
+    JenkinsEventDto withJobName(String jobName);
 
     int getBuildId();
 
     void setBuildId(int buildId);
 
-    JenkinsEvent withBuildId(int buildId);
+    JenkinsEventDto withBuildId(int buildId);
 
     String getJenkinsUrl();
 
     void setJenkinsUrl(String jenkinsUrl);
 
-    JenkinsEvent withJenkinsUrl(String jenkinsUrl);
+    JenkinsEventDto withJenkinsUrl(String jenkinsUrl);
 
     String getRepositoryUrl();
 
     void setRepositoryUrl(String repositoryUrl);
 
-    JenkinsEvent withRepositoryUrl(String repositoryUrl);
+    JenkinsEventDto withRepositoryUrl(String repositoryUrl);
 }

@@ -14,23 +14,18 @@
  */
 package com.codenvy.plugin.jenkins.webhooks;
 
-import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEvent;
+import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEventDto;
 
-import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -48,15 +43,9 @@ public class JenkinsWebhookService extends Service {
 
     @POST
     @Consumes(APPLICATION_JSON)
-    public Response handleWebhookEvent(@Context HttpServletRequest request) throws ApiException {
-        try (ServletInputStream inputStream = request.getInputStream()) {
-            JenkinsEvent jenkinsEvent = DtoFactory.getInstance().createDtoFromJson(inputStream, JenkinsEvent.class);
-            LOG.debug("{}", jenkinsEvent);
-            manager.handleFailedJobEvent(jenkinsEvent);
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage());
-            throw new ApiException(e.getLocalizedMessage());
-        }
-        return Response.ok().build();
+    public Response handleWebhookEvent(JenkinsEventDto jenkinsEvent) throws ServerException {
+        LOG.debug("{}", jenkinsEvent);
+        manager.handleFailedJobEvent(jenkinsEvent);
+        return Response.noContent().build();
     }
 }

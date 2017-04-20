@@ -235,23 +235,18 @@ public class JenkinsConnector {
             httpConnection.addRequestProperty(HttpHeaders.CONTENT_TYPE, contentType);
             httpConnection.setDoOutput(true);
 
-            if (!isNullOrEmpty(data))
-                try (OutputStream output = httpConnection.getOutputStream()) {
-                    output.write(data.getBytes());
+            if (!isNullOrEmpty(data)) {
+                try (OutputStream outputStream = httpConnection.getOutputStream()) {
+                    outputStream.write(data.getBytes());
                 }
-            final int responseCode = httpConnection.getResponseCode();
-            if ((responseCode / 100) != 2) {
-                InputStream in = httpConnection.getErrorStream();
-                if (in == null) {
-                    in = httpConnection.getInputStream();
-                }
-                final String str;
-                try (Reader reader = new InputStreamReader(in)) {
-                    str = CharStreams.toString(reader);
-                }
-                throw new ServerException(str);
             }
-            return readAndCloseQuietly(httpConnection.getInputStream());
+            final int responseCode = httpConnection.getResponseCode();
+            InputStream inputStream = httpConnection.getInputStream();
+            if ((responseCode / 100) != 2) {
+                InputStream errorStream = httpConnection.getErrorStream();
+                throw new ServerException(readAndCloseQuietly(errorStream != null ? errorStream : inputStream));
+            }
+            return readAndCloseQuietly(inputStream);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();

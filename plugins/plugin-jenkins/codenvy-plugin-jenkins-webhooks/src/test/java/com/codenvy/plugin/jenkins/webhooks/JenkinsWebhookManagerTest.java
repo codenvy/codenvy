@@ -14,7 +14,7 @@
  */
 package com.codenvy.plugin.jenkins.webhooks;
 
-import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEvent;
+import com.codenvy.plugin.jenkins.webhooks.shared.JenkinsEventDto;
 
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.factory.server.FactoryManager;
@@ -59,7 +59,7 @@ public class JenkinsWebhookManagerTest {
     private final Map<String, String> parameters = new HashMap<>();
 
     private JenkinsWebhookManager manager;
-    private JenkinsEvent          jenkinsEvent;
+    private JenkinsEventDto       jenkinsEvent;
     private JenkinsConnector      jenkinsConnector;
 
     @Mock
@@ -101,9 +101,9 @@ public class JenkinsWebhookManagerTest {
         when(source.getLocation()).thenReturn("http://repository.git");
         when(source.getParameters()).thenReturn(parameters);
 
-        jenkinsEvent = newDto(JenkinsEvent.class).withJenkinsUrl("http://jenkins.url")
-                                                 .withJobName("jobName")
-                                                 .withRepositoryUrl("http://repository.git");
+        jenkinsEvent = newDto(JenkinsEventDto.class).withJenkinsUrl("http://jenkins.url")
+                                                    .withJobName("jobName")
+                                                    .withRepositoryUrl("http://repository.git");
 
         manager = new JenkinsWebhookManager(factoryManager,
                                             userManager,

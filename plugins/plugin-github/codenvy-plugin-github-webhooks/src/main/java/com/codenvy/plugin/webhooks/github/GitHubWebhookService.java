@@ -26,7 +26,6 @@ import com.codenvy.plugin.webhooks.BaseWebhookService;
 import com.codenvy.plugin.webhooks.github.shared.PullRequestEvent;
 import com.codenvy.plugin.webhooks.github.shared.PushEvent;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -93,7 +92,7 @@ public class GitHubWebhookService extends BaseWebhookService {
     @POST
     @Consumes(APPLICATION_JSON)
     public Response handleGithubWebhookEvent(@ApiParam(value = "New contribution", required = true)
-                                             @Context HttpServletRequest request) throws ApiException {
+                                             @Context HttpServletRequest request) throws ServerException {
 
         Response response = Response.ok().build();
         try (ServletInputStream inputStream = request.getInputStream()) {
@@ -119,8 +118,8 @@ public class GitHubWebhookService extends BaseWebhookService {
                 }
             }
         } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage());
-            throw new ApiException(e.getLocalizedMessage());
+            LOG.warn(e.getLocalizedMessage());
+            throw new ServerException(e.getLocalizedMessage());
         }
 
         return response;

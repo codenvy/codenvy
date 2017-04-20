@@ -30,17 +30,12 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.test.servlet.MockServletInputStream;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +96,7 @@ public class BitbucketServerWebhookServiceTest {
         PushEvent pushEvent = createPushEvent("commit");
 
         //when
-        service.handleWebhookEvent(prepareRequest(pushEvent));
+        service.handleWebhookEvent(pushEvent);
 
         //then
         verify(service).handlePushEvent(anyObject(), anyString());
@@ -113,23 +108,12 @@ public class BitbucketServerWebhookServiceTest {
         PushEvent pushEvent = createPushEvent("Merge pull request #3 in ~projectkey/repository from testBranch to master");
 
         //when
-        service.handleWebhookEvent(prepareRequest(pushEvent));
+        service.handleWebhookEvent(pushEvent);
 
         //then
         verify(service).handleMergeEvent(anyObject(), anyString());
         assertFalse(parameters.containsKey("branch"));
         assertEquals(parameters.get("commitId"), "hash commit");
-    }
-
-    private HttpServletRequest prepareRequest(PushEvent event) throws Exception {
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(event.toString().getBytes(StandardCharsets.UTF_8));
-        final MockServletInputStream mockServletInputStream = new MockServletInputStream(byteArrayInputStream);
-
-        when(mockRequest.getInputStream()).thenReturn(mockServletInputStream);
-
-        return mockRequest;
     }
 
     private PushEvent createPushEvent(String message) {

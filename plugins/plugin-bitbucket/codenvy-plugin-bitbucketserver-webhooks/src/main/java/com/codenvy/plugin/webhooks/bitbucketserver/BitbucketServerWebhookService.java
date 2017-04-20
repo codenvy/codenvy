@@ -25,25 +25,20 @@ import com.codenvy.plugin.webhooks.bitbucketserver.shared.RefChange;
 import com.codenvy.plugin.webhooks.bitbucketserver.shared.Repository;
 import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
@@ -100,40 +95,35 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
 
     @POST
     @Consumes(APPLICATION_JSON)
-    public Response handleWebhookEvent(@Context HttpServletRequest request) throws ApiException {
+    public Response handleWebhookEvent(PushEvent event) throws ServerException {
         EnvironmentContext.getCurrent().setSubject(new TokenSubject());
-        Response response = Response.noContent().build();
-        try (ServletInputStream inputStream = request.getInputStream()) {
-            if (inputStream == null) {
-                return response;
+        LOG.debug("{}", event);
+        for (RefChange refChange : event.getRefChanges()) {
+            Optional<Changeset> changeset = event.getChangesets()
+                                                 .getValues()
+                                                 .stream()
+                                                 .filter(changeSet -> changeSet.getToCommit().getId().equals(refChange.getToHash()))
+                                                 .findFirst();
+            if (!changeset.isPresent()) {
+                continue;
             }
-            final PushEvent event = DtoFactory.getInstance().createDtoFromJson(inputStream, PushEvent.class);
-            LOG.debug("{}", event);
-            for (RefChange refChange : event.getRefChanges()) {
-                Optional<Changeset> changeset = event.getChangesets()
-                                                     .getValues()
-                                                     .stream()
-                                                     .filter(changeSet -> changeSet.getToCommit().getId().equals(refChange.getToHash()))
-                                                     .findFirst();
-                if (!changeset.isPresent()) {
-                    continue;
-                }
-                String commitMessage = changeset.get().getToCommit().getMessage();
-                if (commitMessage.startsWith("Merge pull request #")) {
-                    handleMergeEvent(event, commitMessage);
-                    continue;
-                }
-                String eventType = refChange.getType().toLowerCase();
-                if ("update".equals(eventType) || "add".equals(eventType)) {
+            String commitMessage = changeset.get().getToCommit().getMessage();
+            if (commitMessage.startsWith("Merge pull request #")) {
+                handleMergeEvent(event, commitMessage);
+                continue;
+            }
+            String eventType = refChange.getType().toLowerCase();
+            if ("update".equals(eventType) || "add".equals(eventType)) {
+                try {
                     handlePushEvent(event, refChange.getRefId().substring(11));
+                } catch (IOException e) {
+                    LOG.warn(e.getLocalizedMessage());
+                    throw new ServerException(e.getLocalizedMessage());
                 }
             }
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage());
-            throw new ApiException(e.getLocalizedMessage());
         }
 
-        return response;
+        return Response.noContent().build();
     }
 
     @VisibleForTesting
