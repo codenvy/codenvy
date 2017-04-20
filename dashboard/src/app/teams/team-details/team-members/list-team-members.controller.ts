@@ -381,7 +381,9 @@ export class ListTeamMembersController {
           domainId: 'organization',
           actions: actions
         };
-        let promise = this.codenvyPermissions.storePermissions(permissions);
+        let promise = this.codenvyPermissions.storePermissions(permissions).catch((error: any) => {
+          this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Add member to team failed.');
+        });
         promises.push(promise);
       } else {
         isInvite = true;

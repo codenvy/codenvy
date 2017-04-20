@@ -55,10 +55,10 @@ import static java.util.stream.Collectors.toMap;
 public class SuborganizationResourcesProvider implements ResourcesProvider {
     public static final String PARENT_RESOURCES_PROVIDER = "parentOrganization";
 
-    protected final AccountManager                             accountManager;
-    protected final OrganizationManager                        organizationManager;
-    protected final Provider<OrganizationResourcesDistributor> distributorProvider;
-    protected final Provider<ResourceUsageManager>             usageManagerProvider;
+    private final AccountManager                             accountManager;
+    private final OrganizationManager                        organizationManager;
+    private final Provider<OrganizationResourcesDistributor> distributorProvider;
+    private final Provider<ResourceUsageManager>             usageManagerProvider;
 
     @Inject
     public SuborganizationResourcesProvider(AccountManager accountManager,
@@ -103,7 +103,7 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
         return emptyList();
     }
 
-    protected List<ResourceImpl> cap(Collection<? extends Resource> source, List<? extends Resource> caps) {
+    private List<ResourceImpl> cap(Collection<? extends Resource> source, List<? extends Resource> caps) {
         final Map<String, Resource> resourcesCaps = caps.stream()
                                                         .collect(toMap(Resource::getType, Function.identity()));
         return source.stream()
