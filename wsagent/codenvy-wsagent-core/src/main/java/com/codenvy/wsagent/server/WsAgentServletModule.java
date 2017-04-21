@@ -17,10 +17,16 @@ package com.codenvy.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 
 /**
+ * General binding that may be reused by other Codenvy based basic assembly.
+ * This class add additional to @{@link org.eclipse.che.wsagent.server.WsAgentServletModule}
+ * servlet bindings.
+ * <p>
+ * Note: bindings from @{@link org.eclipse.che.wsagent.server.CheWsAgentServletModule} are Che specific
+ * and must be removed from target packaging.
+ *
  * @author Sergii Kabashniuk
  * @author Max Shaposhnik
  * @author Alexander Garagatyi
@@ -30,11 +36,9 @@ public class WsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         //listeners
-        getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
         getServletContext().addListener(new com.codenvy.auth.sso.client.DestroySessionListener());
 
         //filters
-        filter("/*").through(CheCorsFilter.class);
         filter("/*").through(com.codenvy.machine.authentication.agent.MachineLoginFilter.class);
         filter("/*").through(com.codenvy.workspace.LastAccessTimeFilter.class);
 
