@@ -124,6 +124,10 @@ node default {
 #
   $workspace_email_invite_subject = getValue("CODENVY_WORKSPACE_EMAIL_INVITE_SUBJECT","Join My Workspace")
   $organization_email_invite_subject = getValue("CODENVY_ORGANIZATION_EMAIL_INVITE_SUBJECT","Join My Organization")
+  $account_verify_mail_subject = getValue("CODENVY_ACCOUNT_VERIFY_MAIL_SUBJECT","Verify Your Codenvy Account")
+  $account_password_recovery_mail_subject = getValue("CODENVY_ACCOUNT_PASSWORD_RECOVERY_MAIL_SUBJECT","Codenvy Password Recovery")
+  $account_created_byadmin_mail_subject = getValue("CODENVY_ACCOUNT_CREATED_BYADMIN_MAIL_SUBJECT","Welcome To Codenvy")
+  $account_created_byuser_mail_subject = getValue("CODENVY_ACCOUNT_CREATED_BYUSER_MAIL_SUBJECT","Welcome To Codenvy")
 
 ################################
 # Error reports

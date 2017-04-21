@@ -52,6 +52,8 @@ public class CreationNotificationSender {
     private final RecoveryStorage                          recoveryStorage;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
     private final DefaultEmailResourceResolver             resourceResolver;
+    private final String                                   accountCreatedWithoutPasswordMailSubject;
+    private final String                                   accountCreatedWithPasswordMailSubject;
 
     @Inject
     public CreationNotificationSender(@Named("che.api") String apiEndpoint,
@@ -59,13 +61,17 @@ public class CreationNotificationSender {
                                       RecoveryStorage recoveryStorage,
                                       MailSender mailSender,
                                       HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
-                                      DefaultEmailResourceResolver resourceResolver) {
+                                      DefaultEmailResourceResolver resourceResolver,
+                                      @Named("account.created.byuser.mail.subject") String accountCreatedWithoutPasswordMailSubject,
+                                      @Named("account.created.byadmin.mail.subject") String accountCreatedWithPasswordMailSubject) {
         this.apiEndpoint = apiEndpoint;
         this.mailFrom = mailFrom;
         this.recoveryStorage = recoveryStorage;
         this.mailSender = mailSender;
         this.thymeleaf = thymeleaf;
         this.resourceResolver = resourceResolver;
+        this.accountCreatedWithoutPasswordMailSubject = accountCreatedWithoutPasswordMailSubject;
+        this.accountCreatedWithPasswordMailSubject = accountCreatedWithPasswordMailSubject;
     }
 
     public void sendNotification(String userName,
@@ -79,8 +85,13 @@ public class CreationNotificationSender {
                                                    .withFrom(mailFrom)
                                                    .withTo(userEmail)
                                                    .withReplyTo(null)
-                                                   .withSubject("Welcome To Codenvy")
                                                    .withMimeType(TEXT_HTML);
+        if (withPassword) {
+            emailBean.setSubject(accountCreatedWithPasswordMailSubject);
+        } else {
+            emailBean.setSubject(accountCreatedWithoutPasswordMailSubject);
+        }
+
         mailSender.sendMail(resourceResolver.resolve(emailBean));
     }
 

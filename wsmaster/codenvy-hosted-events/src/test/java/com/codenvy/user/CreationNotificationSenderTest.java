@@ -68,7 +68,9 @@ public class CreationNotificationSenderTest {
                                                             recoveryStorage,
                                                             mailSender,
                                                             thymeleaf,
-                                                            resourceResolver);
+                                                            resourceResolver,
+                                                            "Subject without password",
+                                                            "Subject with password");
     }
 
     @Test
@@ -86,7 +88,7 @@ public class CreationNotificationSenderTest {
         assertEquals(emailBean.getTo(), "test@user.com");
         assertEquals(emailBean.getMimeType(), TEXT_HTML);
         assertEquals(emailBean.getFrom(), "noreply@host");
-        assertEquals(emailBean.getSubject(), "Welcome To Codenvy");
+        assertEquals(emailBean.getSubject(), "Subject with password");
     }
 
 }

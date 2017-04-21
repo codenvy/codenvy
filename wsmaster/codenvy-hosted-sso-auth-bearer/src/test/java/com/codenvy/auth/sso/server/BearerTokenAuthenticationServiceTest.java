@@ -101,7 +101,8 @@ public class BearerTokenAuthenticationServiceTest {
                                                                                 licenseManager,
                                                                                 resourceResolver,
                                                                                 thymeleaf,
-                                                                                "noreply@host");
+                                                                                "noreply@host",
+                                                                                "Subject");
     }
 
     @Test
@@ -122,7 +123,7 @@ public class BearerTokenAuthenticationServiceTest {
         assertTrue(!argumentCaptorValue.getBody().isEmpty());
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
         assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
-        assertEquals(argumentCaptorValue.getSubject(), "Verify Your Codenvy Account");
+        assertEquals(argumentCaptorValue.getSubject(), "Subject");
     }
 
     @Test
