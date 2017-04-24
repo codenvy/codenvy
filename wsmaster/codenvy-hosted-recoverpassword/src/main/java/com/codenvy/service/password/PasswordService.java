@@ -64,7 +64,7 @@ public class PasswordService {
     private final RecoveryStorage                          recoveryStorage;
     private final DefaultEmailResourceResolver             resourceResolver;
     private final String                                   mailFrom;
-    private final String                                   recoverMailSubject;
+    private final String                                   recoverPasswordMailSubject;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
     private final long                                     validationMaxAge;
 
@@ -78,7 +78,7 @@ public class PasswordService {
                            ProfileManager profileManager,
                            DefaultEmailResourceResolver resourceResolver,
                            @Named("mailsender.application.from.email.address") String mailFrom,
-                           @Named("password.recovery.mail.subject") String recoverMailSubject,
+                           @Named("account.password.recovery.mail.subject") String recoverPasswordMailSubject,
                            HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
                            @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;
@@ -87,7 +87,7 @@ public class PasswordService {
         this.profileManager = profileManager;
         this.resourceResolver = resourceResolver;
         this.mailFrom = mailFrom;
-        this.recoverMailSubject = recoverMailSubject;
+        this.recoverPasswordMailSubject = recoverPasswordMailSubject;
         this.thymeleaf = thymeleaf;
         this.validationMaxAge = validationMaxAge;
     }
@@ -136,7 +136,7 @@ public class PasswordService {
                                                                          .withFrom(mailFrom)
                                                                          .withTo(mail)
                                                                          .withReplyTo(null)
-                                                                         .withSubject(recoverMailSubject)
+                                                                         .withSubject(recoverPasswordMailSubject)
                                                                          .withMimeType(TEXT_HTML)));
         } catch (NotFoundException e) {
             throw new NotFoundException("User " + mail + " is not registered in the system.");

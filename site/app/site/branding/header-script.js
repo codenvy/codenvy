@@ -1,5 +1,3 @@
-<!-- Google Analytics: -->
-<script>
   var _gaq = _gaq || [];
   if (window.location.hostname == 'localhost'){//patch for tracking localhost in chrome
     _gaq.push(['_setDomainName', 'none']);
@@ -13,4 +11,3 @@
   (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
   g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
   s.parentNode.insertBefore(g,s)}(document,'script'));
-</script>

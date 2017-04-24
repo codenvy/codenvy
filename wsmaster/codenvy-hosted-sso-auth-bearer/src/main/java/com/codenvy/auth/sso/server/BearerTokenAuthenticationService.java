@@ -82,6 +82,7 @@ public class BearerTokenAuthenticationService {
     private final DefaultEmailResourceResolver             resourceResolver;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
     private final String                                   mailFrom;
+    private final String                                   verifyEmailSubject;
 
     @Inject
     public BearerTokenAuthenticationService(TicketManager ticketManager,
@@ -96,7 +97,8 @@ public class BearerTokenAuthenticationService {
                                             SystemLicenseManager licenseManager,
                                             DefaultEmailResourceResolver resourceResolver,
                                             HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
-                                            @Named("mailsender.application.from.email.address") String mailFrom) {
+                                            @Named("mailsender.application.from.email.address") String mailFrom,
+                                            @Named("account.verify.mail.subject") String verifyEmailSubject) {
         this.ticketManager = ticketManager;
         this.uniqueTokenGenerator = uniqueTokenGenerator;
         this.handler = handler;
@@ -110,6 +112,7 @@ public class BearerTokenAuthenticationService {
         this.resourceResolver = resourceResolver;
         this.thymeleaf = thymeleaf;
         this.mailFrom = mailFrom;
+        this.verifyEmailSubject = verifyEmailSubject;
     }
 
     /**
@@ -221,7 +224,7 @@ public class BearerTokenAuthenticationService {
                                                                     .withFrom(mailFrom)
                                                                     .withTo(email)
                                                                     .withReplyTo(null)
-                                                                    .withSubject("Verify Your Codenvy Account")
+                                                                    .withSubject(verifyEmailSubject)
                                                                     .withMimeType(TEXT_HTML)));
         LOG.info("Email validation message send to {}", email);
 

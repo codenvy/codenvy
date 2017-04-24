@@ -17,6 +17,8 @@ package com.codenvy.api.deploy;
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.audit.server.AuditService;
 import com.codenvy.api.audit.server.AuditServicePermissionsFilter;
+import com.codenvy.api.dao.authentication.AuthenticationDaoInterceptor;
+import com.codenvy.api.dao.authentication.PassportValidator;
 import com.codenvy.api.license.server.SystemLicenseModule;
 import com.codenvy.api.machine.server.jpa.OnPremisesJpaMachineModule;
 import com.codenvy.api.permission.server.PermissionChecker;
@@ -241,7 +243,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         bind(StackDao.class).to(JpaStackDao.class);
         bind(RecipeDao.class).to(JpaRecipeDao.class);
         bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+        // Auth
+        bind(PassportValidator.class);
         bind(AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
+        final AuthenticationDaoInterceptor authInterceptor = new AuthenticationDaoInterceptor();
+        requestInjection(authInterceptor);
+        bindInterceptor(subclassesOf(AuthenticationDao.class), names("login"), authInterceptor);
+
 
         final Multibinder<String> recipeBinder = Multibinder.newSetBinder(binder(),
                                                                           String.class,

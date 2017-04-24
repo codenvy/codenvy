@@ -20,6 +20,7 @@ node default {
 # swarm nodes management
 # coma separated list of <IP>:<PORT>
   $swarm_nodes = getValue("CODENVY_SWARM_NODES","172.17.0.1:2375")
+  $swarm_log_level = getValue("CODENVY_SWARM_LOG_LEVEL","info")
 
 ###############################
 #
@@ -123,6 +124,10 @@ node default {
 #
   $workspace_email_invite_subject = getValue("CODENVY_WORKSPACE_EMAIL_INVITE_SUBJECT","Join My Workspace")
   $organization_email_invite_subject = getValue("CODENVY_ORGANIZATION_EMAIL_INVITE_SUBJECT","Join My Organization")
+  $account_verify_mail_subject = getValue("CODENVY_ACCOUNT_VERIFY_MAIL_SUBJECT","Verify Your Codenvy Account")
+  $account_password_recovery_mail_subject = getValue("CODENVY_ACCOUNT_PASSWORD_RECOVERY_MAIL_SUBJECT","Codenvy Password Recovery")
+  $account_created_byadmin_mail_subject = getValue("CODENVY_ACCOUNT_CREATED_BYADMIN_MAIL_SUBJECT","Welcome To Codenvy")
+  $account_created_byuser_mail_subject = getValue("CODENVY_ACCOUNT_CREATED_BYUSER_MAIL_SUBJECT","Welcome To Codenvy")
 
 ################################
 # Error reports
@@ -313,6 +318,12 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 #
 # System super privileged mode
   $system_super_privileged_mode = getValue("CODENVY_SYSTEM_SUPER_PRIVILEGED_MODE","false")
+
+###############################
+#
+# Blocked countries
+  $auth_blocked_country_names = getValue("CODENVY_AUTH_BLOCKED_COUNTRY_NAMES","")
+
 
 ###############################
 #

@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,16 +71,17 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     private static final String ERROR_MESSAGE_PREFIX =
             "Can't detect container user ids to chown backed up files of workspace ";
 
-    private final String                               backupScript;
-    private final String                               restoreScript;
-    private final int                                  maxBackupDuration;
-    private final int                                  restoreDuration;
-    private final File                                 backupsRootDir;
-    private final WorkspaceIdHashLocationFinder        workspaceIdHashLocationFinder;
-    private final String                               projectFolderPath;
-    private final ConcurrentMap<String, ReentrantLock> workspacesBackupLocks;
-    private final WorkspaceManager                     workspaceManager;
-    private final DockerConnector                      dockerConnector;
+    private final String                                   backupScript;
+    private final String                                   restoreScript;
+    private final int                                      maxBackupDuration;
+    private final int                                      restoreDuration;
+    private final File                                     backupsRootDir;
+    private final WorkspaceIdHashLocationFinder            workspaceIdHashLocationFinder;
+    private final String                                   projectFolderPath;
+    private final ConcurrentMap<String, ReentrantLock>     workspacesBackupLocks;
+    private final ConcurrentMap<String, Map<String, User>> workspacesMachinesUsersInfo;
+    private final WorkspaceManager                         workspaceManager;
+    private final DockerConnector                          dockerConnector;
 
     @Inject
     public DockerEnvironmentBackupManager(@Named("machine.backup.backup_script") String backupScript,
@@ -102,6 +104,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
         this.dockerConnector = dockerConnector;
 
         workspacesBackupLocks = new ConcurrentHashMap<>();
+        workspacesMachinesUsersInfo = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -121,7 +124,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                                                                                   devMachine.getId());
             String nodeHost = dockerDevMachine.getNode().getHost();
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
-            String srcUserName = getUserName(workspaceId, dockerDevMachine.getContainer()).name;
+            String srcUserName = getUserInfo(workspaceId, dockerDevMachine.getContainer()).name;
             int syncPort = getSyncPort(dockerDevMachine);
 
             backupInsideLock(workspaceId,
@@ -154,7 +157,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             // if sync agent is not in machine port parameter is not used
             int syncPort = getSyncPort(containerId);
-            String srcUserName = getUserName(workspaceId, containerId).name;
+            String srcUserName = getUserInfo(workspaceId, containerId).name;
 
             backupAndCleanupInsideLock(workspaceId,
                                        projectFolderPath,
@@ -168,6 +171,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
             // remove lock in case exception prevent removing it in regular place to prevent resources leak
             // and blocking further WS start
             workspacesBackupLocks.remove(workspaceId);
+            // clear user info cache
+            workspacesMachinesUsersInfo.remove(workspaceId);
         }
     }
 
@@ -188,7 +193,7 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                        String nodeHost) throws ServerException {
         try {
             String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
-            User user = getUserNameAndIds(workspaceId, containerId);
+            User user = getUserInfo(workspaceId, containerId);
             int syncPort = getSyncPort(containerId);
 
             restoreBackupInsideLock(workspaceId,
@@ -362,35 +367,39 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     }
 
     /**
-     * Finds user name inside of container.
+     * Returns user id, group id and username in container.
+     * This method caches info about users and on second and subsequent calls cached value will be returned.
      *
      * @param workspaceId
-     *         ID of workspace
+     *         id of workspace
      * @param containerId
-     *         ID of container
-     * @return {@code User} object with only username filled
+     *         id of container
+     * @return {@code User} object with id, groupId and username filled
      * @throws IOException
      *         if connection to container fails
      * @throws ServerException
      *         if other error occurs
      */
-    private User getUserName(String workspaceId,
+    private User getUserInfo(String workspaceId,
                              String containerId) throws IOException,
                                                         ServerException {
-
-        ArrayList<String> output = executeCommandInContainer(workspaceId,
-                                                             containerId,
-                                                             "id -u -n");
-
-        if (output.size() != 1) {
-            LOG.error("{} {}. Docker output: {}", ERROR_MESSAGE_PREFIX, workspaceId, output);
-            throw new ServerException(ERROR_MESSAGE_PREFIX + workspaceId);
+        Map<String, User> workspaceMachinesUserInfo = workspacesMachinesUsersInfo.get(workspaceId);
+        if (workspaceMachinesUserInfo == null) {
+            workspaceMachinesUserInfo = new HashMap<>();
+            workspacesMachinesUsersInfo.put(workspaceId, workspaceMachinesUserInfo);
         }
-        return new User(null, null, output.get(0));
+
+        User user = workspaceMachinesUserInfo.get(containerId);
+        if (user == null) {
+            user = getUserInfoWithinContainer(workspaceId, containerId);
+            workspaceMachinesUserInfo.put(containerId, user);
+        }
+
+        return user;
     }
 
     /**
-     * Finds user id, group id and username inside of container.
+     * Retrieves user id, group id and username inside of container.
      *
      * @param workspaceId
      *         ID of workspace
@@ -402,9 +411,9 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      * @throws ServerException
      *         if other error occurs
      */
-    private User getUserNameAndIds(String workspaceId,
-                                   String containerId) throws IOException,
-                                                              ServerException {
+    private User getUserInfoWithinContainer(String workspaceId,
+                                            String containerId) throws IOException,
+                                                                       ServerException {
 
         ArrayList<String> output = executeCommandInContainer(workspaceId,
                                                              containerId,

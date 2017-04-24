@@ -109,7 +109,9 @@ services:
     image: <%= ENV["IMAGE_SWARM"] %>
     volumes:
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/swarm/node_list:/node_list'
+      - '<%= scope.lookupvar('compose::codenvy_folder') -%>/config/swarm/swarm_entrypoint.sh:/swarm_entrypoint.sh'
       - '<%= scope.lookupvar('compose::codenvy_folder') -%>/logs/swarm/:/var/log/swarm'
+    entrypoint: "/swarm_entrypoint.sh"
     ports:
         - "127.0.0.1:23751:2375"
     links:

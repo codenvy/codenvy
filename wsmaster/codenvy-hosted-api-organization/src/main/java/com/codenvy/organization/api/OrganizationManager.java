@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -172,6 +173,7 @@ public class OrganizationManager {
         requireNonNull(organizationId, "Required non-null organization id");
         try {
             OrganizationImpl organization = organizationDao.getById(organizationId);
+            eventService.publish(new BeforeAccountRemovedEvent(organization.getAccount())).propagateException();
             eventService.publish(new BeforeOrganizationRemovedEvent(organization)).propagateException();
             removeSuborganizations(organizationId);
             final List<Member> members = removeMembers(organizationId);

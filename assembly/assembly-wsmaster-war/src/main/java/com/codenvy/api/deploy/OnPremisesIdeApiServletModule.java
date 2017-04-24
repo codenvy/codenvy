@@ -107,6 +107,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
         serve("/metrics/threaddump").with(com.codahale.metrics.servlets.ThreadDumpServlet.class);
 
         serve("/oauth").with(com.codenvy.auth.sso.oauth.OAuthLoginServlet.class);
+        filter("/oauth").through(com.codenvy.auth.sso.oauth.OauthLoginFilter.class);
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
         serveRegex("^((?!(\\/(ws|eventbus|websocket)($|\\/.*)))\\/.*)").with(org.everrest.guice.servlet.GuiceEverrestServlet.class);
 

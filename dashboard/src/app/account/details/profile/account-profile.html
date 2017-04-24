@@ -37,9 +37,13 @@
 </che-label-container>
 
 <che-label-container che-label-name="Country">
-  <che-select  che-option-values="accountProfileController.countries"
-               che-place-holder="Select Your Country"
-               che-value="accountCtrl.profileAttributes.country">
+  <che-select che-form="profileInformationForm"
+              che-name="country"
+              che-option-values="accountProfileController.countries"
+              che-place-holder="Select Your Country"
+              che-value="accountCtrl.profileAttributes.country"
+              required>
+    <div ng-message="required">A country is required.</div>
   </che-select>
 </che-label-container>
 

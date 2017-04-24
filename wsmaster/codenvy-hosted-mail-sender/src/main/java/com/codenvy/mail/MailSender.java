@@ -19,7 +19,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

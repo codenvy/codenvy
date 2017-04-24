@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.deepToString;
 import static org.eclipse.che.commons.lang.Size.parseSize;
 
 /**
@@ -101,7 +102,8 @@ public class DockerBasedSystemRamInfoProvider implements SystemRamInfoProvider {
             }
         }
         if (allNodesRamUsage.isEmpty()) {
-            LOG.error("System RAM values was not found in docker system info response. All system values from docker: {}", statusOutput);
+            LOG.error("System RAM values was not found in docker system info response. All system values from docker: {}",
+                      deepToString(statusOutput));
             throw new ServerException(SYSTEM_RAM_INFO_ERROR);
         }
 

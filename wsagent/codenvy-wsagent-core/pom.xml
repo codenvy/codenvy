@@ -125,6 +125,7 @@
                         <configuration>
                             <ignoredDependencies>
                                 <ignoredDependency>org.eclipse.che.core:che-wsagent-core</ignoredDependency>
+                                <ignoredDependency>org.everrest:everrest-websockets</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
@@ -143,7 +144,7 @@
                             <artifactId>che-wsagent-core</artifactId>
                             <type>war</type>
                             <excludes>
-                                <exclude>WEB-INF/classes/org/eclipse/che/wsagent/server/CheWsAgentModule*</exclude>
+                                <exclude>WEB-INF/classes/org/eclipse/che/wsagent/server/CheWs*</exclude>
                                 <exclude>WEB-INF/classes/org/eclipse/che/wsagent/server/CheWebSocketEndpoint*</exclude>
                             </excludes>
                         </overlay>

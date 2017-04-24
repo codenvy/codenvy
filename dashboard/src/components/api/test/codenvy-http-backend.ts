@@ -62,7 +62,7 @@ export class CodenvyHttpBackend {
     this.httpBackend.when('POST', '/api/user').respond(() => {
       return [200, {success: true, errors: []}];
     });
-    //license legality - true
+    // license legality - true
     this.httpBackend.when('GET', '/api/license/system/legality').respond({isLegal: true});
 
     // admin role - false
@@ -71,6 +71,8 @@ export class CodenvyHttpBackend {
     this.httpBackend.when('GET', '/api/user/inrole?role=user&scope=system&scopeId=').respond(true);
     // branding
     this.httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
+    // settings
+    this.httpBackend.when('GET', '/api/workspace/settings').respond({});
   }
 
 

@@ -25,6 +25,7 @@ import com.codenvy.organization.spi.OrganizationDao;
 import com.codenvy.organization.spi.impl.MemberImpl;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
 
+import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
@@ -49,6 +50,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -224,13 +226,20 @@ public class OrganizationManagerTest {
         doReturn(members).when(manager).removeMembers(anyString());
         OrganizationImpl toRemove = new OrganizationImpl("org123", "toRemove", null);
         when(organizationDao.getById(anyString())).thenReturn(toRemove);
-        when(eventService.publish(any(BeforeOrganizationRemovedEvent.class))).thenReturn(mock(BeforeOrganizationRemovedEvent.class));
+        BeforeAccountRemovedEvent beforeAccountRemovedEvent = mock(BeforeAccountRemovedEvent.class);
+        BeforeOrganizationRemovedEvent beforeOrganizationRemovedEvent = mock(BeforeOrganizationRemovedEvent.class);
+        doReturn(beforeAccountRemovedEvent)
+                .doReturn(beforeOrganizationRemovedEvent)
+                .when(eventService).publish(any());
 
         manager.remove(toRemove.getId());
 
         verify(organizationDao).remove(toRemove.getId());
         verify(manager).removeMembers(eq(toRemove.getId()));
         verify(manager).removeSuborganizations(eq(toRemove.getId()));
+        verify(eventService, times(3)).publish(anyObject());
+        verify(beforeAccountRemovedEvent).propagateException();
+        verify(beforeOrganizationRemovedEvent).propagateException();
     }
 
     @Test
