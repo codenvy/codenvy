@@ -497,6 +497,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                     .put("medium", "/email-templates/logos/logo_social_medium.png")
                                     .build());
 
+
+        String[] blockedCountries = {"Cuba", "Iran", "Korea, North", "Sudan", "Syria", "Iran, Islamic Republic Of",
+                                     "Syrian Arab Republic", "Korea, Democratic People'S Republic of", "Korea, Democratic People"};
+        bind(new TypeLiteral<String[]>() {}).annotatedWith(Names.named("auth.blocked_country_names")).toInstance(blockedCountries);
+
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
 
