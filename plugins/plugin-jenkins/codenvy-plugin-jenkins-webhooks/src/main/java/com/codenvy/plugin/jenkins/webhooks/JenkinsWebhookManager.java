@@ -89,7 +89,7 @@ public class JenkinsWebhookManager {
                                                         commitId);
             jenkinsConnector.addFailedBuildFactoryLink(baseUrl.substring(0, baseUrl.indexOf("/api")) + "/f?id=" + failedFactory.getId());
         } catch (IOException | NotFoundException | ConflictException e) {
-            LOG.error(e.getMessage());
+            LOG.warn(e.getMessage());
             throw new ServerException(e.getMessage());
         }
     }
