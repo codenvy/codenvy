@@ -120,8 +120,8 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
                 }
             }
         } catch (IOException e) {
-            LOG.warn(e.getLocalizedMessage());
-            throw new ServerException(e.getLocalizedMessage());
+            LOG.warn(e.getMessage());
+            throw new ServerException(e.getMessage());
         } finally {
             EnvironmentContext.reset();
         }

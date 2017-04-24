@@ -206,7 +206,7 @@ public class JenkinsConnector {
             newInstance().newTransformer().transform(new DOMSource(configDocument), new StreamResult(writer));
             return writer.toString();
         } catch (TransformerException e) {
-            throw new ServerException(e.getLocalizedMessage());
+            throw new ServerException(e.getMessage());
         }
     }
 
@@ -217,7 +217,7 @@ public class JenkinsConnector {
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(new ByteArrayInputStream(jobConfigXml.getBytes()));
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new ServerException(e.getLocalizedMessage());
+            throw new ServerException(e.getMessage());
         }
     }
 
