@@ -39,7 +39,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -101,14 +101,14 @@ public class TestGitHubWebhookService {
     public void testGithubWebhookPushEventNoConnector() throws Exception {
         HttpServletRequest mockRequest = prepareRequest(Service.GITHUB, "push");
         Response response = fakeGitHubWebhookService.handleGithubWebhookEvent(mockRequest);
-        Assert.assertTrue(response.getStatus() == OK.getStatusCode());
+        Assert.assertTrue(response.getStatus() == NO_CONTENT.getStatusCode());
     }
 
     @Test
     public void testGithubWebhookPullRequestEventNoConnector() throws Exception {
         HttpServletRequest mockRequest = prepareRequest(Service.GITHUB, "pull_request");
         Response response = fakeGitHubWebhookService.handleGithubWebhookEvent(mockRequest);
-        Assert.assertTrue(response.getStatus() == OK.getStatusCode());
+        Assert.assertTrue(response.getStatus() == NO_CONTENT.getStatusCode());
     }
 
     protected HttpServletRequest prepareRequest(Service service, String eventType) throws Exception {
