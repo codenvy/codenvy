@@ -15,7 +15,6 @@
 package com.codenvy.plugin.jenkins.webhooks;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -37,9 +36,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
