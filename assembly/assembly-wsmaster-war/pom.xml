@@ -192,10 +192,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin</groupId>
-            <artifactId>codenvy-plugin-jenkins-webhooks</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin</groupId>
             <artifactId>codenvy-plugin-linkedin-oauth2</artifactId>
         </dependency>
         <dependency>
