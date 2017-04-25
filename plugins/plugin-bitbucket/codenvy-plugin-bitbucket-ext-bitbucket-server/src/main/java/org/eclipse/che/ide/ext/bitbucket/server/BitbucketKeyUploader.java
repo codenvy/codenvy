@@ -14,7 +14,6 @@
  */
 package org.eclipse.che.ide.ext.bitbucket.server;
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitUrlUtils;
@@ -23,6 +22,7 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketKey;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyUploader;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

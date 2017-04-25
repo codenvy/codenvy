@@ -198,7 +198,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         //oauth
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
-        bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
+        bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
         bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
 
         install(new org.eclipse.che.security.oauth.BitbucketModule());

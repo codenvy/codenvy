@@ -14,7 +14,6 @@
  */
 package org.eclipse.che.ide.ext.bitbucket.server;
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketLink;
@@ -27,6 +26,7 @@ import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerRepositoriesPage;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerRepository;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketServerUser;
 import org.eclipse.che.ide.ext.bitbucket.shared.BitbucketUser;
+import org.eclipse.che.security.oauth.shared.OAuthAuthorizationHeaderProvider;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
