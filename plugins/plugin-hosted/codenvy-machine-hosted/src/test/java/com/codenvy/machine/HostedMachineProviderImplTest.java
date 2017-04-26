@@ -16,6 +16,7 @@ package com.codenvy.machine;
 
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.util.JsonRpcEndpointToMachineNameHolder;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -28,9 +29,14 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
+import org.eclipse.che.plugin.docker.client.json.ImageConfig;
+import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
@@ -54,6 +60,7 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -87,6 +94,10 @@ public class HostedMachineProviderImplTest {
     @Mock
     private ContainerState                                containerState;
     @Mock
+    private ImageInfo                                     imageInfo;
+    @Mock
+    private ImageConfig                                   imageConfig;
+    @Mock
     private RecipeRetriever                               recipeRetriever;
     @Mock
     private MachineTokenRegistry                          machineTokenRegistry;
@@ -105,6 +116,9 @@ public class HostedMachineProviderImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        // let tests pass faster
+        HostedMachineProviderImpl.SWARM_WAIT_BEFORE_REPEAT_WORKAROUND_TIME_MS = 10;
+
         when(dockerConnectorProviderMock.get()).thenReturn(dockerConnector);
         when(dockerConnectorConfiguration.getDockerHostIp()).thenReturn("123.123.123.123");
 
@@ -117,11 +131,12 @@ public class HostedMachineProviderImplTest {
                 .thenReturn(new ContainerCreated(CONTAINER_ID, new String[0]));
         when(dockerConnector.inspectContainer(any(InspectContainerParams.class))).thenReturn(containerInfo);
         when(containerInfo.getState()).thenReturn(containerState);
-        when(containerState.isRunning()).thenReturn(false);
-    }
+        when(dockerConnector.inspectContainer(anyString())).thenReturn(containerInfo);
+        when(containerState.getStatus()).thenReturn("running");
+        when(dockerConnector.inspectImage(anyString())).thenReturn(imageInfo);
+        when(imageInfo.getConfig()).thenReturn(imageConfig);
+        when(imageConfig.getCmd()).thenReturn(new String[] {"tail", "-f", "/dev/null"});
 
-    @Test
-    public void shouldAddMaintenanceConstraintWhenBuildImage() throws Exception {
         provider = new HostedMachineProviderImpl(dockerConnectorProviderMock,
                                                  credentialsReader,
                                                  dockerMachineFactory,
@@ -149,8 +164,14 @@ public class HostedMachineProviderImplTest {
                                                  0,
                                                  emptySet(),
                                                  null);
+    }
 
+    @Test
+    public void shouldAddMaintenanceConstraintWhenBuildImage() throws Exception {
+        // when
         createInstanceFromRecipe();
+
+        // then
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
         verify(dockerConnector).buildImage(argumentCaptor.capture(), anyObject());
         assertNotNull(argumentCaptor.getValue().getBuildArgs().get(MAINTENANCE_CONSTRAINT_KEY));
@@ -159,6 +180,7 @@ public class HostedMachineProviderImplTest {
 
     @Test
     public void shouldAddCpuConsumptionLimitsWhenBuildImage() throws Exception {
+        // given
         final String cpusetCpus = "2,4";
         final Long cpuPeriod = 10000L;
         final Long cpuQuota = 7500L;
@@ -191,12 +213,90 @@ public class HostedMachineProviderImplTest {
                                                  emptySet(),
                                                  null);
 
+        // when
         createInstanceFromRecipe();
+
+        // then
         ArgumentCaptor<BuildImageParams> argumentCaptor = ArgumentCaptor.forClass(BuildImageParams.class);
         verify(dockerConnector).buildImage(argumentCaptor.capture(), anyObject());
         assertEquals(argumentCaptor.getValue().getCpusetCpus(), cpusetCpus);
         assertEquals(argumentCaptor.getValue().getCpuPeriod(), cpuPeriod);
         assertEquals(argumentCaptor.getValue().getCpuQuota(), cpuQuota);
+    }
+
+    @Test
+    public void shouldNotRepeatImageInspectionOnCheckEntrypointCmdIfInspectionSucceeds() throws Exception {
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        verify(dockerConnector).inspectImage(anyString());
+    }
+
+    @Test
+    public void shouldWorkaroundImageNotFoundIssueInSwarmOnCheckEntrypointCmd() throws Exception {
+        // given
+        when(dockerConnector.inspectImage(anyString())).thenThrow(new ImageNotFoundException("test exception"))
+                                                       .thenReturn(imageInfo);
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        verify(dockerConnector, times(2)).inspectImage(anyString());
+    }
+
+    @Test(expectedExceptions = ServerException.class)
+    public void shouldNotRepeatImageInspectionOnCheckEntrypointCmdIfInspectionExceptionDiffers() throws Exception {
+        // given
+        when(dockerConnector.inspectImage(anyString())).thenThrow(new DockerException("test exception", 500))
+                                                       .thenReturn(imageInfo);
+
+        // when
+        try {
+            createInstanceFromRecipe();
+        } finally {
+            // then
+            verify(dockerConnector).inspectImage(anyString());
+        }
+    }
+
+    @Test
+    public void shouldNotRepeatContainerInspectionOnCheckContainerStatusIfInspectionSucceeds() throws Exception {
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        verify(dockerConnector).inspectContainer(anyString());
+    }
+
+    @Test
+    public void shouldWorkaroundContainerNotFoundIssueInSwarmOnCheckContainerStatus() throws Exception {
+        // given
+        when(dockerConnector.inspectContainer(anyString())).thenThrow(new ContainerNotFoundException("test exception"))
+                                                           .thenReturn(containerInfo);
+
+        // when
+        createInstanceFromRecipe();
+
+        // then
+        verify(dockerConnector, times(2)).inspectContainer(anyString());
+    }
+
+    @Test(expectedExceptions = ServerException.class)
+    public void shouldNotRepeatContainerInspectionOnCheckContainerStatusIfInspectionExceptionDiffers()
+            throws Exception {
+        // given
+        when(dockerConnector.inspectContainer(anyString())).thenThrow(new DockerException("test exception", 500))
+                                                           .thenReturn(containerInfo);
+
+        // when
+        try {
+            createInstanceFromRecipe();
+        } finally {
+            // then
+            verify(dockerConnector).inspectContainer(anyString());
+        }
     }
 
     public CheServiceImpl createService() {
