@@ -16,12 +16,15 @@ package com.codenvy.swarm.client;
 
 import com.codenvy.swarm.client.model.DockerNode;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
+import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -29,10 +32,12 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ExecNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ExecInfo;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.slf4j.Logger;
@@ -44,6 +49,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -59,13 +65,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Singleton
 public class SwarmDockerConnector extends DockerConnector {
     private static final Logger LOG = getLogger(SwarmDockerConnector.class);
+    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE =
+            Pattern.compile("^Error: image .* not found.*", Pattern.DOTALL);
 
     private final NodeSelectionStrategy   strategy;
     //TODO should it be done in other way?
     private final String                  nodeDaemonScheme;
     private final int                     nodeDescriptionLength;
-
-    private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .* not found.*", Pattern.DOTALL);
+    // Map of exec ID to container ID (or name)
+    // Temporary solution to investigate why swarm returns 404 on exec start
+    private final Cache<String, String>   execToContainer;
 
     @Inject
     public SwarmDockerConnector(DockerConnectorConfiguration connectorConfiguration,
@@ -77,6 +86,9 @@ public class SwarmDockerConnector extends DockerConnector {
         this.nodeDescriptionLength = nodeDescriptionLength;
         this.strategy = new RandomNodeSelectionStrategy();
         this.nodeDaemonScheme = "http";
+        // entry is not needed after start of exec, and expiration doesn't change anything important
+        // start should go right after, so expire entry after 1 minute timeout
+        this.execToContainer = CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
     }
 
     /**
@@ -122,6 +134,13 @@ public class SwarmDockerConnector extends DockerConnector {
     }
 
     @Override
+    public Exec createExec(CreateExecParams params) throws IOException {
+        Exec exec = super.createExec(params);
+        execToContainer.put(exec.getId(), params.getContainer());
+        return exec;
+    }
+
+    @Override
     public void startExec(StartExecParams params, @Nullable MessageProcessor<LogMessage> execOutputProcessor)
             throws IOException {
         try {
@@ -138,14 +157,27 @@ public class SwarmDockerConnector extends DockerConnector {
                 // throw original error
                 throw new IOException(e);
             }
+        } finally {
+            execToContainer.invalidate(params.getExecId());
         }
     }
 
     private void logMissingExecInfo(String execId) {
         try {
+            LOG.warn("Exec '{}' not found tracing.");
             ExecInfo execInfo = super.getExecInfo(execId);
-            LOG.error("Exec not found problem appeared. Exec: " + execInfo);
-        } catch (IOException ignored) {}
+            LOG.warn("Exec '{}' not found tracing. Info: {}", execId, execInfo);
+        } catch (IOException e) {
+            LOG.warn("Exec '{}' not found tracing. Exec inspection failed. Error: {}", execId, e.getMessage());
+        }
+        String container = execToContainer.getIfPresent(execId);
+        try {
+            ContainerInfo containerInfo = inspectContainer(container);
+            LOG.warn("Exec '{}' not found tracing. Container info on not found exec on start:{}",
+                     execId, containerInfo);
+        } catch (IOException e) {
+            LOG.warn("Exec '{}' not found tracing. Container inspection failed. Error: {}", execId, e.getMessage());
+        }
     }
 
     private DockerException decorateMessage(DockerException e) {
