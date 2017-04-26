@@ -90,14 +90,14 @@ public class RemoteDockerNodeTest {
     }
 
     @Test
-    public void backupIsNotCalledWhenRestoreIsNotCalled() throws ServerException {
+    public void backupIsNotCalledWhenRestoreIsNotCalled() throws Exception {
         remoteDockerNode.unbindWorkspace();
 
         verifyBackupIsNeverCalled();
     }
 
     @Test
-    public void backupIsNotCalledWhenRestoreIsFailed() throws ServerException {
+    public void backupIsNotCalledWhenRestoreIsFailed() throws Exception {
         doThrow(new ServerException("no!"))
                 .when(backupManager)
                 .restoreWorkspaceBackup(anyString(), anyString(), anyString());
@@ -124,7 +124,7 @@ public class RemoteDockerNodeTest {
         remoteDockerNode.bindWorkspace();
     }
 
-    private void verifyBackupIsNeverCalled() throws ServerException {
+    private void verifyBackupIsNeverCalled() throws Exception {
         verify(backupManager, never()).backupWorkspaceAndCleanup(anyString(), anyString(), anyString());
     }
 }

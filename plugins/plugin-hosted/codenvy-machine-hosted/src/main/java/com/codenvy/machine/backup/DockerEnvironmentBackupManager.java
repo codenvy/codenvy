@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
@@ -147,12 +148,14 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      *         id of container that contains data
      * @param nodeHost
      *         host of a node where container is running
+     * @throws EnvironmentException
+     *         if backup failed due to abnormal state of machines in environment
      * @throws ServerException
-     *         if any error occurs
+     *         if any other error occurs
      */
     public void backupWorkspaceAndCleanup(String workspaceId,
                                           String containerId,
-                                          String nodeHost) throws ServerException {
+                                          String nodeHost) throws ServerException, EnvironmentException {
         try {
             String destPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             // if sync agent is not in machine port parameter is not used
@@ -185,12 +188,14 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      *         id of container where data should be copied
      * @param nodeHost
      *         host of a node where container is running
+     * @throws EnvironmentException
+     *         if restore failed due to abnormal state of machines in environment
      * @throws ServerException
      *         if any error occurs
      */
     public void restoreWorkspaceBackup(String workspaceId,
                                        String containerId,
-                                       String nodeHost) throws ServerException {
+                                       String nodeHost) throws ServerException, EnvironmentException {
         try {
             String srcPath = workspaceIdHashLocationFinder.calculateDirPath(backupsRootDir, workspaceId).toString();
             User user = getUserInfo(workspaceId, containerId);
@@ -470,13 +475,16 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
      * @throws ServerException
      *         if port is not found
      */
-    private int getSyncPort(String containerId) throws ServerException {
+    private int getSyncPort(String containerId) throws ServerException, EnvironmentException {
         ContainerInfo containerInfo;
         try {
             containerInfo = dockerConnector.inspectContainer(containerId);
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new ServerException("Workspace projects files in ws-machine are not accessible");
+        }
+        if (!containerInfo.getState().isRunning()) {
+            throw new EnvironmentException("Container " + containerId + " unexpectedly exited");
         }
 
         Map<String, List<PortBinding>> ports = firstNonNull(containerInfo.getNetworkSettings().getPorts(), emptyMap());

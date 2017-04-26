@@ -21,6 +21,7 @@ import org.eclipse.che.api.agent.server.launcher.CommandExistsAgentChecker;
 import org.eclipse.che.api.agent.server.launcher.CompositeAgentLaunchingChecker;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
@@ -30,6 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -66,7 +68,13 @@ public class MachineInnerRsyncAgentLauncherImpl extends AbstractAgentLauncher {
 
         DockerNode node = (DockerNode)machine.getNode();
         DockerInstance dockerMachine = (DockerInstance)machine;
-        node.bindWorkspace();
+        try {
+            node.bindWorkspace();
+        } catch (EnvironmentException e) {
+            throw new AgentStartException(
+                    format("Agent '%s' start failed because of an error with underlying environment. Error: %s",
+                           agent.getId(), e.getLocalizedMessage()));
+        }
         LOG.info("Docker machine has been deployed. " +
                  "ID '{}'. Workspace ID '{}'. " +
                  "Container ID '{}'. Node host '{}'. Node IP '{}'",

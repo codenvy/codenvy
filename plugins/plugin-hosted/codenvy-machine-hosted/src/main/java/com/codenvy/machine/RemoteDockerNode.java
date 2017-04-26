@@ -19,6 +19,7 @@ import com.codenvy.swarm.client.SwarmDockerConnector;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.environment.server.exception.EnvironmentException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -90,7 +91,7 @@ public class RemoteDockerNode implements DockerNode {
     }
 
     @Override
-    public void bindWorkspace() throws ServerException {
+    public void bindWorkspace() throws ServerException, EnvironmentException {
         backupManager.restoreWorkspaceBackup(workspaceId, containerId, nodeHost);
         isBound = true;
     }
@@ -105,6 +106,8 @@ public class RemoteDockerNode implements DockerNode {
         } else {
             try {
                 backupManager.backupWorkspaceAndCleanup(workspaceId, containerId, nodeHost);
+            } catch (EnvironmentException e) {
+                LOG.info("Workspace unbinding failed due to environment error. Error: " + e.getLocalizedMessage());
             } catch (ServerException e) {
                 // TODO do throw it further when it won't brake ws stop
                 LOG.error(e.getLocalizedMessage(), e);
