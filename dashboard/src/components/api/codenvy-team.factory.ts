@@ -179,7 +179,7 @@ export class CodenvyTeam {
       this.cheNamespaceRegistry.setCaption('Team');
     } else {
       this.cheNamespaceRegistry.setCaption('Organization');
-      this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
+      // todo add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
       this.processOrganizationInfoRetriever(organizations);
     }
 
