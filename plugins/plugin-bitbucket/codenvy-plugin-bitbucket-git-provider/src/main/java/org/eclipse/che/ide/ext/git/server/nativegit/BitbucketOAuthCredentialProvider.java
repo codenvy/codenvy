@@ -14,19 +14,19 @@
  */
 package org.eclipse.che.ide.ext.git.server.nativegit;
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.api.git.CredentialsProvider;
+import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.api.git.CredentialsProvider;
-import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 

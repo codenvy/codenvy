@@ -29,6 +29,7 @@ export class TimeoutInfoController {
    */
   codenvySubscription: CodenvySubscription;
   codenvyTeam: CodenvyTeam;
+  cheUser: any;
   $mdDialog: ng.material.IDialogService;
   codenvyResourcesDistribution: CodenvyResourcesDistribution;
   lodash: any;
@@ -40,17 +41,19 @@ export class TimeoutInfoController {
   timeoutValue: string;
   timeout: string;
   accountId: string;
+  canBuy: boolean;
 
   /**
    * @ngInject for Dependency injection
    */
   constructor ($mdDialog: ng.material.IDialogService, $route: ng.route.IRouteService, codenvyTeam: CodenvyTeam,
-               codenvyResourcesDistribution: CodenvyResourcesDistribution,
+               codenvyResourcesDistribution: CodenvyResourcesDistribution, cheUser: any,
                codenvySubscription: CodenvySubscription, lodash: any) {
     this.$mdDialog = $mdDialog;
     this.codenvyTeam = codenvyTeam;
     this.codenvyResourcesDistribution = codenvyResourcesDistribution;
     this.codenvySubscription = codenvySubscription;
+    this.cheUser = cheUser;
     this.lodash = lodash;
 
     this.fetchTeamDetails($route.current.params.namespace);
@@ -68,27 +71,31 @@ export class TimeoutInfoController {
     if (!this.team) {
       this.codenvyTeam.fetchTeamByName(name).then((team: any) => {
         this.team = team;
-        this.fetchTimeoutValue();
+        this.fetchTimeoutValue(this.team.id);
       }, (error: any) => {
         if (error.status === 304) {
           this.team = this.codenvyTeam.getTeamByName(name);
-          this.fetchTimeoutValue();
+          this.fetchTimeoutValue(this.team.id);
+        } else if (error.status === 404 && !this.codenvyTeam.getPersonalAccount() && this.cheUser.getUser().name === name) {
+          this.fetchTimeoutValue(this.cheUser.getUser().id);
         }
       });
     } else {
-      this.fetchTimeoutValue();
+      this.fetchTimeoutValue(this.team.id);
     }
   }
 
   /**
-   * Fetches team's available resources to process timeout.
+   * Fetches available resources to process timeout by provided id.
+   *
+   * @param id id of the instance to fetch available resources
    */
-  fetchTimeoutValue(): void {
-    this.codenvyResourcesDistribution.fetchAvailableOrganizationResources(this.team.id).then(() => {
-      this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.team.id));
+  fetchTimeoutValue(id: string): void {
+    this.codenvyResourcesDistribution.fetchAvailableOrganizationResources(id).then(() => {
+      this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(id));
     }, (error: any) => {
       if (error.status === 304) {
-        this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.team.id));
+        this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(id));
       }
     });
   }
@@ -106,6 +113,9 @@ export class TimeoutInfoController {
     let timeout = this.lodash.find(resources, (resource: any) => {
       return resource.type === CodenvyResourceLimits.TIMEOUT;
     });
+
+    this.canBuy = (this.codenvyTeam.getPersonalAccount() && this.team && this.codenvyTeam.getPersonalAccount().id === this.team.id);
+
     this.timeoutValue =  timeout ? (timeout.amount < 60 ? (timeout.amount + ' minute') : (timeout.amount / 60 + ' hour')) : '';
   }
 
@@ -233,6 +243,6 @@ export class TimeoutInfoController {
    * Handler for RAM changed event.
    */
   onRAMChanged(): void {
-    this.fetchTimeoutValue();
+    this.fetchTimeoutValue(this.team.id);
   }
 }

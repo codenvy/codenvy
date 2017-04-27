@@ -198,7 +198,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
         //oauth
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
-        bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
+        bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
         bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
 
         install(new org.eclipse.che.security.oauth.BitbucketModule());
@@ -499,7 +499,8 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
 
         String[] blockedCountries = {"Cuba", "Iran", "Korea, North", "Sudan", "Syria", "Iran, Islamic Republic Of",
-                                     "Syrian Arab Republic", "Korea, Democratic People'S Republic of", "Korea, Democratic People"};
+                                     "Syrian Arab Republic", "Korea, Democratic People'S Republic of", "Korea, Democratic People",
+                                     "ایران، جمهوری اسلامی", "الجمهورية العربية السورية"};
         bind(new TypeLiteral<String[]>() {}).annotatedWith(Names.named("auth.blocked_country_names")).toInstance(blockedCountries);
 
         bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);

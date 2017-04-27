@@ -18,7 +18,6 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.repackaged.com.google.common.annotations.Beta;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
@@ -29,11 +28,12 @@ import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.microsoft.shared.VstsErrorCodes;
 import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftPullRequest;
-import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftVstsApiError;
-import org.eclipse.che.ide.ext.microsoft.shared.dto.NewMicrosoftPullRequest;
 import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftPullRequestList;
 import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftRepository;
 import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftUserProfile;
+import org.eclipse.che.ide.ext.microsoft.shared.dto.MicrosoftVstsApiError;
+import org.eclipse.che.ide.ext.microsoft.shared.dto.NewMicrosoftPullRequest;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.everrest.core.impl.provider.json.JsonValue;
 
 import javax.inject.Inject;

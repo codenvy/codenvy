@@ -15,10 +15,12 @@
 package com.codenvy.machine;
 
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.FileCleaner;
@@ -34,7 +36,9 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
+import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
@@ -72,6 +76,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class HostedMachineProviderImpl extends MachineProviderImpl {
     private static final Logger LOG = getLogger(HostedMachineProviderImpl.class);
+
+    @VisibleForTesting
+    static int SWARM_WAIT_BEFORE_REPEAT_WORKAROUND_TIME_MS = 5_000;
 
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
@@ -278,6 +285,40 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
+            }
+        }
+    }
+
+    @Override
+    protected void setNonExitingContainerCommandIfNeeded(ContainerConfig containerConfig) throws IOException {
+        // Sometimes Swarm doesn't see newly created images for several seconds.
+        // Here we retry operation to ensure that such behavior of Swarm doesn't affect the product.
+        try {
+            super.setNonExitingContainerCommandIfNeeded(containerConfig);
+        } catch (ImageNotFoundException e) {
+            try {
+                Thread.sleep(SWARM_WAIT_BEFORE_REPEAT_WORKAROUND_TIME_MS);
+                super.setNonExitingContainerCommandIfNeeded(containerConfig);
+            } catch (InterruptedException ignored) {
+                // throw original error
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    protected void checkContainerIsRunning(String container) throws IOException, ServerException {
+        // Sometimes Swarm doesn't see newly created containers for several seconds.
+        // Here we retry operation to ensure that such behavior of Swarm doesn't affect the product.
+        try {
+            super.checkContainerIsRunning(container);
+        } catch (ContainerNotFoundException e) {
+            try {
+                Thread.sleep(SWARM_WAIT_BEFORE_REPEAT_WORKAROUND_TIME_MS);
+                super.checkContainerIsRunning(container);
+            } catch (InterruptedException ignored) {
+                // throw original error
+                throw e;
             }
         }
     }

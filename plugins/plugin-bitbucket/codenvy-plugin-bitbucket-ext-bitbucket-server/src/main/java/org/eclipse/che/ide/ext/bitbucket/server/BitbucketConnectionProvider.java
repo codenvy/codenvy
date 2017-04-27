@@ -14,9 +14,9 @@
  */
 package org.eclipse.che.ide.ext.bitbucket.server;
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.security.oauth.shared.OAuthAuthorizationHeaderProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
