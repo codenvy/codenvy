@@ -55,6 +55,7 @@ import org.testng.annotations.Test;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_KEY;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
@@ -163,7 +164,8 @@ public class HostedMachineProviderImplTest {
                                                  0,
                                                  0,
                                                  emptySet(),
-                                                 null);
+                                                 null,
+                                                 emptyMap());
     }
 
     @Test
@@ -211,7 +213,8 @@ public class HostedMachineProviderImplTest {
                                                  cpuPeriod,
                                                  cpuQuota,
                                                  emptySet(),
-                                                 null);
+                                                 null,
+                                                 emptyMap());
 
         // when
         createInstanceFromRecipe();

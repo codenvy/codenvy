@@ -52,6 +52,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,6 +88,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
     private final String                                        cpusetCpus;
     private final long                                          cpuPeriod;
     private final long                                          cpuQuota;
+    private final Map<String, String>                           buildArgs;
 
     private final ScheduledExecutorService snapshotImagesCleanerService;
 
@@ -116,7 +119,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                      @Named("che.docker.cpu_period") long cpuPeriod,
                                      @Named("che.docker.cpu_quota") long cpuQuota,
                                      @Named("che.docker.extra_hosts") Set<Set<String>> additionalHosts,
-                                     @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers)
+                                     @Nullable @Named("che.docker.dns_resolvers") String[] dnsResolvers,
+                                     @Named("che.docker.build_args") Map<String, String> buildArgs)
             throws IOException {
         super(dockerConnectorProvider,
               dockerCredentials,
@@ -143,7 +147,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               cpuQuota,
               windowsPathEscaper,
               additionalHosts,
-              dnsResolvers);
+              dnsResolvers,
+              buildArgs);
 
         this.docker = dockerConnectorProvider.get();
         this.dockerCredentials = dockerCredentials;
@@ -151,6 +156,9 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.cpusetCpus = cpusetCpus;
         this.cpuPeriod = cpuPeriod;
         this.cpuQuota = cpuQuota;
+        this.buildArgs = new HashMap<>(buildArgs);
+        // don't build an image on a node under maintenance
+        this.buildArgs.put(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE);
 
         this.snapshotImagesCleanerService = Executors.newSingleThreadScheduledExecutor(
                 new ThreadFactoryBuilder().setNameFormat("SnapshotImagesCleaner")
@@ -199,8 +207,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               .withCpusetCpus(cpusetCpus)
                                               .withCpuPeriod(cpuPeriod)
                                               .withCpuQuota(cpuQuota)
-                                              // don't build an image on a node under maintenance
-                                              .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE),
+                                              .withBuildArgs(buildArgs),
                               progressMonitor);
 
         } catch (ImageNotFoundException e) {
@@ -267,6 +274,14 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
                                                    .withDockerfile(service.getBuild().getDockerfilePath());
             }
+            Map<String, String> buildArgs;
+            if (service.getBuild().getArgs() == null || service.getBuild().getArgs().isEmpty()) {
+                buildArgs = this.buildArgs;
+            } else {
+                buildArgs = new HashMap<>(this.buildArgs);
+                buildArgs.putAll(service.getBuild().getArgs());
+            }
+
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
                             .withAuthConfigs(dockerCredentials.getCredentials())
@@ -276,8 +291,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                             .withCpusetCpus(cpusetCpus)
                             .withCpuPeriod(cpuPeriod)
                             .withCpuQuota(cpuQuota)
-                            // don't build an image on a node under maintenance
-                            .addBuildArg(MAINTENANCE_CONSTRAINT_KEY, MAINTENANCE_CONSTRAINT_VALUE);
+                            .withBuildArgs(buildArgs);
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
