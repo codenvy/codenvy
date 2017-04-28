@@ -15,6 +15,7 @@
 package com.codenvy.machine.backup;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -48,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeoutException;
@@ -67,9 +69,15 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Singleton
 public class DockerEnvironmentBackupManager implements EnvironmentBackupManager {
-    private static final Logger LOG                  = getLogger(DockerEnvironmentBackupManager.class);
-    private static final String ERROR_MESSAGE_PREFIX =
+    private static final Logger       LOG                          = getLogger(DockerEnvironmentBackupManager.class);
+    private static final String       ERROR_MESSAGE_PREFIX         =
             "Can't detect container user ids to chown backed up files of workspace ";
+    // if exit code 0 script finished successfully
+    private static final Set<Integer> RESTORE_SUCCESS_RETURN_CODES = ImmutableSet.of(0);
+    // if exit code 0 script finished successfully
+    // if exit code 24 some files are gone during transfer. It may happen on scheduled backups when
+    // user performs some files operations like git checkout. So we treat this situation as successful.
+    private static final Set<Integer> BACKUP_SUCCESS_RETURN_CODES  = ImmutableSet.of(0, 24);
 
     private final String                                   backupScript;
     private final String                                   restoreScript;
@@ -310,7 +318,11 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                                       destGroupId,
                                                       destUserName);
 
-            executeCommand(commandLine.asArray(), restoreDuration, destAddress, workspaceId);
+            executeCommand(commandLine.asArray(),
+                           restoreDuration,
+                           destAddress,
+                           workspaceId,
+                           RESTORE_SUCCESS_RETURN_CODES);
             restored = true;
         } catch (TimeoutException e) {
             throw new ServerException(
@@ -350,7 +362,11 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
                                                   srcUserName);
 
         try {
-            executeCommand(commandLine.asArray(), maxBackupDuration, srcAddress, workspaceId);
+            executeCommand(commandLine.asArray(),
+                           maxBackupDuration,
+                           srcAddress,
+                           workspaceId,
+                           BACKUP_SUCCESS_RETURN_CODES);
         } catch (TimeoutException e) {
             throw new ServerException("Backup of workspace " + workspaceId + " filesystem terminated due to timeout on "
                                       + srcAddress + " node.");
@@ -509,13 +525,14 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     void executeCommand(String[] commandLine,
                         int timeout,
                         String address,
-                        String workspaceId) throws TimeoutException,
-                                                   IOException,
-                                                   InterruptedException {
+                        String workspaceId,
+                        Set<Integer> successResponseCodes) throws TimeoutException,
+                                                                  IOException,
+                                                                  InterruptedException {
         final ListLineConsumer outputConsumer = new ListLineConsumer();
         Process process = ProcessUtil.executeAndWait(commandLine, timeout, SECONDS, outputConsumer);
 
-        if (process.exitValue() != 0) {
+        if (!successResponseCodes.contains(process.exitValue())) {
             LOG.error("Error occurred during backup/restore of workspace '{}' on node '{}' : {}",
                       workspaceId, address, outputConsumer.getText());
             throw new IOException("Synchronization process failed. Exit code " + process.exitValue());

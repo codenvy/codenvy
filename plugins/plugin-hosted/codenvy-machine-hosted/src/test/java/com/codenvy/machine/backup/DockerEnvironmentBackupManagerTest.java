@@ -61,6 +61,7 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
@@ -176,7 +177,7 @@ public class DockerEnvironmentBackupManagerTest {
                                                                   null, null)));
         when(workspaceIdHashLocationFinder.calculateDirPath(any(File.class), any(String.class)))
                 .thenReturn(new File(ABSOLUTE_PATH_TO_WORKSPACE_DIR));
-        doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+        doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString(), anySetOf(Integer.class));
         Exec getUserIdsExecMock = mock(Exec.class);
         when(getUserIdsExecMock.getId()).thenReturn("getUserIdsExecMockId");
         Exec getUserNameExecMock = mock(Exec.class);
@@ -226,8 +227,11 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(NODE_HOST),
-                                             anyString());
+        verify(backupManager).executeCommand(cmdCaptor.capture(),
+                                             eq(MAX_BACKUP_DURATION_SEC),
+                                             eq(NODE_HOST),
+                                             anyString(),
+                                             anySetOf(Integer.class));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_COMMAND, command);
@@ -242,7 +246,7 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+        verify(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString(), anySetOf(Integer.class));
     }
 
     @Test
@@ -252,7 +256,11 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString(), anyString());
+        verify(backupManager, never()).executeCommand(any(String[].class),
+                                                      anyInt(),
+                                                      anyString(),
+                                                      anyString(),
+                                                      anySetOf(Integer.class));
         verifyNoMoreInteractions(docker,
                                  dockerInstance,
                                  dockerNode,
@@ -268,7 +276,11 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString(), anyString());
+        verify(backupManager, never()).executeCommand(any(String[].class),
+                                                      anyInt(),
+                                                      anyString(),
+                                                      anyString(),
+                                                      anySetOf(Integer.class));
         verify(workspaceManager).getWorkspace(eq(WORKSPACE_ID));
         verifyNoMoreInteractions(docker,
                                  dockerInstance,
@@ -293,7 +305,11 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager, never()).executeCommand(any(String[].class), anyInt(), anyString(), anyString());
+        verify(backupManager, never()).executeCommand(any(String[].class),
+                                                      anyInt(),
+                                                      anyString(),
+                                                      anyString(),
+                                                      anySetOf(Integer.class));
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -319,8 +335,11 @@ public class DockerEnvironmentBackupManagerTest {
                                                 CONTAINER_ID,
                                                 NODE_HOST);
 
-        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_BACKUP_DURATION_SEC), eq(NODE_HOST),
-                                             anyString());
+        verify(backupManager).executeCommand(cmdCaptor.capture(),
+                                             eq(MAX_BACKUP_DURATION_SEC),
+                                             eq(NODE_HOST),
+                                             anyString(),
+                                             anySetOf(Integer.class));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(BACKUP_WORKSPACE_WITH_CLEANUP_COMMAND, command);
@@ -328,14 +347,21 @@ public class DockerEnvironmentBackupManagerTest {
 
     @Test
     public void shouldBeAbleRestoreWorkspace() throws Exception {
-        doNothing().when(backupManager).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+        doNothing().when(backupManager).executeCommand(anyObject(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
 
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
                                              CONTAINER_ID,
                                              NODE_HOST);
 
-        verify(backupManager).executeCommand(cmdCaptor.capture(), eq(MAX_RESTORE_DURATION_SEC), eq(NODE_HOST),
-                                             anyString());
+        verify(backupManager).executeCommand(cmdCaptor.capture(),
+                                             eq(MAX_RESTORE_DURATION_SEC),
+                                             eq(NODE_HOST),
+                                             anyString(),
+                                             anySetOf(Integer.class));
 
         String[] command = cmdCaptor.getValue();
         assertArrayEquals(RESTORE_WORKSPACE_COMMAND, command);
@@ -354,7 +380,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(anyObject(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
     }
 
     @Test
@@ -370,7 +400,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(anyObject(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -391,7 +425,11 @@ public class DockerEnvironmentBackupManagerTest {
             // then
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+            verify(backupManager, times(1)).executeCommand(anyObject(),
+                                                           anyInt(),
+                                                           anyString(),
+                                                           anyString(),
+                                                           anySetOf(Integer.class));
         }
     }
 
@@ -425,7 +463,11 @@ public class DockerEnvironmentBackupManagerTest {
             // complete waiting answer
             restoreFreezer.unfreeze();
             awaitFinalization();
-            verify(backupManager, times(1)).executeCommand(anyObject(), anyInt(), anyString(), anyString());
+            verify(backupManager, times(1)).executeCommand(anyObject(),
+                                                           anyInt(),
+                                                           anyString(),
+                                                           anyString(),
+                                                           anySetOf(Integer.class));
         }
     }
 
@@ -434,7 +476,11 @@ public class DockerEnvironmentBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionOnNewRestoreAfterSuccessfulFirstOne() throws Exception {
         // given
-        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
 
         // start restore process
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
@@ -455,7 +501,11 @@ public class DockerEnvironmentBackupManagerTest {
                                             " failed. Another restore process of the same workspace is in progress")
     public void throwsExceptionAfterFailingRestoreThatFollowsSuccessfulOne() throws Exception {
         // given
-        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
 
         // start restore process
         backupManager.restoreWorkspaceBackup(WORKSPACE_ID,
@@ -494,7 +544,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -535,7 +589,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -559,7 +617,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -575,7 +637,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], RESTORE_SCRIPT);
     }
 
@@ -592,7 +658,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(1)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -619,7 +689,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -631,7 +705,11 @@ public class DockerEnvironmentBackupManagerTest {
         backupManager.backupWorkspaceAndCleanup(WORKSPACE_ID,
                                                 CONTAINER_ID,
                                                 NODE_HOST);
-        verify(backupManager, times(2)).executeCommand(anyObject(), anyInt(), eq(NODE_HOST), anyString());
+        verify(backupManager, times(2)).executeCommand(anyObject(),
+                                                       anyInt(),
+                                                       eq(NODE_HOST),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
     }
 
     @Test
@@ -692,7 +770,11 @@ public class DockerEnvironmentBackupManagerTest {
 
         backupManager.backupWorkspace(WORKSPACE_ID);
 
-        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
 
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
@@ -721,7 +803,11 @@ public class DockerEnvironmentBackupManagerTest {
         awaitFinalization();
 
         // then
-        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(), anyInt(), anyString(), anyString());
+        verify(backupManager, times(2)).executeCommand(cmdCaptor.capture(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
         assertEquals(cmdCaptor.getValue()[0], BACKUP_SCRIPT);
     }
 
@@ -862,12 +948,20 @@ public class DockerEnvironmentBackupManagerTest {
                 releaseProcessLatch.await();
             }
             return null;
-        }).when(backupManager).executeCommand(anyVararg(), anyInt(), anyString(), anyString());
+        }).when(backupManager).executeCommand(anyVararg(),
+                                              anyInt(),
+                                              anyString(),
+                                              anyString(),
+                                              anySetOf(Integer.class));
 
         executor.execute(backupType);
 
         invokeProcessLatch.await();
-        doNothing().when(backupManager).executeCommand(anyVararg(), anyInt(), anyString(), anyString());
+        doNothing().when(backupManager).executeCommand(anyVararg(),
+                                                       anyInt(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anySetOf(Integer.class));
 
         return new ThreadFreezer(releaseProcessLatch);
     }
