@@ -132,10 +132,11 @@ public class SwarmDockerConnector extends DockerConnector {
                     throw decorateMessage(e);
                 }
             }
-            LOG.error("Failed to start {} container with {} RAM from {} image.",
+            LOG.error("Failed to start {} container with {} RAM from {} image. Cause: {}",
                       params.getContainerName(),
                       params.getContainerConfig().getHostConfig().getMemory(),
-                      params.getContainerConfig().getImage());
+                      params.getContainerConfig().getImage(),
+                      e.getOriginError());
             throw decorateMessage(e);
         }
     }
