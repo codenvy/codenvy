@@ -39,6 +39,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.commons.lang.StringUtils.endWith;
+import static org.eclipse.che.commons.lang.StringUtils.trimEnd;
 
 /**
  * Protects user's machine from unauthorized access.
@@ -70,6 +72,9 @@ public class MachineLoginFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
                                                                                                      ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
+        if ("OPTIONS".equals(httpRequest.getMethod()) && endWith(trimEnd(httpRequest.getServletPath(), '/'), "/api")) {
+            chain.doFilter(request, response);
+        }
         final HttpSession session = httpRequest.getSession(false);
         if (session != null && session.getAttribute("principal") != null) {
             try {
