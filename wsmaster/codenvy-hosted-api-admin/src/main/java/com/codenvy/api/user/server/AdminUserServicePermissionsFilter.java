@@ -36,8 +36,9 @@ import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_US
 @Path("/admin/user{path:.*}")
 public class AdminUserServicePermissionsFilter extends CheMethodInvokerFilter {
     @Override
-    protected void filter(GenericResourceMethod GenericResourceMethod, Object[] arguments) throws ApiException {
-        if (GenericResourceMethod.getMethod().getName().equals("getAll")) {
+    protected void filter(GenericResourceMethod grm, Object[] arguments) throws ApiException {
+        final String methodName = grm.getMethod().getName();
+        if ("getAll".equals(methodName) || "find".equals(methodName)) {
             EnvironmentContext.getCurrent().getSubject().checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
         } else {
             //unknown method

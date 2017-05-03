@@ -18,7 +18,6 @@ import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -44,6 +43,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -113,6 +113,33 @@ public class AdminUserServicePermissionsFilterTest {
         assertEquals(response.getStatusCode(), 403);
         assertEquals(unwrapError(response), "The user does not have permission to readUsers");
 
+        verifyZeroInteractions(service);
+    }
+
+    @Test
+    public void allowsToSearchUsersByEmailOrNameFragments() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/admin/user/find?name=admin");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(service).find(anyString(), anyString(), anyInt(), anyInt());
+        verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+    }
+
+    @Test
+    public void throwsForbiddenExceptionWhenUserDoesNotHavePermissionsForSearchingUsers() throws Exception {
+        doThrow(new ForbiddenException("The user does not have permission to readUsers"))
+                .when(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+
+        Response response = given().auth()
+                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                   .when()
+                                   .get(SECURE_PATH + "/admin/user/find");
+
+        assertEquals(response.getStatusCode(), 403);
+        assertEquals(unwrapError(response), "The user does not have permission to readUsers");
         verifyZeroInteractions(service);
     }
 
