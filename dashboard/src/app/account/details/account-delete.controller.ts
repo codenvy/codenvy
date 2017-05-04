@@ -21,7 +21,7 @@
  */
 export class AccountDeleteController {
 
-  private $location: ng.ILocationService;
+  private $window: ng.IWindowService;
   private $mdDialog: ng.material.IDialogService;
   private cheUser: any;
   private cheNotification: any;
@@ -31,8 +31,8 @@ export class AccountDeleteController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $mdDialog: ng.material.IDialogService, cheUser: any, cheNotification: any, confirmDialogService: any) {
-    this.$location = $location;
+  constructor($window: ng.IWindowService, $mdDialog: ng.material.IDialogService, cheUser: any, cheNotification: any, confirmDialogService: any) {
+    this.$window = $window;
     this.$mdDialog = $mdDialog;
     this.cheUser = cheUser;
     this.cheNotification = cheNotification;
@@ -48,8 +48,8 @@ export class AccountDeleteController {
 
     promise.then(() => {
       this.cheUser.deleteCurrentUser().then(() => {
-        this.cheUser.logout().then(() => {
-          this.$location.path('/site/account-deleted');
+        this.cheUser.logout().finally(() => {
+          this.$window.location.href = '/site/account-deleted';
         });
       }, (error: any) => {
         this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Account deletion failed.');
