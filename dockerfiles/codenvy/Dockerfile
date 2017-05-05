@@ -19,7 +19,7 @@ ENV LANG=C.UTF-8 \
     DOCKER_BUCKET=get.docker.com \
     DOCKER_VERSION=1.6.0
 
-RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix && \
+RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix tini && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
              /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
              /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
@@ -31,5 +31,6 @@ CMD [ "postfix", "-c", "/etc/postfix", "start" ]
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+# Use Tini as real entrypoint - init process that helps reaping zombies
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 ADD codenvy-onpremises.tar.gz /opt/codenvy-tomcat
