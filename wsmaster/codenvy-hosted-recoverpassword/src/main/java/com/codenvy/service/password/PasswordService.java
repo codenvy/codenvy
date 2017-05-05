@@ -14,6 +14,7 @@
  */
 package com.codenvy.service.password;
 
+import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
@@ -56,10 +57,10 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 public class PasswordService {
 
     private static final Logger LOG           = LoggerFactory.getLogger(PasswordService.class);
-    private static final String MAIL_TEMPLATE = "/email-templates/password_recovery.html";
 
+    private final boolean                                  isLdapMode;
     private final MailSender                               mailService;
-    private final UserManager                              userDao;
+    private final UserManager                              userManager;
     private final ProfileManager                           profileManager;
     private final RecoveryStorage                          recoveryStorage;
     private final DefaultEmailResourceResolver             resourceResolver;
@@ -80,16 +81,18 @@ public class PasswordService {
                            @Named("mailsender.application.from.email.address") String mailFrom,
                            @Named("account.password.recovery.mail.subject") String recoverPasswordMailSubject,
                            HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
-                           @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
+                           @Named("password.recovery.expiration_timeout_hours") long validationMaxAge,
+                           @Named("sys.auth.handler.default") String defaultHandler) {
         this.recoveryStorage = recoveryStorage;
         this.mailService = mailSender;
-        this.userDao = userManager;
+        this.userManager = userManager;
         this.profileManager = profileManager;
         this.resourceResolver = resourceResolver;
         this.mailFrom = mailFrom;
         this.recoverPasswordMailSubject = recoverPasswordMailSubject;
         this.thymeleaf = thymeleaf;
         this.validationMaxAge = validationMaxAge;
+        this.isLdapMode = LdapAuthenticationHandler.TYPE.equals(defaultHandler);
     }
 
     /**
@@ -119,10 +122,13 @@ public class PasswordService {
      */
     @POST
     @Path("recover/{usermail}")
-    public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException {
+    public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException, ForbiddenException {
+        if (isLdapMode) {
+            throw new ForbiddenException("This action is unavailable in LDAP synchronization mode.");
+        }
         try {
             //check if user exists
-            userDao.getByEmail(mail);
+            userManager.getByEmail(mail);
             final String masterEndpoint = uriInfo.getBaseUriBuilder()
                                                  .replacePath(null)
                                                  .build()
@@ -166,6 +172,9 @@ public class PasswordService {
     @GET
     @Path("verify/{uuid}")
     public void setupConfirmation(@PathParam("uuid") String uuid) throws ForbiddenException {
+        if (isLdapMode) {
+            throw new UnsupportedOperationException("This action is unavailable in LDAP synchronization mode.");
+        }
         if (!recoveryStorage.isValid(uuid)) {
             // remove invalid validationData
             recoveryStorage.remove(uuid);
@@ -209,6 +218,9 @@ public class PasswordService {
     public void setupPassword(@FormParam("uuid") String uuid, @FormParam("password") String newPassword)
             throws NotFoundException, ServerException, ConflictException, ForbiddenException {
         // verify is confirmationId valid
+        if (isLdapMode) {
+            throw new UnsupportedOperationException("This action is unavailable in LDAP synchronization mode.");
+        }
         if (!recoveryStorage.isValid(uuid)) {
             // remove invalid validationData
             recoveryStorage.remove(uuid);
@@ -221,9 +233,9 @@ public class PasswordService {
         String email = recoveryStorage.get(uuid);
 
         try {
-            final UserImpl user = new UserImpl(userDao.getByEmail(email));
+            final UserImpl user = new UserImpl(userManager.getByEmail(email));
             user.setPassword(newPassword);
-            userDao.update(user);
+            userManager.update(user);
 
             final Profile profile = profileManager.getById(user.getId());
             if (profile.getAttributes().remove("resetPassword") != null) {
