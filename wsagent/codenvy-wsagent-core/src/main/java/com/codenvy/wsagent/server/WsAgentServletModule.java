@@ -17,6 +17,7 @@ package com.codenvy.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -39,6 +40,7 @@ public class WsAgentServletModule extends ServletModule {
         getServletContext().addListener(new com.codenvy.auth.sso.client.DestroySessionListener());
 
         //filters
+        filter("/*").through(CheCorsFilter.class);
         filter("/*").through(com.codenvy.machine.authentication.agent.MachineLoginFilter.class);
         filter("/*").through(com.codenvy.workspace.LastAccessTimeFilter.class);
 
