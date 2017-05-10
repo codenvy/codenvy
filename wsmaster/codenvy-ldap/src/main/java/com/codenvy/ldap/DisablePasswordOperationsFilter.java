@@ -23,6 +23,8 @@ import org.everrest.core.resource.GenericResourceMethod;
 import javax.ws.rs.Path;
 
 /**
+ * Disables password restoring operations when LDAP sync mode is on.
+ *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  */
 @Filter
