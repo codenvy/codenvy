@@ -89,7 +89,6 @@ public class PasswordService {
         this.recoverPasswordMailSubject = recoverPasswordMailSubject;
         this.thymeleaf = thymeleaf;
         this.validationMaxAge = validationMaxAge;
-
     }
 
     /**
