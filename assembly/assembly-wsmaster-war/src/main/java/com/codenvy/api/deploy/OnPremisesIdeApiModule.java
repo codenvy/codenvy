@@ -39,7 +39,6 @@ import com.codenvy.auth.sso.client.filter.RequestMethodFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
-import com.codenvy.ldap.DisablePasswordOperationsFilter;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.machine.agent.WorkspaceInfrastructureModule;
