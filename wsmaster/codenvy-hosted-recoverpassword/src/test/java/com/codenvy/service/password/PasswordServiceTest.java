@@ -117,8 +117,7 @@ public class PasswordServiceTest {
                                           "Codenvy <noreply@codenvy.com>",
                                           "Codenvy Password Recovery",
                                           thymeleaf,
-                                          1,
-                                          "org");
+                                          1);
         user = spy(new UserImpl(UUID, USER_EMAIL, USER_EMAIL));
 
         doReturn(USER_EMAIL).when(user).getEmail();
@@ -297,28 +296,6 @@ public class PasswordServiceTest {
         assertEquals(response.statusCode(), 500);
         assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
                      "Unable to recover password. Please contact support or try later.");
-    }
-
-
-    @Test
-    public void shouldRespond403IfLdapModeEnabled() throws Exception {
-        passService = new PasswordService(mailSender,
-                                          userManager,
-                                          recoveryStorage,
-                                          profileManager,
-                                          resourceResolver,
-                                          "Codenvy <noreply@codenvy.com>",
-                                          "Codenvy Password Recovery",
-                                          thymeleaf,
-                                          1,
-                                          "ldap");
-        doThrow(new ServerException("error")).when(mailSender).sendMail(any(EmailBean.class));
-
-        Response response = given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");
-
-        assertEquals(response.statusCode(), 403);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(),
-                     "This action is unavailable in LDAP synchronization mode.");
     }
 
     private static <T> T unwrapDto(com.jayway.restassured.response.Response response, Class<T> dtoClass) {

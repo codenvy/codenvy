@@ -58,5 +58,6 @@ public class LdapModule extends AbstractModule {
         bind(LdapSynchronizer.class).asEagerSingleton();
         bind(LdapSynchronizerService.class);
         bind(LdapSynchronizerPermissionsFilter.class);
+        bind(DisablePasswordOperationsFilter.class);
     }
 }

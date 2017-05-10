@@ -14,7 +14,6 @@
  */
 package com.codenvy.service.password;
 
-import com.codenvy.ldap.auth.LdapAuthenticationHandler;
 import com.codenvy.mail.DefaultEmailResourceResolver;
 import com.codenvy.mail.EmailBean;
 import com.codenvy.mail.MailSender;
@@ -58,7 +57,6 @@ public class PasswordService {
 
     private static final Logger LOG           = LoggerFactory.getLogger(PasswordService.class);
 
-    private final boolean                                  isLdapMode;
     private final MailSender                               mailService;
     private final UserManager                              userManager;
     private final ProfileManager                           profileManager;
@@ -81,8 +79,7 @@ public class PasswordService {
                            @Named("mailsender.application.from.email.address") String mailFrom,
                            @Named("account.password.recovery.mail.subject") String recoverPasswordMailSubject,
                            HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
-                           @Named("password.recovery.expiration_timeout_hours") long validationMaxAge,
-                           @Named("sys.auth.handler.default") String defaultHandler) {
+                           @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
         this.recoveryStorage = recoveryStorage;
         this.mailService = mailSender;
         this.userManager = userManager;
@@ -92,7 +89,7 @@ public class PasswordService {
         this.recoverPasswordMailSubject = recoverPasswordMailSubject;
         this.thymeleaf = thymeleaf;
         this.validationMaxAge = validationMaxAge;
-        this.isLdapMode = LdapAuthenticationHandler.TYPE.equals(defaultHandler);
+
     }
 
     /**
@@ -123,9 +120,6 @@ public class PasswordService {
     @POST
     @Path("recover/{usermail}")
     public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException, ForbiddenException {
-        if (isLdapMode) {
-            throw new ForbiddenException("This action is unavailable in LDAP synchronization mode.");
-        }
         try {
             //check if user exists
             userManager.getByEmail(mail);
@@ -172,9 +166,6 @@ public class PasswordService {
     @GET
     @Path("verify/{uuid}")
     public void setupConfirmation(@PathParam("uuid") String uuid) throws ForbiddenException {
-        if (isLdapMode) {
-            throw new UnsupportedOperationException("This action is unavailable in LDAP synchronization mode.");
-        }
         if (!recoveryStorage.isValid(uuid)) {
             // remove invalid validationData
             recoveryStorage.remove(uuid);
@@ -218,9 +209,6 @@ public class PasswordService {
     public void setupPassword(@FormParam("uuid") String uuid, @FormParam("password") String newPassword)
             throws NotFoundException, ServerException, ConflictException, ForbiddenException {
         // verify is confirmationId valid
-        if (isLdapMode) {
-            throw new UnsupportedOperationException("This action is unavailable in LDAP synchronization mode.");
-        }
         if (!recoveryStorage.isValid(uuid)) {
             // remove invalid validationData
             recoveryStorage.remove(uuid);
