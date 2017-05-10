@@ -119,7 +119,7 @@ public class PasswordService {
      */
     @POST
     @Path("recover/{usermail}")
-    public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException, ForbiddenException {
+    public void recoverPassword(@PathParam("usermail") String mail) throws ServerException, NotFoundException {
         try {
             //check if user exists
             userManager.getByEmail(mail);
