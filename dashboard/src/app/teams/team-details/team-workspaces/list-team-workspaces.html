@@ -13,13 +13,14 @@
 <md-content flex class="workspace-list-content" ng-hide="listTeamWorkspacesController.isLoading">
   <che-list-header che-input-placeholder="Search"
                    che-search-model="listTeamWorkspacesController.workspaceFilter.config.name"
+                   che-on-search-change="listTeamWorkspacesController.onSearchChanged(str)"
                    che-hide-search="listTeamWorkspacesController.workspaces.length === 0"
                    che-add-button-title="Add Workspace"
                    che-add-button-href="#/create-workspace?namespace={{listTeamWorkspacesController.team.qualifiedName}}"
                    che-delete-button-title="Delete"
                    che-on-delete="listTeamWorkspacesController.deleteSelectedWorkspaces()"
-                   che-hide-delete="listTeamWorkspacesController.isNoSelected"
-                   che-hide-header="!listTeamWorkspacesController.workspaces || (listTeamWorkspacesController.workspaces | filter:listTeamWorkspacesController.workspaceFilter).length === 0">
+                   che-hide-delete="listTeamWorkspacesController.cheListHelper.isNoItemSelected"
+                   che-hide-header="!listTeamWorkspacesController.workspaces || listTeamWorkspacesController.cheListHelper.visibleItemsNumber === 0">
     <div flex="100"
          layout="row"
          layout-align="start stretch"
@@ -30,8 +31,8 @@
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
           <md-checkbox class="che-list-item-checkbox"
                        aria-label="Workspace list"
-                       ng-checked="listTeamWorkspacesController.isBulkChecked"
-                       ng-click="listTeamWorkspacesController.changeBulkSelection()"></md-checkbox>
+                       ng-checked="listTeamWorkspacesController.cheListHelper.areAllItemsSelected"
+                       ng-click="listTeamWorkspacesController.cheListHelper.changeBulkSelection()"></md-checkbox>
         </div>
       </div>
       <div flex hide-xs layout-gt-xs="row"
@@ -58,17 +59,17 @@
       </div>
     </div>
   </che-list-header>
-  <che-list ng-show="(listTeamWorkspacesController.workspaces | filter:listTeamWorkspacesController.workspaceFilter).length > 0">
+  <che-list ng-show="listTeamWorkspacesController.cheListHelper.visibleItemsNumber > 0">
     <che-workspace-item
-      ng-repeat="workspace in listTeamWorkspacesController.workspaces | orderBy:[listTeamWorkspacesController.workspaceOrderBy, 'config.name'] | filter:listTeamWorkspacesController.workspaceFilter"
-      ng-model="listTeamWorkspacesController.workspacesSelectedStatus[workspace.id]"
+      ng-repeat="workspace in listTeamWorkspacesController.cheListHelper.getVisibleItems() | orderBy:[listTeamWorkspacesController.workspaceOrderBy, 'config.name']"
+      ng-model="listTeamWorkspacesController.cheListHelper.itemsSelectionStatus[workspace.id]"
       che-selectable="true"
       che-display-labels="false"
-      che-on-checkbox-click="listTeamWorkspacesController.updateSelectedStatus()"
+      che-on-checkbox-click="listTeamWorkspacesController.cheListHelper.updateBulkSelectionStatus()"
       che-workspace-item="workspace"></che-workspace-item>
   </che-list>
   <div class="che-list-empty">
-    <span ng-show="listTeamWorkspacesController.workspaces.length > 0 && (listTeamWorkspacesController.workspaces | filter:listTeamWorkspacesController.workspaceFilter).length === 0">
+    <span ng-show="listTeamWorkspacesController.workspaces.length > 0 && listTeamWorkspacesController.cheListHelper.visibleItemsNumber === 0">
           No workspaces found.
     </span>
     <span ng-show="!listTeamWorkspacesController.workspaces || listTeamWorkspacesController.workspaces.length === 0">There are no workspaces.</span>
