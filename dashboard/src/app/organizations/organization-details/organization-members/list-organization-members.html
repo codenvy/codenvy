@@ -5,14 +5,15 @@
 <md-content flex class="organization-member-list">
   <che-list-header che-input-placeholder="Search"
                    che-search-model="listOrganizationMembersController.memberFilter.name"
+                   che-on-search-change="listOrganizationMembersController.onSearchChanged(str)"
                    che-hide-search="listOrganizationMembersController.members.length === 0"
                    che-add-button-title="Add Member"
                    che-on-add="listOrganizationMembersController.selectAddMemberDialog(null)"
                    che-hide-add="!listOrganizationMembersController.hasUpdatePermission"
                    che-delete-button-title="Delete"
                    che-on-delete="listOrganizationMembersController.removeSelectedMembers()"
-                   che-hide-delete="listOrganizationMembersController.isNoSelected || !listOrganizationMembersController.hasUpdatePermission"
-                   che-hide-header="(listOrganizationMembersController.members | filter:listOrganizationMembersController.memberFilter).length === 0">
+                   che-hide-delete="listOrganizationMembersController.cheListHelper.isNoItemSelected || !listOrganizationMembersController.hasUpdatePermission"
+                   che-hide-header="listOrganizationMembersController.cheListHelper.visibleItemsNumber === 0">
     <div flex="100"
          layout="row"
          layout-align="start stretch"
@@ -23,8 +24,8 @@
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
           <md-checkbox class="che-list-item-checkbox"
                        aria-label="Member list"
-                       ng-checked="listOrganizationMembersController.isBulkChecked"
-                       ng-click="listOrganizationMembersController.changeBulkSelection()"></md-checkbox>
+                       ng-checked="listOrganizationMembersController.cheListHelper.areAllItemsSelected"
+                       ng-click="listOrganizationMembersController.cheListHelper.changeBulkSelection()"></md-checkbox>
         </div>
       </div>
       <div flex hide-xs layout-gt-xs="row"
@@ -47,9 +48,9 @@
     </div>
   </che-list-header>
   <che-list
-    ng-show="(listOrganizationMembersController.members | filter:listOrganizationMembersController.memberFilter).length > 0">
+    ng-show="listOrganizationMembersController.cheListHelper.visibleItemsNumber > 0">
     <che-list-item
-      ng-repeat="member in listOrganizationMembersController.members | orderBy:[listOrganizationMembersController.memberOrderBy, 'config.name'] | filter:listOrganizationMembersController.memberFilter"
+      ng-repeat="member in listOrganizationMembersController.cheListHelper.getVisibleItems() | orderBy:[listOrganizationMembersController.memberOrderBy, 'config.name']"
       lex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
       <div flex="100"
            layout="row"
@@ -58,8 +59,8 @@
            class="che-list-item-row member-list-row">
         <div ng-if="listOrganizationMembersController.hasUpdatePermission"
              layout="row" layout-align="start center" class="che-checkbox-area">
-          <che-list-item-checked ng-model="listOrganizationMembersController.membersSelectedStatus[member.id]"
-                                 ng-click="listOrganizationMembersController.updateSelectedStatus()"
+          <che-list-item-checked ng-model="listOrganizationMembersController.cheListHelper.itemsSelectionStatus[member.id]"
+                                 ng-click="listOrganizationMembersController.cheListHelper.updateBulkSelectionStatus()"
                                  ng-show="!listOrganizationMembersController.isOwner(member)"
                                  che-aria-label-checkbox="member {{member.id}}"></che-list-item-checked>
         </div>
@@ -109,7 +110,7 @@
   </che-list>
   <div class="che-list-empty">
     <span
-      ng-show="listOrganizationMembersController.members.length > 0 && (listOrganizationMembersController.members | filter:listOrganizationMembersController.memberFilter).length === 0">
+      ng-show="listOrganizationMembersController.members.length > 0 && listOrganizationMembersController.cheListHelper.visibleItemsNumber === 0">
           No members found.
     </span>
     <span ng-show="listOrganizationMembersController.members.length === 0">There are no members.</span>

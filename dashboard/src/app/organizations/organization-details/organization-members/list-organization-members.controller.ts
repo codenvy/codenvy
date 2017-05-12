@@ -83,22 +83,6 @@ export class ListOrganizationMembersController {
    */
   private memberFilter: any;
   /**
-   * Selected status of members in list.
-   */
-  private membersSelectedStatus: any;
-  /**
-   * Bulk operation state.
-   */
-  private isBulkChecked: boolean;
-  /**
-   * No selected members state.
-   */
-  private isNoSelected: boolean;
-  /**
-   * All selected members state.
-   */
-  private isAllSelected: boolean;
-  /**
    * Current organization (comes from directive's scope).
    */
   private organization: codenvy.IOrganization;
@@ -110,6 +94,10 @@ export class ListOrganizationMembersController {
    * Has update permission.
    */
   private hasUpdatePermission;
+  /**
+   * Selection and filtration helper
+   */
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
@@ -117,7 +105,8 @@ export class ListOrganizationMembersController {
    */
   constructor(codenvyPermissions: CodenvyPermissions, cheUser: any, cheProfile: any, codenvyOrganization: CodenvyOrganization,
               confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
-              lodash: any, $location: ng.ILocationService, organizationsPermissionService: OrganizationsPermissionService) {
+              lodash: any, $location: ng.ILocationService, organizationsPermissionService: OrganizationsPermissionService,
+              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.codenvyPermissions = codenvyPermissions;
     this.cheProfile = cheProfile;
     this.cheUser = cheUser;
@@ -133,13 +122,25 @@ export class ListOrganizationMembersController {
     this.members = [];
 
     this.memberFilter = {name: ''};
-
-    this.membersSelectedStatus = {};
-    this.isBulkChecked = false;
-    this.isNoSelected = true;
+    const helperId = 'list-organization-members';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.formUsersList();
   }
+
+  /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter organization members.
+   */
+  onSearchChanged(str: string): void {
+    this.memberFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.memberFilter);
+  }
+
 
   /**
    * Fetches the list of organization members.
@@ -163,8 +164,10 @@ export class ListOrganizationMembersController {
    * Combines permissions and users data in one list.
    */
   formUsersList(): void {
-    let permissions = this.codenvyPermissions.getOrganizationPermissions(this.organization.id);
+    const permissions = this.codenvyPermissions.getOrganizationPermissions(this.organization.id);
     this.members = [];
+
+    const promises: Array<ng.IPromise<any>> = [];
 
     permissions.forEach((permission: any) => {
       let userId = permission.userId;
@@ -173,10 +176,15 @@ export class ListOrganizationMembersController {
       if (userProfile) {
         this.formUserItem(userProfile, permission);
       } else {
-        this.cheProfile.fetchProfileById(userId).then(() => {
+        const promise = this.cheProfile.fetchProfileById(userId).then(() => {
           this.formUserItem(this.cheProfile.getProfileById(userId), permission);
         });
+        promises.push(promise);
       }
+    });
+
+    this.$q.all(promises).finally(() => {
+      this.cheListHelper.setList(this.members, 'id');
     });
 
     this.hasUpdatePermission = this.organizationsPermissionService.isUserAllowedTo(CodenvyOrganizationActions.UPDATE.toString(), this.organization.id);
@@ -194,79 +202,6 @@ export class ListOrganizationMembersController {
     member.name = this.cheProfile.getFullName(userProfile.attributes);
     member.permissions = permissions;
     this.members.push(member);
-  }
-
-  /**
-   * Return <code>true</code> if all members in list are checked.
-   * @returns {boolean}
-   */
-  isAllMembersSelected(): boolean {
-    return this.isAllSelected;
-  }
-
-  /**
-   * Returns <code>true</code> if all members in list are not checked.
-   * @returns {boolean}
-   */
-  isNoMemberSelected(): boolean {
-    return this.isNoSelected;
-  }
-
-  /**
-   * Make all members in list selected.
-   */
-  selectAllMembers(): void {
-    this.members.forEach((member: codenvy.IMember) => {
-      this.membersSelectedStatus[member.id] = true;
-    });
-  }
-
-  /**
-   * Make all members in list deselected.
-   */
-  deselectAllMembers(): void {
-    this.members.forEach((member: codenvy.IMember) => {
-      this.membersSelectedStatus[member.id] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value.
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllMembers();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllMembers();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update members selected status.
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    Object.keys(this.membersSelectedStatus).forEach((key: string) => {
-      if (this.membersSelectedStatus[key]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
   }
 
   /**
@@ -397,37 +332,28 @@ export class ListOrganizationMembersController {
    * Remove all selected members.
    */
   removeSelectedMembers(): void {
-    let membersSelectedStatusKeys = Object.keys(this.membersSelectedStatus);
-    let checkedKeys = [];
+    const selectedMembers = this.cheListHelper.getSelectedItems(),
+          selectedMemberIds = selectedMembers.map((member: codenvy.IMember) => {
+            return member.id;
+          });
 
-    if (!membersSelectedStatusKeys.length) {
+    if (!selectedMemberIds.length) {
       this.cheNotification.showError('No such developers.');
       return;
     }
 
-    membersSelectedStatusKeys.forEach((key: string) => {
-      if (this.membersSelectedStatus[key] === true) {
-        checkedKeys.push(key);
-      }
-    });
-
-    if (!checkedKeys.length) {
-      this.cheNotification.showError('No such developers.');
-      return;
-    }
-
-    let confirmationPromise = this.showDeleteMembersConfirmation(checkedKeys.length);
+    const confirmationPromise = this.showDeleteMembersConfirmation(selectedMemberIds.length);
     confirmationPromise.then(() => {
+      const removeMembersPromises = [];
       let removalError;
-      let removeMembersPromises = [];
       let isCurrentUser = false;
-      for (let i = 0; i < checkedKeys.length; i++) {
-        let id = checkedKeys[i];
-        this.membersSelectedStatus[id] = false;
+      for (let i = 0; i < selectedMemberIds.length; i++) {
+        const id = selectedMemberIds[i];
+        this.cheListHelper.itemsSelectionStatus[id] = false;
         if (id === this.cheUser.getUser().id) {
           isCurrentUser = true;
         }
-        let promise = this.codenvyPermissions.removeOrganizationPermissions(this.organization.id, id);
+        const promise = this.codenvyPermissions.removeOrganizationPermissions(this.organization.id, id);
         promise.catch((error: any) => {
           removalError = error;
         });
@@ -441,7 +367,6 @@ export class ListOrganizationMembersController {
           this.fetchMembers();
         }
 
-        this.updateSelectedStatus();
         if (removalError) {
           this.cheNotification.showError(removalError.data && removalError.data.message ? removalError.data.message : 'User removal failed.');
         }
