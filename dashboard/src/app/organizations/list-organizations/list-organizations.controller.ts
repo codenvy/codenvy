@@ -73,25 +73,9 @@ export class ListOrganizationsController {
    */
   private organizationAvailableResources: Map<string, any>;
   /**
-   * Selected status of organizations in the list.
-   */
-  private organizationsSelectedStatus: { [organizationId: string]: boolean; };
-  /**
    * Loading state of the page.
    */
   private isLoading: boolean;
-  /**
-   * Bulk operation checked state.
-   */
-  private isBulkChecked: boolean;
-  /**
-   * No selected workspace state.
-   */
-  private isNoSelected: boolean;
-  /**
-   * All selected workspace state.
-   */
-  private isAllSelected: boolean;
   /**
    * On update function.
    */
@@ -112,17 +96,21 @@ export class ListOrganizationsController {
   /**
    * Organization filter.
    */
-  private organizationFilter: Object;
+  private organizationFilter: {name: string};
   /**
    * User services.
    */
   private userServices: codenvy.IUserServices;
+  /**
+   * Selection and filtration helper.
+   */
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, codenvyPermissions: CodenvyPermissions, codenvyResourcesDistribution: CodenvyResourcesDistribution, codenvyOrganization: CodenvyOrganization, cheNotification: any, confirmDialogService: any, $route: ng.route.IRouteService, organizationsPermissionService: OrganizationsPermissionService) {
+  constructor($q: ng.IQService, $scope: ng.IScope, codenvyPermissions: CodenvyPermissions, codenvyResourcesDistribution: CodenvyResourcesDistribution, codenvyOrganization: CodenvyOrganization, cheNotification: any, confirmDialogService: any, $route: ng.route.IRouteService, organizationsPermissionService: OrganizationsPermissionService, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.cheNotification = cheNotification;
     this.codenvyPermissions = codenvyPermissions;
@@ -131,10 +119,14 @@ export class ListOrganizationsController {
     this.codenvyResourcesDistribution = codenvyResourcesDistribution;
 
     this.parentName = $route.current.params.organizationName;
-    this.isNoSelected = true;
     this.organizationOrderBy = 'name';
     this.organizationFilter = {name: ''};
-    this.organizationsSelectedStatus = {};
+
+    const helperId = 'list-organizations';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.userServices = this.codenvyPermissions.getUserServices();
     this.organizationsPermissionService = organizationsPermissionService;
@@ -147,6 +139,16 @@ export class ListOrganizationsController {
       }
     });
     this.processOrganizations();
+  }
+
+  /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter organizations.
+   */
+  onSearchChanged(str: string): void {
+    this.organizationFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.organizationFilter);
   }
 
   /**
@@ -166,17 +168,17 @@ export class ListOrganizationsController {
    */
   processOrganizations(): void {
     if (this.parentName) {
-      let parentOrganization = this.codenvyOrganization.getOrganizationByName(this.parentName);
+      const parentOrganization = this.codenvyOrganization.getOrganizationByName(this.parentName);
       this.parentId = parentOrganization ? parentOrganization.id : null;
     }
     if (this.organizations && this.organizations.length) {
       this.organizationMembers = new Map();
       this.organizationTotalResources = new Map();
       this.organizationAvailableResources = new Map();
-      let promises = [];
+      const promises = [];
       this.isLoading = true;
       this.organizations.forEach((organization: codenvy.IOrganization) => {
-        let promiseMembers = this.codenvyPermissions.fetchOrganizationPermissions(organization.id).then(() => {
+        const promiseMembers = this.codenvyPermissions.fetchOrganizationPermissions(organization.id).then(() => {
           this.organizationMembers.set(organization.id, this.codenvyPermissions.getOrganizationPermissions(organization.id).length);
         });
         promises.push(promiseMembers);
@@ -192,6 +194,7 @@ export class ListOrganizationsController {
       });
       this.$q.all(promises).finally(() => {
         this.isLoading = false;
+        this.cheListHelper.setList(this.organizations, 'id');
       });
     }
   }
@@ -258,107 +261,25 @@ export class ListOrganizationsController {
   }
 
   /**
-   * return true if all organizations in list are checked
-   * @returns {boolean}
-   */
-  isAllOrganizationsSelected(): boolean {
-    return this.isAllSelected;
-  }
-
-  /**
-   * returns true if all organizations in list are not checked
-   * @returns {boolean}
-   */
-  isNoOrganizationsSelected(): boolean {
-    return this.isNoSelected;
-  }
-
-  /**
-   * Check all organizations in list
-   */
-  selectAllOrganizations(): void {
-    this.organizations.forEach((organization: codenvy.IOrganization) => {
-      this.organizationsSelectedStatus[organization.id] = true;
-    });
-  }
-
-  /**
-   * Uncheck all organizations in list
-   */
-  deselectAllOrganizations(): void {
-    Object.keys(this.organizationsSelectedStatus).forEach((key: string) => {
-      this.organizationsSelectedStatus[key] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllOrganizations();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllOrganizations();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update organization selected status
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    Object.keys(this.organizationsSelectedStatus).forEach((key: string) => {
-      if (this.organizationsSelectedStatus[key]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
-  }
-
-  /**
    * Delete all selected organizations.
    */
   deleteSelectedOrganizations(): void {
-    let organizationsSelectedStatusKeys = Object.keys(this.organizationsSelectedStatus);
-    let checkedOrganizationKeys = [];
+    const selectedOrganizations = this.cheListHelper.getSelectedItems(),
+          selectedOrganizationIds = selectedOrganizations.map((organization: codenvy.IOrganization) => {
+            return organization.id;
+          });
 
-    if (!organizationsSelectedStatusKeys.length) {
+    if (!selectedOrganizationIds.length) {
       this.cheNotification.showError('No such organization.');
       return;
     }
 
-    organizationsSelectedStatusKeys.forEach((key: string) => {
-      if (this.organizationsSelectedStatus[key] === true) {
-        checkedOrganizationKeys.push(key);
-      }
-    });
-
-    if (!checkedOrganizationKeys.length) {
-      this.cheNotification.showError('No such organization.');
-      return;
-    }
-
-    let confirmationPromise = this._showDeleteOrganizationConfirmation(checkedOrganizationKeys.length);
+    const confirmationPromise = this._showDeleteOrganizationConfirmation(selectedOrganizationIds.length);
     confirmationPromise.then(() => {
       let promises = [];
 
-      checkedOrganizationKeys.forEach((organizationId: string) => {
-        this.organizationsSelectedStatus[organizationId] = false;
+      selectedOrganizationIds.forEach((organizationId: string) => {
+        this.cheListHelper.itemsSelectionStatus[organizationId] = false;
 
         let promise = this.codenvyOrganization.deleteOrganization(organizationId).catch((error: any) => {
           let errorMessage = 'Failed to delete organization ' + organizationId + '.';
@@ -372,7 +293,6 @@ export class ListOrganizationsController {
         if (typeof this.onUpdate !== 'undefined') {
           this.onUpdate();
         }
-        this.updateSelectedStatus();
       });
     });
   }
