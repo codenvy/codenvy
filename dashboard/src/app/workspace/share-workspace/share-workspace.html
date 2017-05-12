@@ -22,14 +22,15 @@
   <div ng-show="!shareWorkspaceController.isLoading">
     <che-list-header flex="100"
                      che-input-placeholder="Search"
-                     che-search-model="shareWorkspaceController.userFilter.name"
+                     che-search-model="shareWorkspaceController.userFilter.email"
+                     che-on-search-change="shareWorkspaceController.onSearchChanged(str)"
                      che-hide-search="shareWorkspaceController.users.length === 0"
                      che-add-button-title="Add Developer"
                      che-on-add="shareWorkspaceController.showShareWorkspaceDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="shareWorkspaceController.deleteSelectedWorkspaceMembers()"
-                     che-hide-delete="shareWorkspaceController.isNoSelected"
-                     che-hide-header="(shareWorkspaceController.users | filter:shareWorkspaceController.userFilter).length === 0">
+                     che-hide-delete="shareWorkspaceController.cheListHelper.isNoItemSelected"
+                     che-hide-header="shareWorkspaceController.cheListHelper.visibleItemsNumber === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -40,8 +41,8 @@
           <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox md-default-theme"
                          aria-label="Bulk check on users"
-                         ng-checked="shareWorkspaceController.isBulkChecked"
-                         ng-click="shareWorkspaceController.changeBulkSelection()"></md-checkbox>
+                         ng-checked="shareWorkspaceController.cheListHelper.areAllItemsSelected"
+                         ng-click="shareWorkspaceController.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -62,12 +63,12 @@
     </che-list-header>
     <che-list flex ng-if="shareWorkspaceController.users && shareWorkspaceController.users.length > 0">
       <user-item
-              ng-repeat="user in shareWorkspaceController.users | orderBy:shareWorkspaceController.userOrderBy | filter:shareWorkspaceController.userFilter"
+              ng-repeat="user in shareWorkspaceController.cheListHelper.getVisibleItems() | orderBy:shareWorkspaceController.userOrderBy"
               codenvy-user="user" callback="shareWorkspaceController"></user-item>
     </che-list>
 
     <div class="che-list-empty">
-        <span ng-show="shareWorkspaceController.users.length > 0 && (shareWorkspaceController.users | filter:shareWorkspaceController.userFilter).length === 0">
+        <span ng-show="shareWorkspaceController.users.length > 0 && shareWorkspaceController.cheListHelper.visibleItemsNumber === 0">
           No members found.
         </span>
       <span ng-show="shareWorkspaceController.users.length === 0">There are no members.</span>

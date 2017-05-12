@@ -25,8 +25,8 @@
     <div layout="row"
          layout-align="start center"
          class="che-checkbox-area">
-      <che-list-item-checked ng-model="userItemController.callback.usersSelectedStatus[userItemController.user.id]"
-                             ng-click="userItemController.callback.updateSelectedStatus()"
+      <che-list-item-checked ng-model="userItemController.callback.cheListHelper.itemsSelectionStatus[userItemController.user.id]"
+                             ng-click="userItemController.callback.cheListHelper.updateBulkSelectionStatus()"
                              che-aria-label-checkbox="User {{userItemController.user.id}}"></che-list-item-checked>
     </div>
     <div flex

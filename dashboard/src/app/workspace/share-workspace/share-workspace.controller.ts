@@ -16,6 +16,10 @@
 import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 import {CodenvyPermissions} from '../../../components/api/codenvy-permissions.factory';
 
+interface ISharedWorkspaceUser extends che.IUser {
+  permissions: any;
+}
+
 /**
  * Controller for workspace sharing with other users.
  *
@@ -72,7 +76,7 @@ export class ShareWorkspaceController {
 
   private personalAccount: any;
   private separators: number[];
-  private users: string[];
+  private users: Array<ISharedWorkspaceUser>;
   private emails: string[];
   private existingUsers: Map<string, string>;
   private notExistingUsers: string[];
@@ -84,21 +88,16 @@ export class ShareWorkspaceController {
   private workspace: che.IWorkspace;
   private userOrderBy: string;
   private userFilter: {
-    [propName: string]: string;
+    email: string;
   };
-  private usersSelectedStatus: {
-    [propName: string]: boolean
-  };
-  private isNoSelected: boolean;
-  private isAllSelected: boolean;
-  private isBulkChecked: boolean;
   private noPermissionsError: boolean;
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace: any, cheUser: any, codenvyPermissions: CodenvyPermissions, cheNotification: any, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, $mdConstant: any, $route: ng.route.IRouteService, $q: ng.IQService, lodash: any, confirmDialogService: any, codenvyTeam: CodenvyTeam, $log: ng.ILogService) {
+  constructor(cheWorkspace: any, cheUser: any, codenvyPermissions: CodenvyPermissions, cheNotification: any, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, $mdConstant: any, $route: ng.route.IRouteService, $q: ng.IQService, lodash: any, confirmDialogService: any, codenvyTeam: CodenvyTeam, $log: ng.ILogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     "ngInject";
 
     this.cheWorkspace = cheWorkspace;
@@ -151,13 +150,26 @@ export class ShareWorkspaceController {
 
     this.userOrderBy = 'email';
     this.userFilter = {email: ''};
-    this.usersSelectedStatus = {};
-    this.isNoSelected = true;
-    this.isAllSelected = false;
-    this.isBulkChecked = false;
+
+    const helperId = 'share-workspace';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.fetchPersonalAccount();
   }
+
+  /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter user emails.
+   */
+  onSearchChanged(str: string): void {
+    this.userFilter.email = str;
+    this.cheListHelper.applyFilter('email', this.userFilter);
+  }
+
 
   /**
    * Fetches account ID.
@@ -201,19 +213,26 @@ export class ShareWorkspaceController {
    * Combines permissions and users data in one list.
    */
   formUserList(): void {
-    let permissions = this.codenvyPermissions.getWorkspacePermissions(this.workspace.id);
+    const permissions = this.codenvyPermissions.getWorkspacePermissions(this.workspace.id);
     this.users = [];
 
+    const promises: Array<ng.IPromise<any>> = [];
+
     permissions.forEach((permission: any) => {
-      let userId = permission.userId;
-      let user = this.cheUser.getUserFromId(userId);
+      const userId = permission.userId;
+      const user = this.cheUser.getUserFromId(userId);
       if (user) {
         this.formUserItem(user, permission);
       } else {
-        this.cheUser.fetchUserId(userId).then(() => {
+        const promise = this.cheUser.fetchUserId(userId).then(() => {
           this.formUserItem(this.cheUser.getUserFromId(userId), permission);
         });
+        promises.push(promise);
       }
+    });
+
+    this.$q.all(promises).finally(() => {
+      this.cheListHelper.setList(this.users, 'id');
     });
   }
 
@@ -247,83 +266,12 @@ export class ShareWorkspaceController {
   }
 
   /**
-   * Check all users in list
-   */
-  selectAllUsers(): void {
-    this.users.forEach((user: any) => {
-      this.usersSelectedStatus[user.id] = true;
-    });
-  }
-
-  /**
-   * Uncheck all users in list
-   */
-  deselectAllUsers(): void {
-    this.users.forEach((user: any) => {
-      this.usersSelectedStatus[user.id] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllUsers();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllUsers();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update users selected status
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    this.users.forEach((user: any) => {
-      if (this.usersSelectedStatus[user.id]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
-  }
-
-  /**
    * Removes all selected users permissions for current workspace
    */
   deleteSelectedWorkspaceMembers(): void {
-    let usersSelectedStatusKeys = Object.keys(this.usersSelectedStatus);
-    let checkedUsers = [];
+    const selectedUsers: Array<ISharedWorkspaceUser> = this.cheListHelper.getSelectedItems();
 
-    if (!usersSelectedStatusKeys.length) {
-      this.cheNotification.showError('No such workspace members.');
-      return;
-    }
-
-    this.users.forEach((user: any) => {
-      usersSelectedStatusKeys.forEach((key) => {
-        if (user.id === key && this.usersSelectedStatus[key] === true) {
-          checkedUsers.push(user);
-        }
-      });
-    });
-
-    let queueLength = checkedUsers.length;
+    const queueLength = selectedUsers.length;
     if (!queueLength) {
       this.cheNotification.showError('No such workspace member.');
       return;
@@ -331,17 +279,17 @@ export class ShareWorkspaceController {
 
     let confirmationPromise = this.showDeleteConfirmation(queueLength);
     confirmationPromise.then(() => {
-      let numberToDelete = queueLength;
+      const numberToDelete = queueLength;
+      const deleteUserPromises = [];
       let isError = false;
-      let deleteUserPromises = [];
       let currentUserEmail;
-      checkedUsers.forEach((user) => {
+
+      selectedUsers.forEach((user: ISharedWorkspaceUser) => {
         currentUserEmail = user.email;
-        this.usersSelectedStatus[user.id] = false;
-        let promise = this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instanceId, user.id);
-        promise.then(() => {
-          queueLength--;
-        }, (error) => {
+        this.cheListHelper.itemsSelectionStatus[user.id] = false;
+
+        const promise = this.codenvyPermissions.removeWorkspacePermissions(user.permissions.instanceId, user.id);
+        promise.catch((error) => {
           isError = true;
           this.$log.error('Cannot delete permissions: ', error);
         });
