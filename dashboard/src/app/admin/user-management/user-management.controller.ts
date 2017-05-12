@@ -33,23 +33,24 @@ export class AdminsUserManagementCtrl {
   pagesInfo: any;
   users: Array<any>;
   usersMap: Map<string, any>;
-  userFilter: { name: string };
-  usersSelectedStatus: Object;
+  userFilter: {name: string};
   userOrderBy: string;
   isLoading: boolean;
-  isNoSelected: boolean;
-  isAllSelected: boolean;
-  isBulkChecked: boolean;
 
   private confirmDialogService: any;
   private codenvyOrganization: CodenvyOrganization;
-  private userOrganizationCount: { [userId: string]: number } = {};
+  private userOrganizationCount: {[userId: string]: number} = {};
+  private cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheUser: any, cheNotification: any, licenseMessagesService: LicenseMessagesService, confirmDialogService: any, codenvyOrganization: CodenvyOrganization, $rootScope: che.IRootScopeService, $location: ng.ILocationService) {
+  constructor($q: ng.IQService, $rootScope: che.IRootScopeService, $log: ng.ILogService,
+              $mdDialog: ng.material.IDialogService, cheUser: any, $location: ng.ILocationService,
+              cheNotification: any, licenseMessagesService: LicenseMessagesService,
+              confirmDialogService: any, codenvyOrganization: CodenvyOrganization,
+              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -69,10 +70,12 @@ export class AdminsUserManagementCtrl {
 
     this.userOrderBy = 'name';
     this.userFilter = {name: ''};
-    this.usersSelectedStatus = {};
-    this.isNoSelected = true;
-    this.isAllSelected = false;
-    this.isBulkChecked = false;
+
+    const helperId = 'user-management';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     if (this.usersMap && this.usersMap.size > 1) {
       this.updateUsers();
@@ -93,6 +96,16 @@ export class AdminsUserManagementCtrl {
   }
 
   /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter user names.
+   */
+  onSearchChanged(str: string): void {
+    this.userFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.userFilter);
+  }
+
+  /**
    * Redirect to user details
    * @param userId {string}
    * @param tab {string}
@@ -109,63 +122,6 @@ export class AdminsUserManagementCtrl {
     this.codenvyOrganization.fetchUserOrganizations(userId, 1).then(() => {
       this.userOrganizationCount[userId] = this.codenvyOrganization.getUserOrganizationPageInfo(userId).countPages;
     });
-  }
-
-  /**
-   * Check all users in list
-   */
-  selectAllUsers(): void {
-    this.users.forEach((user: any) => {
-      this.usersSelectedStatus[user.id] = true;
-    });
-  }
-
-  /**
-   * Uncheck all users in list
-   */
-  deselectAllUsers(): void {
-    this.users.forEach((user: any) => {
-      this.usersSelectedStatus[user.id] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllUsers();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllUsers();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update users selected status
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    this.users.forEach((user: any) => {
-      if (this.usersSelectedStatus[user.id]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
   }
 
   /**
@@ -195,43 +151,30 @@ export class AdminsUserManagementCtrl {
    * Delete all selected users
    */
   deleteSelectedUsers(): void {
-    let usersSelectedStatusKeys = Object.keys(this.usersSelectedStatus);
-    let checkedUsersKeys = [];
+    const selectedUsers = this.cheListHelper.getSelectedItems(),
+          selectedUserIds = selectedUsers.map((user: che.IUser) => {
+            return user.id;
+          });
 
-    if (!usersSelectedStatusKeys.length) {
-      this.cheNotification.showError('No such users.');
-      return;
-    }
-
-    usersSelectedStatusKeys.forEach((key: string) => {
-      if (this.usersSelectedStatus[key] === true) {
-        checkedUsersKeys.push(key);
-      }
-    });
-
-    let queueLength = checkedUsersKeys.length;
+    const queueLength = selectedUserIds.length;
     if (!queueLength) {
       this.cheNotification.showError('No such user.');
       return;
     }
 
-    let confirmationPromise = this.showDeleteUsersConfirmation(queueLength);
-
+    const confirmationPromise = this.showDeleteUsersConfirmation(queueLength);
     confirmationPromise.then(() => {
-
-      let numberToDelete = queueLength;
+      const numberToDelete = queueLength;
+      const deleteUserPromises = [];
       let isError = false;
-      let deleteUserPromises = [];
       let currentUserId;
 
-      checkedUsersKeys.forEach((userId: string) => {
+      selectedUserIds.forEach((userId: string) => {
         currentUserId = userId;
-        this.usersSelectedStatus[userId] = false;
+        this.cheListHelper.itemsSelectionStatus[userId] = false;
 
         let promise = this.cheUser.deleteUserById(userId);
-        promise.then(() => {
-          queueLength--;
-        }, (error: any) => {
+        promise.catch((error: any) => {
           isError = true;
           this.$log.error('Cannot delete user: ', error);
         });
@@ -240,17 +183,17 @@ export class AdminsUserManagementCtrl {
 
       this.$q.all(deleteUserPromises).finally(() => {
         this.isLoading = true;
-        let promise = this.cheUser.fetchUsersPage(this.pagesInfo.currentPageNumber);
 
+        const promise = this.cheUser.fetchUsersPage(this.pagesInfo.currentPageNumber);
         promise.then(() => {
           this.isLoading = false;
           this.updateUsers();
-          this.updateSelectedStatus();
           this.licenseMessagesService.fetchMessages();
         }, (error: any) => {
           this.isLoading = false;
           this.$log.error(error);
         });
+
         if (isError) {
           this.cheNotification.showError('Delete failed.');
         } else {
@@ -289,6 +232,8 @@ export class AdminsUserManagementCtrl {
     this.usersMap.forEach((user: any) => {
       this.users.push(user);
     });
+
+    this.cheListHelper.setList(this.users, 'id');
   }
 
   /**

@@ -26,13 +26,14 @@
     <che-list-header flex="100"
                      che-input-placeholder="Search"
                      che-search-model="adminsUserManagementCtrl.userFilter.name"
+                     che-on-search-change="adminsUserManagementCtrl.onSearchChanged(str)"
                      che-hide-search="adminsUserManagementCtrl.users.length === 0"
                      che-add-button-title="Add User"
                      che-on-add="adminsUserManagementCtrl.showAddUserDialog($event)"
                      che-delete-button-title="Delete"
                      che-on-delete="adminsUserManagementCtrl.deleteSelectedUsers()"
-                     che-hide-delete="adminsUserManagementCtrl.isNoSelected"
-                     che-hide-header="(adminsUserManagementCtrl.users | filter:adminsUserManagementCtrl.userFilter).length === 0">
+                     che-hide-delete="adminsUserManagementCtrl.cheListHelper.isNoItemSelected"
+                     che-hide-header="adminsUserManagementCtrl.cheListHelper.visibleItemsNumber === 0">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
@@ -43,8 +44,8 @@
           <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
                          aria-label="Bulk check on users"
-                         ng-checked="adminsUserManagementCtrl.isBulkChecked"
-                         ng-click="adminsUserManagementCtrl.changeBulkSelection()"></md-checkbox>
+                         ng-checked="adminsUserManagementCtrl.cheListHelper.areAllItemsSelected"
+                         ng-click="adminsUserManagementCtrl.cheListHelper.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
         <div flex hide-xs layout-gt-xs="row"
@@ -67,7 +68,7 @@
     </che-list-header>
     <che-list flex ng-if="adminsUserManagementCtrl.users && adminsUserManagementCtrl.users.length > 0">
       <che-list-item
-              ng-repeat="user in adminsUserManagementCtrl.users | orderBy:adminsUserManagementCtrl.userOrderBy | filter:adminsUserManagementCtrl.userFilter"
+              ng-repeat="user in adminsUserManagementCtrl.cheListHelper.getVisibleItems() | orderBy:adminsUserManagementCtrl.userOrderBy"
               ng-init="adminsUserManagementCtrl.updateUserOrganizationsCount(user.id)"
               flex-gt-sm="100" flex="33"
               ng-mouseover="hover=true"
@@ -79,8 +80,8 @@
           <div layout="row"
                layout-align="start center"
                class="che-checkbox-area">
-            <che-list-item-checked ng-model="adminsUserManagementCtrl.usersSelectedStatus[user.id]"
-                                   ng-click="adminsUserManagementCtrl.updateSelectedStatus()"
+            <che-list-item-checked ng-model="adminsUserManagementCtrl.cheListHelper.itemsSelectionStatus[user.id]"
+                                   ng-click="adminsUserManagementCtrl.cheListHelper.updateBulkSelectionStatus()"
                                    che-aria-label-checkbox="User {{user.id}}"></che-list-item-checked>
           </div>
           <div flex
@@ -144,7 +145,7 @@
       </div>
     </che-list>
     <div class="che-list-empty">
-        <span ng-show="adminsUserManagementCtrl.users.length > 0 && (adminsUserManagementCtrl.users | filter:adminsUserManagementCtrl.userFilter).length === 0">
+        <span ng-show="adminsUserManagementCtrl.users.length > 0 && adminsUserManagementCtrl.cheListHelper.visibleItemsNumber === 0">
           No users found.
         </span>
       <span ng-show="adminsUserManagementCtrl.users.length === 0">There are no users.</span>
