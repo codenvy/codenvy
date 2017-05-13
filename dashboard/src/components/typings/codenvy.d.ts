@@ -63,6 +63,7 @@ declare namespace _codenvy {
     role?: string;
     permissions?: IPermissions;
     name?: string;
+    isPending?: boolean;
   }
 
   export interface IUser extends che.IUser{

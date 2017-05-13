@@ -16,14 +16,15 @@
 <md-content flex>
   <che-list-header che-input-placeholder="Search"
                    che-search-model="listTeamMembersController.memberFilter.name"
+                   che-on-search-change="listTeamMembersController.onSearchChanged(str)"
                    che-hide-search="listTeamMembersController.members.length === 0"
                    che-add-button-title="Add Member"
                    che-on-add="listTeamMembersController.showMemberDialog(null)"
                    che-hide-add="!listTeamMembersController.editable"
                    che-delete-button-title="Delete"
                    che-on-delete="listTeamMembersController.removeSelectedMembers()"
-                   che-hide-delete="listTeamMembersController.isNoSelected"
-                   che-hide-header="(listTeamMembersController.members | filter:listTeamMembersController.memberFilter).length === 0">
+                   che-hide-delete="listTeamMembersController.cheListHelper.isNoItemSelected"
+                   che-hide-header="listTeamMembersController.cheListHelper.visibleItemsNumber === 0">
     <div flex="100"
          layout="row"
          layout-align="start stretch"
@@ -34,8 +35,8 @@
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
           <md-checkbox class="che-list-item-checkbox"
                        aria-label="Member list"
-                       ng-checked="listTeamMembersController.isBulkChecked"
-                       ng-click="listTeamMembersController.changeBulkSelection()"></md-checkbox>
+                       ng-checked="listTeamMembersController.cheListHelper.areAllItemsSelected"
+                       ng-click="listTeamMembersController.cheListHelper.changeBulkSelection()"></md-checkbox>
         </div>
       </div>
       <div flex hide-xs layout-gt-xs="row"
@@ -60,20 +61,15 @@
       </div>
     </div>
   </che-list-header>
-  <che-list ng-show="(listTeamMembersController.members | filter:listTeamMembersController.memberFilter).length > 0">
-    <member-item
-      ng-repeat="member in listTeamMembersController.members | orderBy:[listTeamMembersController.memberOrderBy, 'name'] | filter:listTeamMembersController.memberFilter"
-      ng-model="listTeamMembersController.membersSelectedStatus[member.userId]"
-      che-selectable="true"
-      che-display-labels="false"
-      che-on-checkbox-click="listTeamMembersController.updateSelectedStatus()"
-      callback="listTeamMembersController"
-      editable="listTeamMembersController.editable"
-      is-owner="(member.userId === listTeamMembersController.owner.id)"
-      member="member"></member-item>
+  <che-list ng-show="listTeamMembersController.cheListHelper.visibleItemsNumber > 0">
+    <member-item ng-repeat="member in listTeamMembersController.cheListHelper.getVisibleItems() | orderBy:[listTeamMembersController.memberOrderBy, 'name']"
+                 callback="listTeamMembersController"
+                 editable="listTeamMembersController.editable"
+                 is-owner="listTeamMembersController.memberIsOwner(member)"
+                 member="member"></member-item>
   </che-list>
   <div class="che-list-empty">
-    <span ng-show="listTeamMembersController.members.length > 0 && (listTeamMembersController.members | filter:listTeamMembersController.memberFilter).length === 0">
+    <span ng-show="listTeamMembersController.members.length > 0 && listTeamMembersController.cheListHelper.visibleItemsNumber === 0">
           No members found.
     </span>
     <span ng-show="listTeamMembersController.members.length === 0">There are no members.</span>

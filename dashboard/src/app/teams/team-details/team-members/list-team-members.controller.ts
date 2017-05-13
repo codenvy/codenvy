@@ -69,7 +69,7 @@ export class ListTeamMembersController {
   /**
    * Lodash library.
    */
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   /**
    * Team's members list.
    */
@@ -83,22 +83,6 @@ export class ListTeamMembersController {
    */
   private memberFilter: any;
   /**
-   * Selected status of members in list.
-   */
-  private membersSelectedStatus: any;
-  /**
-   * Bulk operation state.
-   */
-  private isBulkChecked: boolean;
-  /**
-   * No selected members state.
-   */
-  private isNoSelected: boolean;
-  /**
-   * All selected members state.
-   */
-  private isAllSelected: boolean;
-  /**
    * Current team (comes from directive's scope).
    */
   private team: any;
@@ -110,6 +94,10 @@ export class ListTeamMembersController {
    * The editable (whether current user can edit members list and see invitations) state of the members (comes from outside).
    */
   private editable: any;
+  /**
+   * Selection and filtration helper
+   */
+  cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
@@ -117,7 +105,8 @@ export class ListTeamMembersController {
    */
   constructor(codenvyTeam: CodenvyTeam, codenvyPermissions: CodenvyPermissions, codenvyInvite: CodenvyInvite, cheUser: any, cheProfile: any,
               confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
-              lodash: _.LoDashStatic, $location: ng.ILocationService, teamDetailsService: TeamDetailsService) {
+              lodash: any, $location: ng.ILocationService, teamDetailsService: TeamDetailsService,
+              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.codenvyTeam = codenvyTeam;
     this.codenvyInvite = codenvyInvite;
     this.codenvyPermissions = codenvyPermissions;
@@ -134,10 +123,11 @@ export class ListTeamMembersController {
     this.isLoading = true;
 
     this.memberFilter = {name: ''};
-
-    this.membersSelectedStatus = {};
-    this.isBulkChecked = false;
-    this.isNoSelected = true;
+    const helperId = 'list-team-members';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
 
     this.owner = teamDetailsService.getOwner();
     this.team  = teamDetailsService.getTeam();
@@ -146,19 +136,32 @@ export class ListTeamMembersController {
   }
 
   /**
+   * Callback when name is changed.
+   *
+   * @param str {string} a string to filter team members.
+   */
+  onSearchChanged(str: string): void {
+    this.memberFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.memberFilter);
+  }
+
+  /**
    * Refreshes both list of members and invitations based on provided parameters.
    *
    * @param fetchMembers if <code>true</code> need to refresh members
    * @param fetchInvitations if <code>true</code> need to refresh invitations
+   * @return {IPromise<any>}
    */
-  refreshData(fetchMembers: boolean, fetchInvitations: boolean): void {
+  refreshData(fetchMembers: boolean, fetchInvitations: boolean): ng.IPromise<any> {
     this.members = [];
     if (!this.team || !this.owner) {
       return;
     }
 
+    const promises: Array<ng.IPromise<any>> = [];
+
     if (fetchMembers) {
-      this.fetchMembers();
+      promises.push(this.fetchMembers());
     } else {
       this.formUserList();
     }
@@ -166,41 +169,64 @@ export class ListTeamMembersController {
     // can fetch invites only admin or owner of the team:
     if (this.editable) {
       if (fetchInvitations) {
-        this.fetchInvitations();
+        promises.push(this.fetchInvitations());
       } else {
         this.formInvitationList();
       }
     }
+
+    return this.$q.all(promises).finally(() => {
+      const isMemberSelectable = (member: codenvy.IMember) => {
+        return !this.memberIsOwner(member);
+      };
+      this.cheListHelper.setList(this.members, 'userId', isMemberSelectable);
+    });
+  }
+
+  /**
+   * Returns <code>true</code> if specified member is team owner.
+   *
+   * @param {codenvy.IMember> member a team member
+   * @return {boolean}
+   */
+  memberIsOwner(member: codenvy.IMember): boolean {
+    return member.userId === this.owner.id;
   }
 
   /**
    * Fetches the list of team members.
+   *
+   * @return {IPromise<any>}
    */
-  fetchMembers(): void {
-    this.codenvyPermissions.fetchOrganizationPermissions(this.team.id).then(() => {
+  fetchMembers(): ng.IPromise<any> {
+    return this.codenvyPermissions.fetchOrganizationPermissions(this.team.id).then(() => {
       this.isLoading = false;
-      this.formUserList();
+      return this.formUserList();
     }, (error: any) => {
       this.isLoading = false;
-      if (error.status !== 304) {
+      if (error && error.status !== 304) {
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to retrieve team permissions.');
+        return this.$q.reject(error);
       } else {
-        this.formUserList();
+        return this.formUserList();
       }
     });
   }
 
   /**
    * Combines permissions and users data in one list.
+   *
+   * @return {ng.IPromise<any>}
    */
-  formUserList(): void {
-    let permissions = this.codenvyPermissions.getOrganizationPermissions(this.team.id);
-
+  formUserList(): ng.IPromise<any> {
     let noOwnerPermissions = true;
 
+    const promises: Array<ng.IPromise<any>> = [];
+
+    const permissions = this.codenvyPermissions.getOrganizationPermissions(this.team.id);
     permissions.forEach((permission: any) => {
-      let userId = permission.userId;
-      let user = this.cheProfile.getProfileById(userId);
+      const userId = permission.userId;
+      const user = this.cheProfile.getProfileById(userId);
 
       if (userId === this.owner.id) {
         noOwnerPermissions = false;
@@ -209,23 +235,27 @@ export class ListTeamMembersController {
       if (user) {
         this.formUserItem(user, permission);
       } else {
-        this.cheProfile.fetchProfileById(userId).then(() => {
+        const promise = this.cheProfile.fetchProfileById(userId).then(() => {
           this.formUserItem(this.cheProfile.getProfileById(userId), permission);
         });
+        promises.push(promise);
       }
     });
 
     if (noOwnerPermissions) {
-      let user = this.cheProfile.getProfileById(this.owner.id);
+      const user = this.cheProfile.getProfileById(this.owner.id);
 
       if (user) {
         this.formUserItem(user, null);
       } else {
-        this.cheProfile.fetchProfileById(this.owner.id).then(() => {
+        const promise = this.cheProfile.fetchProfileById(this.owner.id).then(() => {
           this.formUserItem(this.cheProfile.getProfileById(this.owner.id), null);
         });
+        promises.push(promise);
       }
     }
+
+    return this.$q.all(promises);
   }
 
   /**
@@ -243,9 +273,11 @@ export class ListTeamMembersController {
 
   /**
    * Fetches the list of team's invitations.
+   *
+   * @return {IPromise<any>}
    */
-  fetchInvitations(): void {
-    this.codenvyInvite.fetchTeamInvitations(this.team.id).then((data: any) => {
+  fetchInvitations(): ng.IPromise<any> {
+    return this.codenvyInvite.fetchTeamInvitations(this.team.id).then((data: any) => {
       this.isLoading = false;
       this.formInvitationList();
     }, (error: any) => {
@@ -264,81 +296,6 @@ export class ListTeamMembersController {
       let user = {userId: invite.email, name: 'Pending invitation', email: invite.email, permissions: invite, isPending: true};
       this.members.push(user);
     });
-  }
-
-  /**
-   * Return <code>true</code> if all members in list are checked.
-   * @returns {boolean}
-   */
-  isAllMembersSelected(): boolean {
-    return this.isAllSelected;
-  }
-
-  /**
-   * Returns <code>true</code> if all members in list are not checked.
-   * @returns {boolean}
-   */
-  isNoMemberSelected(): boolean {
-    return this.isNoSelected;
-  }
-
-  /**
-   * Make all members in list selected.
-   */
-  selectAllMembers(): void {
-    this.members.forEach((member: any) => {
-      if (this.owner.id !== member.userId) {
-        this.membersSelectedStatus[member.userId] = true;
-      }
-    });
-  }
-
-  /**
-   * Make all members in list deselected.
-   */
-  deselectAllMembers(): void {
-    this.members.forEach((member: any) => {
-      this.membersSelectedStatus[member.userId] = false;
-    });
-  }
-
-  /**
-   * Change bulk selection value.
-   */
-  changeBulkSelection(): void {
-    if (this.isBulkChecked) {
-      this.deselectAllMembers();
-      this.isBulkChecked = false;
-    } else {
-      this.selectAllMembers();
-      this.isBulkChecked = true;
-    }
-    this.updateSelectedStatus();
-  }
-
-  /**
-   * Update members selected status.
-   */
-  updateSelectedStatus(): void {
-    this.isNoSelected = true;
-    this.isAllSelected = true;
-
-    Object.keys(this.membersSelectedStatus).forEach((key: string) => {
-      if (this.membersSelectedStatus[key]) {
-        this.isNoSelected = false;
-      } else {
-        this.isAllSelected = false;
-      }
-    });
-
-    if (this.isNoSelected) {
-      this.isBulkChecked = false;
-      return;
-    }
-
-    if (this.isAllSelected) {
-      this.isBulkChecked = true;
-    }
   }
 
   /**
@@ -395,7 +352,7 @@ export class ListTeamMembersController {
 
     this.isLoading = true;
     this.$q.all(promises).then(() => {
-      this.refreshData(isAddMember, isInvite);
+      return this.refreshData(isAddMember, isInvite);
     }).finally(() => {
       this.isLoading = false;
       if (unregistered.length > 0) {
@@ -478,68 +435,48 @@ export class ListTeamMembersController {
    * Remove all selected members.
    */
   removeSelectedMembers(): void {
-    let membersSelectedStatusKeys = Object.keys(this.membersSelectedStatus);
-    let checkedKeys = [];
+    const selectedMembers = this.cheListHelper.getSelectedItems();
 
-    if (!membersSelectedStatusKeys.length) {
+    if (!selectedMembers.length) {
       this.cheNotification.showError('No such members.');
       return;
     }
 
-    membersSelectedStatusKeys.forEach((key: string) => {
-      if (this.membersSelectedStatus[key] === true) {
-        checkedKeys.push(key);
-      }
-    });
-
-    if (!checkedKeys.length) {
-      this.cheNotification.showError('No such members.');
-      return;
-    }
-
-    let confirmationPromise = this.showDeleteMembersConfirmation(checkedKeys.length);
+    const confirmationPromise = this.showDeleteMembersConfirmation(selectedMembers.length);
     confirmationPromise.then(() => {
+      const removeMembersPromises = [];
       let removalError;
-      let removeMembersPromises = [];
-      let currentUserPromise;
       let deleteInvite = false;
       let deleteMember = false;
+      let deleteCurrentUser = false;
 
-      for (let i = 0; i < checkedKeys.length; i++) {
-        let id = checkedKeys[i];
-        this.membersSelectedStatus[id] = false;
-        let member = this.getMemberById(id);
+      selectedMembers.forEach((member: codenvy.IMember) => {
+        this.cheListHelper.itemsSelectionStatus[member.userId] = false;
         if (member && member.isPending) {
           deleteInvite = true;
-          let promise = this.codenvyInvite.deleteTeamInvitation(this.team.id, member.email);
+          const promise = this.codenvyInvite.deleteTeamInvitation(this.team.id, member.email);
           removeMembersPromises.push(promise);
-          continue;
+          return;
         }
 
         deleteMember = true;
-        if (id === this.cheUser.getUser().id) {
-          currentUserPromise = this.codenvyPermissions.removeOrganizationPermissions(this.team.id, id);
-          continue;
+        if (member.userId === this.cheUser.getUser().id) {
+          deleteCurrentUser = true;
         }
 
-        let promise = this.codenvyPermissions.removeOrganizationPermissions(this.team.id, id).catch((error: any) => {
+        const promise = this.codenvyPermissions.removeOrganizationPermissions(this.team.id, member.userId).catch((error: any) => {
             removalError = error;
         });
         removeMembersPromises.push(promise);
-      }
-
-      if (currentUserPromise) {
-        removeMembersPromises.push(currentUserPromise);
-      }
+      });
 
       this.$q.all(removeMembersPromises).finally(() => {
-        if (currentUserPromise) {
+        if (deleteCurrentUser) {
           this.processCurrentUserRemoval();
         } else {
           this.refreshData(deleteMember, deleteInvite);
         }
 
-        this.updateSelectedStatus();
         if (removalError) {
           this.cheNotification.showError(removalError.data && removalError.data.message ? removalError.data.message : 'User removal failed.');
         }
