@@ -247,7 +247,7 @@ node default {
   $workspace_auto_snapshot = getValue("CODENVY_WORKSPACE_AUTO_SNAPSHOT","false")
   $workspace_auto_restore = getValue("CODENVY_WORKSPACE_AUTO_RESTORE","false")
   $workspace_auto_start = getValue("CODENVY_WORKSPACE_AUTO_START","true")
-  $workspace_java_options= getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
+  $workspace_java_options= getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom")
   $workspace_maven_options = getValue("CHE_WORKSPACE_MAVEN_OPTIONS", "NULL")
 
 ###############################
