@@ -65,6 +65,7 @@ export class CodenvyHttpBackend {
     this.httpBackend.when('GET', '/api/user/inrole?role=user&scope=system&scopeId=').respond(true);
     // branding
     this.httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
+    this.httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
     // settings
     this.httpBackend.when('GET', '/api/workspace/settings').respond({});
   }
