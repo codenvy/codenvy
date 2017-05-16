@@ -68,6 +68,7 @@ public class SwarmDockerConnector extends DockerConnector {
     private static final Pattern IMAGE_NOT_FOUND_BY_SWARM_ERROR_MESSAGE = Pattern.compile("^Error: image .* not found.*", Pattern.DOTALL);
     private static final Pattern REPOSITORY_NOT_FOUND_BY_SWARM_ERROR_MESSAGE =
             Pattern.compile(".*repository .* not found: does not exist or no pull access.*", Pattern.DOTALL);
+    public static final String DOCKER_OUT_OF_RESOURCES_ERROR_MESSAGE = "no resources available to schedule container";
 
     private final NodeSelectionStrategy   strategy;
     //TODO should it be done in other way?
@@ -109,6 +110,11 @@ public class SwarmDockerConnector extends DockerConnector {
         try {
             return super.buildImage(params, progressMonitor);
         } catch (DockerException e) {
+            if (e.getOriginError() != null && e.getOriginError().contains(DOCKER_OUT_OF_RESOURCES_ERROR_MESSAGE)) {
+                LOG.error("Failed to build {} image with {} RAM because of out of resources.",
+                          params.getRepository(),
+                          params.getMemoryLimit());
+            }
             throw decorateMessage(e);
         }
     }
@@ -189,7 +195,7 @@ public class SwarmDockerConnector extends DockerConnector {
     }
 
     private DockerException decorateMessage(DockerException e) {
-        if (e.getOriginError() != null && e.getOriginError().contains("no resources available to schedule container")) {
+        if (e.getOriginError() != null && e.getOriginError().contains(DOCKER_OUT_OF_RESOURCES_ERROR_MESSAGE)) {
             e = new DockerException("The system is out of resources. Please contact your system admin.",
                                     e.getOriginError(),
                                     e.getStatus());
