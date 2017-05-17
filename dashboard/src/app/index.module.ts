@@ -218,8 +218,62 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
   };
 });
 
+// Prevents CSRF(see https://en.wikipedia.org/wiki/Cross-site_request_forgery)
+// using additional token header, see
+// https://tomcat.apache.org/tomcat-7.0-doc/config/filter.html#CSRF_Prevention_Filter_for_REST_APIs
+initModule.factory('CsrfPreventionInterceptor', ($injector, $rootScope) => {
+  const CSRF_TOKEN_HEADER_NAME = 'X-CSRF-Token';
+  let csrfToken = "";
+
+  function isModifyingMethod(method: string): boolean {
+    return method === "POST" || method === "PUT" || method === "DELETE";
+  };
+
+  function isMachineRequest(url: string): boolean {
+    let agents = $injector.get('cheWorkspace').getWorkspaceAgents();
+    for (let agent of agents.values()) {
+      if (url.startsWith(agent.workspaceAgentData.path)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return {
+    request: (config) => {
+      // no need to add X-CSRF-Token to machine requests
+      if (isMachineRequest(config.url)) {
+        return config;
+      }
+
+      // X-CSRF-Token=Fetch if the request method is 'GET' and token is not fetched yet
+      if (config.method === "GET" && !csrfToken) {
+        config.headers[CSRF_TOKEN_HEADER_NAME] = "Fetch";
+        return config;
+      }
+
+      // X-CSRF-Token=0ABCD(actual token) if request modifies server state and token is fetched
+      if (isModifyingMethod(config.method) && csrfToken) {
+        config.headers[CSRF_TOKEN_HEADER_NAME] = csrfToken;
+      }
+
+      return config;
+    },
+
+    // Gets fetched X-CSRF-Token and caches it
+    response: (response) => {
+      var respCsrfToken = response.headers(CSRF_TOKEN_HEADER_NAME);
+      if (respCsrfToken && response.config.method === "GET") {
+        csrfToken = respCsrfToken;
+      }
+      return response;
+    }
+  };
+});
+
 initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
   $httpProvider.interceptors.push('AddMachineTokenToUrlInterceptor');
+  $httpProvider.interceptors.push('CsrfPreventionInterceptor');
   if (DEV) {
     console.log('adding auth interceptor');
     $httpProvider.interceptors.push('AuthInterceptor');
@@ -251,4 +305,3 @@ new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
 new TeamsConfig(instanceRegister);
-
