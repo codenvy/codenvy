@@ -14,6 +14,9 @@
  */
 package com.codenvy.api.deploy;
 
+import com.codenvy.auth.sso.client.CodenvyCsrfFilter;
+import com.google.common.base.Joiner;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
 
 import org.apache.catalina.filters.CorsFilter;
@@ -79,6 +82,11 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         filter(pathForLoginFilter).through(com.codenvy.auth.sso.client.LoginFilter.class);
+
+        // comma separated list of paths like "/service1,/service2"
+        bindConstant().annotatedWith(Names.named("csrf_filter.paths_accepting_parameters")).to("/ssh");
+        filter(pathForLoginFilter).through(CodenvyCsrfFilter.class);
+
         filter(pathForLoginFilter).through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
 
         final Map<String, String> corsFilterParams = new HashMap<>();

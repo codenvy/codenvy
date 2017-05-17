@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /** Extract sso token from cookies. */
 public class CookieRequestTokenExtractor implements RequestTokenExtractor {
-    private static final String SECRET_TOKEN_ACCESS_COOKIE = "session-access-key";
+    public static final String SECRET_TOKEN_ACCESS_COOKIE = "session-access-key";
 
     @Override
     public String getToken(HttpServletRequest req) {
