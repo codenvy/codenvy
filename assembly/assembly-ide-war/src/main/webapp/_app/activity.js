@@ -19,12 +19,19 @@ var ActivityTracker = new function () {
     var maxErrors = 10;
     var errors = 0;
     var active;
+    var csrfToken;
 
     this.init = function (restContext, workspaceId) {
         this.url = restContext + "/activity/" + workspaceId;
         document.addEventListener("mousemove",  ActivityTracker.setActive);
         document.addEventListener("keypress", ActivityTracker.setActive);
-        setInterval(ActivityTracker.sendRequest, timeoutInterval);
+        ActivityTracker.requestCsrfToken(restContext,
+                                         function() {
+                                            setInterval(ActivityTracker.sendRequest, timeoutInterval);
+                                         },
+                                         function() {
+                                            console.log("Could not fetch X-CSRF-Token, activity tracking won't be started");
+                                         });
     };
 
     this.setActive = function() {
@@ -58,7 +65,28 @@ var ActivityTracker = new function () {
             }
         };
         request.open("PUT", ActivityTracker.url, true);
+        if (csrfToken) {
+            request.setRequestHeader("X-CSRF-Token", csrfToken);
+        }
         request.send();
     };
 
+    this.requestCsrfToken = function(restContext, tokenPresentHandler, tokenMissingHandler) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                csrfToken = xhr.getResponseHeader("X-CSRF-Token");
+                if (csrfToken) {
+                    tokenPresentHandler(csrfToken);
+                } else {
+                    tokenMissingHandler();
+                }
+            }
+        };
+
+        xhr.open("GET", restContext + "/profile");
+        xhr.setRequestHeader("X-CSRF-Token", "Fetch");
+        xhr.send();
+    }
 };

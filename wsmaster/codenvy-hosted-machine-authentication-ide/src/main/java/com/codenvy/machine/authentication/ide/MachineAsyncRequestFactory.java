@@ -16,6 +16,7 @@ package com.codenvy.machine.authentication.ide;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
 import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -28,19 +29,18 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
+import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.Unmarshallable;
 
-import java.util.List;
+import javax.annotation.PostConstruct;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Strings.nullToEmpty;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
-import static org.eclipse.che.ide.rest.HTTPMethod.POST;
 
 /**
  * Looks at the request and substitutes an appropriate implementation.
@@ -49,14 +49,14 @@ import static org.eclipse.che.ide.rest.HTTPMethod.POST;
  */
 @Singleton
 public class MachineAsyncRequestFactory extends AsyncRequestFactory implements WorkspaceStoppedEvent.Handler {
-    private static final String DTO_CONTENT_TYPE   = APPLICATION_JSON;
+    private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
     private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
-    private final DtoFactory                          dtoFactory;
-    private final AppContext appContext;
+    private final AppContext                          appContext;
 
     private String machineToken;
     private String wsAgentBaseUrl;
+    private String csrfToken;
 
     @Inject
     public MachineAsyncRequestFactory(DtoFactory dtoFactory,
@@ -65,36 +65,24 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
                                       EventBus eventBus) {
         super(dtoFactory);
         this.machineTokenServiceProvider = machineTokenServiceProvider;
-        this.dtoFactory = dtoFactory;
         this.appContext = appContext;
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
-    @Override
-    protected AsyncRequest doCreateRequest(RequestBuilder.Method method,
-                                           String url,
-                                           Object dtoBody,
-                                           boolean async) {
-        if (!isWsAgentRequest(url)) {
-            return super.doCreateRequest(method, url, dtoBody, async);
-        }
-        return doCreateMachineRequest(method, url, dtoBody, async);
+    @PostConstruct
+    private void init() {
+        requestCsrfToken();
     }
 
-    private AsyncRequest doCreateMachineRequest(RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
-        final AsyncRequest asyncRequest = new MachineAsyncRequest(method, url, async, getMachineToken());
-        if (dtoBody != null) {
-            if (dtoBody instanceof List) {
-                asyncRequest.data(dtoFactory.toJson((List)dtoBody));
-            } else {
-                asyncRequest.data(dtoFactory.toJson(dtoBody));
-            }
-            asyncRequest.header(CONTENT_TYPE, DTO_CONTENT_TYPE);
-        } else if (method != null && POST.equals(method.toString())) {
-            asyncRequest.header(CONTENT_TYPE, TEXT_PLAIN);
+    @Override
+    protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
+        if (isWsAgentRequest(url)) {
+            return new MachineAsyncRequest(method, url, async, getMachineToken());
         }
-
-        return asyncRequest;
+        if (isModifyingMethod(method)) {
+            return new CsrfPreventingAsyncModifyingRequest(method, url, async);
+        }
+        return super.newAsyncRequest(method, url, async);
     }
 
     private Promise<String> getMachineToken() {
@@ -123,6 +111,7 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
 
     /**
      * Going to check is this request goes to WsAgent
+     *
      * @param url
      * @return
      */
@@ -139,5 +128,50 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory implements W
             }
         }
         return url.contains(nullToEmpty(wsAgentBaseUrl));
+    }
+
+    private Promise<String> requestCsrfToken() {
+        if (csrfToken != null) {
+            return Promises.resolve(csrfToken);
+        }
+        return createGetRequest(appContext.getMasterEndpoint() + "/profile")
+                .header(CSRF_TOKEN_HEADER_NAME, "Fetch")
+                .send(new Unmarshallable<String>() {
+                    @Override
+                    public void unmarshal(Response response) throws UnmarshallerException {
+                        csrfToken = response.getHeader(CSRF_TOKEN_HEADER_NAME);
+                        if (csrfToken != null) {
+                            appContext.getProperties().put(CSRF_TOKEN_HEADER_NAME, csrfToken);
+                        }
+                    }
+
+                    @Override
+                    public String getPayload() {
+                        return csrfToken;
+                    }
+                });
+    }
+
+    private class CsrfPreventingAsyncModifyingRequest extends AsyncRequest {
+
+        protected CsrfPreventingAsyncModifyingRequest(RequestBuilder.Method method, String url, boolean async) {
+            super(method, url, async);
+        }
+
+        @Override
+        public void send(AsyncRequestCallback<?> callback) {
+            requestCsrfToken()
+                    .then(token -> {
+                        super.header(CSRF_TOKEN_HEADER_NAME, token);
+                        super.send(callback);
+                    })
+                    .catchError(arg -> {
+                        super.send(callback);
+                    });
+        }
+    }
+
+    private boolean isModifyingMethod(RequestBuilder.Method method) {
+        return method == RequestBuilder.POST || method == RequestBuilder.PUT || method == RequestBuilder.DELETE;
     }
 }
