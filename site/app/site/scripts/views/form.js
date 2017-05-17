@@ -1,10 +1,10 @@
 /*
  * CODENVY CONFIDENTIAL
  * __________________
- * 
- *  [2012] - [2013] Codenvy, S.A. 
+ *
+ *  [2012] - [2013] Codenvy, S.A.
  *  All Rights Reserved.
- * 
+ *
  * NOTICE:  All information contained herein is, and remains
  * the property of Codenvy S.A. and its suppliers,
  * if any.  The intellectual and technical concepts contained
@@ -15,7 +15,7 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Codenvy S.A..
  */
- 
+
 define(["jquery", "underscore", "backbone", "models/account", "validation"],
 
     function($,_,Backbone,Account){
@@ -29,6 +29,10 @@ define(["jquery", "underscore", "backbone", "models/account", "validation"],
                         window.location = "/site/maintenance";
                     }
                 });
+
+                // eagerly fetch csrf token
+                this.csrfToken = Account.getCsrfToken();
+
                 this.getBranding = Account.getBrandingInfo()
                 .done(function(Branding){
                     try{

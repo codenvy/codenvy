@@ -17,7 +17,66 @@
  */
 (function(window) {
     var _gaq = _gaq || [];
+
     define(["jquery", "underscore", "json", "cookies"], function($, _, JSON) {
+
+      // Prevents CSRF(see https://en.wikipedia.org/wiki/Cross-site_request_forgery)
+      // using additional token header, see
+      // https://tomcat.apache.org/tomcat-7.0-doc/config/filter.html#CSRF_Prevention_Filter_for_REST_APIs
+      var CsrfPreventingRequestInterceptor = function() {
+        this.CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
+        this.csrfToken = "";
+
+        function isModifyingMethod(method) {
+          return method === "POST" || method === "PUT" || method === "DELETE";
+        }
+
+        var self = this;
+
+        // adds token to the XMLHttpRequest
+        this.addToken = function(xhr, method) {
+          if (method === "GET" && !self.csrfToken) {
+            xhr.setRequestHeader(self.CSRF_TOKEN_HEADER_NAME, "Fetch");
+          } else if (isModifyingMethod(method) && self.csrfToken) {
+            xhr.setRequestHeader(self.CSRF_TOKEN_HEADER_NAME, self.csrfToken);
+          }
+        };
+
+        // gets token from XMLHttpRequest, sets it to the current context
+        this.catchToken = function(xhr) {
+          var respToken = xhr.getResponseHeader(self.CSRF_TOKEN_HEADER_NAME);
+          if (respToken) {
+            self.csrfToken = respToken;
+          }
+        };
+      };
+
+      var csrfPreventingRequestInterceptor = new CsrfPreventingRequestInterceptor();
+      $.ajaxPrefilter(function(options, originalOptions, xhr) {
+          csrfPreventingRequestInterceptor.addToken(xhr, options.type);
+      });
+
+      // once token is fetched it is cached and used by all the modifying requests
+      var getCsrfToken = function() {
+        var deferredResult = $.Deferred();
+
+        if (csrfPreventingRequestInterceptor.csrfToken) {
+            deferredResult.resolve(csrfPreventingRequestInterceptor.csrfToken);
+        } else {
+            $.ajax({
+                url: "/api/profile",
+                type: "GET",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRF-Token", "Fetch");
+                },
+                complete: function(xhr) {
+                    csrfPreventingRequestInterceptor.catchToken(xhr);
+                    deferredResult.resolve();
+                }
+            });
+        }
+        return deferredResult;
+      };
         /*
             AccountError is used to report errors through error callback function
             (see details below ). Example usage:
@@ -200,17 +259,19 @@
             var data = {
                 name: accountName
             };
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: JSON.stringify(data),
-                contentType: "application/json"
-            })
-            .success(function(response){
-                deferredResult.resolve(response);
-            })
-            .error(function(error){
-                deferredResult.reject(error);
+            getCsrfToken().then(function() {
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json"
+                })
+                .success(function(response) {
+                    deferredResult.resolve(response);
+                })
+                .error(function(error) {
+                    deferredResult.reject(error);
+                });
             });
             return deferredResult;
         };
@@ -308,15 +369,17 @@
         var acceptLicense = function(){
             var deferredResult = $.Deferred();
             var acceptLicenseUrl = "/api/license/system/fair-source-license";
-            $.ajax({
-                url: acceptLicenseUrl,
-                type: "POST"
-            })
-            .success(function(response){
-                deferredResult.resolve(response);
-            })
-            .error(function(error){
-                deferredResult.reject(getResponseMessage(error));
+            getCsrfToken().then(function() {
+                $.ajax({
+                    url: acceptLicenseUrl,
+                    type: "POST"
+                })
+                .success(function(response){
+                    deferredResult.resolve(response);
+                })
+                .error(function(error){
+                    deferredResult.reject(getResponseMessage(error));
+                });
             });
             return deferredResult;
         };
@@ -356,6 +419,7 @@
             getUserSettings: getUserSettings,
             acceptLicense: acceptLicense,
             logout: logout,
+            getCsrfToken: getCsrfToken,
             isValidDomain: function(domain) {
                 return (/^[a-z0-9][a-z0-9_.-]{2,19}$/).exec(domain) !== null;
             },

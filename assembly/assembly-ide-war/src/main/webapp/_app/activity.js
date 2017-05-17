@@ -75,7 +75,7 @@ var ActivityTracker = new function () {
         var xhr = new XMLHttpRequest();
 
         xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
                 csrfToken = xhr.getResponseHeader("X-CSRF-Token");
                 if (csrfToken) {
                     tokenPresentHandler(csrfToken);
