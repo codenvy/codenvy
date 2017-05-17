@@ -39,6 +39,7 @@ backend nginx_bk
     http-request replace-header Cookie (.*)logged_in=([^;]*);(.*) \1\3
     http-request replace-header Cookie (.*)token-access-key=([^;]*);(.*) \1\3
     http-request replace-header Cookie (.*)IDESESSIONID=([^;]*);(.*) \1\3
+    http-request replace-header Cookie (.*)X-CSRF-Token=([^;]*);(.*) \1\3
     server nginx_bk codenvy-nginx:81 check
 
 backend agents_bk
