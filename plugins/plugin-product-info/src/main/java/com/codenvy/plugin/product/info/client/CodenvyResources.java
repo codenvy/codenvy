@@ -26,4 +26,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public interface CodenvyResources extends ClientBundle {
     @Source("logo/codenvy-logo.svg")
     SVGResource logo();
+
+    @Source("logo/codenvy-watermark-logo.svg")
+    SVGResource waterMarkerLogo();
 }

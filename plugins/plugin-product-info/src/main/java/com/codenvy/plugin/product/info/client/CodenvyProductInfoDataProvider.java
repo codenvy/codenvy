@@ -66,6 +66,11 @@ public class CodenvyProductInfoDataProvider extends ProductInfoDataProviderImpl 
     }
 
     @Override
+    public SVGResource getWaterMarkLogo() {
+        return resources.waterMarkerLogo();
+    }
+
+    @Override
     public String getSupportTitle() {
         return locale.supportTitle();
     }
