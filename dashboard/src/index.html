@@ -76,7 +76,12 @@
               che-support-email="{{branding.supportEmail}}"
               che-logo="{{branding.logoURL}}"
               che-version="{{productVersion}}"
-              che-product-name="Codenvy" ng-show="waitingLoaded && !showIDE"></che-footer>
+              che-product-name="Codenvy"
+              che-links="branding.footer.links"
+              che-email="branding.footer.email"
+              ng-show="waitingLoaded && !showIDE">
+    {{branding.footer.content}}
+  </che-footer>
 </div>
 <!-- Addons are not automatically injected -->
 
