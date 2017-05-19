@@ -38,6 +38,7 @@ cmd_start_check_ports() {
 
     PORT_ARRAY+=("$CODENVY_DEBUG_PORT;port ${CODENVY_DEBUG_PORT} (debug):       ")
     PORT_ARRAY+=("9000;port 9000 (lighttpd):   ")
+    PORT_ARRAY+=("5432;port 5432 (postgresql): ")
   fi
 
   if check_all_ports "${PORT_ARRAY[@]}"; then
