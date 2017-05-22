@@ -196,6 +196,8 @@ export class ListOrganizationsController {
         this.isLoading = false;
         this.cheListHelper.setList(this.organizations, 'id');
       });
+    } else {
+      this.cheListHelper.setList(this.organizations, 'id');
     }
   }
 

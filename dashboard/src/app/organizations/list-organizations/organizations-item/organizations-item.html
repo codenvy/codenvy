@@ -46,7 +46,7 @@
       </div>
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
-        <span class="che-list-actions" ng-if="organizationsItemController.hasDeletePermission()">
+        <span class="che-list-actions" ng-if="organizationsItemController.hasDeletePermission() || organizationsItemController.isSelectable">
            <a tooltip="Remove organization" ng-click="organizationsItemController.removeOrganization();">
             <span class="fa fa-trash-o"></span>
           </a>

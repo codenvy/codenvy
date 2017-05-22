@@ -35,6 +35,7 @@ export class LicenseMessagesService {
   $cookies: ng.cookies.ICookiesService;
   $mdDialog: ng.material.IDialogService;
 
+  systemPermissionNotFound: boolean = false;
   legality: {isLegal: boolean, issues?: Array<{message: string, status: string}>};
   userServices: {hasAdminUserService: boolean};
 
@@ -60,8 +61,12 @@ export class LicenseMessagesService {
    */
   fetchMessages(): void {
     this.codenvyLicense.fetchLicenseLegality().then(() => {
-      if (!this.codenvyPermissions.getSystemPermissions()) {
-        this.codenvyPermissions.fetchSystemPermissions().finally(() => {
+      if (!this.codenvyPermissions.getSystemPermissions() && !this.systemPermissionNotFound) {
+        this.codenvyPermissions.fetchSystemPermissions().catch((error: any) => {
+          if (error.status === 404) {
+            this.systemPermissionNotFound = true;
+          }
+        }).finally(() => {
           this.checkLicenseMessage();
           this.checkIssues();
         });

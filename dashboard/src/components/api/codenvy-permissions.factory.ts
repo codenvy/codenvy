@@ -112,8 +112,11 @@ export class CodenvyPermissions {
     }, (error: any) => {
       if (error.status === 304) {
         return this.organizationPermissions.get(organizationId);
+      } else if (error.status === 403) {
+        this.organizationPermissions.set(organizationId, []);
+        return this.organizationPermissions.get(organizationId);
       }
-      return this.$q.reject();
+      return this.$q.reject(error);
     });
 
     return resultPromise;
