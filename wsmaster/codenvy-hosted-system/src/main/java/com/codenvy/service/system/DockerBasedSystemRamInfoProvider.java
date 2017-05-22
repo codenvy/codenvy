@@ -97,7 +97,7 @@ public class DockerBasedSystemRamInfoProvider implements SystemRamInfoProvider {
           There are as many RAM values arrays inside the 'statusOutput' array as many nodes are present in the system.
          */
         for (String[] systemInfoEntry : statusOutput) {
-            if (systemInfoEntry.length == 2 && " └ Reserved Memory".equals(systemInfoEntry[0])) {
+            if (systemInfoEntry.length == 2 && systemInfoEntry[0] != null && systemInfoEntry[0].endsWith("Reserved Memory")) {
                 allNodesRamUsage.add(systemInfoEntry[1]);
             }
         }
