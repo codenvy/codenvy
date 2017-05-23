@@ -23,6 +23,7 @@ define(["jquery", "underscore", "backbone", "models/account", "validation"],
         var Form = Backbone.View.extend({
 
             initialize : function(){
+                var self = this;
                 Account.isApiAvailable()
                 .then(function(apiAvailable){
                     if (!apiAvailable){
@@ -35,6 +36,7 @@ define(["jquery", "underscore", "backbone", "models/account", "validation"],
 
                 this.getBranding = Account.getBrandingInfo()
                 .done(function(Branding){
+                    self.Branding = Branding;
                     try{
                         document.title = Branding.title + ' | ' + document.title;
                     }catch(err){

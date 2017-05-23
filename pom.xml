@@ -69,7 +69,7 @@
         <org.osgi.version>5.0.0</org.osgi.version>
         <org.scala.lang.version>2.10.4</org.scala.lang.version>
         <org.thymeleaf.version>3.0.3.RELEASE</org.thymeleaf.version>
-        <site.classifier>onprem-se</site.classifier>
+        <site.classifier>stage</site.classifier>
         <version.license-header>codenvy-codenvy-license-resource-bundle</version.license-header>
         <version.license.header.artifactid>codenvy-codenvy-license-resource-bundle</version.license.header.artifactid>
         <version.license.header.groupid>com.codenvy.resources</version.license.header.groupid>

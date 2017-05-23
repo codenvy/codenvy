@@ -4,6 +4,7 @@
   "supportEmail": "wish@codenvy.com",
   "supportLink": "http://helpdesk.codenvy.com",
   "oauthDocs": "Please contact your administrator.",
+  "oauthButtons": ["google", "github","microsoft","linkedin", "redhat"],
   "errorpage": {
     "error400": {
       "title":"Codenvy | 400",

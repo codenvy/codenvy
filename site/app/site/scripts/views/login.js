@@ -22,12 +22,14 @@
         var action,
         errorContainer,
 		oauthProviderButtons;
-        oauthProviderButtons = ["google", "github","microsoft","linkedin", "redhat"]; // the list of oauth provider buttons
+        oauthProviderButtons = ["github", "google", "microsoft", "linkedin", "redhat"]; // the default order of oauth provider buttons
+        var self;
         var LoginForm = AccountFormBase.extend({
             loginTemplate : Handlebars.compile(loginTemplate),
             createTemplate : Handlebars.compile(createTemplate),
             oauthTemplate : Handlebars.compile(oauthTemplate),
             initialize : function(attributes){
+                self = this;
                 AccountFormBase.prototype.initialize.apply(this,attributes);
                 Account.isApiAvailable()
                 .then(function(apiAvailable){
@@ -43,41 +45,41 @@
 	        
 	        proceedLogin : function(){
 	        	action = 'login';
-				var self = this;
-				Account.isUserAuthenticated()
-				.then(function(athenticated){
-				   if (athenticated){
-				       Account.navigateToLocation();
-				   }else {
-				       return $.Deferred().reject();
-				   }
-				   })
-				.fail(function(){ //user is not aouthenticated
-                    Account.getUserSettings() //get user props
-                    .then(function(settings){ //set parameter to hide/show create account form
-    					$(".col-md-12").append(self.loginTemplate());//show Login form
-                        Account.getOAuthproviders(_.bind(self.constructOAuthElements,self));
-                        self.el = $(".login-form");
-                        errorContainer = $(".error-container");
-                        self.addValidator();
-                        if (settings["che.auth.user_self_creation"] === "true") {
-                                //show create-account link
-                            $("#signUp").html('Create a New Account');
-                            $("#signUp").click(function(){
-                               $(".col-md-12").empty();//hide login form
-                               self.proceedCreate();
-                            });
-                        }else {
-                            $("#signUp").after('Self-service account creation has been disabled. If you do not have an account, please contact your administrator.').remove();
-                        }
-                   })
-                    .fail();
-				});
+                self.getBranding.complete(function(){ //waiting for Branding response
+    				Account.isUserAuthenticated()
+    				.then(function(athenticated){
+    				   if (athenticated){
+    				       Account.navigateToLocation();
+    				   }else {
+    				       return $.Deferred().reject();
+    				   }
+    				   })
+    				.fail(function(){ //user is not aouthenticated
+                        Account.getUserSettings() //get user props
+                        .then(function(settings){ //set parameter to hide/show create account form
+        					$(".col-md-12").append(self.loginTemplate());//show Login form
+                            Account.getOAuthproviders(_.bind(self.constructOAuthElements,self));
+                            self.el = $(".login-form");
+                            errorContainer = $(".error-container");
+                            self.addValidator();
+                            if (settings["che.auth.user_self_creation"] === "true") {
+                                    //show create-account link
+                                $("#signUp").html('Create a New Account');
+                                $("#signUp").click(function(){
+                                   $(".col-md-12").empty();//hide login form
+                                   self.proceedCreate();
+                                });
+                            }else {
+                                $("#signUp").after('Self-service account creation has been disabled. If you do not have an account, please contact your administrator.').remove();
+                            }
+                       })
+                        .fail();
+    				});
+                });
 	        },
 
 	        proceedCreate : function(){
 	        	action = 'create';
-	        	var self = this;
                 $(".col-md-12").append(this.createTemplate());//show Create form
                 //bind onclick to Google and GitHub buttons
                 $("#signIn").click(function(){
@@ -103,21 +105,28 @@
             },
             
 	        constructOAuthElements : function(deffer){
-	            var self = this;
 	            deffer
 	            .then(function(providers){
+                    var Branding = self.Branding || {};
+                    if (Branding.oauthButtons) {
+                        oauthProviderButtons = Branding.oauthButtons;
+                    }
+                    //sort providers in order they follow in oauthProviderButtons array
+                    providers.sort(function(a,b){
+                        return oauthProviderButtons.indexOf(a.name) - oauthProviderButtons.indexOf(b.name);
+                    });
 	                _.each(providers,function(provider){
-	                    if (oauthProviderButtons.indexOf(provider.name) >= 0){
-	                        self.$(".oauth-list").append(
-	                            self.oauthTemplate(provider)
-	                        );
-	                        // bind action to oauth button
-	                        $(".oauth-button." + provider.name).click(function(){
-	                            Account.loginWithOauthProvider(provider, "Login page", function(url){
-	                                window.location = url;
-	                            });
-	                        });
-	                    }
+                        if (oauthProviderButtons.indexOf(provider.name) >= 0){
+                            self.$(".oauth-list").append(
+                                self.oauthTemplate(provider)
+                            );
+                            // bind action to oauth button
+                            $(".oauth-button." + provider.name).click(function(){
+                                Account.loginWithOauthProvider(provider, "Login page", function(url){
+                                    window.location = url;
+                                });
+                            });
+                        }
 	                },this);
 	            });
 	        },
