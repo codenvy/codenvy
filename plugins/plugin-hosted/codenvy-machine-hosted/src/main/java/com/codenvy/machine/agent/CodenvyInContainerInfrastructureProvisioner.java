@@ -40,8 +40,7 @@ import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
  */
 public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
     public static final String SYNC_KEY_ENV_VAR_NAME = "CODENVY_SYNC_PUB_KEY";
-
-    private static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Arrays.asList("/tmp");
+    public static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Arrays.asList("/tmp");
 
     private final String pubSyncKey;
     private final String projectFolder;

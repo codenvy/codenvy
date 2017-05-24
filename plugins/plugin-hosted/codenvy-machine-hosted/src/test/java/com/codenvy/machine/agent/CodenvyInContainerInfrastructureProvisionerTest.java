@@ -34,12 +34,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.codenvy.machine.agent.CodenvyInContainerInfrastructureProvisioner.SNAPSHOT_EXCLUDED_DIRECTORIES;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Alexander Garagatyi
@@ -49,6 +50,7 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
     private static final String SYNC_KEY             = "testSyncKey";
     private static final String TEST_PROJECTS_FOLDER = "/test/projects/folder";
     private static final String DEV_MACHINE_NAME     = "dev";
+    private static final String NON_DEV_MACHINE_NAME = "non-dev";
 
     @Mock
     private AgentConfigApplier agentConfigApplier;
@@ -74,11 +76,11 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
                                                                       TEST_PROJECTS_FOLDER);
 
         Map<String, ExtendedMachineImpl> extendedMachines = new HashMap<>();
-        extendedMachines.put("non-dev", extendedMachine);
+        extendedMachines.put(NON_DEV_MACHINE_NAME, extendedMachine);
         extendedMachines.put(DEV_MACHINE_NAME, devExtendedMachine);
         environment.setMachines(extendedMachines);
         Map<String, CheServiceImpl> services = new HashMap<>();
-        services.put("non-dev", cheService);
+        services.put(NON_DEV_MACHINE_NAME, cheService);
         services.put(DEV_MACHINE_NAME, devCheService);
         internalEnv.setServices(services);
         devExtendedMachine.setAgents(asList("org.eclipse.che.exec",
@@ -175,8 +177,16 @@ public class CodenvyInContainerInfrastructureProvisionerTest {
 
         provisioner.provision(environment, internalEnv);
 
-        assertEqualsNoOrder(internalEnv.getServices().get(DEV_MACHINE_NAME).getVolumes().toArray(),
-                            asList(TEST_PROJECTS_FOLDER, "/some/volume", "/some/bind:/mount/volume").toArray());
+        assertTrue(internalEnv.getServices().get(DEV_MACHINE_NAME).getVolumes().contains("/some/volume"));
+        assertTrue(internalEnv.getServices().get(DEV_MACHINE_NAME).getVolumes().contains("/some/bind:/mount/volume"));
+    }
+
+    @Test
+    public void shouldAddVolumesForExcludedFromSnapshotFoldersOnEnvironmentProvision() throws Exception {
+        provisioner.provision(environment, internalEnv);
+
+        assertTrue(internalEnv.getServices().get(DEV_MACHINE_NAME).getVolumes().containsAll(SNAPSHOT_EXCLUDED_DIRECTORIES));
+        assertTrue(internalEnv.getServices().get(NON_DEV_MACHINE_NAME).getVolumes().containsAll(SNAPSHOT_EXCLUDED_DIRECTORIES));
     }
 
     @Test
