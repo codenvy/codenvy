@@ -27,6 +27,7 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingPr
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -39,6 +40,9 @@ import static org.eclipse.che.api.workspace.shared.Utils.getDevMachineName;
  */
 public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastructureProvisioner {
     public static final String SYNC_KEY_ENV_VAR_NAME = "CODENVY_SYNC_PUB_KEY";
+
+    private static final List<String> SNAPSHOT_EXCLUDED_DIRECTORIES = Arrays.asList("/tmp");
+
     private final String pubSyncKey;
     private final String projectFolder;
 
@@ -76,6 +80,12 @@ public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastr
         List<String> volumes = new ArrayList<>(devMachine.getVolumes());
         volumes.add(projectFolder);
         devMachine.setVolumes(volumes);
+
+        for (CheServiceImpl service : internalEnv.getServices().values()) {
+            volumes = new ArrayList<>(service.getVolumes());
+            volumes.addAll(SNAPSHOT_EXCLUDED_DIRECTORIES); // creates volume for each directory to exclude from a snapshot
+            service.setVolumes(volumes);
+        }
 
         super.provision(envConfig, internalEnv);
     }
