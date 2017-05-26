@@ -19,13 +19,14 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
 /**
- * Checks user's permission to perform some action with particular instance of given domain
+ * Checks user's permission to perform some action with particular instance of given domain.
  *
  * @author Sergii Leschenko
  */
 public interface PermissionChecker {
     /**
-     * TODO Add comment about public permissions
+     * Checks user's permission to perform some action with particular instance.
+     *
      * @param user
      *         user id
      * @param domain

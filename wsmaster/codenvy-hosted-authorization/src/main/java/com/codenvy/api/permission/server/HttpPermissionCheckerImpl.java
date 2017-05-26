@@ -54,13 +54,11 @@ public class HttpPermissionCheckerImpl implements PermissionChecker {
                                                 @Override
                                                 public Set<String> load(Key key) throws Exception {
                                                     UriBuilder currentUsersPermissions = UriBuilder.fromUri(apiEndpoint)
-                                                                                                   .path(PermissionsService.class)
-                                                                                                   .path(PermissionsService.class,
-                                                                                                         "getCurrentUsersPermissions");
+                                                                                                   .path("permissions/" + key.domain);
                                                     if (key.instance != null) {
                                                         currentUsersPermissions.queryParam("instance", key.instance);
                                                     }
-                                                    String userPermissionsUrl = currentUsersPermissions.build(key.domain).toString();
+                                                    String userPermissionsUrl = currentUsersPermissions.build().toString();
                                                     try {
                                                         PermissionsDto usersPermissions = requestFactory.fromUrl(userPermissionsUrl)
                                                                                                         .useGetMethod()
@@ -78,8 +76,7 @@ public class HttpPermissionCheckerImpl implements PermissionChecker {
     @Override
     public boolean hasPermission(String user, String domain, String instance, String action) throws ServerException {
         try {
-            return permissionsCache.get(new Key(user, domain, instance)).contains(action)
-                    || permissionsCache.get(new Key("*", domain, instance)).contains(action);
+            return permissionsCache.get(new Key(user, domain, instance)).contains(action);
         } catch (Exception e) {
             throw new ServerException(e.getMessage(), e);
         }

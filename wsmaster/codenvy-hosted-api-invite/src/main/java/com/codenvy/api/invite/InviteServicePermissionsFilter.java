@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.invite;
 
-import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.shared.invite.dto.InviteDto;
 
 import org.eclipse.che.api.core.ApiException;
@@ -25,6 +24,8 @@ import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
 import javax.ws.rs.Path;
+
+import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 
 /**
  * Restricts access to methods of {@link InviteService} by users' permissions.
@@ -61,7 +62,7 @@ public class InviteServicePermissionsFilter extends CheMethodInvokerFilter {
                 throw new ForbiddenException("User is not authorized to perform specified operation");
         }
 
-        if (!EnvironmentContext.getCurrent().getSubject().hasPermission(domain, instance, AbstractPermissionsDomain.SET_PERMISSIONS)) {
+        if (!EnvironmentContext.getCurrent().getSubject().hasPermission(domain, instance, SET_PERMISSIONS)) {
             throw new ForbiddenException("User is not authorized to invite into specified instance");
         }
     }

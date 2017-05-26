@@ -51,6 +51,7 @@
         <module>codenvy-hosted-api-machine</module>
         <module>codenvy-hosted-api-workspace</module>
         <module>codenvy-hosted-authorization</module>
+        <module>codenvy-hosted-authorization-impl</module>
         <module>codenvy-hosted-api-factory</module>
         <module>codenvy-hosted-integration-tests</module>
         <module>codenvy-ldap</module>

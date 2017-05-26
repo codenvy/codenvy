@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.ServerException;
 import javax.inject.Inject;
 
 /**
- * Implementation of {@link PermissionChecker} that use {@link PermissionsManager} for checking
+ * Implementation of {@link PermissionChecker} that use {@link PermissionsManager} for checking.
  *
  * @author Sergii Leschenko
  */

@@ -31,6 +31,10 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
+            <artifactId>codenvy-hosted-api-permission</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-system-license-shared</artifactId>
         </dependency>
         <dependency>
@@ -314,6 +318,15 @@
                                 codenvy-sql-schema</includeArtifactIds>
                             <includes>che-schema/,codenvy-schema/</includes>
                             <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>com.codenvy.onpremises.wsmaster:codenvy-hosted-api-permission</ignoreDependenvy>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>

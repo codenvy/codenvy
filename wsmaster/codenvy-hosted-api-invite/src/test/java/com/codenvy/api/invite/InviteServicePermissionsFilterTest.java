@@ -14,7 +14,6 @@
  */
 package com.codenvy.api.invite;
 
-import com.codenvy.api.permission.server.AbstractPermissionsDomain;
 import com.codenvy.shared.invite.dto.InviteDto;
 
 import org.eclipse.che.api.core.ForbiddenException;
@@ -42,6 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.codenvy.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
 import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -131,7 +131,7 @@ public class InviteServicePermissionsFilterTest {
                .post(SECURE_PATH + "/invite");
 
         verify(service).invite(toStore);
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class InviteServicePermissionsFilterTest {
                .post(SECURE_PATH + "/invite");
 
         verify(service, never()).invite(any());
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class InviteServicePermissionsFilterTest {
                .get(SECURE_PATH + "/invite/test?instance=test123&skipCount=1&maxItems=2");
 
         verify(service).getInvites("test", "test123", 1, 2);
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Test
@@ -177,7 +177,7 @@ public class InviteServicePermissionsFilterTest {
                .get(SECURE_PATH + "/invite/test?instance=test123&skipCount=1&maxItems=2");
 
         verify(service, never()).getInvites(anyString(), anyString(), anyLong(), anyInt());
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Test
@@ -189,7 +189,7 @@ public class InviteServicePermissionsFilterTest {
                .delete(SECURE_PATH + "/invite/test?instance=test123&email=user@test.com");
 
         verify(service).remove("test", "test123", "user@test.com");
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Test
@@ -203,7 +203,7 @@ public class InviteServicePermissionsFilterTest {
                .delete(SECURE_PATH + "/invite/test?instance=test123&email=user@test.com");
 
         verify(service, never()).remove(anyString(), anyString(), anyString());
-        verify(subject).hasPermission("test", "test123", AbstractPermissionsDomain.SET_PERMISSIONS);
+        verify(subject).hasPermission("test", "test123", SET_PERMISSIONS);
     }
 
     @Filter

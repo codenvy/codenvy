@@ -29,7 +29,6 @@ import com.codenvy.api.workspace.server.stack.StackPermissionsImpl;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.api.listener.RemoveOrganizationOnLastUserRemovedEventSubscriber;
-import com.codenvy.organization.api.permissions.OrganizationDomain;
 import com.codenvy.organization.api.resource.OrganizationResourcesDistributor;
 import com.codenvy.organization.shared.model.Organization;
 import com.codenvy.organization.spi.MemberDao;
@@ -476,8 +475,8 @@ public class JpaEntitiesCascadeRemovalTest {
         prepareCreator(user2.getId());
         childOrganization = organizationManager.create(new OrganizationImpl(null, "childTestOrg", organization.getId()));
 
-        memberDao.store(new MemberImpl(user2.getId(), organization2.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
-        memberDao.store(new MemberImpl(user3.getId(), organization2.getId(), singletonList(OrganizationDomain.SET_PERMISSIONS)));
+        memberDao.store(new MemberImpl(user2.getId(), organization2.getId(), singletonList(SET_PERMISSIONS)));
+        memberDao.store(new MemberImpl(user3.getId(), organization2.getId(), singletonList(SET_PERMISSIONS)));
 
 
         freeResourcesLimitDao.store(freeResourcesLimit = createFreeResourcesLimit(account.getId()));

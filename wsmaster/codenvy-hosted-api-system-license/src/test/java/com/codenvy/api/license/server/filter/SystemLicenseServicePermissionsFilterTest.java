@@ -47,7 +47,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
- *
  * Tests for {@link SystemLicenseServicePermissionsFilter}
  *
  * @author Alexander Andrienko
