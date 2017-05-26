@@ -218,15 +218,15 @@ initModule.factory('AddMachineTokenToUrlInterceptor', ($injector, $q) => {
   };
 });
 
-// Prevents CSRF(see https://en.wikipedia.org/wiki/Cross-site_request_forgery)
+// prevents CSRF(see https://en.wikipedia.org/wiki/Cross-site_request_forgery)
 // using additional token header, see
 // https://tomcat.apache.org/tomcat-7.0-doc/config/filter.html#CSRF_Prevention_Filter_for_REST_APIs
-initModule.factory('CsrfPreventionInterceptor', ($injector, $rootScope) => {
+initModule.factory('CsrfPreventionInterceptor', ($injector, $q) => {
   const CSRF_TOKEN_HEADER_NAME = 'X-CSRF-Token';
-  let csrfToken = "";
+  let csrfToken = '';
 
   function isModifyingMethod(method: string): boolean {
-    return method === "POST" || method === "PUT" || method === "DELETE";
+    return method === 'POST' || method === 'PUT' || method === 'DELETE';
   };
 
   function isMachineRequest(url: string): boolean {
@@ -239,31 +239,52 @@ initModule.factory('CsrfPreventionInterceptor', ($injector, $rootScope) => {
     return false;
   };
 
+  function requestCSRFToken() {
+    // request X-CSRF-Token through any GET requests, which requires user to be logged-in
+    // and is not used by dashboard to avoid 304:
+    let promise = $injector.get('$http').get('/api/user/settings');
+
+    return promise.then((response: any) => {
+      let respCsrfToken = response.headers(CSRF_TOKEN_HEADER_NAME);
+      if (respCsrfToken) {
+        csrfToken = respCsrfToken;
+      }
+      return respCsrfToken;
+    }, (error: any) => {
+      if (error.status === 304) {
+        return csrfToken;
+      }
+    });
+  }
+
   return {
-    request: (config) => {
+    request: (config: any) => {
       // no need to add X-CSRF-Token to machine requests
       if (isMachineRequest(config.url)) {
         return config;
       }
 
-      // X-CSRF-Token=Fetch if the request method is 'GET' and token is not fetched yet
-      if (config.method === "GET" && !csrfToken) {
-        config.headers[CSRF_TOKEN_HEADER_NAME] = "Fetch";
+      // the X-CSRF-Token=Fetch if the request method is 'GET' and token is not fetched yet
+      if (config.method === 'GET' && !csrfToken) {
+        config.headers[CSRF_TOKEN_HEADER_NAME] = 'Fetch';
         return config;
       }
 
-      // X-CSRF-Token=0ABCD(actual token) if request modifies server state and token is fetched
-      if (isModifyingMethod(config.method) && csrfToken) {
-        config.headers[CSRF_TOKEN_HEADER_NAME] = csrfToken;
+      // the X-CSRF-Token=0ABCD(actual token) if request modifies server state and token is fetched
+      if (isModifyingMethod(config.method)) {
+        return $q.when((csrfToken) || requestCSRFToken()).then((token: string) => {
+            config.headers[CSRF_TOKEN_HEADER_NAME] = token;
+            return config;
+          });
       }
 
       return config;
     },
 
-    // Gets fetched X-CSRF-Token and caches it
-    response: (response) => {
+    // gets fetched X-CSRF-Token and caches it
+    response: (response: any) => {
       var respCsrfToken = response.headers(CSRF_TOKEN_HEADER_NAME);
-      if (respCsrfToken && response.config.method === "GET") {
+      if (respCsrfToken && response.config.method === 'GET') {
         csrfToken = respCsrfToken;
       }
       return response;
@@ -284,7 +305,7 @@ initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($rou
 angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServiceProvider) => {
   gravatarServiceProvider.defaults = {
     size: 43,
-    default: 'mm'  // Mystery man as default for missing avatars
+    default: 'mm'  // mystery man as default for missing avatars
   };
 
   // Use https endpoint

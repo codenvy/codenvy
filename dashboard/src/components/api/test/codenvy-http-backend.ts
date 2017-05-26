@@ -47,6 +47,8 @@ export class CodenvyHttpBackend {
 
     this.httpBackend.when('OPTIONS', '/api/').respond({});
 
+    this.httpBackend.when('GET', '/api/user/settings').respond({});
+
     // change password
     this.httpBackend.when('POST', '/api/user/password').respond(() => {
       return [200, {success: true, errors: []}];
