@@ -16,7 +16,6 @@ package com.codenvy.api.license.filter;
 
 import com.codenvy.api.license.shared.dto.LegalityDto;
 import com.codenvy.api.license.shared.model.Constants;
-import com.codenvy.api.permission.server.SystemDomain;
 import com.codenvy.auth.sso.client.filter.RequestFilter;
 import com.codenvy.auth.sso.client.filter.UriStartFromRequestFilter;
 import com.google.inject.Inject;
@@ -137,7 +136,7 @@ public class SystemLicenseLoginFilter implements Filter {
     }
 
     private boolean isAdmin() {
-        return EnvironmentContext.getCurrent().getSubject().hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        return EnvironmentContext.getCurrent().getSubject().hasPermission("system", null, "manageSystem");
     }
 
     private void sendRedirection(HttpServletResponse response, String url) throws IOException {
