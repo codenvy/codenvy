@@ -237,22 +237,6 @@
             return deferredResult;
         };
 
-        var getProfilePrefs = function(){
-            var deferredResult = $.Deferred();
-            var url = "/api/profile/prefs";
-            $.ajax({
-                url: url,
-                type: "GET",
-                success: function(response){
-                    deferredResult.resolve(response);
-                },
-                error: function(response){
-                    deferredResult.reject(response);
-                }
-            });
-            return deferredResult;
-        };
-
         var createAccount = function(accountName) {
             var deferredResult = $.Deferred();
             var url = "/api/account";
@@ -448,26 +432,19 @@
             },
 
             isUserAuthenticated: function() {
-                return getProfilePrefs()
-                    .then(function(prefs){
-                            if (prefs.temporary){
-                                try {
-                                    var temporary = JSON.parse(prefs.temporary);
-                                    if (temporary===true){
-                                        return false; // anonymous user
-                                    }else{
-                                        return true;
-                                    }
-                                }catch(err) {
-                                    return false;
-                                }
-                            } else{
-                                return true;
-                            }
-                    })
-                    .fail(function(){
-                        return false;
-                    });
+                var deferredResult = $.Deferred();
+                var url = "/api/preferences";
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function(response){
+                        deferredResult.resolve(response);
+                    },
+                    error: function(response){
+                        deferredResult.reject(response);
+                    }
+                });
+                return deferredResult;
             },
 
             navigateToLocation: navigateToLocation,

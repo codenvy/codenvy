@@ -47,13 +47,9 @@
 	        	action = 'login';
                 self.getBranding.complete(function(){ //waiting for Branding response
     				Account.isUserAuthenticated()
-    				.then(function(athenticated){
-    				   if (athenticated){
-    				       Account.navigateToLocation();
-    				   }else {
-    				       return $.Deferred().reject();
-    				   }
-    				   })
+    				.then(function(){
+    				    Account.navigateToLocation();
+    				})
     				.fail(function(){ //user is not aouthenticated
                         Account.getUserSettings() //get user props
                         .then(function(settings){ //set parameter to hide/show create account form
