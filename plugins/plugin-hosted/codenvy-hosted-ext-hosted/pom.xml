@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-workspace-activity</artifactId>
+            <artifactId>codenvy-hosted-workspace-activity-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -93,11 +93,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
                     <execution>
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoredDependency>com.codenvy.onpremises.wsmaster:codenvy-hosted-workspace-activity</ignoredDependency>
+                                <ignoredDependency>com.codenvy.onpremises.wsmaster:codenvy-hosted-workspace-activity-shared</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
