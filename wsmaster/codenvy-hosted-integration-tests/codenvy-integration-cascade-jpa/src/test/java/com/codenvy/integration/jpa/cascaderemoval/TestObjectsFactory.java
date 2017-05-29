@@ -97,7 +97,6 @@ public final class TestObjectsFactory {
                                new AuthorImpl(creator, System.currentTimeMillis()),
                                null,
                                null,
-                               null,
                                null);
     }
 
