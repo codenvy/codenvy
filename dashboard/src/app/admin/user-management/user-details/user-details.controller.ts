@@ -177,7 +177,7 @@ export class AdminUserDetailsController {
    *
    * @returns {che.IPageInfo}
    */
-  getPagesInfo(): codenvy.IPageInfo {
+  getPagesInfo(): che.IPageInfo {
     return this.pageInfo;
   }
 

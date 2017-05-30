@@ -119,7 +119,10 @@ export class AdminsUserManagementCtrl {
    * @param userId {string}
    */
   updateUserOrganizationsCount(userId: string): void {
-    this.codenvyOrganization.fetchUserOrganizations(userId, 1).then(() => {
+    this.codenvyOrganization.fetchUserOrganizations(userId, 1).then((userOrganizations: Array<any>) => {
+      if (!angular.isArray(userOrganizations) || userOrganizations.length === 0) {
+        return;
+      }
       this.userOrganizationCount[userId] = this.codenvyOrganization.getUserOrganizationPageInfo(userId).countPages;
     });
   }
