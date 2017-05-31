@@ -366,6 +366,7 @@ $machine_docker_parent_cgroup = getValue("CODENVY_DOCKER_PARENT_CGROUP","NULL")
 ###############################
 # User mail blacklist
   $user_mail_blacklist = getValue("CODENVY_USER_MAIL_BLACKLIST","")
+  $emailvalidator_blacklistfile = getValue("CODENVY_BLACKLISTFILE_PATH","/opt/codenvy-data/conf/user-mail-blacklist.txt")
 
 ###############################
 # Include base module
