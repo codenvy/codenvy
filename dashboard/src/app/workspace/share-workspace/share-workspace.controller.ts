@@ -337,7 +337,11 @@ export class ShareWorkspaceController {
       let canShare = (this.personalAccount.qualifiedName === this.namespace);
       this.showAddDevelopersDialog($event, canShare);
     } else {
-      this.showAddMembersDialog($event);
+      if (this.cheUser.getUser().name === this.namespace) {
+        this.showAddDevelopersDialog($event, true);
+      } else {
+        this.showAddMembersDialog($event);
+      }
     }
   }
 
