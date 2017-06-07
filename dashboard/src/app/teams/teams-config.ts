@@ -118,6 +118,7 @@ export class TeamsConfig {
       title: (params: any) => {
         return params.teamName;
       },
+      reloadOnSearch: false,
       templateUrl: 'app/teams/team-details/team-details.html',
       controller: 'TeamDetailsController',
       controllerAs: 'teamDetailsController',
@@ -139,7 +140,6 @@ export class TeamsConfig {
         }
       })
       .accessWhen('/team/:teamName*', locationProvider)
-      .accessWhen('/team/:teamName*/page/:page', locationProvider);
     });
   }
 }

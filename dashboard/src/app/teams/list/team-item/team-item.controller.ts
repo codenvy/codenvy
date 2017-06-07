@@ -60,8 +60,8 @@ export class TeamItemController {
   /**
    * Redirect to team details.
    */
-  redirectToTeamDetails(page: string) {
-    this.$location.path('/team/' + this.team.qualifiedName + (page ? '/page/' + page : ''));
+  redirectToTeamDetails(tab: string) {
+    this.$location.path('/team/' + this.team.qualifiedName).search(!tab ? {} : {tab: tab});
   }
 
   /**

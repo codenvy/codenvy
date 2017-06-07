@@ -32,7 +32,7 @@
            md-center-tabs="">
 
     <!-- Settings Tab -->
-    <md-tab>
+    <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Settings);">
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Settings</span>
@@ -136,7 +136,7 @@
     </md-tab>
 
     <!-- Developers Tab -->
-    <md-tab>
+    <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Members);">
       <md-tab-label>
         <md-icon md-font-icon="fa-group" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Members</span>
@@ -168,7 +168,7 @@
     </md-tab>-->
 
     <!-- Workspaces Tab -->
-    <md-tab>
+    <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Workspaces);">
       <md-tab-label>
         <md-icon md-font-icon="chefont cheico-workspace" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Workspaces</span>

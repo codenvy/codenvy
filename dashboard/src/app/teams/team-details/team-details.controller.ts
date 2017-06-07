@@ -28,6 +28,8 @@ enum Tab {Settings, Members, Workspaces}
  * @author Ann Shumilova
  */
 export class TeamDetailsController {
+  tab: Object = Tab;
+
   /**
    * Team API interaction.
    */
@@ -128,27 +130,6 @@ export class TeamDetailsController {
 
     this.allowedUserActions = [];
 
-    let page = $route.current.params.page;
-    if (!page) {
-      $location.path('/team/' + this.teamName);
-    } else {
-      this.selectedTabIndex = Tab.Settings;
-      switch (page) {
-        case 'settings':
-          this.selectedTabIndex = Tab.Settings;
-          break;
-        case 'developers':
-          this.selectedTabIndex = Tab.Members;
-          break;
-        case 'workspaces':
-          this.selectedTabIndex = Tab.Workspaces;
-          break;
-        default:
-          $location.path('/team/' + this.teamName);
-          break;
-      }
-    }
-
     let deleteHandler = (info: any) => {
       if (this.team && (this.team.id === info.organization.id)) {
         this.$location.path('/workspaces');
@@ -163,9 +144,18 @@ export class TeamDetailsController {
     };
     this.codenvyTeamEventsManager.addRenameHandler(renameHandler);
 
+    this.updateSelectedTab(this.$location.search().tab);
+    let deRegistrationFn = $scope.$watch(() => {
+      return $location.search().tab;
+    }, (tab: string) => {
+      if (angular.isDefined(tab)) {
+        this.updateSelectedTab(tab);
+      }
+    }, true);
     $scope.$on('$destroy', () => {
       this.codenvyTeamEventsManager.removeRenameHandler(renameHandler);
       this.codenvyTeamEventsManager.removeDeleteHandler(deleteHandler);
+      deRegistrationFn();
     });
 
     this.isLoading = true;
@@ -188,6 +178,32 @@ export class TeamDetailsController {
           this.fetchUserPermissions();
         });
       }
+    }
+  }
+
+  /**
+   * Update selected tab index by search part of URL.
+   *
+   * @param {string} tab
+   */
+  updateSelectedTab(tab: string): void {
+    this.selectedTabIndex = parseInt(this.tab[tab], 10);
+  }
+
+  /**
+   * Changes search part of URL.
+   *
+   * @param {number} tabIndex
+   */
+  onSelectTab(tabIndex?: number): void {
+    let param: { tab?: string } = {};
+    if (angular.isDefined(tabIndex)) {
+      param.tab = Tab[tabIndex];
+    }
+    if (angular.isUndefined(this.$location.search().tab)) {
+      this.$location.replace().search(param);
+    } else {
+      this.$location.search(param);
     }
   }
 

@@ -151,7 +151,7 @@ export class OrganizationDetailsController {
     let deRegistrationFn = $scope.$watch(() => {
       return $location.search().tab;
     }, (tab: string) => {
-      if (!angular.isUndefined(tab)) {
+      if (angular.isDefined(tab)) {
         this.updateSelectedTab(tab);
       }
     }, true);
@@ -228,13 +228,14 @@ export class OrganizationDetailsController {
    */
   onSelectTab(tabIndex?: number): void {
     let param: { tab?: string } = {};
-    if (!angular.isUndefined(tabIndex)) {
+    if (angular.isDefined(tabIndex)) {
       param.tab = Tab[tabIndex];
     }
     if (angular.isUndefined(this.$location.search().tab)) {
-      this.$location.replace();
+      this.$location.replace().search(param);
+    } else {
+      this.$location.search(param);
     }
-    this.$location.search(param);
   }
 
   /**
