@@ -41,10 +41,6 @@ export class CodenvyTeam {
    */
   private teamsMap: Map<string, any> = new Map();
   /**
-   * Teams map by team's name.
-   */
-  private teamsByNameMap: Map<string, any> = new Map();
-  /**
    * Array of teams.
    */
   private teams: any = [];
@@ -262,18 +258,9 @@ export class CodenvyTeam {
    * @returns {ng.IPromise<any>} result promise
    */
   fetchTeamByName(name: string): ng.IPromise<any> {
-    let promise = this.remoteTeamAPI.findTeam({'teamName' : name}).$promise;
-    let resultPromise = promise.then((team: any) => {
-    this.teamsByNameMap.set(team.qualifiedName, team);
-    return team;
-    }, (error: any) => {
-      if (error.status === 304) {
-        return this.getTeamByName(name);
-      }
-      return this.$q.reject(error);
-    });
+    let promise = this.codenvyOrganization.fetchOrganizationByName(name);
 
-    return resultPromise;
+    return promise;
   }
 
   /**
@@ -287,8 +274,9 @@ export class CodenvyTeam {
       return this.personalAccount;
     }
 
-    if (this.teamsByNameMap.has(name)) {
-      return this.teamsByNameMap.get(name);
+    const team = this.codenvyOrganization.getOrganizationByName(name);
+    if (angular.isDefined(team)) {
+      return team;
     }
 
     for (let i = 0; i < this.teams.length; i++) {

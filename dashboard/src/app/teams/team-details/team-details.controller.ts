@@ -279,6 +279,9 @@ export class TeamDetailsController {
       this.processResources();
     }, (error: any) => {
       this.isLoading = false;
+      if (angular.isUndefined(error)) {
+        return;
+      }
       if (error.status === 304) {
         this.processResources();
       } else if (error.status === 404) {

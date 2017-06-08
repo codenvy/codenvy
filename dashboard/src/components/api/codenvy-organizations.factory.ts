@@ -379,7 +379,18 @@ export class CodenvyOrganization {
    */
   updateOrganization(organization: codenvy.IOrganization): ng.IPromise<any> {
     let promise = this.remoteOrganizationAPI.updateOrganization({'id': organization.id}, organization).$promise;
-    return promise;
+
+    return promise.then((organization: codenvy.IOrganization) => {
+      if (organization) {
+        if (this.organizationsByIdMap.has(organization.id)) {
+          this.organizationsByIdMap.set(organization.id, organization);
+        }
+        if (this.organizationByNameMap.has(organization.qualifiedName)) {
+          this.organizationByNameMap.set(organization.qualifiedName, organization);
+        }
+      }
+      return organization;
+    });
   }
 
   /**
