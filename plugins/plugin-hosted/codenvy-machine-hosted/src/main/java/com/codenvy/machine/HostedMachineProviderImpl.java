@@ -37,6 +37,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnectorProvider;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
@@ -210,7 +211,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               .withBuildArgs(buildArgs),
                               progressMonitor);
 
-        } catch (ImageNotFoundException e) {
+        } catch (DockerException e) {
             throw new SourceNotFoundException(e.getLocalizedMessage(), e);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
