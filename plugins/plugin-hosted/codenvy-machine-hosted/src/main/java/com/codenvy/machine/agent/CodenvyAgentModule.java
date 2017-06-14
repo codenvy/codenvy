@@ -68,7 +68,8 @@ public class CodenvyAgentModule extends AbstractModule {
         agents.addBinding().to(org.eclipse.che.api.agent.LSJsonAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSCSharpAgent.class);
         agents.addBinding().to(org.eclipse.che.api.agent.LSTypeScriptAgent.class);
-  
+        agents.addBinding().to(org.eclipse.che.api.agent.GitCredentialsAgent.class);
+
         bind(org.eclipse.che.plugin.machine.ssh.exec.SshMachineExecAgentLauncher.class);  
         bind(String.class).annotatedWith(Names.named("workspace.backup.public_key"))
                           .toProvider(com.codenvy.machine.agent.WorkspaceSyncPublicKeyProvider.class);
