@@ -189,13 +189,14 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                              String machineImageName,
                              ProgressMonitor progressMonitor) throws MachineException {
 
+        String image = service.getImage();
         File workDir = null;
         try {
             // build docker image
             workDir = Files.createTempDirectory(null).toFile();
             final File dockerfileFile = new File(workDir, "Dockerfile");
             try (FileWriter output = new FileWriter(dockerfileFile)) {
-                output.append("FROM ").append(service.getImage());
+                output.append("FROM ").append(image);
             }
 
             docker.buildImage(BuildImageParams.create(dockerfileFile)
@@ -210,9 +211,13 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                                               .withCpuQuota(cpuQuota)
                                               .withBuildArgs(buildArgs),
                               progressMonitor);
-
-        } catch (DockerException e) {
+        } catch (ImageNotFoundException e) {
             throw new SourceNotFoundException(e.getLocalizedMessage(), e);
+        } catch (DockerException e) {
+            if (image != null && SNAPSHOT_LOCATION_PATTERN.matcher(image).matches()) {
+                throw new SourceNotFoundException(e.getLocalizedMessage(), e);
+            }
+            throw new MachineException(e.getLocalizedMessage(), e);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
         } finally {
