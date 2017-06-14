@@ -214,6 +214,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         } catch (ImageNotFoundException e) {
             throw new SourceNotFoundException(e.getLocalizedMessage(), e);
         } catch (DockerException e) {
+            // Check whether image to pull is a snapshot and if so then fallback to workspace recipe.
             if (image != null && SNAPSHOT_LOCATION_PATTERN.matcher(image).matches()) {
                 throw new SourceNotFoundException(e.getLocalizedMessage(), e);
             }
