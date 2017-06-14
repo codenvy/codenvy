@@ -36,6 +36,7 @@ import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
@@ -123,6 +124,7 @@ public class MailSender {
             message.setContent(contentPart);
             message.setSubject(emailBean.getSubject(), "UTF-8");
             message.setFrom(new InternetAddress(emailBean.getFrom(), true));
+            message.setSentDate(new Date());
             message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(emailBean.getTo()));
 
             if (emailBean.getReplyTo() != null) {
