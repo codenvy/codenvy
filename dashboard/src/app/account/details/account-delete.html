@@ -18,4 +18,5 @@
 
 -->
 <che-button-danger che-button-title="Delete this account"
+                   ng-disabled="accountDeleteController.isLoading"
                    ng-click="accountDeleteController.deleteAccount()"/>

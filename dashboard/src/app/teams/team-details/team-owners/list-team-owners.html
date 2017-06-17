@@ -10,11 +10,11 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<md-content flex class="list-team-owners-section" layout="column">
-  <che-input-box che-name="owner"
-                 che-place-holder="There are no owners of the team"
-                 aria-label="Owner of the team"
-                 ng-model="listTeamOwnersController.owners"
-                 readonly>
-  </che-input-box>
-</md-content>
+<che-input-box che-label-name="Owner"
+               che-label-description="Owner can set permissions and share resources."
+               che-name="owner"
+               che-place-holder="There are no owners of the team"
+               aria-label="Owner of the team"
+               ng-model="listTeamOwnersController.owners"
+               readonly>
+</che-input-box>

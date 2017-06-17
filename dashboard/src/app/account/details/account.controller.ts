@@ -14,14 +14,27 @@
  */
 'use strict';
 
+interface IAccountScope extends ng.IScope {
+  profileInformationForm: ng.IFormController;
+}
+
 export class AccountCtrl {
+
+  private cheAPI: any;
+  private cheNotification: any;
+  private profile: che.IProfile;
+  private selectedTabIndex: number;
+  private profileAttributes: che.IProfileAttributes;
+  private newPassword: string;
+
+  private isLoading: boolean;
 
   /**
    * Controller for a account details
    * @ngInject for Dependency injection
    * @author Oleksii Orel
    */
-  constructor($routeParams, $location, cheAPI, cheNotification, $rootScope, $timeout, $scope) {
+  constructor($routeParams: ng.route.IRouteParamsService, $location: ng.ILocationService, cheAPI: any, cheNotification: any, $timeout: ng.ITimeoutService, $scope: IAccountScope) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
 
@@ -29,7 +42,7 @@ export class AccountCtrl {
 
     this.profileAttributes = {};
 
-    //copy the profile attribute if it exist
+    // copy the profile attribute if it exist
     if (this.profile.attributes) {
       this.profileAttributes = angular.copy(this.profile.attributes);
     } else {
@@ -38,8 +51,8 @@ export class AccountCtrl {
       });
     }
 
-    //search the selected tab
-    let routeParams = $routeParams.tabName;
+    // search the selected tab
+    let routeParams = (<any>$routeParams).tabName;
     if (!routeParams) {
       this.selectedTabIndex = 0;
     } else {
@@ -55,24 +68,25 @@ export class AccountCtrl {
       }
     }
 
-    this.resetPasswordForm = false;
-
-    $rootScope.showIDE = false;
-
-    this.timeoutPromise;
-    $scope.$watch(() => {return this.profileAttributes}, () => {
-      if (!$scope.profileInformationForm || $scope.profileInformationForm.$invalid) {
+    let timeoutPromise: ng.IPromise<any>;
+    $scope.$watch(() => {
+      return this.profileAttributes;
+    }, () => {
+      const form: ng.IFormController = $scope.profileInformationForm;
+      if (!form || form.$invalid) {
         return;
       }
-      $timeout.cancel(this.timeoutPromise);
+      if (angular.isDefined(timeoutPromise)) {
+        $timeout.cancel(timeoutPromise);
+      }
 
-      this.timeoutPromise = $timeout(() => {
+      timeoutPromise = $timeout(() => {
         this.setProfileAttributes();
       }, 500);
     }, true);
     $scope.$on('$destroy', () => {
-      if (this.timeoutPromise) {
-        $timeout.cancel(this.timeoutPromise);
+      if (angular.isDefined(timeoutPromise)) {
+        $timeout.cancel(timeoutPromise);
       }
     });
   }
@@ -81,50 +95,53 @@ export class AccountCtrl {
    * Check if profile attributes have changed
    * @returns {boolean}
    */
-  isAttributesChanged() {
+  isAttributesChanged(): boolean {
     return !angular.equals(this.profile.attributes, this.profileAttributes);
   }
 
   /**
    * Set profile attributes
    */
-  setProfileAttributes() {
-
-    if (this.isAttributesChanged()) {
-      let promise = this.cheAPI.getProfile().setAttributes(this.profileAttributes);
-
-      promise.then(() => {
-        this.cheNotification.showInfo('Profile successfully updated.');
-        this.profile.attributes = angular.copy(this.profileAttributes);
-      }, (error) => {
-        if (error.status === 304) {
-          this.profile.attributes = angular.copy(this.profileAttributes);
-        } else {
-          this.profileAttributes = angular.copy(this.profile.attributes);
-          this.cheNotification.showError(error.data.message ? error.data.message : 'Profile update failed.');
-          console.log('error', error);
-        }
-      });
-
+  setProfileAttributes(): void {
+    if (!this.isAttributesChanged()) {
+      return;
     }
+    const promise = this.cheAPI.getProfile().setAttributes(this.profileAttributes);
+
+    this.isLoading = true;
+    promise.then(() => {
+      this.cheNotification.showInfo('Profile successfully updated.');
+      this.profile.attributes = angular.copy(this.profileAttributes);
+    }, (error: any) => {
+      if (error.status === 304) {
+        this.profile.attributes = angular.copy(this.profileAttributes);
+      } else {
+        this.profileAttributes = angular.copy(this.profile.attributes);
+        this.cheNotification.showError(error.data.message ? error.data.message : 'Profile update failed.');
+        console.log('error', error);
+      }
+    }).finally(() => {
+      this.isLoading = false;
+    });
   }
 
   /**
-   * Set new password
+   * Sets new password
    */
-  setPassword(password) {
-    if (!password) {
+  setPassword(): void {
+    if (!this.newPassword) {
       return;
     }
+    const promise = this.cheAPI.getUser().setPassword(this.newPassword);
 
-    let promise = this.cheAPI.getUser().setPassword(password);
-
+    this.isLoading = true;
     promise.then(() => {
       this.cheNotification.showInfo('Password successfully updated.');
-      this.resetPasswordForm = true;
-    }, (error) => {
-      this.cheNotification.showError(error.data.message ? error.data.message : 'Password updated failed.');
-      console.log('error', error);
+      this.newPassword = '';
+    }, (error: any) => {
+      this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Password updated failed.');
+    }).finally(() => {
+      this.isLoading = false;
     });
   }
 

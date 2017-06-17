@@ -30,7 +30,7 @@ import {MainDashboardConfig} from './dashboard/main-dashboard-config';
 import {OrganizationsConfig} from './organizations/organizations-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
-  'ngResource', 'ngRoute', 'ngPasswordStrength', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
+  'ngResource', 'ngRoute', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
 
 // add a global resolve flag on all routes (user needs to be resolved first)
 initModule.config(['$routeProvider', ($routeProvider) => {

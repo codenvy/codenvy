@@ -20,14 +20,14 @@
 <che-toolbar che-title="Account"></che-toolbar>
 
 <md-content md-scroll-y flex>
-  <md-tabs md-dynamic-height md-stretch-tabs="auto" md-center-tabs="" md-selected="accountCtrl.selectedTabIndex">
+  <md-tabs md-dynamic-height md-stretch-tabs="auto" md-center-tabs="" md-selected="accountController.selectedTabIndex">
     <md-tab>
       <md-tab-label>
         <md-icon md-font-icon="fa-user" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Profile</span>
       </md-tab-label>
       <md-tab-body>
-        <account-profile profile-attributes="accountCtrl.profileAttributes"
+        <account-profile profile-attributes="accountController.profileAttributes"
                          profile-information-form="profileInformationForm"></account-profile>
       </md-tab-body>
     </md-tab>
@@ -38,15 +38,14 @@
         <span class="che-tab-label-title">Security</span>
       </md-tab-label>
       <md-tab-body>
-        <div class="account-content">
+        <md-progress-linear md-mode="indeterminate" ng-show="accountController.isLoading"></md-progress-linear>
+        <div class="cdvy-account-security" ng-if="!accountController.isLoading">
           <che-label-container che-label-name="New password"
                                che-label-description="Minimum 8 characters, both letters and digits.">
-            <account-update-password cdvy-password="newPassword"
-                                     cdvy-reset-password="accountCtrl.resetPasswordForm">
-            </account-update-password>
+            <account-update-password cdvy-password="accountController.newPassword"></account-update-password>
             <che-button-default che-button-title="Update Password"
-                                ng-disabled="!newPassword"
-                                ng-click="accountCtrl.setPassword(newPassword)">
+                                ng-disabled="!accountController.newPassword"
+                                ng-click="accountController.setPassword()">
             </che-button-default>
           </che-label-container>
           <che-label-container che-label-name="Delete account"

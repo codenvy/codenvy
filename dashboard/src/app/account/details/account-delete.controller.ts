@@ -27,6 +27,8 @@ export class AccountDeleteController {
   private cheNotification: any;
   private confirmDialogService: any;
 
+  private isLoading = false;
+
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection

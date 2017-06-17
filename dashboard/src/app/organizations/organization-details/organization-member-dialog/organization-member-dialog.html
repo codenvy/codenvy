@@ -15,7 +15,6 @@
                        ng-keypress="memberForm.$valid && $event.which === 13 && organizationMemberDialogController.addMembers()"
                        required
                        focusable>
-          <div ng-message="required" ng-if="memberForm.$dirty">A user email is required.</div>
           <div ng-message="customValidator" ng-if="memberForm.$dirty">{{organizationMemberDialogController.emailError}}</div>
         </che-input-box>
       </che-label-container>

@@ -44,78 +44,74 @@
         <div flex layout="column" class="team-details-content">
           <ng-form name="teamDetailsController.teamForm">
             <!-- Name -->
-          <che-label-container che-label-name="Name">
-                  <che-input-box che-form="teamDetailsController.teamForm"
-                                 che-name="name"
-                                 aria-label="Name of the team"
-                                 che-place-holder="Name of the team"
-                                 ng-model="teamDetailsController.newName"
-                                 che-readonly="!teamDetailsController.isUserAllowedTo('update')"
-                                 unique-team-name="teamDetailsController.team.name"
-                                 parent-account="teamDetailsController.owner.name"
-                                 required
-                                 ng-maxlength="20"
-                                 ng-pattern="/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i">
-                    <div ng-message="required">A name is required.</div>
-                    <div ng-message="pattern">The name can contain alphanumeric characters or single '-' inside.
-                    </div>
-                    <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-                    <div ng-message="md-maxlength">The name has to be less than 20 characters long.</div>
-                    <div ng-message="uniqueTeamName">This team name is already used.</div>
-                  </che-input-box>
-
-          </che-label-container>
-          <!-- Owner -->
-          <che-label-container che-label-name="Owner" che-label-description="Owner can set permissions and share resources.">
+            <che-input-box che-form="teamDetailsController.teamForm"
+                            che-label-name="Name"
+                            che-name="name"
+                            aria-label="Name of the team"
+                            che-place-holder="Name of the team"
+                            ng-model="teamDetailsController.newName"
+                            che-readonly="!teamDetailsController.isUserAllowedTo('update')"
+                            unique-team-name="teamDetailsController.team.name"
+                            parent-account="teamDetailsController.owner.name"
+                            required
+                            ng-maxlength="20"
+                            ng-pattern="/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i">
+              <div ng-message="pattern">The name can contain alphanumeric characters or single '-' inside.</div>
+              <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+              <div ng-message="uniqueTeamName">This team name is already used.</div>
+            </che-input-box>
+            <!-- Owner -->
             <list-team-owners ng-if="teamDetailsController.owner"></list-team-owners>
-          </che-label-container>
 
-          <!-- Workspace cap -->
-          <che-label-container che-label-name="Workspace Cap" che-label-description="Maximum number of workspaces for the team.">
-            <che-input-box che-name="workspaceCap" che-form="teamDetailsController.teamForm"
-                           aria-label="workspace cap"
-                           che-place-holder="Total number of workspaces has not been limited."
-                           ng-model="teamDetailsController.limits.workspaceCap"
-                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
-                           type="number"
-                           che-type-number
-                           min="0"
-                           max="1000">
-              <div ng-message="required">A workspace cap is required.</div>
+            <!-- Workspace cap -->
+            <che-input-box che-label-name="Workspace Cap"
+                            che-label-description="Maximum number of workspaces for the team."
+                            che-name="workspaceCap"
+                            che-form="teamDetailsController.teamForm"
+                            aria-label="workspace cap"
+                            che-place-holder="Total number of workspaces has not been limited"
+                            ng-model="teamDetailsController.limits.workspaceCap"
+                            che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                            type="number"
+                            che-type-number
+                            required
+                            min="0"
+                            max="1000">
               <div ng-message="min">A workspace cap should be greater than 0.</div>
             </che-input-box>
-          </che-label-container>
-
-          <!-- Running workspace cap -->
-          <che-label-container che-label-name="Running Workspace Cap" che-label-description="Maximum number of running workspaces for each team.">
-            <che-input-box che-name="runtimeCap" che-form="teamDetailsController.teamForm"
-                           aria-label="runtime cap"
-                           che-place-holder="Number of running workspaces has not been limited."
-                           ng-model="teamDetailsController.limits.runtimeCap"
-                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
-                           type="number"
-                           che-type-number
-                           min="0"
-                           max="1000">
-              <div ng-message="required">A running workspace cap is required.</div>
+            <!-- Running workspace cap -->
+            <che-input-box che-label-name="Running Workspace Cap"
+                            che-label-description="Maximum number of running workspaces for each team."
+                            che-name="runtimeCap"
+                            che-form="teamDetailsController.teamForm"
+                            aria-label="runtime cap"
+                            che-place-holder="Number of running workspaces has not been limited."
+                            ng-model="teamDetailsController.limits.runtimeCap"
+                            che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                            type="number"
+                            che-type-number
+                            required
+                            min="0"
+                            max="1000">
               <div ng-message="min">A running workspace cap should be greater than 0.</div>
             </che-input-box>
-          </che-label-container>
-          <!-- Workspace RAM cap -->
-          <che-label-container che-label-name="Workspace RAM Cap" class="team-ram-cap"
-                               che-label-description="Maximum RAM team workspaces can use.">
-            <che-input-box che-name="workspaceRamCap" che-form="teamDetailsController.teamForm"
-                           aria-label="runtime cap"
-                           che-place-holder="Workspace RAM has not been limited."
-                           ng-model="teamDetailsController.limits.ramCap"
-                           che-readonly="!teamDetailsController.canChangeResourceLimits()"
-                           type="number"
-                           che-type-number
-                           min="0"
-                           max="1000">
+            <!-- Workspace RAM cap -->
+            <che-input-box che-label-name="Workspace RAM Cap"
+                            che-label-description="Maximum RAM team workspaces can use."
+                            che-name="workspaceRamCap"
+                            che-form="teamDetailsController.teamForm"
+                            aria-label="runtime cap"
+                            che-place-holder="Workspace RAM has not been limited."
+                            ng-model="teamDetailsController.limits.ramCap"
+                            che-readonly="!teamDetailsController.canChangeResourceLimits()"
+                            type="number"
+                            che-type-number
+                            required
+                            min="0"
+                            max="1000">
               <div ng-message="min">A workspace RAM cap should be greater than 0.</div>
             </che-input-box>
-          </che-label-container>
+
           <che-label-container class="team-details-delete-label"
                                  ng-if="teamDetailsController.canLeaveTeam()"
                                  che-label-name="Leave Team"

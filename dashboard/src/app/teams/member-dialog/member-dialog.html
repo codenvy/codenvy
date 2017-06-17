@@ -14,7 +14,6 @@
                          aria-label="New member"
                          ng-keypress="memberForm.$valid && $event.which === 13 && memberDialogController.addMembers()"
                          required focusable>
-            <div ng-message="required" ng-if="memberForm.$dirty">A user email is required.</div>
             <div ng-message="customValidator">{{memberDialogController.emailError}}</div>
           </che-input-box>
       </che-label-container>

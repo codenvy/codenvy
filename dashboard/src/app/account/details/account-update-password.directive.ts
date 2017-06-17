@@ -14,58 +14,56 @@
  */
 'use strict';
 
+interface IAccountUpdateScope extends ng.IScope {
+  newPassword: string;
+  passStrength: number;
+  confirmPassword: string;
+  onPasswordChange: Function;
+  isPasswordMatch: Function;
+}
+
 /**
  * Defines a directive for displaying update password widget.
  * @author Oleksii Orel
  */
 export class AccountUpdatePassword {
+  restrict = 'E';
+  templateUrl = 'app/account/details/account-update-password.html';
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = false;
-    this.templateUrl = 'app/account/details/account-update-password.html';
-
-    // scope values
-    this.scope = {
-      password: '=cdvyPassword',
-      resetPassword: '=cdvyResetPassword'
-    };
-
-  }
+  // scope values
+  scope = {
+    newPassword: '=cdvyPassword',
+    changePasswordForm: '=cdvyForm'
+  };
 
   /**
    * Keep reference to the model controller
    */
-  link($scope) {
-    $scope.$watch('changePasswordForm.$pristine', () => {
-      $scope.$watch('newPassword', (newVal) => {
-        if (!$scope.changePasswordForm || $scope.changePasswordForm.$invalid || ($scope.confirmPassword !== newVal)) {
-          $scope.password = null;
-          return;
-        }
-        $scope.password = newVal;
-      });
-      $scope.$watch('confirmPassword', (newVal) => {
-        if (!$scope.changePasswordForm || $scope.changePasswordForm.newPassword.$invalid || ($scope.newPassword !== newVal)) {
-          $scope.password = null;
-          return;
-        }
-        $scope.password = newVal;
-      });
-      $scope.$watch('resetPassword', (newVal) => {
-        if (!newVal) {
-          return;
-        }
-        $scope.newPassword = '';
-        $scope.confirmPassword = '';
-        $scope.resetPassword = false;
-      });
-    });
+  link($scope: IAccountUpdateScope) {
+    const reTests = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z\d]/];
 
+    const checkPassStrength = (pass: string): void => {
+      if (!pass || !reTests || reTests.length === 0) {
+        $scope.passStrength = 0;
+        return;
+      }
+      let passStrength = pass && pass.length > 16 ? 1 : 0;
+      reTests.forEach((reTest: RegExp) => {
+        if (reTest.test(pass)) {
+          passStrength++;
+        }
+      });
+
+      $scope.passStrength = passStrength * 100 / reTests.length;
+    };
+
+    $scope.onPasswordChange = (value: string) => {
+      $scope.confirmPassword = '';
+      checkPassStrength(value);
+    };
+
+    $scope.isPasswordMatch = (value: string) => {
+      return !value || value === $scope.newPassword;
+    };
   }
-
 }

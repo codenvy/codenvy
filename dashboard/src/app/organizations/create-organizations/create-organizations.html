@@ -32,7 +32,6 @@
                          ng-keypress="createOrganizationForm.$valid && $event.which === 13 && createOrganizationController.createOrganization()"
                          ng-pattern="/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i"
                          required focusable>
-            <div ng-message="required" ng-if="createOrganizationForm.$dirty">A organization name is required.</div>
             <div ng-message="pattern">The name can contain alphanumeric characters or single '-' inside.
             </div>
             <div ng-message="minlength">The name has to be more than 1 character long.</div>
