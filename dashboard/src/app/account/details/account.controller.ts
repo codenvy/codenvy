@@ -18,7 +18,7 @@ interface IAccountScope extends ng.IScope {
   profileInformationForm: ng.IFormController;
 }
 
-export class AccountCtrl {
+export class AccountController {
 
   private cheAPI: any;
   private cheNotification: any;

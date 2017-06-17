@@ -18,7 +18,7 @@ import {AccountProfile} from './profile/account-profile.directive';
 import {AccountDelete} from './account-delete.directive';
 import {AccountDeleteController} from './account-delete.controller';
 import {AccountUpdatePassword} from './account-update-password.directive';
-import {AccountCtrl} from './account.controller';
+import {AccountController} from './account.controller';
 
 
 export class AccountConfig {
@@ -31,15 +31,15 @@ export class AccountConfig {
     register.controller('AccountDeleteController', AccountDeleteController);
     register.directive('accountDelete', AccountDelete);
 
-    register.controller('AccountCtrl', AccountCtrl);
+    register.controller('AccountController', AccountController);
 
     // config routes
     register.app.config(($routeProvider: ng.route.IRouteProvider) => {
       let locationProvider = {
         title: 'Account',
         templateUrl: 'app/account/details/account.html',
-        controller: 'AccountCtrl',
-        controllerAs: 'accountCtrl'
+        controller: 'AccountController',
+        controllerAs: 'accountController'
       };
 
       $routeProvider.accessWhen('/account', locationProvider)

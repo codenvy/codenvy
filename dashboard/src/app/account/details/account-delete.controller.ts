@@ -24,6 +24,7 @@ export class AccountDeleteController {
   private $window: ng.IWindowService;
   private $mdDialog: ng.material.IDialogService;
   private cheUser: any;
+  private isLoading: boolean;
   private cheNotification: any;
   private confirmDialogService: any;
 
@@ -49,11 +50,14 @@ export class AccountDeleteController {
     let promise = this.confirmDialogService.showConfirmDialog('Remove account', content, 'Delete');
 
     promise.then(() => {
+      this.isLoading = true;
       this.cheUser.deleteCurrentUser().then(() => {
         this.cheUser.logout().finally(() => {
+          this.isLoading = false;
           this.$window.location.href = '/site/account-deleted';
         });
       }, (error: any) => {
+        this.isLoading = false;
         this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Account deletion failed.');
       });
     });

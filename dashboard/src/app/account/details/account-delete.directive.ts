@@ -19,21 +19,12 @@
  * @author Oleksii Orel
  */
 export class AccountDelete {
-  replace: boolean;
-  restrict: string;
-  templateUrl: string;
-  controller: string;
-  controllerAs: string;
+  restrict = 'E';
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='E';
-    this.replace = false;
-    this.templateUrl = 'app/account/details/account-delete.html';
-    this.controller = 'AccountDeleteController';
-    this.controllerAs = 'accountDeleteController';
-  }
+  controller = 'AccountDeleteController';
+  controllerAs = 'accountDeleteController';
+
+  templateUrl = 'app/account/details/account-delete.html';
+
+  scope = {};
 }
