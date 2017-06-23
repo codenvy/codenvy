@@ -42,11 +42,14 @@
         <div class="cdvy-account-security" ng-if="!accountController.isLoading">
           <che-label-container che-label-name="New password"
                                che-label-description="Minimum 8 characters, both letters and digits.">
-            <account-update-password cdvy-password="accountController.newPassword"></account-update-password>
-            <che-button-default che-button-title="Update Password"
-                                ng-disabled="!accountController.newPassword"
-                                ng-click="accountController.setPassword()">
-            </che-button-default>
+            <ng-form name="changePasswordForm">
+              <account-update-password cdvy-password="accountController.newPassword"
+                                       cdvy-form="changePasswordForm"></account-update-password>
+              <che-button-default che-button-title="Update Password"
+                                  ng-disabled="changePasswordForm.$invalid"
+                                  ng-click="accountController.setPassword()">
+              </che-button-default>
+            </ng-form>
           </che-label-container>
           <che-label-container che-label-name="Delete account"
                                che-label-description="Delete your account is irreversible.">
