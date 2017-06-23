@@ -21,7 +21,7 @@
   <che-panel che-title="Developer Mode Login" flex="50">
     <ng-form name="loginDeveloperForm">
 
-      <che-input che-form="loginDeveloperForm"
+      <che-input-box che-form="loginDeveloperForm"
                  che-name="login"
                  che-label-name="Login"
                  che-place-holder="Login of the user"
@@ -29,9 +29,9 @@
                   required
                   ng-maxlength="128">
         <div ng-message="required">A login is required.</div>
-      </che-input>
+      </che-input-box>
 
-      <che-input che-form="loginDeveloperForm"
+      <che-input-box che-form="loginDeveloperForm"
                  che-name="password"
                  che-label-name="Password"
                  che-place-holder="Password of the user"
@@ -41,7 +41,7 @@
                   required
                   ng-maxlength="128">
         <div ng-message="required">A password is required.</div>
-      </che-input>
+      </che-input-box>
 
       <che-button-primary ng-click="loginCtrl.submit()" che-button-title="Login"></che-button-primary>
       <div layout="column" layout-align="center center">

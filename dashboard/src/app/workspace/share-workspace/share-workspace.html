@@ -19,7 +19,7 @@
 -->
 <md-content class="workspace-members-panel" ng-if="shareWorkspaceController.noPermissionsError">
   <md-progress-linear md-mode="indeterminate" ng-show="shareWorkspaceController.isLoading"></md-progress-linear>
-  <div ng-show="!shareWorkspaceController.isLoading">
+  <div ng-show="!shareWorkspaceController.isLoading" class="workspace-members-table">
     <che-list-header flex="100"
                      che-input-placeholder="Search"
                      che-search-model="shareWorkspaceController.userFilter.email"
@@ -61,6 +61,7 @@
         </div>
       </div>
     </che-list-header>
+  </div>
     <che-list flex ng-if="shareWorkspaceController.users && shareWorkspaceController.users.length > 0">
       <user-item
               ng-repeat="user in shareWorkspaceController.cheListHelper.getVisibleItems() | orderBy:shareWorkspaceController.userOrderBy"
@@ -73,7 +74,7 @@
         </span>
       <span ng-show="shareWorkspaceController.users.length === 0">There are no members.</span>
     </div>
-  </div>
+
 </md-content>
 <div ng-if="!shareWorkspaceController.noPermissionsError" class="no-permissions-error" layout="row" layout-align="center center">
   <span class="material-design icon-ic_error_outline_24px"></span>

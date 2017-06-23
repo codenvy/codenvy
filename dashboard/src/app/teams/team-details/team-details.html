@@ -27,14 +27,11 @@
 </che-toolbar>
 <md-content md-scroll-y flex md-theme="default"
             ng-if="teamDetailsController.team && teamDetailsController.hasTeamAccess">
-  <md-tabs md-dynamic-height md-stretch-tabs="auto"
-           md-selected="teamDetailsController.selectedTabIndex"
-           md-center-tabs="">
+  <md-tabs md-dynamic-height md-no-ink-bar md-stretch-tabs="auto" md-selected="teamDetailsController.selectedTabIndex">
 
     <!-- Settings Tab -->
     <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Settings);">
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Settings</span>
       </md-tab-label>
       <md-tab-body>
@@ -131,7 +128,6 @@
     <!-- Developers Tab -->
     <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Members);">
       <md-tab-label>
-        <md-icon md-font-icon="fa-group" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Members</span>
       </md-tab-label>
       <md-tab-body>
@@ -143,7 +139,6 @@
     <!-- Templates Tab -->
    <!-- <md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="fa-briefcase" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Templates</span>
       </md-tab-label>
       <md-tab-body>
@@ -153,7 +148,6 @@
     <!-- Stacks Tab -->
     <!--<md-tab>
       <md-tab-label>
-        <md-icon md-font-icon="fa-archive" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Stacks</span>
       </md-tab-label>
       <md-tab-body>
@@ -163,7 +157,6 @@
     <!-- Workspaces Tab -->
     <md-tab md-on-select="teamDetailsController.onSelectTab(teamDetailsController.tab.Workspaces);">
       <md-tab-label>
-        <md-icon md-font-icon="chefont cheico-workspace" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Workspaces</span>
       </md-tab-label>
       <md-tab-body>

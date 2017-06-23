@@ -6,11 +6,10 @@
 <md-content md-scroll-y flex md-theme="default">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="adminUserDetailsController.selectedTabIndex"
-           md-center-tabs="">
+           md-no-ink-bar>
 
     <!-- User Profile Tab -->
     <md-tab md-on-select="adminUserDetailsController.onSelectTab(adminUserDetailsController.tab.Profile);">
-      <md-icon md-font-icon="fa-user" class="fa che-tab-label-icon"></md-icon>
       <span class="che-tab-label-title">Profile</span>
       </md-tab-label>
       <md-tab-body>
@@ -24,7 +23,6 @@
 
     <!-- User Organizations Tab -->
     <md-tab md-on-select="adminUserDetailsController.onSelectTab(adminUserDetailsController.tab.Organization);">
-      <md-icon md-font-icon="md-font fa fa-sitemap material-icons" class="che-tab-label-icon"></md-icon>
       <span class="che-tab-label-title">Organizations</span>
       </md-tab-label>
       <md-tab-body>
