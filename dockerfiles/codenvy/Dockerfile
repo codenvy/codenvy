@@ -30,6 +30,7 @@ RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix tini
 CMD [ "postfix", "-c", "/etc/postfix", "start" ]
 
 COPY entrypoint.sh /entrypoint.sh
+COPY open-jdk-source-file-location /open-jdk-source-file-location
 RUN chmod +x entrypoint.sh
 # Use Tini as real entrypoint - init process that helps reaping zombies
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
