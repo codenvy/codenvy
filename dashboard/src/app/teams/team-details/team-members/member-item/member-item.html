@@ -52,7 +52,7 @@
       <div flex-gt-xs="35" class="che-list-item-secondary" ng-if="!memberItemController.hideDetails">
         <span class="che-xs-header noselect" hide-gt-xs>Roles</span>
         <span class="member-list-permissions">{{memberItemController.getMemberRoles()}} </span>
-        <span tooltip="{{memberItemController.otherActions.toString()}}" ng-if="memberItemController.otherActions.length > 0"> Other...</span>
+        <span uib-tooltip="{{memberItemController.otherActions.toString()}}" ng-if="memberItemController.otherActions.length > 0"> Other...</span>
       </div>
      <!-- <div flex-gt-xs="10"
            class="che-list-item-secondary">
@@ -63,13 +63,13 @@
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
 
-          <a tooltip="Edit developer permissions"
+          <a uib-tooltip="Edit developer permissions"
              ng-click="memberItemController.editMember()"
              ng-if="!memberItemController.isOwner"
              ng-disabled="!memberItemController.editable">
             <span class="fa fa-pencil"></span>
           </a>
-          <a tooltip="Remove developer"
+          <a uib-tooltip="Remove developer"
              ng-click="memberItemController.removeMember($event)"
              ng-if="!memberItemController.isOwner"
              ng-disabled="!memberItemController.editable">
