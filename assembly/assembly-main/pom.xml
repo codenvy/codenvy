@@ -110,7 +110,9 @@
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <updateOnly>false</updateOnly>
-                    <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                    <descriptors>
+                      <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                    </descriptors>
                     <finalName>codenvy-onpremises-${project.version}</finalName>
                     <tarLongFileMode>posix</tarLongFileMode>
                 </configuration>
