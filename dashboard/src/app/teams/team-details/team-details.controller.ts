@@ -160,7 +160,6 @@ export class TeamDetailsController {
 
     this.isLoading = true;
     this.hasTeamAccess = true;
-
     this.team = teamDetailsService.getTeam();
     this.owner = teamDetailsService.getOwner();
 
@@ -213,6 +212,7 @@ export class TeamDetailsController {
   fetchUserPermissions(): void {
     this.codenvyPermissions.fetchOrganizationPermissions(this.team.id).then(() => {
       this.allowedUserActions = this.processUserPermissions();
+      this.hasTeamAccess = this.allowedUserActions.length > 0;
       this.fetchLimits();
     }, (error: any) => {
       this.isLoading = false;
