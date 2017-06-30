@@ -17,6 +17,7 @@ package com.codenvy.activity.server;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.workspace.server.activity.WorkspaceActivityService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.everrest.assured.EverrestJetty;

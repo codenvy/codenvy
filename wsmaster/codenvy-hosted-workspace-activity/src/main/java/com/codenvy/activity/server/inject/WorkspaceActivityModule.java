@@ -15,9 +15,11 @@
 package com.codenvy.activity.server.inject;
 
 import com.codenvy.activity.server.ActivityPermissionsFilter;
-import com.codenvy.activity.server.WorkspaceActivityManager;
-import com.codenvy.activity.server.WorkspaceActivityService;
+import com.codenvy.activity.server.HostedWorkspaceActivityManager;
 import com.google.inject.AbstractModule;
+
+import org.eclipse.che.api.workspace.server.activity.WorkspaceActivityManager;
+import org.eclipse.che.api.workspace.server.activity.WorkspaceActivityService;
 
 public class WorkspaceActivityModule extends AbstractModule {
 
@@ -25,6 +27,6 @@ public class WorkspaceActivityModule extends AbstractModule {
     protected void configure() {
         bind(ActivityPermissionsFilter.class);
         bind(WorkspaceActivityService.class);
-        bind(WorkspaceActivityManager.class);
+        bind(WorkspaceActivityManager.class).to(HostedWorkspaceActivityManager.class);
     }
 }
