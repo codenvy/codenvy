@@ -56,8 +56,8 @@ export class BillingController {
    * @ngInject for Dependency injection
    */
   constructor ($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
-               $rootScope: che.IRootScopeService, $scope: ng.IScope, confirmDialogService: any, cheAPI: any,
-               codenvyPayment: CodenvyPayment, codenvyTeam: CodenvyTeam,cheNotification: any, billingService: BillingService) {
+               $rootScope: che.IRootScopeService, confirmDialogService: any, cheAPI: any,
+               codenvyPayment: CodenvyPayment, codenvyTeam: CodenvyTeam, cheNotification: any, billingService: BillingService) {
     this.$location = $location;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -139,7 +139,7 @@ export class BillingController {
       this.loading = true;
       this.billingService.removeCreditCard(this.creditCard.accountId, this.creditCard.token).then(() => {
         return this.fetchCreditCard();
-      },(error: any) => {
+      }, (error: any) => {
         this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Failed to delete the credit card.');
       }).finally(() => {
         this.loading = false;

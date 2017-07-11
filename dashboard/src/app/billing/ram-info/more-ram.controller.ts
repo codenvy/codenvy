@@ -58,79 +58,79 @@ export class MoreRamController {
   /**
    * New RAM value.
    */
-  value: number;
+  private value: number;
   /**
    * Current account's id (set from outside).
    */
-  accountId: string;
+  private accountId: string;
   /**
    * Callback controller (set from outside).
    */
-  callbackController: any;
+  private callbackController: any;
   /**
    * Provided free RAM. (set from outside).
    */
-  freeRAM: number;
+  private freeRAM: number;
   /**
    * Provided total RAM. (set from outside).
    */
-  totalRAM: number;
+  private totalRAM: number;
   /**
    * Price of the resources. Is retrieved from package details.
    */
-  price: number;
+  private price: number;
   /**
    * Price for the resources by portion of time. Is retrieved from package details.
    */
-  partialPrice: number;
+  private partialPrice: number;
   /**
    * Amount of resources, that are paid for. Is retrieved from package details.
    */
-  amount: string;
+  private amount: string;
   /**
    * Team workspaces idle timeout. Is retrieved from package details.
    */
-  timeout: number;
+  private timeout: number;
   /**
    * Team workspaces idle timeout resource. Is retrieved from package details.
    */
-  timeoutResource: any;
+  private timeoutResource: any;
   /**
    * The next month charge date.
    */
-  nextMonthChargeDate: Date;
+  private nextMonthChargeDate: Date;
   /**
    * The number of days left till the end of current month.
    */
-  leftDaysInMonth: number;
+  private leftDaysInMonth: number;
   /**
    * Minimum amount of resources, that can be bought. Is retrieved from package details.
    */
-  minValue: number;
+  private minValue: number;
   /**
    * Maximum amount of resources, that can be bought. Is retrieved from package details.
    */
-  maxValue: number;
+  private maxValue: number;
   /**
    * Package with RAM type.
    */
-  ramPackage: any;
+  private ramPackage: any;
   /**
    * Loading state of the dialog.
    */
-  isLoading: boolean;
+  private isLoading: boolean;
   /**
    * Steps to use them in dialog template.
    */
-  step: Object;
+  private step: Object;
   /**
    * Current step of wizard.
    */
-  currentStep: number;
+  private currentStep: number;
   /**
    * Credit card data.
    */
-  creditCard: ICreditCard;
+  private creditCard: ICreditCard;
 
   /**
    * @ngInject for Dependency injection
@@ -159,8 +159,7 @@ export class MoreRamController {
    */
   calcDateBasedValues(): void {
     let now = new Date();
-    let month = now.getMonth();
-    this.nextMonthChargeDate = (now.getMonth() == 11) ? new Date(now.getFullYear() + 1, 0, 1) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    this.nextMonthChargeDate = (now.getMonth() === 11) ? new Date(now.getFullYear() + 1, 0, 1) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
     this.leftDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate() + 1;
   }
 
@@ -273,9 +272,7 @@ export class MoreRamController {
     }
 
     savePromise.then(() => {
-      return this.codenvySubscription.fetchActiveSubscription(this.accountId).then(() => {
-        this.processSubscription(this.codenvySubscription.getActiveSubscription(this.accountId));
-      }, (error: any) => {
+      return this.codenvySubscription.fetchActiveSubscription(this.accountId).finally(() => {
         this.processSubscription(this.codenvySubscription.getActiveSubscription(this.accountId));
       });
     }).finally(() => {
@@ -375,6 +372,6 @@ export class MoreRamController {
       this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : 'Failed to save the credit card.');
     }).finally(() => {
       this.isLoading = false;
-    })
+    });
   }
 }
