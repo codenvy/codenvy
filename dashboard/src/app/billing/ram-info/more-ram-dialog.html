@@ -12,7 +12,7 @@
           Your account settings
         </div>
         <div>
-          Your account currently has {{moreRamController.totalRAM | cheNumberRoundFilter:0}} GB RAM and {{moreRamController.usedRAM | cheNumberRoundFilter:0}} GB in use.
+          Your account currently has {{moreRamController.totalRAM | numberRound:0}} GB RAM and {{moreRamController.usedRAM | numberRound:0}} GB in use.
           <span ng-show="moreRamController.ramPackage">You can add more RAM to the account.</span>
         </div>
 
@@ -35,8 +35,8 @@
           </div>
           <div>
             <div class="error-label">
-              <div ng-show="ramForm.$invalid">The RAM value should be from {{moreRamController.minValue | cheNumberRoundFilter:0}} GB to
-                {{moreRamController.maxValue | cheNumberRoundFilter:0}} GB
+              <div ng-show="ramForm.$invalid">The RAM value should be from {{moreRamController.minValue | numberRound:0}} GB to
+                {{moreRamController.maxValue | numberRound:0}} GB
               </div>
             </div>
           </div>
@@ -51,11 +51,11 @@
             Your workspaces will have a {{moreRamController.timeout}} hour idle timeout.
           </div>
 
-          Your request will cost ${{moreRamController.calcRequestMonthlyCost() | cheNumberRoundFilter:2}} / month / {{moreRamController.value | cheNumberRoundFilter:0}} GB.<br/>
-          You will be charged ${{moreRamController.calcChargedAmount() | cheNumberRoundFilter:2}} now for the remainder of the current month.<br/>
-          You will be charged ${{moreRamController.calcNextMonthChargeAmount() | cheNumberRoundFilter:2}}
+          Your request will cost ${{moreRamController.calcRequestMonthlyCost() | numberRound:2}} / month / {{moreRamController.value | numberRound:0}} GB.<br/>
+          You will be charged ${{moreRamController.calcChargedAmount() | numberRound:2}} now for the remainder of the current month.<br/>
+          You will be charged ${{moreRamController.calcNextMonthChargeAmount() | numberRound:2}}
           on {{moreRamController.nextMonthChargeDate | date:'dd-MMM-yyyy'}}
-          for {{moreRamController.totalRAM + moreRamController.value | cheNumberRoundFilter:0}} GB RAM for the next month.
+          for {{moreRamController.totalRAM + moreRamController.value | numberRound:0}} GB RAM for the next month.
         </div>
       </div>
 
