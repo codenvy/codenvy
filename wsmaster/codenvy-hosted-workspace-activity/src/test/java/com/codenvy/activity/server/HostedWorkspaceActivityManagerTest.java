@@ -162,7 +162,7 @@ public class HostedWorkspaceActivityManagerTest {
 
     @SuppressWarnings("unchecked")
     private Map<String, Long> getActiveWorkspaces(HostedWorkspaceActivityManager workspaceActivityManager) throws Exception {
-        for (Field field : workspaceActivityManager.getClass().getDeclaredFields()) {
+        for (Field field : workspaceActivityManager.getClass().getSuperclass().getDeclaredFields()) {
             field.setAccessible(true);
             if (field.getName().equals("activeWorkspaces")) {
                 return (Map<String, Long>)field.get(workspaceActivityManager);

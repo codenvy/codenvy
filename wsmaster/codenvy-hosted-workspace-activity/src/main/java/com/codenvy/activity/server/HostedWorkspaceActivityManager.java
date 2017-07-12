@@ -83,7 +83,7 @@ public class HostedWorkspaceActivityManager extends WorkspaceActivityManager {
                                                                     .findAny();
 
         if (timeoutOpt.isPresent()) {
-            return timeoutOpt.get().getAmount();
+            return timeoutOpt.get().getAmount() * 60 * 1000;
         } else {
             return -1;
         }
