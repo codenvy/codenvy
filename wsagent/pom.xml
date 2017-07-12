@@ -30,7 +30,6 @@
     <modules>
         <module>wsagent-codenvy</module>
         <module>codenvy-hosted-machine-authentication-agent</module>
-        <module>codenvy-hosted-workspace-activity-agent</module>
         <module>codenvy-wsagent-core</module>
     </modules>
 </project>
