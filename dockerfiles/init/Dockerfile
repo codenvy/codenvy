@@ -31,3 +31,4 @@ COPY modules /etc/puppet/modules
 COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+
