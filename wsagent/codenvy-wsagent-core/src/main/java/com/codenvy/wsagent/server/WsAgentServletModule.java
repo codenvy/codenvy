@@ -42,7 +42,6 @@ public class WsAgentServletModule extends ServletModule {
         //filters
         filter("/*").through(CheCorsFilter.class);
         filter("/*").through(com.codenvy.machine.authentication.agent.MachineLoginFilter.class);
-        filter("/*").through(com.codenvy.workspace.LastAccessTimeFilter.class);
 
         //servlets
         install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());

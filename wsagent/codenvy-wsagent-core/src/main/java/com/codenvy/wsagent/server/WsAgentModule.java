@@ -50,7 +50,6 @@ public class WsAgentModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
         bind(ProjectServiceLinksInjector.class).to(CodenvyProjectServiceLinksInjector.class);
         bind(HttpJsonRequestFactory.class).to(AuthorizeTokenHttpJsonRequestFactory.class);
-        bind(com.codenvy.workspace.websocket.WorkspaceWebsocketConnectionListener.class);
         bind(RequestTokenExtractor.class).to(com.codenvy.auth.sso.client.token.ChainedTokenExtractor.class);
 
 
