@@ -1,5 +1,80 @@
 # Change Log
 
+## [5.14.0](https://github.com/codenvy/codenvy/tree/5.14.0) (2017-06-29)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.13.0...5.14.0)
+
+**Merged pull requests:**
+
+- change angular-bootstrap version to 1.1.2 [\#2288](https://github.com/codenvy/codenvy/pull/2288) ([olexii4](https://github.com/olexii4))
+- codenvy-2289: fix team permission denied validation [\#2291](https://github.com/codenvy/codenvy/pull/2291) ([ashumilova](https://github.com/ashumilova))
+- fix readonly attribute for input boxes [\#2287](https://github.com/codenvy/codenvy/pull/2287) ([olexii4](https://github.com/olexii4))
+- add notification file for openJDK [\#2286](https://github.com/codenvy/codenvy/pull/2286) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-2277: remove required attributes from 'RAM cap' inputs [\#2280](https://github.com/codenvy/codenvy/pull/2280) ([olexii4](https://github.com/olexii4))
+
+## [5.13.0](https://github.com/codenvy/codenvy/tree/5.13.0) (2017-06-21)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.12.0...5.13.0)
+
+**Merged pull requests:**
+
+- Provide ability to manage public stacks for codenvy admins [\#2254](https://github.com/codenvy/codenvy/pull/2254) ([akorneta](https://github.com/akorneta))
+- CHE-4518: change styles for input boxes [\#2271](https://github.com/codenvy/codenvy/pull/2271) ([olexii4](https://github.com/olexii4))
+
+## [5.12.0](https://github.com/codenvy/codenvy/tree/5.12.0) (2017-06-14)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.11.2...5.12.0)
+
+**Merged pull requests:**
+
+- CODENVY-1511: Add date header for emails [\#2266](https://github.com/codenvy/codenvy/pull/2266) ([mmorhun](https://github.com/mmorhun))
+- CHE-5169: Add Git credentials agent [\#2265](https://github.com/codenvy/codenvy/pull/2265) ([vinokurig](https://github.com/vinokurig))
+- Fix build accordingly to changes from CHE-5060 [\#2241](https://github.com/codenvy/codenvy/pull/2241) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Fix typo in README.md. [\#2236](https://github.com/codenvy/codenvy/pull/2236) ([deviousgeek](https://github.com/deviousgeek))
+- CODENVY-2888: Fallback to start from recipe if snapshot is unavailable [\#2262](https://github.com/codenvy/codenvy/pull/2262) ([mmorhun](https://github.com/mmorhun))
+- Improve  update team details for UD [\#2259](https://github.com/codenvy/codenvy/pull/2259) ([olexii4](https://github.com/olexii4))
+- SLX-51: allow to share personal workspaces for onprem [\#2249](https://github.com/codenvy/codenvy/pull/2249) ([akurinnoy](https://github.com/akurinnoy))
+- allow to configure path to email blacklist file [\#2248](https://github.com/codenvy/codenvy/pull/2248) ([riuvshin](https://github.com/riuvshin))
+- Fix user details page for admin [\#2244](https://github.com/codenvy/codenvy/pull/2244) ([olexii4](https://github.com/olexii4))
+- codenvy-2235 remove unused functionality [\#2240](https://github.com/codenvy/codenvy/pull/2240) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- CODENVY-1740 Removed dependency on api permissions from all war archives except ws-master [\#2238](https://github.com/codenvy/codenvy/pull/2238) ([sleshchenko](https://github.com/sleshchenko))
+- Request csrf token on modification request if not requested before [\#2237](https://github.com/codenvy/codenvy/pull/2237) ([ashumilova](https://github.com/ashumilova))
+- CODENVY-2199: Do not snapshot /tmp folder [\#2229](https://github.com/codenvy/codenvy/pull/2229) ([mmorhun](https://github.com/mmorhun))
+
+## [5.11.2](https://github.com/codenvy/codenvy/tree/5.11.2) (2017-05-29)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.11.1...5.11.2)
+
+## [5.11.1](https://github.com/codenvy/codenvy/tree/5.11.1) (2017-05-26)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.11.0...5.11.1)
+
+**Merged pull requests:**
+
+- INFRA-95; Move email blacklist into separate configurable file; [\#2233](https://github.com/codenvy/codenvy/pull/2233) ([mshaposhnik](https://github.com/mshaposhnik))
+
+## [5.11.0](https://github.com/codenvy/codenvy/tree/5.11.0) (2017-05-24)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.10.0...5.11.0)
+
+**Merged pull requests:**
+
+- CODENVY-2095: Fix codenvy-water-mark-logo. [\#2220](https://github.com/codenvy/codenvy/pull/2220) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Fix codenvy.env snapshotting comments [\#2200](https://github.com/codenvy/codenvy/pull/2200) ([eivantsov](https://github.com/eivantsov))
+- CHE-4977; enable UseStringDeduplication java flag for WS agent; [\#2190](https://github.com/codenvy/codenvy/pull/2190) ([mshaposhnik](https://github.com/mshaposhnik))
+- Update README.md [\#2182](https://github.com/codenvy/codenvy/pull/2182) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- Unification of JSON RPC codebase [\#2177](https://github.com/codenvy/codenvy/pull/2177) ([dkuleshov](https://github.com/dkuleshov))
+- CODENVY-1017; disable password recovering services in LDAP sync mode; [\#2165](https://github.com/codenvy/codenvy/pull/2165) ([mshaposhnik](https://github.com/mshaposhnik))
+- show oauth buttons in defined order [\#2225](https://github.com/codenvy/codenvy/pull/2225) ([vkuznyetsov](https://github.com/vkuznyetsov))
+- INFRASTRUCTURE-17: Reduce sensitivity of docker system RAM values parser [\#2223](https://github.com/codenvy/codenvy/pull/2223) ([vinokurig](https://github.com/vinokurig))
+- Track permissions error to avoid refetch [\#2222](https://github.com/codenvy/codenvy/pull/2222) ([ashumilova](https://github.com/ashumilova))
+- \[cli\] Add check on postgresql port in case of debug mode [\#2219](https://github.com/codenvy/codenvy/pull/2219) ([benoitf](https://github.com/benoitf))
+- Fix documentation URL in Help menu [\#2216](https://github.com/codenvy/codenvy/pull/2216) ([vparfonov](https://github.com/vparfonov))
+- Extended footer's branding capabilities [\#2215](https://github.com/codenvy/codenvy/pull/2215) ([ashumilova](https://github.com/ashumilova))
+- Add CSRF prevention filter and adapt clients [\#2213](https://github.com/codenvy/codenvy/pull/2213) ([evoevodin](https://github.com/evoevodin))
+- Add possibility to extend codenvy.env with addon.env if it exist [\#2211](https://github.com/codenvy/codenvy/pull/2211) ([riuvshin](https://github.com/riuvshin))
+- INFRA-89; do not allow JSESSIONID cookies to be pass between agents; [\#2209](https://github.com/codenvy/codenvy/pull/2209) ([mshaposhnik](https://github.com/mshaposhnik))
+- CODENVY-2104: Add additional error logging on docker image build fail [\#2201](https://github.com/codenvy/codenvy/pull/2201) ([mmorhun](https://github.com/mmorhun))
+- CHE-5059 Fix backend according to new branding request [\#2198](https://github.com/codenvy/codenvy/pull/2198) ([olexii4](https://github.com/olexii4))
+- CHE-4803: fix items bulk selection and filtration. [\#2197](https://github.com/codenvy/codenvy/pull/2197) ([akurinnoy](https://github.com/akurinnoy))
+- CODENVY-2164: Add search user method by email/username for admins [\#2191](https://github.com/codenvy/codenvy/pull/2191) ([akorneta](https://github.com/akorneta))
+- CODENVY-1812 Add ability to use -1 in the amount of resources [\#2174](https://github.com/codenvy/codenvy/pull/2174) ([sleshchenko](https://github.com/sleshchenko))
+- CODENVY-2005: Add user detail page for admin [\#2139](https://github.com/codenvy/codenvy/pull/2139) ([olexii4](https://github.com/olexii4))
+
 ## [5.10.0](https://github.com/codenvy/codenvy/tree/5.10.0) (2017-05-10)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.9.0...5.10.0)
 
