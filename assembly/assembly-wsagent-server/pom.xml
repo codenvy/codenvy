@@ -75,7 +75,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <updateOnly>false</updateOnly>
                     <descriptors>
-                      <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                        <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
                     </descriptors>
                 </configuration>
             </plugin>

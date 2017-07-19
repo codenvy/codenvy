@@ -53,9 +53,9 @@
         <commons-configuration.version>1.10</commons-configuration.version>
         <de.flapdoodle.embed-mongo.version>1.50.0</de.flapdoodle.embed-mongo.version>
         <jline.version>2.12</jline.version>
-        <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <license_contributor>Red Hat, Inc. - initial API and implementation</license_contributor>
         <license_copyrightOwner>Red Hat, Inc.</license_copyrightOwner>
+        <license_years>[${project.inceptionYear}] - [${currentYear}]</license_years>
         <maven.releases.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-releases/</maven.releases.repo.url>
         <maven.snapshots.repo.url>https://maven.codenvycorp.com/content/repositories/codenvy-private-snapshots/</maven.snapshots.repo.url>
         <org.apache.apacheds.version>1.5.7</org.apache.apacheds.version>
@@ -68,7 +68,6 @@
         <org.scala.lang.version>2.10.4</org.scala.lang.version>
         <org.thymeleaf.version>3.0.3.RELEASE</org.thymeleaf.version>
         <site.classifier>onprem-se</site.classifier>
-
     </properties>
     <dependencyManagement>
         <dependencies>
