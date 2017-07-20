@@ -1,5 +1,17 @@
 # Change Log
 
+## [5.15.0](https://github.com/codenvy/codenvy/tree/5.15.0) (2017-07-19)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.14.0...5.15.0)
+
+**Merged pull requests:**
+
+- Change calculation of workspace ram when it is starting [\#2317](https://github.com/codenvy/codenvy/pull/2317) ([sleshchenko](https://github.com/sleshchenko))
+- Reuse workspace activity managing components from Che [\#2297](https://github.com/codenvy/codenvy/pull/2297) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Fixed round filter [\#2307](https://github.com/codenvy/codenvy/pull/2307) ([olexii4](https://github.com/olexii4))
+- Removed the use of deprecated format of maven assembly plugin  [\#2292](https://github.com/codenvy/codenvy/pull/2292) ([benoitf](https://github.com/benoitf))
+- Changed angular-bootstrap version to 1.1.2 [\#2288](https://github.com/codenvy/codenvy/pull/2288) ([olexii4](https://github.com/olexii4))
+
+
 ## [5.14.0](https://github.com/codenvy/codenvy/tree/5.14.0) (2017-06-29)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.13.0...5.14.0)
 
