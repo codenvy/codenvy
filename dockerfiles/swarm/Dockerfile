@@ -13,7 +13,7 @@
 FROM alpine:3.4
 
 RUN apk --update add ca-certificates wget \
-    && wget -O swarm.tgz https://github.com/docker/swarm/releases/download/v1.2.6/swarm-1.2.6-linux-x86_64.tgz \
+    && wget -O swarm.tgz https://github.com/docker/swarm/releases/download/v1.2.8/swarm-v1.2.8-linux-x86_64.tgz \
     && tar xvzf swarm.tgz \
     && rm -rf swarm.tgz
 
