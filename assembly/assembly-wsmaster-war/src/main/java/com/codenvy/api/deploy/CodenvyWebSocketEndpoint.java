@@ -36,6 +36,6 @@ public class CodenvyWebSocketEndpoint extends BasicWebSocketEndpoint {
 
     @Override
     protected String getEndpointId() {
-        return "ws-agent-websocket-endpoint";
+        return "ws-master-websocket-endpoint";
     }
 }
