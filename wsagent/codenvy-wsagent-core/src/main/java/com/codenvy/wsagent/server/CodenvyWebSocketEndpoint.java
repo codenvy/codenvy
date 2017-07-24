@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
 import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
+import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
 import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;
@@ -30,13 +31,19 @@ import javax.websocket.server.ServerEndpoint;
  * @author Vitalii Parfonov
  */
 
-@ServerEndpoint(value = "/{node.port_host}/websocket/{endpoint-id}", configurator = GuiceInjectorEndpointConfigurator.class)
+@ServerEndpoint(value = "/{node.port_host}/wsagent", configurator = GuiceInjectorEndpointConfigurator.class)
 public class CodenvyWebSocketEndpoint extends BasicWebSocketEndpoint {
 
     @Inject
     public CodenvyWebSocketEndpoint(WebSocketSessionRegistry registry,
                                     MessagesReSender reSender,
-                                    WebSocketMessageReceiver receiver) {
-        super(registry, reSender, receiver);
+                                    WebSocketMessageReceiver receiver,
+                                    WebsocketIdService identificationService) {
+        super(registry, reSender, receiver, identificationService);
+    }
+
+    @Override
+    protected String getEndpointId() {
+        return "ws-agent-websocket-endpoint";
     }
 }
