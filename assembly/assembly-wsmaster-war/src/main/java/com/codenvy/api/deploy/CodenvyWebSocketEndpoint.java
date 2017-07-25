@@ -22,9 +22,9 @@ import javax.websocket.server.ServerEndpoint;
 
 /**
  * Implementation of {@link BasicWebSocketEndpoint} for Che packaging.
- * Add only mapping "/websocket/{endpoint-id}".
+ * Add only mapping "/websocket".
  */
-@ServerEndpoint(value = "/", configurator = GuiceInjectorEndpointConfigurator.class)
+@ServerEndpoint(value = "/websocket", configurator = GuiceInjectorEndpointConfigurator.class)
 public class CodenvyWebSocketEndpoint extends BasicWebSocketEndpoint {
     @Inject
     public CodenvyWebSocketEndpoint(WebSocketSessionRegistry registry,
