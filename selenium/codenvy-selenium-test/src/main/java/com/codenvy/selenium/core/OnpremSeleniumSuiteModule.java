@@ -23,6 +23,9 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.plugin.ssh.key.HttpSshServiceClient;
+import org.eclipse.che.plugin.ssh.key.SshServiceClient;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
@@ -53,7 +56,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 
 import javax.inject.Named;
-import java.util.concurrent.ExecutionException;
 
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 
@@ -103,5 +105,11 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
     @Provides
     public ActionsFactory getActionFactory() {
         return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+    }
+
+    @Provides
+    public SshServiceClient getSshServiceClient(TestApiEndpointUrlProvider apiEndpointUrlProvider,
+                                                HttpJsonRequestFactory requestFactory) {
+        return new HttpSshServiceClient(apiEndpointUrlProvider.get().toString(), requestFactory);
     }
 }

@@ -77,6 +77,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-user-shared</artifactId>
         </dependency>
         <dependency>
@@ -98,6 +102,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-ssh-key-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.selenium</groupId>
@@ -144,6 +152,11 @@
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-authorization</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-server</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>

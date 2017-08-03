@@ -45,7 +45,7 @@ public class OnpremTestMachineServiceClient implements TestMachineServiceClient 
      */
     @Override
     public String getMachineApiToken(String workspaceId, String authToken) throws Exception {
-        HttpJsonResponse response = requestFactory.fromUrl(apiEndpoint + "machine/token/" + workspaceId)
+        HttpJsonResponse response = requestFactory.fromUrl(apiEndpoint + "/machine/token/" + workspaceId)
                                                   .setAuthorizationHeader(authToken)
                                                   .useGetMethod()
                                                   .request();

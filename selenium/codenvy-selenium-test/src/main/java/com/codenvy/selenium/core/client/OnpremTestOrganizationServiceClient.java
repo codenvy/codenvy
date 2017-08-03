@@ -63,7 +63,7 @@ public class OnpremTestOrganizationServiceClient {
         return organizations;
     }
 
-    private String getApiUrl() {return apiEndpoint + "organization/";}
+    private String getApiUrl() {return apiEndpoint + "/organization";}
 
     public OrganizationDto createOrganization(String name, String parentId, String authToken) throws Exception {
         OrganizationDto data = newDto(OrganizationDto.class)
@@ -86,7 +86,7 @@ public class OnpremTestOrganizationServiceClient {
     }
 
     public void deleteOrganizationById(String id, String authToken) throws Exception {
-        String apiUrl = format("%s%s", getApiUrl(), id);
+        String apiUrl = format("%s/%s", getApiUrl(), id);
 
         try {
             requestFactory.fromUrl(apiUrl)
@@ -125,7 +125,7 @@ public class OnpremTestOrganizationServiceClient {
     }
 
     public OrganizationDto getOrganizationByName(String organizationName, String authToken) throws Exception {
-        String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
+        String apiUrl = format("%s/find?name=%s", getApiUrl(), organizationName);
         return requestFactory.fromUrl(apiUrl)
                              .setAuthorizationHeader(authToken)
                              .request()
@@ -145,7 +145,7 @@ public class OnpremTestOrganizationServiceClient {
     }
 
     public void addOrganizationMember(String organizationId, String userId, List<String> actions, String authToken) throws Exception {
-        String apiUrl = apiEndpoint + "permissions";
+        String apiUrl = apiEndpoint + "/permissions";
         PermissionsDto data = newDto(PermissionsDto.class)
                 .withDomainId("organization")
                 .withInstanceId(organizationId)
