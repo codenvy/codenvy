@@ -418,7 +418,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                                        .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
         //workspace activity service
-        install(new com.codenvy.activity.server.inject.WorkspaceActivityModule());
+        install(new com.codenvy.plugin.activity.inject.WorkspaceActivityModule());
 
         MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
                 MapBinder.newMapBinder(binder(),

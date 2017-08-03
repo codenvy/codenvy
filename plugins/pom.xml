@@ -25,6 +25,7 @@
     <packaging>pom</packaging>
     <name>Codenvy Plugin Parent</name>
     <modules>
+        <module>plugin-activity</module>
         <module>plugin-google</module>
         <module>plugin-wso2</module>
         <module>plugin-projectlocker</module>

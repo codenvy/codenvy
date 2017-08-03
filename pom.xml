@@ -484,16 +484,6 @@
             </dependency>
             <dependency>
                 <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-workspace-activity</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
-                <artifactId>codenvy-hosted-workspace-activity-shared</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.codenvy.onpremises.wsmaster</groupId>
                 <artifactId>codenvy-ldap</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -540,6 +530,16 @@
             <dependency>
                 <groupId>com.codenvy.plugin</groupId>
                 <artifactId>codenvy-machine-hosted</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-activity-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.codenvy.plugin</groupId>
+                <artifactId>codenvy-plugin-activity-wsmaster</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

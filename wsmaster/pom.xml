@@ -37,8 +37,6 @@
         <module>codenvy-hosted-sso-client</module>
         <module>codenvy-hosted-sso-oauth</module>
         <module>codenvy-hosted-sso-server-organization</module>
-        <module>codenvy-hosted-workspace-activity-shared</module>
-        <module>codenvy-hosted-workspace-activity</module>
         <module>codenvy-hosted-api-permission-shared</module>
         <module>codenvy-hosted-api-permission</module>
         <module>codenvy-hosted-api-invite-shared</module>
