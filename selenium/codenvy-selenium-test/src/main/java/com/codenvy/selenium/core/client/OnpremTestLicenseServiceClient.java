@@ -44,7 +44,7 @@ public class OnpremTestLicenseServiceClient {
 
     public void removeLicense() throws Exception {
         try {
-            requestFactory.fromUrl(apiEndpoint + "license/system")
+            requestFactory.fromUrl(apiEndpoint + "/license/system")
                           .setAuthorizationHeader(adminTestUser.getAuthToken())
                           .useDeleteMethod()
                           .request();
@@ -57,7 +57,7 @@ public class OnpremTestLicenseServiceClient {
         HttpURLConnection httpConnection = null;
 
         try {
-            String apiUrl = apiEndpoint + "license/system";
+            String apiUrl = apiEndpoint + "/license/system";
             URL url = new URL(apiUrl);
             httpConnection = (HttpURLConnection)url.openConnection();
             httpConnection.setRequestMethod("POST");

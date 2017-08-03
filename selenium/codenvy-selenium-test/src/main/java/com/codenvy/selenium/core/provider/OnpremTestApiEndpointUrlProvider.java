@@ -34,7 +34,7 @@ public class OnpremTestApiEndpointUrlProvider implements TestApiEndpointUrlProvi
     @Override
     public URL get() {
         try {
-            return new URL(protocol, host, -1, "/api/");
+            return new URL(protocol, host, -1, "/api");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

@@ -13,10 +13,10 @@ package com.codenvy.selenium.ssh;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.plugin.ssh.key.SshServiceClient;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -47,7 +47,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 /**
  * @author Musienko Maxim
@@ -90,13 +89,13 @@ public class LoginBySshKeyTest {
     @Inject
     private TestCommandServiceClient   testCommandServiceClient;
     @Inject
-    private TestSshServiceClient       testSshServiceClient;
-    @Inject
     private TestWorkspaceServiceClient workspaceServiceClient;
     @Inject
     private TestProjectServiceClient   testProjectServiceClient;
     @Inject
     private SeleniumWebDriver          seleniumWebDriver;
+    @Inject
+    private SshServiceClient           sshServiceClient;
 
     @BeforeClass
     public void setUp() throws Exception {
@@ -117,7 +116,7 @@ public class LoginBySshKeyTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        testSshServiceClient.deleteMachineKeyByName(user.getAuthToken(), TITLE_OF_SSH_KEY);
+        sshServiceClient.removePair("machine", TITLE_OF_SSH_KEY);
     }
 
     @Test
@@ -130,7 +129,8 @@ public class LoginBySshKeyTest {
         preferences.generateNewSshKey(TITLE_OF_SSH_KEY);
         preferences.clickOnCloseBtn();
 
-        String sshPrivateKeyFromFirstMachine = testSshServiceClient.getPrivateKeyByName(user.getAuthToken(), TITLE_OF_SSH_KEY);
+        String sshPrivateKeyFromFirstMachine = sshServiceClient.getPair("machine", TITLE_OF_SSH_KEY)
+                                                               .getPrivateKey();
         workspaceServiceClient.stop(ws1.getName(), user.getName(), user.getAuthToken(), false);
         seleniumWebDriver.navigate().refresh();
         notifications.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);

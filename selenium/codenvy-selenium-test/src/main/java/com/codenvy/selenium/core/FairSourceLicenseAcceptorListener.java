@@ -57,7 +57,7 @@ public class FairSourceLicenseAcceptorListener implements ISuiteListener {
         injector.injectMembers(this);
 
         try {
-            requestFactory.fromUrl(apiEndpoint.get() + "license/system/fair-source-license")
+            requestFactory.fromUrl(apiEndpoint.get() + "/license/system/fair-source-license")
                           .setAuthorizationHeader(adminTestUser.getAuthToken())
                           .usePostMethod()
                           .request();

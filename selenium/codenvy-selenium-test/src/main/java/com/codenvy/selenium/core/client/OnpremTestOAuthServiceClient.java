@@ -38,7 +38,7 @@ public class OnpremTestOAuthServiceClient {
      *         the name of OAuth provider
      */
     public synchronized void invalidateOAuthProvider(String provider, String token) throws Exception {
-        requestFactory.fromUrl(apiEndpoint + "oauth/token?oauth_provider=" + provider)
+        requestFactory.fromUrl(apiEndpoint + "/oauth/token?oauth_provider=" + provider)
                       .useDeleteMethod()
                       .setAuthorizationHeader(token)
                       .request();
@@ -53,7 +53,7 @@ public class OnpremTestOAuthServiceClient {
      */
     public boolean isOAuthProviderValid(String provider, String token) {
         try {
-            requestFactory.fromUrl(apiEndpoint + "oauth/token?oauth_provider=" + provider)
+            requestFactory.fromUrl(apiEndpoint + "/oauth/token?oauth_provider=" + provider)
                           .useGetMethod()
                           .setAuthorizationHeader(token)
                           .request();

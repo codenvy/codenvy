@@ -54,7 +54,7 @@ public class OnpremTestAuthServiceClient implements TestAuthServiceClient {
         HttpURLConnection http = null;
         String line;
         try {
-            String loginUrl = apiEndpoint + "auth/login";
+            String loginUrl = apiEndpoint + "/auth/login";
             http = (HttpURLConnection)new URL(loginUrl).openConnection();
             http.setRequestMethod("POST");
             http.setAllowUserInteraction(false);
@@ -96,7 +96,7 @@ public class OnpremTestAuthServiceClient implements TestAuthServiceClient {
     @Override
     public void logout(String authToken) {
         try {
-            String apiUrl = apiEndpoint + "auth/logout?token=" + authToken;
+            String apiUrl = apiEndpoint + "/auth/logout?token=" + authToken;
             requestFactory.fromUrl(apiUrl)
                           .usePostMethod()
                           .request();
