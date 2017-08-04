@@ -22,8 +22,7 @@ ENV LANG=C.UTF-8 \
 RUN apk add --update curl bash rsync sudo openssh postgresql-client postfix tini && \
     mkdir -p /opt/codenvy-data/ /opt/codenvy-data/logs /opt/codenvy-data/fs \
              /opt/codenvy-data/che-machines /opt/codenvy-data/che-machines-logs \
-             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback \
-             /opt/codenvy-data/license && \
+             /opt/codenvy-data/conf /opt/codenvy-data/conf/logback && \
     curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
      > /usr/bin/docker; chmod +x /usr/bin/docker
 

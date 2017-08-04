@@ -23,8 +23,8 @@ pre_init() {
   WS_AGENT_IN_REPO="${WS_AGENT_IN_REPO_MODULE_NAME}/target/assembly-wsagent-server-*.tar.gz"
   WS_AGENT_ASSEMBLY="ws-agent.tar.gz"
   CHE_SCRIPTS_CONTAINER_SOURCE_DIR="/repo/dockerfiles/cli/scripts"
-  CHE_LICENSE=true
-  CHE_LICENSE_URL="https://codenvy.com/legal/fair-source/"
+  CHE_LICENSE=false
+  CHE_LICENSE_URL="https://www.eclipse.org/legal/epl-v10.html"
   CHE_SERVER_CONTAINER_NAME="${CHE_MINI_PRODUCT_NAME}_${CHE_MINI_PRODUCT_NAME}_1"
   CHE_IMAGE_FULLNAME="codenvy/cli:<version>"
   CODENVY_PORT=80

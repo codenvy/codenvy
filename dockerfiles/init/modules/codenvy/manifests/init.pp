@@ -5,7 +5,6 @@ class codenvy {
     "/opt/codenvy/config/codenvy/conf",
     "/opt/codenvy/config/codenvy/conf/ssh",
     "/opt/codenvy/config/codenvy/conf/logback",
-    "/opt/codenvy/config/codenvy/license"
   ]
 
 # creating folders
@@ -88,14 +87,6 @@ class codenvy {
   file { "/opt/codenvy/config/codenvy/conf/machine.properties":
     ensure  => "present",
     content => template("codenvy/machine.properties.erb"),
-    mode    => "644",
-    require => File[$config_dirs],
-  }
-
-# creating licence.properties
-  file { "/opt/codenvy/config/codenvy/conf/license.properties":
-    ensure  => "present",
-    content => template("codenvy/license.properties.erb"),
     mode    => "644",
     require => File[$config_dirs],
   }
