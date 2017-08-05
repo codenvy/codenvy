@@ -78,7 +78,7 @@ public class OrganizationTest {
         String lastName = generate("L", 7);
         emailsList.stream().forEach(email -> {
             try {
-                profileServiceClient.setUserNames(firstName, lastName, adminTestUser.getAuthToken());
+                profileServiceClient.setUserNames(firstName, lastName);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -86,14 +86,14 @@ public class OrganizationTest {
 
         orgName = generate("orgX", 6);
 
-        organization = organizationServiceClient.createOrganization(orgName, adminTestUser.getAuthToken());
+        organization = organizationServiceClient.createOrganization(orgName);
 
         dashboard.open(adminTestUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(organization.getId(), adminTestUser.getAuthToken());
+        organizationServiceClient.deleteOrganizationById(organization.getId());
     }
 
     @Test

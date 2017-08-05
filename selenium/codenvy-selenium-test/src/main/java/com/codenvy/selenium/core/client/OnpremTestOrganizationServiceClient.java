@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,21 +39,24 @@ public class OnpremTestOrganizationServiceClient {
 
     private final String                 apiEndpoint;
     private final HttpJsonRequestFactory requestFactory;
+    private final TestUser adminTestUser;
 
     @Inject
     public OnpremTestOrganizationServiceClient(TestApiEndpointUrlProvider apiEndpointUrlProvider,
-                                               HttpJsonRequestFactory requestFactory) {
+                                               HttpJsonRequestFactory requestFactory,
+                                               AdminTestUser adminTestUser) {
         this.apiEndpoint = apiEndpointUrlProvider.get().toString();
         this.requestFactory = requestFactory;
+        this.adminTestUser = adminTestUser;
     }
 
-    public List<OrganizationDto> getOrganizations(String authToken) throws Exception {
-        return getOrganizations(null, authToken);
+    public List<OrganizationDto> getOrganizations() throws Exception {
+        return getOrganizations(null);
     }
 
-    public List<OrganizationDto> getOrganizations(@Nullable String parent, String authToken) throws Exception {
+    public List<OrganizationDto> getOrganizations(@Nullable String parent) throws Exception {
         List<OrganizationDto> organizations = requestFactory.fromUrl(getApiUrl())
-                                                            .setAuthorizationHeader(authToken)
+                                                            .setAuthorizationHeader(adminTestUser.getAuthToken())
                                                             .request()
                                                             .asList(OrganizationDto.class);
 
@@ -65,13 +69,13 @@ public class OnpremTestOrganizationServiceClient {
 
     private String getApiUrl() {return apiEndpoint + "organization/";}
 
-    public OrganizationDto createOrganization(String name, String parentId, String authToken) throws Exception {
+    public OrganizationDto createOrganization(String name, String parentId) throws Exception {
         OrganizationDto data = newDto(OrganizationDto.class)
                 .withName(name)
                 .withParent(parentId);
 
         OrganizationDto organizationDto = requestFactory.fromUrl(getApiUrl())
-                                                        .setAuthorizationHeader(authToken)
+                                                        .setAuthorizationHeader(adminTestUser.getAuthToken())
                                                         .setBody(data)
                                                         .usePostMethod().request()
                                                         .asDto(OrganizationDto.class);
@@ -81,16 +85,16 @@ public class OnpremTestOrganizationServiceClient {
         return organizationDto;
     }
 
-    public OrganizationDto createOrganization(String name, String authToken) throws Exception {
-        return createOrganization(name, null, authToken);
+    public OrganizationDto createOrganization(String name) throws Exception {
+        return createOrganization(name, null);
     }
 
-    public void deleteOrganizationById(String id, String authToken) throws Exception {
+    public void deleteOrganizationById(String id) throws Exception {
         String apiUrl = format("%s%s", getApiUrl(), id);
 
         try {
             requestFactory.fromUrl(apiUrl)
-                          .setAuthorizationHeader(authToken)
+                          .setAuthorizationHeader(adminTestUser.getAuthToken())
                           .useDeleteMethod()
                           .request();
         } catch (NotFoundException e) {
@@ -100,51 +104,51 @@ public class OnpremTestOrganizationServiceClient {
         LOG.debug("Organization with id='{}' removed", id);
     }
 
-    public void deleteOrganizationByName(String name, String authToken) throws Exception {
-        OrganizationDto organization = getOrganizationByName(name, authToken);
+    public void deleteOrganizationByName(String name) throws Exception {
+        OrganizationDto organization = getOrganizationByName(name);
 
         if (organization != null) {
-            deleteOrganizationById(organization.getId(), authToken);
+            deleteOrganizationById(organization.getId());
         }
     }
 
     public void deleteAllOrganizationsOfUser(TestUser testUser) throws Exception {
-        deleteAllOrganizationsOfUser(testUser.getName(), testUser.getAuthToken());
+        deleteAllOrganizationsOfUser(testUser.getName());
     }
 
-    public void deleteAllOrganizationsOfUser(String parentId, String authToken) throws Exception {
-        getOrganizations(parentId, authToken).stream()
-                                             .filter(organization -> organization.getParent() != null)
-                                             .forEach(organization -> {
+    public void deleteAllOrganizationsOfUser(String parentId) throws Exception {
+        getOrganizations(parentId).stream()
+                                  .filter(organization -> organization.getParent() != null)
+                                  .forEach(organization -> {
                                                  try {
-                                                     deleteOrganizationById(organization.getId(), authToken);
+                                                     deleteOrganizationById(organization.getId());
                                                  } catch (Exception e) {
                                                      throw new RuntimeException(e.getMessage(), e);
                                                  }
                                              });
     }
 
-    public OrganizationDto getOrganizationByName(String organizationName, String authToken) throws Exception {
+    public OrganizationDto getOrganizationByName(String organizationName) throws Exception {
         String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
         return requestFactory.fromUrl(apiUrl)
-                             .setAuthorizationHeader(authToken)
+                             .setAuthorizationHeader(adminTestUser.getAuthToken())
                              .request()
                              .asDto(OrganizationDto.class);
     }
 
-    public void addOrganizationMember(String organizationId, String userId, String authToken) throws Exception {
-        addOrganizationMember(organizationId, userId, asList("createWorkspaces"), authToken);
+    public void addOrganizationMember(String organizationId, String userId) throws Exception {
+        addOrganizationMember(organizationId, userId, asList("createWorkspaces"));
     }
 
-    public void addOrganizationAdmin(String organizationId, String userId, String authToken) throws Exception {
+    public void addOrganizationAdmin(String organizationId, String userId) throws Exception {
         addOrganizationMember(organizationId,
                               userId,
                               asList("update", "setPermissions", "manageResources", "manageWorkspaces", "createWorkspaces", "delete",
-                                     "manageSuborganizations"),
-                              authToken);
+                                     "manageSuborganizations")
+        );
     }
 
-    public void addOrganizationMember(String organizationId, String userId, List<String> actions, String authToken) throws Exception {
+    public void addOrganizationMember(String organizationId, String userId, List<String> actions) throws Exception {
         String apiUrl = apiEndpoint + "permissions";
         PermissionsDto data = newDto(PermissionsDto.class)
                 .withDomainId("organization")
@@ -153,7 +157,7 @@ public class OnpremTestOrganizationServiceClient {
                 .withActions(actions);
 
         requestFactory.fromUrl(apiUrl)
-                      .setAuthorizationHeader(authToken)
+                      .setAuthorizationHeader(adminTestUser.getAuthToken())
                       .setBody(data)
                       .usePostMethod()
                       .request();

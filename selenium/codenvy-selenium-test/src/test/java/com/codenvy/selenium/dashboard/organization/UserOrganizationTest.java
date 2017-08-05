@@ -61,20 +61,20 @@ public class UserOrganizationTest {
 
     @BeforeClass
     public void setUp() throws Exception {
-        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5), adminTestUser.getAuthToken());
+        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
         childOrganization = organizationServiceClient
-                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId(), adminTestUser.getAuthToken());
+                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-        organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId(), adminTestUser.getAuthToken());
-        organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId(), adminTestUser.getAuthToken());
+        organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId());
+        organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());
 
         dashboard.open(testUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(childOrganization.getId(), adminTestUser.getAuthToken());
-        organizationServiceClient.deleteOrganizationById(parentOrganization.getId(), adminTestUser.getAuthToken());
+        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
     }
 
     @Test(priority = 1)

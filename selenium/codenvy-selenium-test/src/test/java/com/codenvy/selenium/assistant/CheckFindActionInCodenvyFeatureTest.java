@@ -86,8 +86,6 @@ public class CheckFindActionInCodenvyFeatureTest {
     @Inject
     private TestWorkspace            testWorkspace;
     @Inject
-    private DefaultTestUser          defaultTestUser;
-    @Inject
     private FindAction               findAction;
     @Inject
     private ProjectExplorer          projectExplorer;
@@ -101,7 +99,7 @@ public class CheckFindActionInCodenvyFeatureTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = CheckFindActionInCodenvyFeatureTest.this.getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(testWorkspace.getId(), defaultTestUser.getAuthToken(), Paths.get(resource.toURI()),
+        testProjectServiceClient.importProject(testWorkspace.getId(), Paths.get(resource.toURI()),
                                                PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING);
 

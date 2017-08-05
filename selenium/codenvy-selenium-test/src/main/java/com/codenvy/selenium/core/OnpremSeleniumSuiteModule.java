@@ -23,6 +23,8 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
@@ -80,6 +82,9 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
         bind(TestApiEndpointUrlProvider.class).to(OnpremTestApiEndpointUrlProvider.class);
         bind(TestIdeUrlProvider.class).to(OnpremTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(OnpremTestDashboardUrlProvider.class);
+
+        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
+
         bind(AdminTestUser.class).to(OnpremAdminTestUser.class);
         bind(TestAuthServiceClient.class).to(OnpremTestAuthServiceClient.class);
         bind(TestMachineServiceClient.class).to(OnpremTestMachineServiceClient.class);

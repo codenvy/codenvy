@@ -39,14 +39,11 @@ public class OnpremTestMachineServiceClient implements TestMachineServiceClient 
      *
      * @param workspaceId
      *         the workspace id
-     * @param authToken
-     *         the authorization token
      * @return the machine token for current workspace
      */
     @Override
-    public String getMachineApiToken(String workspaceId, String authToken) throws Exception {
+    public String getMachineApiToken(String workspaceId) throws Exception {
         HttpJsonResponse response = requestFactory.fromUrl(apiEndpoint + "machine/token/" + workspaceId)
-                                                  .setAuthorizationHeader(authToken)
                                                   .useGetMethod()
                                                   .request();
         return response.asDto(MachineTokenDto.class).getMachineToken();

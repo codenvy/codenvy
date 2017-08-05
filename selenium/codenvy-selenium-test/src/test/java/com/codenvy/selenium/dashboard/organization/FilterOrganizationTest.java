@@ -63,12 +63,12 @@ public class FilterOrganizationTest {
         dashboard.open(adminTestUser.getAuthToken());
 
         organizationName = NameGenerator.generate("organization", 5);
-        organizations = organizationServiceClient.getOrganizations(adminTestUser.getAuthToken());
+        organizations = organizationServiceClient.getOrganizations();
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByName(organizationName, adminTestUser.getAuthToken());
+        organizationServiceClient.deleteOrganizationByName(organizationName);
     }
 
     @Test

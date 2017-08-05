@@ -76,9 +76,9 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
         User user = testUserServiceClient.getUser(authToken);
 
         workspaceServiceClient.getAll(authToken)
-                              .forEach(w -> {
+                              .forEach(ws -> {
                                   try {
-                                      workspaceServiceClient.delete(w, user.getName(), authToken);
+                                      workspaceServiceClient.delete(ws, user.getName(), authToken);
                                   } catch (Exception e) {
                                       throw new RuntimeException(e);
                                   }

@@ -47,7 +47,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 /**
  * @author Musienko Maxim
@@ -101,27 +100,26 @@ public class LoginBySshKeyTest {
     @BeforeClass
     public void setUp() throws Exception {
         URL resource = LoginBySshKeyTest.this.getClass().getResource("/projects/default-spring-project");
-        testProjectServiceClient.importProject(ws1.getId(), user.getAuthToken(), Paths.get(resource.toURI()), PROJECT_NAME,
+        testProjectServiceClient.importProject(ws1.getId(), Paths.get(resource.toURI()), PROJECT_NAME,
                                                ProjectTemplates.MAVEN_SPRING);
-        testProjectServiceClient.createFileInProject(ws1.getId(), user.getAuthToken(),
-                                                     PROJECT_NAME, CHECKED_FILE_NAME, user.getAuthToken());
+        testProjectServiceClient.createFileInProject(ws1.getId(), PROJECT_NAME, CHECKED_FILE_NAME, "text");
 
         ide.open(ws1);
         String commandForPreparingSshDirectory = "mkdir -p /home/user/.ssh";
         testCommandServiceClient.createCommand(commandForPreparingSshDirectory, NAME_COMMAND_FOR_CREATION_SSH_DIRECTORY,
                                                TestCommandsConstants.CUSTOM,
-                                               ws1.getId(), user.getAuthToken());
+                                               ws1.getId());
         projectExplorer.waitProjectExplorer();
         notifications.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        testSshServiceClient.deleteMachineKeyByName(user.getAuthToken(), TITLE_OF_SSH_KEY);
+        testSshServiceClient.deleteMachineKeyByName(TITLE_OF_SSH_KEY);
     }
 
     @Test
-    public void loginByShhKeyTest() throws Exception {
+    public void loginBySshKeyTest() throws Exception {
         menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, TestMenuCommandsConstants.Profile.PREFERENCES);
         preferences.waitPreferencesForm();
         preferences.waitDropDownHeaderMenu(Preferences.DropDownListsHeaders.KEYS_SETTINGS);
@@ -130,8 +128,8 @@ public class LoginBySshKeyTest {
         preferences.generateNewSshKey(TITLE_OF_SSH_KEY);
         preferences.clickOnCloseBtn();
 
-        String sshPrivateKeyFromFirstMachine = testSshServiceClient.getPrivateKeyByName(user.getAuthToken(), TITLE_OF_SSH_KEY);
-        workspaceServiceClient.stop(ws1.getName(), user.getName(), user.getAuthToken(), false);
+        String sshPrivateKeyFromFirstMachine = testSshServiceClient.getPrivateKeyByName(TITLE_OF_SSH_KEY);
+        workspaceServiceClient.stop(ws1.getName(), user.getName(), false);
         seleniumWebDriver.navigate().refresh();
         notifications.waitExpectedMessageOnProgressPanelAndClosed(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
         notifications.waitPopUpPanelsIsClosed();
@@ -144,13 +142,13 @@ public class LoginBySshKeyTest {
         String commandForCreatingSshKey =
                 "mkdir -p ~/.ssh && echo -e '" + sshPrivateKeyFromFirstMachine.replaceAll("\n", "\\\\n") + "' > " + PATH_TO_SSH_KEY_FOLDER;
         testCommandServiceClient.createCommand(commandForCreatingSshKey, NAME_COMMAND_FOR_CREATION_SSH_KEY, TestCommandsConstants.CUSTOM,
-                                               ws2.getId(), user.getAuthToken());
+                                               ws2.getId());
         consoles.clickOnOpenSshTerminalBtn();
         testCommandServiceClient.createCommand(
                 "chmod 0700 " + PATH_TO_SSH_KEY_FOLDER + " && " + commandForConnection + " \" cd /projects/" + PROJECT_NAME +
                 " && ls \" ",
                 NAME_COMMAND_CONNECTION_BY_SSH_KEY, TestCommandsConstants.CUSTOM,
-                ws2.getId(), user.getAuthToken());
+                ws2.getId());
 
         //This actions for redrawing the just add commands on Toolbar widget after fixing CHE-1357 the refresh browser block should be removed
         seleniumWebDriver.navigate().refresh();

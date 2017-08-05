@@ -53,14 +53,14 @@ public class OrganizationListTest {
     @BeforeClass
     public void setUp() throws Exception {
         organization =
-                organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5), adminTestUser.getAuthToken());
-        organizations = organizationServiceClient.getOrganizations(adminTestUser.getAuthToken());
+                organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
+        organizations = organizationServiceClient.getOrganizationsAsAdmin();
         dashboard.open(adminTestUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(organization.getId(), adminTestUser.getAuthToken());
+        organizationServiceClient.deleteOrganizationByIdAsAdmin(organization.getId());
     }
 
     @Test
