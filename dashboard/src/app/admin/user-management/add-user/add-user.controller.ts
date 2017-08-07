@@ -9,7 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {LicenseMessagesService} from '../../../onprem/license-messages/license-messages.service';
 import {AdminsUserManagementCtrl} from '../user-management.controller';
 import {CodenvyOrganization} from '../../../../components/api/codenvy-organizations.factory';
 import {CodenvyPermissions} from '../../../../components/api/codenvy-permissions.factory';
@@ -25,7 +24,6 @@ export class AdminsAddUserController {
   private cheNotification: any;
   private cheUser: any;
   private callbackController: AdminsUserManagementCtrl;
-  private licenseMessagesService: LicenseMessagesService;
   private newUserName: string;
   private newUserEmail: string;
   private newUserPassword: string;
@@ -39,12 +37,11 @@ export class AdminsAddUserController {
    * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService, cheUser: any, cheNotification: any, lodash: _.LoDashStatic,
-              licenseMessagesService: LicenseMessagesService, codenvyOrganization: CodenvyOrganization, codenvyPermissions: CodenvyPermissions) {
+              codenvyOrganization: CodenvyOrganization, codenvyPermissions: CodenvyPermissions) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.cheUser = cheUser;
     this.cheNotification = cheNotification;
-    this.licenseMessagesService = licenseMessagesService;
     this.codenvyOrganization = codenvyOrganization;
     this.codenvyPermissions = codenvyPermissions;
 
@@ -93,7 +90,6 @@ export class AdminsAddUserController {
     this.$mdDialog.hide();
     this.callbackController.updateUsers();
     this.cheNotification.showInfo('User successfully created.');
-    this.licenseMessagesService.fetchMessages();
   }
 
   /**

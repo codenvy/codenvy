@@ -10,25 +10,11 @@
  */
 'use strict';
 
-import {OnPremisesAdminLicenseController} from './onprem-administration/license/license.controller';
 import {AdminsUserManagementConfig} from './user-management/user-management-config';
-import {License} from './onprem-administration/license/license.directive';
 
 export class AdminConfig {
 
   constructor(register: che.IRegisterService) {
-
-    register.directive('cdvyLicense', License);
-    register.controller('OnPremisesAdminLicenseController', OnPremisesAdminLicenseController);
-
-    // configure routes
-    register.app.config(($routeProvider: ng.route.IRouteProvider) => {
-      ($routeProvider as any).accessWhen('/onprem/administration', {
-        title: 'Administration',
-        templateUrl: 'app/admin/onprem-administration/onprem-administration.html'
-      });
-    });
-
     new AdminsUserManagementConfig(register);
   }
 }
