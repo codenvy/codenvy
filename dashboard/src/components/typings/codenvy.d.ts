@@ -17,7 +17,6 @@ declare namespace _codenvy {
     hasUserProfileService: boolean;
     hasAdminUserService: boolean;
     hasInstallationManagerService: boolean;
-    hasLicenseService: boolean;
   }
 
   export interface ILink {

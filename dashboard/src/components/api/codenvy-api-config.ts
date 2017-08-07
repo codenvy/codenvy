@@ -11,7 +11,6 @@
 'use strict';
 
 import {CodenvyAPI} from './codenvy-api.factory';
-import {CodenvyLicense} from './codenvy-license.factory';
 import {CodenvyPermissions} from './codenvy-permissions.factory';
 import {CodenvySystem} from './codenvy-system.factory';
 import {CodenvyTeam} from './codenvy-team.factory';
@@ -32,7 +31,6 @@ export class CodenvyApiConfig {
   constructor(register: che.IRegisterService) {
     register.app.constant('clientTokenPath', '/'); // is necessary for Braintree
     register.factory('codenvyPermissions', CodenvyPermissions);
-    register.factory('codenvyLicense', CodenvyLicense);
     register.factory('codenvySystem', CodenvySystem);
     register.factory('codenvyTeam', CodenvyTeam);
     register.factory('codenvyOrganization', CodenvyOrganization);

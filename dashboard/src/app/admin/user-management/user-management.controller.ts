@@ -9,7 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {LicenseMessagesService} from '../../onprem/license-messages/license-messages.service';
 import {CodenvyOrganization} from '../../../components/api/codenvy-organizations.factory';
 
 const MAX_ITEMS = 12;
@@ -24,7 +23,6 @@ export class AdminsUserManagementCtrl {
   $mdDialog: ng.material.IDialogService;
   $location: ng.ILocationService;
   cheUser: any;
-  licenseMessagesService: LicenseMessagesService;
   cheNotification: any;
   pagesInfo: any;
   users: Array<any>;
@@ -44,8 +42,7 @@ export class AdminsUserManagementCtrl {
    */
   constructor($q: ng.IQService, $rootScope: che.IRootScopeService, $log: ng.ILogService,
               $mdDialog: ng.material.IDialogService, cheUser: any, $location: ng.ILocationService,
-              cheNotification: any, licenseMessagesService: LicenseMessagesService,
-              confirmDialogService: any, codenvyOrganization: CodenvyOrganization,
+              cheNotification: any, confirmDialogService: any, codenvyOrganization: CodenvyOrganization,
               $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$log = $log;
@@ -54,7 +51,6 @@ export class AdminsUserManagementCtrl {
     this.cheUser = cheUser;
     this.codenvyOrganization = codenvyOrganization;
     this.cheNotification = cheNotification;
-    this.licenseMessagesService = licenseMessagesService;
     this.confirmDialogService = confirmDialogService;
 
     $rootScope.showIDE = false;
@@ -138,7 +134,6 @@ export class AdminsUserManagementCtrl {
       promise.then(() => {
         this.isLoading = false;
         this.updateUsers();
-        this.licenseMessagesService.fetchMessages();
       }, (error: any) => {
         this.isLoading = false;
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Delete user failed.');
@@ -187,7 +182,6 @@ export class AdminsUserManagementCtrl {
         promise.then(() => {
           this.isLoading = false;
           this.updateUsers();
-          this.licenseMessagesService.fetchMessages();
         }, (error: any) => {
           this.isLoading = false;
           this.$log.error(error);

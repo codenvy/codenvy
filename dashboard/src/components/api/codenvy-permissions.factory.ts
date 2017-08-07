@@ -72,8 +72,7 @@ export class CodenvyPermissions {
       hasUserService: false,
       hasUserProfileService: false,
       hasAdminUserService: false,
-      hasInstallationManagerService: false,
-      hasLicenseService: false
+      hasInstallationManagerService: false
     };
 
     this.remotePermissionsAPI = <ICodenvyPermissionsResource<any>>this.$resource('/api/permissions', {}, {
@@ -214,6 +213,5 @@ export class CodenvyPermissions {
     this.userServices.hasUserProfileService = isManageUsers;
     this.userServices.hasAdminUserService = isManageUsers;
     this.userServices.hasInstallationManagerService = isManageSystem;
-    this.userServices.hasLicenseService = isManageSystem;
   }
 }
