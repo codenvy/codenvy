@@ -10,9 +10,9 @@
  *******************************************************************************/
 package com.codenvy.api.user.server;
 
-import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
+
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -38,17 +38,14 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_USERS_ACTION;
 import static com.jayway.restassured.RestAssured.given;
-import static java.lang.String.format;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,8 +73,6 @@ public class UserServicePermissionsFilterTest {
     WorkspaceManager     workspaceManager;
     @Mock
     UserManager          userManager;
-    @Mock
-    SystemLicenseManager licenseManager;
 
     UserServicePermissionsFilter permissionsFilter;
 
@@ -89,14 +84,12 @@ public class UserServicePermissionsFilterTest {
 
     @BeforeMethod
     public void setUp() throws ServerException {
-        permissionsFilter = new UserServicePermissionsFilter(true, licenseManager);
+        permissionsFilter = new UserServicePermissionsFilter(true);
         when(subject.getUserId()).thenReturn(USER_ID);
     }
 
     @Test
     public void shouldNotCheckPermissionsOnUserCreationFromToken() throws Exception {
-        when(licenseManager.canUserBeAdded()).thenReturn(true);
-
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
@@ -109,62 +102,7 @@ public class UserServicePermissionsFilterTest {
     }
 
     @Test
-    public void shouldThrowAUserExceptionWhenCreatingUserIsBeyondLicense() throws Exception {
-        when(licenseManager.canUserBeAdded()).thenReturn(false);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .post(SECURE_PATH + "/user?token=" + TOKEN);
-
-        assertEquals(response.getStatusCode(), 403);
-        assertEquals(response.getBody().prettyPrint(), "{\n"
-                                                       + "    \"message\": \"" + UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE + "\"\n"
-                                                       + "}");
-        verify(service, never()).create(any(), any(), any());
-        verify(subject, never()).checkPermission(any(), any(), any());
-    }
-
-    @Test
-    public void shouldThrowAnAdminUserExceptionWhenCreatingUserIsBeyondLicense() throws Exception {
-        when(licenseManager.canUserBeAdded()).thenReturn(false);
-        when(subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)).thenReturn(true);
-        long allowedUsersNumber = 10;
-        when(licenseManager.getAllowedUserNumber()).thenReturn(allowedUsersNumber);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .post(SECURE_PATH + "/user?token=" + TOKEN);
-
-        assertEquals(response.getStatusCode(), 403);
-        assertEquals(response.getBody().prettyPrint(), format("{\n"
-                                                       + "    \"message\": \"The user cannot be added. You have %s users in Codenvy which is the maximum allowed by your current license.\"\n"
-                                                       + "}", allowedUsersNumber));
-        verify(service, never()).create(any(), any(), any());
-        verify(subject, never()).checkPermission(any(), any(), any());
-    }
-
-
-    @Test
-    public void shouldThrowAnExceptionWhenCheckUserLicenseError() throws Exception {
-        doThrow(new ServerException("read users error")).when(licenseManager).canUserBeAdded();
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .post(SECURE_PATH + "/user?token=" + TOKEN);
-
-        assertEquals(response.getStatusCode(), 500);
-    }
-
-    @Test
     public void shouldCheckPermissionsOnUserCreationFromEntity() throws Exception {
-        when(licenseManager.canUserBeAdded()).thenReturn(true);
-
         final UserDto userToCreate = DtoFactory.newDto(UserDto.class)
                                                .withId("user123")
                                                .withEmail("test @test.com")

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.codenvy.auth.sso.server;
 
-import com.codenvy.api.license.server.SystemLicenseManager;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.user.User;
@@ -25,10 +24,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-
-import static com.codenvy.api.license.shared.model.Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
-import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -63,22 +58,16 @@ public class OrgServiceUserCreatorTest {
     @Mock
     User createdUser;
 
-    @Mock
-    SystemLicenseManager licenseManager;
-
     OrgServiceUserCreator creator;
 
     @BeforeMethod
     public void setUp() throws Exception {
         final String userId = "userId123";
-        creator = new OrgServiceUserCreator(manager, profileManager, preferenceManager, licenseManager, true);
+        creator = new OrgServiceUserCreator(manager, profileManager, preferenceManager, true);
         when(profileManager.getById(userId)).thenReturn(new ProfileImpl(userId, singletonMap("phone", "123")));
         doNothing().when(profileManager).update(any());
         when(createdUser.getId()).thenReturn(userId);
         doReturn(createdUser).when(manager).getByName(anyString());
-
-        doReturn(true).when(licenseManager).isFairSourceLicenseAccepted();
-        doReturn(true).when(licenseManager).canUserBeAdded();
     }
 
     @Test
@@ -110,23 +99,5 @@ public class OrgServiceUserCreatorTest {
         verify(manager, times(2)).create(user.capture(), eq(false));
         assertTrue(user.getValue().getName().startsWith("reserved"));
         assertFalse(user.getValue().getName().equals("reserved"));
-    }
-
-    @Test(expectedExceptions = IOException.class,
-          expectedExceptionsMessageRegExp = UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE)
-    public void shouldNotCreateUserBeyoundLicense() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
-        doReturn(false).when(licenseManager).canUserBeAdded();
-
-        creator.createUser("user@codenvy.com", "test", "John", "Doe");
-    }
-
-    @Test(expectedExceptions = IOException.class,
-        expectedExceptionsMessageRegExp = FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE)
-    public void shouldNotCreateUserIfFairSourceLicenseIsNotAccepted() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
-        doReturn(false).when(licenseManager).isFairSourceLicenseAccepted();
-
-        creator.createUser("user@codenvy.com", "test", "John", "Doe");
     }
 }

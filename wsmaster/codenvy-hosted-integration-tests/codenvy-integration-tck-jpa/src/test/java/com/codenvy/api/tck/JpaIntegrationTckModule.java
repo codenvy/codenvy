@@ -10,9 +10,7 @@
  *******************************************************************************/
 package com.codenvy.api.tck;
 
-import com.codenvy.api.license.server.dao.SystemLicenseActionDao;
-import com.codenvy.api.license.server.jpa.JpaSystemLicenseActionDao;
-import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
+import com.codenvy.api.invite.InviteImpl;
 import com.codenvy.api.machine.server.jpa.JpaRecipePermissionsDao;
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.codenvy.api.machine.server.spi.tck.RecipePermissionsDaoTest;
@@ -43,7 +41,6 @@ import com.codenvy.resource.spi.FreeResourcesLimitDao;
 import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
 import com.codenvy.resource.spi.jpa.JpaFreeResourcesLimitDao;
 import com.codenvy.spi.invite.InviteDao;
-import com.codenvy.api.invite.InviteImpl;
 import com.codenvy.spi.invite.jpa.JpaInviteDao;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -205,10 +202,6 @@ public class JpaIntegrationTckModule extends TckModule {
         //api-resource
         bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {}).toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));
 
-        //api-license
-        bind(new TypeLiteral<TckRepository<SystemLicenseActionImpl>>() {})
-                .toInstance(new JpaTckRepository<>(SystemLicenseActionImpl.class));
-
         //dao
         //api-account
         bind(AccountDao.class).to(JpaAccountDao.class);
@@ -233,8 +226,6 @@ public class JpaIntegrationTckModule extends TckModule {
         bind(OrganizationDistributedResourcesDao.class).to(JpaOrganizationDistributedResourcesDao.class);
         bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
         bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
-        //api-license
-        bind(SystemLicenseActionDao.class).to(JpaSystemLicenseActionDao.class);
         //api-resource
         bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
         //api-invite

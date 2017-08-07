@@ -76,15 +76,6 @@
         </dependency>
         <dependency>
             <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-system-license</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises.wsmaster</groupId>
-            <artifactId>codenvy-hosted-api-system-license</artifactId>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.onpremises.wsmaster</groupId>
             <artifactId>codenvy-hosted-api-workspace</artifactId>
         </dependency>
         <dependency>
@@ -246,7 +237,6 @@
                                         codenvy-hosted-api-organization,
                                         codenvy-hosted-api-resource,
                                         codenvy-hosted-api-permission,
-                                        codenvy-hosted-api-system-license,
                                         codenvy-hosted-api-invite,
                                         che-core-api-factory</includeArtifactIds>
                                     <includeScope>test</includeScope>

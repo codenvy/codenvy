@@ -14,7 +14,6 @@ import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.dao.authentication.TokenGenerator;
-import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.auth.sso.server.email.template.VerifyEmailTemplate;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
@@ -27,7 +26,6 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 
 import org.eclipse.che.api.auth.AuthenticationException;
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserValidator;
@@ -50,8 +48,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.codenvy.api.license.shared.model.Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE;
-import static com.codenvy.api.license.shared.model.Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 /**
@@ -74,7 +70,6 @@ public class BearerTokenAuthenticationService {
     private final UserCreationValidator                    creationValidator;
     private final UserCreator                              userCreator;
     private final UserValidator                            userNameValidator;
-    private final SystemLicenseManager                     licenseManager;
     private final DefaultEmailResourceResolver             resourceResolver;
     private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
     private final String                                   mailFrom;
@@ -90,7 +85,6 @@ public class BearerTokenAuthenticationService {
                                             UserCreationValidator creationValidator,
                                             UserCreator userCreator,
                                             UserValidator userNameValidator,
-                                            SystemLicenseManager licenseManager,
                                             DefaultEmailResourceResolver resourceResolver,
                                             HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
                                             @Named("mailsender.application.from.email.address") String mailFrom,
@@ -104,7 +98,6 @@ public class BearerTokenAuthenticationService {
         this.creationValidator = creationValidator;
         this.userCreator = userCreator;
         this.userNameValidator = userNameValidator;
-        this.licenseManager = licenseManager;
         this.resourceResolver = resourceResolver;
         this.thymeleaf = thymeleaf;
         this.mailFrom = mailFrom;
@@ -201,13 +194,6 @@ public class BearerTokenAuthenticationService {
         emailValidator.validateUserMail(email);
         creationValidator.ensureUserCreationAllowed(email, validationData.getUsername());
 
-        if (!licenseManager.isFairSourceLicenseAccepted()) {
-            throw new ForbiddenException(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE);
-        }
-
-        if (!licenseManager.canUserBeAdded()) {
-            throw new ForbiddenException(UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE);
-        }
         final String bearerToken = handler.generateBearerToken(email,
                                                                validationData.getUsername(),
                                                                Collections.singletonMap("initiator", "email"));
