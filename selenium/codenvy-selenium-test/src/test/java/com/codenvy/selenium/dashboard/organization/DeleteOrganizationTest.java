@@ -57,9 +57,9 @@ public class DeleteOrganizationTest {
     @BeforeClass
     public void setUp() throws Exception {
         dashboard.open(adminTestUser.getAuthToken());
-        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+        parentOrganization = organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
         childOrganization = organizationServiceClient
-                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId());
+                .createOrganizationAsAdmin(NameGenerator.generate("organization", 5), parentOrganization.getId());
 
         organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
         organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
@@ -69,8 +69,8 @@ public class DeleteOrganizationTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
-        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
+        organizationServiceClient.deleteOrganizationByIdAsAdmin(childOrganization.getId());
+        organizationServiceClient.deleteOrganizationByIdAsAdmin(parentOrganization.getId());
     }
 
     @Test(priority = 1)

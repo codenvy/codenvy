@@ -50,11 +50,11 @@ public class OnpremTestOrganizationServiceClient {
         this.adminTestUser = adminTestUser;
     }
 
-    public List<OrganizationDto> getOrganizations() throws Exception {
-        return getOrganizations(null);
+    public List<OrganizationDto> getOrganizationsAsAdmin() throws Exception {
+        return getOrganizationsAsAdmin(null);
     }
 
-    public List<OrganizationDto> getOrganizations(@Nullable String parent) throws Exception {
+    public List<OrganizationDto> getOrganizationsAsAdmin(@Nullable String parent) throws Exception {
         List<OrganizationDto> organizations = requestFactory.fromUrl(getApiUrl())
                                                             .setAuthorizationHeader(adminTestUser.getAuthToken())
                                                             .request()
@@ -67,9 +67,22 @@ public class OnpremTestOrganizationServiceClient {
         return organizations;
     }
 
+    public List<OrganizationDto> getOrganizations(@Nullable String parent, String authToken) throws Exception {
+        List<OrganizationDto> organizations = requestFactory.fromUrl(getApiUrl())
+                                                            .setAuthorizationHeader(authToken)
+                                                            .request()
+                                                            .asList(OrganizationDto.class);
+
+        if (parent == null) {
+            organizations.removeIf(o -> o.getParent() != null);
+        }
+
+        return organizations;
+    }
+
     private String getApiUrl() {return apiEndpoint + "organization/";}
 
-    public OrganizationDto createOrganization(String name, String parentId) throws Exception {
+    public OrganizationDto createOrganizationAsAdmin(String name, String parentId) throws Exception {
         OrganizationDto data = newDto(OrganizationDto.class)
                 .withName(name)
                 .withParent(parentId);
@@ -85,11 +98,27 @@ public class OnpremTestOrganizationServiceClient {
         return organizationDto;
     }
 
-    public OrganizationDto createOrganization(String name) throws Exception {
-        return createOrganization(name, null);
+    public OrganizationDto createOrganizationAsAdmin(String name) throws Exception {
+        return createOrganizationAsAdmin(name, null);
     }
 
-    public void deleteOrganizationById(String id) throws Exception {
+    public OrganizationDto createOrganization(String name, String parentId, String authToken) throws Exception {
+        OrganizationDto data = newDto(OrganizationDto.class)
+                .withName(name)
+                .withParent(parentId);
+
+        OrganizationDto organizationDto = requestFactory.fromUrl(getApiUrl())
+                                                        .setAuthorizationHeader(authToken)
+                                                        .setBody(data)
+                                                        .usePostMethod().request()
+                                                        .asDto(OrganizationDto.class);
+
+        LOG.debug("Organization with name='{}', id='{}' and parent's id='{}' created", name, organizationDto.getId(), parentId);
+
+        return organizationDto;
+    }
+
+    public void deleteOrganizationByIdAsAdmin(String id) throws Exception {
         String apiUrl = format("%s%s", getApiUrl(), id);
 
         try {
@@ -104,31 +133,46 @@ public class OnpremTestOrganizationServiceClient {
         LOG.debug("Organization with id='{}' removed", id);
     }
 
-    public void deleteOrganizationByName(String name) throws Exception {
-        OrganizationDto organization = getOrganizationByName(name);
+    public void deleteOrganizationById(String id, String authToken) throws Exception {
+        String apiUrl = format("%s%s", getApiUrl(), id);
+
+        try {
+            requestFactory.fromUrl(apiUrl)
+                          .setAuthorizationHeader(authToken)
+                          .useDeleteMethod()
+                          .request();
+        } catch (NotFoundException e) {
+            // ignore if there is no organization of certain id
+        }
+
+        LOG.debug("Organization with id='{}' removed", id);
+    }
+
+    public void deleteOrganizationByNameAsAdmin(String name) throws Exception {
+        OrganizationDto organization = getOrganizationByNameAsAdmin(name);
 
         if (organization != null) {
-            deleteOrganizationById(organization.getId());
+            deleteOrganizationByIdAsAdmin(organization.getId());
         }
     }
 
     public void deleteAllOrganizationsOfUser(TestUser testUser) throws Exception {
-        deleteAllOrganizationsOfUser(testUser.getName());
+        deleteAllOrganizationsOfUser(testUser.getName(), testUser.getAuthToken());
     }
 
-    public void deleteAllOrganizationsOfUser(String parentId) throws Exception {
-        getOrganizations(parentId).stream()
-                                  .filter(organization -> organization.getParent() != null)
-                                  .forEach(organization -> {
+    public void deleteAllOrganizationsOfUser(String parentId, String authToken) throws Exception {
+        getOrganizations(parentId, authToken).stream()
+                                             .filter(organization -> organization.getParent() != null)
+                                             .forEach(organization -> {
                                                  try {
-                                                     deleteOrganizationById(organization.getId());
+                                                     deleteOrganizationById(organization.getId(), authToken);
                                                  } catch (Exception e) {
                                                      throw new RuntimeException(e.getMessage(), e);
                                                  }
                                              });
     }
 
-    public OrganizationDto getOrganizationByName(String organizationName) throws Exception {
+    public OrganizationDto getOrganizationByNameAsAdmin(String organizationName) throws Exception {
         String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
         return requestFactory.fromUrl(apiUrl)
                              .setAuthorizationHeader(adminTestUser.getAuthToken())
@@ -136,19 +180,27 @@ public class OnpremTestOrganizationServiceClient {
                              .asDto(OrganizationDto.class);
     }
 
-    public void addOrganizationMember(String organizationId, String userId) throws Exception {
-        addOrganizationMember(organizationId, userId, asList("createWorkspaces"));
+    public OrganizationDto getOrganizationByName(String organizationName, String authToken) throws Exception {
+        String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
+        return requestFactory.fromUrl(apiUrl)
+                             .setAuthorizationHeader(authToken)
+                             .request()
+                             .asDto(OrganizationDto.class);
+    }
+
+    public void addOrganizationMemberAsAdmin(String organizationId, String userId) throws Exception {
+        addOrganizationMemberAsAdmin(organizationId, userId, asList("createWorkspaces"));
     }
 
     public void addOrganizationAdmin(String organizationId, String userId) throws Exception {
-        addOrganizationMember(organizationId,
-                              userId,
-                              asList("update", "setPermissions", "manageResources", "manageWorkspaces", "createWorkspaces", "delete",
+        addOrganizationMemberAsAdmin(organizationId,
+                                     userId,
+                                     asList("update", "setPermissions", "manageResources", "manageWorkspaces", "createWorkspaces", "delete",
                                      "manageSuborganizations")
         );
     }
 
-    public void addOrganizationMember(String organizationId, String userId, List<String> actions) throws Exception {
+    public void addOrganizationMemberAsAdmin(String organizationId, String userId, List<String> actions) throws Exception {
         String apiUrl = apiEndpoint + "permissions";
         PermissionsDto data = newDto(PermissionsDto.class)
                 .withDomainId("organization")

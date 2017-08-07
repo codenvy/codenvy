@@ -86,14 +86,14 @@ public class OrganizationTest {
 
         orgName = generate("orgX", 6);
 
-        organization = organizationServiceClient.createOrganization(orgName);
+        organization = organizationServiceClient.createOrganizationAsAdmin(orgName);
 
         dashboard.open(adminTestUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(organization.getId());
+        organizationServiceClient.deleteOrganizationByIdAsAdmin(organization.getId());
     }
 
     @Test
