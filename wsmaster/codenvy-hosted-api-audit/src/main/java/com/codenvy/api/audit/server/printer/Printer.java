@@ -73,7 +73,12 @@ public abstract class Printer {
         printRow(format("[ERROR] %s!\n", error));
     }
 
-    public static Printer createUserPrinter(Path auditReport, UserImpl user, List<WorkspaceImpl> workspaces, Map<String, AbstractPermissions> wsPermissions) {
+    public static Printer createSystemInfoPrinter(Path auditReport, long allUsersNumber) {
+        return new SystemInfoPrinter(auditReport, allUsersNumber);
+    }
+
+    public static Printer createUserPrinter(Path auditReport, UserImpl user, List<WorkspaceImpl> workspaces,
+                                            Map<String, AbstractPermissions> wsPermissions) {
         return new UserInfoPrinter(auditReport, user, workspaces, wsPermissions);
     }
 

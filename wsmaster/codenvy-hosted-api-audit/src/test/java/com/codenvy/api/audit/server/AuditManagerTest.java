@@ -132,7 +132,8 @@ public class AuditManagerTest {
 
         //then
         assertEquals(readFileToString(auditReport.toFile()),
-                     "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
+                     "Number of users: 2\n"
+                     + "user@email.com is owner of 1 workspace and has permissions in 2 workspaces\n"
                      + "   └ Workspace1Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n"
                      + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
                      + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
@@ -154,7 +155,8 @@ public class AuditManagerTest {
 
         //then
         assertEquals(readFileToString(auditReport.toFile()),
-                     "user@email.com is owner of 0 workspaces and has permissions in 2 workspaces\n"
+                     "Number of users: 2\n"
+                     + "user@email.com is owner of 0 workspaces and has permissions in 2 workspaces\n"
                      + "   └ Workspace1Name, is owner: false, permissions: [read, use, run, configure, setPermissions, delete]\n"
                      + "   └ Workspace2Name, is owner: false, permissions: [read, use, run, configure, setPermissions]\n"
                      + "user2@email.com is owner of 2 workspaces and has permissions in 1 workspace\n"
@@ -172,7 +174,8 @@ public class AuditManagerTest {
 
         //then
         assertEquals(readFileToString(auditReport.toFile()),
-                     "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n"
+                     "Number of users: 2\n"
+                     + "[ERROR] Failed to retrieve the list of related workspaces for user User1Id!\n"
                      + "user2@email.com is owner of 1 workspace and has permissions in 1 workspace\n"
                      + "   └ Workspace2Name, is owner: true, permissions: [read, use, run, configure, setPermissions, delete]\n");
     }

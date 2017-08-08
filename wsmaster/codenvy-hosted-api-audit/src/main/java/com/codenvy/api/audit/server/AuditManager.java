@@ -88,6 +88,7 @@ public class AuditManager {
         Path auditReport = null;
         try {
             auditReport = createEmptyAuditReportFile();
+            printSystemInfo(auditReport);
             printAllUsersInfo(auditReport);
         } catch (Exception exception) {
             if (auditReport != null) {
@@ -107,6 +108,10 @@ public class AuditManager {
         Path auditReport = createTempDirectory(null).resolve("report_" + dateTime + ".txt");
         Files.createFile(auditReport);
         return auditReport;
+    }
+
+    void printSystemInfo(Path auditReport) throws ServerException {
+        Printer.createSystemInfoPrinter(auditReport, userManager.getTotalCount()).print();
     }
 
     private void printDelimiter(Path auditReport, String title) throws ServerException {
