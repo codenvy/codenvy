@@ -26,6 +26,8 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Profile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
+
+import org.openqa.selenium.Cookie;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -59,7 +61,7 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
     @Inject
     private TestUserServiceClient           testUserServiceClient;
     @Inject
-    private TestWorkspaceServiceClient      workspaceServiceClient;
+    private TestWorkspaceServiceClient      originalWorkspaceServiceClient;
 
     private TestFactory testFactory;
 
@@ -71,14 +73,18 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        String authToken = ide.driver().manage().getCookieNamed("session-access-key").getValue();
+        Cookie cookieNamed = ide.driver().manage().getCookieNamed("session-access-key");
+        if (cookieNamed == null) {
+            return;
+        }
 
+        String authToken = cookieNamed.getValue();
         User user = testUserServiceClient.getUser(authToken);
-
-        workspaceServiceClient.getAll(authToken)
+        TestWorkspaceServiceClient workspaceServiceClient = originalWorkspaceServiceClient.getInstance(authToken);
+        workspaceServiceClient.getAll()
                               .forEach(ws -> {
                                   try {
-                                      workspaceServiceClient.delete(ws, user.getName(), authToken);
+                                      workspaceServiceClient.delete(ws, user.getName());
                                   } catch (Exception e) {
                                       throw new RuntimeException(e);
                                   }
