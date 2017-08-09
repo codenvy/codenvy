@@ -167,8 +167,6 @@ public class OrganizationTest {
         organizationPage.clickMembersTab();
 
         organizationPage.clickSettingsTab();
-        organizationPage.clickDeleteOrganizationButton();
-        organizationListPage.waitForOrganizationsList();
     }
 
 }

@@ -187,7 +187,6 @@ public class OrganizationPage {
 
     public void clickDeleteOrganizationButton() {
         redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(deleteOrgButton)).click();
-        redrawUiElementsTimeout.until(ExpectedConditions.visibilityOf(deleteOrgWidgetButton)).click();
     }
 
     public int getWorkspaceCap() {
