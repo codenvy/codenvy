@@ -181,8 +181,7 @@
                                 </property>
                                 <property>
                                     <name>listener</name>
-                                    <value>com.codenvy.selenium.core.FairSourceLicenseAcceptorListener,
-                                        com.codenvy.selenium.core.OnpremSeleniumTestHandler</value>
+                                    <value>com.codenvy.selenium.core.OnpremSeleniumTestHandler</value>
                                 </property>
                             </properties>
                         </configuration>
