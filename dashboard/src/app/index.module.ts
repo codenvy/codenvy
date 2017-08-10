@@ -19,7 +19,6 @@ import {LoginCtrl} from './login/login.controller';
 
 import {AdminConfig} from './admin/admin-config';
 import {AccountConfig} from './account/details/account-config';
-import {CodenvyOnpremConfig} from './onprem/onprem-config';
 import {WorkspaceConfig} from './workspace/workspace-config';
 import {TeamsConfig} from './teams/teams-config';
 import {MainDashboardConfig} from './dashboard/main-dashboard-config';
@@ -98,8 +97,8 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
 }]);
 
 // add tasks to run
-initModule.run(['$rootScope', '$routeParams', 'licenseMessagesService', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope, $routeParams, licenseMessagesService, cheUIElementsInjectorService, workspaceDetailsService) => {
+initModule.run(['$rootScope', '$routeParams', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  ($rootScope, $routeParams, cheUIElementsInjectorService, workspaceDetailsService) => {
 
     $rootScope.$on('$routeChangeSuccess', (event, next) => {
       if (next.$$route.title && angular.isFunction(next.$$route.title)) {
@@ -111,9 +110,6 @@ initModule.run(['$rootScope', '$routeParams', 'licenseMessagesService', 'cheUIEl
 
     workspaceDetailsService.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
     workspaceDetailsService.addSection('Idle timeout', 'The time period during which the workspace may be not used, before being stopped.', '<timeout-info></timeout-info>');
-    $rootScope.$on('$viewContentLoaded', () => {
-      licenseMessagesService.fetchMessages();
-    });
   }]);
 
 // add interceptors
@@ -318,7 +314,6 @@ new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
 new AdminConfig(instanceRegister);
-new CodenvyOnpremConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
 new TeamsConfig(instanceRegister);

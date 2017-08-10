@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.codenvy.report;
 
-import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.mail.MailSender;
 import com.codenvy.report.shared.dto.Ip;
 import com.google.inject.Inject;
@@ -49,7 +48,6 @@ public class ReportSender {
     private final MailSender             mailSender;
     private final HttpJsonRequestFactory httpJsonRequestFactory;
     private final String                 updateServerEndpoint;
-    private final SystemLicenseManager   licenseManager;
     private final UserManager            userManager;
     private final String                 apiEndpoint;
 
@@ -58,12 +56,10 @@ public class ReportSender {
                         @Named("che.api") String apiEndpoint,
                         MailSender mailSender,
                         HttpJsonRequestFactory httpJsonRequestFactory,
-                        SystemLicenseManager licenseManager,
                         UserManager userManager) {
         this.mailSender = mailSender;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.updateServerEndpoint = updateServerEndpoint;
-        this.licenseManager = licenseManager;
         this.userManager = userManager;
         this.apiEndpoint = apiEndpoint;
     }
@@ -78,16 +74,6 @@ public class ReportSender {
     }
 
     private void sendNumberOfUsers() throws IOException, JsonParseException, ApiException {
-        try {
-            if (licenseManager.isSystemUsageLegal()) {
-                // do not send a report if codenvy usage is legal.
-                return;
-            }
-        } catch (Exception e) {
-            LOG.error("There is a problem with system License.", e);
-            // send report if there is a problem with license
-        }
-
         ReportParameters parameters = obtainReportParameters(ReportType.CODENVY_ONPREM_USER_NUMBER_REPORT);
 
         Ip externalIP = obtainExternalIP();

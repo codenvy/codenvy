@@ -53,9 +53,9 @@
     },
     "che-dashboard": {
       "main": [
-        "dashboard/dist/scripts/app-*",
-        "dashboard/dist/styles/app-*",
-        "dashboard/dist/fonts/*"
+        "dashboard/target/dist/scripts/app-*",
+        "dashboard/target/dist/styles/app-*",
+        "dashboard/target/dist/fonts/*"
       ]
     }
   }

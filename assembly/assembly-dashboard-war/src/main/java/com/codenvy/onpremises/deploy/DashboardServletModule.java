@@ -21,9 +21,6 @@ import org.eclipse.che.inject.DynaModule;
 
 import javax.inject.Singleton;
 
-import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
-import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
-import static com.codenvy.api.license.filter.SystemLicenseLoginFilter.NO_USER_INTERACTION;
 
 /** Servlet module composer for user dashboard war. */
 @DynaModule
@@ -42,17 +39,9 @@ public class DashboardServletModule extends ServletModule {
 
         bind(com.xemantic.tadedon.servlet.CacheForcingFilter.class).in(Singleton.class);
 
-        bindConstant().annotatedWith(Names.named(NO_USER_INTERACTION)).to(false);
-        bindConstant().annotatedWith(Names.named(ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL))
-                      .to("/site/auth/accept-fair-source-license");
-        bindConstant().annotatedWith(Names.named(FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL))
-                      .to("/site/error/fair-source-license-is-not-accepted-error");
-
         filterRegex("/(?!assets/).*$").through(com.xemantic.tadedon.servlet.CacheForcingFilter.class);
 
         filterRegex("/(?!_sso/).*$").through(com.codenvy.auth.sso.client.LoginFilter.class);
-
-        filterRegex("/(?!_sso/).*$").through(com.codenvy.api.license.filter.SystemLicenseLoginFilter.class);
 
         serve("/scheduled").with(MaintenanceStatusServlet.class);
         serve("/factory").with(FactoryRedirectServlet.class);

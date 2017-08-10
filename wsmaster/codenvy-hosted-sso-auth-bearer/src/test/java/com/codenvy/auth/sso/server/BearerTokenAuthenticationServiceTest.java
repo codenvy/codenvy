@@ -13,8 +13,6 @@ package com.codenvy.auth.sso.server;
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.codenvy.api.dao.authentication.TokenGenerator;
-import com.codenvy.api.license.server.SystemLicenseManager;
-import com.codenvy.api.license.shared.model.Constants;
 import com.codenvy.auth.sso.server.BearerTokenAuthenticationService.ValidationData;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
@@ -25,12 +23,9 @@ import com.codenvy.mail.MailSender;
 import com.codenvy.template.processor.html.HTMLTemplateProcessor;
 import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.user.server.UserValidator;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -41,12 +36,10 @@ import org.testng.annotations.Test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -72,8 +65,6 @@ public class BearerTokenAuthenticationServiceTest {
     @Mock
     private UserCreator                              userCreator;
     @Mock
-    private SystemLicenseManager                     licenseManager;
-    @Mock
     private DefaultEmailResourceResolver             resourceResolver;
     @Mock
     private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
@@ -94,7 +85,6 @@ public class BearerTokenAuthenticationServiceTest {
                                                                                 creationValidator,
                                                                                 userCreator,
                                                                                 mock(UserValidator.class),
-                                                                                licenseManager,
                                                                                 resourceResolver,
                                                                                 thymeleaf,
                                                                                 "noreply@host",
@@ -105,8 +95,6 @@ public class BearerTokenAuthenticationServiceTest {
     public void shouldSendEmailToValidateUserEmailAndUserName() throws Exception {
         ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
         ValidationData validationData = new ValidationData("Email", "UserName");
-        when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(true);
-        when(licenseManager.canUserBeAdded()).thenReturn(true);
         when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
         when(thymeleaf.process(any())).thenReturn("email body");
 
@@ -120,34 +108,5 @@ public class BearerTokenAuthenticationServiceTest {
         assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
         assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
         assertEquals(argumentCaptorValue.getSubject(), "Subject");
-    }
-
-    @Test
-    public void shouldThrowAnExceptionWhenUserBeyondTheLicense() throws Exception {
-        ValidationData validationData = new ValidationData("Email", "UserName");
-        when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(true);
-        when(licenseManager.canUserBeAdded()).thenReturn(false);
-
-        Response response =
-                given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
-
-        assertEquals(response.getStatusCode(), 403);
-        assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
-                     newDto(ServiceError.class).withMessage(Constants.UNABLE_TO_ADD_ACCOUNT_BECAUSE_OF_LICENSE));
-        verifyZeroInteractions(mailSender);
-    }
-
-    @Test
-    public void shouldThrowAnExceptionWhenFairSourceLicenseIsNotAccepted() throws Exception {
-        ValidationData validationData = new ValidationData("Email", "UserName");
-        when(licenseManager.isFairSourceLicenseAccepted()).thenReturn(false);
-
-        Response response =
-                given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
-
-        assertEquals(response.getStatusCode(), 403);
-        assertEquals(DtoFactory.getInstance().createDtoFromJson(response.asString(), ServiceError.class),
-                     newDto(ServiceError.class).withMessage(Constants.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_MESSAGE));
-        verifyZeroInteractions(mailSender);
     }
 }

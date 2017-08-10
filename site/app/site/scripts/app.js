@@ -24,7 +24,6 @@ define(["jquery","config",
         "views/onpremises-login",
         "views/factory-usage-notification",
         "views/login",
-        "views/accept-fair-source-license",
         "views/errors/branding-pages"
         ],
 
@@ -36,7 +35,6 @@ define(["jquery","config",
         OnPremisesLogin,
         FactoryUsageNotification,
         MainPage,
-        AcceptLicensePage,
         BrandingPages){
 
         function modernize(){
@@ -71,9 +69,8 @@ define(["jquery","config",
                         11:{class:".error-factory-creation",pageName:"FactoryWorkspaceCreationFailed"},
                         12:{class:".error-tenant-name",pageName:"WorkspaceDoesNotExist"},
                         13:{class:".maintenance",pageName:"Maintenance"},
-                        14:{class:".fair-source-license-is-not-accepted-error",pageName:"AccessRequiresLicenseAcceptance"},
-                        15:{class:".no-account-found", pageName:"NoAccountFound"},
-                        16:{class:".websocket-connection-error", pageName:"WebsocketConnectionError"}};
+                        14:{class:".no-account-found", pageName:"NoAccountFound"},
+                        15:{class:".websocket-connection-error", pageName:"WebsocketConnectionError"}};
 
                     var forgotPasswordForm = $(".forgotpassword-form"),
                         resetPasswordForm = $(".resetpassword-form"),
@@ -81,8 +78,7 @@ define(["jquery","config",
                         creatWsAddMember = $(".create-ws-add-memeber"),
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
-                        mainpage = $(".main-page"),
-                        acceptLicensePage = $(".accept-license-form");
+                        mainpage = $(".main-page");
 
                     $.each(brandingPages, function(i,val){
                         var page = $(val.class);
@@ -92,20 +88,6 @@ define(["jquery","config",
                             }());
                         }
                     });
-
-                    if(acceptLicensePage.length !== 0){
-                        (function(){
-                            var form = AcceptLicensePage.get(acceptLicensePage),
-                            errorReport = ErrorReport.get(errorContainer);
-                            form.on("invalid", function(field,message){
-                                errorReport.show(message);
-                            });
-                            form.on("submitting", function(){
-                                errorReport.hide();
-                            });
-                        }());
-
-                    }
 
                     if(factoryUsageNotification.length !== 0){
                         (function(){
