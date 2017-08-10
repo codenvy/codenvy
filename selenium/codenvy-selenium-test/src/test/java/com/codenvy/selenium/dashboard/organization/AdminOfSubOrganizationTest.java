@@ -11,8 +11,10 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
+
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
@@ -52,30 +54,30 @@ public class AdminOfSubOrganizationTest {
     private OrganizationDto childOrganization;
 
     @Inject
-    private OrganizationListPage                organizationListPage;
+    private OrganizationListPage                        organizationListPage;
     @Inject
-    private OrganizationPage                    organizationPage;
+    private OrganizationPage                            organizationPage;
     @Inject
-    private NavigationBar                       navigationBar;
+    private NavigationBar                               navigationBar;
     @Inject
-    private CodenvyAdminDashboard               dashboard;
+    private CodenvyAdminDashboard                       dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClient organizationServiceClient;
+    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
     @Inject
-    private DefaultTestUser                     testUser;
+    private DefaultTestUser                             testUser;
     @Inject
-    private AdminTestUser                       adminTestUser;
+    private AdminTestUser                               adminTestUser;
 
 
     @BeforeClass
     public void setUp() throws Exception {
         dashboard.open(adminTestUser.getAuthToken());
 
-        parentOrganization = organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
+        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
         childOrganization = organizationServiceClient
-                .createOrganizationAsAdmin(NameGenerator.generate("organization", 5), parentOrganization.getId());
+                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-        organizationServiceClient.addOrganizationMemberAsAdmin(parentOrganization.getId(), testUser.getId());
+        organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId());
         organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
         dashboard.open(testUser.getAuthToken());
@@ -83,8 +85,8 @@ public class AdminOfSubOrganizationTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(childOrganization.getId());
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(parentOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
     }
 
     @Test(priority = 1)

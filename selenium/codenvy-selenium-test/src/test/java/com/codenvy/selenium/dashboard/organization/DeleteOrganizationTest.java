@@ -11,7 +11,7 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
 import com.codenvy.selenium.pageobject.dashboard.ConfirmDialog;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
@@ -38,28 +38,28 @@ public class DeleteOrganizationTest {
     private OrganizationDto childOrganization;
 
     @Inject
-    private OrganizationListPage                organizationListPage;
+    private OrganizationListPage                        organizationListPage;
     @Inject
-    private OrganizationPage                    organizationPage;
+    private OrganizationPage                            organizationPage;
     @Inject
-    private NavigationBar                       navigationBar;
+    private NavigationBar                               navigationBar;
     @Inject
-    private ConfirmDialog                       confirmDialog;
+    private ConfirmDialog                               confirmDialog;
     @Inject
-    private Dashboard                           dashboard;
+    private Dashboard                                   dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClient organizationServiceClient;
+    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
     @Inject
-    private DefaultTestUser                     testUser;
+    private DefaultTestUser                             testUser;
     @Inject
-    private AdminTestUser                       adminTestUser;
+    private AdminTestUser                               adminTestUser;
 
     @BeforeClass
     public void setUp() throws Exception {
         dashboard.open(adminTestUser.getAuthToken());
-        parentOrganization = organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
+        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
         childOrganization = organizationServiceClient
-                .createOrganizationAsAdmin(NameGenerator.generate("organization", 5), parentOrganization.getId());
+                .createOrganization(NameGenerator.generate("organization", 5));
 
         organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
         organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
@@ -69,8 +69,8 @@ public class DeleteOrganizationTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(childOrganization.getId());
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(parentOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
     }
 
     @Test(priority = 1)

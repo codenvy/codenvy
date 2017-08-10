@@ -11,8 +11,7 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
 import com.codenvy.selenium.pageobject.dashboard.organization.AddOrganization;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
@@ -21,6 +20,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -44,31 +44,31 @@ public class FilterOrganizationTest {
     private String                organizationName;
 
     @Inject
-    private OrganizationListPage                organizationListPage;
+    private OrganizationListPage                        organizationListPage;
     @Inject
-    private OrganizationPage                    organizationPage;
+    private OrganizationPage                            organizationPage;
     @Inject
-    private NavigationBar                       navigationBar;
+    private NavigationBar                               navigationBar;
     @Inject
-    private Dashboard                           dashboard;
+    private Dashboard                                   dashboard;
     @Inject
-    private AddOrganization                     addOrganization;
+    private AddOrganization                             addOrganization;
     @Inject
-    private OnpremTestOrganizationServiceClient organizationServiceClient;
+    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
     @Inject
-    private AdminTestUser                       adminTestUser;
+    private AdminTestUser                               adminTestUser;
 
     @BeforeClass
     public void setUp() throws Exception {
         dashboard.open(adminTestUser.getAuthToken());
 
         organizationName = NameGenerator.generate("organization", 5);
-        organizations = organizationServiceClient.getOrganizationsAsAdmin();
+        organizations = organizationServiceClient.getOrganizations();
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByNameAsAdmin(organizationName);
+        organizationServiceClient.deleteOrganizationByName(organizationName);
     }
 
     @Test

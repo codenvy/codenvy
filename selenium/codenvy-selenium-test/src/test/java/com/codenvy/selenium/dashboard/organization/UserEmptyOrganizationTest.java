@@ -38,12 +38,10 @@ public class UserEmptyOrganizationTest {
     private NavigationBar        navigationBar;
     @Inject
     private Dashboard            dashboard;
-    @Inject
-    private DefaultTestUser      testUser;
 
     @BeforeClass
     public void setUp() {
-        dashboard.open(testUser.getAuthToken());
+        dashboard.open();
     }
 
     @Test

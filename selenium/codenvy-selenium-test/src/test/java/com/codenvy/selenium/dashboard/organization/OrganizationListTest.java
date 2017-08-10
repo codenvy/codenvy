@@ -11,7 +11,7 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.google.inject.Inject;
 
@@ -38,29 +38,29 @@ public class OrganizationListTest {
     private List<OrganizationDto> organizations;
 
     @Inject
-    private OrganizationListPage                organizationListPage;
+    private OrganizationListPage                        organizationListPage;
     @Inject
-    private NavigationBar                       navigationBar;
+    private NavigationBar                               navigationBar;
     @Inject
-    private Dashboard                           dashboard;
+    private Dashboard                                   dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClient organizationServiceClient;
+    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
     @Inject
-    private AdminTestUser                       adminTestUser;
+    private AdminTestUser                               adminTestUser;
 
     private OrganizationDto organization;
 
     @BeforeClass
     public void setUp() throws Exception {
         organization =
-                organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
-        organizations = organizationServiceClient.getOrganizationsAsAdmin();
+                organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+        organizations = organizationServiceClient.getOrganizations();
         dashboard.open(adminTestUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(organization.getId());
+        organizationServiceClient.deleteOrganizationById(organization.getId());
     }
 
     @Test

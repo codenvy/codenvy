@@ -24,7 +24,6 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.selenium.core.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
@@ -43,6 +42,7 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForDefaultUser;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -55,7 +55,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 
 import javax.inject.Named;
-import java.util.concurrent.ExecutionException;
 
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 
@@ -83,7 +82,7 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
         bind(TestIdeUrlProvider.class).to(OnpremTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(OnpremTestDashboardUrlProvider.class);
 
-        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactory.class);
+        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactoryForDefaultUser.class);
 
         bind(AdminTestUser.class).to(OnpremAdminTestUser.class);
         bind(TestAuthServiceClient.class).to(OnpremTestAuthServiceClient.class);

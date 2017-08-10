@@ -11,16 +11,15 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -45,36 +44,34 @@ public class UserOrganizationTest {
     private OrganizationDto childOrganization;
 
     @Inject
-    private OrganizationListPage                organizationListPage;
+    private OrganizationListPage                        organizationListPage;
     @Inject
-    private OrganizationPage                    organizationPage;
+    private OrganizationPage                            organizationPage;
     @Inject
-    private NavigationBar                       navigationBar;
+    private NavigationBar                               navigationBar;
     @Inject
-    private Dashboard                           dashboard;
+    private Dashboard                                   dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClient organizationServiceClient;
+    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
     @Inject
-    private DefaultTestUser                     testUser;
-    @Inject
-    private AdminTestUser                       adminTestUser;
+    private DefaultTestUser                             testUser;
 
     @BeforeClass
     public void setUp() throws Exception {
-        parentOrganization = organizationServiceClient.createOrganizationAsAdmin(NameGenerator.generate("organization", 5));
+        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
         childOrganization = organizationServiceClient
-                .createOrganizationAsAdmin(NameGenerator.generate("organization", 5), parentOrganization.getId());
+                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-        organizationServiceClient.addOrganizationMemberAsAdmin(parentOrganization.getId(), testUser.getId());
-        organizationServiceClient.addOrganizationMemberAsAdmin(childOrganization.getId(), testUser.getId());
+        organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId());
+        organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());
 
         dashboard.open(testUser.getAuthToken());
     }
 
     @AfterClass
     public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(childOrganization.getId());
-        organizationServiceClient.deleteOrganizationByIdAsAdmin(parentOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
+        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
     }
 
     @Test(priority = 1)
