@@ -10,6 +10,7 @@
  *******************************************************************************/
 package com.codenvy.selenium.factory;
 
+import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -20,13 +21,14 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Profile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
-
 import org.openqa.selenium.Cookie;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -61,7 +63,9 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
     @Inject
     private TestUserServiceClient           testUserServiceClient;
     @Inject
-    private TestWorkspaceServiceClient      originalWorkspaceServiceClient;
+    private TestApiEndpointUrlProvider      apiEndpointUrlProvider;
+    @Inject
+    private TestUserNamespaceResolver       testUserNamespaceResolver;
 
     private TestFactory testFactory;
 
@@ -80,7 +84,9 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
         String authToken = cookieNamed.getValue();
         User user = testUserServiceClient.getUser(authToken);
-        TestWorkspaceServiceClient workspaceServiceClient = originalWorkspaceServiceClient.getInstance(authToken);
+        TestWorkspaceServiceClient workspaceServiceClient = new TestWorkspaceServiceClient(apiEndpointUrlProvider,
+                                                                                           new TestUserHttpJsonRequestFactory(authToken),
+                                                                                           testUserNamespaceResolver);
         workspaceServiceClient.getAll()
                               .forEach(ws -> {
                                   try {

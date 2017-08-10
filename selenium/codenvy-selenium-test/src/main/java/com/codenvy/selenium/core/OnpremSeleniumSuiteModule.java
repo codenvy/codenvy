@@ -12,6 +12,7 @@ package com.codenvy.selenium.core;
 
 import com.codenvy.selenium.core.client.OnpremTestAuthServiceClient;
 import com.codenvy.selenium.core.client.OnpremTestMachineServiceClient;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
 import com.codenvy.selenium.core.provider.OnpremTestApiEndpointUrlProvider;
 import com.codenvy.selenium.core.provider.OnpremTestDashboardUrlProvider;
 import com.codenvy.selenium.core.provider.OnpremTestIdeUrlProvider;
@@ -42,7 +43,8 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactoryForDefaultUser;
+import org.eclipse.che.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestDefaultUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -82,7 +84,7 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
         bind(TestIdeUrlProvider.class).to(OnpremTestIdeUrlProvider.class);
         bind(TestDashboardUrlProvider.class).to(OnpremTestDashboardUrlProvider.class);
 
-        bind(HttpJsonRequestFactory.class).to(TestHttpJsonRequestFactoryForDefaultUser.class);
+        bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
 
         bind(AdminTestUser.class).to(OnpremAdminTestUser.class);
         bind(TestAuthServiceClient.class).to(OnpremTestAuthServiceClient.class);
@@ -107,5 +109,12 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
     @Provides
     public ActionsFactory getActionFactory() {
         return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+    }
+
+    @Provides
+    @Named("admin")
+    public OnpremTestOrganizationServiceClient getAdminOrganizationServiceClient(TestApiEndpointUrlProvider apiEndpointUrlProvider,
+                                                                                 TestAdminHttpJsonRequestFactory requestFactory) {
+        return new OnpremTestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
     }
 }

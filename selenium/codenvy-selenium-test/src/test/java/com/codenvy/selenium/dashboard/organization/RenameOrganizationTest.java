@@ -11,11 +11,12 @@
 package com.codenvy.selenium.dashboard.organization;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
 import com.codenvy.selenium.pageobject.dashboard.EditMode;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -55,7 +56,8 @@ public class RenameOrganizationTest {
     @Inject
     private Dashboard                                   dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
+    @Named("admin")
+    private OnpremTestOrganizationServiceClient         organizationServiceClient;
     @Inject
     private DefaultTestUser                             testUser;
     @Inject

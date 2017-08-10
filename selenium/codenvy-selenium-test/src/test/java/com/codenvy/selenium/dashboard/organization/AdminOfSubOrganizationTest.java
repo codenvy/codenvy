@@ -14,7 +14,7 @@ import com.codenvy.organization.shared.dto.OrganizationDto;
 
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientForAdmin;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
@@ -23,6 +23,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import com.codenvy.selenium.pageobject.dashboard.CodenvyAdminDashboard;
+import com.google.inject.name.Named;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -62,7 +64,8 @@ public class AdminOfSubOrganizationTest {
     @Inject
     private CodenvyAdminDashboard                       dashboard;
     @Inject
-    private OnpremTestOrganizationServiceClientForAdmin organizationServiceClient;
+    @Named("admin")
+    private OnpremTestOrganizationServiceClient         organizationServiceClient;
     @Inject
     private DefaultTestUser                             testUser;
     @Inject
