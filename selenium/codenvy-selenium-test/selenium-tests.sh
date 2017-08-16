@@ -50,6 +50,8 @@ defineProfileConfiguration() {
 
 defineProfileConfiguration $@
 
+cd ${CUR_DIR}
+
 mvn dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
@@ -57,5 +59,12 @@ mvn dependency:unpack-dependencies \
     -DoutputDirectory=${CUR_DIR}/target/bin
 chmod +x ${CUR_DIR}/target/bin/webdriver.sh
 
-(target/bin/webdriver.sh --suite=CodenvyOnpremSuite.xml "$@" "$ADDITIONAL_ARGS")
+TESTS_SCOPE="--suite=CodenvyOnpremSuite.xml"
+for var in "$@"; do
+    if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
+        TESTS_SCOPE=
+        break
+    fi
+done
 
+(target/bin/webdriver.sh "$TESTS_SCOPE" $@ "$ADDITIONAL_ARGS")
