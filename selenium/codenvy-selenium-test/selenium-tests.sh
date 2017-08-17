@@ -20,22 +20,22 @@ defineProfileConfiguration() {
             PROFILE=$(echo "$var" | sed -e "s/-P//g")
 
             if [[ ${PROFILE} == "nightly" ]]; then
-                ADDITIONAL_ARGS="--https --host=nightly-onprem.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=nightly-onprem.codenvy-stg.com"
 
             elif [[ ${PROFILE} == "a1" ]]; then
-                ADDITIONAL_ARGS="--https --host=a1.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=a1.codenvy-stg.com"
 
             elif [[ ${PROFILE} == "a2" ]]; then
-                ADDITIONAL_ARGS="--https --host=a2.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=a2.codenvy-stg.com"
 
             elif [[ ${PROFILE} == "a3" ]]; then
-                ADDITIONAL_ARGS="--https --host=a3.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=a3.codenvy-stg.com"
 
             elif [[ ${PROFILE} == "a4" ]]; then
-                ADDITIONAL_ARGS="--https --host=a4.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=a4.codenvy-stg.com"
 
             elif [[ ${PROFILE} == "a5" ]]; then
-                ADDITIONAL_ARGS="--https --host=a5.codenvy-stg.com"
+                PROFILE_ARGS="--https --host=a5.codenvy-stg.com"
 
             else
                 echo "[TEST] Unrecognized profile "${PROFILE}
@@ -67,4 +67,4 @@ for var in "$@"; do
     fi
 done
 
-(target/bin/webdriver.sh "$TESTS_SCOPE" $@ "$ADDITIONAL_ARGS")
+(target/bin/webdriver.sh "$TESTS_SCOPE" $@ "$PROFILE_ARGS")
