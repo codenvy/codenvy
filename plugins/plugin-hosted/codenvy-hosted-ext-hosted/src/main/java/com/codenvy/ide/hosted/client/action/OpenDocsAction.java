@@ -11,11 +11,11 @@
 package com.codenvy.ide.hosted.client.action;
 
 import com.codenvy.ide.hosted.client.HostedLocalizationConstant;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**
  * Open view with product documentation.
@@ -34,6 +34,6 @@ public class OpenDocsAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        Window.open(locale.actionOpenDocsUrl(), "_blank", "");
+        BrowserUtils.openInNewTab(locale.actionOpenDocsUrl());
     }
 }

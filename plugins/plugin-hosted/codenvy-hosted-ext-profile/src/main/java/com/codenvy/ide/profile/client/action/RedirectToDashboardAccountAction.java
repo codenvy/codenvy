@@ -11,11 +11,11 @@
 package com.codenvy.ide.profile.client.action;
 
 import com.codenvy.ide.profile.client.ProfileLocalizationConstant;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**
  * Open a new dashboard window with account information
@@ -34,6 +34,6 @@ public class RedirectToDashboardAccountAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        Window.open(locale.redirectToDashboardAccountUrl(), "_blank", "");
+        BrowserUtils.openInNewTab(locale.redirectToDashboardAccountUrl());
     }
 }

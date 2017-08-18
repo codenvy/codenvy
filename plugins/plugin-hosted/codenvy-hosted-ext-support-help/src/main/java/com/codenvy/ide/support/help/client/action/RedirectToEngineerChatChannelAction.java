@@ -12,11 +12,11 @@ package com.codenvy.ide.support.help.client.action;
 
 import com.codenvy.ide.support.help.client.HelpLocalizationConstant;
 import com.codenvy.ide.support.help.client.HelpResources;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**
  * Open a new window with the IRC channel URL
@@ -37,6 +37,6 @@ public class RedirectToEngineerChatChannelAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        Window.open(locale.actionRedirectToEngineerChatChannelUrl(), "_blank", "");
+        BrowserUtils.openInNewTab(locale.actionRedirectToEngineerChatChannelUrl());
     }
 }
