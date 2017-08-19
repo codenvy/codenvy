@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Represents a pull requests page in the Bitbucket Server rest API.
@@ -22,15 +21,15 @@ import java.util.List;
 @DTO
 public interface BitbucketServerPullRequestsPage extends BitbucketServerPage {
 
-    List<BitbucketServerPullRequest> getValues();
+  List<BitbucketServerPullRequest> getValues();
 
-    void setValues(List<BitbucketServerPullRequest> values);
+  void setValues(List<BitbucketServerPullRequest> values);
 
-    BitbucketServerPullRequestsPage withValues(List<BitbucketServerPullRequest> values);
+  BitbucketServerPullRequestsPage withValues(List<BitbucketServerPullRequest> values);
 
-    int getNextPageStart();
+  int getNextPageStart();
 
-    void setNextPageStart(int nextPageStart);
+  void setNextPageStart(int nextPageStart);
 
-    BitbucketServerPullRequestsPage withNextPageStart(int nextPageStart);
+  BitbucketServerPullRequestsPage withNextPageStart(int nextPageStart);
 }

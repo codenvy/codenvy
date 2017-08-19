@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,42 +7,40 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.type;
 
 import com.google.common.collect.ImmutableSet;
-
 import java.util.Set;
 
 /**
- * Describes resource type that control number of workspaces
- * which user can run at the same time.
+ * Describes resource type that control number of workspaces which user can run at the same time.
  *
  * @author Sergii Leshchenko
  */
 public class RuntimeResourceType extends AbstractExhaustibleResource {
-    public static final String ID   = "runtime";
-    public static final String UNIT = "item";
+  public static final String ID = "runtime";
+  public static final String UNIT = "item";
 
-    private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
+  private static final Set<String> SUPPORTED_UNITS = ImmutableSet.of(UNIT);
 
-    @Override
-    public String getId() {
-        return ID;
-    }
+  @Override
+  public String getId() {
+    return ID;
+  }
 
-    @Override
-    public String getDescription() {
-        return "Number of workspaces which user can run at the same time";
-    }
+  @Override
+  public String getDescription() {
+    return "Number of workspaces which user can run at the same time";
+  }
 
-    @Override
-    public Set<String> getSupportedUnits() {
-        return SUPPORTED_UNITS;
-    }
+  @Override
+  public Set<String> getSupportedUnits() {
+    return SUPPORTED_UNITS;
+  }
 
-    @Override
-    public String getDefaultUnit() {
-        return UNIT;
-    }
+  @Override
+  public String getDefaultUnit() {
+    return UNIT;
+  }
 }

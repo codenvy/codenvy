@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.free;
 
 import com.codenvy.resource.spi.impl.ResourceImpl;
-
+import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 
-import java.util.List;
-
 /**
- * Provides default resources which should be are available for usage by account
- * when admin doesn't override limit by {@link FreeResourcesLimitService}.
+ * Provides default resources which should be are available for usage by account when admin doesn't
+ * override limit by {@link FreeResourcesLimitService}.
  *
  * @author Sergii Leschenko
  */
 public interface DefaultResourcesProvider {
-    /**
-     * Provides default resources are available for usage by account
-     */
-    List<ResourceImpl> getResources(String accountId) throws ServerException, NotFoundException;
+  /** Provides default resources are available for usage by account */
+  List<ResourceImpl> getResources(String accountId) throws ServerException, NotFoundException;
 
-    /**
-     * Returns account type for which this class provides default resources.
-     */
-    String getAccountType();
+  /** Returns account type for which this class provides default resources. */
+  String getAccountType();
 }

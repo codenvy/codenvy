@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.vsts.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -15,36 +15,36 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface Message {
 
-    /**
-     * Get message text.
-     *
-     * @return {@link String} text
-     */
-    String getText();
+  /**
+   * Get message text.
+   *
+   * @return {@link String} text
+   */
+  String getText();
 
-    void setText(final String text);
+  void setText(final String text);
 
-    Message withText(final String text);
+  Message withText(final String text);
 
-    /**
-     * Get message html.
-     *
-     * @return {@link String} html
-     */
-    String getHtml();
+  /**
+   * Get message html.
+   *
+   * @return {@link String} html
+   */
+  String getHtml();
 
-    void setHtml(final String html);
+  void setHtml(final String html);
 
-    Message withHtml(final String html);
+  Message withHtml(final String html);
 
-    /**
-     * Get message markdown.
-     *
-     * @return {@link String} markdown
-     */
-    String getMarkdown();
+  /**
+   * Get message markdown.
+   *
+   * @return {@link String} markdown
+   */
+  String getMarkdown();
 
-    void setMarkdown(final String markdown);
+  void setMarkdown(final String markdown);
 
-    Message withMarkdown(final String markdown);
+  Message withMarkdown(final String markdown);
 }

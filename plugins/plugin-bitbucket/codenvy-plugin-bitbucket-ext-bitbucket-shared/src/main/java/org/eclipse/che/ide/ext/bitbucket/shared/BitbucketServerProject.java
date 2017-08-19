@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,27 +19,27 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface BitbucketServerProject {
-    String getKey();
+  String getKey();
 
-    void setKey(String key);
+  void setKey(String key);
 
-    BitbucketServerProject withKey(String key);
+  BitbucketServerProject withKey(String key);
 
-    int getId();
+  int getId();
 
-    void setId(int id);
+  void setId(int id);
 
-    BitbucketServerProject withId(int id);
+  BitbucketServerProject withId(int id);
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    BitbucketServerProject withName(String name);
+  BitbucketServerProject withName(String name);
 
-    BitbucketServerUser getOwner();
+  BitbucketServerUser getOwner();
 
-    void setOwner(BitbucketServerUser owner);
+  void setOwner(BitbucketServerUser owner);
 
-    BitbucketServerProject withOwner(BitbucketServerUser owner);
+  BitbucketServerProject withOwner(BitbucketServerUser owner);
 }

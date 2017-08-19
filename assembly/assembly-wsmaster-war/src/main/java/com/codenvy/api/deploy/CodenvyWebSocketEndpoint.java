@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.deploy;
 
+import javax.inject.Inject;
+import javax.websocket.server.ServerEndpoint;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
@@ -17,25 +19,23 @@ import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
 import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
-import javax.inject.Inject;
-import javax.websocket.server.ServerEndpoint;
-
 /**
- * Implementation of {@link BasicWebSocketEndpoint} for Che packaging.
- * Add only mapping "/websocket".
+ * Implementation of {@link BasicWebSocketEndpoint} for Che packaging. Add only mapping
+ * "/websocket".
  */
 @ServerEndpoint(value = "/websocket", configurator = GuiceInjectorEndpointConfigurator.class)
 public class CodenvyWebSocketEndpoint extends BasicWebSocketEndpoint {
-    @Inject
-    public CodenvyWebSocketEndpoint(WebSocketSessionRegistry registry,
-                                    MessagesReSender reSender,
-                                    WebSocketMessageReceiver receiver,
-                                    WebsocketIdService identificationService) {
-        super(registry, reSender, receiver, identificationService);
-    }
+  @Inject
+  public CodenvyWebSocketEndpoint(
+      WebSocketSessionRegistry registry,
+      MessagesReSender reSender,
+      WebSocketMessageReceiver receiver,
+      WebsocketIdService identificationService) {
+    super(registry, reSender, receiver, identificationService);
+  }
 
-    @Override
-    protected String getEndpointId() {
-        return "ws-master-websocket-endpoint";
-    }
+  @Override
+  protected String getEndpointId() {
+    return "ws-master-websocket-endpoint";
+  }
 }

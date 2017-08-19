@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.invite.event;
 
 import com.codenvy.shared.invite.model.Invite;
-
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -20,26 +19,22 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Sergii Leschenko
  */
 public class InviteCreatedEvent {
-    private String initiatorId;
-    private Invite invite;
+  private String initiatorId;
+  private Invite invite;
 
-    public InviteCreatedEvent(String initiatorId, Invite invite) {
-        this.initiatorId = initiatorId;
-        this.invite = invite;
-    }
+  public InviteCreatedEvent(String initiatorId, Invite invite) {
+    this.initiatorId = initiatorId;
+    this.invite = invite;
+  }
 
-    /**
-     * Returns id of user who sent invite or null if user is undefined.
-     */
-    @Nullable
-    public String getInitiatorId() {
-        return initiatorId;
-    }
+  /** Returns id of user who sent invite or null if user is undefined. */
+  @Nullable
+  public String getInitiatorId() {
+    return initiatorId;
+  }
 
-    /**
-     * Returns created invite.
-     */
-    public Invite getInvite() {
-        return invite;
-    }
+  /** Returns created invite. */
+  public Invite getInvite() {
+    return invite;
+  }
 }

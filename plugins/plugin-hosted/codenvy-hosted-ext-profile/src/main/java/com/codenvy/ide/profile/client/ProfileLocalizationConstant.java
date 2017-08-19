@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.profile.client;
 
 import com.google.gwt.i18n.client.Messages;
@@ -19,23 +19,22 @@ import com.google.gwt.i18n.client.Messages;
  * @author Oleksii Orel
  */
 public interface ProfileLocalizationConstant extends Messages {
-    /* Group */
+  /* Group */
 
-    @Key("profileActionGroup")
-    String profileActionGroup();
+  @Key("profileActionGroup")
+  String profileActionGroup();
 
-    /* Actions */
+  /* Actions */
 
-    @Key("action.redirectToDashboardAccount.action")
-    String redirectToDashboardAccountAction();
+  @Key("action.redirectToDashboardAccount.action")
+  String redirectToDashboardAccountAction();
 
-    @Key("action.redirectToDashboardAccount.url")
-    String redirectToDashboardAccountUrl();
+  @Key("action.redirectToDashboardAccount.url")
+  String redirectToDashboardAccountUrl();
 
-    @Key("action.redirectToDashboardAccount.title")
-    String redirectToDashboardAccountTitle();
+  @Key("action.redirectToDashboardAccount.title")
+  String redirectToDashboardAccountTitle();
 
-    @Key("action.redirectToDashboardAccount.description")
-    String redirectToDashboardAccountDescription();
-
+  @Key("action.redirectToDashboardAccount.description")
+  String redirectToDashboardAccountDescription();
 }

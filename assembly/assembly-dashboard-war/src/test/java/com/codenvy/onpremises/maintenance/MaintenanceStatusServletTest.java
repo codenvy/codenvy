@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,25 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.onpremises.maintenance;
-
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /**
  * Test of {@link MaintenanceStatusServlet} functionality.
@@ -34,45 +33,41 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(value = MockitoTestNGListener.class)
 public class MaintenanceStatusServletTest {
-    @Mock
-    private HttpServletRequest req;
+  @Mock private HttpServletRequest req;
 
-    @Mock
-    private HttpServletResponse resp;
+  @Mock private HttpServletResponse resp;
 
-    @Mock
-    private StatusPageContentProvider contentProvider;
+  @Mock private StatusPageContentProvider contentProvider;
 
-    @Mock
-    private PrintWriter responseWriter;
+  @Mock private PrintWriter responseWriter;
 
-    private MaintenanceStatusServlet servlet;
+  private MaintenanceStatusServlet servlet;
 
-    @BeforeMethod
-    public void setup() {
-        servlet = new MaintenanceStatusServlet(contentProvider);
-    }
+  @BeforeMethod
+  public void setup() {
+    servlet = new MaintenanceStatusServlet(contentProvider);
+  }
 
-    @Test
-    public void shouldWriteContentToResponse() throws ServletException, IOException {
-        when(contentProvider.getContent()).thenReturn("JSON");
-        when(resp.getWriter()).thenReturn(responseWriter);
+  @Test
+  public void shouldWriteContentToResponse() throws ServletException, IOException {
+    when(contentProvider.getContent()).thenReturn("JSON");
+    when(resp.getWriter()).thenReturn(responseWriter);
 
-        servlet.doGet(req, resp);
+    servlet.doGet(req, resp);
 
-        verify(resp).getWriter();
-        verify(responseWriter).write(eq("JSON"));
-    }
+    verify(resp).getWriter();
+    verify(responseWriter).write(eq("JSON"));
+  }
 
-    @Test
-    public void shouldWriteErrorToResponceWrappedInJson() throws ServletException, IOException {
-        doThrow(new IOException("error message")).when(contentProvider).getContent();
-        when(resp.getWriter()).thenReturn(responseWriter);
+  @Test
+  public void shouldWriteErrorToResponceWrappedInJson() throws ServletException, IOException {
+    doThrow(new IOException("error message")).when(contentProvider).getContent();
+    when(resp.getWriter()).thenReturn(responseWriter);
 
-        servlet.doGet(req, resp);
+    servlet.doGet(req, resp);
 
-        verify(resp).setStatus(eq(500));
-        verify(resp).getWriter();
-        verify(responseWriter).write(eq("{\"error\":\"error message\"}"));
-    }
+    verify(resp).setStatus(eq(500));
+    verify(resp).getWriter();
+    verify(responseWriter).write(eq("{\"error\":\"error message\"}"));
+  }
 }

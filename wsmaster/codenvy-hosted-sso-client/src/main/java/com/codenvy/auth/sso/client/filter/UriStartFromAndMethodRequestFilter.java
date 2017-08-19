@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.client.filter;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Filter LoginFilter request by request method and beginning of the url.
@@ -20,19 +20,19 @@ import java.util.List;
  * @author Sergii Kabashniuk
  */
 public class UriStartFromAndMethodRequestFilter extends UriStartFromRequestFilter {
-    private final String method;
+  private final String method;
 
-    public UriStartFromAndMethodRequestFilter(String method, List<String> startUrlPatterns) {
-        super(startUrlPatterns);
-        this.method = method;
-    }
+  public UriStartFromAndMethodRequestFilter(String method, List<String> startUrlPatterns) {
+    super(startUrlPatterns);
+    this.method = method;
+  }
 
-    public UriStartFromAndMethodRequestFilter(String method, String startUrlPattern) {
-        this(method, Collections.<String>singletonList(startUrlPattern));
-    }
+  public UriStartFromAndMethodRequestFilter(String method, String startUrlPattern) {
+    this(method, Collections.<String>singletonList(startUrlPattern));
+  }
 
-    @Override
-    public boolean shouldSkip(HttpServletRequest request) {
-        return method.equals(request.getMethod()) && super.shouldSkip(request);
-    }
+  @Override
+  public boolean shouldSkip(HttpServletRequest request) {
+    return method.equals(request.getMethod()) && super.shouldSkip(request);
+  }
 }

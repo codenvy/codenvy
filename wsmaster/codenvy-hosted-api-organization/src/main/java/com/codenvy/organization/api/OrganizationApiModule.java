@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api;
 
 import com.codenvy.api.permission.server.SuperPrivilegesChecker;
@@ -36,40 +36,46 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 public class OrganizationApiModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(OrganizationService.class);
-        bind(OrganizationPermissionsFilter.class);
-        bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
+  @Override
+  protected void configure() {
+    bind(OrganizationService.class);
+    bind(OrganizationPermissionsFilter.class);
+    bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
 
-        Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class)
-                   .addBinding().to(DefaultOrganizationResourcesProvider.class);
+    Multibinder.newSetBinder(binder(), DefaultResourcesProvider.class)
+        .addBinding()
+        .to(DefaultOrganizationResourcesProvider.class);
 
-        Multibinder.newSetBinder(binder(), ResourcesProvider.class)
-                   .addBinding().to(SuborganizationResourcesProvider.class);
+    Multibinder.newSetBinder(binder(), ResourcesProvider.class)
+        .addBinding()
+        .to(SuborganizationResourcesProvider.class);
 
-        MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class)
-                 .addBinding(OrganizationImpl.ORGANIZATIONAL_ACCOUNT).to(OrganizationalAccountAvailableResourcesProvider.class);
+    MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class)
+        .addBinding(OrganizationImpl.ORGANIZATIONAL_ACCOUNT)
+        .to(OrganizationalAccountAvailableResourcesProvider.class);
 
-        Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class)
-                   .addBinding().to(OrganizationResourceLockKeyProvider.class);
+    Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class)
+        .addBinding()
+        .to(OrganizationResourceLockKeyProvider.class);
 
-        Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class)
-                   .addBinding().to(OrganizationalAccountPermissionsChecker.class);
+    Multibinder.newSetBinder(binder(), AccountPermissionsChecker.class)
+        .addBinding()
+        .to(OrganizationalAccountPermissionsChecker.class);
 
-        bind(OrganizationResourcesDistributionService.class);
-        bind(OrganizationResourceDistributionServicePermissionsFilter.class);
+    bind(OrganizationResourcesDistributionService.class);
+    bind(OrganizationResourceDistributionServicePermissionsFilter.class);
 
-        bind(OrganizationEventsWebsocketBroadcaster.class).asEagerSingleton();
-        bind(OrganizationNotificationEmailSender.class).asEagerSingleton();
-        bind(MemberEventsPublisher.class).asEagerSingleton();
+    bind(OrganizationEventsWebsocketBroadcaster.class).asEagerSingleton();
+    bind(OrganizationNotificationEmailSender.class).asEagerSingleton();
+    bind(MemberEventsPublisher.class).asEagerSingleton();
 
-        Multibinder.newSetBinder(binder(), PermissionsDomain.class,
-                                 Names.named(SuperPrivilegesChecker.SUPER_PRIVILEGED_DOMAINS))
-                   .addBinding().to(OrganizationDomain.class);
-    }
+    Multibinder.newSetBinder(
+            binder(),
+            PermissionsDomain.class,
+            Names.named(SuperPrivilegesChecker.SUPER_PRIVILEGED_DOMAINS))
+        .addBinding()
+        .to(OrganizationDomain.class);
+  }
 }

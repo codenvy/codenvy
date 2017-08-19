@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.permission.server;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -22,33 +16,43 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
 @Listeners(MockitoTestNGListener.class)
 public class PermissionCheckerImplTest {
-    @Mock
-    private PermissionsManager permissionsManager;
+  @Mock private PermissionsManager permissionsManager;
 
-    @InjectMocks
-    private PermissionCheckerImpl permissionChecker;
+  @InjectMocks private PermissionCheckerImpl permissionChecker;
 
-    @Test
-    public void shouldCheckExistingDirectUsersPermissions() throws Exception {
-        when(permissionsManager.exists(anyString(), anyString(), anyString(), anyString())).thenReturn(true);
+  @Test
+  public void shouldCheckExistingDirectUsersPermissions() throws Exception {
+    when(permissionsManager.exists(anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(true);
 
-        boolean hasPermission = permissionChecker.hasPermission("user123", "domain123", "instance123", "test");
+    boolean hasPermission =
+        permissionChecker.hasPermission("user123", "domain123", "instance123", "test");
 
-        assertEquals(hasPermission, true);
-        verify(permissionsManager).exists("user123", "domain123", "instance123", "test");
-    }
+    assertEquals(hasPermission, true);
+    verify(permissionsManager).exists("user123", "domain123", "instance123", "test");
+  }
 
-    @Test
-    public void shouldCheckExistingPublicPermissionsIfThereIsNoDirectUsersPermissions() throws Exception {
-        when(permissionsManager.exists(eq("user123"), anyString(), anyString(), anyString())).thenReturn(false);
-        when(permissionsManager.exists(eq("*"), anyString(), anyString(), anyString())).thenReturn(true);
+  @Test
+  public void shouldCheckExistingPublicPermissionsIfThereIsNoDirectUsersPermissions()
+      throws Exception {
+    when(permissionsManager.exists(eq("user123"), anyString(), anyString(), anyString()))
+        .thenReturn(false);
+    when(permissionsManager.exists(eq("*"), anyString(), anyString(), anyString()))
+        .thenReturn(true);
 
-        boolean hasPermission = permissionChecker.hasPermission("user123", "domain123", "instance123", "test");
+    boolean hasPermission =
+        permissionChecker.hasPermission("user123", "domain123", "instance123", "test");
 
-        assertEquals(hasPermission, true);
-        verify(permissionsManager).exists("user123", "domain123", "instance123", "test");
-        verify(permissionsManager).exists("*", "domain123", "instance123", "test");
-    }
+    assertEquals(hasPermission, true);
+    verify(permissionsManager).exists("user123", "domain123", "instance123", "test");
+    verify(permissionsManager).exists("*", "domain123", "instance123", "test");
+  }
 }

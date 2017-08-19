@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.vsts.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -15,14 +15,14 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface ResourceContainer {
 
-    /**
-     * Get resource container id.
-     *
-     * @return {@link String} id
-     */
-    String getId();
+  /**
+   * Get resource container id.
+   *
+   * @return {@link String} id
+   */
+  String getId();
 
-    void setId(final String id);
+  void setId(final String id);
 
-    ResourceContainer withId(final String id);
+  ResourceContainer withId(final String id);
 }

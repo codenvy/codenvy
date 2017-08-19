@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -18,29 +18,29 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Igor Vinokur
  */
 @DTO
-public interface BitbucketServerRepository extends BitbucketRepository{
+public interface BitbucketServerRepository extends BitbucketRepository {
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    BitbucketServerRepository withName(String name);
+  BitbucketServerRepository withName(String name);
 
-    String getSlug();
+  String getSlug();
 
-    void setSlug(String slug);
+  void setSlug(String slug);
 
-    BitbucketServerRepository withSlug(String slug);
+  BitbucketServerRepository withSlug(String slug);
 
-    BitbucketServerRepository getOrigin();
+  BitbucketServerRepository getOrigin();
 
-    void setOrigin(BitbucketServerRepository parent);
+  void setOrigin(BitbucketServerRepository parent);
 
-    BitbucketServerRepository withOrigin(BitbucketServerRepository parent);
+  BitbucketServerRepository withOrigin(BitbucketServerRepository parent);
 
-    BitbucketServerProject getProject();
+  BitbucketServerProject getProject();
 
-    void setProject(BitbucketServerProject project);
+  void setProject(BitbucketServerProject project);
 
-    BitbucketServerRepository withProject(BitbucketServerProject project);
+  BitbucketServerRepository withProject(BitbucketServerProject project);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.account.personal;
+
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -20,47 +23,47 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 @Listeners(MockitoTestNGListener.class)
 public class PersonalAccountPermissionsCheckerTest {
-    private static String userId = "userok";
-    @Mock
-    private Subject subject;
+  private static String userId = "userok";
+  @Mock private Subject subject;
 
-    private PersonalAccountPermissionsChecker permissionsChecker;
+  private PersonalAccountPermissionsChecker permissionsChecker;
 
-    @BeforeMethod
-    public void setUp() {
-        when(subject.getUserId()).thenReturn(userId);
-        EnvironmentContext.getCurrent().setSubject(subject);
+  @BeforeMethod
+  public void setUp() {
+    when(subject.getUserId()).thenReturn(userId);
+    EnvironmentContext.getCurrent().setSubject(subject);
 
-        permissionsChecker = new PersonalAccountPermissionsChecker();
-    }
+    permissionsChecker = new PersonalAccountPermissionsChecker();
+  }
 
-    @AfterMethod
-    public void cleanUp() {
-        EnvironmentContext.getCurrent().setSubject(null);
-    }
+  @AfterMethod
+  public void cleanUp() {
+    EnvironmentContext.getCurrent().setSubject(null);
+  }
 
-    @Test
-    public void shouldNotThrowExceptionWhenUserIdFromSubjectEqualsToSpecifiedAccountId() throws Exception {
-        permissionsChecker.checkPermissions(userId, null);
-    }
+  @Test
+  public void shouldNotThrowExceptionWhenUserIdFromSubjectEqualsToSpecifiedAccountId()
+      throws Exception {
+    permissionsChecker.checkPermissions(userId, null);
+  }
 
-    @Test(expectedExceptions = ForbiddenException.class,
-          expectedExceptionsMessageRegExp = "User is not authorized to use specified account")
-    public void shouldThrowForbiddenExceptionWhenUserIdFromSubjectDoesNotEqualToSpecifiedAccountId() throws Exception {
-        permissionsChecker.checkPermissions("anotherUserId", null);
-    }
+  @Test(
+    expectedExceptions = ForbiddenException.class,
+    expectedExceptionsMessageRegExp = "User is not authorized to use specified account"
+  )
+  public void shouldThrowForbiddenExceptionWhenUserIdFromSubjectDoesNotEqualToSpecifiedAccountId()
+      throws Exception {
+    permissionsChecker.checkPermissions("anotherUserId", null);
+  }
 
-    @Test
-    public void shouldReturnPersonalAccountType() throws Exception {
-        //when
-        final String accountType = permissionsChecker.getAccountType();
+  @Test
+  public void shouldReturnPersonalAccountType() throws Exception {
+    //when
+    final String accountType = permissionsChecker.getAccountType();
 
-        //then
-        assertEquals(accountType, OnpremisesUserManager.PERSONAL_ACCOUNT);
-    }
+    //then
+    assertEquals(accountType, OnpremisesUserManager.PERSONAL_ACCOUNT);
+  }
 }

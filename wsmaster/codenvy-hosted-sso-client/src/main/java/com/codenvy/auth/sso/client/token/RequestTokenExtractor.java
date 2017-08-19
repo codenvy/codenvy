@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.client.token;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /** Allow extract sso token from request. */
 public interface RequestTokenExtractor {
-    /**
-     * Extract token from request.
-     *
-     * @param req
-     *         - request object.
-     * @return - token if it was found, null otherwise.
-     */
-    String getToken(HttpServletRequest req);
+  /**
+   * Extract token from request.
+   *
+   * @param req - request object.
+   * @return - token if it was found, null otherwise.
+   */
+  String getToken(HttpServletRequest req);
 }

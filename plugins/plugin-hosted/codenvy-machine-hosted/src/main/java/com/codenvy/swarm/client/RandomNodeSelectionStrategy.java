@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.swarm.client;
 
 import com.codenvy.swarm.client.model.DockerNode;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -23,13 +22,13 @@ import java.util.Random;
  */
 public class RandomNodeSelectionStrategy implements NodeSelectionStrategy {
 
-    private static final Random random = new Random();
+  private static final Random random = new Random();
 
-    @Override
-    public DockerNode select(List<DockerNode> uris) throws IOException {
-        if (uris.size() == 0) {
-            throw new IOException("No docker nodes available");
-        }
-        return uris.get(random.nextInt(uris.size()));
+  @Override
+  public DockerNode select(List<DockerNode> uris) throws IOException {
+    if (uris.size() == 0) {
+      throw new IOException("No docker nodes available");
     }
+    return uris.get(random.nextInt(uris.size()));
+  }
 }

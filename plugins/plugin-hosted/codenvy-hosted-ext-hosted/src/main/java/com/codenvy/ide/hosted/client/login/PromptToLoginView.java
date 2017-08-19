@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.hosted.client.login;
-
 
 import org.eclipse.che.ide.api.mvp.View;
 
@@ -21,15 +20,14 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface PromptToLoginView extends View<PromptToLoginView.ActionDelegate> {
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        void onLogin();
+    void onLogin();
 
-        void onCreateAccount();
+    void onCreateAccount();
+  }
 
-    }
+  void showDialog(String title, String message);
 
-    void showDialog(String title, String message);
-
-    void close();
+  void close();
 }

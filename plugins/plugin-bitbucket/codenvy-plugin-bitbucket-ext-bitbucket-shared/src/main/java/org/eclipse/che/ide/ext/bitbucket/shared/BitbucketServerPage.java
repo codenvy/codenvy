@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
 /**
@@ -16,33 +16,33 @@ package org.eclipse.che.ide.ext.bitbucket.shared;
  * @author Igor Vinokur
  */
 public interface BitbucketServerPage {
-    int getSize();
+  int getSize();
 
-    void setSize(int size);
+  void setSize(int size);
 
-    BitbucketServerPage withSize(int size);
+  BitbucketServerPage withSize(int size);
 
-    int getLimit();
+  int getLimit();
 
-    void setLimit(int limit);
+  void setLimit(int limit);
 
-    BitbucketServerPage withLimit(int limit);
+  BitbucketServerPage withLimit(int limit);
 
-    boolean isIsLastPage();
+  boolean isIsLastPage();
 
-    void setIsLastPage(boolean isLastPage);
+  void setIsLastPage(boolean isLastPage);
 
-    BitbucketServerPage withIsLastPage(boolean isLastPage);
+  BitbucketServerPage withIsLastPage(boolean isLastPage);
 
-    int getStart();
+  int getStart();
 
-    void setStart(int start);
+  void setStart(int start);
 
-    BitbucketServerPage withStart(int start);
+  BitbucketServerPage withStart(int start);
 
-    int getNextPageStart();
+  int getNextPageStart();
 
-    void setNextPageStart(int nextPageStart);
+  void setNextPageStart(int nextPageStart);
 
-    BitbucketServerPage withNextPageStart(int nextPageStart);
+  BitbucketServerPage withNextPageStart(int nextPageStart);
 }

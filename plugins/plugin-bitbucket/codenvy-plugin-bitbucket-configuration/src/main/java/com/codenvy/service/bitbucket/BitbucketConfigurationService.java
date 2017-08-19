@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.service.bitbucket;
-
-import org.eclipse.che.api.core.rest.Service;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import org.eclipse.che.api.core.rest.Service;
 
 /**
  * Service for retrieving configured Bitbucket properties from ws-master.
@@ -25,16 +24,16 @@ import javax.ws.rs.Path;
 @Path("bitbucket")
 public class BitbucketConfigurationService extends Service {
 
-    private final String bitbucketEndpoint;
+  private final String bitbucketEndpoint;
 
-    @Inject
-    public BitbucketConfigurationService(@Named("bitbucket.endpoint") String bitbucketEndpoint) {
-        this.bitbucketEndpoint = bitbucketEndpoint;
-    }
+  @Inject
+  public BitbucketConfigurationService(@Named("bitbucket.endpoint") String bitbucketEndpoint) {
+    this.bitbucketEndpoint = bitbucketEndpoint;
+  }
 
-    @GET
-    @Path("endpoint")
-    public String getEndpoint() {
-        return bitbucketEndpoint;
-    }
+  @GET
+  @Path("endpoint")
+  public String getEndpoint() {
+    return bitbucketEndpoint;
+  }
 }

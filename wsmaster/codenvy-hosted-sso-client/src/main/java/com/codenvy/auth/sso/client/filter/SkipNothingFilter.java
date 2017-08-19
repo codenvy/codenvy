@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.client.filter;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Implementation of  RequestFilter that tels LoginFilter to handle all request.
+ * Implementation of RequestFilter that tels LoginFilter to handle all request.
  *
  * @author Sergii Kabashniuk
  */
 public class SkipNothingFilter implements RequestFilter {
-    @Override
-    public boolean shouldSkip(HttpServletRequest request) {
-        return false;
-    }
+  @Override
+  public boolean shouldSkip(HttpServletRequest request) {
+    return false;
+  }
 }

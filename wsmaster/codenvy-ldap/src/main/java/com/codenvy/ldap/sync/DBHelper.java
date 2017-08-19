@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,16 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ldap.sync;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-
+import java.util.List;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import java.util.List;
 
 /**
  * Helps to make db requests.
@@ -26,20 +25,16 @@ import java.util.List;
 @Singleton
 public class DBHelper {
 
-    @Inject
-    private Provider<EntityManager> emProvider;
+  @Inject private Provider<EntityManager> emProvider;
 
-    /**
-     * Executes native query and returns execution result.
-     *
-     * @param nativeQuery
-     *         query to execute
-     * @return execution result
-     */
-    @Transactional
-    public List executeNativeQuery(String nativeQuery) {
-        return emProvider.get()
-                         .createNativeQuery(nativeQuery)
-                         .getResultList();
-    }
+  /**
+   * Executes native query and returns execution result.
+   *
+   * @param nativeQuery query to execute
+   * @return execution result
+   */
+  @Transactional
+  public List executeNativeQuery(String nativeQuery) {
+    return emProvider.get().createNativeQuery(nativeQuery).getResultList();
+  }
 }

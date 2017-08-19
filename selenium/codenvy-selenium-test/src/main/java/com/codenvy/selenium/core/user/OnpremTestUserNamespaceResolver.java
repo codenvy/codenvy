@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.selenium.core.user;
 
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 
-/**
- * @author Anatolii Bazko
- */
+/** @author Anatolii Bazko */
 public class OnpremTestUserNamespaceResolver implements TestUserNamespaceResolver {
-    @Override
-    public String resolve(String username) {
-        return username.split("@")[0];
-    }
+  @Override
+  public String resolve(String username) {
+    return username.split("@")[0];
+  }
 }

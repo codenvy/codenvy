@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.workspace.server;
 
-import com.codenvy.api.workspace.server.spi.WorkerDao;
 import com.codenvy.api.workspace.server.model.impl.WorkerImpl;
-
+import com.codenvy.api.workspace.server.spi.WorkerDao;
+import java.util.ArrayList;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -21,12 +25,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.ArrayList;
-
 /**
  * Adds permissions for creator after workspace creation
  *
@@ -34,35 +32,42 @@ import java.util.ArrayList;
  */
 @Singleton
 public class WorkspaceCreatorPermissionsProvider implements EventSubscriber<WorkspaceCreatedEvent> {
-    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceCreatorPermissionsProvider.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(WorkspaceCreatorPermissionsProvider.class);
 
-    private final WorkerDao    workerDao;
-    private final EventService eventService;
+  private final WorkerDao workerDao;
+  private final EventService eventService;
 
-    @Inject
-    public WorkspaceCreatorPermissionsProvider(EventService eventService, WorkerDao workerDao) {
-        this.workerDao = workerDao;
-        this.eventService = eventService;
+  @Inject
+  public WorkspaceCreatorPermissionsProvider(EventService eventService, WorkerDao workerDao) {
+    this.workerDao = workerDao;
+    this.eventService = eventService;
+  }
+
+  @PostConstruct
+  void subscribe() {
+    eventService.subscribe(this);
+  }
+
+  @PreDestroy
+  void unsubscribe() {
+    eventService.subscribe(this);
+  }
+
+  @Override
+  public void onEvent(WorkspaceCreatedEvent event) {
+    try {
+      workerDao.store(
+          new WorkerImpl(
+              event.getWorkspace().getId(),
+              EnvironmentContext.getCurrent().getSubject().getUserId(),
+              new ArrayList<>(new WorkspaceDomain().getAllowedActions())));
+    } catch (ServerException e) {
+      LOG.error(
+          "Can't add creator's permissions for workspace with id '"
+              + event.getWorkspace().getId()
+              + "'",
+          e);
     }
-
-    @PostConstruct
-    void subscribe() {
-        eventService.subscribe(this);
-    }
-
-    @PreDestroy
-    void unsubscribe() {
-        eventService.subscribe(this);
-    }
-
-    @Override
-    public void onEvent(WorkspaceCreatedEvent event) {
-        try {
-            workerDao.store(new WorkerImpl(event.getWorkspace().getId(),
-                                           EnvironmentContext.getCurrent().getSubject().getUserId(),
-                                           new ArrayList<>(new WorkspaceDomain().getAllowedActions())));
-        } catch (ServerException e) {
-            LOG.error("Can't add creator's permissions for workspace with id '" + event.getWorkspace().getId() + "'", e);
-        }
-    }
+  }
 }

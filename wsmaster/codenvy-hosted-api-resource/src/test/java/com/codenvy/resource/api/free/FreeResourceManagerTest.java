@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.free;
-
-import com.codenvy.resource.model.FreeResourcesLimit;
-import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
-import com.codenvy.resource.shared.dto.ResourceDto;
-import com.codenvy.resource.spi.FreeResourcesLimitDao;
-import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
-import com.codenvy.resource.spi.impl.ResourceImpl;
-
-import org.eclipse.che.api.core.Page;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
@@ -32,6 +17,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import com.codenvy.resource.model.FreeResourcesLimit;
+import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
+import com.codenvy.resource.shared.dto.ResourceDto;
+import com.codenvy.resource.spi.FreeResourcesLimitDao;
+import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
 /**
  * Tests for {@link FreeResourcesLimitManager}
  *
@@ -39,104 +38,107 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class FreeResourceManagerTest {
-    private static final String TEST_RESOURCE_TYPE = "Test";
+  private static final String TEST_RESOURCE_TYPE = "Test";
 
-    @Mock
-    private FreeResourcesLimitDao freeResourcesLimitDao;
+  @Mock private FreeResourcesLimitDao freeResourcesLimitDao;
 
-    @InjectMocks
-    private FreeResourcesLimitManager manager;
+  @InjectMocks private FreeResourcesLimitManager manager;
 
-    @Test
-    public void shouldStoreFreeResourcesLimit() throws Exception {
-        //given
-        ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                 1,
-                                                 "unit");
-        FreeResourcesLimitImpl resourcesLimitImpl = new FreeResourcesLimitImpl("account123", singletonList(resource));
+  @Test
+  public void shouldStoreFreeResourcesLimit() throws Exception {
+    //given
+    ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
+    FreeResourcesLimitImpl resourcesLimitImpl =
+        new FreeResourcesLimitImpl("account123", singletonList(resource));
 
-        ResourceDto resourceDto = DtoFactory.newDto(ResourceDto.class)
-                                            .withAmount(1)
-                                            .withType(TEST_RESOURCE_TYPE)
-                                            .withUnit("unit");
-        FreeResourcesLimitDto freeResourcesLimitDto = DtoFactory.newDto(FreeResourcesLimitDto.class)
-                                                                .withAccountId("account123")
-                                                                .withResources(singletonList(resourceDto));
+    ResourceDto resourceDto =
+        DtoFactory.newDto(ResourceDto.class)
+            .withAmount(1)
+            .withType(TEST_RESOURCE_TYPE)
+            .withUnit("unit");
+    FreeResourcesLimitDto freeResourcesLimitDto =
+        DtoFactory.newDto(FreeResourcesLimitDto.class)
+            .withAccountId("account123")
+            .withResources(singletonList(resourceDto));
 
-        //when
-        FreeResourcesLimit storedLimit = manager.store(freeResourcesLimitDto);
+    //when
+    FreeResourcesLimit storedLimit = manager.store(freeResourcesLimitDto);
 
-        //then
-        assertEquals(storedLimit, resourcesLimitImpl);
-        verify(freeResourcesLimitDao).store(resourcesLimitImpl);
-    }
+    //then
+    assertEquals(storedLimit, resourcesLimitImpl);
+    verify(freeResourcesLimitDao).store(resourcesLimitImpl);
+  }
 
-    @Test(expectedExceptions = NullPointerException.class,
-          expectedExceptionsMessageRegExp = "Required non-null free resources limit")
-    public void shouldThrowNpeOnStoringNullableFreeResourcesLimit() throws Exception {
-        //when
-        manager.store(null);
-    }
+  @Test(
+    expectedExceptions = NullPointerException.class,
+    expectedExceptionsMessageRegExp = "Required non-null free resources limit"
+  )
+  public void shouldThrowNpeOnStoringNullableFreeResourcesLimit() throws Exception {
+    //when
+    manager.store(null);
+  }
 
-    @Test
-    public void shouldReturnFreeResourcesLimitForSpecifiedAccount() throws Exception {
-        //given
-        ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                 1,
-                                                 "unit");
-        FreeResourcesLimitImpl resourcesLimitImpl = new FreeResourcesLimitImpl("account123", singletonList(resource));
+  @Test
+  public void shouldReturnFreeResourcesLimitForSpecifiedAccount() throws Exception {
+    //given
+    ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
+    FreeResourcesLimitImpl resourcesLimitImpl =
+        new FreeResourcesLimitImpl("account123", singletonList(resource));
 
-        when(freeResourcesLimitDao.get(any())).thenReturn(resourcesLimitImpl);
+    when(freeResourcesLimitDao.get(any())).thenReturn(resourcesLimitImpl);
 
-        //when
-        FreeResourcesLimit fetchedLimit = manager.get("account123");
+    //when
+    FreeResourcesLimit fetchedLimit = manager.get("account123");
 
-        //then
-        assertEquals(fetchedLimit, resourcesLimitImpl);
-        verify(freeResourcesLimitDao).get("account123");
-    }
+    //then
+    assertEquals(fetchedLimit, resourcesLimitImpl);
+    verify(freeResourcesLimitDao).get("account123");
+  }
 
-    @Test(expectedExceptions = NullPointerException.class,
-          expectedExceptionsMessageRegExp = "Required non-null account id")
-    public void shouldThrowNpeOnGettingFreeResourcesLimitByNullableAccountId() throws Exception {
-        //when
-        manager.get(null);
-    }
+  @Test(
+    expectedExceptions = NullPointerException.class,
+    expectedExceptionsMessageRegExp = "Required non-null account id"
+  )
+  public void shouldThrowNpeOnGettingFreeResourcesLimitByNullableAccountId() throws Exception {
+    //when
+    manager.get(null);
+  }
 
-    @Test
-    public void shouldRemoveFreeResourcesLimitForSpecifiedAccount() throws Exception {
-        //when
-        manager.remove("account123");
+  @Test
+  public void shouldRemoveFreeResourcesLimitForSpecifiedAccount() throws Exception {
+    //when
+    manager.remove("account123");
 
-        //then
-        verify(freeResourcesLimitDao).remove("account123");
-    }
+    //then
+    verify(freeResourcesLimitDao).remove("account123");
+  }
 
-    @Test(expectedExceptions = NullPointerException.class,
-          expectedExceptionsMessageRegExp = "Required non-null account id")
-    public void shouldThrowNpeOnRemovingFreeResourcesLimitByNullableAccountId() throws Exception {
-        //when
-        manager.remove(null);
-    }
+  @Test(
+    expectedExceptions = NullPointerException.class,
+    expectedExceptionsMessageRegExp = "Required non-null account id"
+  )
+  public void shouldThrowNpeOnRemovingFreeResourcesLimitByNullableAccountId() throws Exception {
+    //when
+    manager.remove(null);
+  }
 
-    @Test
-    public void shouldReturnFreeResourcesLimits() throws Exception {
-        //given
-        ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                 1,
-                                                 "unit");
-        FreeResourcesLimitImpl resourcesLimitImpl = new FreeResourcesLimitImpl("account123", singletonList(resource));
+  @Test
+  public void shouldReturnFreeResourcesLimits() throws Exception {
+    //given
+    ResourceImpl resource = new ResourceImpl(TEST_RESOURCE_TYPE, 1, "unit");
+    FreeResourcesLimitImpl resourcesLimitImpl =
+        new FreeResourcesLimitImpl("account123", singletonList(resource));
 
-        when(freeResourcesLimitDao.getAll(anyInt(), anyInt()))
-                .thenReturn(new Page<>(singletonList(resourcesLimitImpl), 5, 1, 9));
+    when(freeResourcesLimitDao.getAll(anyInt(), anyInt()))
+        .thenReturn(new Page<>(singletonList(resourcesLimitImpl), 5, 1, 9));
 
-        //when
-        Page<? extends FreeResourcesLimit> fetchedLimits = manager.getAll(1, 5);
+    //when
+    Page<? extends FreeResourcesLimit> fetchedLimits = manager.getAll(1, 5);
 
-        //then
-        assertEquals(fetchedLimits.getTotalItemsCount(), 9);
-        assertEquals(fetchedLimits.getSize(), 1);
-        assertEquals(fetchedLimits.getItems().get(0), resourcesLimitImpl);
-        verify(freeResourcesLimitDao).getAll(1, 5);
-    }
+    //then
+    assertEquals(fetchedLimits.getTotalItemsCount(), 9);
+    assertEquals(fetchedLimits.getSize(), 1);
+    assertEquals(fetchedLimits.getItems().get(0), resourcesLimitImpl);
+    verify(freeResourcesLimitDao).getAll(1, 5);
+  }
 }

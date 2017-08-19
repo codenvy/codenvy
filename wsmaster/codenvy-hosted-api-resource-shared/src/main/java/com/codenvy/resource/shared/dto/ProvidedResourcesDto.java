@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,59 +7,55 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.shared.dto;
 
 import com.codenvy.resource.model.ProvidedResources;
-
+import java.util.List;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @DTO
 public interface ProvidedResourcesDto extends ProvidedResources {
-    @Override
-    String getProviderId();
+  @Override
+  String getProviderId();
 
-    void setProviderId(String providerId);
+  void setProviderId(String providerId);
 
-    ProvidedResourcesDto withProviderId(String providerId);
+  ProvidedResourcesDto withProviderId(String providerId);
 
-    @Override
-    String getId();
+  @Override
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    ProvidedResourcesDto withId(String id);
+  ProvidedResourcesDto withId(String id);
 
-    @Override
-    String getOwner();
+  @Override
+  String getOwner();
 
-    void setOwner(String owner);
+  void setOwner(String owner);
 
-    ProvidedResourcesDto withOwner(String owner);
+  ProvidedResourcesDto withOwner(String owner);
 
-    @Override
-    Long getStartTime();
+  @Override
+  Long getStartTime();
 
-    void setStartTime(Long startTime);
+  void setStartTime(Long startTime);
 
-    ProvidedResourcesDto withStartTime(Long startTime);
+  ProvidedResourcesDto withStartTime(Long startTime);
 
-    @Override
-    Long getEndTime();
+  @Override
+  Long getEndTime();
 
-    void setEndTime(Long endTime);
+  void setEndTime(Long endTime);
 
-    ProvidedResourcesDto withEndTime(Long endTime);
+  ProvidedResourcesDto withEndTime(Long endTime);
 
-    @Override
-    List<ResourceDto> getResources();
+  @Override
+  List<ResourceDto> getResources();
 
-    void setResources(List<ResourceDto> resources);
+  void setResources(List<ResourceDto> resources);
 
-    ProvidedResourcesDto withResources(List<ResourceDto> resources);
+  ProvidedResourcesDto withResources(List<ResourceDto> resources);
 }

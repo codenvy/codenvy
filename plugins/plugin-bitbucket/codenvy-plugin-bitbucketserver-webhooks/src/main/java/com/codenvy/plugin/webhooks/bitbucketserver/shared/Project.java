@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.bitbucketserver.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -20,21 +20,17 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface Project {
 
-    /**
-     * Returns project's key.
-     */
-    String getKey();
+  /** Returns project's key. */
+  String getKey();
 
-    void setKey(String key);
+  void setKey(String key);
 
-    Project withKey(String key);
+  Project withKey(String key);
 
-    /**
-     * Returns {@link User} object that represent's project owner.
-     */
-    User getOwner();
+  /** Returns {@link User} object that represent's project owner. */
+  User getOwner();
 
-    void setOwner(User owner);
+  void setOwner(User owner);
 
-    Project withOwner(User owner);
+  Project withOwner(User owner);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.hosted.client.informers;
 
 import com.google.inject.Inject;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.AppCloseActionEvent;
@@ -26,33 +25,34 @@ import org.eclipse.che.ide.rest.RestContext;
  */
 public class UnstagedChangesInformer extends Action {
 
-    private final AppContext appContext;
-    @SuppressWarnings({"unused", "FieldCanBeLocal"})//used in native method
-    private final String     restContext;
-    @SuppressWarnings({"unused", "FieldCanBeLocal"})//used in native method
-    private final String     workspaceId;
+  private final AppContext appContext;
 
-    @Inject
-    public UnstagedChangesInformer(AppContext appContext,
-                                   @RestContext String restContext) {
-        this.appContext = appContext;
-        this.restContext = restContext;
-        this.workspaceId = appContext.getWorkspace().getId();
+  @SuppressWarnings({"unused", "FieldCanBeLocal"}) //used in native method
+  private final String restContext;
+
+  @SuppressWarnings({"unused", "FieldCanBeLocal"}) //used in native method
+  private final String workspaceId;
+
+  @Inject
+  public UnstagedChangesInformer(AppContext appContext, @RestContext String restContext) {
+    this.appContext = appContext;
+    this.restContext = restContext;
+    this.workspaceId = appContext.getWorkspace().getId();
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    if (e instanceof AppCloseActionEvent) {
+      ((AppCloseActionEvent) e).setCancelMessage(checkUnstagedChanges());
     }
+  }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e instanceof AppCloseActionEvent) {
-            ((AppCloseActionEvent)e).setCancelMessage(checkUnstagedChanges());
-        }
-    }
-
-    /**
-     * Performs registered action
-     *
-     * @return null if user hasn't unstaged changes else string with description of changes.
-     */
-    private native String checkUnstagedChanges() /*-{
+  /**
+   * Performs registered action
+   *
+   * @return null if user hasn't unstaged changes else string with description of changes.
+   */
+  private native String checkUnstagedChanges() /*-{
         var instance = this;
 
         var projectPath = instance.@com.codenvy.ide.hosted.client.informers.UnstagedChangesInformer::getCurrentProjectPath()();
@@ -121,15 +121,13 @@ public class UnstagedChangesInformer extends Action {
         return null;
     }-*/;
 
-    /**
-     * Returns path of current opened project.
-     */
-    private String getCurrentProjectPath() {
-        Project project = appContext.getRootProject();
-        if (project == null) {
-            return null;
-        }
-
-        return project.getLocation().toString();
+  /** Returns path of current opened project. */
+  private String getCurrentProjectPath() {
+    Project project = appContext.getRootProject();
+    if (project == null) {
+      return null;
     }
+
+    return project.getLocation().toString();
+  }
 }

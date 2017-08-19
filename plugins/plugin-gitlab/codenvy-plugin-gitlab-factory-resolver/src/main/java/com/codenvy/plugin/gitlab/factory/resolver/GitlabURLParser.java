@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.gitlab.factory.resolver;
 
 /**
@@ -17,21 +17,19 @@ package com.codenvy.plugin.gitlab.factory.resolver;
  */
 public interface GitlabURLParser {
 
-    /**
-     * Check if the URL is a valid gitlab url for the given provider.
-     *
-     * @param url
-     *         a not null string representation of URL
-     * @return {@code true} if the URL is a valid url for the given provider.
-     */
-    boolean isValid(String url);
+  /**
+   * Check if the URL is a valid gitlab url for the given provider.
+   *
+   * @param url a not null string representation of URL
+   * @return {@code true} if the URL is a valid url for the given provider.
+   */
+  boolean isValid(String url);
 
-    /**
-     * Provides a parsed URL object of the given provider type.
-     *
-     * @param url
-     *         URL to transform into a managed object
-     * @return managed url object
-     */
-    GitlabUrl parse(String url);
+  /**
+   * Provides a parsed URL object of the given provider type.
+   *
+   * @param url URL to transform into a managed object
+   * @return managed url object
+   */
+  GitlabUrl parse(String url);
 }

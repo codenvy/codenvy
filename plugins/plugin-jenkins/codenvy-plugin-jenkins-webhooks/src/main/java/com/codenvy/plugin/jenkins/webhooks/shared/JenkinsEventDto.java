@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.jenkins.webhooks.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,27 +19,27 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface JenkinsEventDto {
-    String getJobName();
+  String getJobName();
 
-    void setJobName(String jobName);
+  void setJobName(String jobName);
 
-    JenkinsEventDto withJobName(String jobName);
+  JenkinsEventDto withJobName(String jobName);
 
-    int getBuildId();
+  int getBuildId();
 
-    void setBuildId(int buildId);
+  void setBuildId(int buildId);
 
-    JenkinsEventDto withBuildId(int buildId);
+  JenkinsEventDto withBuildId(int buildId);
 
-    String getJenkinsUrl();
+  String getJenkinsUrl();
 
-    void setJenkinsUrl(String jenkinsUrl);
+  void setJenkinsUrl(String jenkinsUrl);
 
-    JenkinsEventDto withJenkinsUrl(String jenkinsUrl);
+  JenkinsEventDto withJenkinsUrl(String jenkinsUrl);
 
-    String getRepositoryUrl();
+  String getRepositoryUrl();
 
-    void setRepositoryUrl(String repositoryUrl);
+  void setRepositoryUrl(String repositoryUrl);
 
-    JenkinsEventDto withRepositoryUrl(String repositoryUrl);
+  JenkinsEventDto withRepositoryUrl(String repositoryUrl);
 }

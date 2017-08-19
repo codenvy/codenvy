@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.shared.model;
 
 import java.util.List;
@@ -19,18 +19,12 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public interface Member {
-    /**
-     * Returns id of user
-     */
-    String getUserId();
+  /** Returns id of user */
+  String getUserId();
 
-    /**
-     * Returns id of organization
-     */
-    String getOrganizationId();
+  /** Returns id of organization */
+  String getOrganizationId();
 
-    /**
-     * Returns list of actions that user can perform in organization
-     */
-    List<String> getActions();
+  /** Returns list of actions that user can perform in organization */
+  List<String> getActions();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,30 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.user.server;
+
+import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_USERS_ACTION;
+import static com.jayway.restassured.RestAssured.given;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
+import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import com.codenvy.api.permission.server.SystemDomain;
 import com.jayway.restassured.response.Response;
-
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -35,26 +53,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
-
-import static com.codenvy.api.user.server.UserServicePermissionsFilter.MANAGE_USERS_ACTION;
-import static com.jayway.restassured.RestAssured.given;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
-import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 /**
  * Tests for {@link UserServicePermissionsFilter}
  *
@@ -62,131 +60,137 @@ import static org.testng.Assert.assertNotNull;
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class UserServicePermissionsFilterTest {
-    @SuppressWarnings("unused")
-    private static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
-    @SuppressWarnings("unused")
-    private static final EnvironmentFilter  FILTER = new EnvironmentFilter();
-    public static final String TOKEN = "token123";
-    public static final String USER_ID = "userok";
+  @SuppressWarnings("unused")
+  private static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
 
-    @Mock
-    WorkspaceManager     workspaceManager;
-    @Mock
-    UserManager          userManager;
+  @SuppressWarnings("unused")
+  private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
-    UserServicePermissionsFilter permissionsFilter;
+  public static final String TOKEN = "token123";
+  public static final String USER_ID = "userok";
 
-    @Mock
-    private static Subject subject;
+  @Mock WorkspaceManager workspaceManager;
+  @Mock UserManager userManager;
 
-    @Mock
-    UserService service;
+  UserServicePermissionsFilter permissionsFilter;
 
-    @BeforeMethod
-    public void setUp() throws ServerException {
-        permissionsFilter = new UserServicePermissionsFilter(true);
-        when(subject.getUserId()).thenReturn(USER_ID);
+  @Mock private static Subject subject;
+
+  @Mock UserService service;
+
+  @BeforeMethod
+  public void setUp() throws ServerException {
+    permissionsFilter = new UserServicePermissionsFilter(true);
+    when(subject.getUserId()).thenReturn(USER_ID);
+  }
+
+  @Test
+  public void shouldNotCheckPermissionsOnUserCreationFromToken() throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .post(SECURE_PATH + "/user?token=" + TOKEN);
+
+    assertEquals(response.getStatusCode(), 204);
+    verify(service).create(eq(null), eq(TOKEN), anyBoolean());
+    verifyZeroInteractions(subject);
+  }
+
+  @Test
+  public void shouldCheckPermissionsOnUserCreationFromEntity() throws Exception {
+    final UserDto userToCreate =
+        DtoFactory.newDto(UserDto.class)
+            .withId("user123")
+            .withEmail("test @test.com")
+            .withPassword("***");
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(userToCreate)
+            .when()
+            .post(SECURE_PATH + "/user");
+
+    assertEquals(response.getStatusCode(), 204);
+    verify(service).create(any(), eq(null), anyBoolean());
+    verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+  }
+
+  @Test
+  public void shouldCheckPermissionsOnUserRemoving() throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .delete(SECURE_PATH + "/user/user123");
+
+    assertEquals(response.getStatusCode(), 204);
+    verify(service).remove(eq("user123"));
+    verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+  }
+
+  @Test
+  public void shouldNotCheckPermissionsOnUserSelfRemoving() throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .delete(SECURE_PATH + "/user/" + USER_ID);
+
+    assertEquals(response.getStatusCode(), 204);
+    verify(service).remove(eq(USER_ID));
+    verify(subject, never()).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+  }
+
+  @Test(
+    expectedExceptions = ForbiddenException.class,
+    expectedExceptionsMessageRegExp = "User is not authorized to perform this operation"
+  )
+  public void shouldThrowForbiddenExceptionWhenRequestedUnknownMethod() throws Exception {
+    final GenericResourceMethod mock = mock(GenericResourceMethod.class);
+    Method injectLinks = AdminUserService.class.getMethod("getServiceDescriptor");
+    when(mock.getMethod()).thenReturn(injectLinks);
+
+    permissionsFilter.filter(mock, new Object[] {});
+  }
+
+  @Test(dataProvider = "publicMethods")
+  public void shouldNotCheckPermissionsForPublicMethods(String methodName) throws Exception {
+    final Method method =
+        Stream.of(UserService.class.getMethods())
+            .filter(userServiceMethod -> userServiceMethod.getName().equals(methodName))
+            .findAny()
+            .orElseGet(null);
+    assertNotNull(method);
+
+    final GenericResourceMethod mock = mock(GenericResourceMethod.class);
+    when(mock.getMethod()).thenReturn(method);
+
+    permissionsFilter.filter(mock, new Object[] {});
+
+    verifyNoMoreInteractions(subject);
+  }
+
+  @DataProvider(name = "publicMethods")
+  private Object[][] pathsProvider() {
+    return new Object[][] {
+      {"getCurrent"}, {"updatePassword"}, {"getById"}, {"find"}, {"getSettings"}
+    };
+  }
+
+  @Filter
+  public static class EnvironmentFilter implements RequestFilter {
+    public void doFilter(GenericContainerRequest request) {
+      EnvironmentContext.getCurrent().setSubject(subject);
     }
-
-    @Test
-    public void shouldNotCheckPermissionsOnUserCreationFromToken() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .post(SECURE_PATH + "/user?token=" + TOKEN);
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).create(eq(null), eq(TOKEN), anyBoolean());
-        verifyZeroInteractions(subject);
-    }
-
-    @Test
-    public void shouldCheckPermissionsOnUserCreationFromEntity() throws Exception {
-        final UserDto userToCreate = DtoFactory.newDto(UserDto.class)
-                                               .withId("user123")
-                                               .withEmail("test @test.com")
-                                               .withPassword("***");
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                             .contentType("application/json")
-                                         .body(userToCreate)
-                                         .when()
-                                         .post(SECURE_PATH + "/user");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).create(any(), eq(null), anyBoolean());
-        verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
-    }
-
-    @Test
-    public void shouldCheckPermissionsOnUserRemoving() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .delete(SECURE_PATH + "/user/user123");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).remove(eq("user123"));
-        verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
-    }
-
-    @Test
-    public void shouldNotCheckPermissionsOnUserSelfRemoving() throws Exception {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .delete(SECURE_PATH + "/user/" + USER_ID);
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(service).remove(eq(USER_ID));
-        verify(subject, never()).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
-    }
-
-    @Test(expectedExceptions = ForbiddenException.class,
-          expectedExceptionsMessageRegExp = "User is not authorized to perform this operation")
-    public void shouldThrowForbiddenExceptionWhenRequestedUnknownMethod() throws Exception {
-        final GenericResourceMethod mock = mock(GenericResourceMethod.class);
-        Method injectLinks = AdminUserService.class.getMethod("getServiceDescriptor");
-        when(mock.getMethod()).thenReturn(injectLinks);
-
-        permissionsFilter.filter(mock, new Object[] {});
-    }
-
-    @Test(dataProvider = "publicMethods")
-    public void shouldNotCheckPermissionsForPublicMethods(String methodName) throws Exception {
-        final Method method = Stream.of(UserService.class.getMethods())
-                                    .filter(userServiceMethod -> userServiceMethod.getName().equals(methodName))
-                                    .findAny()
-                                    .orElseGet(null);
-        assertNotNull(method);
-
-        final GenericResourceMethod mock = mock(GenericResourceMethod.class);
-        when(mock.getMethod()).thenReturn(method);
-
-        permissionsFilter.filter(mock, new Object[] {});
-
-        verifyNoMoreInteractions(subject);
-    }
-
-    @DataProvider(name = "publicMethods")
-    private Object[][] pathsProvider() {
-        return new Object[][] {
-                {"getCurrent"},
-                {"updatePassword"},
-                {"getById"},
-                {"find"},
-                {"getSettings"}
-        };
-    }
-
-    @Filter
-    public static class EnvironmentFilter implements RequestFilter {
-        public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setSubject(subject);
-        }
-    }
+  }
 }

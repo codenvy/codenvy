@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,22 +7,20 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.vsts;
 
-
 enum VSTSWebhookType {
+  WORK_ITEM_CREATED_WEBHOOK("work-item-created"),
+  PULL_REQUEST_UPDATED_WEBHOOK("pull-request-updated");
 
-    WORK_ITEM_CREATED_WEBHOOK("work-item-created"),
-    PULL_REQUEST_UPDATED_WEBHOOK("pull-request-updated");
+  private final String name;
 
-    private final String name;
+  VSTSWebhookType(final String name) {
+    this.name = name;
+  }
 
-    VSTSWebhookType(final String name) {
-        this.name = name;
-    }
-
-    public String toString() {
-        return this.name;
-    }
+  public String toString() {
+    return this.name;
+  }
 }

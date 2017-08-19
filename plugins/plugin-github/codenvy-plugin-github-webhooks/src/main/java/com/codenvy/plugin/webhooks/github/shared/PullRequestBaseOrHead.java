@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,54 +7,54 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.github.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface PullRequestBaseOrHead {
-    /**
-     * Get pull request head (or base) label.
-     *
-     * @return {@link String} label
-     */
-    String getLabel();
+  /**
+   * Get pull request head (or base) label.
+   *
+   * @return {@link String} label
+   */
+  String getLabel();
 
-    void setLabel(String label);
+  void setLabel(String label);
 
-    PullRequestBaseOrHead withLabel(String label);
+  PullRequestBaseOrHead withLabel(String label);
 
-    /**
-     * Get pull request head (or base) ref.
-     *
-     * @return {@link String} ref
-     */
-    String getRef();
+  /**
+   * Get pull request head (or base) ref.
+   *
+   * @return {@link String} ref
+   */
+  String getRef();
 
-    void setRef(String ref);
+  void setRef(String ref);
 
-    PullRequestBaseOrHead withRef(String ref);
+  PullRequestBaseOrHead withRef(String ref);
 
-    /**
-     * Get pull request head (or base) sha.
-     *
-     * @return {@link String} sha
-     */
-    String getSha();
+  /**
+   * Get pull request head (or base) sha.
+   *
+   * @return {@link String} sha
+   */
+  String getSha();
 
-    void setSha(String sha);
+  void setSha(String sha);
 
-    PullRequestBaseOrHead withSha(String sha);
+  PullRequestBaseOrHead withSha(String sha);
 
-    /**
-     * Get pull request head (or base) repo.
-     *
-     * @return {@link Repository} repo
-     */
-    Repository getRepo();
+  /**
+   * Get pull request head (or base) repo.
+   *
+   * @return {@link Repository} repo
+   */
+  Repository getRepo();
 
-    void setRepo(Repository repo);
+  void setRepo(Repository repo);
 
-    PullRequestBaseOrHead withRepo(Repository repo);
+  PullRequestBaseOrHead withRepo(Repository repo);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.workspace;
 
-import com.codenvy.resource.api.usage.tracker.EnvironmentRamCalculator;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
+import com.codenvy.resource.api.usage.tracker.EnvironmentRamCalculator;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
@@ -22,13 +27,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 /**
  * Tests for {@link EnvironmentRamCalculator}
  *
@@ -36,57 +34,61 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class EnvironmentRamCalculatorTest {
-    private static final long MEGABYTES_TO_BYTES_MULTIPLIER = 1024L * 1024L;
+  private static final long MEGABYTES_TO_BYTES_MULTIPLIER = 1024L * 1024L;
 
-    @Mock
-    private EnvironmentParser environmentParser;
-    @Mock
-    private Environment       environment;
+  @Mock private EnvironmentParser environmentParser;
+  @Mock private Environment environment;
 
-    private EnvironmentRamCalculator environmentRamCalculator;
+  private EnvironmentRamCalculator environmentRamCalculator;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        environmentRamCalculator = new EnvironmentRamCalculator(environmentParser,
-                                                                2048);
-    }
+  @BeforeMethod
+  public void setUp() throws Exception {
+    environmentRamCalculator = new EnvironmentRamCalculator(environmentParser, 2048);
+  }
 
-    @Test
-    public void shouldCalculateRamOfEnvironmentWithMultipleMachines() throws Exception {
-        Map<String, CheServiceImpl> services = new HashMap<>();
-        services.put("service1", new CheServiceImpl().withMemLimit(1024 * MEGABYTES_TO_BYTES_MULTIPLIER));
-        services.put("service2", new CheServiceImpl().withMemLimit(512 * MEGABYTES_TO_BYTES_MULTIPLIER));
+  @Test
+  public void shouldCalculateRamOfEnvironmentWithMultipleMachines() throws Exception {
+    Map<String, CheServiceImpl> services = new HashMap<>();
+    services.put(
+        "service1", new CheServiceImpl().withMemLimit(1024 * MEGABYTES_TO_BYTES_MULTIPLIER));
+    services.put(
+        "service2", new CheServiceImpl().withMemLimit(512 * MEGABYTES_TO_BYTES_MULTIPLIER));
 
-        when(environmentParser.parse(anyObject())).thenReturn(new CheServicesEnvironmentImpl().withServices(services));
+    when(environmentParser.parse(anyObject()))
+        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
 
-        long ram = environmentRamCalculator.calculate(environment);
+    long ram = environmentRamCalculator.calculate(environment);
 
-        assertEquals(ram, 1536L);
-    }
+    assertEquals(ram, 1536L);
+  }
 
-    @Test
-    public void shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentWithMultipleMachinesIncludingMachineWithoutLimit()
-            throws Exception {
-        Map<String, CheServiceImpl> services = new HashMap<>();
-        services.put("service1", new CheServiceImpl().withMemLimit(null));
+  @Test
+  public void
+      shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentWithMultipleMachinesIncludingMachineWithoutLimit()
+          throws Exception {
+    Map<String, CheServiceImpl> services = new HashMap<>();
+    services.put("service1", new CheServiceImpl().withMemLimit(null));
 
-        when(environmentParser.parse(anyObject())).thenReturn(new CheServicesEnvironmentImpl().withServices(services));
+    when(environmentParser.parse(anyObject()))
+        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
 
-        long ram = environmentRamCalculator.calculate(environment);
+    long ram = environmentRamCalculator.calculate(environment);
 
-        assertEquals(ram, 2048L);
-    }
+    assertEquals(ram, 2048L);
+  }
 
-    @Test
-    public void shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentIncludingMachineWithZeroLimit()
-            throws Exception {
-        Map<String, CheServiceImpl> services = new HashMap<>();
-        services.put("service2", new CheServiceImpl().withMemLimit(0L));
+  @Test
+  public void
+      shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentIncludingMachineWithZeroLimit()
+          throws Exception {
+    Map<String, CheServiceImpl> services = new HashMap<>();
+    services.put("service2", new CheServiceImpl().withMemLimit(0L));
 
-        when(environmentParser.parse(anyObject())).thenReturn(new CheServicesEnvironmentImpl().withServices(services));
+    when(environmentParser.parse(anyObject()))
+        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
 
-        long ram = environmentRamCalculator.calculate(environment);
+    long ram = environmentRamCalculator.calculate(environment);
 
-        assertEquals(ram, 2048L);
-    }
+    assertEquals(ram, 2048L);
+  }
 }

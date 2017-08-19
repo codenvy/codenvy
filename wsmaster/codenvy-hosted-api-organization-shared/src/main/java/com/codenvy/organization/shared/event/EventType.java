@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.shared.event;
 
 /**
@@ -17,24 +17,15 @@ package com.codenvy.organization.shared.event;
  */
 public enum EventType {
 
-    /**
-     * Published when organization name changed.
-     */
-    ORGANIZATION_RENAMED,
+  /** Published when organization name changed. */
+  ORGANIZATION_RENAMED,
 
-    /**
-     * Published when organization removed.
-     */
-    ORGANIZATION_REMOVED,
+  /** Published when organization removed. */
+  ORGANIZATION_REMOVED,
 
-    /**
-     * Published when new member added to organization.
-     */
-    MEMBER_ADDED,
+  /** Published when new member added to organization. */
+  MEMBER_ADDED,
 
-    /**
-     * Published when member removed from organization.
-     */
-    MEMBER_REMOVED
-
+  /** Published when member removed from organization. */
+  MEMBER_REMOVED
 }

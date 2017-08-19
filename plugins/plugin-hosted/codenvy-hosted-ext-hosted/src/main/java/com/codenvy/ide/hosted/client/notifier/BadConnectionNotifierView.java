@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.hosted.client.notifier;
-
 
 import org.eclipse.che.ide.api.mvp.View;
 
@@ -20,15 +19,15 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface BadConnectionNotifierView extends View<BadConnectionNotifierView.ActionDelegate> {
 
-    interface ActionDelegate {
+  interface ActionDelegate {
 
-        /** delegates {@link BadConnectionNotifierView#close()} */
-        void onOkClicked();
-    }
+    /** delegates {@link BadConnectionNotifierView#close()} */
+    void onOkClicked();
+  }
 
-    /** opens information popup */
-    void showDialog(String title, String message);
+  /** opens information popup */
+  void showDialog(String title, String message);
 
-    /** close information popup */
-    void close();
+  /** close information popup */
+  void close();
 }

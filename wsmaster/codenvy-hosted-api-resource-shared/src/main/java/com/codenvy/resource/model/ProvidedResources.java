@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.model;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.List;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Resources that are provided for using by account by some resource providing mechanism.
@@ -21,35 +20,24 @@ import java.util.List;
  */
 public interface ProvidedResources {
 
-    /**
-     * Returns id of resource provider.
-     */
-    String getProviderId();
+  /** Returns id of resource provider. */
+  String getProviderId();
 
-    /**
-     * Returns id of granted resource entity.
-     * Can be null when provider provides static single entry.
-     */
-    @Nullable
-    String getId();
+  /**
+   * Returns id of granted resource entity. Can be null when provider provides static single entry.
+   */
+  @Nullable
+  String getId();
 
-    /**
-     * Returns owner of license.
-     */
-    String getOwner();
+  /** Returns owner of license. */
+  String getOwner();
 
-    /**
-     * Returns time when license became active.
-     */
-    Long getStartTime();
+  /** Returns time when license became active. */
+  Long getStartTime();
 
-    /**
-     * Returns time when license will be/became inactive.
-     */
-    Long getEndTime();
+  /** Returns time when license will be/became inactive. */
+  Long getEndTime();
 
-    /**
-     * Returns list of resources which can be used by owner.
-     */
-    List<? extends Resource> getResources();
+  /** Returns list of resources which can be used by owner. */
+  List<? extends Resource> getResources();
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,22 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.server;
-
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.user.server.PreferenceManager;
-import org.eclipse.che.api.user.server.ProfileManager;
-import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
@@ -40,64 +26,75 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
-/**
- * @author Mihail Kuznyetsov
- */
+/** @author Mihail Kuznyetsov */
 @Listeners(MockitoTestNGListener.class)
 public class OrgServiceUserCreatorTest {
-    @Mock
-    UserManager manager;
+  @Mock UserManager manager;
 
-    @Mock
-    ProfileManager profileManager;
+  @Mock ProfileManager profileManager;
 
-    @Mock
-    PreferenceManager preferenceManager;
+  @Mock PreferenceManager preferenceManager;
 
-    @Mock
-    User createdUser;
+  @Mock User createdUser;
 
-    OrgServiceUserCreator creator;
+  OrgServiceUserCreator creator;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        final String userId = "userId123";
-        creator = new OrgServiceUserCreator(manager, profileManager, preferenceManager, true);
-        when(profileManager.getById(userId)).thenReturn(new ProfileImpl(userId, singletonMap("phone", "123")));
-        doNothing().when(profileManager).update(any());
-        when(createdUser.getId()).thenReturn(userId);
-        doReturn(createdUser).when(manager).getByName(anyString());
-    }
+  @BeforeMethod
+  public void setUp() throws Exception {
+    final String userId = "userId123";
+    creator = new OrgServiceUserCreator(manager, profileManager, preferenceManager, true);
+    when(profileManager.getById(userId))
+        .thenReturn(new ProfileImpl(userId, singletonMap("phone", "123")));
+    doNothing().when(profileManager).update(any());
+    when(createdUser.getId()).thenReturn(userId);
+    doReturn(createdUser).when(manager).getByName(anyString());
+  }
 
-    @Test
-    public void shouldCreateUser() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
+  @Test
+  public void shouldCreateUser() throws Exception {
+    doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
 
-        creator.createUser("user@codenvy.com", "test", "John", "Doe");
+    creator.createUser("user@codenvy.com", "test", "John", "Doe");
 
-        ArgumentCaptor<User> user = ArgumentCaptor.forClass(User.class);
-        verify(manager).create(user.capture(), eq(false));
-        assertTrue(user.getValue().getName().equals("test"));
-    }
+    ArgumentCaptor<User> user = ArgumentCaptor.forClass(User.class);
+    verify(manager).create(user.capture(), eq(false));
+    assertTrue(user.getValue().getName().equals("test"));
+  }
 
-    @Test
-    public void shouldCreateUserWithGeneratedNameOnConflict() throws Exception {
-        doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
-        doAnswer(invocation -> {
-            for (Object arg : invocation.getArguments()) {
-                if (arg instanceof User && ((User)arg).getName().equals("reserved")) {
-                    throw new ConflictException("User name is reserved");
+  @Test
+  public void shouldCreateUserWithGeneratedNameOnConflict() throws Exception {
+    doThrow(NotFoundException.class).when(manager).getByEmail(anyObject());
+    doAnswer(
+            invocation -> {
+              for (Object arg : invocation.getArguments()) {
+                if (arg instanceof User && ((User) arg).getName().equals("reserved")) {
+                  throw new ConflictException("User name is reserved");
                 }
-            }
-            return null;
-        }).when(manager).create(anyObject(), anyBoolean());
+              }
+              return null;
+            })
+        .when(manager)
+        .create(anyObject(), anyBoolean());
 
-        creator.createUser("user@codenvy.com", "reserved", "John", "Doe");
+    creator.createUser("user@codenvy.com", "reserved", "John", "Doe");
 
-        ArgumentCaptor<User> user = ArgumentCaptor.forClass(User.class);
-        verify(manager, times(2)).create(user.capture(), eq(false));
-        assertTrue(user.getValue().getName().startsWith("reserved"));
-        assertFalse(user.getValue().getName().equals("reserved"));
-    }
+    ArgumentCaptor<User> user = ArgumentCaptor.forClass(User.class);
+    verify(manager, times(2)).create(user.capture(), eq(false));
+    assertTrue(user.getValue().getName().startsWith("reserved"));
+    assertFalse(user.getValue().getName().equals("reserved"));
+  }
 }

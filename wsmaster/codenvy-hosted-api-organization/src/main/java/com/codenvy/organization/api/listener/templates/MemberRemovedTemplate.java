@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api.listener.templates;
 
 import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
@@ -19,14 +19,13 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
  */
 public class MemberRemovedTemplate extends ThymeleafTemplate {
 
-    public MemberRemovedTemplate(String organizationName, String initiator) {
-        context.setVariable("organizationName", organizationName);
-        context.setVariable("initiator", initiator);
-    }
+  public MemberRemovedTemplate(String organizationName, String initiator) {
+    context.setVariable("organizationName", organizationName);
+    context.setVariable("initiator", initiator);
+  }
 
-    @Override
-    public String getPath() {
-        return "/email-templates/user_removed_from_organization";
-    }
-
+  @Override
+  public String getPath() {
+    return "/email-templates/user_removed_from_organization";
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.model;
 
 /**
@@ -17,21 +17,17 @@ package com.codenvy.resource.model;
  * @author Sergii Leschenko
  */
 public interface Resource {
-    /**
-     * Returns type of resources, e.g. RAM.
-     */
-    String getType();
+  /** Returns type of resources, e.g. RAM. */
+  String getType();
 
-    /**
-     * Returns amount of resources.
-     *
-     * <p>Applicable values here are from -1 to {@link Long#MAX_VALUE} inclusively.
-     * -1 value represent infinity.
-     */
-    long getAmount();
+  /**
+   * Returns amount of resources.
+   *
+   * <p>Applicable values here are from -1 to {@link Long#MAX_VALUE} inclusively. -1 value represent
+   * infinity.
+   */
+  long getAmount();
 
-    /**
-     * Returns unit of resources.
-     */
-    String getUnit();
+  /** Returns unit of resources. */
+  String getUnit();
 }

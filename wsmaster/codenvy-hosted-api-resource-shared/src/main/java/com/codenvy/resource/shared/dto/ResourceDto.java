@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,36 +7,33 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.shared.dto;
 
 import com.codenvy.resource.model.Resource;
-
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @DTO
 public interface ResourceDto extends Resource {
-    @Override
-    String getType();
+  @Override
+  String getType();
 
-    void setType(String type);
+  void setType(String type);
 
-    ResourceDto withType(String type);
+  ResourceDto withType(String type);
 
-    @Override
-    long getAmount();
+  @Override
+  long getAmount();
 
-    void setAmount(long amount);
+  void setAmount(long amount);
 
-    ResourceDto withAmount(long amount);
+  ResourceDto withAmount(long amount);
 
-    @Override
-    String getUnit();
+  @Override
+  String getUnit();
 
-    void setUnit(String unit);
+  void setUnit(String unit);
 
-    ResourceDto withUnit(String unit);
+  ResourceDto withUnit(String unit);
 }

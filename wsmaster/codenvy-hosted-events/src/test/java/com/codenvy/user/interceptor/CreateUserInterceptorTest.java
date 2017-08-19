@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.user.interceptor;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import com.codenvy.service.password.RecoveryStorage;
 import com.codenvy.user.CreationNotificationSender;
-
+import java.lang.reflect.Method;
+import javax.ws.rs.core.Response;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.user.server.UserService;
@@ -24,14 +30,6 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Method;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
 /**
  * Tests for {@link UserCreatorInterceptor}
  *
@@ -40,68 +38,61 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class CreateUserInterceptorTest {
-    @Mock
-    private MethodInvocation invocation;
-    @Mock
-    private RecoveryStorage  recoveryStorage;
-    @Mock
-    private Response         response;
-    @Mock
-    private UserService      userService;
-    @Mock
-    CreationNotificationSender notificationSender;
+  @Mock private MethodInvocation invocation;
+  @Mock private RecoveryStorage recoveryStorage;
+  @Mock private Response response;
+  @Mock private UserService userService;
+  @Mock CreationNotificationSender notificationSender;
 
-    @InjectMocks
-    private CreateUserInterceptor interceptor;
+  @InjectMocks private CreateUserInterceptor interceptor;
 
-    private String recipient = "test@user.com";
+  private String recipient = "test@user.com";
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldNotSendEmailIfInvocationThrowsException() throws Throwable {
-        when(invocation.proceed()).thenThrow(new ConflictException("conflict"));
+  @Test(expectedExceptions = ConflictException.class)
+  public void shouldNotSendEmailIfInvocationThrowsException() throws Throwable {
+    when(invocation.proceed()).thenThrow(new ConflictException("conflict"));
 
-        interceptor.invoke(invocation);
+    interceptor.invoke(invocation);
 
-        verifyZeroInteractions(notificationSender);
-    }
+    verifyZeroInteractions(notificationSender);
+  }
 
+  @Test
+  public void shouldSendEmailWhenUserWasCreatedByUserServiceWithToken() throws Throwable {
+    // preparing user creator's method
+    final Method method =
+        UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
+    when(invocation.getMethod()).thenReturn(method);
 
-    @Test
-    public void shouldSendEmailWhenUserWasCreatedByUserServiceWithToken() throws Throwable {
-        // preparing user creator's method
-        final Method method = UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
-        when(invocation.getMethod()).thenReturn(method);
+    final Object[] invocationArgs = new Object[method.getParameterCount()];
+    invocationArgs[1] = "token123";
+    when(invocation.getArguments()).thenReturn(invocationArgs);
 
-        final Object[] invocationArgs = new Object[method.getParameterCount()];
-        invocationArgs[1] = "token123";
-        when(invocation.getArguments()).thenReturn(invocationArgs);
+    when(invocation.proceed()).thenReturn(response);
+    when(response.getEntity())
+        .thenReturn(DtoFactory.newDto(UserDto.class).withEmail(recipient).withName("user123"));
 
-        when(invocation.proceed()).thenReturn(response);
-        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDto.class)
-                                                        .withEmail(recipient)
-                                                        .withName("user123"));
+    interceptor.invoke(invocation);
 
-        interceptor.invoke(invocation);
+    verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(false));
+  }
 
-        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(false));
-    }
+  @Test
+  public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
+    // preparing user creator's method
+    final Method method =
+        UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
+    when(invocation.getMethod()).thenReturn(method);
 
-    @Test
-    public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
-        // preparing user creator's method
-        final Method method = UserService.class.getMethod("create", UserDto.class, String.class, Boolean.class);
-        when(invocation.getMethod()).thenReturn(method);
+    final Object[] invocationArgs = new Object[method.getParameterCount()];
+    when(invocation.getArguments()).thenReturn(invocationArgs);
 
-        final Object[] invocationArgs = new Object[method.getParameterCount()];
-        when(invocation.getArguments()).thenReturn(invocationArgs);
+    when(invocation.proceed()).thenReturn(response);
+    when(response.getEntity())
+        .thenReturn(DtoFactory.newDto(UserDto.class).withEmail(recipient).withName("user123"));
 
-        when(invocation.proceed()).thenReturn(response);
-        when(response.getEntity()).thenReturn(DtoFactory.newDto(UserDto.class)
-                                                        .withEmail(recipient)
-                                                        .withName("user123"));
+    interceptor.invoke(invocation);
 
-        interceptor.invoke(invocation);
-
-        verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(true));
-    }
+    verify(notificationSender).sendNotification(eq("user123"), eq(recipient), eq(true));
+  }
 }

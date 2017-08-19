@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.template.processor.html.thymeleaf;
-
 
 import org.thymeleaf.context.Context;
 
@@ -20,16 +19,15 @@ import org.thymeleaf.context.Context;
  */
 public abstract class ThymeleafTemplate {
 
-    protected final Context context;
+  protected final Context context;
 
-    public ThymeleafTemplate() {
-        this.context = new Context();
-    }
+  public ThymeleafTemplate() {
+    this.context = new Context();
+  }
 
-    public Context getContext() {
-        return context;
-    }
+  public Context getContext() {
+    return context;
+  }
 
-    public abstract String getPath();
-
+  public abstract String getPath();
 }

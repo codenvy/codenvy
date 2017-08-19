@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,58 +7,52 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.github.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Commit {
-    String getId();
+  String getId();
 
-    void setId(final String id);
+  void setId(final String id);
 
-    Commit withId(final String id);
+  Commit withId(final String id);
 
+  boolean getDistinct();
 
-    boolean getDistinct();
+  void setDistinct(final boolean distinct);
 
-    void setDistinct(final boolean distinct);
+  Commit withDistinct(final boolean distinct);
 
-    Commit withDistinct(final boolean distinct);
+  String getMessage();
 
+  void setMessage(final String message);
 
-    String getMessage();
+  Commit withMessage(final String message);
 
-    void setMessage(final String message);
+  String getTimestamp();
 
-    Commit withMessage(final String message);
+  void setTimestamp(final String timestamp);
 
+  Commit withTimestamp(final String timestamp);
 
-    String getTimestamp();
+  String getUrl();
 
-    void setTimestamp(final String timestamp);
+  void setUrl(final String url);
 
-    Commit withTimestamp(final String timestamp);
+  Commit withUrl(final String url);
 
+  Author getAuthor();
 
-    String getUrl();
+  void setAuthor(final Author author);
 
-    void setUrl(final String url);
+  Commit withAuthor(final Author author);
 
-    Commit withUrl(final String url);
+  Committer getCommitter();
 
+  void setCommitter(final Committer committer);
 
-    Author getAuthor();
-
-    void setAuthor(final Author author);
-
-    Commit withAuthor(final Author author);
-
-
-    Committer getCommitter();
-
-    void setCommitter(final Committer committer);
-
-    Commit withCommitter(final Committer committer);
+  Commit withCommitter(final Committer committer);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ldap.sync;
 
+import java.util.function.Function;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.ldaptive.LdapEntry;
-
-import java.util.function.Function;
-
 
 /**
  * Maps {@link LdapEntry} to {@link UserImpl}.
@@ -24,20 +22,23 @@ import java.util.function.Function;
  */
 public class UserMapper implements Function<LdapEntry, UserImpl> {
 
-    private final String idAttr;
-    private final String nameAttr;
-    private final String mailAttr;
+  private final String idAttr;
+  private final String nameAttr;
+  private final String mailAttr;
 
-    public UserMapper(String userIdAttr, String userNameAttr, String userEmailAttr) {
-        this.idAttr = userIdAttr;
-        this.nameAttr = userNameAttr;
-        this.mailAttr = userEmailAttr;
-    }
+  public UserMapper(String userIdAttr, String userNameAttr, String userEmailAttr) {
+    this.idAttr = userIdAttr;
+    this.nameAttr = userNameAttr;
+    this.mailAttr = userEmailAttr;
+  }
 
-    @Override
-    public UserImpl apply(LdapEntry entry) {
-        return new UserImpl(entry.getAttribute(idAttr) != null ? entry.getAttribute(idAttr).getStringValue() : null,
-                            entry.getAttribute(mailAttr)!= null ? entry.getAttribute(mailAttr).getStringValue() : null,
-                            entry.getAttribute(nameAttr) != null ? entry.getAttribute(nameAttr).getStringValue() : null);
-    }
+  @Override
+  public UserImpl apply(LdapEntry entry) {
+    return new UserImpl(
+        entry.getAttribute(idAttr) != null ? entry.getAttribute(idAttr).getStringValue() : null,
+        entry.getAttribute(mailAttr) != null ? entry.getAttribute(mailAttr).getStringValue() : null,
+        entry.getAttribute(nameAttr) != null
+            ? entry.getAttribute(nameAttr).getStringValue()
+            : null);
+  }
 }

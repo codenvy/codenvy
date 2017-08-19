@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.selenium.dashboard.organization;
+
+import static org.testng.Assert.assertEquals;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -17,7 +19,6 @@ import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPa
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -27,101 +28,99 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-
 /**
  * Test validates organization deletion.
  *
  * @author Ann Shumilova
  */
 public class DeleteOrganizationTest {
-    private OrganizationDto parentOrganization;
-    private OrganizationDto childOrganization;
+  private OrganizationDto parentOrganization;
+  private OrganizationDto childOrganization;
 
-    @Inject
-    private OrganizationListPage                        organizationListPage;
-    @Inject
-    private OrganizationPage                            organizationPage;
-    @Inject
-    private NavigationBar                               navigationBar;
-    @Inject
-    private ConfirmDialog                               confirmDialog;
-    @Inject
-    private Dashboard                                   dashboard;
-    @Inject
-    @Named("admin")
-    private OnpremTestOrganizationServiceClient         organizationServiceClient;
-    @Inject
-    private DefaultTestUser                             testUser;
-    @Inject
-    private AdminTestUser                               adminTestUser;
+  @Inject private OrganizationListPage organizationListPage;
+  @Inject private OrganizationPage organizationPage;
+  @Inject private NavigationBar navigationBar;
+  @Inject private ConfirmDialog confirmDialog;
+  @Inject private Dashboard dashboard;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        dashboard.open(adminTestUser.getAuthToken());
-        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
-        childOrganization = organizationServiceClient
-                .createOrganization(NameGenerator.generate("organization", 5));
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
-        organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
-        organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
+  @Inject private DefaultTestUser testUser;
+  @Inject private AdminTestUser adminTestUser;
 
-        dashboard.open(testUser.getAuthToken());
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    dashboard.open(adminTestUser.getAuthToken());
+    parentOrganization =
+        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+    childOrganization =
+        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(childOrganization.getId());
-        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
-    }
+    organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
+    organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
-    @Test(priority = 1)
-    public void testSubOrganizationDelete() {
-        navigationBar.waitNavigationBar();
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        organizationListPage.waitForOrganizationsList();
+    dashboard.open(testUser.getAuthToken());
+  }
 
-        organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
+  @AfterClass
+  public void tearDown() throws Exception {
+    organizationServiceClient.deleteOrganizationById(childOrganization.getId());
+    organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
+  }
 
-        organizationPage.waitOrganizationName(childOrganization.getName());
-        organizationPage.clickDeleteOrganizationButton();
-        confirmDialog.waitOpened();
+  @Test(priority = 1)
+  public void testSubOrganizationDelete() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
 
-        assertEquals(confirmDialog.getTitle(), "Delete organization");
-        assertEquals(confirmDialog.getMessage(), "Would you like to delete organization '" + childOrganization.getName() + "'?");
-        assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
+    organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
 
-        confirmDialog.clickConfirm();
-        confirmDialog.waitClosed();
+    organizationPage.waitOrganizationName(childOrganization.getName());
+    organizationPage.clickDeleteOrganizationButton();
+    confirmDialog.waitOpened();
 
-        organizationListPage.waitForOrganizationsList();
-        organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-        assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "1");
-        assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
-    }
+    assertEquals(confirmDialog.getTitle(), "Delete organization");
+    assertEquals(
+        confirmDialog.getMessage(),
+        "Would you like to delete organization '" + childOrganization.getName() + "'?");
+    assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
 
-    @Test(priority = 2)
-    public void testParentOrganizationDeletion() {
-        navigationBar.waitNavigationBar();
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        organizationListPage.waitForOrganizationsList();
+    confirmDialog.clickConfirm();
+    confirmDialog.waitClosed();
 
-        organizationListPage.clickOnOrganization(parentOrganization.getName());
+    organizationListPage.waitForOrganizationsList();
+    organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
+    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "1");
+    assertEquals(organizationListPage.getOrganizationListItemCount(), 1);
+  }
 
-        organizationPage.waitOrganizationName(parentOrganization.getName());
-        organizationPage.clickDeleteOrganizationButton();
-        confirmDialog.waitOpened();
+  @Test(priority = 2)
+  public void testParentOrganizationDeletion() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
 
-        assertEquals(confirmDialog.getTitle(), "Delete organization");
-        assertEquals(confirmDialog.getMessage(), "Would you like to delete organization '" + parentOrganization.getName() + "'?");
-        assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
 
-        confirmDialog.clickConfirm();
-        confirmDialog.waitClosed();
+    organizationPage.waitOrganizationName(parentOrganization.getName());
+    organizationPage.clickDeleteOrganizationButton();
+    confirmDialog.waitOpened();
 
-        organizationListPage.waitForOrganizationsEmptyList();
-        assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "0");
-    }
+    assertEquals(confirmDialog.getTitle(), "Delete organization");
+    assertEquals(
+        confirmDialog.getMessage(),
+        "Would you like to delete organization '" + parentOrganization.getName() + "'?");
+    assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
+
+    confirmDialog.clickConfirm();
+    confirmDialog.waitClosed();
+
+    organizationListPage.waitForOrganizationsEmptyList();
+    assertEquals(navigationBar.getMenuCounterValue(NavigationBar.MenuItem.ORGANIZATIONS), "0");
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.jenkins.webhooks.inject;
 
 import com.codenvy.plugin.jenkins.webhooks.JenkinsConnectorFactory;
 import com.codenvy.plugin.jenkins.webhooks.JenkinsWebhookService;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-
 import org.eclipse.che.inject.DynaModule;
 
 /**
@@ -25,9 +24,9 @@ import org.eclipse.che.inject.DynaModule;
 @DynaModule
 public class JenkinsWebhookModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(JenkinsWebhookService.class);
-        install(new FactoryModuleBuilder().build(JenkinsConnectorFactory.class));
-    }
+  @Override
+  protected void configure() {
+    bind(JenkinsWebhookService.class);
+    install(new FactoryModuleBuilder().build(JenkinsConnectorFactory.class));
+  }
 }

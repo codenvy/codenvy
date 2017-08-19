@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.machine;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 
 /**
  * Modify machine server to be able to change its attributes to proxy network calls to server.
- * <p>
- * Can be used to enable some(https) proxy.
+ *
+ * <p>Can be used to enable some(https) proxy.
  *
  * @author Alexander Garagatyi
  */
 public interface MachineServerProxyTransformer {
-    ServerImpl transform(ServerImpl server);
+  ServerImpl transform(ServerImpl server);
 }

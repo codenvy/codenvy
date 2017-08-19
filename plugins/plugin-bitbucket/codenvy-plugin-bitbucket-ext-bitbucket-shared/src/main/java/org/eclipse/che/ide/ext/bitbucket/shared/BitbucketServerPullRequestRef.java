@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,27 +19,27 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface BitbucketServerPullRequestRef {
-    String getId();
+  String getId();
 
-    void setId(String id);
+  void setId(String id);
 
-    BitbucketServerPullRequestRef withId(String id);
+  BitbucketServerPullRequestRef withId(String id);
 
-    String getDisplayId();
+  String getDisplayId();
 
-    void setDisplayId(String displayId);
+  void setDisplayId(String displayId);
 
-    BitbucketServerPullRequestRef withDisplayId(String displayId);
+  BitbucketServerPullRequestRef withDisplayId(String displayId);
 
-    String getLatestCommit();
+  String getLatestCommit();
 
-    void setLatestCommit(String latestCommit);
+  void setLatestCommit(String latestCommit);
 
-    BitbucketServerPullRequestRef withLatestCommit(String latestCommit);
+  BitbucketServerPullRequestRef withLatestCommit(String latestCommit);
 
-    BitbucketServerRepository getRepository();
+  BitbucketServerRepository getRepository();
 
-    void setRepository(BitbucketServerRepository repository);
+  void setRepository(BitbucketServerRepository repository);
 
-    BitbucketServerPullRequestRef withRepository(BitbucketServerRepository repository);
+  BitbucketServerPullRequestRef withRepository(BitbucketServerRepository repository);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.github.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -15,25 +15,25 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface Committer {
 
-    /**
-     * Get committer's name.
-     *
-     * @return {@link String} name
-     */
-    String getName();
+  /**
+   * Get committer's name.
+   *
+   * @return {@link String} name
+   */
+  String getName();
 
-    void setName(final String name);
+  void setName(final String name);
 
-    Committer withName(final String name);
+  Committer withName(final String name);
 
-    /**
-     * Get committer's email.
-     *
-     * @return {@link String} email
-     */
-    String getEmail();
+  /**
+   * Get committer's email.
+   *
+   * @return {@link String} email
+   */
+  String getEmail();
 
-    void setEmail(final String email);
+  void setEmail(final String email);
 
-    Committer withEmail(final String email);
+  Committer withEmail(final String email);
 }

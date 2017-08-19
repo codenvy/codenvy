@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api;
 
 import com.codenvy.api.permission.server.SystemDomain;
@@ -27,18 +27,18 @@ import com.google.inject.name.Names;
  */
 public class AdminApiModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(AdminUserService.class);
+  @Override
+  protected void configure() {
+    bind(AdminUserService.class);
 
-        final Multibinder<String> binder = Multibinder.newSetBinder(binder(),
-                                                                    String.class,
-                                                                    Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
-        binder.addBinding().toInstance(UserServicePermissionsFilter.MANAGE_USERS_ACTION);
+    final Multibinder<String> binder =
+        Multibinder.newSetBinder(
+            binder(), String.class, Names.named(SystemDomain.SYSTEM_DOMAIN_ACTIONS));
+    binder.addBinding().toInstance(UserServicePermissionsFilter.MANAGE_USERS_ACTION);
 
-        bind(AdminUserServicePermissionsFilter.class);
-        bind(UserProfileServicePermissionsFilter.class);
-        bind(UserServicePermissionsFilter.class);
-        bind(AdminUserCreator.class);
-    }
+    bind(AdminUserServicePermissionsFilter.class);
+    bind(UserProfileServicePermissionsFilter.class);
+    bind(UserServicePermissionsFilter.class);
+    bind(AdminUserCreator.class);
+  }
 }

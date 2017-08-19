@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,96 +7,84 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.github.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface PushEvent {
 
-    String getRef();
+  String getRef();
 
-    void setRef(final String ref);
+  void setRef(final String ref);
 
-    PushEvent withRef(final String ref);
+  PushEvent withRef(final String ref);
 
+  String getBefore();
 
-    String getBefore();
+  void setBefore(final String before);
 
-    void setBefore(final String before);
+  PushEvent withBefore(final String before);
 
-    PushEvent withBefore(final String before);
+  String getAfter();
 
+  void setAfter(final String after);
 
-    String getAfter();
+  PushEvent withAfter(final String after);
 
-    void setAfter(final String after);
+  boolean getCreated();
 
-    PushEvent withAfter(final String after);
+  void setCreated(final boolean created);
 
+  PushEvent withCreated(final boolean created);
 
-    boolean getCreated();
+  boolean getDeleted();
 
-    void setCreated(final boolean created);
+  void setDeleted(final boolean deleted);
 
-    PushEvent withCreated(final boolean created);
+  PushEvent withDeleted(final boolean deleted);
 
+  boolean getForced();
 
-    boolean getDeleted();
+  void setForced(final boolean forced);
 
-    void setDeleted(final boolean deleted);
+  PushEvent withForced(final boolean forced);
 
-    PushEvent withDeleted(final boolean deleted);
+  String getBaseRef();
 
+  void setBaseRef(final String baseRef);
 
-    boolean getForced();
+  PushEvent withBaseRef(final String baseRef);
 
-    void setForced(final boolean forced);
+  String getCompare();
 
-    PushEvent withForced(final boolean forced);
+  void setCompare(final String compare);
 
+  PushEvent withCompare(final String compare);
 
-    String getBaseRef();
+  List<Commit> getCommits();
 
-    void setBaseRef(final String baseRef);
+  void setCommits(final List<Commit> commits);
 
-    PushEvent withBaseRef(final String baseRef);
+  PushEvent withCommits(final List<Commit> commits);
 
+  Commit getHeadCommit();
 
-    String getCompare();
+  void setHeadCommit(final Commit headCommit);
 
-    void setCompare(final String compare);
+  PushEvent withHeadCommit(final Commit headCommit);
 
-    PushEvent withCompare(final String compare);
+  Repository getRepository();
 
+  void setRepository(final Repository repository);
 
-    List<Commit> getCommits();
+  PushEvent withRepository(final Repository repository);
 
-    void setCommits(final List<Commit> commits);
+  Pusher getPusher();
 
-    PushEvent withCommits(final List<Commit> commits);
+  void setPusher(final Pusher pusher);
 
-
-    Commit getHeadCommit();
-
-    void setHeadCommit(final Commit headCommit);
-
-    PushEvent withHeadCommit(final Commit headCommit);
-
-
-    Repository getRepository();
-
-    void setRepository(final Repository repository);
-
-    PushEvent withRepository(final Repository repository);
-
-
-    Pusher getPusher();
-
-    void setPusher(final Pusher pusher);
-
-    PushEvent withPusher(final Pusher pusher);
+  PushEvent withPusher(final Pusher pusher);
 }

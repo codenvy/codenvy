@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,15 +7,24 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.machine.server.jpa;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.codenvy.api.machine.server.recipe.RecipePermissionsImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.jpa.JpaPersistModule;
-
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.eclipse.che.api.machine.server.jpa.JpaRecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -29,148 +38,141 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.persistence.EntityManager;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_DRIVER;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_PASSWORD;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_URL;
-import static org.eclipse.persistence.config.PersistenceUnitProperties.JDBC_USER;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-/**
- * @author Max Shaposhnik
- */
+/** @author Max Shaposhnik */
 public class OnPremisesJpaRecipeDaoTest {
-    private EntityManager          manager;
-    private OnPremisesJpaRecipeDao dao;
+  private EntityManager manager;
+  private OnPremisesJpaRecipeDao dao;
 
-    private RecipePermissionsImpl[] permissions;
-    private UserImpl[]              users;
-    private RecipeImpl[]            recipes;
+  private RecipePermissionsImpl[] permissions;
+  private UserImpl[] users;
+  private RecipeImpl[] recipes;
 
-    @BeforeClass
-    public void setupEntities() throws Exception {
-        permissions = new RecipePermissionsImpl[] {
-                new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "search")),
-                new RecipePermissionsImpl("user1", "recipe2", asList("read", "search")),
-                new RecipePermissionsImpl("user1", "recipe3", asList("read", "search")),
-                new RecipePermissionsImpl("user1", "recipe4", asList("read", "run")),
-                new RecipePermissionsImpl("user2", "recipe1", asList("read", "use")),
-                new RecipePermissionsImpl("*", "recipe_debian", singletonList("search")),
-                new RecipePermissionsImpl("*", "recipe_ubuntu", singletonList("search"))
+  @BeforeClass
+  public void setupEntities() throws Exception {
+    permissions =
+        new RecipePermissionsImpl[] {
+          new RecipePermissionsImpl("user1", "recipe1", asList("read", "use", "search")),
+          new RecipePermissionsImpl("user1", "recipe2", asList("read", "search")),
+          new RecipePermissionsImpl("user1", "recipe3", asList("read", "search")),
+          new RecipePermissionsImpl("user1", "recipe4", asList("read", "run")),
+          new RecipePermissionsImpl("user2", "recipe1", asList("read", "use")),
+          new RecipePermissionsImpl("*", "recipe_debian", singletonList("search")),
+          new RecipePermissionsImpl("*", "recipe_ubuntu", singletonList("search"))
         };
 
-        users = new UserImpl[] {new UserImpl("user1", "user1@com.com", "usr1"),
-                                new UserImpl("user2", "user2@com.com", "usr2")};
-
-        recipes = new RecipeImpl[] {
-                new RecipeImpl("recipe1", "rc1", null, null, null, asList("tag1", "tag2"), null),
-                new RecipeImpl("recipe2", "rc2", null, "testType", null, null, null),
-                new RecipeImpl("recipe3", "rc3", null, null, null, asList("tag1", "tag2"), null),
-                new RecipeImpl("recipe4", "rc4", null, null, null, null, null),
-                new RecipeImpl("recipe_debian", "DEBIAN_JDK8", "test", "test", null, asList("debian", "tag1"), null),
-                new RecipeImpl("recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
+    users =
+        new UserImpl[] {
+          new UserImpl("user1", "user1@com.com", "usr1"),
+          new UserImpl("user2", "user2@com.com", "usr2")
         };
 
-        Injector injector = Guice.createInjector(new TestModule(),
-                                                 new OnPremisesJpaMachineModule());
-        manager = injector.getInstance(EntityManager.class);
-        dao = injector.getInstance(OnPremisesJpaRecipeDao.class);
+    recipes =
+        new RecipeImpl[] {
+          new RecipeImpl("recipe1", "rc1", null, null, null, asList("tag1", "tag2"), null),
+          new RecipeImpl("recipe2", "rc2", null, "testType", null, null, null),
+          new RecipeImpl("recipe3", "rc3", null, null, null, asList("tag1", "tag2"), null),
+          new RecipeImpl("recipe4", "rc4", null, null, null, null, null),
+          new RecipeImpl(
+              "recipe_debian", "DEBIAN_JDK8", "test", "test", null, asList("debian", "tag1"), null),
+          new RecipeImpl(
+              "recipe_ubuntu", "DEBIAN_JDK8", "test", "test", null, asList("ubuntu", "tag1"), null)
+        };
+
+    Injector injector = Guice.createInjector(new TestModule(), new OnPremisesJpaMachineModule());
+    manager = injector.getInstance(EntityManager.class);
+    dao = injector.getInstance(OnPremisesJpaRecipeDao.class);
+  }
+
+  @BeforeMethod
+  public void setUp() throws Exception {
+    manager.getTransaction().begin();
+    for (UserImpl user : users) {
+      manager.persist(user);
     }
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        manager.getTransaction().begin();
-        for (UserImpl user : users) {
-            manager.persist(user);
-        }
-
-        for (RecipeImpl recipe : recipes) {
-            manager.persist(recipe);
-        }
-
-        for (RecipePermissionsImpl recipePermissions : permissions) {
-            manager.persist(recipePermissions);
-        }
-        manager.getTransaction().commit();
-        manager.clear();
+    for (RecipeImpl recipe : recipes) {
+      manager.persist(recipe);
     }
 
-    @AfterMethod
-    public void cleanup() {
-        manager.getTransaction().begin();
-
-        manager.createQuery("SELECT p FROM RecipePermissions p", RecipePermissionsImpl.class)
-               .getResultList()
-               .forEach(manager::remove);
-
-        manager.createQuery("SELECT r FROM Recipe r", RecipeImpl.class)
-               .getResultList()
-               .forEach(manager::remove);
-
-        manager.createQuery("SELECT u FROM Usr u", UserImpl.class)
-               .getResultList()
-               .forEach(manager::remove);
-        manager.getTransaction().commit();
+    for (RecipePermissionsImpl recipePermissions : permissions) {
+      manager.persist(recipePermissions);
     }
+    manager.getTransaction().commit();
+    manager.clear();
+  }
 
-    @AfterClass
-    public void shutdown() throws Exception {
-        manager.getEntityManagerFactory().close();
-        H2TestHelper.shutdownDefault();
+  @AfterMethod
+  public void cleanup() {
+    manager.getTransaction().begin();
+
+    manager
+        .createQuery("SELECT p FROM RecipePermissions p", RecipePermissionsImpl.class)
+        .getResultList()
+        .forEach(manager::remove);
+
+    manager
+        .createQuery("SELECT r FROM Recipe r", RecipeImpl.class)
+        .getResultList()
+        .forEach(manager::remove);
+
+    manager
+        .createQuery("SELECT u FROM Usr u", UserImpl.class)
+        .getResultList()
+        .forEach(manager::remove);
+    manager.getTransaction().commit();
+  }
+
+  @AfterClass
+  public void shutdown() throws Exception {
+    manager.getEntityManagerFactory().close();
+    H2TestHelper.shutdownDefault();
+  }
+
+  @Test
+  public void shouldFindRecipeByPermissionsAndType() throws Exception {
+    List<RecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
+    assertEquals(results.size(), 3);
+    assertTrue(results.contains(recipes[0]));
+    assertTrue(results.contains(recipes[1]));
+    assertTrue(results.contains(recipes[2]));
+  }
+
+  @Test
+  public void shouldFindRecipeByPermissionsAndTags() throws Exception {
+    List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("tag2"), null, 0, 0);
+    assertEquals(results.size(), 2);
+    assertTrue(results.contains(recipes[0]));
+    assertTrue(results.contains(recipes[2]));
+  }
+
+  @Test
+  public void shouldFindRecipeByUserIdAndPublicPermissions() throws Exception {
+    final Set<RecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
+    assertEquals(results.size(), 5);
+    assertTrue(results.contains(recipes[0]));
+    assertTrue(results.contains(recipes[1]));
+    assertTrue(results.contains(recipes[2]));
+    assertTrue(results.contains(recipes[4]));
+    assertTrue(results.contains(recipes[5]));
+  }
+
+  @Test
+  public void shouldNotFindRecipeNonexistentTags() throws Exception {
+    List<RecipeImpl> results =
+        dao.search(users[0].getId(), singletonList("unexisted_tag2"), null, 0, 0);
+    assertTrue(results.isEmpty());
+  }
+
+  private class TestModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+      bind(JpaRecipeDao.class).to(OnPremisesJpaRecipeDao.class);
+      install(new JpaPersistModule("main"));
+      bind(SchemaInitializer.class)
+          .toInstance(
+              new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
+      bind(DBInitializer.class).asEagerSingleton();
     }
-
-    @Test
-    public void shouldFindRecipeByPermissionsAndType() throws Exception {
-        List<RecipeImpl> results = dao.search(users[0].getId(), null, "testType", 0, 0);
-        assertEquals(results.size(), 3);
-        assertTrue(results.contains(recipes[0]));
-        assertTrue(results.contains(recipes[1]));
-        assertTrue(results.contains(recipes[2]));
-    }
-
-    @Test
-    public void shouldFindRecipeByPermissionsAndTags() throws Exception {
-        List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("tag2"), null, 0, 0);
-        assertEquals(results.size(), 2);
-        assertTrue(results.contains(recipes[0]));
-        assertTrue(results.contains(recipes[2]));
-    }
-
-    @Test
-    public void shouldFindRecipeByUserIdAndPublicPermissions() throws Exception {
-        final Set<RecipeImpl> results = new HashSet<>(dao.search(users[0].getId(), null, null, 0, 30));
-        assertEquals(results.size(), 5);
-        assertTrue(results.contains(recipes[0]));
-        assertTrue(results.contains(recipes[1]));
-        assertTrue(results.contains(recipes[2]));
-        assertTrue(results.contains(recipes[4]));
-        assertTrue(results.contains(recipes[5]));
-    }
-
-    @Test
-    public void shouldNotFindRecipeNonexistentTags() throws Exception {
-        List<RecipeImpl> results = dao.search(users[0].getId(), singletonList("unexisted_tag2"), null, 0, 0);
-        assertTrue(results.isEmpty());
-    }
-
-    private class TestModule extends AbstractModule {
-
-        @Override
-        protected void configure() {
-            bind(JpaRecipeDao.class).to(OnPremisesJpaRecipeDao.class);
-            install(new JpaPersistModule("main"));
-            bind(SchemaInitializer.class).toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema", "codenvy-schema"));
-            bind(DBInitializer.class).asEagerSingleton();
-        }
-    }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api.resource;
-
-import com.codenvy.organization.shared.dto.OrganizationDistributedResourcesDto;
-import com.codenvy.resource.api.free.ResourceValidator;
-import com.codenvy.resource.shared.dto.ResourceDto;
-import com.jayway.restassured.response.Response;
-
-import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.CheJsonProvider;
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.assured.EverrestJetty;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
@@ -45,6 +23,26 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.codenvy.organization.shared.dto.OrganizationDistributedResourcesDto;
+import com.codenvy.resource.api.free.ResourceValidator;
+import com.codenvy.resource.shared.dto.ResourceDto;
+import com.jayway.restassured.response.Response;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.everrest.assured.EverrestJetty;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
 /**
  * Tests for {@link OrganizationResourcesDistributionService}
  *
@@ -52,114 +50,127 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class OrganizationResourcesDistributionServiceTest {
-    @SuppressWarnings("unused") //is declared for deploying by everrest-assured
-    private ApiExceptionMapper mapper;
+  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  private ApiExceptionMapper mapper;
 
-    @SuppressWarnings("unused") //is declared for deploying by everrest-assured
-    private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
+  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
-    @Mock
-    private OrganizationResourcesDistributor organizationResourcesManager;
-    @Mock
-    private ResourceValidator                resourceValidator;
+  @Mock private OrganizationResourcesDistributor organizationResourcesManager;
+  @Mock private ResourceValidator resourceValidator;
 
-    @InjectMocks
-    private OrganizationResourcesDistributionService service;
+  @InjectMocks private OrganizationResourcesDistributionService service;
 
-    @Test
-    public void shouldCapOrganizationResources() throws Exception {
-        ResourceDto resource = DtoFactory.newDto(ResourceDto.class)
-                                         .withType("test")
-                                         .withAmount(1020)
-                                         .withUnit("unit");
-        List<ResourceDto> resources = singletonList(resource);
+  @Test
+  public void shouldCapOrganizationResources() throws Exception {
+    ResourceDto resource =
+        DtoFactory.newDto(ResourceDto.class).withType("test").withAmount(1020).withUnit("unit");
+    List<ResourceDto> resources = singletonList(resource);
 
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .contentType("application/json")
-               .body(resources)
-               .when()
-               .expect().statusCode(204)
-               .post(SECURE_PATH + "/organization/resource/organization123/cap");
+    given()
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .contentType("application/json")
+        .body(resources)
+        .when()
+        .expect()
+        .statusCode(204)
+        .post(SECURE_PATH + "/organization/resource/organization123/cap");
 
-        verify(organizationResourcesManager).capResources("organization123", resources);
-        verify(resourceValidator).validate(resource);
-    }
+    verify(organizationResourcesManager).capResources("organization123", resources);
+    verify(resourceValidator).validate(resource);
+  }
 
-    @Test
-    public void shouldReturn400WhenBodyContainTwoResourcesWithTheSameTypeOnDistributingOrganizationResources() throws Exception {
-        List<ResourceDto> resources = Arrays.asList(DtoFactory.newDto(ResourceDto.class)
-                                                              .withType("test"),
-                                                    DtoFactory.newDto(ResourceDto.class)
-                                                              .withType("test"));
+  @Test
+  public void
+      shouldReturn400WhenBodyContainTwoResourcesWithTheSameTypeOnDistributingOrganizationResources()
+          throws Exception {
+    List<ResourceDto> resources =
+        Arrays.asList(
+            DtoFactory.newDto(ResourceDto.class).withType("test"),
+            DtoFactory.newDto(ResourceDto.class).withType("test"));
 
-        String response = given().auth()
-                                 .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                 .contentType("application/json")
-                                 .body(resources)
-                                 .when()
-                                 .expect().statusCode(400)
-                                 .post(SECURE_PATH + "/organization/resource/organization123/cap")
-                                 .print();
+    String response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(resources)
+            .when()
+            .expect()
+            .statusCode(400)
+            .post(SECURE_PATH + "/organization/resource/organization123/cap")
+            .print();
 
-        String errorMessage = DtoFactory.getInstance().createDtoFromJson(response, ServiceError.class).getMessage();
-        assertEquals(errorMessage, "Resources to cap must contain only one resource with type 'test'.");
-    }
+    String errorMessage =
+        DtoFactory.getInstance().createDtoFromJson(response, ServiceError.class).getMessage();
+    assertEquals(errorMessage, "Resources to cap must contain only one resource with type 'test'.");
+  }
 
-    @Test
-    public void shouldReturnResourcesCapForSuborganization() throws Exception {
-        final ResourceDto resourcesCap = DtoFactory.newDto(ResourceDto.class)
-                                                   .withType("test")
-                                                   .withAmount(1020)
-                                                   .withUnit("unit");
-        final List<ResourceDto> toFetch = singletonList(resourcesCap);
-        doReturn(toFetch).when(organizationResourcesManager).getResourcesCaps(any());
+  @Test
+  public void shouldReturnResourcesCapForSuborganization() throws Exception {
+    final ResourceDto resourcesCap =
+        DtoFactory.newDto(ResourceDto.class).withType("test").withAmount(1020).withUnit("unit");
+    final List<ResourceDto> toFetch = singletonList(resourcesCap);
+    doReturn(toFetch).when(organizationResourcesManager).getResourcesCaps(any());
 
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .expect().statusCode(200)
-                                         .get(SECURE_PATH + "/organization/resource/organization123/cap");
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .expect()
+            .statusCode(200)
+            .get(SECURE_PATH + "/organization/resource/organization123/cap");
 
-        final List<ResourceDto> fetched = unwrapDtoList(response, ResourceDto.class);
-        assertEquals(fetched.size(), 1);
-        assertTrue(fetched.contains(resourcesCap));
-        verify(organizationResourcesManager).getResourcesCaps("organization123");
-    }
+    final List<ResourceDto> fetched = unwrapDtoList(response, ResourceDto.class);
+    assertEquals(fetched.size(), 1);
+    assertTrue(fetched.contains(resourcesCap));
+    verify(organizationResourcesManager).getResourcesCaps("organization123");
+  }
 
-    @Test
-    public void shouldReturnOrganizationDistributedResources() throws Exception {
-        final OrganizationDistributedResourcesDto distributedResources = createOrganizationDistributedResources();
-        final List<OrganizationDistributedResourcesDto> toFetch = singletonList(distributedResources);
-        doReturn(new Page<>(toFetch, 1, 1, 3))
-                .when(organizationResourcesManager).getByParent(any(), anyInt(), anyLong());
+  @Test
+  public void shouldReturnOrganizationDistributedResources() throws Exception {
+    final OrganizationDistributedResourcesDto distributedResources =
+        createOrganizationDistributedResources();
+    final List<OrganizationDistributedResourcesDto> toFetch = singletonList(distributedResources);
+    doReturn(new Page<>(toFetch, 1, 1, 3))
+        .when(organizationResourcesManager)
+        .getByParent(any(), anyInt(), anyLong());
 
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .expect().statusCode(200)
-                                         .get(SECURE_PATH + "/organization/resource/organization123?maxItems=1&skipCount=1");
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .expect()
+            .statusCode(200)
+            .get(SECURE_PATH + "/organization/resource/organization123?maxItems=1&skipCount=1");
 
-        final List<OrganizationDistributedResourcesDto> fetched = unwrapDtoList(response, OrganizationDistributedResourcesDto.class);
-        assertEquals(fetched.size(), 1);
-        assertTrue(fetched.contains(distributedResources));
-        verify(organizationResourcesManager).getByParent("organization123", 1, 1L);
-    }
+    final List<OrganizationDistributedResourcesDto> fetched =
+        unwrapDtoList(response, OrganizationDistributedResourcesDto.class);
+    assertEquals(fetched.size(), 1);
+    assertTrue(fetched.contains(distributedResources));
+    verify(organizationResourcesManager).getByParent("organization123", 1, 1L);
+  }
 
-    private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
-        return DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass)
-                         .stream()
-                         .collect(Collectors.toList());
-    }
+  private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
+    return DtoFactory.getInstance()
+        .createListDtoFromJson(response.body().print(), dtoClass)
+        .stream()
+        .collect(Collectors.toList());
+  }
 
-    private OrganizationDistributedResourcesDto createOrganizationDistributedResources() {
-        return DtoFactory.newDto(OrganizationDistributedResourcesDto.class)
-                         .withOrganizationId("organization123")
-                         .withResourcesCap(singletonList(DtoFactory.newDto(ResourceDto.class)
-                                                                   .withType("test")
-                                                                   .withAmount(1020)
-                                                                   .withUnit("unit")));
-    }
+  private OrganizationDistributedResourcesDto createOrganizationDistributedResources() {
+    return DtoFactory.newDto(OrganizationDistributedResourcesDto.class)
+        .withOrganizationId("organization123")
+        .withResourcesCap(
+            singletonList(
+                DtoFactory.newDto(ResourceDto.class)
+                    .withType("test")
+                    .withAmount(1020)
+                    .withUnit("unit")));
+  }
 }

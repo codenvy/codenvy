@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.selenium.dashboard.organization;
+
+import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
+import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -16,7 +22,7 @@ import com.codenvy.selenium.pageobject.dashboard.ConfirmDialog;
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
+import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -28,92 +34,85 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.List;
-
-import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
-import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Test validates organization creation and actions on it in the list of organizations.
  *
  * @author Ann Shumilova
  */
 public class DeleteOrganizationInListTest {
-    private static final Logger LOG = LoggerFactory.getLogger(DeleteOrganizationInListTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DeleteOrganizationInListTest.class);
 
-    private List<OrganizationDto> organizations;
-    private OrganizationDto       organization;
+  private List<OrganizationDto> organizations;
+  private OrganizationDto organization;
 
-    @Inject
-    private OrganizationListPage                        organizationListPage;
-    @Inject
-    private NavigationBar                               navigationBar;
-    @Inject
-    private ConfirmDialog                               confirmDialog;
-    @Inject
-    private Dashboard                                   dashboard;
-    @Inject
-    @Named("admin")
-    private OnpremTestOrganizationServiceClient         organizationServiceClient;
-    @Inject
-    private AdminTestUser                               adminTestUser;
+  @Inject private OrganizationListPage organizationListPage;
+  @Inject private NavigationBar navigationBar;
+  @Inject private ConfirmDialog confirmDialog;
+  @Inject private Dashboard dashboard;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        dashboard.open(adminTestUser.getAuthToken());
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
-        String organizationName = NameGenerator.generate("organization", 5);
-        organization = organizationServiceClient.createOrganization(organizationName);
-        organizations = organizationServiceClient.getOrganizations();
-    }
+  @Inject private AdminTestUser adminTestUser;
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(organization.getId());
-    }
+  @BeforeClass
+  public void setUp() throws Exception {
+    dashboard.open(adminTestUser.getAuthToken());
 
-    @Test
-    public void testOrganizationDeletionFromList() {
-        navigationBar.waitNavigationBar();
-        int organizationsCount = organizations.size();
+    String organizationName = NameGenerator.generate("organization", 5);
+    organization = organizationServiceClient.createOrganization(organizationName);
+    organizations = organizationServiceClient.getOrganizations();
+  }
 
-        navigationBar.clickOnMenu(ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
-        navigationBar.clickOnMenu(ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        organizationListPage.waitForOrganizationsList();
-        assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
-        assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
+  @AfterClass
+  public void tearDown() throws Exception {
+    organizationServiceClient.deleteOrganizationById(organization.getId());
+  }
 
-        // Tests delete:
-        organizationListPage.clickOnDeleteButton(organization.getName());
-        confirmDialog.waitOpened();
-        assertEquals(confirmDialog.getTitle(), "Delete organization");
-        assertEquals(confirmDialog.getMessage(), String.format("Would you like to delete organization '%s'?", organization.getName()));
-        assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
-        assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
-        confirmDialog.closeDialog();
-        confirmDialog.waitClosed();
-        assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+  @Test
+  public void testOrganizationDeletionFromList() {
+    navigationBar.waitNavigationBar();
+    int organizationsCount = organizations.size();
 
-        organizationListPage.clickOnDeleteButton(organization.getName());
-        confirmDialog.waitOpened();
-        confirmDialog.clickCancel();
-        confirmDialog.waitClosed();
-        assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    assertEquals(
+        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
+    navigationBar.clickOnMenu(ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+    assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
 
-        organizationListPage.clickOnDeleteButton(organization.getName());
-        confirmDialog.waitOpened();
-        confirmDialog.clickConfirm();
-        confirmDialog.waitClosed();
-        organizationListPage.waitForOrganizationsList();
-        WaitUtils.sleepQuietly(3);
-        assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount - 1);
-        assertFalse(organizationListPage.getValues(NAME).contains(organization.getName()));
-        assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount - 1));
-    }
+    // Tests delete:
+    organizationListPage.clickOnDeleteButton(organization.getName());
+    confirmDialog.waitOpened();
+    assertEquals(confirmDialog.getTitle(), "Delete organization");
+    assertEquals(
+        confirmDialog.getMessage(),
+        String.format("Would you like to delete organization '%s'?", organization.getName()));
+    assertEquals(confirmDialog.getConfirmButtonTitle(), "Delete");
+    assertEquals(confirmDialog.getCancelButtonTitle(), "Close");
+    confirmDialog.closeDialog();
+    confirmDialog.waitClosed();
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+
+    organizationListPage.clickOnDeleteButton(organization.getName());
+    confirmDialog.waitOpened();
+    confirmDialog.clickCancel();
+    confirmDialog.waitClosed();
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
+
+    organizationListPage.clickOnDeleteButton(organization.getName());
+    confirmDialog.waitOpened();
+    confirmDialog.clickConfirm();
+    confirmDialog.waitClosed();
+    organizationListPage.waitForOrganizationsList();
+    WaitUtils.sleepQuietly(3);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount - 1);
+    assertFalse(organizationListPage.getValues(NAME).contains(organization.getName()));
+    assertEquals(
+        navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount - 1));
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api;
 
 import com.codenvy.resource.model.AccountLicense;
@@ -18,10 +18,8 @@ import com.codenvy.resource.shared.dto.AccountLicenseDto;
 import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
 import com.codenvy.resource.shared.dto.ProvidedResourcesDto;
 import com.codenvy.resource.shared.dto.ResourceDto;
-
-import org.eclipse.che.dto.server.DtoFactory;
-
 import java.util.stream.Collectors;
+import org.eclipse.che.dto.server.DtoFactory;
 
 /**
  * Helps to convert objects related to resource to DTOs.
@@ -29,47 +27,51 @@ import java.util.stream.Collectors;
  * @author Sergii Leschenko
  */
 public final class DtoConverter {
-    private DtoConverter() {}
+  private DtoConverter() {}
 
-    public static ResourceDto asDto(Resource resource) {
-        return DtoFactory.newDto(ResourceDto.class)
-                         .withAmount(resource.getAmount())
-                         .withType(resource.getType())
-                         .withUnit(resource.getUnit());
-    }
+  public static ResourceDto asDto(Resource resource) {
+    return DtoFactory.newDto(ResourceDto.class)
+        .withAmount(resource.getAmount())
+        .withType(resource.getType())
+        .withUnit(resource.getUnit());
+  }
 
-    public static FreeResourcesLimitDto asDto(FreeResourcesLimit limit) {
-        return DtoFactory.newDto(FreeResourcesLimitDto.class)
-                         .withResources(limit.getResources()
-                                             .stream()
-                                             .map(DtoConverter::asDto)
-                                             .collect(Collectors.toList()))
-                         .withAccountId(limit.getAccountId());
-    }
+  public static FreeResourcesLimitDto asDto(FreeResourcesLimit limit) {
+    return DtoFactory.newDto(FreeResourcesLimitDto.class)
+        .withResources(
+            limit.getResources().stream().map(DtoConverter::asDto).collect(Collectors.toList()))
+        .withAccountId(limit.getAccountId());
+  }
 
-    public static AccountLicenseDto asDto(AccountLicense license) {
-        return DtoFactory.newDto(AccountLicenseDto.class)
-                         .withAccountId(license.getAccountId())
-                         .withTotalResources(license.getTotalResources()
-                                                    .stream()
-                                                    .map(DtoConverter::asDto)
-                                                    .collect(Collectors.toList()))
-                         .withResourcesDetails(license.getResourcesDetails()
-                                                      .stream()
-                                                      .map(DtoConverter::asDto)
-                                                      .collect(Collectors.toList()));
-    }
+  public static AccountLicenseDto asDto(AccountLicense license) {
+    return DtoFactory.newDto(AccountLicenseDto.class)
+        .withAccountId(license.getAccountId())
+        .withTotalResources(
+            license
+                .getTotalResources()
+                .stream()
+                .map(DtoConverter::asDto)
+                .collect(Collectors.toList()))
+        .withResourcesDetails(
+            license
+                .getResourcesDetails()
+                .stream()
+                .map(DtoConverter::asDto)
+                .collect(Collectors.toList()));
+  }
 
-    private static ProvidedResourcesDto asDto(ProvidedResources providedResources) {
-        return DtoFactory.newDto(ProvidedResourcesDto.class)
-                         .withId(providedResources.getId())
-                         .withOwner(providedResources.getOwner())
-                         .withStartTime(providedResources.getStartTime())
-                         .withEndTime(providedResources.getEndTime())
-                         .withProviderId(providedResources.getProviderId())
-                         .withResources(providedResources.getResources()
-                                                         .stream()
-                                                         .map(DtoConverter::asDto)
-                                                         .collect(Collectors.toList()));
-    }
+  private static ProvidedResourcesDto asDto(ProvidedResources providedResources) {
+    return DtoFactory.newDto(ProvidedResourcesDto.class)
+        .withId(providedResources.getId())
+        .withOwner(providedResources.getOwner())
+        .withStartTime(providedResources.getStartTime())
+        .withEndTime(providedResources.getEndTime())
+        .withProviderId(providedResources.getProviderId())
+        .withResources(
+            providedResources
+                .getResources()
+                .stream()
+                .map(DtoConverter::asDto)
+                .collect(Collectors.toList()));
+  }
 }

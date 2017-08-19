@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api;
 
 import com.codenvy.api.permission.server.AbstractPermissionsDomain;
@@ -25,20 +25,21 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 public class OrganizationJpaModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(OrganizationDao.class).to(JpaOrganizationDao.class);
-        bind(MemberDao.class).to(JpaMemberDao.class);
+  @Override
+  protected void configure() {
+    bind(OrganizationDao.class).to(JpaOrganizationDao.class);
+    bind(MemberDao.class).to(JpaMemberDao.class);
 
-        bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
+    bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
 
-        Multibinder.newSetBinder(binder(), new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {})
-                   .addBinding().to(JpaMemberDao.class);
+    Multibinder.newSetBinder(
+            binder(), new TypeLiteral<PermissionsDao<? extends AbstractPermissions>>() {})
+        .addBinding()
+        .to(JpaMemberDao.class);
 
-        bind(OrganizationDistributedResourcesDao.class).to(JpaOrganizationDistributedResourcesDao.class);
-    }
+    bind(OrganizationDistributedResourcesDao.class)
+        .to(JpaOrganizationDistributedResourcesDao.class);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.server.ticket;
-
 
 import com.codahale.metrics.annotation.Gauge;
 import com.codenvy.api.dao.authentication.AccessTicket;
 import com.codenvy.api.dao.authentication.TicketManager;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.commons.lang.IoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,116 +26,125 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.servlet.http.HttpServletResponse;
+import org.eclipse.che.commons.lang.IoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Simple implementation of <code>TicketManager</code> */
 @Singleton
 public class InMemoryTicketManager implements TicketManager {
-    private static final Logger                    LOG           = LoggerFactory.getLogger(InMemoryTicketManager.class);
-    private final        Map<String, AccessTicket> accessTickets = new HashMap<>();
-    private final        ReadWriteLock             readWriteLock = new ReentrantReadWriteLock();
+  private static final Logger LOG = LoggerFactory.getLogger(InMemoryTicketManager.class);
+  private final Map<String, AccessTicket> accessTickets = new HashMap<>();
+  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
+  /** @see TicketManager#putAccessTicket(com.codenvy.api.dao.authentication.AccessTicket) */
+  @Override
+  public void putAccessTicket(AccessTicket accessTicket) {
+    if (accessTicket.getUserId() == null) {
+      throw new IllegalArgumentException("Access ticket has no principal or username in principal");
+    }
+    readWriteLock.writeLock().lock();
+    try {
+      accessTickets.put(accessTicket.getAccessToken(), accessTicket);
+    } finally {
+      readWriteLock.writeLock().unlock();
+    }
+  }
 
-    /** @see TicketManager#putAccessTicket(com.codenvy.api.dao.authentication.AccessTicket) */
-    @Override
-    public void putAccessTicket(AccessTicket accessTicket) {
-        if (accessTicket.getUserId() == null) {
-            throw new IllegalArgumentException("Access ticket has no principal or username in principal");
-        }
-        readWriteLock.writeLock().lock();
-        try {
-            accessTickets.put(accessTicket.getAccessToken(), accessTicket);
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
+  /** @see TicketManager#getAccessTicket(java.lang.String) */
+  @Override
+  public AccessTicket getAccessTicket(String accessToken) {
+    if (accessToken == null) {
+      return null;
     }
 
-    /** @see TicketManager#getAccessTicket(java.lang.String) */
-    @Override
-    public AccessTicket getAccessTicket(String accessToken) {
-        if (accessToken == null) {
-            return null;
-        }
+    readWriteLock.readLock().lock();
+    try {
+      return accessTickets.get(accessToken);
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+  }
 
-        readWriteLock.readLock().lock();
-        try {
-            return accessTickets.get(accessToken);
-        } finally {
-            readWriteLock.readLock().unlock();
-        }
+  /** @see TicketManager#removeTicket(java.lang.String) */
+  @Override
+  public AccessTicket removeTicket(String accessToken) {
+    if (accessToken == null) {
+      return null;
     }
 
-    /** @see TicketManager#removeTicket(java.lang.String) */
-    @Override
-    public AccessTicket removeTicket(String accessToken) {
-        if (accessToken == null) {
-            return null;
-        }
+    readWriteLock.writeLock().lock();
+    try {
 
-        readWriteLock.writeLock().lock();
+      AccessTicket ticket = accessTickets.remove(accessToken);
+      if (ticket == null) return null;
+      for (String ssoClient : ticket.getRegisteredClients()) {
+        // NOTE : must send as many logout request as possible.
+        HttpURLConnection conn = null;
         try {
+          conn = (HttpURLConnection) new URL(ssoClient + "/_sso/client/logout").openConnection();
+          conn.setRequestMethod("POST");
+          conn.setDoOutput(true);
+          conn.setInstanceFollowRedirects(false);
+          conn.setConnectTimeout(5 * 1000);
+          conn.setReadTimeout(5 * 1000);
+          conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+          OutputStream out = conn.getOutputStream();
+          out.write(
+              ("authToken=" + URLEncoder.encode(ticket.getAccessToken(), "UTF-8")).getBytes());
 
-            AccessTicket ticket = accessTickets.remove(accessToken);
-            if (ticket == null)
-                return null;
-            for (String ssoClient : ticket.getRegisteredClients()) {
-                // NOTE : must send as many logout request as possible.
-                HttpURLConnection conn = null;
-                try {
-                    conn = (HttpURLConnection)new URL(ssoClient + "/_sso/client/logout").openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setDoOutput(true);
-                    conn.setInstanceFollowRedirects(false);
-                    conn.setConnectTimeout(5 * 1000);
-                    conn.setReadTimeout(5 * 1000);
-                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                    OutputStream out = conn.getOutputStream();
-                    out.write(("authToken=" + URLEncoder.encode(ticket.getAccessToken(), "UTF-8")).getBytes());
-
-                    int responseCode = conn.getResponseCode();
-                    LOG.debug("Sent logout request to {} response {}", conn.getURL(), responseCode);
-                    if (responseCode / 100 != 2) {
-                        if (responseCode == HttpServletResponse.SC_BAD_GATEWAY) {
-                            LOG.warn("Tenant {} is unavailable. Logout request not executed", ssoClient);
-                        } else if (responseCode == HttpServletResponse.SC_MOVED_TEMPORARILY) {
-                            LOG.warn("Logout request for tenant {} was redirected to {}. Logout was omitted",
-                                     ssoClient, conn.getHeaderField("Location"));
-                        } else {
-                            InputStream errorStream = conn.getErrorStream();
-                            String message = errorStream != null ? IoUtil.readAndCloseQuietly(errorStream) : "";
-                            throw new IOException(
-                                    "Unexpected response code '" + responseCode + "' for SSO logout request to" +
-                                    " '" + conn.getURL() + "'. " + message);
-                        }
-                    }
-
-                } catch (IOException e) {
-                    LOG.warn("{}. Not able to send logout request to {}", e.getLocalizedMessage(), ssoClient);
-                } finally {
-                    if (conn != null) {
-                        conn.disconnect();
-                    }
-
-                }
+          int responseCode = conn.getResponseCode();
+          LOG.debug("Sent logout request to {} response {}", conn.getURL(), responseCode);
+          if (responseCode / 100 != 2) {
+            if (responseCode == HttpServletResponse.SC_BAD_GATEWAY) {
+              LOG.warn("Tenant {} is unavailable. Logout request not executed", ssoClient);
+            } else if (responseCode == HttpServletResponse.SC_MOVED_TEMPORARILY) {
+              LOG.warn(
+                  "Logout request for tenant {} was redirected to {}. Logout was omitted",
+                  ssoClient,
+                  conn.getHeaderField("Location"));
+            } else {
+              InputStream errorStream = conn.getErrorStream();
+              String message = errorStream != null ? IoUtil.readAndCloseQuietly(errorStream) : "";
+              throw new IOException(
+                  "Unexpected response code '"
+                      + responseCode
+                      + "' for SSO logout request to"
+                      + " '"
+                      + conn.getURL()
+                      + "'. "
+                      + message);
             }
-            return ticket;
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
-    }
+          }
 
-    /** @return number of access tickets. */
-    @Gauge(name = "auth.sso.access_ticket_number")
-    public int size() {
-        return accessTickets.size();
-    }
-
-    @Override
-    public Set<AccessTicket> getAccessTickets() {
-        readWriteLock.readLock().lock();
-        try {
-            return new HashSet<>(accessTickets.values());
+        } catch (IOException e) {
+          LOG.warn("{}. Not able to send logout request to {}", e.getLocalizedMessage(), ssoClient);
         } finally {
-            readWriteLock.readLock().unlock();
+          if (conn != null) {
+            conn.disconnect();
+          }
         }
+      }
+      return ticket;
+    } finally {
+      readWriteLock.writeLock().unlock();
     }
+  }
+
+  /** @return number of access tickets. */
+  @Gauge(name = "auth.sso.access_ticket_number")
+  public int size() {
+    return accessTickets.size();
+  }
+
+  @Override
+  public Set<AccessTicket> getAccessTickets() {
+    readWriteLock.readLock().lock();
+    try {
+      return new HashSet<>(accessTickets.values());
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+  }
 }

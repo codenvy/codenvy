@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,24 +7,21 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ext.java.server;
-
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerContextService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Initializes Swagger config with correct base path.
@@ -34,26 +31,23 @@ import java.net.URL;
 @Singleton
 public class AgentSwaggerConfig extends HttpServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AgentSwaggerConfig.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AgentSwaggerConfig.class);
 
-    @Inject
-    @Named("wsagent.endpoint")
-    private String agentEndpoint;
+  @Inject
+  @Named("wsagent.endpoint")
+  private String agentEndpoint;
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        try {
-            BeanConfig beanConfig = new BeanConfig();
-            beanConfig.setVersion("1.0");
-            beanConfig.setTitle("Codenvy");
-            beanConfig.setBasePath(new URL(agentEndpoint).getPath());
-            beanConfig.scanAndRead();
-            new SwaggerContextService()
-                    .withSwaggerConfig(beanConfig)
-                    .initConfig()
-                    .initScanner();
-        } catch (MalformedURLException e) {
-             LOG.warn("Unable to initialize swagger config due to malformed agent URL.", e);
-        }
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    try {
+      BeanConfig beanConfig = new BeanConfig();
+      beanConfig.setVersion("1.0");
+      beanConfig.setTitle("Codenvy");
+      beanConfig.setBasePath(new URL(agentEndpoint).getPath());
+      beanConfig.scanAndRead();
+      new SwaggerContextService().withSwaggerConfig(beanConfig).initConfig().initScanner();
+    } catch (MalformedURLException e) {
+      LOG.warn("Unable to initialize swagger config due to malformed agent URL.", e);
     }
+  }
 }

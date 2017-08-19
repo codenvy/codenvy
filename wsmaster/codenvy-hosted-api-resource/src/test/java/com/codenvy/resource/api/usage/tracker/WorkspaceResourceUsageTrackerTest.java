@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,25 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.usage.tracker;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.codenvy.resource.api.type.WorkspaceResourceType;
 import com.codenvy.resource.model.Resource;
-
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import javax.inject.Provider;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
@@ -25,79 +38,63 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.inject.Provider;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-/**
- * Tests for {@link WorkspaceResourceUsageTracker}
- */
+/** Tests for {@link WorkspaceResourceUsageTracker} */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceResourceUsageTrackerTest {
-    @Mock
-    private Provider<WorkspaceManager> workspaceManagerProvider;
-    @Mock
-    private WorkspaceManager           workspaceManager;
-    @Mock
-    private AccountManager             accountManager;
-    @Mock
-    private Account                    account;
+  @Mock private Provider<WorkspaceManager> workspaceManagerProvider;
+  @Mock private WorkspaceManager workspaceManager;
+  @Mock private AccountManager accountManager;
+  @Mock private Account account;
 
-    @InjectMocks
-    private WorkspaceResourceUsageTracker workspaceResourceUsageTracker;
+  @InjectMocks private WorkspaceResourceUsageTracker workspaceResourceUsageTracker;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        when(workspaceManagerProvider.get()).thenReturn(workspaceManager);
-    }
+  @BeforeMethod
+  public void setUp() throws Exception {
+    when(workspaceManagerProvider.get()).thenReturn(workspaceManager);
+  }
 
-    @Test(expectedExceptions = NotFoundException.class,
-          expectedExceptionsMessageRegExp = "Account was not found")
-    public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedWorkspaces() throws Exception {
-        when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));
+  @Test(
+    expectedExceptions = NotFoundException.class,
+    expectedExceptionsMessageRegExp = "Account was not found"
+  )
+  public void shouldThrowNotFoundExceptionWhenAccountDoesNotExistOnGettingUsedWorkspaces()
+      throws Exception {
+    when(accountManager.getById(any())).thenThrow(new NotFoundException("Account was not found"));
 
+    workspaceResourceUsageTracker.getUsedResource("account123");
+  }
+
+  @Test
+  public void shouldReturnEmptyOptionalWhenAccountDoesNotUseWorkspaces() throws Exception {
+    when(accountManager.getById(any())).thenReturn(account);
+    when(account.getName()).thenReturn("testAccount");
+
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
+        .thenReturn(Collections.emptyList());
+
+    Optional<Resource> usedWorkspacesOpt =
         workspaceResourceUsageTracker.getUsedResource("account123");
-    }
 
-    @Test
-    public void shouldReturnEmptyOptionalWhenAccountDoesNotUseWorkspaces() throws Exception {
-        when(accountManager.getById(any())).thenReturn(account);
-        when(account.getName()).thenReturn("testAccount");
+    assertFalse(usedWorkspacesOpt.isPresent());
+  }
 
-        when(workspaceManager.getByNamespace(anyString(), anyBoolean())).thenReturn(Collections.emptyList());
+  @Test
+  public void shouldReturnUsedWorkspacesForGivenAccount() throws Exception {
+    when(accountManager.getById(any())).thenReturn(account);
+    when(account.getName()).thenReturn("testAccount");
 
-        Optional<Resource> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
+        .thenReturn(Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()));
 
-        assertFalse(usedWorkspacesOpt.isPresent());
-    }
+    Optional<Resource> usedWorkspacesOpt =
+        workspaceResourceUsageTracker.getUsedResource("account123");
 
-    @Test
-    public void shouldReturnUsedWorkspacesForGivenAccount() throws Exception {
-        when(accountManager.getById(any())).thenReturn(account);
-        when(account.getName()).thenReturn("testAccount");
-
-        when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
-                .thenReturn(Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()));
-
-        Optional<Resource> usedWorkspacesOpt = workspaceResourceUsageTracker.getUsedResource("account123");
-
-        assertTrue(usedWorkspacesOpt.isPresent());
-        Resource usedWorkspaces = usedWorkspacesOpt.get();
-        assertEquals(usedWorkspaces.getType(), WorkspaceResourceType.ID);
-        assertEquals(usedWorkspaces.getAmount(), 3);
-        assertEquals(usedWorkspaces.getUnit(), WorkspaceResourceType.UNIT);
-        verify(accountManager).getById(eq("account123"));
-        verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
-    }
+    assertTrue(usedWorkspacesOpt.isPresent());
+    Resource usedWorkspaces = usedWorkspacesOpt.get();
+    assertEquals(usedWorkspaces.getType(), WorkspaceResourceType.ID);
+    assertEquals(usedWorkspaces.getAmount(), 3);
+    assertEquals(usedWorkspaces.getUnit(), WorkspaceResourceType.UNIT);
+    verify(accountManager).getById(eq("account123"));
+    verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
+  }
 }

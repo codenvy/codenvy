@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.shared.dto;
 
 import com.codenvy.organization.shared.event.EventType;
-
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.shared.DTO;
@@ -25,23 +24,22 @@ import org.eclipse.che.dto.shared.DTO;
 @EventOrigin("organization")
 public interface MemberRemovedEventDto extends OrganizationEventDto {
 
-    @Override
-    MemberRemovedEventDto withOrganization(OrganizationDto organization);
+  @Override
+  MemberRemovedEventDto withOrganization(OrganizationDto organization);
 
-    @Override
-    MemberRemovedEventDto withType(EventType eventType);
+  @Override
+  MemberRemovedEventDto withType(EventType eventType);
 
-    UserDto getMember();
+  UserDto getMember();
 
-    void setMember(UserDto member);
+  void setMember(UserDto member);
 
-    MemberRemovedEventDto withMember(UserDto member);
+  MemberRemovedEventDto withMember(UserDto member);
 
-    /** Returns name of user who initiated member removal */
-    String getInitiator();
+  /** Returns name of user who initiated member removal */
+  String getInitiator();
 
-    void setInitiator(String initiator);
+  void setInitiator(String initiator);
 
-    MemberRemovedEventDto withInitiator(String initiator);
-
+  MemberRemovedEventDto withInitiator(String initiator);
 }

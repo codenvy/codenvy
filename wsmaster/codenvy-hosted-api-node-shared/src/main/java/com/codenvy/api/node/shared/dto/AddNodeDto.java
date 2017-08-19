@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.node.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -15,12 +15,15 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface AddNodeDto {
 
-    Integer getPort();
-    AddNodeDto withPort(Integer port);
-    void setPort(Integer port);
+  Integer getPort();
 
-    String getIp();
-    AddNodeDto withIp(String ip);
-    void setIp(String ip);
+  AddNodeDto withPort(Integer port);
 
+  void setPort(Integer port);
+
+  String getIp();
+
+  AddNodeDto withIp(String ip);
+
+  void setIp(String ip);
 }

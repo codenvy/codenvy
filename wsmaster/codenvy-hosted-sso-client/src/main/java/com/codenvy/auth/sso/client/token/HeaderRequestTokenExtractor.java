@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.client.token;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,9 +15,8 @@ import javax.ws.rs.core.HttpHeaders;
 
 /** Extract sso token from request headers. */
 public class HeaderRequestTokenExtractor implements RequestTokenExtractor {
-    @Override
-    public String getToken(HttpServletRequest req) {
-        return req.getHeader(HttpHeaders.AUTHORIZATION);
-    }
-
+  @Override
+  public String getToken(HttpServletRequest req) {
+    return req.getHeader(HttpHeaders.AUTHORIZATION);
+  }
 }

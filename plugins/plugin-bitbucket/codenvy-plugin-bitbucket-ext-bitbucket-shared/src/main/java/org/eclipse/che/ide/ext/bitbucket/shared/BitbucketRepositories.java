@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Represents a list of {@link BitbucketRepository}.
@@ -21,9 +20,9 @@ import java.util.List;
  */
 @DTO
 public interface BitbucketRepositories {
-    List<BitbucketRepository> getRepositories();
+  List<BitbucketRepository> getRepositories();
 
-    void setRepositories(List<BitbucketRepository> repositories);
+  void setRepositories(List<BitbucketRepository> repositories);
 
-    BitbucketRepositories withRepositories(List<BitbucketRepository> repositories);
+  BitbucketRepositories withRepositories(List<BitbucketRepository> repositories);
 }

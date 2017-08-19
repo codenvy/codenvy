@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.shared.invite.model;
 
 import java.util.List;
@@ -18,23 +18,15 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public interface Invite {
-    /**
-     * Return user email.
-     */
-    String getEmail();
+  /** Return user email. */
+  String getEmail();
 
-    /**
-     * Returns domain id.
-     */
-    String getDomainId();
+  /** Returns domain id. */
+  String getDomainId();
 
-    /**
-     * Returns instance id.
-     */
-    String getInstanceId();
+  /** Returns instance id. */
+  String getInstanceId();
 
-    /**
-     * List of actions which user will be able to perform after accepting.
-     */
-    List<String> getActions();
+  /** List of actions which user will be able to perform after accepting. */
+  List<String> getActions();
 }

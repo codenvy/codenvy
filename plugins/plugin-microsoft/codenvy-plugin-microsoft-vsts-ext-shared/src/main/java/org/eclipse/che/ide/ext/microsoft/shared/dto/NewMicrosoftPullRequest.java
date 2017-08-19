@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,38 +7,36 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.microsoft.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * @author Mihail Kuznyetsov
- */
+/** @author Mihail Kuznyetsov */
 @DTO
 public interface NewMicrosoftPullRequest {
 
-    String getTitle();
+  String getTitle();
 
-    void setTitle(String title);
+  void setTitle(String title);
 
-    NewMicrosoftPullRequest withTitle(String title);
+  NewMicrosoftPullRequest withTitle(String title);
 
-    String getSourceRefName();
+  String getSourceRefName();
 
-    void setSourceRefName(String sourceRefName);
+  void setSourceRefName(String sourceRefName);
 
-    NewMicrosoftPullRequest withSourceRefName(String sourceRefName);
+  NewMicrosoftPullRequest withSourceRefName(String sourceRefName);
 
-    String getTargetRefName();
+  String getTargetRefName();
 
-    void setTargetRefName(String targetRefName);
+  void setTargetRefName(String targetRefName);
 
-    NewMicrosoftPullRequest withTargetRefName(String targetRefName);
+  NewMicrosoftPullRequest withTargetRefName(String targetRefName);
 
-    String getDescription();
+  String getDescription();
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    NewMicrosoftPullRequest withDescription(String description);
+  NewMicrosoftPullRequest withDescription(String description);
 }

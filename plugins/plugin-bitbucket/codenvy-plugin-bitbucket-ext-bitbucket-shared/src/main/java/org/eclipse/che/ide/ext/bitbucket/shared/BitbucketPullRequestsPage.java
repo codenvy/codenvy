@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Represents a pull requests page in the Bitbucket API.
@@ -21,27 +20,27 @@ import java.util.List;
  */
 @DTO
 public interface BitbucketPullRequestsPage {
-    int getSize();
+  int getSize();
 
-    void setSize(int size);
+  void setSize(int size);
 
-    int getPage();
+  int getPage();
 
-    void setPage(int page);
+  void setPage(int page);
 
-    int getPagelen();
+  int getPagelen();
 
-    void setPagelen(int pagelen);
+  void setPagelen(int pagelen);
 
-    String getNext();
+  String getNext();
 
-    void setNext(String next);
+  void setNext(String next);
 
-    String getPrevious();
+  String getPrevious();
 
-    void setPrevious(String previous);
+  void setPrevious(String previous);
 
-    List<BitbucketPullRequest> getValues();
+  List<BitbucketPullRequest> getValues();
 
-    void setValues(List<BitbucketPullRequest> values);
+  void setValues(List<BitbucketPullRequest> values);
 }

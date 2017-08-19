@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.audit.server.printer;
 
-import org.eclipse.che.api.core.ServerException;
+import static java.lang.String.format;
 
 import java.nio.file.Path;
-
-import static java.lang.String.format;
+import org.eclipse.che.api.core.ServerException;
 
 /**
  * Prints system info into audit report.
@@ -24,15 +23,15 @@ import static java.lang.String.format;
  */
 public class SystemInfoPrinter extends Printer {
 
-    private long allUsersNumber;
+  private long allUsersNumber;
 
-    public SystemInfoPrinter(Path auditReport, long allUsersNumber) {
-        super(auditReport);
-        this.allUsersNumber = allUsersNumber;
-    }
+  public SystemInfoPrinter(Path auditReport, long allUsersNumber) {
+    super(auditReport);
+    this.allUsersNumber = allUsersNumber;
+  }
 
-    @Override
-    public void print() throws ServerException {
-        printRow(format("Number of users: %s\n", allUsersNumber));
-    }
+  @Override
+  public void print() throws ServerException {
+    printRow(format("Number of users: %s\n", allUsersNumber));
+  }
 }

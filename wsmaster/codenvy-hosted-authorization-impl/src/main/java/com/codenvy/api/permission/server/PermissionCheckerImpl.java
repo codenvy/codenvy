@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.permission.server;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-
-import javax.inject.Inject;
 
 /**
  * Implementation of {@link PermissionChecker} that use {@link PermissionsManager} for checking.
@@ -22,18 +21,17 @@ import javax.inject.Inject;
  * @author Sergii Leschenko
  */
 public class PermissionCheckerImpl implements PermissionChecker {
-    private final PermissionsManager permissionsManager;
+  private final PermissionsManager permissionsManager;
 
-    @Inject
-    public PermissionCheckerImpl(PermissionsManager permissionsManager) {
-        this.permissionsManager = permissionsManager;
-    }
+  @Inject
+  public PermissionCheckerImpl(PermissionsManager permissionsManager) {
+    this.permissionsManager = permissionsManager;
+  }
 
-    @Override
-    public boolean hasPermission(String user, String domain, String instance, String action) throws ServerException,
-                                                                                                    NotFoundException,
-                                                                                                    ConflictException {
-        return permissionsManager.exists(user, domain, instance, action)
-                || permissionsManager.exists("*", domain, instance, action);
-    }
+  @Override
+  public boolean hasPermission(String user, String domain, String instance, String action)
+      throws ServerException, NotFoundException, ConflictException {
+    return permissionsManager.exists(user, domain, instance, action)
+        || permissionsManager.exists("*", domain, instance, action);
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.deploy;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.inject.matcher.Matchers.subclassesOf;
+import static org.eclipse.che.inject.Matchers.names;
 
 import com.codenvy.api.AdminApiModule;
 import com.codenvy.api.audit.server.AuditService;
@@ -64,7 +68,8 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import com.palominolabs.metrics.guice.InstrumentationModule;
-
+import java.util.Map;
+import javax.sql.DataSource;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.auth.AuthenticationDao;
@@ -135,365 +140,412 @@ import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
-import javax.sql.DataSource;
-import java.util.Map;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.inject.matcher.Matchers.subclassesOf;
-import static org.eclipse.che.inject.Matchers.names;
-
 /**
- * Guice container configuration file. Replaces old REST application composers and servlet context listeners.
+ * Guice container configuration file. Replaces old REST application composers and servlet context
+ * listeners.
  *
  * @author Max Shaposhnik
  */
 @DynaModule
 public class OnPremisesIdeApiModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        bind(ApiInfoService.class);
-        bind(ProjectTemplateRegistry.class);
-        bind(ProjectTemplateDescriptionLoader.class).asEagerSingleton();
-        bind(ProjectTemplateService.class);
-        bind(AuthenticationService.class);
-        bind(WorkspaceService.class);
-        bind(UserService.class);
-        bind(AdminUserService.class);
-        bind(ProfileService.class);
-        bind(PreferencesService.class);
-        bind(PreferencesService.class);
+  @Override
+  protected void configure() {
+    bind(ApiInfoService.class);
+    bind(ProjectTemplateRegistry.class);
+    bind(ProjectTemplateDescriptionLoader.class).asEagerSingleton();
+    bind(ProjectTemplateService.class);
+    bind(AuthenticationService.class);
+    bind(WorkspaceService.class);
+    bind(UserService.class);
+    bind(AdminUserService.class);
+    bind(ProfileService.class);
+    bind(PreferencesService.class);
+    bind(PreferencesService.class);
 
-        install(new AdminApiModule());
+    install(new AdminApiModule());
 
-        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
-        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+    bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
+    bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}"))
+        .to(AsynchronousJobService.class);
 
-        bind(ETagResponseFilter.class);
-        bind(EverrestDownloadFileResponseFilter.class);
-        bind(WSocketEventBusServer.class);
+    bind(ETagResponseFilter.class);
+    bind(EverrestDownloadFileResponseFilter.class);
+    bind(WSocketEventBusServer.class);
 
-        bind(WsMasterAnalyticsAddresser.class);
+    bind(WsMasterAnalyticsAddresser.class);
 
-        install(new org.eclipse.che.api.core.rest.CoreRestModule());
-        install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
+    install(new org.eclipse.che.api.core.rest.CoreRestModule());
+    install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
 
-        install(new org.eclipse.che.api.machine.server.MachineModule());
-        install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
+    install(new org.eclipse.che.api.machine.server.MachineModule());
+    install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
-        install(new org.eclipse.che.swagger.deploy.DocsModule());
+    install(new org.eclipse.che.swagger.deploy.DocsModule());
 
-        install(new WebSocketModule());
-        install(new JsonRpcModule());
+    install(new WebSocketModule());
+    install(new JsonRpcModule());
 
-        install(new com.codenvy.plugin.webhooks.bitbucketserver.inject.BitbucketServerWebhookModule());
+    install(new com.codenvy.plugin.webhooks.bitbucketserver.inject.BitbucketServerWebhookModule());
 
-        //oauth
-        bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
-        bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
-        bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
+    //oauth
+    bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
+    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
+        .to(OAuthAuthenticatorTokenProvider.class);
+    bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
 
-        install(new org.eclipse.che.security.oauth.BitbucketModule());
-        install(new org.eclipse.che.security.oauth1.BitbucketModule());
+    install(new org.eclipse.che.security.oauth.BitbucketModule());
+    install(new org.eclipse.che.security.oauth1.BitbucketModule());
 
-        bind(BitbucketConfigurationService.class);
+    bind(BitbucketConfigurationService.class);
 
-        bind(FactoryAcceptValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
-        bind(FactoryCreateValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
-        bind(FactoryEditValidator.class).to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
-        bind(FactoryService.class);
+    bind(FactoryAcceptValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl.class);
+    bind(FactoryCreateValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryCreateValidatorImpl.class);
+    bind(FactoryEditValidator.class)
+        .to(org.eclipse.che.api.factory.server.impl.FactoryEditValidatorImpl.class);
+    bind(FactoryService.class);
 
-        Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
-                Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
-        factoryParametersResolverMultibinder.addBinding()
-                                            .to(GithubFactoryParametersResolver.class);
-        factoryParametersResolverMultibinder.addBinding()
-                                            .to(GitlabFactoryParametersResolver.class);
+    Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
+        Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
+    factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
+    factoryParametersResolverMultibinder.addBinding().to(GitlabFactoryParametersResolver.class);
 
-        Multibinder<ProjectHandler> projectHandlerMultibinder =
-                Multibinder.newSetBinder(binder(), org.eclipse.che.api.project.server.handlers.ProjectHandler.class);
+    Multibinder<ProjectHandler> projectHandlerMultibinder =
+        Multibinder.newSetBinder(
+            binder(), org.eclipse.che.api.project.server.handlers.ProjectHandler.class);
 
+    install(new JpaPersistModule("main"));
+    bind(SchemaInitializer.class).to(FlywaySchemaInitializer.class);
+    bind(DBInitializer.class).asEagerSingleton();
+    bind(DataSource.class).toProvider(JndiDataSourceProvider.class);
+    bind(PlaceholderReplacer.class).toProvider(PlaceholderReplacerProvider.class);
+    install(new UserJpaModule());
+    install(new SshJpaModule());
+    install(new WorkspaceJpaModule());
+    install(new OnPremisesJpaWorkspaceModule());
+    install(new OnPremisesJpaMachineModule());
+    install(new FactoryJpaModule());
+    bind(AccountDao.class).to(JpaAccountDao.class);
+    install(new OrganizationApiModule());
+    install(new OrganizationJpaModule());
+    install(new com.codenvy.api.invite.InviteApiModule());
+    install(new com.codenvy.spi.invite.jpa.InviteJpaModule());
+    install(new ResourceModule());
+    bind(FactoryDao.class).to(JpaFactoryDao.class);
+    bind(StackDao.class).to(JpaStackDao.class);
+    bind(RecipeDao.class).to(JpaRecipeDao.class);
+    bind(SnapshotDao.class).to(JpaSnapshotDao.class);
+    // Auth
+    bind(PassportValidator.class);
+    bind(AuthenticationDao.class)
+        .to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
+    final AuthenticationDaoInterceptor authInterceptor = new AuthenticationDaoInterceptor();
+    requestInjection(authInterceptor);
+    bindInterceptor(subclassesOf(AuthenticationDao.class), names("login"), authInterceptor);
 
-        install(new JpaPersistModule("main"));
-        bind(SchemaInitializer.class).to(FlywaySchemaInitializer.class);
-        bind(DBInitializer.class).asEagerSingleton();
-        bind(DataSource.class).toProvider(JndiDataSourceProvider.class);
-        bind(PlaceholderReplacer.class).toProvider(PlaceholderReplacerProvider.class);
-        install(new UserJpaModule());
-        install(new SshJpaModule());
-        install(new WorkspaceJpaModule());
-        install(new OnPremisesJpaWorkspaceModule());
-        install(new OnPremisesJpaMachineModule());
-        install(new FactoryJpaModule());
-        bind(AccountDao.class).to(JpaAccountDao.class);
-        install(new OrganizationApiModule());
-        install(new OrganizationJpaModule());
-        install(new com.codenvy.api.invite.InviteApiModule());
-        install(new com.codenvy.spi.invite.jpa.InviteJpaModule());
-        install(new ResourceModule());
-        bind(FactoryDao.class).to(JpaFactoryDao.class);
-        bind(StackDao.class).to(JpaStackDao.class);
-        bind(RecipeDao.class).to(JpaRecipeDao.class);
-        bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-        // Auth
-        bind(PassportValidator.class);
-        bind(AuthenticationDao.class).to(com.codenvy.api.dao.authentication.AuthenticationDaoImpl.class);
-        final AuthenticationDaoInterceptor authInterceptor = new AuthenticationDaoInterceptor();
-        requestInjection(authInterceptor);
-        bindInterceptor(subclassesOf(AuthenticationDao.class), names("login"), authInterceptor);
+    bind(RecipeService.class);
+    bind(com.codenvy.api.machine.server.recipe.OnPremisesRecipeLoader.class);
+    Multibinder.newSetBinder(
+            binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
+        .addBinding()
+        .toInstance("predefined-recipes.json");
 
-        bind(RecipeService.class);
-        bind(com.codenvy.api.machine.server.recipe.OnPremisesRecipeLoader.class);
-        Multibinder.newSetBinder(binder(), String.class, Names.named(RecipeLoader.CHE_PREDEFINED_RECIPES))
-                   .addBinding().toInstance("predefined-recipes.json");
+    bind(StackService.class);
+    bind(com.codenvy.api.workspace.server.stack.OnPremisesStackLoader.class);
+    MapBinder.newMapBinder(
+            binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS))
+        .addBinding("stacks.json")
+        .toInstance("stacks-images");
 
-        bind(StackService.class);
-        bind(com.codenvy.api.workspace.server.stack.OnPremisesStackLoader.class);
-        MapBinder.newMapBinder(binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS))
-                 .addBinding("stacks.json")
-                 .toInstance("stacks-images");
+    bind(WorkspaceValidator.class)
+        .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
+    bind(WorkspaceManager.class).to(com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.class);
+    bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
+    bind(WorkspaceMessenger.class).asEagerSingleton();
 
-        bind(WorkspaceValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
-        bind(WorkspaceManager.class).to(com.codenvy.api.workspace.LimitsCheckingWorkspaceManager.class);
-        bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
-        bind(WorkspaceMessenger.class).asEagerSingleton();
+    bind(com.codenvy.service.password.PasswordService.class);
 
+    bind(SystemRamLimitMessageSender.class);
 
-        bind(com.codenvy.service.password.PasswordService.class);
+    bind(HostedSystemService.class);
+    bind(SystemServicePermissionsFilter.class);
+    bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class)
+        .asEagerSingleton();
 
-        bind(SystemRamLimitMessageSender.class);
+    bind(SystemRamInfoProvider.class).to(DockerBasedSystemRamInfoProvider.class);
 
-        bind(HostedSystemService.class);
-        bind(SystemServicePermissionsFilter.class);
-        bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class).asEagerSingleton();
+    bind(AuditService.class);
+    bind(AuditServicePermissionsFilter.class);
 
-        bind(SystemRamInfoProvider.class).to(DockerBasedSystemRamInfoProvider.class);
+    //authentication
 
-        bind(AuditService.class);
-        bind(AuditServicePermissionsFilter.class);
+    bind(TokenValidator.class).to(com.codenvy.auth.sso.server.BearerTokenValidator.class);
+    bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
 
-        //authentication
+    //machine authentication
+    bind(com.codenvy.machine.authentication.server.MachineTokenPermissionsFilter.class);
+    bind(com.codenvy.machine.authentication.server.MachineTokenRegistry.class);
+    bind(com.codenvy.machine.authentication.server.MachineTokenService.class);
+    bind(WorkspaceServiceLinksInjector.class)
+        .to(com.codenvy.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
+    bind(MachineLinksInjector.class).to(MachineAuthLinksInjector.class);
+    install(new com.codenvy.machine.authentication.server.interceptor.InterceptorModule());
+    bind(ServerClient.class).to(com.codenvy.auth.sso.client.MachineSsoServerClient.class);
+    bind(com.codenvy.auth.sso.client.MachineSessionInvalidator.class);
 
-        bind(TokenValidator.class).to(com.codenvy.auth.sso.server.BearerTokenValidator.class);
-        bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
+    //SSO
+    Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
+        Multibinder.newSetBinder(
+            binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
+    handlerBinder
+        .addBinding()
+        .to(com.codenvy.auth.sso.server.OrgServiceAuthenticationHandler.class);
 
-        //machine authentication
-        bind(com.codenvy.machine.authentication.server.MachineTokenPermissionsFilter.class);
-        bind(com.codenvy.machine.authentication.server.MachineTokenRegistry.class);
-        bind(com.codenvy.machine.authentication.server.MachineTokenService.class);
-        bind(WorkspaceServiceLinksInjector.class).to(com.codenvy.machine.authentication.server.WorkspaceServiceAuthLinksInjector.class);
-        bind(MachineLinksInjector.class).to(MachineAuthLinksInjector.class);
-        install(new com.codenvy.machine.authentication.server.interceptor.InterceptorModule());
-        bind(ServerClient.class).to(com.codenvy.auth.sso.client.MachineSsoServerClient.class);
-        bind(com.codenvy.auth.sso.client.MachineSessionInvalidator.class);
+    bind(UserCreator.class).to(com.codenvy.auth.sso.server.OrgServiceUserCreator.class);
 
-        //SSO
-        Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
-                Multibinder.newSetBinder(binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
-        handlerBinder.addBinding().to(com.codenvy.auth.sso.server.OrgServiceAuthenticationHandler.class);
+    bind(UserCreationValidator.class).to(com.codenvy.auth.sso.server.OrgServiceUserValidator.class);
+    bind(PermissionChecker.class).to(com.codenvy.api.permission.server.PermissionCheckerImpl.class);
+    bind(TokenHandler.class).to(com.codenvy.api.permission.server.PermissionTokenHandler.class);
+    bind(TokenHandler.class)
+        .annotatedWith(Names.named("delegated.handler"))
+        .to(com.codenvy.auth.sso.client.NoUserInteractionTokenHandler.class);
 
-        bind(UserCreator.class).to(com.codenvy.auth.sso.server.OrgServiceUserCreator.class);
+    bindConstant().annotatedWith(Names.named("auth.jaas.realm")).to("default_realm");
+    bindConstant()
+        .annotatedWith(Names.named("auth.sso.access_cookie_path"))
+        .to("/api/internal/sso/server");
+    bindConstant()
+        .annotatedWith(Names.named("auth.sso.create_workspace_page_url"))
+        .to("/site/auth/create");
+    bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
+    bindConstant()
+        .annotatedWith(Names.named("che.auth.access_denied_error_page"))
+        .to("/site/login");
+    bindConstant()
+        .annotatedWith(Names.named("error.page.workspace_not_found_redirect_url"))
+        .to("/site/error/error-tenant-name");
+    bindConstant()
+        .annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url"))
+        .to("/site/error/error-cookies-disabled");
+    bindConstant()
+        .annotatedWith(Names.named("auth.no.account.found.page"))
+        .to("/site/error/no-account-found");
 
-        bind(UserCreationValidator.class).to(com.codenvy.auth.sso.server.OrgServiceUserValidator.class);
-        bind(PermissionChecker.class).to(com.codenvy.api.permission.server.PermissionCheckerImpl.class);
-        bind(TokenHandler.class).to(com.codenvy.api.permission.server.PermissionTokenHandler.class);
-        bind(TokenHandler.class).annotatedWith(Names.named("delegated.handler"))
-                                .to(com.codenvy.auth.sso.client.NoUserInteractionTokenHandler.class);
-
-        bindConstant().annotatedWith(Names.named("auth.jaas.realm")).to("default_realm");
-        bindConstant().annotatedWith(Names.named("auth.sso.access_cookie_path")).to("/api/internal/sso/server");
-        bindConstant().annotatedWith(Names.named("auth.sso.create_workspace_page_url")).to("/site/auth/create");
-        bindConstant().annotatedWith(Names.named("auth.sso.login_page_url")).to("/site/login");
-        bindConstant().annotatedWith(Names.named("che.auth.access_denied_error_page")).to("/site/login");
-        bindConstant().annotatedWith(Names.named("error.page.workspace_not_found_redirect_url")).to("/site/error/error-tenant-name");
-        bindConstant().annotatedWith(Names.named("auth.sso.cookies_disabled_error_page_url"))
-                      .to("/site/error/error-cookies-disabled");
-        bindConstant().annotatedWith(Names.named("auth.no.account.found.page")).to("/site/error/no-account-found");
-
-        bind(RequestFilter.class).toInstance(
-                new DisjunctionRequestFilter(
+    bind(RequestFilter.class)
+        .toInstance(
+            new DisjunctionRequestFilter(
+                new ConjunctionRequestFilter(
+                    new UriStartFromRequestFilter("/api/factory"),
+                    new RequestMethodFilter("GET"),
+                    new DisjunctionRequestFilter(
+                        new PathSegmentValueFilter(4, "image"),
+                        new PathSegmentValueFilter(4, "snippet"),
                         new ConjunctionRequestFilter(
-                                new UriStartFromRequestFilter("/api/factory"),
-                                new RequestMethodFilter("GET"),
-                                new DisjunctionRequestFilter(
-                                        new PathSegmentValueFilter(4, "image"),
-                                        new PathSegmentValueFilter(4, "snippet"),
-                                        new ConjunctionRequestFilter(
-                                                //api/factory/{}
-                                                new PathSegmentNumberFilter(3),
-                                                new NegationRequestFilter(new UriStartFromRequestFilter("/api/factory/find"))
-                                        ))
-                        ),
-                        new UriStartFromRequestFilter("/api/analytics/public-metric"),
-                        new UriStartFromRequestFilter("/api/docs"),
-                        new RegexpRequestFilter("^/api/builder/(\\w+)/download/(.+)$"),
-                        new ConjunctionRequestFilter(
-                                new UriStartFromRequestFilter("/api/oauth/authenticate"),
-                                r -> isNullOrEmpty(r.getParameter("userId"))
-                        ),
-                        new UriStartFromRequestFilter("/api/user/settings"),
-                        new ConjunctionRequestFilter(
-                                new RegexpRequestFilter("^/api/permissions$"),
-                                new RequestMethodFilter("GET")
-                        )
-                ));
+                            //api/factory/{}
+                            new PathSegmentNumberFilter(3),
+                            new NegationRequestFilter(
+                                new UriStartFromRequestFilter("/api/factory/find"))))),
+                new UriStartFromRequestFilter("/api/analytics/public-metric"),
+                new UriStartFromRequestFilter("/api/docs"),
+                new RegexpRequestFilter("^/api/builder/(\\w+)/download/(.+)$"),
+                new ConjunctionRequestFilter(
+                    new UriStartFromRequestFilter("/api/oauth/authenticate"),
+                    r -> isNullOrEmpty(r.getParameter("userId"))),
+                new UriStartFromRequestFilter("/api/user/settings"),
+                new ConjunctionRequestFilter(
+                    new RegexpRequestFilter("^/api/permissions$"),
+                    new RequestMethodFilter("GET"))));
 
+    bindConstant()
+        .annotatedWith(Names.named("notification.server.propagate_events"))
+        .to("vfs,workspace");
 
-        bindConstant().annotatedWith(Names.named("notification.server.propagate_events")).to("vfs,workspace");
+    install(new com.codenvy.workspace.interceptor.InterceptorModule());
+    install(new com.codenvy.auth.sso.server.deploy.SsoServerModule());
 
-        install(new com.codenvy.workspace.interceptor.InterceptorModule());
-        install(new com.codenvy.auth.sso.server.deploy.SsoServerModule());
+    install(new InstrumentationModule());
+    bind(org.eclipse.che.api.ssh.server.SshService.class);
 
-        install(new InstrumentationModule());
-        bind(org.eclipse.che.api.ssh.server.SshService.class);
+    install(new ScheduleModule());
 
-        install(new ScheduleModule());
+    bind(org.eclipse.che.plugin.docker.client.DockerConnector.class)
+        .to(com.codenvy.swarm.client.SwarmDockerConnector.class);
+    MapBinder<String, org.eclipse.che.plugin.docker.client.DockerConnector> dockerConnectors =
+        MapBinder.newMapBinder(
+            binder(), String.class, org.eclipse.che.plugin.docker.client.DockerConnector.class);
+    dockerConnectors.addBinding("swarm").to(com.codenvy.swarm.client.SwarmDockerConnector.class);
+    bindConstant().annotatedWith(Names.named("che.docker.connector")).to("swarm");
+    bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
+        .to(AwsEcrAuthResolver.class);
 
-        bind(org.eclipse.che.plugin.docker.client.DockerConnector.class).to(com.codenvy.swarm.client.SwarmDockerConnector.class);
-        MapBinder<String, org.eclipse.che.plugin.docker.client.DockerConnector> dockerConnectors =
-                MapBinder.newMapBinder(binder(), String.class, org.eclipse.che.plugin.docker.client.DockerConnector.class);
-        dockerConnectors.addBinding("swarm").to(com.codenvy.swarm.client.SwarmDockerConnector.class);
-        bindConstant().annotatedWith(Names.named("che.docker.connector")).to("swarm");
-        bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
-                .to(AwsEcrAuthResolver.class);
+    Multibinder<String> allMachineVolumes =
+        Multibinder.newSetBinder(
+            binder(), String.class, Names.named("machine.docker.machine_volumes"));
+    allMachineVolumes
+        .addBinding()
+        .toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
-        Multibinder<String> allMachineVolumes = Multibinder.newSetBinder(binder(),
-                                                                         String.class,
-                                                                         Names.named("machine.docker.machine_volumes"));
-        allMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
+    Multibinder<String> allMachinesEnvVars =
+        Multibinder.newSetBinder(binder(), String.class, Names.named("machine.docker.machine_env"))
+            .permitDuplicates();
+    allMachinesEnvVars
+        .addBinding()
+        .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
+    install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
 
-        Multibinder<String> allMachinesEnvVars = Multibinder.newSetBinder(binder(),
-                                                                          String.class,
-                                                                          Names.named("machine.docker.machine_env"))
-                                                            .permitDuplicates();
-        allMachinesEnvVars.addBinding().toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
+    install(new SystemPermissionsJpaModule());
+    install(new com.codenvy.api.permission.server.PermissionsModule());
+    install(new com.codenvy.api.node.server.NodeModule());
+    install(new OnPremisesJpaWorkspaceModule());
+    install(new com.codenvy.api.workspace.server.WorkspaceApiModule());
 
-        install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
+    install(
+        new FactoryModuleBuilder()
+            .implement(
+                org.eclipse.che.api.machine.server.spi.Instance.class,
+                com.codenvy.machine.HostedDockerInstance.class)
+            .implement(
+                org.eclipse.che.api.machine.server.spi.InstanceProcess.class,
+                org.eclipse.che.plugin.docker.machine.DockerProcess.class)
+            .implement(
+                org.eclipse.che.plugin.docker.machine.node.DockerNode.class,
+                com.codenvy.machine.RemoteDockerNode.class)
+            .implement(
+                org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo.class,
+                com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
+            .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
 
-        install(new SystemPermissionsJpaModule());
-        install(new com.codenvy.api.permission.server.PermissionsModule());
-        install(new com.codenvy.api.node.server.NodeModule());
-        install(new OnPremisesJpaWorkspaceModule());
-        install(new com.codenvy.api.workspace.server.WorkspaceApiModule());
+    MapBinder<String, EnvironmentBackupManager> backupManagers =
+        MapBinder.newMapBinder(binder(), String.class, EnvironmentBackupManager.class);
+    backupManagers.addBinding("compose").to(DockerEnvironmentBackupManager.class);
+    backupManagers.addBinding("dockerfile").to(DockerEnvironmentBackupManager.class);
+    backupManagers.addBinding("dockerimage").to(DockerEnvironmentBackupManager.class);
 
-        install(new FactoryModuleBuilder()
-                        .implement(org.eclipse.che.api.machine.server.spi.Instance.class,
-                                   com.codenvy.machine.HostedDockerInstance.class)
-                        .implement(org.eclipse.che.api.machine.server.spi.InstanceProcess.class,
-                                   org.eclipse.che.plugin.docker.machine.DockerProcess.class)
-                        .implement(org.eclipse.che.plugin.docker.machine.node.DockerNode.class,
-                                   com.codenvy.machine.RemoteDockerNode.class)
-                        .implement(org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo.class,
-                                   com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
-                        .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
+    bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
+        .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
 
-        MapBinder<String, EnvironmentBackupManager> backupManagers = MapBinder.newMapBinder(binder(),
-                                                                                            String.class,
-                                                                                            EnvironmentBackupManager.class);
-        backupManagers.addBinding("compose").to(DockerEnvironmentBackupManager.class);
-        backupManagers.addBinding("dockerfile").to(DockerEnvironmentBackupManager.class);
-        backupManagers.addBinding("dockerimage").to(DockerEnvironmentBackupManager.class);
+    install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
 
-        bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
-                .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
+    bind(com.codenvy.machine.backup.WorkspaceFsBackupScheduler.class).asEagerSingleton();
 
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
+    bind(String.class)
+        .annotatedWith(Names.named("che.workspace.che_server_endpoint"))
+        .to(Key.get(String.class, Names.named("che.api")));
 
-        bind(com.codenvy.machine.backup.WorkspaceFsBackupScheduler.class).asEagerSingleton();
+    //        install(new com.codenvy.router.MachineRouterModule());
 
-        bind(String.class).annotatedWith(Names.named("che.workspace.che_server_endpoint"))
-                          .to(Key.get(String.class, Names.named("che.api")));
+    bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-//        install(new com.codenvy.router.MachineRouterModule());
+    install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
+    Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider>
+        machineImageProviderMultibinder =
+            Multibinder.newSetBinder(
+                binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
+    machineImageProviderMultibinder
+        .addBinding()
+        .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+    //workspace activity service
+    install(new com.codenvy.plugin.activity.inject.WorkspaceActivityModule());
 
-        install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
-        Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
-                Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
-        machineImageProviderMultibinder.addBinding()
-                                       .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
+    MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
+        MapBinder.newMapBinder(
+            binder(), String.class, com.codenvy.machine.MachineServerProxyTransformer.class);
+    mapBinder
+        .addBinding(org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE)
+        .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
+    mapBinder
+        .addBinding(org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE)
+        .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
+    mapBinder
+        .addBinding(org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE)
+        .to(com.codenvy.machine.WsAgentServerProxyTransformer.class);
 
-        //workspace activity service
-        install(new com.codenvy.plugin.activity.inject.WorkspaceActivityModule());
+    install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
+    bind(com.codenvy.api.factory.server.filters.FactoryPermissionsFilter.class);
 
-        MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
-                MapBinder.newMapBinder(binder(),
-                                       String.class,
-                                       com.codenvy.machine.MachineServerProxyTransformer.class);
-        mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE)
-                 .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
-        mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.EXEC_AGENT_REFERENCE)
-                 .to(com.codenvy.machine.TerminalServerProxyTransformer.class);
-        mapBinder.addBinding(org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE)
-                 .to(com.codenvy.machine.WsAgentServerProxyTransformer.class);
+    bind(MachineInstanceProvider.class).to(com.codenvy.machine.HostedMachineProviderImpl.class);
 
-        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
-        bind(com.codenvy.api.factory.server.filters.FactoryPermissionsFilter.class);
+    final Multibinder<MessageBodyAdapter> adaptersMultibinder =
+        Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(FactoryMessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
+    adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
 
-        bind(MachineInstanceProvider.class)
-                .to(com.codenvy.machine.HostedMachineProviderImpl.class);
+    final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
+    requestInjection(interceptor);
+    bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
 
-        final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(FactoryMessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
-        adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
-
-        final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
-        requestInjection(interceptor);
-        bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-
-        //ldap
-        if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
-            install(new LdapModule());
-        }
-
-        // install report sender
-        install(new ReportModule());
-
-        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
-                .to(com.codenvy.workspace.WorkspaceFilesCleanUpScriptExecutor.class);
-        install(new com.codenvy.machine.agent.CodenvyAgentModule());
-        bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
-                .to(com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.class);
-
-        MapBinder<String, org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy> strategies =
-                MapBinder.newMapBinder(binder(),
-                                       String.class,
-                                       org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.class);
-        strategies.addBinding("codenvy")
-                  .to(com.codenvy.machine.CodenvyDockerServerEvaluationStrategy.class);
-
-        bindConstant().annotatedWith(Names.named("che.docker.server_evaluation_strategy"))
-                      .to("codenvy");
-        install(new WorkspaceInfrastructureModule());
-
-        install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
-
-        bind(new TypeLiteral<HTMLTemplateProcessor<ThymeleafTemplate>>() {}).to(HTMLTemplateProcessorImpl.class);
-
-        bind(new TypeLiteral<Map<String, String>>() {})
-                .annotatedWith(Names.named("codenvy.email.logos"))
-                .toInstance(ImmutableMap.<String, String>builder()
-                                    .put("codenvy", "/email-templates/logos/logo-codenvy-white.png")
-                                    .put("codenvySmall", "/email-templates/logos/196x196-white.png")
-                                    .put("linkedin", "/email-templates/logos/logo_social_linkedin.png")
-                                    .put("facebook", "/email-templates/logos/logo_social_facebook.png")
-                                    .put("twitter", "/email-templates/logos/logo_social_twitter.png")
-                                    .put("medium", "/email-templates/logos/logo_social_medium.png")
-                                    .build());
-
-
-        String[] blockedCountries = {"Cuba", "Iran", "Korea, North", "Sudan", "Syria", "Iran, Islamic Republic Of",
-                                     "Syrian Arab Republic", "Korea, Democratic People'S Republic of", "Korea, Democratic People",
-                                     "ایران، جمهوری اسلامی", "الجمهورية العربية السورية"};
-        bind(new TypeLiteral<String[]>() {}).annotatedWith(Names.named("auth.blocked_country_names")).toInstance(blockedCountries);
-
-        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
-        bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
-
-        bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class).asEagerSingleton();
+    //ldap
+    if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
+      install(new LdapModule());
     }
+
+    // install report sender
+    install(new ReportModule());
+
+    bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
+        .to(com.codenvy.workspace.WorkspaceFilesCleanUpScriptExecutor.class);
+    install(new com.codenvy.machine.agent.CodenvyAgentModule());
+    bind(org.eclipse.che.api.environment.server.InfrastructureProvisioner.class)
+        .to(com.codenvy.machine.agent.CodenvyInfrastructureProvisioner.class);
+
+    MapBinder<String, org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy> strategies =
+        MapBinder.newMapBinder(
+            binder(),
+            String.class,
+            org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy.class);
+    strategies
+        .addBinding("codenvy")
+        .to(com.codenvy.machine.CodenvyDockerServerEvaluationStrategy.class);
+
+    bindConstant()
+        .annotatedWith(Names.named("che.docker.server_evaluation_strategy"))
+        .to("codenvy");
+    install(new WorkspaceInfrastructureModule());
+
+    install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
+
+    bind(new TypeLiteral<HTMLTemplateProcessor<ThymeleafTemplate>>() {})
+        .to(HTMLTemplateProcessorImpl.class);
+
+    bind(new TypeLiteral<Map<String, String>>() {})
+        .annotatedWith(Names.named("codenvy.email.logos"))
+        .toInstance(
+            ImmutableMap.<String, String>builder()
+                .put("codenvy", "/email-templates/logos/logo-codenvy-white.png")
+                .put("codenvySmall", "/email-templates/logos/196x196-white.png")
+                .put("linkedin", "/email-templates/logos/logo_social_linkedin.png")
+                .put("facebook", "/email-templates/logos/logo_social_facebook.png")
+                .put("twitter", "/email-templates/logos/logo_social_twitter.png")
+                .put("medium", "/email-templates/logos/logo_social_medium.png")
+                .build());
+
+    String[] blockedCountries = {
+      "Cuba",
+      "Iran",
+      "Korea, North",
+      "Sudan",
+      "Syria",
+      "Iran, Islamic Republic Of",
+      "Syrian Arab Republic",
+      "Korea, Democratic People'S Republic of",
+      "Korea, Democratic People",
+      "ایران، جمهوری اسلامی",
+      "الجمهورية العربية السورية"
+    };
+    bind(new TypeLiteral<String[]>() {})
+        .annotatedWith(Names.named("auth.blocked_country_names"))
+        .toInstance(blockedCountries);
+
+    bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInWorkspaceFilter.class);
+    bind(org.eclipse.che.api.agent.server.filters.AddExecAgentInStackFilter.class);
+
+    bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
+        .asEagerSingleton();
+  }
 }

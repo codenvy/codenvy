@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,14 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.type;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
 import com.codenvy.resource.spi.impl.ResourceImpl;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Abstract resource that contains logic for aggregating and deduction for exhaustible resources.
@@ -22,49 +22,51 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author Sergii Leschenko
  */
 public abstract class AbstractExhaustibleResource implements ResourceType {
-    @Override
-    public Resource aggregate(Resource resourceA, Resource resourceB) {
-        checkResource(resourceA);
-        checkResource(resourceB);
+  @Override
+  public Resource aggregate(Resource resourceA, Resource resourceB) {
+    checkResource(resourceA);
+    checkResource(resourceB);
 
-        if (resourceA.getAmount() == -1 || resourceB.getAmount() == -1) {
-            return new ResourceImpl(getId(), -1, getDefaultUnit());
-        }
-
-        return new ResourceImpl(getId(), resourceA.getAmount() + resourceB.getAmount(), getDefaultUnit());
+    if (resourceA.getAmount() == -1 || resourceB.getAmount() == -1) {
+      return new ResourceImpl(getId(), -1, getDefaultUnit());
     }
 
-    @Override
-    public Resource deduct(Resource total, Resource deduction) throws NoEnoughResourcesException {
-        checkResource(total);
-        checkResource(deduction);
+    return new ResourceImpl(
+        getId(), resourceA.getAmount() + resourceB.getAmount(), getDefaultUnit());
+  }
 
-        if (total.getAmount() == -1) {
-            return total;
-        }
+  @Override
+  public Resource deduct(Resource total, Resource deduction) throws NoEnoughResourcesException {
+    checkResource(total);
+    checkResource(deduction);
 
-        if (deduction.getAmount() == -1) {
-            throw new NoEnoughResourcesException(total, deduction, deduction);
-        }
-
-        final long resultAmount = total.getAmount() - deduction.getAmount();
-        if (resultAmount < 0) {
-            throw new NoEnoughResourcesException(total, deduction, new ResourceImpl(getId(), -resultAmount, getDefaultUnit()));
-        }
-        return new ResourceImpl(getId(), resultAmount, getDefaultUnit());
+    if (total.getAmount() == -1) {
+      return total;
     }
 
-    /**
-     * Checks that given resources can be processed by this resource type
-     *
-     * @param resource
-     *         resource to check
-     * @throws IllegalArgumentException
-     *         if given resources has unsupported type or unit
-     */
-    private void checkResource(Resource resource) {
-        checkArgument(getId().equals(resource.getType()), "Resource should have '" + getId() + "' type");
-        checkArgument(getSupportedUnits().contains(resource.getUnit()),
-                      "Resource has unsupported unit '" + resource.getUnit() + "'");
+    if (deduction.getAmount() == -1) {
+      throw new NoEnoughResourcesException(total, deduction, deduction);
     }
+
+    final long resultAmount = total.getAmount() - deduction.getAmount();
+    if (resultAmount < 0) {
+      throw new NoEnoughResourcesException(
+          total, deduction, new ResourceImpl(getId(), -resultAmount, getDefaultUnit()));
+    }
+    return new ResourceImpl(getId(), resultAmount, getDefaultUnit());
+  }
+
+  /**
+   * Checks that given resources can be processed by this resource type
+   *
+   * @param resource resource to check
+   * @throws IllegalArgumentException if given resources has unsupported type or unit
+   */
+  private void checkResource(Resource resource) {
+    checkArgument(
+        getId().equals(resource.getType()), "Resource should have '" + getId() + "' type");
+    checkArgument(
+        getSupportedUnits().contains(resource.getUnit()),
+        "Resource has unsupported unit '" + resource.getUnit() + "'");
+  }
 }

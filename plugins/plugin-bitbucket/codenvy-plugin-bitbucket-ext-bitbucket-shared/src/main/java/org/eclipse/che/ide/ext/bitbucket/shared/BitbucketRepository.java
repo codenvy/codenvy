@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Represents a Bitbucket repository.
@@ -21,48 +20,48 @@ import java.util.List;
  */
 @DTO
 public interface BitbucketRepository {
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    BitbucketRepository withName(String name);
+  BitbucketRepository withName(String name);
 
-    BitbucketRepository getParent();
+  BitbucketRepository getParent();
 
-    void setParent(BitbucketRepository parent);
+  void setParent(BitbucketRepository parent);
 
-    BitbucketRepository withParent(BitbucketRepository parent);
+  BitbucketRepository withParent(BitbucketRepository parent);
 
-    boolean isIsPrivate();
+  boolean isIsPrivate();
 
-    void setIsPrivate(boolean isIsPrivate);
+  void setIsPrivate(boolean isIsPrivate);
 
-    BitbucketRepository withIsPrivate(boolean isIsPrivate);
+  BitbucketRepository withIsPrivate(boolean isIsPrivate);
 
-    BitbucketRepositoryLinks getLinks();
+  BitbucketRepositoryLinks getLinks();
 
-    void setLinks(BitbucketRepositoryLinks links);
+  void setLinks(BitbucketRepositoryLinks links);
 
-    BitbucketRepository withLinks(BitbucketRepositoryLinks links);
+  BitbucketRepository withLinks(BitbucketRepositoryLinks links);
 
-    BitbucketUser getOwner();
+  BitbucketUser getOwner();
 
-    void setOwner(BitbucketUser owner);
+  void setOwner(BitbucketUser owner);
 
-    BitbucketRepository withOwner(BitbucketUser owner);
+  BitbucketRepository withOwner(BitbucketUser owner);
 
-    String getFullName();
+  String getFullName();
 
-    void setFullName(String fullName);
+  void setFullName(String fullName);
 
-    BitbucketRepository withFullName(String fullName);
+  BitbucketRepository withFullName(String fullName);
 
-    @DTO
-    interface BitbucketRepositoryLinks {
-        List<BitbucketLink> getClone();
+  @DTO
+  interface BitbucketRepositoryLinks {
+    List<BitbucketLink> getClone();
 
-        void setClone(List<BitbucketLink> clone);
+    void setClone(List<BitbucketLink> clone);
 
-        BitbucketRepositoryLinks withClone(List<BitbucketLink> clone);
-    }
+    BitbucketRepositoryLinks withClone(List<BitbucketLink> clone);
+  }
 }

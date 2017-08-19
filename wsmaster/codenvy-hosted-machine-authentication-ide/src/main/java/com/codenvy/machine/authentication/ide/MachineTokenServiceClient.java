@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.machine.authentication.ide;
 
 import com.codenvy.machine.authentication.shared.dto.MachineTokenDto;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.shared.dto.UserDto;
 
@@ -22,7 +21,7 @@ import org.eclipse.che.api.user.shared.dto.UserDto;
  */
 public interface MachineTokenServiceClient {
 
-    Promise<MachineTokenDto> getMachineToken();
+  Promise<MachineTokenDto> getMachineToken();
 
-    Promise<UserDto> getUserByToken(String token);
+  Promise<UserDto> getUserByToken(String token);
 }

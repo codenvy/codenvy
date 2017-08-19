@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,30 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.free;
-
-import com.codenvy.resource.api.DtoConverter;
-import com.codenvy.resource.model.FreeResourcesLimit;
-import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
-import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
-import com.codenvy.resource.spi.impl.ResourceImpl;
-import com.jayway.restassured.response.Response;
-
-import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.CheJsonProvider;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.assured.EverrestJetty;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
@@ -46,121 +24,146 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-/**
- * @author Sergii Leschenko
- */
+import com.codenvy.resource.api.DtoConverter;
+import com.codenvy.resource.model.FreeResourcesLimit;
+import com.codenvy.resource.shared.dto.FreeResourcesLimitDto;
+import com.codenvy.resource.spi.impl.FreeResourcesLimitImpl;
+import com.codenvy.resource.spi.impl.ResourceImpl;
+import com.jayway.restassured.response.Response;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.everrest.assured.EverrestJetty;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+/** @author Sergii Leschenko */
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class FreeResourcesLimitServiceTest {
-    private final static String TEST_RESOURCE_TYPE = "test";
-    @SuppressWarnings("unused") //is declared for deploying by everrest-assured
-    private ApiExceptionMapper mapper;
+  private static final String TEST_RESOURCE_TYPE = "test";
 
-    @SuppressWarnings("unused") //is declared for deploying by everrest-assured
-    private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
+  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  private ApiExceptionMapper mapper;
 
-    @Mock
-    private FreeResourcesLimitManager   freeResourcesLimitManager;
-    @Mock
-    private FreeResourcesLimitValidator resourcesLimitValidator;
+  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
-    @InjectMocks
-    private FreeResourcesLimitService service;
+  @Mock private FreeResourcesLimitManager freeResourcesLimitManager;
+  @Mock private FreeResourcesLimitValidator resourcesLimitValidator;
 
-    @Test
-    public void shouldReturnResourcesLimitForGivenAccount() throws Exception {
-        FreeResourcesLimit resourcesLimit = new FreeResourcesLimitImpl("account123",
-                                                                       singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                                                                      1000,
-                                                                                                      "unit")));
+  @InjectMocks private FreeResourcesLimitService service;
 
-        when(freeResourcesLimitManager.get("account123")).thenReturn(resourcesLimit);
+  @Test
+  public void shouldReturnResourcesLimitForGivenAccount() throws Exception {
+    FreeResourcesLimit resourcesLimit =
+        new FreeResourcesLimitImpl(
+            "account123", singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
 
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .expect()
-                                         .statusCode(200)
-                                         .get(SECURE_PATH + "/resource/free/account123");
+    when(freeResourcesLimitManager.get("account123")).thenReturn(resourcesLimit);
 
-        final FreeResourcesLimitDto fetchedLimit = unwrapDto(response, FreeResourcesLimitDto.class);
-        assertEquals(fetchedLimit, DtoConverter.asDto(resourcesLimit));
-        verify(freeResourcesLimitManager).get("account123");
-    }
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .expect()
+            .statusCode(200)
+            .get(SECURE_PATH + "/resource/free/account123");
 
-    @Test
-    public void shouldReturnResourcesLimits() throws Exception {
-        FreeResourcesLimit resourcesLimit1 = new FreeResourcesLimitImpl("account123",
-                                                                        singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                                                                       1000,
-                                                                                                       "unit")));
+    final FreeResourcesLimitDto fetchedLimit = unwrapDto(response, FreeResourcesLimitDto.class);
+    assertEquals(fetchedLimit, DtoConverter.asDto(resourcesLimit));
+    verify(freeResourcesLimitManager).get("account123");
+  }
 
-        FreeResourcesLimit resourcesLimit2 = new FreeResourcesLimitImpl("account321",
-                                                                        singletonList(new ResourceImpl(TEST_RESOURCE_TYPE,
-                                                                                                       2000,
-                                                                                                       "unit")));
+  @Test
+  public void shouldReturnResourcesLimits() throws Exception {
+    FreeResourcesLimit resourcesLimit1 =
+        new FreeResourcesLimitImpl(
+            "account123", singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
 
-        doReturn(new Page<>(Arrays.asList(resourcesLimit1, resourcesLimit2), 1, 2, 2))
-                .when(freeResourcesLimitManager).getAll(anyInt(), anyInt());
+    FreeResourcesLimit resourcesLimit2 =
+        new FreeResourcesLimitImpl(
+            "account321", singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 2000, "unit")));
 
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .when()
-                                         .expect()
-                                         .statusCode(200)
-                                         .get(SECURE_PATH + "/resource/free?skipCount=1&maxItems=5");
+    doReturn(new Page<>(Arrays.asList(resourcesLimit1, resourcesLimit2), 1, 2, 2))
+        .when(freeResourcesLimitManager)
+        .getAll(anyInt(), anyInt());
 
-        final List<FreeResourcesLimitDto> freeResourcesLimits = unwrapDtoList(response, FreeResourcesLimitDto.class);
-        assertEquals(freeResourcesLimits.size(), 2);
-        assertTrue(freeResourcesLimits.contains(DtoConverter.asDto(resourcesLimit1)));
-        assertTrue(freeResourcesLimits.contains(DtoConverter.asDto(resourcesLimit2)));
-        verify(freeResourcesLimitManager).getAll(5, 1);
-    }
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .when()
+            .expect()
+            .statusCode(200)
+            .get(SECURE_PATH + "/resource/free?skipCount=1&maxItems=5");
 
-    @Test
-    public void shouldStoreResourcesLimit() throws Exception {
-        FreeResourcesLimit toCreate = new FreeResourcesLimitImpl("account123",
-                                                                 singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
+    final List<FreeResourcesLimitDto> freeResourcesLimits =
+        unwrapDtoList(response, FreeResourcesLimitDto.class);
+    assertEquals(freeResourcesLimits.size(), 2);
+    assertTrue(freeResourcesLimits.contains(DtoConverter.asDto(resourcesLimit1)));
+    assertTrue(freeResourcesLimits.contains(DtoConverter.asDto(resourcesLimit2)));
+    verify(freeResourcesLimitManager).getAll(5, 1);
+  }
 
-        FreeResourcesLimit created = new FreeResourcesLimitImpl("account123",
-                                                                singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
-        when(freeResourcesLimitManager.store(any())).thenReturn(created);
+  @Test
+  public void shouldStoreResourcesLimit() throws Exception {
+    FreeResourcesLimit toCreate =
+        new FreeResourcesLimitImpl(
+            "account123", singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
 
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .body(DtoConverter.asDto(toCreate))
-                                         .when()
-                                         .expect()
-                                         .statusCode(201)
-                                         .post(SECURE_PATH + "/resource/free");
-        final FreeResourcesLimitDto result = unwrapDto(response, FreeResourcesLimitDto.class);
-        assertEquals(DtoConverter.asDto(created), result);
-        verify(freeResourcesLimitManager).store(DtoConverter.asDto(toCreate));
-        verify(resourcesLimitValidator).check(any());
-    }
+    FreeResourcesLimit created =
+        new FreeResourcesLimitImpl(
+            "account123", singletonList(new ResourceImpl(TEST_RESOURCE_TYPE, 1000, "unit")));
+    when(freeResourcesLimitManager.store(any())).thenReturn(created);
 
-    @Test
-    public void shouldRemoveResourcesLimit() throws Exception {
-        given().auth()
-               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-               .contentType("application/json")
-               .when()
-               .expect()
-               .statusCode(204)
-               .delete(SECURE_PATH + "/resource/free/account123");
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(DtoConverter.asDto(toCreate))
+            .when()
+            .expect()
+            .statusCode(201)
+            .post(SECURE_PATH + "/resource/free");
+    final FreeResourcesLimitDto result = unwrapDto(response, FreeResourcesLimitDto.class);
+    assertEquals(DtoConverter.asDto(created), result);
+    verify(freeResourcesLimitManager).store(DtoConverter.asDto(toCreate));
+    verify(resourcesLimitValidator).check(any());
+  }
 
-        verify(freeResourcesLimitManager).remove("account123");
-    }
+  @Test
+  public void shouldRemoveResourcesLimit() throws Exception {
+    given()
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .contentType("application/json")
+        .when()
+        .expect()
+        .statusCode(204)
+        .delete(SECURE_PATH + "/resource/free/account123");
 
-    private static <T> T unwrapDto(Response response, Class<T> dtoClass) {
-        return DtoFactory.getInstance().createDtoFromJson(response.body().print(), dtoClass);
-    }
+    verify(freeResourcesLimitManager).remove("account123");
+  }
 
-    private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
-        return DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass)
-                         .stream()
-                         .collect(toList());
-    }
+  private static <T> T unwrapDto(Response response, Class<T> dtoClass) {
+    return DtoFactory.getInstance().createDtoFromJson(response.body().print(), dtoClass);
+  }
+
+  private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
+    return DtoFactory.getInstance()
+        .createListDtoFromJson(response.body().print(), dtoClass)
+        .stream()
+        .collect(toList());
+  }
 }

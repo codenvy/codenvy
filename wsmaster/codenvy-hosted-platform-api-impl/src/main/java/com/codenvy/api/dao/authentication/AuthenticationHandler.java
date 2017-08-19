@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.dao.authentication;
 
 import org.eclipse.che.api.auth.AuthenticationException;
@@ -18,15 +18,14 @@ import org.eclipse.che.api.auth.AuthenticationException;
  * @author Sergii Kabashniuk
  */
 public interface AuthenticationHandler {
-    /**
-     * Check user password.
-     *
-     * @return User id  of authenticated user.
-     * @throws AuthenticationException
-     *         - in case if login name and password are not matched.
-     */
-    String authenticate(final String login, final String password) throws AuthenticationException;
+  /**
+   * Check user password.
+   *
+   * @return User id of authenticated user.
+   * @throws AuthenticationException - in case if login name and password are not matched.
+   */
+  String authenticate(final String login, final String password) throws AuthenticationException;
 
-    /** @return - type of authentication handler */
-    String getType();
+  /** @return - type of authentication handler */
+  String getType();
 }

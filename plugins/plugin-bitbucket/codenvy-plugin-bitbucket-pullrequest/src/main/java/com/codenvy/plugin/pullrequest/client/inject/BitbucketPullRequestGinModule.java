@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,18 +7,17 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.pullrequest.client.inject;
 
 import com.codenvy.plugin.pullrequest.client.BitbucketHostingService;
-import org.eclipse.che.plugin.pullrequest.client.parts.contribute.StagesProvider;
-import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
-import org.eclipse.che.plugin.pullrequest.client.workflow.ContributionWorkflow;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
-
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.plugin.pullrequest.client.parts.contribute.StagesProvider;
+import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
+import org.eclipse.che.plugin.pullrequest.client.workflow.ContributionWorkflow;
 
 /**
  * Gin module definition for Bitbucket pull request plugin.
@@ -26,26 +25,24 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
  * @author Mihail Kuznyetsov
  */
 @ExtensionGinModule
-public class BitbucketPullRequestGinModule extends AbstractGinModule{
+public class BitbucketPullRequestGinModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        final GinMapBinder<String, ContributionWorkflow> workflowBinder
-                = GinMapBinder.newMapBinder(binder(),
-                                            String.class,
-                                            ContributionWorkflow.class);
-        workflowBinder.addBinding(BitbucketHostingService.SERVICE_NAME).to(
-                com.codenvy.plugin.pullrequest.client.BitbucketContributionWorkflow.class);
+  @Override
+  protected void configure() {
+    final GinMapBinder<String, ContributionWorkflow> workflowBinder =
+        GinMapBinder.newMapBinder(binder(), String.class, ContributionWorkflow.class);
+    workflowBinder
+        .addBinding(BitbucketHostingService.SERVICE_NAME)
+        .to(com.codenvy.plugin.pullrequest.client.BitbucketContributionWorkflow.class);
 
-        final GinMapBinder<String, StagesProvider> stagesProvider
-                = GinMapBinder.newMapBinder(binder(),
-                                            String.class,
-                                            StagesProvider.class);
-        stagesProvider.addBinding(BitbucketHostingService.SERVICE_NAME).to(
-                com.codenvy.plugin.pullrequest.client.BitbucketStagesProvider.class);
+    final GinMapBinder<String, StagesProvider> stagesProvider =
+        GinMapBinder.newMapBinder(binder(), String.class, StagesProvider.class);
+    stagesProvider
+        .addBinding(BitbucketHostingService.SERVICE_NAME)
+        .to(com.codenvy.plugin.pullrequest.client.BitbucketStagesProvider.class);
 
-        final GinMultibinder<VcsHostingService> vcsHostingService
-                = GinMultibinder.newSetBinder(binder(), VcsHostingService.class);
-        vcsHostingService.addBinding().to(BitbucketHostingService.class);
-    }
+    final GinMultibinder<VcsHostingService> vcsHostingService =
+        GinMultibinder.newSetBinder(binder(), VcsHostingService.class);
+    vcsHostingService.addBinding().to(BitbucketHostingService.class);
+  }
 }

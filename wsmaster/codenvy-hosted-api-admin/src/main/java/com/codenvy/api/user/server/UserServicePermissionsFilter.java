@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.user.server;
 
-import com.codenvy.api.permission.server.SystemDomain;
+import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALLOWED;
 
+import com.codenvy.api.permission.server.SystemDomain;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.user.server.UserService;
@@ -21,12 +25,6 @@ import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.Path;
-
-import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALLOWED;
-
 /**
  * Filter that covers calls to {@link UserService} with authorization
  *
@@ -35,52 +33,55 @@ import static org.eclipse.che.api.user.server.UserService.USER_SELF_CREATION_ALL
 @Filter
 @Path("/user{path:.*}")
 public class UserServicePermissionsFilter extends CheMethodInvokerFilter {
-    public static final String MANAGE_USERS_ACTION = "manageUsers";
+  public static final String MANAGE_USERS_ACTION = "manageUsers";
 
-    private final boolean              userSelfCreationAllowed;
+  private final boolean userSelfCreationAllowed;
 
-    @Inject
-    public UserServicePermissionsFilter(@Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed) {
-        this.userSelfCreationAllowed = userSelfCreationAllowed;
-    }
+  @Inject
+  public UserServicePermissionsFilter(
+      @Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed) {
+    this.userSelfCreationAllowed = userSelfCreationAllowed;
+  }
 
-    @Override
-    protected void filter(GenericResourceMethod genericResourceMethod, Object[] arguments) throws ApiException {
-        final String methodName = genericResourceMethod.getMethod().getName();
-        final Subject subject = EnvironmentContext.getCurrent().getSubject();
-        switch (methodName) {
-            case "getCurrent":
-            case "updatePassword":
-            case "getById":
-            case "find":
-            case "getSettings":
-                //public methods
-                return;
-            case "create":
-                final String token = (String)arguments[1];
-                if (token != null) {
-                    //it is available to create user from token without permissions
-                    if (!userSelfCreationAllowed && !subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
-                        throw new ForbiddenException(
-                                "Currently only admins can create accounts. Please contact our Admin Team for further info.");
-                    }
+  @Override
+  protected void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
+      throws ApiException {
+    final String methodName = genericResourceMethod.getMethod().getName();
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    switch (methodName) {
+      case "getCurrent":
+      case "updatePassword":
+      case "getById":
+      case "find":
+      case "getSettings":
+        //public methods
+        return;
+      case "create":
+        final String token = (String) arguments[1];
+        if (token != null) {
+          //it is available to create user from token without permissions
+          if (!userSelfCreationAllowed
+              && !subject.hasPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION)) {
+            throw new ForbiddenException(
+                "Currently only admins can create accounts. Please contact our Admin Team for further info.");
+          }
 
-                    return;
-                }
-
-                subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
-                break;
-            case "remove":
-                final String userToRemove = (String)arguments[0];
-                if (subject.getUserId().equals(userToRemove)) {
-                    //everybody should be able to remove himself
-                    return;
-                }
-                subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
-                break;
-            default:
-                //unknown method
-                throw new ForbiddenException("User is not authorized to perform this operation");
+          return;
         }
+
+        subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+        break;
+      case "remove":
+        final String userToRemove = (String) arguments[0];
+        if (subject.getUserId().equals(userToRemove)) {
+          //everybody should be able to remove himself
+          return;
+        }
+        subject.checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
+        break;
+      default:
+        //unknown method
+        throw new ForbiddenException("User is not authorized to perform this operation");
     }
+  }
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,28 +7,26 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.microsoft.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.dto.shared.JsonFieldName;
 
-/**
- * @author Yevhenii Voevodin
- */
+/** @author Yevhenii Voevodin */
 @DTO
 public interface MicrosoftVstsApiError {
 
-    @JsonFieldName("$id")
-    String getId();
+  @JsonFieldName("$id")
+  String getId();
 
-    String getMessage();
+  String getMessage();
 
-    String getTypeName();
+  String getTypeName();
 
-    String getTypeKey();
+  String getTypeKey();
 
-    Integer getErrorCode();
+  Integer getErrorCode();
 
-    Integer getEventId();
+  Integer getEventId();
 }

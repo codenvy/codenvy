@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,19 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.machine.agent;
 
-import org.eclipse.che.commons.lang.IoUtil;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import org.eclipse.che.commons.lang.IoUtil;
 
 /**
  * Reads content of public key that is used for workspaces projects synchronization from file.
@@ -28,17 +27,19 @@ import java.io.IOException;
  */
 @Singleton
 public class WorkspaceSyncPublicKeyProvider implements Provider<String> {
-    private String pubKey;
+  private String pubKey;
 
-    @Inject
-    public WorkspaceSyncPublicKeyProvider(@Named("workspace.backup.public_key_path") String pubKeyPath)
-            throws IOException {
+  @Inject
+  public WorkspaceSyncPublicKeyProvider(
+      @Named("workspace.backup.public_key_path") String pubKeyPath) throws IOException {
 
-        pubKey = IoUtil.readAndCloseQuietly(new BufferedInputStream(new FileInputStream(new File(pubKeyPath))));
-    }
+    pubKey =
+        IoUtil.readAndCloseQuietly(
+            new BufferedInputStream(new FileInputStream(new File(pubKeyPath))));
+  }
 
-    @Override
-    public String get() {
-        return pubKey;
-    }
+  @Override
+  public String get() {
+    return pubKey;
+  }
 }

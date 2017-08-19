@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.bitbucketserver.shared;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * Represents Bitbucket Server push event.
@@ -22,21 +21,21 @@ import java.util.List;
 @DTO
 public interface PushEvent {
 
-    Repository getRepository();
+  Repository getRepository();
 
-    void setRepository(Repository repository);
+  void setRepository(Repository repository);
 
-    PushEvent withRepository(Repository repository);
+  PushEvent withRepository(Repository repository);
 
-    List<RefChange> getRefChanges();
+  List<RefChange> getRefChanges();
 
-    void setRefChanges(List<RefChange> refChanges);
+  void setRefChanges(List<RefChange> refChanges);
 
-    PushEvent withRefChanges(List<RefChange> refChanges);
+  PushEvent withRefChanges(List<RefChange> refChanges);
 
-    Changesets getChangesets();
+  Changesets getChangesets();
 
-    void setChangesets(Changesets changesets);
+  void setChangesets(Changesets changesets);
 
-    PushEvent withChangesets(Changesets changesets);
+  PushEvent withChangesets(Changesets changesets);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.hosted.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -21,23 +20,23 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Ann Shumilova
  */
 public interface HostedResources extends ClientBundle {
-    interface HostedCSS extends CssResource {
-        String bottomMenuTooltip();
+  interface HostedCSS extends CssResource {
+    String bottomMenuTooltip();
 
-        String bottomMenuTooltipBody();
+    String bottomMenuTooltipBody();
 
-        String bottomMenuTooltipHeader();
+    String bottomMenuTooltipHeader();
 
-        String temporary();
+    String temporary();
 
-        String temporaryLabel();
+    String temporaryLabel();
 
-        String blueButton();
-    }
+    String blueButton();
+  }
 
-    @Source({"Hosted.css", "org/eclipse/che/ide/api/ui/style.css"})
-    HostedCSS hostedCSS();
+  @Source({"Hosted.css", "org/eclipse/che/ide/api/ui/style.css"})
+  HostedCSS hostedCSS();
 
-    @Source("temporary/temporary.svg")
-    SVGResource temporaryButton();
+  @Source("temporary/temporary.svg")
+  SVGResource temporaryButton();
 }

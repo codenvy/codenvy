@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.client.filter;
 
-import org.everrest.core.impl.uri.UriComponent;
-
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.PathSegment;
-import java.util.List;
+import org.everrest.core.impl.uri.UriComponent;
 
 /**
  * Filter request by number of path segments.
@@ -23,22 +22,21 @@ import java.util.List;
  */
 public class PathSegmentNumberFilter implements RequestFilter {
 
-    private final int segmentNumber;
+  private final int segmentNumber;
 
-    public PathSegmentNumberFilter(int segmentNumber) {
-        this.segmentNumber = segmentNumber;
+  public PathSegmentNumberFilter(int segmentNumber) {
+    this.segmentNumber = segmentNumber;
+  }
+
+  @Override
+  public boolean shouldSkip(HttpServletRequest request) {
+    List<PathSegment> pathSegments = UriComponent.parsePathSegments(request.getRequestURI(), false);
+    int notEmptyPathSergments = 0;
+    for (PathSegment pathSegment : pathSegments) {
+      if (pathSegment.getPath() != null && !pathSegment.getPath().isEmpty()) {
+        notEmptyPathSergments++;
+      }
     }
-
-
-    @Override
-    public boolean shouldSkip(HttpServletRequest request) {
-        List<PathSegment> pathSegments = UriComponent.parsePathSegments(request.getRequestURI(), false);
-        int notEmptyPathSergments = 0;
-        for (PathSegment pathSegment : pathSegments) {
-            if (pathSegment.getPath() != null && !pathSegment.getPath().isEmpty()) {
-                notEmptyPathSergments++;
-            }
-        }
-        return notEmptyPathSergments == segmentNumber;
-    }
+    return notEmptyPathSergments == segmentNumber;
+  }
 }

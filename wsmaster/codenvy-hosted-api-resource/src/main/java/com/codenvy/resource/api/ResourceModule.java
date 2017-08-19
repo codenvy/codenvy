@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api;
 
 import com.codenvy.resource.api.free.FreeResourcesLimitService;
@@ -32,37 +32,38 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 public class ResourceModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(ResourceUsageService.class);
-        bind(ResourceUsageServicePermissionsFilter.class);
+  @Override
+  protected void configure() {
+    bind(ResourceUsageService.class);
+    bind(ResourceUsageServicePermissionsFilter.class);
 
-        bind(AccountLicenseService.class);
-        bind(LicenseServicePermissionsFilter.class);
+    bind(AccountLicenseService.class);
+    bind(LicenseServicePermissionsFilter.class);
 
-        bind(FreeResourcesLimitService.class);
-        bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
-        bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
-        bind(FreeResourcesLimitServicePermissionsFilter.class);
+    bind(FreeResourcesLimitService.class);
+    bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
+    bind(JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
+    bind(FreeResourcesLimitServicePermissionsFilter.class);
 
-        Multibinder.newSetBinder(binder(), ResourcesProvider.class)
-                   .addBinding().to(FreeResourcesProvider.class);
+    Multibinder.newSetBinder(binder(), ResourcesProvider.class)
+        .addBinding()
+        .to(FreeResourcesProvider.class);
 
-        MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
+    MapBinder.newMapBinder(binder(), String.class, AvailableResourcesProvider.class);
 
-        Multibinder<ResourceType> resourcesTypesBinder = Multibinder.newSetBinder(binder(), ResourceType.class);
-        resourcesTypesBinder.addBinding().to(RamResourceType.class);
-        resourcesTypesBinder.addBinding().to(WorkspaceResourceType.class);
-        resourcesTypesBinder.addBinding().to(RuntimeResourceType.class);
-        resourcesTypesBinder.addBinding().to(TimeoutResourceType.class);
+    Multibinder<ResourceType> resourcesTypesBinder =
+        Multibinder.newSetBinder(binder(), ResourceType.class);
+    resourcesTypesBinder.addBinding().to(RamResourceType.class);
+    resourcesTypesBinder.addBinding().to(WorkspaceResourceType.class);
+    resourcesTypesBinder.addBinding().to(RuntimeResourceType.class);
+    resourcesTypesBinder.addBinding().to(TimeoutResourceType.class);
 
-        Multibinder<ResourceUsageTracker> usageTrackersBinder = Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
-        usageTrackersBinder.addBinding().to(RamResourceUsageTracker.class);
-        usageTrackersBinder.addBinding().to(WorkspaceResourceUsageTracker.class);
-        usageTrackersBinder.addBinding().to(RuntimeResourceUsageTracker.class);
-    }
+    Multibinder<ResourceUsageTracker> usageTrackersBinder =
+        Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
+    usageTrackersBinder.addBinding().to(RamResourceUsageTracker.class);
+    usageTrackersBinder.addBinding().to(WorkspaceResourceUsageTracker.class);
+    usageTrackersBinder.addBinding().to(RuntimeResourceUsageTracker.class);
+  }
 }

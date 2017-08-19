@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.machine.server.filters;
 
+import static com.codenvy.api.machine.server.recipe.RecipeDomain.DELETE;
+import static com.codenvy.api.machine.server.recipe.RecipeDomain.DOMAIN_ID;
+import static com.codenvy.api.machine.server.recipe.RecipeDomain.READ;
+import static com.codenvy.api.machine.server.recipe.RecipeDomain.SEARCH;
+import static com.codenvy.api.machine.server.recipe.RecipeDomain.UPDATE;
+
+import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
@@ -19,14 +26,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
-
-import javax.ws.rs.Path;
-
-import static com.codenvy.api.machine.server.recipe.RecipeDomain.DELETE;
-import static com.codenvy.api.machine.server.recipe.RecipeDomain.DOMAIN_ID;
-import static com.codenvy.api.machine.server.recipe.RecipeDomain.READ;
-import static com.codenvy.api.machine.server.recipe.RecipeDomain.SEARCH;
-import static com.codenvy.api.machine.server.recipe.RecipeDomain.UPDATE;
 
 /**
  * Restricts access to methods of {@link RecipeService} by users' permissions
@@ -39,47 +38,49 @@ import static com.codenvy.api.machine.server.recipe.RecipeDomain.UPDATE;
 @Filter
 @Path("/recipe{path:(?!/script)(/.*)?}")
 public class RecipePermissionsFilter extends CheMethodInvokerFilter {
-    @Override
-    public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments) throws ForbiddenException, ServerException {
-        final String methodName = genericResourceMethod.getMethod().getName();
+  @Override
+  public void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
+      throws ForbiddenException, ServerException {
+    final String methodName = genericResourceMethod.getMethod().getName();
 
-        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
-        String action;
-        String recipeId;
+    final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+    String action;
+    String recipeId;
 
-        switch (methodName) {
-            case "getRecipe":
-            case "getRecipeScript":
-                recipeId = ((String)arguments[0]);
-                action = READ;
+    switch (methodName) {
+      case "getRecipe":
+      case "getRecipeScript":
+        recipeId = ((String) arguments[0]);
+        action = READ;
 
-                if (currentSubject.hasPermission(DOMAIN_ID, recipeId, SEARCH)) {
-                    //allow to read recipe if user has 'search' permission
-                    return;
-                }
-                break;
-
-            case "updateRecipe":
-                RecipeUpdate recipeUpdate = (RecipeUpdate)arguments[0];
-                recipeId = recipeUpdate.getId();
-                action = UPDATE;
-                break;
-
-            case "removeRecipe":
-                recipeId = ((String)arguments[0]);
-                action = DELETE;
-                break;
-
-            case "createRecipe":
-            case "searchRecipes":
-                //available for all
-                return;
-            default:
-                throw new ForbiddenException("The user does not have permission to perform this operation");
+        if (currentSubject.hasPermission(DOMAIN_ID, recipeId, SEARCH)) {
+          //allow to read recipe if user has 'search' permission
+          return;
         }
+        break;
 
-        if (!currentSubject.hasPermission(DOMAIN_ID, recipeId, action)) {
-            throw new ForbiddenException("The user does not have permission to " + action + " recipe with id '" + recipeId + "'");
-        }
+      case "updateRecipe":
+        RecipeUpdate recipeUpdate = (RecipeUpdate) arguments[0];
+        recipeId = recipeUpdate.getId();
+        action = UPDATE;
+        break;
+
+      case "removeRecipe":
+        recipeId = ((String) arguments[0]);
+        action = DELETE;
+        break;
+
+      case "createRecipe":
+      case "searchRecipes":
+        //available for all
+        return;
+      default:
+        throw new ForbiddenException("The user does not have permission to perform this operation");
     }
+
+    if (!currentSubject.hasPermission(DOMAIN_ID, recipeId, action)) {
+      throw new ForbiddenException(
+          "The user does not have permission to " + action + " recipe with id '" + recipeId + "'");
+    }
+  }
 }

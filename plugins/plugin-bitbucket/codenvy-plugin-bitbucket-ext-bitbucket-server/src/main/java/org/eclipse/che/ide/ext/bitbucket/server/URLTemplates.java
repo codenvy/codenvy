@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.server;
 
 /**
@@ -17,15 +17,15 @@ package org.eclipse.che.ide.ext.bitbucket.server;
  */
 public interface URLTemplates {
 
-    String repositoryUrl(String owner, String repositorySlug);
+  String repositoryUrl(String owner, String repositorySlug);
 
-    String userUrl();
+  String userUrl();
 
-    String pullRequestUrl(String owner, String repositorySlug);
+  String pullRequestUrl(String owner, String repositorySlug);
 
-    String updatePullRequestUrl(String owner, String repositorySlug, int pullRequestId);
+  String updatePullRequestUrl(String owner, String repositorySlug, int pullRequestId);
 
-    String forksUrl(String owner, String repositorySlug);
+  String forksUrl(String owner, String repositorySlug);
 
-    String forkRepositoryUrl(String owner, String repositorySlug);
+  String forkRepositoryUrl(String owner, String repositorySlug);
 }

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,140 +7,138 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.dao.authentication;
-
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Random alphanumeric sequence that provide access to codenvy services.
- * Can be saved in the cookie in browser or provides some other way (i.e. query, header).
+ * Random alphanumeric sequence that provide access to codenvy services. Can be saved in the cookie
+ * in browser or provides some other way (i.e. query, header).
  *
  * @author Andrey Parfonov
  * @author Sergey Kabashniuk
  */
 public final class AccessTicket {
-    private final Set<String> registeredClients;
-    private final String      userId;
-    private final String      authHandlerType;
-    /** Time of ticket creation in milliseconds. */
-    private       long        creationTime;
-    /** Value of access cookie associated with this access key. */
-    private       String      accessToken;
+  private final Set<String> registeredClients;
+  private final String userId;
+  private final String authHandlerType;
+  /** Time of ticket creation in milliseconds. */
+  private long creationTime;
+  /** Value of access cookie associated with this access key. */
+  private String accessToken;
 
-    public AccessTicket(String accessToken, String userId, String authHandlerType) {
-        this(accessToken, userId, authHandlerType, System.currentTimeMillis());
+  public AccessTicket(String accessToken, String userId, String authHandlerType) {
+    this(accessToken, userId, authHandlerType, System.currentTimeMillis());
+  }
+
+  public AccessTicket(
+      String accessToken, String userId, String authHandlerType, long creationTime) {
+
+    if (accessToken == null) {
+      throw new IllegalArgumentException("Invalid access token: " + accessToken);
     }
-
-
-    public AccessTicket(String accessToken, String userId, String authHandlerType, long creationTime) {
-
-        if (accessToken == null) {
-            throw new IllegalArgumentException("Invalid access token: " + accessToken);
-        }
-        if (userId == null) {
-            throw new IllegalArgumentException("Invalid userId: " + userId);
-        }
-        if (authHandlerType == null) {
-            throw new IllegalArgumentException("Invalid authHandlerType: " + authHandlerType);
-        }
-        if (creationTime < 0) {
-            throw new IllegalArgumentException("Invalid creation time : " + creationTime);
-        }
-        this.accessToken = accessToken;
-        this.authHandlerType = authHandlerType;
-
-        this.userId = userId;
-        this.creationTime = creationTime;
-        this.registeredClients = new HashSet<>();
+    if (userId == null) {
+      throw new IllegalArgumentException("Invalid userId: " + userId);
     }
-
-    public String getAccessToken() {
-        return accessToken;
+    if (authHandlerType == null) {
+      throw new IllegalArgumentException("Invalid authHandlerType: " + authHandlerType);
     }
-
-    public String getUserId() {
-        return userId;
+    if (creationTime < 0) {
+      throw new IllegalArgumentException("Invalid creation time : " + creationTime);
     }
+    this.accessToken = accessToken;
+    this.authHandlerType = authHandlerType;
 
-    /**
-     * @return type of authentication handler was used for current user authentication.
-     */
-    public String getAuthHandlerType() {
-        return authHandlerType;
-    }
+    this.userId = userId;
+    this.creationTime = creationTime;
+    this.registeredClients = new HashSet<>();
+  }
 
+  public String getAccessToken() {
+    return accessToken;
+  }
 
-    /** Get time of token creation. */
-    public long getCreationTime() {
-        return creationTime;
-    }
+  public String getUserId() {
+    return userId;
+  }
 
-    /** Get copy of the set of registered clients for this token. */
-    public Set<String> getRegisteredClients() {
-        return new LinkedHashSet<>(registeredClients);
-    }
+  /** @return type of authentication handler was used for current user authentication. */
+  public String getAuthHandlerType() {
+    return authHandlerType;
+  }
 
-    /**
-     * Register SSO client for this token.
-     *
-     * @param clientUrl
-     *         - Indicate that SSO server knows about registration of the current user in given client url.
-     */
-    public synchronized void registerClientUrl(String clientUrl) {
-        registeredClients.add(clientUrl);
-    }
+  /** Get time of token creation. */
+  public long getCreationTime() {
+    return creationTime;
+  }
 
-    /**
-     * Unregister SSO client for this token.
-     *
-     * @param clientUrl
-     *         - given client url to unregister
-     */
-    public synchronized void unRegisterClientUrl(String clientUrl) {
-        registeredClients.remove(clientUrl);
-    }
+  /** Get copy of the set of registered clients for this token. */
+  public Set<String> getRegisteredClients() {
+    return new LinkedHashSet<>(registeredClients);
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+  /**
+   * Register SSO client for this token.
+   *
+   * @param clientUrl - Indicate that SSO server knows about registration of the current user in
+   *     given client url.
+   */
+  public synchronized void registerClientUrl(String clientUrl) {
+    registeredClients.add(clientUrl);
+  }
 
-        AccessTicket that = (AccessTicket)o;
+  /**
+   * Unregister SSO client for this token.
+   *
+   * @param clientUrl - given client url to unregister
+   */
+  public synchronized void unRegisterClientUrl(String clientUrl) {
+    registeredClients.remove(clientUrl);
+  }
 
-        if (creationTime != that.creationTime) return false;
-        if (accessToken != null ? !accessToken.equals(that.accessToken) : that.accessToken != null) return false;
-        if (authHandlerType != null ? !authHandlerType.equals(that.authHandlerType) : that.authHandlerType != null) return false;
-        if (userId != null ? !userId.equals(that.userId) : that.userId != null) return false;
-        if (registeredClients != null ? !registeredClients.equals(that.registeredClients) : that.registeredClients != null) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-        return true;
-    }
+    AccessTicket that = (AccessTicket) o;
 
-    @Override
-    public int hashCode() {
-        int result = registeredClients != null ? registeredClients.hashCode() : 0;
-        result = 31 * result + (userId != null ? userId.hashCode() : 0);
-        result = 31 * result + (authHandlerType != null ? authHandlerType.hashCode() : 0);
-        result = 31 * result + (int)(creationTime ^ (creationTime >>> 32));
-        result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
-        return result;
-    }
+    if (creationTime != that.creationTime) return false;
+    if (accessToken != null ? !accessToken.equals(that.accessToken) : that.accessToken != null)
+      return false;
+    if (authHandlerType != null
+        ? !authHandlerType.equals(that.authHandlerType)
+        : that.authHandlerType != null) return false;
+    if (userId != null ? !userId.equals(that.userId) : that.userId != null) return false;
+    if (registeredClients != null
+        ? !registeredClients.equals(that.registeredClients)
+        : that.registeredClients != null) return false;
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("AccessTicket{");
-        sb.append("registeredClients=").append(registeredClients);
-        sb.append(", userId='").append(userId).append('\'');
-        sb.append(", authHandlerType='").append(authHandlerType).append('\'');
-        sb.append(", creationTime=").append(creationTime);
-        sb.append(", accessToken='").append(accessToken).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = registeredClients != null ? registeredClients.hashCode() : 0;
+    result = 31 * result + (userId != null ? userId.hashCode() : 0);
+    result = 31 * result + (authHandlerType != null ? authHandlerType.hashCode() : 0);
+    result = 31 * result + (int) (creationTime ^ (creationTime >>> 32));
+    result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("AccessTicket{");
+    sb.append("registeredClients=").append(registeredClients);
+    sb.append(", userId='").append(userId).append('\'');
+    sb.append(", authHandlerType='").append(authHandlerType).append('\'');
+    sb.append(", creationTime=").append(creationTime);
+    sb.append(", accessToken='").append(accessToken).append('\'');
+    sb.append('}');
+    return sb.toString();
+  }
 }
-
-

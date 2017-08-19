@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,11 +7,10 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api.event;
 
 import com.codenvy.organization.shared.model.Organization;
-
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.core.db.cascade.event.PersistEvent;
 
@@ -22,13 +21,13 @@ import org.eclipse.che.core.db.cascade.event.PersistEvent;
  */
 @EventOrigin("organization")
 public class OrganizationPersistedEvent extends PersistEvent {
-    private final Organization organization;
+  private final Organization organization;
 
-    public OrganizationPersistedEvent(Organization organization) {
-        this.organization = organization;
-    }
+  public OrganizationPersistedEvent(Organization organization) {
+    this.organization = organization;
+  }
 
-    public Organization getOrganization() {
-        return organization;
-    }
+  public Organization getOrganization() {
+    return organization;
+  }
 }

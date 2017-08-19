@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.ide.hosted.client.informers;
+
+import static com.google.gwt.dom.client.Style.Display.BLOCK;
+import static com.google.gwt.dom.client.Style.Display.NONE;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 import com.codenvy.ide.hosted.client.HostedLocalizationConstant;
 import com.codenvy.ide.hosted.client.HostedResources;
@@ -23,7 +27,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -36,125 +39,138 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
-import static com.google.gwt.dom.client.Style.Display.BLOCK;
-import static com.google.gwt.dom.client.Style.Display.NONE;
-import static com.google.gwt.dom.client.Style.Unit.PX;
-
 /**
  * @author Vitaliy Guliy
  * @author Oleksii Orel
  */
 public class TemporaryWorkspaceInformer {
-    private final HostedResources             resources;
-    private final HostedLocalizationConstant  locale;
-    private final ActionManager               actionManager;
-    private final TemporaryWorkspaceIndicator temporaryWorkspaceIndicator;
-    private final AppContext                  appContext;
+  private final HostedResources resources;
+  private final HostedLocalizationConstant locale;
+  private final ActionManager actionManager;
+  private final TemporaryWorkspaceIndicator temporaryWorkspaceIndicator;
+  private final AppContext appContext;
 
-    @Inject
-    public TemporaryWorkspaceInformer(ActionManager actionManager,
-                                      HostedResources resources,
-                                      HostedLocalizationConstant locale,
-                                      AppContext appContext) {
-        this.actionManager = actionManager;
-        this.resources = resources;
-        this.locale = locale;
-        temporaryWorkspaceIndicator = new TemporaryWorkspaceIndicator();
-        this.appContext = appContext;
+  @Inject
+  public TemporaryWorkspaceInformer(
+      ActionManager actionManager,
+      HostedResources resources,
+      HostedLocalizationConstant locale,
+      AppContext appContext) {
+    this.actionManager = actionManager;
+    this.resources = resources;
+    this.locale = locale;
+    temporaryWorkspaceIndicator = new TemporaryWorkspaceIndicator();
+    this.appContext = appContext;
+  }
+
+  public void process() {
+    Workspace workspace = appContext.getWorkspace();
+    if (workspace == null || !workspace.isTemporary()) {
+      return;
     }
 
-    public void process() {
-        Workspace workspace = appContext.getWorkspace();
-        if (workspace == null || !workspace.isTemporary()) {
-            return;
-        }
+    actionManager.registerAction("temporaryWorkspaceIndicator", temporaryWorkspaceIndicator);
 
-        actionManager.registerAction("temporaryWorkspaceIndicator", temporaryWorkspaceIndicator);
+    DefaultActionGroup mainToolbarGroup =
+        (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_LEFT_STATUS_PANEL);
+    mainToolbarGroup.add(temporaryWorkspaceIndicator, Constraints.FIRST);
+    mainToolbarGroup.addSeparator();
+  }
 
-        DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_LEFT_STATUS_PANEL);
-        mainToolbarGroup.add(temporaryWorkspaceIndicator, Constraints.FIRST);
-        mainToolbarGroup.addSeparator();
+  public class TemporaryWorkspaceIndicator extends Action implements CustomComponentAction {
+
+    @Override
+    public void actionPerformed(ActionEvent e) {}
+
+    @Override
+    public Widget createCustomComponent(Presentation presentation) {
+      final FlowPanel wrapper = new FlowPanel();
+      final Label button = new Label();
+      final Element tooltipElement = DOM.createDiv();
+      final Element tooltipHeader = DOM.createDiv();
+      final Element tooltipHeaderMessageElement = DOM.createSpan();
+      final Element tooltipBody = DOM.createDiv();
+      final Element tooltipBodyMessageElement = DOM.createSpan();
+      final Element tooltipArrow = DOM.createDiv();
+
+      wrapper.addStyleName(resources.hostedCSS().temporary());
+      wrapper.add(new SVGImage(resources.temporaryButton()));
+
+      button.addStyleName(resources.hostedCSS().temporaryLabel());
+      button.setText(locale.temporaryToolbarLabelText());
+      button.ensureDebugId("temporary-workspace-used-toolbar-button");
+
+      // add handlers
+      wrapper.addDomHandler(
+          new MouseOverHandler() {
+            public void onMouseOver(MouseOverEvent event) {
+              tooltipHeaderMessageElement.setInnerHTML(locale.temporaryToolbarLabelTitle());
+              tooltipBodyMessageElement.setInnerHTML(locale.temporaryToolbarLabelTitleMessage());
+              tooltipElement.getStyle().setRight(0, PX);
+              tooltipElement.getStyle().setBottom(0, PX);
+              tooltipElement.getStyle().setDisplay(BLOCK);
+
+              final Element parent = wrapper.getElement();
+              final int screenWidth = Document.get().getClientWidth();
+              final int screenHeight = Document.get().getClientHeight();
+              final int parentRight = screenWidth - parent.getAbsoluteRight();
+              final double parentMiddleRight = parentRight + (parent.getClientWidth() / 2.0);
+
+              double right = parentRight - (tooltipElement.getOffsetWidth() / 2.0);
+              right += parent.getClientWidth() / 2.0;
+              if (right < 0) {
+                right = 0;
+              }
+              if (screenWidth < (right + tooltipElement.getOffsetWidth())) {
+                right = screenWidth - tooltipElement.getOffsetWidth();
+              }
+              tooltipElement.getStyle().setRight(right, PX);
+              tooltipArrow
+                  .getStyle()
+                  .setRight(parentMiddleRight - (tooltipArrow.getOffsetWidth() / 2.0), PX);
+              tooltipElement
+                  .getStyle()
+                  .setBottom(
+                      screenHeight
+                          - parent.getAbsoluteTop()
+                          + (tooltipArrow.getOffsetHeight() / 2.0),
+                      PX);
+              tooltipArrow
+                  .getStyle()
+                  .setBottom(
+                      screenHeight
+                          - parent.getAbsoluteTop()
+                          - (tooltipArrow.getOffsetHeight() / 2.0),
+                      PX);
+            }
+          },
+          MouseOverEvent.getType());
+
+      wrapper.addDomHandler(
+          new MouseOutHandler() {
+            public void onMouseOut(MouseOutEvent event) {
+              tooltipElement.getStyle().setDisplay(NONE);
+            }
+          },
+          MouseOutEvent.getType());
+
+      wrapper.add(button);
+
+      tooltipHeader.addClassName(resources.hostedCSS().bottomMenuTooltipHeader());
+      tooltipHeader.appendChild(new SVGImage(resources.temporaryButton()).getElement());
+      tooltipHeader.appendChild(tooltipHeaderMessageElement);
+
+      tooltipBody.addClassName(resources.hostedCSS().bottomMenuTooltipBody());
+      tooltipBody.appendChild(tooltipBodyMessageElement);
+
+      tooltipElement.addClassName(resources.hostedCSS().bottomMenuTooltip());
+      tooltipElement.appendChild(tooltipHeader);
+      tooltipElement.appendChild(tooltipBody);
+      tooltipElement.appendChild(tooltipArrow);
+
+      wrapper.getElement().appendChild(tooltipElement);
+
+      return wrapper;
     }
-
-    public class TemporaryWorkspaceIndicator extends Action implements CustomComponentAction {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-        }
-
-        @Override
-        public Widget createCustomComponent(Presentation presentation) {
-            final FlowPanel wrapper = new FlowPanel();
-            final Label button = new Label();
-            final Element tooltipElement = DOM.createDiv();
-            final Element tooltipHeader = DOM.createDiv();
-            final Element tooltipHeaderMessageElement = DOM.createSpan();
-            final Element tooltipBody = DOM.createDiv();
-            final Element tooltipBodyMessageElement = DOM.createSpan();
-            final Element tooltipArrow = DOM.createDiv();
-
-            wrapper.addStyleName(resources.hostedCSS().temporary());
-            wrapper.add(new SVGImage(resources.temporaryButton()));
-
-            button.addStyleName(resources.hostedCSS().temporaryLabel());
-            button.setText(locale.temporaryToolbarLabelText());
-            button.ensureDebugId("temporary-workspace-used-toolbar-button");
-
-            // add handlers
-            wrapper.addDomHandler(new MouseOverHandler() {
-                public void onMouseOver(MouseOverEvent event) {
-                    tooltipHeaderMessageElement.setInnerHTML(locale.temporaryToolbarLabelTitle());
-                    tooltipBodyMessageElement.setInnerHTML(locale.temporaryToolbarLabelTitleMessage());
-                    tooltipElement.getStyle().setRight(0, PX);
-                    tooltipElement.getStyle().setBottom(0, PX);
-                    tooltipElement.getStyle().setDisplay(BLOCK);
-
-                    final Element parent = wrapper.getElement();
-                    final int screenWidth = Document.get().getClientWidth();
-                    final int screenHeight = Document.get().getClientHeight();
-                    final int parentRight = screenWidth - parent.getAbsoluteRight();
-                    final double parentMiddleRight = parentRight + (parent.getClientWidth() / 2.0);
-
-                    double right = parentRight - (tooltipElement.getOffsetWidth() / 2.0);
-                    right += parent.getClientWidth() / 2.0;
-                    if (right < 0) {
-                        right = 0;
-                    }
-                    if (screenWidth < (right + tooltipElement.getOffsetWidth())) {
-                        right = screenWidth - tooltipElement.getOffsetWidth();
-                    }
-                    tooltipElement.getStyle().setRight(right, PX);
-                    tooltipArrow.getStyle().setRight(parentMiddleRight - (tooltipArrow.getOffsetWidth() / 2.0), PX);
-                    tooltipElement.getStyle()
-                                  .setBottom(screenHeight - parent.getAbsoluteTop() + (tooltipArrow.getOffsetHeight() / 2.0), PX);
-                    tooltipArrow.getStyle().setBottom(screenHeight - parent.getAbsoluteTop() - (tooltipArrow.getOffsetHeight() / 2.0), PX);
-                }
-            }, MouseOverEvent.getType());
-
-            wrapper.addDomHandler(new MouseOutHandler() {
-                public void onMouseOut(MouseOutEvent event) {
-                    tooltipElement.getStyle().setDisplay(NONE);
-                }
-            }, MouseOutEvent.getType());
-
-            wrapper.add(button);
-
-            tooltipHeader.addClassName(resources.hostedCSS().bottomMenuTooltipHeader());
-            tooltipHeader.appendChild(new SVGImage(resources.temporaryButton()).getElement());
-            tooltipHeader.appendChild(tooltipHeaderMessageElement);
-
-            tooltipBody.addClassName(resources.hostedCSS().bottomMenuTooltipBody());
-            tooltipBody.appendChild(tooltipBodyMessageElement);
-
-            tooltipElement.addClassName(resources.hostedCSS().bottomMenuTooltip());
-            tooltipElement.appendChild(tooltipHeader);
-            tooltipElement.appendChild(tooltipBody);
-            tooltipElement.appendChild(tooltipArrow);
-
-            wrapper.getElement().appendChild(tooltipElement);
-
-            return wrapper;
-        }
-    }
-
+  }
 }

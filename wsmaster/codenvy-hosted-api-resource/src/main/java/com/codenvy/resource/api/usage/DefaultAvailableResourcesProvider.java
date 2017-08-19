@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,73 +7,77 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.usage;
 
 import com.codenvy.resource.api.AvailableResourcesProvider;
 import com.codenvy.resource.api.ResourceAggregator;
 import com.codenvy.resource.api.exception.NoEnoughResourcesException;
 import com.codenvy.resource.model.Resource;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Default implementation of providing available resources for accounts.
  *
- * <p>By default account can use resources only by itself, so available
- * resources equals to total resources minus resources which
- * are already used by account.
+ * <p>By default account can use resources only by itself, so available resources equals to total
+ * resources minus resources which are already used by account.
  *
  * @author Sergii Leschenko
  */
 @Singleton
 public class DefaultAvailableResourcesProvider implements AvailableResourcesProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultAvailableResourcesProvider.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DefaultAvailableResourcesProvider.class);
 
-    private final Provider<ResourceUsageManager> resourceUsageManagerProvider;
-    private final ResourceAggregator             resourceAggregator;
+  private final Provider<ResourceUsageManager> resourceUsageManagerProvider;
+  private final ResourceAggregator resourceAggregator;
 
-    @Inject
-    public DefaultAvailableResourcesProvider(Provider<ResourceUsageManager> resourceUsageManagerProvider,
-                                             ResourceAggregator resourceAggregator) {
-        this.resourceUsageManagerProvider = resourceUsageManagerProvider;
-        this.resourceAggregator = resourceAggregator;
+  @Inject
+  public DefaultAvailableResourcesProvider(
+      Provider<ResourceUsageManager> resourceUsageManagerProvider,
+      ResourceAggregator resourceAggregator) {
+    this.resourceUsageManagerProvider = resourceUsageManagerProvider;
+    this.resourceAggregator = resourceAggregator;
+  }
+
+  @Override
+  public List<? extends Resource> getAvailableResources(String accountId)
+      throws NotFoundException, ServerException {
+    ResourceUsageManager resourceUsageManager = resourceUsageManagerProvider.get();
+    List<? extends Resource> totalResources = null;
+    List<Resource> usedResources = null;
+    try {
+      totalResources = resourceUsageManager.getTotalResources(accountId);
+      usedResources = new ArrayList<>(resourceUsageManager.getUsedResources(accountId));
+      return resourceAggregator.deduct(totalResources, usedResources);
+    } catch (NoEnoughResourcesException e) {
+      LOG.warn(
+          "Account with id {} uses more resources {} than he has {}.",
+          accountId,
+          format(usedResources),
+          format(totalResources));
+      return resourceAggregator.excess(totalResources, usedResources);
     }
+  }
 
-    @Override
-    public List<? extends Resource> getAvailableResources(String accountId) throws NotFoundException, ServerException {
-        ResourceUsageManager resourceUsageManager = resourceUsageManagerProvider.get();
-        List<? extends Resource> totalResources = null;
-        List<Resource> usedResources = null;
-        try {
-            totalResources = resourceUsageManager.getTotalResources(accountId);
-            usedResources = new ArrayList<>(resourceUsageManager.getUsedResources(accountId));
-            return resourceAggregator.deduct(totalResources, usedResources);
-        } catch (NoEnoughResourcesException e) {
-            LOG.warn("Account with id {} uses more resources {} than he has {}.", accountId, format(usedResources), format(totalResources));
-            return resourceAggregator.excess(totalResources, usedResources);
-        }
-    }
-
-    /**
-     * Returns formatted string for list of resources.
-     */
-    private static String format(Collection<? extends Resource> resources) {
-        return '[' +
-               resources.stream()
-                        .map(resource -> resource.getAmount() + resource.getUnit() + " of " + resource.getType())
-                        .collect(Collectors.joining(", "))
-               + ']';
-    }
+  /** Returns formatted string for list of resources. */
+  private static String format(Collection<? extends Resource> resources) {
+    return '['
+        + resources
+            .stream()
+            .map(
+                resource -> resource.getAmount() + resource.getUnit() + " of " + resource.getType())
+            .collect(Collectors.joining(", "))
+        + ']';
+  }
 }

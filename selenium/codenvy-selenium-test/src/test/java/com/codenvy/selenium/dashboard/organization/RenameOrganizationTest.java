@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.selenium.dashboard.organization;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.codenvy.organization.shared.dto.OrganizationDto;
 import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
@@ -17,7 +21,6 @@ import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPa
 import com.codenvy.selenium.pageobject.dashboard.organization.OrganizationPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -29,123 +32,125 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Test validates organization rename.
  *
  * @author Ann Shumilova
  */
 public class RenameOrganizationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(RenameOrganizationTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RenameOrganizationTest.class);
 
-    private OrganizationDto parentOrganization;
-    private OrganizationDto childOrganization;
-    private String          parentNewName;
+  private OrganizationDto parentOrganization;
+  private OrganizationDto childOrganization;
+  private String parentNewName;
 
-    @Inject
-    private OrganizationListPage                        organizationListPage;
-    @Inject
-    private OrganizationPage                            organizationPage;
-    @Inject
-    private NavigationBar                               navigationBar;
-    @Inject
-    private EditMode                                    editMode;
-    @Inject
-    private Dashboard                                   dashboard;
-    @Inject
-    @Named("admin")
-    private OnpremTestOrganizationServiceClient         organizationServiceClient;
-    @Inject
-    private DefaultTestUser                             testUser;
-    @Inject
-    private AdminTestUser                               adminTestUser;
+  @Inject private OrganizationListPage organizationListPage;
+  @Inject private OrganizationPage organizationPage;
+  @Inject private NavigationBar navigationBar;
+  @Inject private EditMode editMode;
+  @Inject private Dashboard dashboard;
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        dashboard.open(adminTestUser.getAuthToken());
+  @Inject
+  @Named("admin")
+  private OnpremTestOrganizationServiceClient organizationServiceClient;
 
-        parentOrganization = organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
-        childOrganization = organizationServiceClient
-                .createOrganization(NameGenerator.generate("organization", 5), parentOrganization.getId());
+  @Inject private DefaultTestUser testUser;
+  @Inject private AdminTestUser adminTestUser;
 
-        parentNewName = NameGenerator.generate("newname", 5);
-        organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
-        organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
+  @BeforeClass
+  public void setUp() throws Exception {
+    dashboard.open(adminTestUser.getAuthToken());
 
-        dashboard.open(testUser.getAuthToken());
-    }
+    parentOrganization =
+        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
+    childOrganization =
+        organizationServiceClient.createOrganization(
+            NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-    @AfterClass
-    public void tearDown() throws Exception {
-        organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
-    }
+    parentNewName = NameGenerator.generate("newname", 5);
+    organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
+    organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
 
-    @Test(priority = 1)
-    public void testParentOrganizationRename() {
-        navigationBar.waitNavigationBar();
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        organizationListPage.waitForOrganizationsList();
+    dashboard.open(testUser.getAuthToken());
+  }
 
-        organizationListPage.clickOnOrganization(parentOrganization.getName());
+  @AfterClass
+  public void tearDown() throws Exception {
+    organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
+  }
 
-        organizationPage.waitOrganizationName(parentOrganization.getName());
+  @Test(priority = 1)
+  public void testParentOrganizationRename() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
 
-        organizationPage.setOrganizationName("");
-        editMode.waitDisplayed();
-        assertFalse(editMode.isSaveEnabled());
+    organizationListPage.clickOnOrganization(parentOrganization.getName());
 
-        editMode.clickCancel();
-        editMode.waitHidden();
-        assertEquals(parentOrganization.getName(), organizationPage.getOrganizationName());
+    organizationPage.waitOrganizationName(parentOrganization.getName());
 
-        organizationPage.setOrganizationName(parentNewName);
-        editMode.waitDisplayed();
-        assertTrue(editMode.isSaveEnabled());
+    organizationPage.setOrganizationName("");
+    editMode.waitDisplayed();
+    assertFalse(editMode.isSaveEnabled());
 
-        editMode.clickSave();
-        editMode.waitHidden();
+    editMode.clickCancel();
+    editMode.waitHidden();
+    assertEquals(parentOrganization.getName(), organizationPage.getOrganizationName());
 
-        organizationPage.waitOrganizationTitle(parentNewName);
-        assertEquals(parentNewName, organizationPage.getOrganizationName());
-    }
+    organizationPage.setOrganizationName(parentNewName);
+    editMode.waitDisplayed();
+    assertTrue(editMode.isSaveEnabled());
 
-    @Test(priority = 2)
-    public void testSubOrganizationRename() {
-        navigationBar.waitNavigationBar();
-        navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
-        organizationListPage.waitForOrganizationsToolbar();
-        organizationListPage.waitForOrganizationsList();
-        String organizationPath = parentNewName + "/" + childOrganization.getName();
+    editMode.clickSave();
+    editMode.waitHidden();
 
-        organizationListPage.clickOnOrganization(organizationPath);
+    organizationPage.waitOrganizationTitle(parentNewName);
+    assertEquals(parentNewName, organizationPage.getOrganizationName());
+  }
 
-        organizationPage.waitOrganizationName(organizationPath);
-        String newName = NameGenerator.generate("newname", 5);
+  @Test(priority = 2)
+  public void testSubOrganizationRename() {
+    navigationBar.waitNavigationBar();
+    navigationBar.clickOnMenu(NavigationBar.MenuItem.ORGANIZATIONS);
+    organizationListPage.waitForOrganizationsToolbar();
+    organizationListPage.waitForOrganizationsList();
+    String organizationPath = parentNewName + "/" + childOrganization.getName();
 
-        organizationPage.setOrganizationName(newName);
-        editMode.waitDisplayed();
-        assertTrue(editMode.isSaveEnabled());
+    organizationListPage.clickOnOrganization(organizationPath);
 
-        editMode.clickSave();
-        editMode.waitHidden();
+    organizationPage.waitOrganizationName(organizationPath);
+    String newName = NameGenerator.generate("newname", 5);
 
-        String path = parentNewName + "/" + newName;
-        organizationPage.waitOrganizationTitle(path);
-        assertEquals(organizationPage.getOrganizationName(), newName);
+    organizationPage.setOrganizationName(newName);
+    editMode.waitDisplayed();
+    assertTrue(editMode.isSaveEnabled());
 
-        organizationPage.clickBackButton();
-        organizationPage.waitOrganizationTitle(parentNewName);
-        organizationPage.clickSubOrganizationsTab();
-        organizationListPage.waitForOrganizationsList();
-        assertTrue(organizationListPage.getValues(OrganizationListPage.OrganizationListHeader.NAME).contains(path));
+    editMode.clickSave();
+    editMode.waitHidden();
 
-        organizationPage.clickBackButton();
-        organizationListPage.waitForOrganizationsList();
-        assertTrue(organizationListPage.getValues(OrganizationListPage.OrganizationListHeader.NAME).contains(path));
-        assertTrue(organizationListPage.getValues(OrganizationListPage.OrganizationListHeader.NAME).contains(parentNewName));
-    }
+    String path = parentNewName + "/" + newName;
+    organizationPage.waitOrganizationTitle(path);
+    assertEquals(organizationPage.getOrganizationName(), newName);
+
+    organizationPage.clickBackButton();
+    organizationPage.waitOrganizationTitle(parentNewName);
+    organizationPage.clickSubOrganizationsTab();
+    organizationListPage.waitForOrganizationsList();
+    assertTrue(
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(path));
+
+    organizationPage.clickBackButton();
+    organizationListPage.waitForOrganizationsList();
+    assertTrue(
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(path));
+    assertTrue(
+        organizationListPage
+            .getValues(OrganizationListPage.OrganizationListHeader.NAME)
+            .contains(parentNewName));
+  }
 }

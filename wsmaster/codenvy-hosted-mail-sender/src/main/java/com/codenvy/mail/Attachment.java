@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.mail;
 
 import java.util.Objects;
@@ -19,73 +19,77 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 public class Attachment {
-    private String content;
-    private String contentId;
-    private String fileName;
+  private String content;
+  private String contentId;
+  private String fileName;
 
-    /**
-     * Base-64 encoded string that represents attachment content.
-     */
-    public String getContent() {
-        return content;
-    }
+  /** Base-64 encoded string that represents attachment content. */
+  public String getContent() {
+    return content;
+  }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+  public void setContent(String content) {
+    this.content = content;
+  }
 
-    public Attachment withContent(String content) {
-        this.content = content;
-        return this;
-    }
+  public Attachment withContent(String content) {
+    this.content = content;
+    return this;
+  }
 
-    public String getContentId() {
-        return contentId;
-    }
+  public String getContentId() {
+    return contentId;
+  }
 
-    public void setContentId(String contentId) {
-        this.contentId = contentId;
-    }
+  public void setContentId(String contentId) {
+    this.contentId = contentId;
+  }
 
-    public Attachment withContentId(String contentId) {
-        this.contentId = contentId;
-        return this;
-    }
+  public Attachment withContentId(String contentId) {
+    this.contentId = contentId;
+    return this;
+  }
 
-    public String getFileName() {
-        return fileName;
-    }
+  public String getFileName() {
+    return fileName;
+  }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
 
-    public Attachment withFileName(String fileName) {
-        this.fileName = fileName;
-        return this;
-    }
+  public Attachment withFileName(String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Attachment)) return false;
-        Attachment that = (Attachment)o;
-        return Objects.equals(getContent(), that.getContent()) &&
-               Objects.equals(getContentId(), that.getContentId()) &&
-               Objects.equals(getFileName(), that.getFileName());
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Attachment)) return false;
+    Attachment that = (Attachment) o;
+    return Objects.equals(getContent(), that.getContent())
+        && Objects.equals(getContentId(), that.getContentId())
+        && Objects.equals(getFileName(), that.getFileName());
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getContent(), getContentId(), getFileName());
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(getContent(), getContentId(), getFileName());
+  }
 
-    @Override
-    public String toString() {
-        return "Attachment{" +
-               "content='" + content + '\'' +
-               ", contentId='" + contentId + '\'' +
-               ", fileName='" + fileName + '\'' +
-               '}';
-    }
+  @Override
+  public String toString() {
+    return "Attachment{"
+        + "content='"
+        + content
+        + '\''
+        + ", contentId='"
+        + contentId
+        + '\''
+        + ", fileName='"
+        + fileName
+        + '\''
+        + '}';
+  }
 }

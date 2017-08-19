@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,17 +7,16 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.resource.api.usage.tracker;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.environment.server.EnvironmentParser;
 import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.commons.lang.Size;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Helps to calculate amount of RAM defined in {@link Environment environment}
@@ -25,35 +24,40 @@ import javax.inject.Named;
  * @author Sergii Leschenko
  */
 public class EnvironmentRamCalculator {
-    private static final long BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
+  private static final long BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
-    private final EnvironmentParser environmentParser;
-    private final long              defaultMachineMemorySizeBytes;
+  private final EnvironmentParser environmentParser;
+  private final long defaultMachineMemorySizeBytes;
 
-    @Inject
-    public EnvironmentRamCalculator(EnvironmentParser environmentParser,
-                                    @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB) {
-        this.environmentParser = environmentParser;
-        this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
-    }
+  @Inject
+  public EnvironmentRamCalculator(
+      EnvironmentParser environmentParser,
+      @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB) {
+    this.environmentParser = environmentParser;
+    this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
+  }
 
-    /**
-     * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in environment in megabytes.
-     */
-    public long calculate(Environment environment) throws ServerException {
-        CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
+  /**
+   * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in
+   * environment in megabytes.
+   */
+  public long calculate(Environment environment) throws ServerException {
+    CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
 
-        long sumBytes = composeEnv.getServices()
-                                  .values()
-                                  .stream()
-                                  .mapToLong(value -> {
-                                      if (value.getMemLimit() == null || value.getMemLimit() == 0) {
-                                          return defaultMachineMemorySizeBytes;
-                                      } else {
-                                          return value.getMemLimit();
-                                      }
-                                  })
-                                  .sum();
-        return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
-    }
+    long sumBytes =
+        composeEnv
+            .getServices()
+            .values()
+            .stream()
+            .mapToLong(
+                value -> {
+                  if (value.getMemLimit() == null || value.getMemLimit() == 0) {
+                    return defaultMachineMemorySizeBytes;
+                  } else {
+                    return value.getMemLimit();
+                  }
+                })
+            .sum();
+    return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
+  }
 }

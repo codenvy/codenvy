@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,33 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.bitbucketserver;
-
-import com.codenvy.plugin.webhooks.AuthConnection;
-import com.codenvy.plugin.webhooks.FactoryConnection;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changeset;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changesets;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Commit;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Project;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.PushEvent;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.RefChange;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.Repository;
-import com.codenvy.plugin.webhooks.bitbucketserver.shared.User;
-
-import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.inject.ConfigurationProperties;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-import java.util.HashMap;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.anyObject;
@@ -46,88 +21,128 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+import com.codenvy.plugin.webhooks.AuthConnection;
+import com.codenvy.plugin.webhooks.FactoryConnection;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changeset;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Changesets;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Commit;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Project;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.PushEvent;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.RefChange;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.Repository;
+import com.codenvy.plugin.webhooks.bitbucketserver.shared.User;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.inject.ConfigurationProperties;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
 @Listeners(value = MockitoTestNGListener.class)
 public class BitbucketServerWebhookServiceTest {
 
-    private BitbucketServerWebhookService service;
+  private BitbucketServerWebhookService service;
 
-    private final Map<String, String> parameters = new HashMap<>();
+  private final Map<String, String> parameters = new HashMap<>();
 
-    @BeforeMethod
-    public void setup() throws Exception {
-        FactoryConnection factoryConnection = mock(FactoryConnection.class);
-        FactoryDto factory = mock(FactoryDto.class);
-        WorkspaceConfigDto workspace = mock(WorkspaceConfigDto.class);
-        ProjectConfigDto project = mock(ProjectConfigDto.class);
-        SourceStorageDto source = mock(SourceStorageDto.class);
-        ConfigurationProperties configurationProperties = mock(ConfigurationProperties.class);
-        Map<String, String> properties = new HashMap<>();
-        properties.put("env.CODENVY_BITBUCKET_SERVER_WEBHOOK_WEBHOOK1_REPOSITORY_URL",
-                       "http://owner@bitbucketserver.host/scm/projectkey/repository.git");
-        properties.put("env.CODENVY_BITBUCKET_SERVER_WEBHOOK_WEBHOOK1_FACTORY1_ID", "factoryId");
-        when(configurationProperties.getProperties(eq("env.CODENVY_BITBUCKET_SERVER_WEBHOOK_.+"))).thenReturn(properties);
-        when(factory.getWorkspace()).thenReturn(workspace);
-        when(factory.getLink(anyString())).thenReturn(mock(Link.class));
-        when(factory.getId()).thenReturn("factoryId");
-        when(factoryConnection.getFactory("factoryId")).thenReturn(factory);
-        when(factoryConnection.updateFactory(factory)).thenReturn(factory);
-        when(workspace.getProjects()).thenReturn(singletonList(project));
-        when(project.getSource()).thenReturn(source);
-        when(source.getType()).thenReturn("type");
-        when(source.getLocation()).thenReturn("http://owner@bitbucketserver.host/scm/projectkey/repository.git");
-        parameters.put("branch", "testBranch");
-        when(source.getParameters()).thenReturn(parameters);
+  @BeforeMethod
+  public void setup() throws Exception {
+    FactoryConnection factoryConnection = mock(FactoryConnection.class);
+    FactoryDto factory = mock(FactoryDto.class);
+    WorkspaceConfigDto workspace = mock(WorkspaceConfigDto.class);
+    ProjectConfigDto project = mock(ProjectConfigDto.class);
+    SourceStorageDto source = mock(SourceStorageDto.class);
+    ConfigurationProperties configurationProperties = mock(ConfigurationProperties.class);
+    Map<String, String> properties = new HashMap<>();
+    properties.put(
+        "env.CODENVY_BITBUCKET_SERVER_WEBHOOK_WEBHOOK1_REPOSITORY_URL",
+        "http://owner@bitbucketserver.host/scm/projectkey/repository.git");
+    properties.put("env.CODENVY_BITBUCKET_SERVER_WEBHOOK_WEBHOOK1_FACTORY1_ID", "factoryId");
+    when(configurationProperties.getProperties(eq("env.CODENVY_BITBUCKET_SERVER_WEBHOOK_.+")))
+        .thenReturn(properties);
+    when(factory.getWorkspace()).thenReturn(workspace);
+    when(factory.getLink(anyString())).thenReturn(mock(Link.class));
+    when(factory.getId()).thenReturn("factoryId");
+    when(factoryConnection.getFactory("factoryId")).thenReturn(factory);
+    when(factoryConnection.updateFactory(factory)).thenReturn(factory);
+    when(workspace.getProjects()).thenReturn(singletonList(project));
+    when(project.getSource()).thenReturn(source);
+    when(source.getType()).thenReturn("type");
+    when(source.getLocation())
+        .thenReturn("http://owner@bitbucketserver.host/scm/projectkey/repository.git");
+    parameters.put("branch", "testBranch");
+    when(source.getParameters()).thenReturn(parameters);
 
-        service = spy(new BitbucketServerWebhookService(mock(AuthConnection.class),
-                                                        factoryConnection,
-                                                        configurationProperties,
-                                                        "username",
-                                                        "password",
-                                                        "http://bitbucketserver.host"));
-    }
+    service =
+        spy(
+            new BitbucketServerWebhookService(
+                mock(AuthConnection.class),
+                factoryConnection,
+                configurationProperties,
+                "username",
+                "password",
+                "http://bitbucketserver.host"));
+  }
 
-    @Test
-    public void shouldHandlePushEvent() throws Exception {
-        //given
-        PushEvent pushEvent = createPushEvent("commit");
+  @Test
+  public void shouldHandlePushEvent() throws Exception {
+    //given
+    PushEvent pushEvent = createPushEvent("commit");
 
-        //when
-        service.handleWebhookEvent(pushEvent);
+    //when
+    service.handleWebhookEvent(pushEvent);
 
-        //then
-        verify(service).handlePushEvent(anyObject(), anyString());
-    }
+    //then
+    verify(service).handlePushEvent(anyObject(), anyString());
+  }
 
-    @Test
-    public void shouldChangeFactoryStartPointFromBranchToCommitWhenMergeCommitDetected() throws Exception {
-        //given
-        PushEvent pushEvent = createPushEvent("Merge pull request #3 in ~projectkey/repository from testBranch to master");
+  @Test
+  public void shouldChangeFactoryStartPointFromBranchToCommitWhenMergeCommitDetected()
+      throws Exception {
+    //given
+    PushEvent pushEvent =
+        createPushEvent(
+            "Merge pull request #3 in ~projectkey/repository from testBranch to master");
 
-        //when
-        service.handleWebhookEvent(pushEvent);
+    //when
+    service.handleWebhookEvent(pushEvent);
 
-        //then
-        verify(service).handleMergeEvent(anyObject(), anyString());
-        assertFalse(parameters.containsKey("branch"));
-        assertEquals(parameters.get("commitId"), "hash commit");
-    }
+    //then
+    verify(service).handleMergeEvent(anyObject(), anyString());
+    assertFalse(parameters.containsKey("branch"));
+    assertEquals(parameters.get("commitId"), "hash commit");
+  }
 
-    private PushEvent createPushEvent(String message) {
-        return DtoFactory.newDto(PushEvent.class)
-                         .withRepository(DtoFactory.newDto(Repository.class)
-                                                   .withProject(DtoFactory.newDto(Project.class)
-                                                                          .withOwner(DtoFactory.newDto(User.class)
-                                                                                               .withName("owner"))
-                                                                          .withKey("projectkey"))
-                                                   .withSlug("repository"))
-                         .withRefChanges(singletonList(DtoFactory.newDto(RefChange.class)
-                                                                 .withToHash("hash commit")
-                                                                 .withType("UPDATE")
-                                                                 .withRefId("refs/heads/master")))
-                         .withChangesets(DtoFactory.newDto(Changesets.class)
-                                                   .withValues(singletonList(DtoFactory.newDto(Changeset.class)
-                                                                                       .withToCommit(DtoFactory.newDto(Commit.class)
-                                                                                                               .withId("hash commit")
-                                                                                                               .withMessage(message)))));
-    }
+  private PushEvent createPushEvent(String message) {
+    return DtoFactory.newDto(PushEvent.class)
+        .withRepository(
+            DtoFactory.newDto(Repository.class)
+                .withProject(
+                    DtoFactory.newDto(Project.class)
+                        .withOwner(DtoFactory.newDto(User.class).withName("owner"))
+                        .withKey("projectkey"))
+                .withSlug("repository"))
+        .withRefChanges(
+            singletonList(
+                DtoFactory.newDto(RefChange.class)
+                    .withToHash("hash commit")
+                    .withType("UPDATE")
+                    .withRefId("refs/heads/master")))
+        .withChangesets(
+            DtoFactory.newDto(Changesets.class)
+                .withValues(
+                    singletonList(
+                        DtoFactory.newDto(Changeset.class)
+                            .withToCommit(
+                                DtoFactory.newDto(Commit.class)
+                                    .withId("hash commit")
+                                    .withMessage(message)))));
+  }
 }

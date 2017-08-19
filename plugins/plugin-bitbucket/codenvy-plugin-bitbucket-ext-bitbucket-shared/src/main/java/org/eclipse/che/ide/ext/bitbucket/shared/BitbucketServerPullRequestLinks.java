@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,21 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
 
+import java.util.List;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * Represents links from Bitbucket Server pull request.
- */
+/** Represents links from Bitbucket Server pull request. */
 @DTO
 public interface BitbucketServerPullRequestLinks {
-    List<BitbucketLink> getSelf();
+  List<BitbucketLink> getSelf();
 
-    void setSelf(List<BitbucketLink> self);
+  void setSelf(List<BitbucketLink> self);
 
-    BitbucketServerPullRequestLinks withSelf(List<BitbucketLink> self);
+  BitbucketServerPullRequestLinks withSelf(List<BitbucketLink> self);
 }

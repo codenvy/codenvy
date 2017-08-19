@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,40 +7,34 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.api.audit.server.printer;
 
+import java.nio.file.Path;
 import org.eclipse.che.api.core.ServerException;
 
-import java.nio.file.Path;
-
 /**
- * Prints delimiter into audit report in view of:
- * {empty line}
- * --- {title} ---
+ * Prints delimiter into audit report in view of: {empty line} --- {title} ---
  *
  * @author Dmytro Nochevnov
  */
 public class DelimiterPrinter extends Printer {
 
-    private String title;
+  private String title;
 
-    /**
-     * @param auditReport
-     *          path to the audit report
-     * @param title
-     *          string inside delimiter
-     */
-    public DelimiterPrinter(Path auditReport, String title) {
-        super(auditReport);
+  /**
+   * @param auditReport path to the audit report
+   * @param title string inside delimiter
+   */
+  public DelimiterPrinter(Path auditReport, String title) {
+    super(auditReport);
 
-        this.title = title;
-    }
+    this.title = title;
+  }
 
-    @Override
-    public void print() throws ServerException {
-        printRow("\n");
-        printRow(String.format("--- %s ---\n", title));
-    }
-
+  @Override
+  public void print() throws ServerException {
+    printRow("\n");
+    printRow(String.format("--- %s ---\n", title));
+  }
 }

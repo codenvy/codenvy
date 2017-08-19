@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,18 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.auth.sso.server;
+
+import static com.jayway.restassured.RestAssured.given;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.codenvy.api.dao.authentication.CookieBuilder;
 import com.codenvy.api.dao.authentication.TicketManager;
@@ -23,7 +33,6 @@ import com.codenvy.mail.MailSender;
 import com.codenvy.template.processor.html.HTMLTemplateProcessor;
 import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.jayway.restassured.http.ContentType;
-
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.user.server.UserValidator;
 import org.everrest.assured.EverrestJetty;
@@ -34,16 +43,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static com.jayway.restassured.RestAssured.given;
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Test for {@link BearerTokenAuthenticationService}
  *
@@ -52,61 +51,55 @@ import static org.testng.Assert.assertTrue;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class BearerTokenAuthenticationServiceTest {
 
-    @Mock
-    private BearerTokenAuthenticationHandler         handler;
-    @Mock
-    private MailSender                               mailSender;
-    @Mock
-    private EmailValidator                           emailValidator;
-    @Mock
-    private CookieBuilder                            cookieBuilder;
-    @Mock
-    private UserCreationValidator                    creationValidator;
-    @Mock
-    private UserCreator                              userCreator;
-    @Mock
-    private DefaultEmailResourceResolver             resourceResolver;
-    @Mock
-    private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private BearerTokenAuthenticationHandler handler;
+  @Mock private MailSender mailSender;
+  @Mock private EmailValidator emailValidator;
+  @Mock private CookieBuilder cookieBuilder;
+  @Mock private UserCreationValidator creationValidator;
+  @Mock private UserCreator userCreator;
+  @Mock private DefaultEmailResourceResolver resourceResolver;
+  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
 
-    private BearerTokenAuthenticationService bearerTokenAuthenticationService;
+  private BearerTokenAuthenticationService bearerTokenAuthenticationService;
 
-    @SuppressWarnings("unused")
-    private ApiExceptionMapper apiExceptionMapper;
+  @SuppressWarnings("unused")
+  private ApiExceptionMapper apiExceptionMapper;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        bearerTokenAuthenticationService = new BearerTokenAuthenticationService(mock(TicketManager.class),
-                                                                                mock(TokenGenerator.class),
-                                                                                handler,
-                                                                                mailSender,
-                                                                                emailValidator,
-                                                                                cookieBuilder,
-                                                                                creationValidator,
-                                                                                userCreator,
-                                                                                mock(UserValidator.class),
-                                                                                resourceResolver,
-                                                                                thymeleaf,
-                                                                                "noreply@host",
-                                                                                "Subject");
-    }
+  @BeforeMethod
+  public void setUp() throws Exception {
+    bearerTokenAuthenticationService =
+        new BearerTokenAuthenticationService(
+            mock(TicketManager.class),
+            mock(TokenGenerator.class),
+            handler,
+            mailSender,
+            emailValidator,
+            cookieBuilder,
+            creationValidator,
+            userCreator,
+            mock(UserValidator.class),
+            resourceResolver,
+            thymeleaf,
+            "noreply@host",
+            "Subject");
+  }
 
-    @Test
-    public void shouldSendEmailToValidateUserEmailAndUserName() throws Exception {
-        ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
-        ValidationData validationData = new ValidationData("Email", "UserName");
-        when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
-        when(thymeleaf.process(any())).thenReturn("email body");
+  @Test
+  public void shouldSendEmailToValidateUserEmailAndUserName() throws Exception {
+    ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
+    ValidationData validationData = new ValidationData("Email", "UserName");
+    when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
+    when(thymeleaf.process(any())).thenReturn("email body");
 
-        given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
+    given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
 
-        verify(mailSender).sendMail(argumentCaptor.capture());
-        verify(thymeleaf, times(1)).process(any());
-        verify(resourceResolver, times(1)).resolve(any());
-        EmailBean argumentCaptorValue = argumentCaptor.getValue();
-        assertTrue(!argumentCaptorValue.getBody().isEmpty());
-        assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
-        assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
-        assertEquals(argumentCaptorValue.getSubject(), "Subject");
-    }
+    verify(mailSender).sendMail(argumentCaptor.capture());
+    verify(thymeleaf, times(1)).process(any());
+    verify(resourceResolver, times(1)).resolve(any());
+    EmailBean argumentCaptorValue = argumentCaptor.getValue();
+    assertTrue(!argumentCaptorValue.getBody().isEmpty());
+    assertEquals(argumentCaptorValue.getMimeType(), TEXT_HTML);
+    assertEquals(argumentCaptorValue.getFrom(), "noreply@host");
+    assertEquals(argumentCaptorValue.getSubject(), "Subject");
+  }
 }

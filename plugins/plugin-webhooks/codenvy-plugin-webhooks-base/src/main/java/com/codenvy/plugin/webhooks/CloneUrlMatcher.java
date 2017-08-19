@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Matcher that checks specified project to be related to given clone url and branch.
@@ -22,35 +22,32 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public interface CloneUrlMatcher {
 
-    /**
-     * Default implementation of {@link CloneUrlMatcher}.
-     */
-    CloneUrlMatcher DEFAULT_CLONE_URL_MATCHER = (project, repositoryUrl, branch) -> {
+  /** Default implementation of {@link CloneUrlMatcher}. */
+  CloneUrlMatcher DEFAULT_CLONE_URL_MATCHER =
+      (project, repositoryUrl, branch) -> {
         if (isNullOrEmpty(repositoryUrl) || isNullOrEmpty(branch)) {
-            return false;
+          return false;
         }
 
         final SourceStorageDto source = project.getSource();
         if (source == null) {
-            return false;
+          return false;
         }
 
         final String projectLocation = source.getLocation();
         final String projectBranch = source.getParameters().get("branch");
 
-        return (repositoryUrl.equals(projectLocation) || (repositoryUrl + ".git").equals(projectLocation)) &&
-               ("master".equals(branch) || branch.equals(projectBranch));
-    };
+        return (repositoryUrl.equals(projectLocation)
+                || (repositoryUrl + ".git").equals(projectLocation))
+            && ("master".equals(branch) || branch.equals(projectBranch));
+      };
 
-    /**
-     * Whether or not the given clone url matches repository and branch of the given project.
-     *
-     * @param project
-     *         the project to check
-     * @param cloneUrl
-     *         the clone URL that the project source location has to match
-     * @param branch
-     *         the branch that the project has to match
-     */
-    boolean isCloneUrlMatching(ProjectConfigDto project, String cloneUrl, String branch);
+  /**
+   * Whether or not the given clone url matches repository and branch of the given project.
+   *
+   * @param project the project to check
+   * @param cloneUrl the clone URL that the project source location has to match
+   * @param branch the branch that the project has to match
+   */
+  boolean isCloneUrlMatching(ProjectConfigDto project, String cloneUrl, String branch);
 }

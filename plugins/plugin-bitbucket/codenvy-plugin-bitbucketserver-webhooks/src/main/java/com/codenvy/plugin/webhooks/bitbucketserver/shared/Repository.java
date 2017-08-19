@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.bitbucketserver.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,30 +19,24 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface Repository {
-    /**
-     * Returns the repository's slug.
-     */
-    String getSlug();
+  /** Returns the repository's slug. */
+  String getSlug();
 
-    void setSlug(String slug);
+  void setSlug(String slug);
 
-    Repository withSlug(String slug);
+  Repository withSlug(String slug);
 
-    /**
-     * Returns the repository's name.
-     */
-    String getName();
+  /** Returns the repository's name. */
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    Repository withName(String name);
+  Repository withName(String name);
 
-    /**
-     * Returns {@link Project} object of the repository's project.
-     */
-    Project getProject();
+  /** Returns {@link Project} object of the repository's project. */
+  Project getProject();
 
-    void setProject(Project project);
+  void setProject(Project project);
 
-    Repository withProject(Project project);
+  Repository withProject(Project project);
 }

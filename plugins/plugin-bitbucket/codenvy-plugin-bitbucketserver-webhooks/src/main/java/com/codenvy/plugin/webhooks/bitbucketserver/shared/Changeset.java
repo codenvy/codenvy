@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.plugin.webhooks.bitbucketserver.shared;
 
 import org.eclipse.che.dto.shared.DTO;
@@ -19,21 +19,17 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface Changeset {
-    /**
-     * Returns {@link Commit} object of the new head commit.
-     */
-    Commit getToCommit();
+  /** Returns {@link Commit} object of the new head commit. */
+  Commit getToCommit();
 
-    void setToCommit(Commit toToCommit);
+  void setToCommit(Commit toToCommit);
 
-    Changeset withToCommit(Commit toToCommit);
+  Changeset withToCommit(Commit toToCommit);
 
-    /**
-     * Returns {@link Commit} object of the head commit before the change.
-     */
-    Commit getFromCommit();
+  /** Returns {@link Commit} object of the head commit before the change. */
+  Commit getFromCommit();
 
-    void setFromCommit(Commit toToCommit);
+  void setFromCommit(Commit toToCommit);
 
-    Changeset withFromCommit(Commit toToCommit);
+  Changeset withFromCommit(Commit toToCommit);
 }

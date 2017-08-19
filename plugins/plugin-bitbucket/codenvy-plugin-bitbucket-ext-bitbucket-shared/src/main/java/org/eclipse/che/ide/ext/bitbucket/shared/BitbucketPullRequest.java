@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,9 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.bitbucket.shared;
-
 
 import org.eclipse.che.dto.shared.DTO;
 
@@ -20,107 +19,107 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface BitbucketPullRequest {
-    int getId();
+  int getId();
 
-    void setId(int id);
+  void setId(int id);
 
-    BitbucketPullRequest withId(int id);
+  BitbucketPullRequest withId(int id);
 
-    int getVersion();
+  int getVersion();
 
-    void setVersion(int version);
+  void setVersion(int version);
 
-    BitbucketPullRequest withVersion(int version);
+  BitbucketPullRequest withVersion(int version);
 
-    String getTitle();
+  String getTitle();
 
-    void setTitle(String title);
+  void setTitle(String title);
 
-    BitbucketPullRequest withTitle(String title);
+  BitbucketPullRequest withTitle(String title);
 
-    String getDescription();
+  String getDescription();
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    BitbucketPullRequest withDescription(String description);
+  BitbucketPullRequest withDescription(String description);
 
-    State getState();
+  State getState();
 
-    void setState(State state);
+  void setState(State state);
 
-    BitbucketPullRequest withState(State state);
+  BitbucketPullRequest withState(State state);
 
-    BitbucketPullRequestLinks getLinks();
+  BitbucketPullRequestLinks getLinks();
 
-    void setLinks(BitbucketPullRequestLinks links);
+  void setLinks(BitbucketPullRequestLinks links);
 
-    BitbucketPullRequest withLinks(BitbucketPullRequestLinks links);
+  BitbucketPullRequest withLinks(BitbucketPullRequestLinks links);
 
-    BitbucketPullRequestLocation getSource();
+  BitbucketPullRequestLocation getSource();
 
-    void setSource(BitbucketPullRequestLocation source);
+  void setSource(BitbucketPullRequestLocation source);
 
-    BitbucketPullRequest withSource(BitbucketPullRequestLocation source);
+  BitbucketPullRequest withSource(BitbucketPullRequestLocation source);
 
-    BitbucketPullRequestLocation getDestination();
+  BitbucketPullRequestLocation getDestination();
 
-    void setDestination(BitbucketPullRequestLocation destination);
+  void setDestination(BitbucketPullRequestLocation destination);
 
-    BitbucketPullRequest withDestination(BitbucketPullRequestLocation destination);
+  BitbucketPullRequest withDestination(BitbucketPullRequestLocation destination);
 
-    BitbucketUser getAuthor();
+  BitbucketUser getAuthor();
 
-    void setAuthor(BitbucketUser author);
+  void setAuthor(BitbucketUser author);
 
-    BitbucketPullRequest withAuthor(BitbucketUser author);
+  BitbucketPullRequest withAuthor(BitbucketUser author);
 
-    enum State {
-        OPEN,
-        DECLINED,
-        MERGED
-    }
+  enum State {
+    OPEN,
+    DECLINED,
+    MERGED
+  }
 
-    @DTO
-    interface BitbucketPullRequestLinks {
-        BitbucketLink getSelf();
+  @DTO
+  interface BitbucketPullRequestLinks {
+    BitbucketLink getSelf();
 
-        void setSelf(BitbucketLink self);
+    void setSelf(BitbucketLink self);
 
-        BitbucketLink getHtml();
+    BitbucketLink getHtml();
 
-        void setHtml(BitbucketLink html);
-    }
+    void setHtml(BitbucketLink html);
+  }
 
-    @DTO
-    interface BitbucketPullRequestLocation {
-        BitbucketPullRequestBranch getBranch();
+  @DTO
+  interface BitbucketPullRequestLocation {
+    BitbucketPullRequestBranch getBranch();
 
-        void setBranch(BitbucketPullRequestBranch branch);
+    void setBranch(BitbucketPullRequestBranch branch);
 
-        BitbucketPullRequestLocation withBranch(BitbucketPullRequestBranch branch);
+    BitbucketPullRequestLocation withBranch(BitbucketPullRequestBranch branch);
 
-        BitbucketPullRequestRepository getRepository();
+    BitbucketPullRequestRepository getRepository();
 
-        void setRepository(BitbucketPullRequestRepository repository);
+    void setRepository(BitbucketPullRequestRepository repository);
 
-        BitbucketPullRequestLocation withRepository(BitbucketPullRequestRepository repository);
-    }
+    BitbucketPullRequestLocation withRepository(BitbucketPullRequestRepository repository);
+  }
 
-    @DTO
-    interface BitbucketPullRequestRepository {
-        String getFullName();
+  @DTO
+  interface BitbucketPullRequestRepository {
+    String getFullName();
 
-        void setFullName(String fullName);
+    void setFullName(String fullName);
 
-        BitbucketPullRequestRepository withFullName(String fullName);
-    }
+    BitbucketPullRequestRepository withFullName(String fullName);
+  }
 
-    @DTO
-    interface BitbucketPullRequestBranch {
-        String getName();
+  @DTO
+  interface BitbucketPullRequestBranch {
+    String getName();
 
-        void setName(String name);
+    void setName(String name);
 
-        BitbucketPullRequestBranch withName(String name);
-    }
+    BitbucketPullRequestBranch withName(String name);
+  }
 }

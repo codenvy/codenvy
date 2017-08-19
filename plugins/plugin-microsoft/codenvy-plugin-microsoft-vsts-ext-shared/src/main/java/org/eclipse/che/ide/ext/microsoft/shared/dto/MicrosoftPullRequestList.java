@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,28 +7,25 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package org.eclipse.che.ide.ext.microsoft.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
-
-/**
- * @author Mihail Kuznyetsov
- */
+/** @author Mihail Kuznyetsov */
 @DTO
 public interface MicrosoftPullRequestList {
-    
-    int getCount();
 
-    void setCount(int count);
+  int getCount();
 
-    MicrosoftPullRequestList withCount(int count);
+  void setCount(int count);
 
-    List<MicrosoftPullRequest> getValue();
+  MicrosoftPullRequestList withCount(int count);
 
-    void setValue(List<MicrosoftPullRequest> value);
+  List<MicrosoftPullRequest> getValue();
 
-    MicrosoftPullRequestList withValue(List<MicrosoftPullRequest> value);
+  void setValue(List<MicrosoftPullRequest> value);
+
+  MicrosoftPullRequestList withValue(List<MicrosoftPullRequest> value);
 }

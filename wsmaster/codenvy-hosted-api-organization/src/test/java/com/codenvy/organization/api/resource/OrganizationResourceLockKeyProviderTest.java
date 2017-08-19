@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,20 +7,19 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.organization.api.resource;
+
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import com.codenvy.organization.api.OrganizationManager;
 import com.codenvy.organization.spi.impl.OrganizationImpl;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Tests for {@link OrganizationResourceLockKeyProvider}
@@ -29,33 +28,32 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class OrganizationResourceLockKeyProviderTest {
-    @Mock
-    private OrganizationManager organizationManager;
+  @Mock private OrganizationManager organizationManager;
 
-    @InjectMocks
-    private OrganizationResourceLockKeyProvider lockProvider;
+  @InjectMocks private OrganizationResourceLockKeyProvider lockProvider;
 
-    @Test
-    public void shouldReturnRootOrganizationId() throws Exception {
-        //given
-        createOrganization("root", null);
-        createOrganization("suborg", "root");
-        createOrganization("subsuborg", "suborg");
+  @Test
+  public void shouldReturnRootOrganizationId() throws Exception {
+    //given
+    createOrganization("root", null);
+    createOrganization("suborg", "root");
+    createOrganization("subsuborg", "suborg");
 
-        //when
-        final String lockId = lockProvider.getLockKey("subsuborg");
+    //when
+    final String lockId = lockProvider.getLockKey("subsuborg");
 
-        //then
-        assertEquals(lockId, "root");
-    }
+    //then
+    assertEquals(lockId, "root");
+  }
 
-    @Test
-    public void shouldReturnOrganizationalReturnType() throws Exception {
-        //then
-        assertEquals(lockProvider.getAccountType(), OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
-    }
+  @Test
+  public void shouldReturnOrganizationalReturnType() throws Exception {
+    //then
+    assertEquals(lockProvider.getAccountType(), OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
+  }
 
-    private void createOrganization(String id, String parentId) throws Exception {
-        when(organizationManager.getById(id)).thenReturn(new OrganizationImpl(id, id + "Name", parentId));
-    }
+  private void createOrganization(String id, String parentId) throws Exception {
+    when(organizationManager.getById(id))
+        .thenReturn(new OrganizationImpl(id, id + "Name", parentId));
+  }
 }

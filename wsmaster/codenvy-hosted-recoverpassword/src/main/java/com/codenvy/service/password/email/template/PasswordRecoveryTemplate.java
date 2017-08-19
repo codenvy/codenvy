@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.service.password.email.template;
 
 import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
@@ -19,16 +19,14 @@ import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
  */
 public class PasswordRecoveryTemplate extends ThymeleafTemplate {
 
-    public PasswordRecoveryTemplate(String tokenAgeMessage,
-                                    String masterEndpoint,
-                                    String uuid) {
-        context.setVariable("tokenAgeMessage", tokenAgeMessage);
-        context.setVariable("masterEndpoint", masterEndpoint);
-        context.setVariable("uuid", uuid);
-    }
+  public PasswordRecoveryTemplate(String tokenAgeMessage, String masterEndpoint, String uuid) {
+    context.setVariable("tokenAgeMessage", tokenAgeMessage);
+    context.setVariable("masterEndpoint", masterEndpoint);
+    context.setVariable("uuid", uuid);
+  }
 
-    @Override
-    public String getPath() {
-        return "/email-templates/password_recovery";
-    }
+  @Override
+  public String getPath() {
+    return "/email-templates/password_recovery";
+  }
 }

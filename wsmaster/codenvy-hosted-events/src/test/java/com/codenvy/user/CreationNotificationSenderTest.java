@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) [2012] - [2017] Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,23 +7,8 @@
  *
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
- *******************************************************************************/
+ */
 package com.codenvy.user;
-
-import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
-import com.codenvy.service.password.RecoveryStorage;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
-
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.mockito.Matchers.any;
@@ -35,6 +20,20 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.codenvy.mail.DefaultEmailResourceResolver;
+import com.codenvy.mail.EmailBean;
+import com.codenvy.mail.MailSender;
+import com.codenvy.service.password.RecoveryStorage;
+import com.codenvy.template.processor.html.HTMLTemplateProcessor;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
 /**
  * Tests for {@link CreationNotificationSender}
  *
@@ -43,48 +42,45 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class CreationNotificationSenderTest {
-    @Captor
-    private ArgumentCaptor<EmailBean> argumentCaptor;
+  @Captor private ArgumentCaptor<EmailBean> argumentCaptor;
 
-    @Mock
-    private DefaultEmailResourceResolver             resourceResolver;
-    @Mock
-    private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
-    @Mock
-    private MailSender                               mailSender;
+  @Mock private DefaultEmailResourceResolver resourceResolver;
+  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private MailSender mailSender;
 
-    private CreationNotificationSender notificationSender;
+  private CreationNotificationSender notificationSender;
 
-    @BeforeMethod
-    public void setUp() {
-        RecoveryStorage recoveryStorage = mock(RecoveryStorage.class);
-        when(recoveryStorage.generateRecoverToken(anyString())).thenReturn("uuid");
-        notificationSender = new CreationNotificationSender("http://localhost/api",
-                                                            "noreply@host",
-                                                            recoveryStorage,
-                                                            mailSender,
-                                                            thymeleaf,
-                                                            resourceResolver,
-                                                            "Subject without password",
-                                                            "Subject with password");
-    }
+  @BeforeMethod
+  public void setUp() {
+    RecoveryStorage recoveryStorage = mock(RecoveryStorage.class);
+    when(recoveryStorage.generateRecoverToken(anyString())).thenReturn("uuid");
+    notificationSender =
+        new CreationNotificationSender(
+            "http://localhost/api",
+            "noreply@host",
+            recoveryStorage,
+            mailSender,
+            thymeleaf,
+            resourceResolver,
+            "Subject without password",
+            "Subject with password");
+  }
 
-    @Test
-    public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
-        when(thymeleaf.process(any())).thenReturn("body");
-        when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
-        notificationSender.sendNotification("user123", "test@user.com", true);
+  @Test
+  public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
+    when(thymeleaf.process(any())).thenReturn("body");
+    when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
+    notificationSender.sendNotification("user123", "test@user.com", true);
 
-        verify(mailSender).sendMail(argumentCaptor.capture());
-        verify(resourceResolver, times(1)).resolve(any(EmailBean.class));
-        verify(thymeleaf, times(1)).process(any());
+    verify(mailSender).sendMail(argumentCaptor.capture());
+    verify(resourceResolver, times(1)).resolve(any(EmailBean.class));
+    verify(thymeleaf, times(1)).process(any());
 
-        final EmailBean emailBean = argumentCaptor.getValue();
-        assertTrue(!emailBean.getBody().isEmpty());
-        assertEquals(emailBean.getTo(), "test@user.com");
-        assertEquals(emailBean.getMimeType(), TEXT_HTML);
-        assertEquals(emailBean.getFrom(), "noreply@host");
-        assertEquals(emailBean.getSubject(), "Subject with password");
-    }
-
+    final EmailBean emailBean = argumentCaptor.getValue();
+    assertTrue(!emailBean.getBody().isEmpty());
+    assertEquals(emailBean.getTo(), "test@user.com");
+    assertEquals(emailBean.getMimeType(), TEXT_HTML);
+    assertEquals(emailBean.getFrom(), "noreply@host");
+    assertEquals(emailBean.getSubject(), "Subject with password");
+  }
 }
