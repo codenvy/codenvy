@@ -30,7 +30,7 @@ public class RecoveryStorage {
       throw new IllegalArgumentException("Expiration timeout must not be less or equal 0");
     }
     this.storage =
-        CacheBuilder.<String, String>newBuilder()
+        CacheBuilder.newBuilder()
             .expireAfterAccess(validationMaxAge, TimeUnit.HOURS)
             .maximumSize(10000)
             .build();
