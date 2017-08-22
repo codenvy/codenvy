@@ -836,16 +836,6 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.selenium</groupId>
-                <artifactId>che-selenium-core</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.selenium</groupId>
-                <artifactId>che-selenium-test</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.everrest</groupId>
                 <artifactId>everrest-groovy</artifactId>
                 <version>${org.everrest.version}</version>
