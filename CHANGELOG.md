@@ -1,5 +1,24 @@
 # Change Log
 
+## [5.16.0](https://github.com/codenvy/codenvy/tree/5.16.0) (2017-08-09)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.15.0...5.16.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#2363](https://github.com/codenvy/codenvy/pull/2363) ([riuvshin](https://github.com/riuvshin))
+- adapt to changes in che-dashboard [\#2360](https://github.com/codenvy/codenvy/pull/2360) ([riuvshin](https://github.com/riuvshin))
+- Implement mechanism for providing unique ids for JSON-RPC clients [\#2339](https://github.com/codenvy/codenvy/pull/2339) ([dkuleshov](https://github.com/dkuleshov))
+- set actual parent version [\#2333](https://github.com/codenvy/codenvy/pull/2333) ([riuvshin](https://github.com/riuvshin))
+- RELEASE: Update CHANGELOG [\#2330](https://github.com/codenvy/codenvy/pull/2330) ([riuvshin](https://github.com/riuvshin))
+- Update open-jdk-source-file-location [\#2361](https://github.com/codenvy/codenvy/pull/2361) ([riuvshin](https://github.com/riuvshin))
+- CODENVY-2350: Remove system license [\#2359](https://github.com/codenvy/codenvy/pull/2359) ([tolusha](https://github.com/tolusha))
+- Remove fair-source license management from dashboard [\#2358](https://github.com/codenvy/codenvy/pull/2358) ([ashumilova](https://github.com/ashumilova))
+- add missing image-stacks file [\#2357](https://github.com/codenvy/codenvy/pull/2357) ([riuvshin](https://github.com/riuvshin))
+- update swarm to 1.2.8 [\#2335](https://github.com/codenvy/codenvy/pull/2335) ([riuvshin](https://github.com/riuvshin))
+- RELEASE: Set next development version [\#2328](https://github.com/codenvy/codenvy/pull/2328) ([riuvshin](https://github.com/riuvshin))
+- Change license to EPL [\#2326](https://github.com/codenvy/codenvy/pull/2326) ([mkuznyetsov](https://github.com/mkuznyetsov))
+
+
 ## [5.15.0](https://github.com/codenvy/codenvy/tree/5.15.0) (2017-07-19)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.14.0...5.15.0)
 
