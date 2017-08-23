@@ -1,5 +1,22 @@
 # Change Log
 
+## [5.17.0](https://github.com/codenvy/codenvy/tree/5.17.0) (2017-08-23)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.16.0...5.17.0)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#2393](https://github.com/codenvy/codenvy/pull/2393) ([riuvshin](https://github.com/riuvshin))
+- RELEASE: Set next development version [\#2391](https://github.com/codenvy/codenvy/pull/2391) ([riuvshin](https://github.com/riuvshin))
+- Fix plugin activity IDE version [\#2367](https://github.com/codenvy/codenvy/pull/2367) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Move activity components to plugin-activity [\#2347](https://github.com/codenvy/codenvy/pull/2347) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Introduce selenium tests [\#2336](https://github.com/codenvy/codenvy/pull/2336) ([tolusha](https://github.com/tolusha))
+- Fix some error prone cases [\#2384](https://github.com/codenvy/codenvy/pull/2384) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- Replace Window.open\(\) with JS native call [\#2382](https://github.com/codenvy/codenvy/pull/2382) ([vparfonov](https://github.com/vparfonov))
+- Remove license filters [\#2372](https://github.com/codenvy/codenvy/pull/2372) ([tolusha](https://github.com/tolusha))
+- RELEASE: Set next development version [\#2363](https://github.com/codenvy/codenvy/pull/2363) ([riuvshin](https://github.com/riuvshin))
+- adapt to changes in che-dashboard [\#2360](https://github.com/codenvy/codenvy/pull/2360) ([riuvshin](https://github.com/riuvshin))
+
+
 ## [5.16.0](https://github.com/codenvy/codenvy/tree/5.16.0) (2017-08-09)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.15.0...5.16.0)
 
