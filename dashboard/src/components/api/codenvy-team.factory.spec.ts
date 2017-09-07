@@ -111,6 +111,9 @@ describe('CodenvyTeam', () => {
 
       // setup backend for teams
       codenvyHttpBackend.teamsBackendSetup();
+
+      let profile = cheAPIBuilder.getProfileBuilder().withId('idDefaultUser').withEmail('eclipseChe@eclipse.org').build();
+      httpBackend.when('GET', '/api/profile').respond(200, profile);
     });
 
     it('should reject promise if team\'s request failed', () => {

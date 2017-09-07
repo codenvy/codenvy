@@ -310,10 +310,7 @@ export class OrganizationsConfigService {
 
     parentQualifiedNameDefer.resolve(this.$route.current.params.parentQualifiedName || '');
     parentQualifiedNameDefer.promise.then((name: string) => {
-        if (name) {
-          return this.getOrFetchOrganizationByName(name);
-        }
-        return this.$q.reject('Cannot get parent for root organization');
+        return this.getOrFetchOrganizationByName(name);
       }
     ).then(
       /* resolve parent organization ID */
