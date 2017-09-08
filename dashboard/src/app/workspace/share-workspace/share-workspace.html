@@ -62,21 +62,23 @@
       </div>
     </che-list-header>
   </div>
-    <che-list flex ng-if="shareWorkspaceController.users && shareWorkspaceController.users.length > 0">
-      <user-item
-              ng-repeat="user in shareWorkspaceController.cheListHelper.getVisibleItems() | orderBy:shareWorkspaceController.userOrderBy"
-              codenvy-user="user" callback="shareWorkspaceController"></user-item>
-    </che-list>
+  <che-list flex ng-if="shareWorkspaceController.users && shareWorkspaceController.users.length > 0">
+    <user-item
+      ng-repeat="user in shareWorkspaceController.cheListHelper.getVisibleItems() | orderBy:shareWorkspaceController.userOrderBy"
+      codenvy-user="user" callback="shareWorkspaceController"></user-item>
+  </che-list>
 
-    <div class="che-list-empty">
-        <span ng-show="shareWorkspaceController.users.length > 0 && shareWorkspaceController.cheListHelper.visibleItemsNumber === 0">
+  <div class="che-list-empty">
+        <span
+          ng-show="shareWorkspaceController.users.length > 0 && shareWorkspaceController.cheListHelper.visibleItemsNumber === 0">
           No members found.
         </span>
-      <span ng-show="shareWorkspaceController.users.length === 0">There are no members.</span>
-    </div>
+    <span ng-show="shareWorkspaceController.users.length === 0">There are no members.</span>
+  </div>
 
 </md-content>
-<div ng-if="!shareWorkspaceController.noPermissionsError" class="no-permissions-error" layout="row" layout-align="center center">
+<div ng-if="!shareWorkspaceController.noPermissionsError" class="no-permissions-error" layout="row"
+     layout-align="center center">
   <span class="material-design icon-ic_error_outline_24px"></span>
   You have no access to view workspace permissions.
 </div>
