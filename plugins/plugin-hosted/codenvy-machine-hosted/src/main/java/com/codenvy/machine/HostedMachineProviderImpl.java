@@ -214,17 +214,14 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
               .withBuildArgs(buildArgs),
           progressMonitor);
     } catch (ImageNotFoundException e) {
-      throw new SourceNotFoundException(format("Failed to get image: %s. Cause: %s",
-                                               image,
-                                               e.getLocalizedMessage()),
-                                        e);
+      throw new SourceNotFoundException(
+          format("Failed to get image: %s. Cause: %s", image, e.getLocalizedMessage()), e);
     } catch (DockerException e) {
       // Check whether image to pull is a snapshot and if so then fallback to workspace recipe.
       if (image != null && SNAPSHOT_LOCATION_PATTERN.matcher(image).matches()) {
-        throw new SourceNotFoundException(format("Failed to get snapshot image: %s. Cause: %s",
-                                                 image,
-                                                 e.getLocalizedMessage()),
-                                          e);
+        throw new SourceNotFoundException(
+            format("Failed to get snapshot image: %s. Cause: %s", image, e.getLocalizedMessage()),
+            e);
       }
       throw new MachineException(e.getLocalizedMessage(), e);
     } catch (IOException e) {
