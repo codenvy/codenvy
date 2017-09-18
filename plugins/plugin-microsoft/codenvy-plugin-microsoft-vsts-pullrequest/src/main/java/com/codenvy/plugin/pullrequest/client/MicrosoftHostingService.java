@@ -41,6 +41,7 @@ import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
 import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
 import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * {@link VcsHostingService} implementation for Microsoft VSTS
@@ -59,6 +60,7 @@ public class MicrosoftHostingService implements VcsHostingService {
   private final MicrosoftServiceClient microsoftClient;
   private final String baseUrl;
   private final MicrosoftTemplates microsoftTemplates;
+  private final SecurityTokenProvider securityTokenProvider;
 
   private String account;
   private String collection;
@@ -69,19 +71,26 @@ public class MicrosoftHostingService implements VcsHostingService {
       AppContext appContext,
       DtoFactory dtoFactory,
       MicrosoftServiceClient microsoftClient,
-      MicrosoftTemplates microsoftTemplates) {
+      MicrosoftTemplates microsoftTemplates,
+      SecurityTokenProvider securityTokenProvider) {
     this.baseUrl = baseUrl;
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
     this.microsoftClient = microsoftClient;
     this.microsoftTemplates = microsoftTemplates;
+    this.securityTokenProvider = securityTokenProvider;
   }
 
   @Override
   public VcsHostingService init(String remoteUrl) {
     MicrosoftHostingService service =
         new MicrosoftHostingService(
-            baseUrl, appContext, dtoFactory, microsoftClient, microsoftTemplates);
+            baseUrl,
+            appContext,
+            dtoFactory,
+            microsoftClient,
+            microsoftTemplates,
+            securityTokenProvider);
     service.account = getAccountFromRemoteUrl(remoteUrl);
     service.collection = getCollectionFromRemoteUrl(remoteUrl);
     return service;
@@ -302,7 +311,7 @@ public class MicrosoftHostingService implements VcsHostingService {
             + Window.Location.getHost()
             + "/ws/"
             + workspace.getConfig().getName();
-    return ServiceUtil.performWindowAuth(this, authUrl);
+    return ServiceUtil.performWindowAuth(this, authUrl, securityTokenProvider);
   }
 
   @Override

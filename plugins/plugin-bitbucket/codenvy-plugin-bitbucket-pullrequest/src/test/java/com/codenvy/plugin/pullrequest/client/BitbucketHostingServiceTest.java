@@ -17,6 +17,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.bitbucket.client.BitbucketClientService;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
@@ -49,6 +50,7 @@ public class BitbucketHostingServiceTest {
             bitbucketClientService,
             bitBucketTemplates,
             bitBucketServerTemplates,
+            new SecurityTokenProvider(),
             "");
   }
 

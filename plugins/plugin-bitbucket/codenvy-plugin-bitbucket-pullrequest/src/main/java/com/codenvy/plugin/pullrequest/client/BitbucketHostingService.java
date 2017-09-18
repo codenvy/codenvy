@@ -53,6 +53,7 @@ import org.eclipse.che.plugin.pullrequest.client.vcs.hosting.VcsHostingService;
 import org.eclipse.che.plugin.pullrequest.shared.dto.HostUser;
 import org.eclipse.che.plugin.pullrequest.shared.dto.PullRequest;
 import org.eclipse.che.plugin.pullrequest.shared.dto.Repository;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * {@link VcsHostingService} implementation for Bitbucket.
@@ -77,6 +78,7 @@ public class BitbucketHostingService implements VcsHostingService {
   private final DtoFactory dtoFactory;
   private final BitbucketClientService bitbucketClientService;
   private final String baseUrl;
+  private final SecurityTokenProvider securityTokenProvider;
 
   private HostingServiceTemplates templates;
   private String remoteUrl;
@@ -89,12 +91,14 @@ public class BitbucketHostingService implements VcsHostingService {
       final BitbucketClientService bitbucketClientService,
       final BitBucketTemplates templates,
       final BitBucketServerTemplates bitbucketServerTemplates,
+      final SecurityTokenProvider securityTokenProvider,
       @RestContext final String baseUrl) {
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
     this.bitbucketClientService = bitbucketClientService;
     this.templates = templates;
     this.baseUrl = baseUrl;
+    this.securityTokenProvider = securityTokenProvider;
 
     bitbucketClientService
         .getBitbucketEndpoint()
@@ -411,7 +415,7 @@ public class BitbucketHostingService implements VcsHostingService {
             + Window.Location.getHost()
             + "/ws/"
             + workspace.getConfig().getName();
-    return ServiceUtil.performWindowAuth(this, authUrl);
+    return ServiceUtil.performWindowAuth(this, authUrl, securityTokenProvider);
   }
 
   @Override

@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Provides SSH keys for bitbucket.org and deploys it.
@@ -42,6 +43,7 @@ public class BitbucketSshKeyProvider implements SshKeyUploader, OAuthCallback {
   private final NotificationManager notificationManager;
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
+  private final SecurityTokenProvider securityTokenProvider;
   private AsyncCallback<Void> callback;
   private String userId;
 
@@ -52,7 +54,8 @@ public class BitbucketSshKeyProvider implements SshKeyUploader, OAuthCallback {
       @NotNull final BitbucketLocalizationConstant constant,
       @NotNull final NotificationManager notificationManager,
       @NotNull final DialogFactory dialogFactory,
-      AppContext appContext) {
+      AppContext appContext,
+      @NotNull final SecurityTokenProvider securityTokenProvider) {
 
     this.bitbucketService = bitbucketService;
     this.baseUrl = baseUrl;
@@ -60,6 +63,7 @@ public class BitbucketSshKeyProvider implements SshKeyUploader, OAuthCallback {
     this.notificationManager = notificationManager;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
+    this.securityTokenProvider = securityTokenProvider;
   }
 
   @Override
@@ -113,7 +117,7 @@ public class BitbucketSshKeyProvider implements SshKeyUploader, OAuthCallback {
             + "/ws/"
             + appContext.getWorkspace().getConfig().getName();
 
-    new JsOAuthWindow(authUrl, "error.url", 500, 980, this).loginWithOAuth();
+    new JsOAuthWindow(authUrl, "error.url", 500, 980, this, securityTokenProvider).loginWithOAuth();
   }
 
   @Override
