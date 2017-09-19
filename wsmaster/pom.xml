@@ -50,7 +50,6 @@
         <module>codenvy-hosted-api-factory</module>
         <module>codenvy-hosted-integration-tests</module>
         <module>codenvy-ldap</module>
-        <module>codenvy-hosted-report-shared</module>
         <module>codenvy-hosted-api-admin</module>
         <module>codenvy-hosted-api-resource-shared</module>
         <module>codenvy-hosted-api-resource</module>

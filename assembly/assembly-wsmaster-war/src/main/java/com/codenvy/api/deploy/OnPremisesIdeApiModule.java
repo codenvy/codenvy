@@ -47,7 +47,6 @@ import com.codenvy.machine.backup.EnvironmentBackupManager;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.gitlab.factory.resolver.GitlabFactoryParametersResolver;
-import com.codenvy.report.ReportModule;
 import com.codenvy.resource.api.ResourceModule;
 import com.codenvy.service.bitbucket.BitbucketConfigurationService;
 import com.codenvy.service.system.DockerBasedSystemRamInfoProvider;
@@ -484,9 +483,6 @@ public class OnPremisesIdeApiModule extends AbstractModule {
     if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
       install(new LdapModule());
     }
-
-    // install report sender
-    install(new ReportModule());
 
     bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
         .to(com.codenvy.workspace.WorkspaceFilesCleanUpScriptExecutor.class);
