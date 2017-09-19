@@ -42,12 +42,12 @@ public class CheckFindActionInCodenvyFeatureTest {
 
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY =
       "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ...  GitCommandGroup\n"
+          + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "SvnCredentialsCommandGroup  Subversion";
 
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY =
-      "Branches...  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
+      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
       "Update Project Configuration...  Project\n"
@@ -66,7 +66,7 @@ public class CheckFindActionInCodenvyFeatureTest {
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
       "Commands \n"
           + "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ...  GitCommandGroup\n"
+          + "Commit ... [Alt+C]  GitCommandGroup\n"
           + "Commit...  SvnFileCommandGroup\n"
           + "Execute default command of Debug goal [Alt+D] \n"
           + "Execute default command of Run goal [Alt+R] \n"
@@ -78,7 +78,7 @@ public class CheckFindActionInCodenvyFeatureTest {
           + "SvnRemoteCommandGroup \n"
           + "SvnRepositoryCommandGroup ";
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
-      "Branches...  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
+      "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String PROJECT_NAME =
       CheckFindActionInCodenvyFeatureTest.class.getSimpleName();
