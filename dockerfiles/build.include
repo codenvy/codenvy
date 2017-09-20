@@ -8,6 +8,9 @@
 # Contributors:
 #   Florent Benoit - Initial Implementation
 
+set -e
+set -u
+
 skip_update() {
   for i in "$@" ; do
     if [ $i = "--skip-update" ]; then
