@@ -5,6 +5,8 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+set -e
+
 IMAGE_NAME="codenvy/agents"
 DIR=$(cd "$(dirname "$0")"; pwd)
 . ${DIR}/../build.include

@@ -5,6 +5,8 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+set -e
+
 IMAGE_NAME="codenvy/rsyslog"
 . $(cd "$(dirname "$0")"; pwd)/../build.include
 

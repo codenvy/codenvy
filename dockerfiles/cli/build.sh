@@ -8,6 +8,8 @@
 # Contributors:
 #   Florent Benoit - Initial Implementation
 
+set -e
+
 IMAGE_NAME="codenvy/cli"
 
 base_dir=$(cd "$(dirname "$0")"; pwd)
