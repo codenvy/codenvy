@@ -17,11 +17,11 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -55,6 +55,7 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
   @Inject private TestUserServiceClient testUserServiceClient;
   @Inject private TestApiEndpointUrlProvider apiEndpointUrlProvider;
   @Inject private TestUserNamespaceResolver testUserNamespaceResolver;
+  @Inject private TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
 
   private TestFactory testFactory;
 
@@ -73,10 +74,7 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
     String authToken = cookieNamed.getValue();
     User user = testUserServiceClient.getUser(authToken);
     TestWorkspaceServiceClient workspaceServiceClient =
-        new TestWorkspaceServiceClient(
-            apiEndpointUrlProvider,
-            new TestUserHttpJsonRequestFactory(authToken),
-            testUserNamespaceResolver);
+        testWorkspaceServiceClientFactory.create(authToken);
     workspaceServiceClient
         .getAll()
         .forEach(
