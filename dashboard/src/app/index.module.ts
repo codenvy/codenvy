@@ -80,7 +80,7 @@ initModule.controller('LoginCtrl', LoginCtrl);
 
 
 // config routes
-initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipProvider) => {
+initModule.config(['$routeProvider', ($routeProvider) => {
   $routeProvider
     .accessWhen('/login', {
       title: 'Login',
@@ -91,9 +91,6 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
     .accessOtherWise({
       redirectTo: '/workspaces'
     });
-    //add .swf path location using ngClipProvider
-    let ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
-    ngClipProvider.setPath(ngClipProviderPath);
 }]);
 
 // add tasks to run
