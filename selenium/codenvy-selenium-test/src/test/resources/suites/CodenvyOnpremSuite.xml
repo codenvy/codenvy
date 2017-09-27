@@ -406,7 +406,7 @@
             <class name="org.eclipse.che.selenium.mavenplugin.GenerateEffectivePomTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.CheckCreatingProjectInEmptyWsTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.CheckMacrosFeatureTest"/>
-            <class name="org.eclipse.che.selenium.miscellaneous.CheckWsAgentAfterStopProcessTest">
+            <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcess">
                 <methods>
                     <!-- unstable -->
                     <exclude name="checkDialogAfterKillingProcess"/>
