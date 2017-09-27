@@ -750,7 +750,7 @@
             <class name="org.eclipse.che.selenium.refactor.parameters.FailParametersTest"/>
             <class name="org.eclipse.che.selenium.refactor.parameters.RenameParametersTest"/>
             <class name="org.eclipse.che.selenium.refactor.preview.CheckTreeInRefactorPanelTest"/>
-            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefreshTest"/>
+            <class name="org.eclipse.che.selenium.refactor.preview.PreviewRefactoringTest"/>
             <class name="org.eclipse.che.selenium.refactor.types.GenericsTest">
                 <methods>
                     <!-- unstable -->
