@@ -52,19 +52,28 @@ defineProfileConfiguration $@
 
 cd ${CUR_DIR}
 
-mvn clean dependency:unpack-dependencies \
-    -DincludeArtifactIds=che-selenium-core \
-    -DincludeGroupIds=org.eclipse.che.selenium \
-    -Dmdep.unpack.includes=webdriver.sh \
-    -DoutputDirectory=${CUR_DIR}/target/bin
-chmod +x ${CUR_DIR}/target/bin/webdriver.sh
-
 TESTS_SCOPE="--suite=CodenvyOnpremSuite.xml"
+CLEAN_TARGET_COMMAND="clean"
 for var in "$@"; do
     if [[ "$var" =~ --test=.* ]] || [[ "$var" =~ --suite=.* ]]; then
         TESTS_SCOPE=
         break
     fi
+
+    if [[ "$var" == "--compare-with-ci" ]] \
+        || [[ "$var" == "--failed-tests" ]] \
+        || [[ "$var" == "--regression-tests" ]]; then
+        TESTS_SCOPE=
+        CLEAN_TARGET_COMMAND=
+        break
+    fi
 done
+
+mvn $CLEAN_TARGET_COMMAND dependency:unpack-dependencies \
+    -DincludeArtifactIds=che-selenium-core \
+    -DincludeGroupIds=org.eclipse.che.selenium \
+    -Dmdep.unpack.includes=webdriver.sh \
+    -DoutputDirectory=${CUR_DIR}/target/bin
+chmod +x ${CUR_DIR}/target/bin/webdriver.sh
 
 (target/bin/webdriver.sh "$TESTS_SCOPE" $@ "$PROFILE_ARGS")
