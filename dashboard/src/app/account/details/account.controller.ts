@@ -22,6 +22,7 @@ export class AccountController {
   private selectedTabIndex: number;
   private profileAttributes: che.IProfileAttributes;
   private newPassword: string;
+  private profileInformationForm: ng.IFormController;
 
   private isLoading: boolean;
 
@@ -68,8 +69,7 @@ export class AccountController {
     $scope.$watch(() => {
       return this.profileAttributes;
     }, () => {
-      const form: ng.IFormController = $scope.profileInformationForm;
-      if (!form || form.$invalid) {
+      if (!this.profileInformationForm || this.profileInformationForm.$invalid) {
         return;
       }
       if (angular.isDefined(timeoutPromise)) {
