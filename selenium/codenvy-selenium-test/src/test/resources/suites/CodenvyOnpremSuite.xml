@@ -27,7 +27,7 @@
                     <exclude name="organizeImportsTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCharpLanguageTest"/>
+            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCSharpLanguageTest"/>
             <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
                 <methods>
                     <!-- unstable -->
