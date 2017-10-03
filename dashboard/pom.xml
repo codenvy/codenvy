@@ -29,87 +29,12 @@
         <finalName>dashboard-war</finalName>
         <plugins>
             <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${basedir}/bower_components</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                        <fileset>
-                            <directory>${basedir}/node_modules</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                        <fileset>
-                            <directory>${basedir}/dist</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- Download NPM dependencies -->
-                                <exec dir="${basedir}" executable="npm" failonerror="true">
-                                    <arg value="install" />
-                                </exec>
-                                <!-- Disable development mode -->
-                                <replace file="${basedir}/src/app/index.module.ts">
-                                    <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
-                                </replace>
-                                <!-- Build the application -->
-                                <exec dir="${basedir}" executable="npm" failonerror="true">
-                                    <arg value="run" />
-                                    <arg value="build" />
-                                </exec>
-                                <!-- Change base HREF of the application that will be hosted on /dashboard -->
-                                <replace file="${basedir}/dist/index.html">
-                                    <replacetoken><![CDATA[<base href="/">]]></replacetoken>
-                                    <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
-                                </replace>
-                                <!-- Enable back development mode -->
-                                <replace file="${basedir}/src/app/index.module.ts">
-                                    <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
-                                </replace>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                      <id>compilation</id>
-                      <phase>test</phase>
-                      <goals>
-                        <goal>run</goal>
-                      </goals>
-                      <configuration>
-                        <target unless="skipTests">
-                          <!-- Run unit tests -->
-                          <exec dir="${basedir}" executable="npm" failonerror="true">
-                            <arg value="run" />
-                            <arg value="test" />
-                          </exec>
-                        </target>
-                      </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <webResources>
                         <resource>
-                            <directory>dist</directory>
+                            <directory>target/dist</directory>
                         </resource>
                     </webResources>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -135,6 +60,138 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <!-- Docker build used by default, to use native build, use -Pnative -->
+            <id>docker</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build-image</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard with maven -->
+                                        <exec dir="${basedir}" executable="docker" failonerror="true">
+                                            <arg value="build" />
+                                            <arg value="-t" />
+                                            <arg value="codenvy-dashboard" />
+                                            <arg value="." />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-docker-build</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build user dashboard with docker -->
+                                        <exec executable="bash">
+                                            <arg value="-c" />
+                                            <arg value="docker run --rm codenvy-dashboard | tar -C target/ -xf -" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${basedir}/bower_components</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                                <fileset>
+                                    <directory>${basedir}/node_modules</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                                <fileset>
+                                    <directory>${basedir}/dist</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Download NPM dependencies -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="install" />
+                                        </exec>
+                                        <!-- Disable development mode -->
+                                        <replace file="${basedir}/src/app/index.module.ts">
+                                            <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
+                                            <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
+                                        </replace>
+                                        <!-- Build the application -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="run" />
+                                            <arg value="build" />
+                                        </exec>
+                                        <!-- Change base HREF of the application that will be hosted on /dashboard -->
+                                        <replace file="${basedir}/target/dist/index.html">
+                                            <replacetoken><![CDATA[<base href="/">]]></replacetoken>
+                                            <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
+                                        </replace>
+                                        <!-- Enable back development mode -->
+                                        <replace file="${basedir}/src/app/index.module.ts">
+                                            <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
+                                            <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
+                                        </replace>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compilation</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target unless="skipTests">
+                                        <!-- Run unit tests -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="run" />
+                                            <arg value="test" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>qa</id>
             <build>
