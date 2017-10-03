@@ -19,7 +19,9 @@ import java.util.Arrays;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -28,7 +30,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author */
 @Singleton
-public class LoginAndCreateOnpremAccountPage {
+public class LoginAndCreateOnpremAccountPage implements LoginPage {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
@@ -96,6 +98,27 @@ public class LoginAndCreateOnpremAccountPage {
 
   @FindBy(xpath = Locators.EMAIL_INPUT_XPATH)
   private WebElement emailInput;
+
+  @Override
+  public void login(String username, String password) {
+    waitMainElementsOnLoginPage();
+    usernameInput.clear();
+    usernameInput.sendKeys(username);
+    passwordInput.clear();
+    passwordInput.sendKeys(password);
+    clickOnLogInBtnAndGo();
+  }
+
+  @Override
+  public boolean isOpened() {
+    try {
+      waitLoginPage();
+      return true;
+    } catch (TimeoutException ex) {
+      ex.printStackTrace();
+      return false;
+    }
+  }
 
   /** wait main elements on login page */
   public void waitLoginPage() {
