@@ -11,8 +11,6 @@
 package com.codenvy.selenium.core;
 
 import com.codenvy.selenium.OnpremSeleniumWebDriverRelatedModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.Module;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +20,10 @@ import org.eclipse.che.selenium.core.inject.SeleniumTestHandler;
 public class OnpremSeleniumTestHandler extends SeleniumTestHandler {
 
   @Override
-  public Injector createParentInjector() {
-    return Guice.createInjector(new OnpremSeleniumSuiteModule());
+  public List<Module> getParentModules() {
+    List<Module> modules = new ArrayList<>();
+    modules.add(new OnpremSeleniumSuiteModule());
+    return modules;
   }
 
   @Override
