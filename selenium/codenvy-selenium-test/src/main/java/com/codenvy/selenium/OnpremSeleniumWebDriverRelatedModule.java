@@ -10,9 +10,9 @@
  */
 package com.codenvy.selenium;
 
+import com.codenvy.selenium.core.entrance.OnpremEntranceImpl;
 import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.AbstractModule;
-import org.eclipse.che.selenium.core.entrance.CookieEntrance;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 
@@ -21,6 +21,6 @@ public class OnpremSeleniumWebDriverRelatedModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(LoginPage.class).to(LoginAndCreateOnpremAccountPage.class);
-    bind(Entrance.class).to(CookieEntrance.class);
+    bind(Entrance.class).to(OnpremEntranceImpl.class);
   }
 }
