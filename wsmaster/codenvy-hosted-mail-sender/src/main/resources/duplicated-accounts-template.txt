@@ -1,5 +1,0 @@
-Please, be advised that due to improvements of Codenvy.com database we have merged your multiple accounts registered with ${user.email} email into one single account.
-
-
-
-To login to your account, please, use password recovery procedure at https://codenvy.com/recover-password.jsp

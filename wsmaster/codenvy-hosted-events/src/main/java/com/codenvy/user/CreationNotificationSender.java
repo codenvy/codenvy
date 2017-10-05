@@ -13,20 +13,23 @@ package com.codenvy.user;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
 import com.codenvy.service.password.RecoveryStorage;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.codenvy.user.email.template.CreateUserWithPasswordTemplate;
 import com.codenvy.user.email.template.CreateUserWithoutPasswordTemplate;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.ServerException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.SendMailException;
+import org.eclipse.che.mail.template.Template;
+import org.eclipse.che.mail.template.TemplateProcessor;
+import org.eclipse.che.mail.template.exception.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +47,7 @@ public class CreationNotificationSender {
   private final String mailFrom;
   private final MailSender mailSender;
   private final RecoveryStorage recoveryStorage;
-  private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  private final TemplateProcessor templateProcessor;
   private final DefaultEmailResourceResolver resourceResolver;
   private final String accountCreatedWithoutPasswordMailSubject;
   private final String accountCreatedWithPasswordMailSubject;
@@ -52,10 +55,10 @@ public class CreationNotificationSender {
   @Inject
   public CreationNotificationSender(
       @Named("che.api") String apiEndpoint,
-      @Named("mailsender.application.from.email.address") String mailFrom,
+      @Named("che.mail.from_email_address") String mailFrom,
       RecoveryStorage recoveryStorage,
       MailSender mailSender,
-      HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
+      TemplateProcessor templateProcessor,
       DefaultEmailResourceResolver resourceResolver,
       @Named("account.created.byuser.mail.subject") String accountCreatedWithoutPasswordMailSubject,
       @Named("account.created.byadmin.mail.subject") String accountCreatedWithPasswordMailSubject) {
@@ -63,7 +66,7 @@ public class CreationNotificationSender {
     this.mailFrom = mailFrom;
     this.recoveryStorage = recoveryStorage;
     this.mailSender = mailSender;
-    this.thymeleaf = thymeleaf;
+    this.templateProcessor = templateProcessor;
     this.resourceResolver = resourceResolver;
     this.accountCreatedWithoutPasswordMailSubject = accountCreatedWithoutPasswordMailSubject;
     this.accountCreatedWithPasswordMailSubject = accountCreatedWithPasswordMailSubject;
@@ -73,13 +76,13 @@ public class CreationNotificationSender {
       throws IOException, ApiException {
     final URL urlEndpoint = new URL(apiEndpoint);
     final String masterEndpoint = urlEndpoint.getProtocol() + "://" + urlEndpoint.getHost();
-    final ThymeleafTemplate template =
+    final Template template =
         withPassword
             ? templateWithPassword(masterEndpoint, userEmail, userName)
             : templateWithoutPassword(masterEndpoint, userName);
     final EmailBean emailBean =
         new EmailBean()
-            .withBody(thymeleaf.process(template))
+            .withBody(doProcessTemplate(template))
             .withFrom(mailFrom)
             .withTo(userEmail)
             .withReplyTo(null)
@@ -90,11 +93,22 @@ public class CreationNotificationSender {
       emailBean.setSubject(accountCreatedWithoutPasswordMailSubject);
     }
 
-    mailSender.sendMail(resourceResolver.resolve(emailBean));
+    try {
+      mailSender.sendMail(resourceResolver.resolve(emailBean));
+    } catch (SendMailException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
   }
 
-  private ThymeleafTemplate templateWithPassword(
-      String masterEndpoint, String userEmail, String userName) {
+  private String doProcessTemplate(Template template) throws ServerException {
+    try {
+      return templateProcessor.process(template);
+    } catch (TemplateException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
+  }
+
+  private Template templateWithPassword(String masterEndpoint, String userEmail, String userName) {
     final String uuid = recoveryStorage.generateRecoverToken(userEmail);
     final String resetPasswordLink =
         UriBuilder.fromUri(masterEndpoint)
@@ -105,7 +119,7 @@ public class CreationNotificationSender {
     return new CreateUserWithPasswordTemplate(masterEndpoint, resetPasswordLink, userName);
   }
 
-  private ThymeleafTemplate templateWithoutPassword(String masterEndpoint, String userName) {
+  private Template templateWithoutPassword(String masterEndpoint, String userName) {
     return new CreateUserWithoutPasswordTemplate(masterEndpoint, userName);
   }
 }

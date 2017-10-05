@@ -10,23 +10,25 @@
  */
 package com.codenvy.service.password.email.template;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
- * Thymeleaf template for password recovery email notifications.
+ * Template for password recovery email notifications.
  *
  * @author Anton Korneta
  */
-public class PasswordRecoveryTemplate extends ThymeleafTemplate {
+public class PasswordRecoveryTemplate extends Template {
+
+  private static final String PASSWORD_RECOVERY_EMAIL_TEMPLATE =
+      "/email-templates/password_recovery";
 
   public PasswordRecoveryTemplate(String tokenAgeMessage, String masterEndpoint, String uuid) {
-    context.setVariable("tokenAgeMessage", tokenAgeMessage);
-    context.setVariable("masterEndpoint", masterEndpoint);
-    context.setVariable("uuid", uuid);
-  }
-
-  @Override
-  public String getPath() {
-    return "/email-templates/password_recovery";
+    super(
+        PASSWORD_RECOVERY_EMAIL_TEMPLATE,
+        ImmutableMap.of(
+            "tokenAgeMessage", tokenAgeMessage,
+            "masterEndpoint", masterEndpoint,
+            "uuid", uuid));
   }
 }

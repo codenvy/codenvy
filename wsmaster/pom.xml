@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
     <name>Codenvy Master Parent</name>
     <modules>
-        <module>codenvy-hosted-mail-sender</module>
+        <module>codenvy-hosted-mail-resources</module>
         <module>codenvy-hosted-template-processor</module>
         <module>codenvy-hosted-platform-api-impl</module>
         <module>codenvy-hosted-recoverpassword</module>

@@ -10,21 +10,22 @@
  */
 package com.codenvy.api.invite.email;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
  * Defines thymeleaf template organization member invitation.
  *
  * @author Sergii Leshchenko
  */
-public class MemberInvitationTemplate extends ThymeleafTemplate {
-  public MemberInvitationTemplate(String initiator, String joinLink) {
-    context.setVariable("initiator", initiator);
-    context.setVariable("joinLink", joinLink);
-  }
+public class MemberInvitationTemplate extends Template {
 
-  @Override
-  public String getPath() {
-    return "/email-templates/user_organization_invitation";
+  private static final String USER_ORGANIZATION_INVITATION_EMAIL_TEMPLATE =
+      "/email-templates/user_organization_invitation";
+
+  public MemberInvitationTemplate(String initiator, String joinLink) {
+    super(
+        USER_ORGANIZATION_INVITATION_EMAIL_TEMPLATE,
+        ImmutableMap.of("initiator", initiator, "joinLink", joinLink));
   }
 }

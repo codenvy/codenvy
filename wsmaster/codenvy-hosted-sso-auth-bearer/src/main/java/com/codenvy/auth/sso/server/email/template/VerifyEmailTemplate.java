@@ -10,24 +10,29 @@
  */
 package com.codenvy.auth.sso.server.email.template;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
  * Thymeleaf template for notifications about verifying email.
  *
  * @author Anton Korneta
  */
-public class VerifyEmailTemplate extends ThymeleafTemplate {
+public class VerifyEmailTemplate extends Template {
+
+  private static final String VERIFY_EMAIL_ADDRESS_EMAIL_TEMPLATE =
+      "/email-templates/verify_email_address";
 
   public VerifyEmailTemplate(
       String bearerToken, String additionalQueryParameters, String masterEndpoint) {
-    context.setVariable("bearertoken", bearerToken);
-    context.setVariable("additionalQueryParameters", additionalQueryParameters);
-    context.setVariable("masterEndpoint", masterEndpoint);
-  }
-
-  @Override
-  public String getPath() {
-    return "/email-templates/verify_email_address";
+    super(
+        VERIFY_EMAIL_ADDRESS_EMAIL_TEMPLATE,
+        ImmutableMap.of(
+            "bearertoken",
+            bearerToken,
+            "additionalQueryParameters",
+            additionalQueryParameters,
+            "masterEndpoint",
+            masterEndpoint));
   }
 }

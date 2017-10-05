@@ -43,10 +43,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.jayway.restassured.response.Response;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,6 +56,10 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.SendMailException;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.tools.DependencySupplierImpl;
 import org.mockito.ArgumentCaptor;
@@ -85,7 +85,7 @@ public class PasswordServiceTest {
   @Mock private RecoveryStorage recoveryStorage;
   @Mock private ProfileImpl profile;
   @Mock private DefaultEmailResourceResolver resourceResolver;
-  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private TemplateProcessor templateProcessor;
 
   private User user;
 
@@ -105,7 +105,7 @@ public class PasswordServiceTest {
             resourceResolver,
             "Codenvy <noreply@codenvy.com>",
             "Codenvy Password Recovery",
-            thymeleaf,
+            templateProcessor,
             1);
     user = spy(new UserImpl(UUID, USER_EMAIL, USER_EMAIL));
 
@@ -271,14 +271,14 @@ public class PasswordServiceTest {
     when(userManager.getByEmail(USER_EMAIL)).thenReturn(user);
     when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
     when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
-    when(thymeleaf.process(any())).thenReturn("body");
+    when(templateProcessor.process(any())).thenReturn("body");
     ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
 
     given().pathParam("username", USER_EMAIL).post(SERVICE_PATH + "/recover/{username}");
 
     verify(mailSender).sendMail(argumentCaptor.capture());
     verify(resourceResolver, times(1)).resolve(any());
-    verify(thymeleaf, times(1)).process(any());
+    verify(templateProcessor, times(1)).process(any());
     EmailBean argumentCaptorValue = argumentCaptor.getValue();
     assertEquals(argumentCaptorValue.getFrom(), "Codenvy <noreply@codenvy.com>");
     assertEquals(argumentCaptorValue.getSubject(), "Codenvy Password Recovery");
@@ -303,7 +303,8 @@ public class PasswordServiceTest {
 
   @Test
   public void shouldRespond500IfProblemOnEmailSendingOccurs() throws Exception {
-    doThrow(new ServerException("error")).when(mailSender).sendMail(any(EmailBean.class));
+    when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
+    doThrow(new SendMailException("error", null)).when(mailSender).sendMail(any(EmailBean.class));
 
     Response response =
         given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");

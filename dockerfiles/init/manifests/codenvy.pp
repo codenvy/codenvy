@@ -142,8 +142,8 @@ node default {
 
 # Configuration of organization email notifications
 #
-  $organization_email_member_added_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_ADDED_SUBJECT","You?ve been added to a Codenvy Organization")
-  $organization_email_member_removed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_REMOVED_SUBJECT","You?ve been removed from a Codenvy Organization")
+  $organization_email_member_added_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_ADDED_SUBJECT","You’ve been added to a Codenvy Organization")
+  $organization_email_member_removed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_MEMBER_REMOVED_SUBJECT","You’ve been removed from a Codenvy Organization")
   $organization_email_renamed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_RENAMED_SUBJECT","Codenvy Organization renamed")
   $organization_email_removed_subject=getValue("CODENVY_ORGANIZATION_EMAIL_REMOVED_SUBJECT","Codenvy Organization deleted")
 

@@ -47,9 +47,7 @@ import com.codenvy.service.system.DockerBasedSystemRamInfoProvider;
 import com.codenvy.service.system.HostedSystemService;
 import com.codenvy.service.system.SystemRamInfoProvider;
 import com.codenvy.service.system.SystemRamLimitMessageSender;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.HTMLTemplateProcessorImpl;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplateProcessorImpl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -117,6 +115,7 @@ import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule;
@@ -518,8 +517,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
     install(new org.eclipse.che.plugin.docker.machine.dns.DnsResolversModule());
 
-    bind(new TypeLiteral<HTMLTemplateProcessor<ThymeleafTemplate>>() {})
-        .to(HTMLTemplateProcessorImpl.class);
+    bind(TemplateProcessor.class).to(ThymeleafTemplateProcessorImpl.class);
 
     bind(new TypeLiteral<Map<String, String>>() {})
         .annotatedWith(Names.named("codenvy.email.logos"))

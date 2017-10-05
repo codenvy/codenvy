@@ -17,11 +17,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import com.codenvy.api.invite.event.InviteCreatedEvent;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
 import com.codenvy.shared.invite.model.Invite;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +31,11 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.template.Template;
+import org.eclipse.che.mail.template.TemplateProcessor;
+import org.eclipse.che.mail.template.exception.TemplateException;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.slf4j.Logger;
@@ -56,13 +57,13 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
   private final UserManager userManager;
   private final ProfileManager profileManager;
   private final BearerTokenAuthenticationHandler tokenHandler;
-  private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  private final TemplateProcessor templateProcessor;
   private final DefaultEmailResourceResolver resourceResolver;
 
   @Inject
   public EmailInviteSender(
       @Named("che.api") String apiEndpoint,
-      @Named("mailsender.application.from.email.address") String mailFrom,
+      @Named("che.mail.from_email_address") String mailFrom,
       @Named("workspace.email.invite.subject") String workspaceInviteSubject,
       @Named("organization.email.invite.subject") String organizationInviteSubject,
       DefaultEmailResourceResolver resourceResolver,
@@ -70,7 +71,7 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
       UserManager userManager,
       ProfileManager profileManager,
       BearerTokenAuthenticationHandler tokenHandler,
-      HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf) {
+      TemplateProcessor templateProcessor) {
     this.apiEndpoint = apiEndpoint;
     this.mailFrom = mailFrom;
     this.workspaceInviteSubject = workspaceInviteSubject;
@@ -79,7 +80,7 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
     this.userManager = userManager;
     this.profileManager = profileManager;
     this.tokenHandler = tokenHandler;
-    this.thymeleaf = thymeleaf;
+    this.templateProcessor = templateProcessor;
     this.resourceResolver = resourceResolver;
   }
 
@@ -123,7 +124,7 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
         apiEndpoint.replace("/api", "") + "/site/auth/create?bearertoken=" + bearerToken;
     String initiator = getInitiatorInfo(initiatorId);
 
-    ThymeleafTemplate template;
+    Template template;
     String subject;
     switch (invite.getDomainId()) {
       case OrganizationDomain.DOMAIN_ID:
@@ -139,15 +140,19 @@ public class EmailInviteSender implements EventSubscriber<InviteCreatedEvent> {
             format(
                 "There is no configured template for specified %s domain", invite.getDomainId()));
     }
-    mailSender.sendAsync(
-        resourceResolver.resolve(
-            new EmailBean()
-                .withSubject(subject)
-                .withBody(thymeleaf.process(template))
-                .withFrom(mailFrom)
-                .withReplyTo(mailFrom)
-                .withTo(email)
-                .withMimeType(TEXT_HTML)));
+    try {
+      mailSender.sendAsync(
+          resourceResolver.resolve(
+              new EmailBean()
+                  .withSubject(subject)
+                  .withBody(templateProcessor.process(template))
+                  .withFrom(mailFrom)
+                  .withReplyTo(mailFrom)
+                  .withTo(email)
+                  .withMimeType(TEXT_HTML)));
+    } catch (TemplateException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
   }
 
   @VisibleForTesting

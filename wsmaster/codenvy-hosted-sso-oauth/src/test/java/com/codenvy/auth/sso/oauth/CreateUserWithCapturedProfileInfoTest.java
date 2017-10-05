@@ -16,7 +16,6 @@ import static org.testng.Assert.assertNull;
 
 import com.codenvy.auth.sso.server.EmailValidator;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
-import com.codenvy.mail.MailSender;
 import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -45,7 +44,6 @@ public class CreateUserWithCapturedProfileInfoTest {
   @Mock private OAuthAuthenticator authenticator;
   @Mock private UserManager userManager;
   @Mock private ServletConfig servletConfig;
-  @Mock private MailSender mailSender;
   @Mock private OAuthAuthenticatorProvider authenticatorProvider;
   @Mock private BearerTokenAuthenticationHandler handler;
   @Mock private org.eclipse.che.security.oauth.shared.User googleUser;

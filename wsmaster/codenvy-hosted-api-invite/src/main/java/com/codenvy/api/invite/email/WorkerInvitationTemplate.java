@@ -10,21 +10,22 @@
  */
 package com.codenvy.api.invite.email;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
  * Defines thymeleaf template workspace worker invitation.
  *
  * @author Sergii Leshchenko
  */
-public class WorkerInvitationTemplate extends ThymeleafTemplate {
-  public WorkerInvitationTemplate(String initiator, String joinLink) {
-    context.setVariable("initiator", initiator);
-    context.setVariable("joinLink", joinLink);
-  }
+public class WorkerInvitationTemplate extends Template {
 
-  @Override
-  public String getPath() {
-    return "/email-templates/user_workspace_invitation";
+  private static final String USER_WORKSPACE_INVITATION_EMAIL_TEMPLATE =
+      "/email-templates/user_workspace_invitation";
+
+  public WorkerInvitationTemplate(String initiator, String joinLink) {
+    super(
+        USER_WORKSPACE_INVITATION_EMAIL_TEMPLATE,
+        ImmutableMap.of("initiator", initiator, "joinLink", joinLink));
   }
 }

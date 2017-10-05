@@ -12,30 +12,28 @@ package com.codenvy.template.processor.html.thymeleaf;
 
 import static org.thymeleaf.templatemode.TemplateMode.HTML;
 
-import com.codenvy.template.processor.exception.FailedProcessingTemplateException;
-import com.codenvy.template.processor.exception.TemplateNotFoundException;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.mail.template.Template;
+import org.eclipse.che.mail.template.TemplateProcessor;
+import org.eclipse.che.mail.template.exception.TemplateException;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
- * Thymeleaf implementation of {@link HTMLTemplateProcessor}.
+ * Thymeleaf implementation of {@link TemplateProcessor}.
  *
  * @author Anton Korneta
  */
 @Singleton
-public class HTMLTemplateProcessorImpl implements HTMLTemplateProcessor<ThymeleafTemplate> {
+public class ThymeleafTemplateProcessorImpl implements TemplateProcessor {
 
   private final TemplateEngine templateEngine;
 
   @Inject
-  public HTMLTemplateProcessorImpl() {
+  public ThymeleafTemplateProcessorImpl() {
     final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
     templateResolver.setTemplateMode(HTML);
     templateResolver.setSuffix(".html");
@@ -45,23 +43,15 @@ public class HTMLTemplateProcessorImpl implements HTMLTemplateProcessor<Thymelea
   }
 
   @Override
-  public String process(String template, Map<String, Object> variables)
-      throws TemplateNotFoundException, FailedProcessingTemplateException {
-    final StringWriter stringWriter = new StringWriter();
-    this.process(template, variables, stringWriter);
-    return stringWriter.toString();
-  }
-
-  @Override
-  public void process(String template, Map<String, Object> variables, Writer writer)
-      throws TemplateNotFoundException, FailedProcessingTemplateException {
+  public String process(String templateName, Map<String, Object> variables)
+      throws TemplateException {
     final Context context = new Context();
     context.setVariables(variables);
-    templateEngine.process(template, context, writer);
+    return templateEngine.process(templateName, context);
   }
 
   @Override
-  public String process(ThymeleafTemplate template) {
-    return templateEngine.process(template.getPath(), template.getContext());
+  public String process(Template template) throws TemplateException {
+    return process(template.getName(), template.getAttributes());
   }
 }

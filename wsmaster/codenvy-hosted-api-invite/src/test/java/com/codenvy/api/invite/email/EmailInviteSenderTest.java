@@ -23,11 +23,7 @@ import static org.testng.Assert.assertEquals;
 import com.codenvy.api.invite.event.InviteCreatedEvent;
 import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
 import com.codenvy.shared.invite.dto.InviteDto;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import org.eclipse.che.api.core.ServerException;
@@ -37,6 +33,10 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.template.Template;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.mockito.ArgumentCaptor;
@@ -64,7 +64,7 @@ public class EmailInviteSenderTest {
   @Mock private UserManager userManager;
   @Mock private ProfileManager profileManager;
   @Mock private BearerTokenAuthenticationHandler tokenHandler;
-  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private TemplateProcessor templateProcessor;
   @Mock private EventService eventService;
 
   @Mock private User initiator;
@@ -87,7 +87,7 @@ public class EmailInviteSenderTest {
                 userManager,
                 profileManager,
                 tokenHandler,
-                thymeleaf));
+                templateProcessor));
 
     when(userManager.getById(anyString())).thenReturn(initiator);
     when(profileManager.getById(anyString())).thenReturn(initiatorProfile);
@@ -169,13 +169,12 @@ public class EmailInviteSenderTest {
   }
 
   @Test(dataProvider = "invitations")
-  public void shouldSendEmailInvite(
-      String domain, String subject, Class<? extends ThymeleafTemplate> templateClass)
+  public void shouldSendEmailInvite(String domain, String subject, Class<Template> templateClass)
       throws Exception {
     when(emailSender.getInitiatorInfo("userok")).thenReturn("INITIATOR");
     when(tokenHandler.generateBearerToken(anyString(), any())).thenReturn("token123");
     when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
-    when(thymeleaf.process(any())).thenReturn("invitation");
+    when(templateProcessor.process(any())).thenReturn("invitation");
 
     emailSender.sendEmail(
         USER_INITIATOR_ID,
@@ -184,17 +183,15 @@ public class EmailInviteSenderTest {
             .withInstanceId("instance123")
             .withEmail("user@test.com"));
 
-    ArgumentCaptor<ThymeleafTemplate> templateCaptor =
-        ArgumentCaptor.forClass(ThymeleafTemplate.class);
+    ArgumentCaptor<Template> templateCaptor = ArgumentCaptor.forClass(Template.class);
 
     verify(emailSender).getInitiatorInfo(USER_INITIATOR_ID);
-    verify(thymeleaf).process(templateCaptor.capture());
-    ThymeleafTemplate template = templateCaptor.getValue();
+    verify(templateProcessor).process(templateCaptor.capture());
+    Template template = templateCaptor.getValue();
     assertEquals(template.getClass(), templateClass);
-    assertEquals(template.getContext().getVariable("initiator"), "INITIATOR");
+    assertEquals(template.getAttributes().get("initiator"), "INITIATOR");
     assertEquals(
-        template.getContext().getVariable("joinLink"),
-        "{HOST}/site/auth/create?bearertoken=token123");
+        template.getAttributes().get("joinLink"), "{HOST}/site/auth/create?bearertoken=token123");
     ArgumentCaptor<EmailBean> emailBeanCaptor = ArgumentCaptor.forClass(EmailBean.class);
     verify(mailSender).sendAsync(emailBeanCaptor.capture());
     EmailBean sentEmail = emailBeanCaptor.getValue();

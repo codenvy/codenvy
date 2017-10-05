@@ -10,6 +10,7 @@
  */
 package com.codenvy.auth.sso.server;
 
+import static com.google.common.base.Strings.*;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import com.codenvy.api.dao.authentication.AccessTicket;
@@ -21,10 +22,6 @@ import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -45,6 +42,11 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserValidator;
 import org.eclipse.che.commons.auth.AuthenticationException;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.SendMailException;
+import org.eclipse.che.mail.template.TemplateProcessor;
+import org.eclipse.che.mail.template.exception.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +71,7 @@ public class BearerTokenAuthenticationService {
   private final UserCreator userCreator;
   private final UserValidator userNameValidator;
   private final DefaultEmailResourceResolver resourceResolver;
-  private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  private final TemplateProcessor templateProcessor;
   private final String mailFrom;
   private final String verifyEmailSubject;
 
@@ -85,8 +87,8 @@ public class BearerTokenAuthenticationService {
       UserCreator userCreator,
       UserValidator userNameValidator,
       DefaultEmailResourceResolver resourceResolver,
-      HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
-      @Named("mailsender.application.from.email.address") String mailFrom,
+      TemplateProcessor templateProcessor,
+      @Named("che.mail.from_email_address") String mailFrom,
       @Named("account.verify.mail.subject") String verifyEmailSubject) {
     this.ticketManager = ticketManager;
     this.uniqueTokenGenerator = uniqueTokenGenerator;
@@ -98,7 +100,7 @@ public class BearerTokenAuthenticationService {
     this.userCreator = userCreator;
     this.userNameValidator = userNameValidator;
     this.resourceResolver = resourceResolver;
-    this.thymeleaf = thymeleaf;
+    this.templateProcessor = templateProcessor;
     this.mailFrom = mailFrom;
     this.verifyEmailSubject = verifyEmailSubject;
   }
@@ -200,19 +202,23 @@ public class BearerTokenAuthenticationService {
     final String bearerToken =
         handler.generateBearerToken(
             email, validationData.getUsername(), Collections.singletonMap("initiator", "email"));
-    final String additionalParams = uriInfo.getRequestUri().getQuery();
+    final String additionalParams = nullToEmpty(uriInfo.getRequestUri().getQuery());
     final String masterEndpoint = uriInfo.getBaseUriBuilder().replacePath(null).build().toString();
     final VerifyEmailTemplate emailTemplate =
         new VerifyEmailTemplate(bearerToken, additionalParams, masterEndpoint);
-    mailSender.sendMail(
-        resourceResolver.resolve(
-            new EmailBean()
-                .withBody(thymeleaf.process(emailTemplate))
-                .withFrom(mailFrom)
-                .withTo(email)
-                .withReplyTo(null)
-                .withSubject(verifyEmailSubject)
-                .withMimeType(TEXT_HTML)));
+    try {
+      mailSender.sendMail(
+          resourceResolver.resolve(
+              new EmailBean()
+                  .withBody(templateProcessor.process(emailTemplate))
+                  .withFrom(mailFrom)
+                  .withTo(email)
+                  .withReplyTo(null)
+                  .withSubject(verifyEmailSubject)
+                  .withMimeType(TEXT_HTML)));
+    } catch (SendMailException | TemplateException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
     LOG.info("Email validation message send to {}", email);
 
     return Response.ok().build();

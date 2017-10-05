@@ -13,6 +13,7 @@ package com.codenvy.auth.sso.server;
 import static com.jayway.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,13 +29,12 @@ import com.codenvy.auth.sso.server.handler.BearerTokenAuthenticationHandler;
 import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import com.jayway.restassured.http.ContentType;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.user.server.UserValidator;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -58,7 +58,7 @@ public class BearerTokenAuthenticationServiceTest {
   @Mock private UserCreationValidator creationValidator;
   @Mock private UserCreator userCreator;
   @Mock private DefaultEmailResourceResolver resourceResolver;
-  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private TemplateProcessor templateProcessor;
 
   private BearerTokenAuthenticationService bearerTokenAuthenticationService;
 
@@ -79,7 +79,7 @@ public class BearerTokenAuthenticationServiceTest {
             userCreator,
             mock(UserValidator.class),
             resourceResolver,
-            thymeleaf,
+            templateProcessor,
             "noreply@host",
             "Subject");
   }
@@ -89,12 +89,13 @@ public class BearerTokenAuthenticationServiceTest {
     ArgumentCaptor<EmailBean> argumentCaptor = ArgumentCaptor.forClass(EmailBean.class);
     ValidationData validationData = new ValidationData("Email", "UserName");
     when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
-    when(thymeleaf.process(any())).thenReturn("email body");
+    when(templateProcessor.process(any())).thenReturn("email body");
+    when(handler.generateBearerToken(anyString(), anyString(), any())).thenReturn("token");
 
     given().contentType(ContentType.JSON).content(validationData).post("/internal/token/validate");
 
     verify(mailSender).sendMail(argumentCaptor.capture());
-    verify(thymeleaf, times(1)).process(any());
+    verify(templateProcessor, times(1)).process(any());
     verify(resourceResolver, times(1)).resolve(any());
     EmailBean argumentCaptorValue = argumentCaptor.getValue();
     assertTrue(!argumentCaptorValue.getBody().isEmpty());

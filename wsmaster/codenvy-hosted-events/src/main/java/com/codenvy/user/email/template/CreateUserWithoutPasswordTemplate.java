@@ -10,22 +10,22 @@
  */
 package com.codenvy.user.email.template;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
  * Thymeleaf template for user creation from bearer token.
  *
  * @author Anton Korneta
  */
-public class CreateUserWithoutPasswordTemplate extends ThymeleafTemplate {
+public class CreateUserWithoutPasswordTemplate extends Template {
+
+  private static final String USER_CREATED_WITHOUT_PASSWORD_TEMPLATE =
+      "/email-templates/user_created_without_password";
 
   public CreateUserWithoutPasswordTemplate(String masterEndpoint, String userName) {
-    context.setVariable("masterEndpoint", masterEndpoint);
-    context.setVariable("userName", userName);
-  }
-
-  @Override
-  public String getPath() {
-    return "/email-templates/user_created_without_password";
+    super(
+        USER_CREATED_WITHOUT_PASSWORD_TEMPLATE,
+        ImmutableMap.of("masterEndpoint", masterEndpoint, "userName", userName));
   }
 }

@@ -13,11 +13,7 @@ package com.codenvy.service.password;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
 import com.codenvy.service.password.email.template.PasswordRecoveryTemplate;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
@@ -38,6 +34,11 @@ import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.SendMailException;
+import org.eclipse.che.mail.template.TemplateProcessor;
+import org.eclipse.che.mail.template.exception.TemplateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class PasswordService {
   private final DefaultEmailResourceResolver resourceResolver;
   private final String mailFrom;
   private final String recoverPasswordMailSubject;
-  private final HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  private final TemplateProcessor templateProcessor;
   private final long validationMaxAge;
 
   @Context private UriInfo uriInfo;
@@ -70,9 +71,9 @@ public class PasswordService {
       RecoveryStorage recoveryStorage,
       ProfileManager profileManager,
       DefaultEmailResourceResolver resourceResolver,
-      @Named("mailsender.application.from.email.address") String mailFrom,
+      @Named("che.mail.from_email_address") String mailFrom,
       @Named("account.password.recovery.mail.subject") String recoverPasswordMailSubject,
-      HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf,
+      TemplateProcessor templateProcessor,
       @Named("password.recovery.expiration_timeout_hours") long validationMaxAge) {
     this.recoveryStorage = recoveryStorage;
     this.mailService = mailSender;
@@ -81,7 +82,7 @@ public class PasswordService {
     this.resourceResolver = resourceResolver;
     this.mailFrom = mailFrom;
     this.recoverPasswordMailSubject = recoverPasswordMailSubject;
-    this.thymeleaf = thymeleaf;
+    this.templateProcessor = templateProcessor;
     this.validationMaxAge = validationMaxAge;
   }
 
@@ -122,12 +123,11 @@ public class PasswordService {
           uriInfo.getBaseUriBuilder().replacePath(null).build().toString();
       final String tokenAgeMessage = String.valueOf(validationMaxAge) + " hour";
       final String uuid = recoveryStorage.generateRecoverToken(mail);
-      final String body =
-          thymeleaf.process(new PasswordRecoveryTemplate(tokenAgeMessage, masterEndpoint, uuid));
+
       mailService.sendMail(
           resourceResolver.resolve(
               new EmailBean()
-                  .withBody(body)
+                  .withBody(getEmailBody(masterEndpoint, tokenAgeMessage, uuid))
                   .withFrom(mailFrom)
                   .withTo(mail)
                   .withReplyTo(null)
@@ -135,9 +135,19 @@ public class PasswordService {
                   .withMimeType(TEXT_HTML)));
     } catch (NotFoundException e) {
       throw new NotFoundException("User " + mail + " is not registered in the system.");
-    } catch (ApiException e) {
+    } catch (SendMailException | ApiException e) {
       LOG.error("Error during setting user's password", e);
       throw new ServerException("Unable to recover password. Please contact support or try later.");
+    }
+  }
+
+  private String getEmailBody(String masterEndpoint, String tokenAgeMessage, String uuid)
+      throws ServerException {
+    try {
+      return templateProcessor.process(
+          new PasswordRecoveryTemplate(tokenAgeMessage, masterEndpoint, uuid));
+    } catch (TemplateException e) {
+      throw new ServerException(e.getMessage());
     }
   }
 

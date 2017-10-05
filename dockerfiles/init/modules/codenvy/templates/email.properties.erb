@@ -9,15 +9,26 @@ workspace.email.added.member.enabled=true
 workspace.email.removed.member.enabled=true
 
 # sender email address
-mailsender.application.from.email.address=<%= scope.lookupvar('codenvy::email_from') %>
+che.mail.from_email_address=<%= scope.lookupvar('codenvy::email_from') %>
 
 # Configuration of email notifications
 workspace.email.invite.subject=<%= scope.lookupvar('codenvy::workspace_email_invite_subject') %>
 organization.email.invite.subject=<%= scope.lookupvar('codenvy::organization_email_invite_subject') %>
-organization.email.member.added.subject=<%= scope.lookupvar('codenvy::organization_email_member_added_subject') %>
-organization.email.member.removed.subject=<%= scope.lookupvar('codenvy::organization_email_member_removed_subject') %>
-organization.email.renamed.subject=<%= scope.lookupvar('codenvy::organization_email_renamed_subject') %>
-organization.email.removed.subject=<%= scope.lookupvar('codenvy::organization_email_removed_subject') %>
+
+#####                     ORGANIZATIONS' NOTIFICATIONS SETTINGS                       #####
+che.organization.email.member_added_subject=<%= scope.lookupvar('codenvy::organization_email_member_added_subject') %>
+che.organization.email.member_added_template=/email-templates/user_added_to_organization
+
+che.organization.email.member_removed_subject=<%= scope.lookupvar('codenvy::organization_email_member_removed_subject') %>
+che.organization.email.member_removed_template=/email-templates/user_removed_from_organization
+
+che.organization.email.org_removed_subject=<%= scope.lookupvar('codenvy::organization_email_removed_subject') %>
+che.organization.email.org_removed_template=/email-templates/organization_deleted
+
+che.organization.email.org_renamed_subject=<%= scope.lookupvar('codenvy::organization_email_renamed_subject') %>
+che.organization.email.org_renamed_template=/email-templates/organization_renamed
+
+
 account.verify.mail.subject=<%= scope.lookupvar('codenvy::account_verify_mail_subject') %>
 account.password.recovery.mail.subject=<%= scope.lookupvar('codenvy::account_password_recovery_mail_subject') %>
 account.created.byadmin.mail.subject=<%= scope.lookupvar('codenvy::account_created_byadmin_mail_subject') %>

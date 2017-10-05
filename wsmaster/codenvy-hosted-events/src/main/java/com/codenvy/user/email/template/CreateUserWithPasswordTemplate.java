@@ -10,24 +10,29 @@
  */
 package com.codenvy.user.email.template;
 
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.mail.template.Template;
 
 /**
- * Thymeleaf template for user that created by admins.
+ * Template for user that created by admins.
  *
  * @author Anton Korneta
  */
-public class CreateUserWithPasswordTemplate extends ThymeleafTemplate {
+public class CreateUserWithPasswordTemplate extends Template {
+
+  private static final String USER_CREATED_WITH_PASSWORD_EMAIL_TEMPLATE =
+      "/email-templates/user_created_with_password";
 
   public CreateUserWithPasswordTemplate(
       String masterEndpoint, String resetPasswordLink, String userName) {
-    context.setVariable("masterEndpoint", masterEndpoint);
-    context.setVariable("resetPasswordLink", resetPasswordLink);
-    context.setVariable("userName", userName);
-  }
-
-  @Override
-  public String getPath() {
-    return "/email-templates/user_created_with_password";
+    super(
+        USER_CREATED_WITH_PASSWORD_EMAIL_TEMPLATE,
+        ImmutableMap.of(
+            "masterEndpoint",
+            masterEndpoint,
+            "resetPasswordLink",
+            resetPasswordLink,
+            "userName",
+            userName));
   }
 }

@@ -21,11 +21,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.codenvy.mail.DefaultEmailResourceResolver;
-import com.codenvy.mail.EmailBean;
-import com.codenvy.mail.MailSender;
 import com.codenvy.service.password.RecoveryStorage;
-import com.codenvy.template.processor.html.HTMLTemplateProcessor;
-import com.codenvy.template.processor.html.thymeleaf.ThymeleafTemplate;
+import org.eclipse.che.mail.EmailBean;
+import org.eclipse.che.mail.MailSender;
+import org.eclipse.che.mail.template.TemplateProcessor;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -45,7 +44,7 @@ public class CreationNotificationSenderTest {
   @Captor private ArgumentCaptor<EmailBean> argumentCaptor;
 
   @Mock private DefaultEmailResourceResolver resourceResolver;
-  @Mock private HTMLTemplateProcessor<ThymeleafTemplate> thymeleaf;
+  @Mock private TemplateProcessor templateProcessor;
   @Mock private MailSender mailSender;
 
   private CreationNotificationSender notificationSender;
@@ -60,7 +59,7 @@ public class CreationNotificationSenderTest {
             "noreply@host",
             recoveryStorage,
             mailSender,
-            thymeleaf,
+            templateProcessor,
             resourceResolver,
             "Subject without password",
             "Subject with password");
@@ -68,13 +67,13 @@ public class CreationNotificationSenderTest {
 
   @Test
   public void shouldSendEmailWhenUserWasCreatedByUserServiceWithDescriptor() throws Throwable {
-    when(thymeleaf.process(any())).thenReturn("body");
+    when(templateProcessor.process(any())).thenReturn("body");
     when(resourceResolver.resolve(any())).thenAnswer(answer -> answer.getArguments()[0]);
     notificationSender.sendNotification("user123", "test@user.com", true);
 
     verify(mailSender).sendMail(argumentCaptor.capture());
     verify(resourceResolver, times(1)).resolve(any(EmailBean.class));
-    verify(thymeleaf, times(1)).process(any());
+    verify(templateProcessor, times(1)).process(any());
 
     final EmailBean emailBean = argumentCaptor.getValue();
     assertTrue(!emailBean.getBody().isEmpty());

@@ -10,15 +10,16 @@
  */
 package com.codenvy.organization.api;
 
-import com.codenvy.organization.api.listener.OrganizationNotificationEmailSender;
 import com.google.inject.AbstractModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.organization.api.notification.OrganizationEmailNotifications;
 
 /** @author Sergii Leshchenko */
 @DynaModule
 public class OrganizationApiModule extends AbstractModule {
+
   @Override
   protected void configure() {
-    bind(OrganizationNotificationEmailSender.class).asEagerSingleton();
+    bind(OrganizationEmailNotifications.class).to(CodenvyOrganizationEmailNotifications.class);
   }
 }
