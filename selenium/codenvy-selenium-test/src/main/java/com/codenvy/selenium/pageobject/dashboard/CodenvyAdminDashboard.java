@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -44,8 +45,15 @@ public class CodenvyAdminDashboard extends Dashboard {
       TestUser testUser,
       TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
-      Entrance entrance) {
-    super(seleniumWebDriver, testUser, testIdeUrlProvider, testDashboardUrlProvider, entrance);
+      Entrance entrance,
+      LoginPage loginPage) {
+    super(
+        seleniumWebDriver,
+        testUser,
+        testIdeUrlProvider,
+        testDashboardUrlProvider,
+        entrance,
+        loginPage);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
