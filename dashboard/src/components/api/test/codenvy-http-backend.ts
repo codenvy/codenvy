@@ -21,7 +21,6 @@ export class CodenvyHttpBackend {
   private httpBackend: ng.IHttpBackendService;
   private defaultBranding: any;
   private teamsMap: Map<string, any>;
-  private organizationsMap: Map<string, codenvy.IOrganization>;
   private permissionsMap: Map<string, Array<codenvy.IPermissions>>;
   private resourcesMap: Map<string, Map<string, any>>;
 
@@ -34,8 +33,6 @@ export class CodenvyHttpBackend {
     this.defaultBranding = {};
 
     this.teamsMap = new Map();
-
-    this.organizationsMap = new Map();
 
     this.permissionsMap = new Map();
 
@@ -98,35 +95,6 @@ export class CodenvyHttpBackend {
    */
   addTeamById(team) {
     this.teamsMap.set(team.id, team);
-  }
-
-  /**
-   * Setup Backend for organizations
-   */
-  organizationsBackendSetup(): void {
-    const allOrganizations = [];
-
-    const organizationKeys = this.organizationsMap.keys();
-    for (let key of organizationKeys) {
-      const organization = this.organizationsMap.get(key);
-      this.httpBackend.when('GET', '/api/organization/' + organization.id).respond(organization);
-      this.httpBackend.when('GET', '/api/organization/find?name=' + encodeURIComponent(organization.qualifiedName)).respond(organization);
-      this.httpBackend.when('DELETE', '/api/organization/' + organization.id).respond(() => {
-        return [200, {success: true, errors: []}];
-      });
-      allOrganizations.push(organization);
-    }
-    this.httpBackend.when('GET', /^\/api\/organization\/find\?name=.*$/).respond(404, {}, {message: 'Organization is not found.'});
-    this.httpBackend.when('GET', /\/api\/organization(\?.*$)?/).respond(allOrganizations);
-  }
-
-  /**
-   * Add the given organization to organizationsMap
-   *
-   * @param {codenvy.IOrganization} organization the organization
-   */
-  addOrganizationById(organization: codenvy.IOrganization): void {
-    this.organizationsMap.set(organization.id, organization);
   }
 
   /**

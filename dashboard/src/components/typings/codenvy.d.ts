@@ -27,14 +27,6 @@ declare namespace _codenvy {
     rel: string;
   }
 
-  export interface IOrganization {
-    id: string;
-    links: Array<ILink>;
-    name: string;
-    parent?: string;
-    qualifiedName: string;
-  }
-
   export interface IPermissions {
     actions: Array<string>;
     domainId: string;

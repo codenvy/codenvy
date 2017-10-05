@@ -14,15 +14,10 @@ import {BillingConfig} from './billing/billing-config';
 import {CodenvyNavbarConfig} from './navbar/navbar-config';
 import {Register} from './utils/register';
 import {CodenvyComponentsConfig} from '../components/components-config';
-
 import {LoginCtrl} from './login/login.controller';
-
-import {AdminConfig} from './admin/admin-config';
 import {AccountConfig} from './account/details/account-config';
 import {WorkspaceConfig} from './workspace/workspace-config';
-import {TeamsConfig} from './teams/teams-config';
 import {MainDashboardConfig} from './dashboard/main-dashboard-config';
-import {OrganizationsConfig} from './organizations/organizations-config';
 
 let initModule = angular.module('codenvyDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'braintree-angular', 'gavruk.card',
   'ngResource', 'ngRoute', 'ui.codemirror', 'ui.gravatar', 'userDashboard', 'ngMessages']);
@@ -105,7 +100,6 @@ initModule.run(['$rootScope', '$routeParams', 'cheUIElementsInjectorService', 'w
       }
     });
 
-    workspaceDetailsService.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
     workspaceDetailsService.addSection('Idle timeout', 'The time period during which the workspace may be not used, before being stopped.', '<timeout-info></timeout-info>');
   }]);
 
@@ -290,7 +284,6 @@ initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($rou
   }
 }]);
 
-
 angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServiceProvider) => {
   gravatarServiceProvider.defaults = {
     size: 43,
@@ -303,14 +296,10 @@ angular.module('ui.gravatar').config(['gravatarServiceProvider', (gravatarServic
 }
 ]);
 
-
 var instanceRegister = new Register(initModule);
-new OrganizationsConfig(instanceRegister);
 new MainDashboardConfig(instanceRegister);
 new BillingConfig(instanceRegister);
 new CodenvyNavbarConfig(instanceRegister);
 new CodenvyComponentsConfig(instanceRegister);
-new AdminConfig(instanceRegister);
 new AccountConfig(instanceRegister);
 new WorkspaceConfig(instanceRegister);
-new TeamsConfig(instanceRegister);

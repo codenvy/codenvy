@@ -85,7 +85,7 @@
                             </target>
                         </configuration>
                     </execution>
-                    <execution>
+                   <!-- no tests at the moment <execution>
                         <id>compilation</id>
                         <phase>test</phase>
                         <goals>
@@ -93,14 +93,14 @@
                         </goals>
                         <configuration>
                             <target unless="skipTests">
-                                <!-- Run unit tests -->
+                                &lt;!&ndash; Run unit tests &ndash;&gt;
                                 <exec dir="${basedir}" executable="npm" failonerror="true">
                                     <arg value="run" />
                                     <arg value="test" />
                                 </exec>
                             </target>
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

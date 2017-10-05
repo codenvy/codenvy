@@ -9,7 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CodenvyTeam} from '../../components/api/codenvy-team.factory';
 
 /**
  * @ngdoc controller
@@ -18,14 +17,14 @@ import {CodenvyTeam} from '../../components/api/codenvy-team.factory';
  * @author Ann Shumilova
  */
 export class MainDashboardController {
-  codenvyTeam: CodenvyTeam;
+  cheTeam: che.api.ICheTeam;
   accountId: string;
 
   /**
    * @ngInject for Dependency injection
    */
-  constructor ($rootScope: che.IRootScopeService, codenvyTeam: CodenvyTeam) {
-    this.codenvyTeam = codenvyTeam;
+  constructor ($rootScope: che.IRootScopeService, cheTeam: che.api.ICheTeam) {
+    this.cheTeam = cheTeam;
 
     $rootScope.showIDE = false;
 
@@ -40,11 +39,11 @@ export class MainDashboardController {
    * @return {IPromise<any>}
    */
   fetchAccountId(): ng.IPromise<any> {
-    return this.codenvyTeam.fetchTeams().then(() => {
-      this.accountId = this.codenvyTeam.getPersonalAccount() ? this.codenvyTeam.getPersonalAccount().id : null;
+    return this.cheTeam.fetchTeams().then(() => {
+      this.accountId = this.cheTeam.getPersonalAccount() ? this.cheTeam.getPersonalAccount().id : null;
     }, (error: any) => {
       if (error.status === 304) {
-        this.accountId = this.codenvyTeam.getPersonalAccount() ? this.codenvyTeam.getPersonalAccount().id : null;
+        this.accountId = this.cheTeam.getPersonalAccount() ? this.cheTeam.getPersonalAccount().id : null;
       }
     });
   }

@@ -10,9 +10,6 @@
  */
 'use strict';
 import {CodenvySubscription} from '../../../components/api/codenvy-subscription.factory';
-import {CodenvyResourcesDistribution} from './../../../components/api/codenvy-resources-distribution.factory';
-import {CodenvyResourceLimits} from '../../../components/api/codenvy-resource-limits';
-import {CodenvyTeam} from '../../../components/api/codenvy-team.factory';
 
 /**
  * Controller for timeout information widget.
@@ -24,10 +21,11 @@ export class TimeoutInfoController {
    * Subscription API service.
    */
   codenvySubscription: CodenvySubscription;
-  codenvyTeam: CodenvyTeam;
+  cheTeam: che.api.ICheTeam;
   cheUser: any;
   $mdDialog: ng.material.IDialogService;
-  codenvyResourcesDistribution: CodenvyResourcesDistribution;
+  cheResourcesDistribution: che.api.ICheResourcesDistribution;
+  resourceLimits: che.resource.ICheResourceLimits;
   lodash: any;
 
   team: any;
@@ -42,15 +40,16 @@ export class TimeoutInfoController {
   /**
    * @ngInject for Dependency injection
    */
-  constructor ($mdDialog: ng.material.IDialogService, $route: ng.route.IRouteService, codenvyTeam: CodenvyTeam,
-               codenvyResourcesDistribution: CodenvyResourcesDistribution, cheUser: any,
-               codenvySubscription: CodenvySubscription, lodash: any) {
+  constructor ($mdDialog: ng.material.IDialogService, $route: ng.route.IRouteService, cheTeam: che.api.ICheTeam,
+               cheResourcesDistribution: che.api.ICheResourcesDistribution, cheUser: any,
+               codenvySubscription: CodenvySubscription, lodash: any, resourcesService: che.service.IResourcesService) {
     this.$mdDialog = $mdDialog;
-    this.codenvyTeam = codenvyTeam;
-    this.codenvyResourcesDistribution = codenvyResourcesDistribution;
+    this.cheTeam = cheTeam;
+    this.cheResourcesDistribution = cheResourcesDistribution;
     this.codenvySubscription = codenvySubscription;
     this.cheUser = cheUser;
     this.lodash = lodash;
+    this.resourceLimits = resourcesService.getResourceLimits();
 
     this.fetchTeamDetails($route.current.params.namespace);
     this.getPackages();
@@ -63,16 +62,16 @@ export class TimeoutInfoController {
    *
    */
   fetchTeamDetails(name: string): void {
-    this.team  = this.codenvyTeam.getTeamByName(name);
+    this.team  = this.cheTeam.getTeamByName(name);
     if (!this.team) {
-      this.codenvyTeam.fetchTeamByName(name).then((team: any) => {
+      this.cheTeam.fetchTeamByName(name).then((team: any) => {
         this.team = team;
         this.fetchTimeoutValue(this.team.id);
       }, (error: any) => {
         if (error.status === 304) {
-          this.team = this.codenvyTeam.getTeamByName(name);
+          this.team = this.cheTeam.getTeamByName(name);
           this.fetchTimeoutValue(this.team.id);
-        } else if (error.status === 404 && !this.codenvyTeam.getPersonalAccount() && this.cheUser.getUser().name === name) {
+        } else if (error.status === 404 && !this.cheTeam.getPersonalAccount() && this.cheUser.getUser().name === name) {
           this.fetchTimeoutValue(this.cheUser.getUser().id);
         }
       });
@@ -87,11 +86,11 @@ export class TimeoutInfoController {
    * @param id id of the instance to fetch available resources
    */
   fetchTimeoutValue(id: string): void {
-    this.codenvyResourcesDistribution.fetchAvailableOrganizationResources(id).then(() => {
-      this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(id));
+    this.cheResourcesDistribution.fetchAvailableOrganizationResources(id).then(() => {
+      this.processTimeoutValue(this.cheResourcesDistribution.getAvailableOrganizationResources(id));
     }, (error: any) => {
       if (error.status === 304) {
-        this.processTimeoutValue(this.codenvyResourcesDistribution.getAvailableOrganizationResources(id));
+        this.processTimeoutValue(this.cheResourcesDistribution.getAvailableOrganizationResources(id));
       }
     });
   }
@@ -107,10 +106,10 @@ export class TimeoutInfoController {
     }
 
     let timeout = this.lodash.find(resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.TIMEOUT;
+      return resource.type === this.resourceLimits.TIMEOUT;
     });
 
-    this.canBuy = (this.codenvyTeam.getPersonalAccount() && this.team && this.codenvyTeam.getPersonalAccount().id === this.team.id);
+    this.canBuy = (this.cheTeam.getPersonalAccount() && this.team && this.cheTeam.getPersonalAccount().id === this.team.id);
 
     this.timeoutValue =  timeout ? (timeout.amount < 60 ? (timeout.amount + ' minute') : (timeout.amount / 60 + ' hour')) : '';
   }
@@ -137,7 +136,7 @@ export class TimeoutInfoController {
    */
   processPackages(packages: Array<any>): void {
     let ramPackage = this.lodash.find(packages, (pack: any) => {
-      return pack.type === CodenvyResourceLimits.RAM;
+      return pack.type === this.resourceLimits.RAM;
     });
 
     if (!ramPackage) {
@@ -146,7 +145,7 @@ export class TimeoutInfoController {
     }
 
     let timeoutResource = this.lodash.find(ramPackage.resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.TIMEOUT;
+      return resource.type === this.resourceLimits.TIMEOUT;
     });
 
     this.timeout = timeoutResource ? (timeoutResource.amount < 60 ? (timeoutResource.amount + ' minute') : (timeoutResource.amount / 60 + ' hour')) : '4 hour';
@@ -186,13 +185,13 @@ export class TimeoutInfoController {
 
     this.totalRAM = this.getRamValue(license.totalResources);
 
-    this.codenvyResourcesDistribution.fetchAvailableOrganizationResources(this.accountId).then(() => {
-      let resources = this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.accountId);
+    this.cheResourcesDistribution.fetchAvailableOrganizationResources(this.accountId).then(() => {
+      let resources = this.cheResourcesDistribution.getAvailableOrganizationResources(this.accountId);
       this.usedRAM = this.totalRAM - this.getRamValue(resources);
       this.getMoreRAM();
     }, (error: any) => {
       if (error.status === 304) {
-        let resources = this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.accountId);
+        let resources = this.cheResourcesDistribution.getAvailableOrganizationResources(this.accountId);
         this.usedRAM = this.totalRAM - this.getRamValue(resources);
         this.getMoreRAM();
       }
@@ -210,7 +209,7 @@ export class TimeoutInfoController {
     }
 
     let ram = this.lodash.find(resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.RAM;
+      return resource.type === this.resourceLimits.RAM;
     });
     return ram ? (ram.amount / 1024) : 0;
   }

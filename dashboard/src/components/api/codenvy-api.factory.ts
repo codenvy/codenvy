@@ -9,10 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CodenvyPermissions} from './codenvy-permissions.factory';
 import {CodenvySystem} from './codenvy-system.factory';
-import {CodenvyTeam} from './codenvy-team.factory';
-import {CodenvyOrganization} from './codenvy-organizations.factory';
 import {CodenvyPayment} from './codenvy-payment.factory';
 import {CodenvyInvoices} from './codenvy-invoices.factory';
 
@@ -23,10 +20,7 @@ import {CodenvyInvoices} from './codenvy-invoices.factory';
  * @author Florent Benoit
  */
 export class CodenvyAPI {
-  private codenvyPermissions: CodenvyPermissions;
   private codenvySystem: CodenvySystem;
-  private codenvyTeam: CodenvyTeam;
-  private codenvyOrganization: CodenvyOrganization;
   private codenvyPayment: CodenvyPayment;
   private codenvyInvoices: CodenvyInvoices;
 
@@ -34,11 +28,8 @@ export class CodenvyAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(codenvyPermissions, codenvySystem, codenvyTeam, codenvyOrganization: CodenvyOrganization, codenvyPayment, codenvyInvoices) {
-    this.codenvyPermissions = codenvyPermissions;
+  constructor(codenvySystem, codenvyPayment, codenvyInvoices) {
     this.codenvySystem = codenvySystem;
-    this.codenvyTeam = codenvyTeam;
-    this.codenvyOrganization = codenvyOrganization;
     this.codenvyPayment = codenvyPayment;
     this.codenvyInvoices = codenvyInvoices;
   }
@@ -52,27 +43,11 @@ export class CodenvyAPI {
   }
 
   /**
-   * The Codenvy Permissions API
-   * @returns {CodenvyPermissions|*}
-   */
-  getPermissions(): CodenvyPermissions {
-    return this.codenvyPermissions;
-  }
-
-  /**
    * The Codenvy System API
    * @returns {CodenvySystem|*}
    */
   getSystem(): CodenvySystem {
     return this.codenvySystem;
-  }
-
-  getTeam(): CodenvyTeam {
-    return this.codenvyTeam;
-  }
-
-  getOrganization(): CodenvyOrganization {
-    return this.codenvyOrganization;
   }
 
   /**

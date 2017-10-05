@@ -10,10 +10,6 @@
  */
 'use strict';
 
-
-import {CodenvyTeamBuilder} from './codenvy-team-builder';
-import {CodenvyOrganizationsBuilder} from './codenvy-organizations-builder';
-import {CodenvyPermissionsBuilder} from './codenvy-permissions-builder';
 import {CodenvyResourceBuilder} from './codenvy-resource-builder';
 
 /**
@@ -28,32 +24,6 @@ export class CodenvyAPIBuilder {
    * @ngInject for Dependency injection
    */
   constructor () {
-  }
-
-  /***
-   * The Codenvy Team builder
-   * @returns {CodenvyTeamBuilder}
-   */
-  getTeamBuilder() {
-    return new CodenvyTeamBuilder();
-  }
-
-  /**
-   * The Codenvy Organizations builder
-   *
-   * @return {CodenvyOrganizationsBuilder}
-   */
-  getOrganizationsBuilder() {
-    return new CodenvyOrganizationsBuilder();
-  }
-
-  /**
-   * The Codenvy Permissions builder
-   *
-   * @return {CodenvyPermissionsBuilder}
-   */
-  getPermissionsBuilder() {
-    return new CodenvyPermissionsBuilder();
   }
 
   /**

@@ -26,21 +26,21 @@ interface IAccountProfileScope extends ng.IScope {
 
 /**
  * @ngdoc directive
- * @name account.profile.directive:accountProfile
+ * @name account.profile.directive:codenvyAccountProfile
  * @restrict E
  * @element
  *
  * @description
- * <account-profile profile-attributes="ctrl.profileAttributes"></account-profile>` for displaying account profile.
+ * <codenvy-account-profile profile-attributes="ctrl.profileAttributes"></codenvy-account-profile>` for displaying account profile.
  *
  * @usage
- *   <account-profile profile-attributes="ctrl.profileAttributes"></account-profile>
+ *   <codenvy-account-profile profile-attributes="ctrl.profileAttributes"></codenvy-account-profile>
  *
  * @author Florent Benoit
  */
-export class AccountProfile implements ng.IDirective {
+export class CodenvyAccountProfile implements ng.IDirective {
   restrict = 'E';
-  templateUrl = 'app/account/details/profile/account-profile.html';
+  templateUrl = 'app/account/details/profile/codenvy-account-profile.html';
   replace = true;
   scope = {
     profileAttributes: '=profileAttributes',

@@ -11,13 +11,10 @@
 'use strict';
 
 import {CodenvyApiConfig} from './api/codenvy-api-config';
-import {UniqueTeamNameValidator} from './api/validator/unique-team-name-validator.directive';
 
 export class CodenvyComponentsConfig {
 
   constructor(register) {
     new CodenvyApiConfig(register);
-
-    register.directive('uniqueTeamName', UniqueTeamNameValidator);
   }
 }

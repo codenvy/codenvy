@@ -11,7 +11,6 @@
 'use strict';
 import {CodenvyPayment, ICreditCard} from '../../components/api/codenvy-payment.factory';
 import {BillingService} from './billing.service';
-import {CodenvyTeam} from '../../components/api/codenvy-team.factory';
 
 interface ICreditCardProblem {
   message: string;
@@ -35,7 +34,7 @@ export class BillingController {
   confirmDialogService: any;
   cheAPI: any;
   codenvyPayment: CodenvyPayment;
-  codenvyTeam: CodenvyTeam;
+  cheTeam: che.api.ICheTeam;
   cheNotification: any;
   billingService: BillingService;
 
@@ -53,7 +52,7 @@ export class BillingController {
    */
   constructor ($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
                $rootScope: che.IRootScopeService, confirmDialogService: any, cheAPI: any,
-               codenvyPayment: CodenvyPayment, codenvyTeam: CodenvyTeam, cheNotification: any, billingService: BillingService) {
+               codenvyPayment: CodenvyPayment, cheTeam: che.api.ICheTeam, cheNotification: any, billingService: BillingService) {
     this.$location = $location;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -61,7 +60,7 @@ export class BillingController {
     this.confirmDialogService = confirmDialogService;
     this.cheAPI = cheAPI;
     this.codenvyPayment = codenvyPayment;
-    this.codenvyTeam = codenvyTeam;
+    this.cheTeam = cheTeam;
     this.cheNotification = cheNotification;
     this.billingService = billingService;
 
@@ -81,11 +80,11 @@ export class BillingController {
    * @return {IPromise<any>}
    */
   fetchAccountId(): ng.IPromise<any> {
-    return this.codenvyTeam.fetchTeams().then(() => {
-      this.accountId = this.codenvyTeam.getPersonalAccount().id;
+    return this.cheTeam.fetchTeams().then(() => {
+      this.accountId = this.cheTeam.getPersonalAccount().id;
     }, (error: any) => {
       if (error.status === 304) {
-        this.accountId = this.codenvyTeam.getPersonalAccount().id;
+        this.accountId = this.cheTeam.getPersonalAccount().id;
       }
     });
   }

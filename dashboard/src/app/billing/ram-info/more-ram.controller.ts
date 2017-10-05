@@ -10,7 +10,6 @@
  */
 'use strict';
 import {CodenvySubscription} from '../../../components/api/codenvy-subscription.factory';
-import {CodenvyResourceLimits} from '../../../components/api/codenvy-resource-limits';
 import {ICreditCard} from '../../../components/api/codenvy-payment.factory';
 import {BillingService} from '../billing.service';
 
@@ -128,11 +127,13 @@ export class MoreRamController {
    */
   private creditCard: ICreditCard;
 
+  private resourceLimits: che.resource.ICheResourceLimits;
+
   /**
    * @ngInject for Dependency injection
    */
   constructor ($mdDialog: angular.material.IDialogService, $q: ng.IQService, codenvySubscription: CodenvySubscription,
-               lodash: any, cheNotification: any, billingService: BillingService) {
+               lodash: any, cheNotification: any, billingService: BillingService, resourcesService: che.service.IResourcesService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.codenvySubscription = codenvySubscription;
@@ -142,6 +143,7 @@ export class MoreRamController {
     this.isLoading = true;
     this.step = Step;
     this.currentStep = Step.ONE;
+    this.resourceLimits = resourcesService.getResourceLimits();
 
     this.calcDateBasedValues();
 
@@ -184,7 +186,7 @@ export class MoreRamController {
    */
   processPackages(packages: Array<any>): void {
     this.ramPackage = this.lodash.find(packages, (pack: any) => {
-      return pack.type === CodenvyResourceLimits.RAM;
+      return pack.type === this.resourceLimits.RAM;
     });
 
     if (!this.ramPackage) {
@@ -192,11 +194,11 @@ export class MoreRamController {
     }
 
     let ramResource = this.lodash.find(this.ramPackage.resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.RAM;
+      return resource.type === this.resourceLimits.RAM;
     });
 
     this.timeoutResource = this.lodash.find(this.ramPackage.resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.TIMEOUT;
+      return resource.type === this.resourceLimits.TIMEOUT;
     });
 
     if (!ramResource) {
@@ -296,7 +298,7 @@ export class MoreRamController {
 
       if (ramPackage) {
         let ramResource = this.lodash.find(ramPackage.resources, (resource: any) => {
-          return resource.type === CodenvyResourceLimits.RAM;
+          return resource.type === this.resourceLimits.RAM;
         });
         // check RAM resource was defined:
         if (ramResource) {
@@ -333,7 +335,7 @@ export class MoreRamController {
    * @returns any ram resource
    */
   prepareRAMResource(value: number): any {
-    return {amount: value, unit: 'mb', type: CodenvyResourceLimits.RAM};
+    return {amount: value, unit: 'mb', type: this.resourceLimits.RAM};
   }
 
   /**
@@ -342,7 +344,7 @@ export class MoreRamController {
    * @returns any timeout resource
    */
   prepareTimeoutResource(): any {
-    return {amount: this.timeoutResource.amount, unit: this.timeoutResource.unit, type: CodenvyResourceLimits.TIMEOUT};
+    return {amount: this.timeoutResource.amount, unit: this.timeoutResource.unit, type: this.resourceLimits.TIMEOUT};
   }
 
   /**

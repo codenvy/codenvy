@@ -10,8 +10,6 @@
  */
 'use strict';
 import {CodenvySubscription} from '../../../components/api/codenvy-subscription.factory';
-import {CodenvyResourcesDistribution} from './../../../components/api/codenvy-resources-distribution.factory';
-import {CodenvyResourceLimits} from './../../../components/api/codenvy-resource-limits';
 
 /**
  * @ngdoc controller
@@ -25,7 +23,8 @@ export class RamInfoController {
    */
   codenvySubscription: CodenvySubscription;
   $mdDialog: ng.material.IDialogService;
-  codenvyResourcesDistribution: CodenvyResourcesDistribution;
+  cheResourcesDistribution: che.api.ICheResourcesDistribution;
+  resourceLimits: che.resource.ICheResourceLimits;
   lodash: any;
   /**
    * Current account id, comes from external component.
@@ -38,13 +37,13 @@ export class RamInfoController {
   /**
    * @ngInject for Dependency injection
    */
-  constructor ($mdDialog: ng.material.IDialogService, codenvyResourcesDistribution: CodenvyResourcesDistribution,
-               codenvySubscription: CodenvySubscription, lodash: any) {
+  constructor ($mdDialog: ng.material.IDialogService, cheResourcesDistribution: che.api.ICheResourcesDistribution,
+               codenvySubscription: CodenvySubscription, lodash: any, resourcesService: che.service.IResourcesService) {
     this.$mdDialog = $mdDialog;
-    this.codenvyResourcesDistribution = codenvyResourcesDistribution;
+    this.cheResourcesDistribution = cheResourcesDistribution;
     this.codenvySubscription = codenvySubscription;
     this.lodash = lodash;
-
+    this.resourceLimits = resourcesService.getResourceLimits();
     this.getRamInfo();
   }
 
@@ -78,12 +77,12 @@ export class RamInfoController {
 
     this.totalRAM = this.getRamValue(license.totalResources);
 
-    this.codenvyResourcesDistribution.fetchAvailableOrganizationResources(this.accountId).then(() => {
-      let resources = this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.accountId);
+    this.cheResourcesDistribution.fetchAvailableOrganizationResources(this.accountId).then(() => {
+      let resources = this.cheResourcesDistribution.getAvailableOrganizationResources(this.accountId);
       this.usedRAM = this.totalRAM - this.getRamValue(resources);
     }, (error: any) => {
       if (error.status === 304) {
-        let resources = this.codenvyResourcesDistribution.getAvailableOrganizationResources(this.accountId);
+        let resources = this.cheResourcesDistribution.getAvailableOrganizationResources(this.accountId);
         this.usedRAM = this.totalRAM - this.getRamValue(resources);
       }
     });
@@ -99,7 +98,7 @@ export class RamInfoController {
     }
 
     let ram = this.lodash.find(resources, (resource: any) => {
-      return resource.type === CodenvyResourceLimits.RAM;
+      return resource.type === this.resourceLimits.RAM;
     });
     return (ram && ram.amount !== -1) ? (ram.amount / 1024) : ram.amount;
   }
