@@ -22,11 +22,11 @@ import com.codenvy.selenium.core.provider.OnpremTestIdeUrlProvider;
 import com.codenvy.selenium.core.requestfactory.TestAdminHttpJsonRequestFactory;
 import com.codenvy.selenium.core.requestfactory.TestDefaultUserHttpJsonRequestFactory;
 import com.codenvy.selenium.core.user.OnpremAdminTestUser;
+import com.codenvy.selenium.core.user.OnpremTestUserImpl;
 import com.codenvy.selenium.core.user.OnpremTestUserNamespaceResolver;
 import com.codenvy.selenium.core.workspace.OnpremTestWorkspaceUrlResolver;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import javax.inject.Named;
@@ -98,7 +98,7 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
     bind(TestAuthServiceClient.class).to(OnpremTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(OnpremTestMachineServiceClient.class);
 
-    bind(TestUser.class).to(TestUserImpl.class).in(Singleton.class);
+    bind(TestUser.class).to(OnpremTestUserImpl.class);
     bind(TestWorkspaceProvider.class).to(TestWorkspaceProviderImpl.class).asEagerSingleton();
 
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
