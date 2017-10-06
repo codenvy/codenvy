@@ -18,16 +18,12 @@
 
     <test name="all">
         <classes>
-            <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
-            <class name="com.codenvy.selenium.assistant.CheckFindActionInCodenvyFeatureTest"/>
-            <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
             <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest">
                 <methods>
                     <!-- unstable -->
                     <exclude name="organizeImportsTest"/>
                 </methods>
             </class>
-            <class name="org.eclipse.che.selenium.languageserver.CheckMainFeatureForCSharpLanguageTest"/>
             <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest">
                 <methods>
                     <!-- unstable -->

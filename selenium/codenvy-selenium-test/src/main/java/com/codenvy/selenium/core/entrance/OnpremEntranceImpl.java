@@ -36,6 +36,6 @@ public class OnpremEntranceImpl implements Entrance {
    */
   public void login(TestUser user) {
     loginAndCreateOnpremAccountPage.waitLoginPage();
-    loginAndCreateOnpremAccountPage.login(user.getName(), user.getPassword());
+    loginAndCreateOnpremAccountPage.loginToDashboard(user.getName(), user.getPassword());
   }
 }
