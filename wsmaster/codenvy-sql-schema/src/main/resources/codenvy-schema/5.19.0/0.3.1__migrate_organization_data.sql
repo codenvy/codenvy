@@ -16,13 +16,13 @@ FROM organization;
 
 
 -- Members migration -----------------------------------------------------------
-INSERT INTO che_member_actions(member_id, actions)
-SELECT                         member_id, actions
-FROM member_actions;
-
 INSERT INTO che_member(id, organization_id, user_id)
 SELECT                 id, organizationid,  userid
 FROM member;
+
+INSERT INTO che_member_actions(member_id, actions)
+SELECT                         member_id, actions
+FROM member_actions;
 
 
 -- Organization resources migration --------------------------------------------
