@@ -12,11 +12,13 @@ package com.codenvy.selenium.core.requestfactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.TestUser;
 
 /** @author Anton Korneta */
+@Singleton
 public class TestDefaultUserHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
 
   @Inject

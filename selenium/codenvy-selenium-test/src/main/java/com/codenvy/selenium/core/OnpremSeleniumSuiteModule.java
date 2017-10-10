@@ -51,7 +51,6 @@ import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
 import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
-import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -89,9 +88,8 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
     bind(TestApiEndpointUrlProvider.class).to(OnpremTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(OnpremTestIdeUrlProvider.class);
     bind(TestDashboardUrlProvider.class).to(OnpremTestDashboardUrlProvider.class);
+    bind(HttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
 
-    bind(HttpJsonRequestFactory.class).to(TestUserHttpJsonRequestFactory.class);
-    bind(TestUserHttpJsonRequestFactory.class).to(TestDefaultUserHttpJsonRequestFactory.class);
     install(new FactoryModuleBuilder().build(TestUserHttpJsonRequestFactoryCreator.class));
 
     bind(TestUserServiceClient.class).to(OnpremTestUserServiceClient.class);

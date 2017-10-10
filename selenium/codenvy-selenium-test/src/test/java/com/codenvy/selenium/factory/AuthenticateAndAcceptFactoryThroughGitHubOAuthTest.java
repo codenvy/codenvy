@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Profile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,7 +64,9 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
     testFactory = testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL).build();
   }
 
-  @AfterClass
+  //  @AfterClass
+  // This method removes default user instead of github user.
+  // Need to be reworked https://github.com/codenvy/codenvy/issues/2471
   public void tearDown() throws Exception {
     User user = testUserServiceClient.findByEmail(testUser.getEmail());
     TestWorkspaceServiceClient workspaceServiceClient =
