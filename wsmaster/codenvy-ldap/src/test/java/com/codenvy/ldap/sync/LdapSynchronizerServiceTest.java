@@ -14,7 +14,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -89,7 +89,7 @@ public class LdapSynchronizerServiceTest {
   public void shouldRejectSynchronizationIfUserPermissionsCheckFails() throws Exception {
     doThrow(new ForbiddenException("test"))
         .when(SUBJECT)
-        .checkPermission(anyString(), anyString(), anyString());
+        .checkPermission(nullable(String.class), nullable(String.class), nullable(String.class));
 
     final Response response =
         given()

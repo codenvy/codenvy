@@ -10,6 +10,7 @@
  */
 package com.codenvy.machine;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -46,7 +47,6 @@ import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -119,10 +119,10 @@ public class HostedDockerInstanceTest {
 
     doAnswer(waitingAnswer1)
         .when(dockerConnectorMock)
-        .commit(Matchers.argThat(new CommitParamsMatcher(repo1)));
+        .commit(argThat(new CommitParamsMatcher(repo1)));
     doAnswer(waitingAnswer2)
         .when(dockerConnectorMock)
-        .commit(Matchers.argThat(new CommitParamsMatcher(repo2)));
+        .commit(argThat(new CommitParamsMatcher(repo2)));
 
     // Starting threads #1 & 2
     executor.execute(() -> performCommit(repo1, TAG));
@@ -137,7 +137,7 @@ public class HostedDockerInstanceTest {
 
     // thread #3 is entered  method but should wait - semaphore is red
     verify(dockerInstance).commitContainer(eq(repo3), eq(TAG));
-    verify(dockerConnectorMock, never()).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
+    verify(dockerConnectorMock, never()).commit(argThat(new CommitParamsMatcher(repo3)));
 
     // completing first 2 calls
     waitingAnswer1.completeAnswer();
@@ -146,9 +146,9 @@ public class HostedDockerInstanceTest {
     // then
     awaitFinalization();
 
-    verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo1)));
-    verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo2)));
-    verify(dockerConnectorMock).commit(Matchers.argThat(new CommitParamsMatcher(repo3)));
+    verify(dockerConnectorMock).commit(argThat(new CommitParamsMatcher(repo1)));
+    verify(dockerConnectorMock).commit(argThat(new CommitParamsMatcher(repo2)));
+    verify(dockerConnectorMock).commit(argThat(new CommitParamsMatcher(repo3)));
   }
 
   @Test
@@ -163,10 +163,10 @@ public class HostedDockerInstanceTest {
 
     doAnswer(waitingAnswer1)
         .when(dockerConnectorMock)
-        .commit(Matchers.argThat(new CommitParamsMatcher(repo1)));
+        .commit(argThat(new CommitParamsMatcher(repo1)));
     doAnswer(waitingAnswer2)
         .when(dockerConnectorMock)
-        .commit(Matchers.argThat(new CommitParamsMatcher(repo2)));
+        .commit(argThat(new CommitParamsMatcher(repo2)));
 
     // Starting threads #1 & 2
     executor.execute(() -> performCommit(repo1, TAG));
@@ -229,7 +229,7 @@ public class HostedDockerInstanceTest {
     }
   }
 
-  private class CommitParamsMatcher extends ArgumentMatcher<CommitParams> {
+  private class CommitParamsMatcher implements ArgumentMatcher<CommitParams> {
 
     private final String compareValue;
 
@@ -238,8 +238,8 @@ public class HostedDockerInstanceTest {
     }
 
     @Override
-    public boolean matches(Object argument) {
-      CommitParams item = (CommitParams) argument;
+    public boolean matches(CommitParams argument) {
+      CommitParams item = argument;
       return item.getRepository().equals(compareValue);
     }
   }

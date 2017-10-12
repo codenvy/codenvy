@@ -12,10 +12,9 @@ package com.codenvy.api.user.server;
 
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -70,9 +69,9 @@ public class AdminUserCreatorTest {
 
     final AbstractPermissionsDomain mock = mock(AbstractPermissionsDomain.class);
     doNothing().when(permissionsManager).storePermission(any(SystemPermissionsImpl.class));
-    when(permissionsManager.getDomain(anyString())).thenReturn(cast(mock));
+    when(permissionsManager.getDomain(nullable(String.class))).thenReturn(cast(mock));
     when(mock.getAllowedActions()).thenReturn(emptyList());
-    when(mock.newInstance(anyString(), anyString(), anyListOf(String.class)))
+    when(mock.newInstance(nullable(String.class), nullable(String.class), nullable(List.class)))
         .then(
             invocation ->
                 new SystemPermissionsImpl(
@@ -98,12 +97,8 @@ public class AdminUserCreatorTest {
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals("qwe");
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument -> argument.getUserId().equals("qwe")));
   }
 
   @Test
@@ -122,7 +117,7 @@ public class AdminUserCreatorTest {
   public void shouldAddSystemPermissionsInLdapMode() throws Exception {
     Injector injector = Guice.createInjector(new LdapModule());
     UserManager userManager = injector.getInstance(UserManager.class);
-    when(userManager.getByName(anyString())).thenReturn(user);
+    when(userManager.getByName(nullable(String.class))).thenReturn(user);
     when(userManager.create(any(UserImpl.class), anyBoolean())).thenReturn(user);
     AdminUserCreator creator = injector.getInstance(AdminUserCreator.class);
     creator.onEvent(
@@ -130,12 +125,8 @@ public class AdminUserCreatorTest {
     verify(permissionsManager)
         .storePermission(
             argThat(
-                new ArgumentMatcher<SystemPermissionsImpl>() {
-                  @Override
-                  public boolean matches(Object argument) {
-                    return ((SystemPermissionsImpl) argument).getUserId().equals(NAME);
-                  }
-                }));
+                (ArgumentMatcher<SystemPermissionsImpl>)
+                    argument -> argument.getUserId().equals(NAME)));
   }
 
   public class OrgModule extends BaseModule {

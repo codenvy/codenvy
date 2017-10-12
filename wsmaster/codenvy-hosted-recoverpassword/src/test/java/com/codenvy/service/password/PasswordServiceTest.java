@@ -29,6 +29,7 @@ package com.codenvy.service.password;
 
 import static com.jayway.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -263,7 +264,7 @@ public class PasswordServiceTest {
 
     assertEquals(response.statusCode(), 204);
 
-    verify(mailSender).sendMail(any(EmailBean.class));
+    verify(mailSender).sendMail(nullable(EmailBean.class));
   }
 
   @Test
@@ -304,7 +305,9 @@ public class PasswordServiceTest {
   @Test
   public void shouldRespond500IfProblemOnEmailSendingOccurs() throws Exception {
     when(recoveryStorage.generateRecoverToken(eq(USER_EMAIL))).thenReturn(UUID);
-    doThrow(new SendMailException("error", null)).when(mailSender).sendMail(any(EmailBean.class));
+    doThrow(new SendMailException("error", null))
+        .when(mailSender)
+        .sendMail(nullable(EmailBean.class));
 
     Response response =
         given().pathParam("username", USER_EMAIL).when().post(SERVICE_PATH + "/recover/{username}");

@@ -10,6 +10,7 @@
  */
 package com.codenvy.auth.sso.client;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyString;
@@ -299,7 +300,7 @@ public class LoginFilterTest {
         new MockHttpServletRequest("http://localhost:8080/ws/ws?token=t13f", null, 0, "GET", null);
 
     when(tokenExtractor.getToken(eq(request))).thenReturn("t13f");
-    when(ssoServerClient.getSubject(eq("t13f"), anyString()))
+    when(ssoServerClient.getSubject(eq("t13f"), nullable(String.class)))
         .thenReturn(createSubject("user@domain"));
     //when
     filter.doFilter(request, response, chain);
@@ -599,7 +600,7 @@ public class LoginFilterTest {
             null);
 
     when(tokenExtractor.getToken(eq(request))).thenReturn("t13f");
-    when(ssoServerClient.getSubject(eq("t13f"), anyString()))
+    when(ssoServerClient.getSubject(eq("t13f"), nullable(String.class)))
         .thenReturn(createSubject("user@domain"));
     //when
     filter.doFilter(request, response, chain);

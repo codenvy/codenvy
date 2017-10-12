@@ -10,11 +10,14 @@
  */
 package com.codenvy.onpremises;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.api.core.rest.HttpJsonHelper;
@@ -23,8 +26,9 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.omg.CORBA.ServerRequest;
-import org.testng.annotations.*;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class DashboardRedirectionFilterTest {
@@ -50,7 +54,7 @@ public class DashboardRedirectionFilterTest {
     filter.doFilter(request, response, chain);
 
     //then
-    verify(chain).doFilter((ServletRequest) any(ServerRequest.class), any(ServletResponse.class));
+    verify(chain).doFilter(nullable(ServletRequest.class), nullable(ServletResponse.class));
   }
 
   @Test(dataProvider = "nonNamespacePathProvider")
@@ -90,7 +94,7 @@ public class DashboardRedirectionFilterTest {
     filter.doFilter(request, response, chain);
 
     //then
-    verify(chain).doFilter((ServletRequest) any(ServerRequest.class), any(ServletResponse.class));
+    verify(chain).doFilter(nullable(ServletRequest.class), nullable(ServletResponse.class));
   }
 
   @DataProvider(name = "notGETMethodProvider")

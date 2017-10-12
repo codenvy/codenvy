@@ -15,8 +15,8 @@ import static org.eclipse.che.multiuser.permission.user.UserServicePermissionsFi
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -124,7 +124,7 @@ public class AdminUserServicePermissionsFilterTest {
             .get(SECURE_PATH + "/admin/user/find?name=admin");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(service).find(anyString(), anyString(), anyInt(), anyInt());
+    verify(service).find(nullable(String.class), nullable(String.class), anyInt(), anyInt());
     verify(subject).checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
   }
 

@@ -18,9 +18,9 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +34,7 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.user.server.UserLinksInjector;
 import org.eclipse.che.api.user.server.UserManager;
@@ -69,13 +70,14 @@ public class AdminUserServiceTest {
 
   @BeforeMethod
   public void init() {
-    when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);
+    when(linksInjector.injectLinks(nullable(UserDto.class), nullable(ServiceContext.class)))
+        .thenAnswer(inv -> inv.getArguments()[0]);
   }
 
   @Test
   public void shouldReturnAllUsers() throws Exception {
     UserImpl testUser = new UserImpl("test_id", "test@email", "name");
-    when(userManager.getAll(anyInt(), anyInt()))
+    when(userManager.getAll(anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(testUser), 0, 1, 1));
 
     final Response response =
@@ -98,7 +100,7 @@ public class AdminUserServiceTest {
 
   @Test
   public void shouldThrowServerErrorIfDaoThrowException() throws Exception {
-    when(userManager.getAll(anyInt(), anyInt())).thenThrow(new ServerException("some error"));
+    when(userManager.getAll(anyInt(), anyLong())).thenThrow(new ServerException("some error"));
     final Response response =
         given()
             .auth()
@@ -151,7 +153,7 @@ public class AdminUserServiceTest {
   @Test
   public void throwsServerExceptionWhenAnyInternalServerErrorOccur() throws Exception {
     final String errMsg = "server error";
-    when(userManager.getByEmailPart(anyString(), anyInt(), anyInt()))
+    when(userManager.getByEmailPart(nullable(String.class), anyInt(), anyLong()))
         .thenThrow(new ServerException(errMsg));
     final Response response =
         given()

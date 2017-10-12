@@ -12,6 +12,7 @@ package com.codenvy.machine.backup;
 
 import static java.lang.Thread.sleep;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -148,7 +149,7 @@ public class WorkspaceFsBackupSchedulerTest {
     scheduler.scheduleBackup();
 
     // then
-    verify(backupManager, timeout(2000).never()).backupWorkspace(wsId);
+    verify(backupManager, after(2000).never()).backupWorkspace(wsId);
   }
 
   @Test
@@ -171,7 +172,7 @@ public class WorkspaceFsBackupSchedulerTest {
     // add this verification with timeout to ensure that thread executor had enough time before verification of call
     verify(backupManager, timeout(2000)).backupWorkspace(WORKSPACE_ID_1);
     verify(backupManager, timeout(2000)).backupWorkspace(WORKSPACE_ID_2);
-    verify(backupManager, timeout(2000).never()).backupWorkspace("ws3");
+    verify(backupManager, after(2000).never()).backupWorkspace("ws3");
     // previous verifying should wait enough, so no timeouts here
     verify(backupManager, never()).backupWorkspace("ws4");
     verify(backupManager, never()).backupWorkspace("ws5");
