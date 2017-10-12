@@ -18,18 +18,18 @@
 
     <test name="codenvy-organization" preserve-order="true">
         <classes>
-            <class name="com.codenvy.selenium.dashboard.organization.AdminOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.BulkOrganizationDeletionTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.DeleteOrganizationInListTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.FilterOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.OrganizationListTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.OrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.UserOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.AdminOfParentOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.AdminOfSubOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.UserEmptyOrganizationTest" />
-            <class name="com.codenvy.selenium.dashboard.organization.DeleteOrganizationTest"/>
-            <class name="com.codenvy.selenium.dashboard.organization.RenameOrganizationTest"/>
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.AdminOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.BulkOnpremOrganizationDeletionTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.DeleteOnpremOrganizationInListTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.FilterOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.OrganizationOnpremListTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.OrganizationOnpremTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.UserOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.AdminOfParentOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.AdminOfSubOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.UserEmptyOnpremOrganizationTest" />
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.DeleteOnpremOrganizationTest"/>
+            <class name="com.codenvy.selenium.dashboard.onprem_organization.RenameOnpremOrganizationTest"/>
         </classes>
     </test>
 </suite>

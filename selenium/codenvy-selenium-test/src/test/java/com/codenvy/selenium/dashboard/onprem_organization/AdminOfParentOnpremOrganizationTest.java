@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
 import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
@@ -30,8 +30,11 @@ import com.google.inject.name.Named;
 import java.util.ArrayList;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
+import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +43,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for organization admin.
+ * Test validates organization views for admin of the onprem_organization.
  *
  * @author Ann Shumilova
  */
-public class AdminOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(AdminOrganizationTest.class);
+public class AdminOfParentOnpremOrganizationTest {
 
-  private OrganizationDto rootOrganization;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(AdminOfParentOnpremOrganizationTest.class);
+
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -55,20 +59,21 @@ public class AdminOrganizationTest {
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private CodenvyAdminDashboard dashboard;
+  @Inject private TestIdeUrlProvider testIdeUrlProvider;
+  @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
+  @Inject private TestUser testUser;
 
   @Inject
   @Named("admin")
   private OnpremTestOrganizationServiceClient organizationServiceClient;
 
-  @Inject private TestUser testUser;
   @Inject private AdminTestUser adminTestUser;
 
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
+    dashboard.waitDashboardToolbarTitle();
 
-    rootOrganization =
-        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     childOrganization =
@@ -85,7 +90,6 @@ public class AdminOrganizationTest {
   public void tearDown() throws Exception {
     organizationServiceClient.deleteOrganizationById(childOrganization.getId());
     organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
-    organizationServiceClient.deleteOrganizationById(rootOrganization.getId());
   }
 
   @Test(priority = 1)
@@ -95,6 +99,7 @@ public class AdminOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+    WaitUtils.sleepQuietly(3);
 
     assertEquals(
         navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
@@ -112,11 +117,9 @@ public class AdminOrganizationTest {
     assertTrue(headers.contains(AVAILABLE_RAM.getTitle()));
     assertTrue(headers.contains(SUB_ORGANIZATIONS.getTitle()));
     assertTrue(headers.contains(ACTIONS.getTitle()));
-
     assertTrue(
         organizationListPage.getValues(NAME).contains(parentOrganization.getQualifiedName()));
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
-    assertFalse(organizationListPage.getValues(NAME).contains(rootOrganization.getQualifiedName()));
   }
 
   @Test(priority = 2)
@@ -151,8 +154,8 @@ public class AdminOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
+    WaitUtils.sleepQuietly(3);
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
-
     organizationPage.waitOrganizationName(childOrganization.getQualifiedName());
     assertTrue(organizationPage.isOrganizationNameReadonly());
     assertFalse(organizationPage.isWorkspaceCapReadonly());

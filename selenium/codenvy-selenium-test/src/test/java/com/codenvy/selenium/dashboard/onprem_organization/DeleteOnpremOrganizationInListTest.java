@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
@@ -39,8 +39,9 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class DeleteOrganizationInListTest {
-  private static final Logger LOG = LoggerFactory.getLogger(DeleteOrganizationInListTest.class);
+public class DeleteOnpremOrganizationInListTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DeleteOnpremOrganizationInListTest.class);
 
   private List<OrganizationDto> organizations;
   private OrganizationDto organization;
@@ -58,7 +59,7 @@ public class DeleteOrganizationInListTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     String organizationName = NameGenerator.generate("organization", 5);
     organization = organizationServiceClient.createOrganization(organizationName);

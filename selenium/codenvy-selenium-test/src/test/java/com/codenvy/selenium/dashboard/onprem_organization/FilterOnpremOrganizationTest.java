@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -36,8 +36,8 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class FilterOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(FilterOrganizationTest.class);
+public class FilterOnpremOrganizationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(FilterOnpremOrganizationTest.class);
 
   private List<OrganizationDto> organizations;
   private String organizationName;
@@ -56,7 +56,7 @@ public class FilterOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
 
     organizationName = NameGenerator.generate("organization", 5);
     organizations = organizationServiceClient.getOrganizations();
