@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class OrganizationListTest {
+public class OrganizationOnpremListTest {
   private List<OrganizationDto> organizations;
 
   @Inject private OrganizationListPage organizationListPage;
@@ -53,7 +53,7 @@ public class OrganizationListTest {
     organization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     organizations = organizationServiceClient.getOrganizations();
-    dashboard.open();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass

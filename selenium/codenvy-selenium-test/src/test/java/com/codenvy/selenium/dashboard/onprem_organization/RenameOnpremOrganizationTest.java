@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -37,8 +37,8 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class RenameOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(RenameOrganizationTest.class);
+public class RenameOnpremOrganizationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(RenameOnpremOrganizationTest.class);
 
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;

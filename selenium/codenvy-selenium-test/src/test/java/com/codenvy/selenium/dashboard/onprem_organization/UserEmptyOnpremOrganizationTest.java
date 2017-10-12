@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -23,12 +23,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for simple user being a member of any organization.
+ * Test validates organization views for simple user being a member of any onprem_organization.
  *
  * @author Ann Shumilova
  */
-public class UserEmptyOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(UserEmptyOrganizationTest.class);
+public class UserEmptyOnpremOrganizationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(UserEmptyOnpremOrganizationTest.class);
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private NavigationBar navigationBar;

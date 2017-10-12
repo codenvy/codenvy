@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.ACTIONS;
 import static com.codenvy.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.AVAILABLE_RAM;
@@ -40,13 +40,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Test validates organization views for admin of the sub-organization.
+ * Test validates organization views for onprem_organization admin.
  *
  * @author Ann Shumilova
  */
-public class AdminOfSubOrganizationTest {
-  private static final Logger LOG = LoggerFactory.getLogger(AdminOfSubOrganizationTest.class);
+public class AdminOnpremOrganizationTest {
+  private static final Logger LOG = LoggerFactory.getLogger(AdminOnpremOrganizationTest.class);
 
+  private OrganizationDto rootOrganization;
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 
@@ -66,14 +67,16 @@ public class AdminOfSubOrganizationTest {
   public void setUp() throws Exception {
     dashboard.open();
 
+    rootOrganization =
+        organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     parentOrganization =
         organizationServiceClient.createOrganization(NameGenerator.generate("organization", 5));
     childOrganization =
         organizationServiceClient.createOrganization(
             NameGenerator.generate("organization", 5), parentOrganization.getId());
 
-    organizationServiceClient.addOrganizationMember(parentOrganization.getId(), testUser.getId());
-    organizationServiceClient.addOrganizationAdmin(childOrganization.getId(), testUser.getId());
+    organizationServiceClient.addOrganizationAdmin(parentOrganization.getId(), testUser.getId());
+    organizationServiceClient.addOrganizationMember(childOrganization.getId(), testUser.getId());
 
     dashboard.open();
   }
@@ -82,6 +85,7 @@ public class AdminOfSubOrganizationTest {
   public void tearDown() throws Exception {
     organizationServiceClient.deleteOrganizationById(childOrganization.getId());
     organizationServiceClient.deleteOrganizationById(parentOrganization.getId());
+    organizationServiceClient.deleteOrganizationById(rootOrganization.getId());
   }
 
   @Test(priority = 1)
@@ -97,8 +101,6 @@ public class AdminOfSubOrganizationTest {
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(
         navigationBar.getMenuCounterValue(ORGANIZATIONS), String.valueOf(organizationsCount));
-    //WaitUtils.sleepQuietly(3);
-
     assertEquals(organizationListPage.getOrganizationListItemCount(), organizationsCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
@@ -114,6 +116,7 @@ public class AdminOfSubOrganizationTest {
     assertTrue(
         organizationListPage.getValues(NAME).contains(parentOrganization.getQualifiedName()));
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
+    assertFalse(organizationListPage.getValues(NAME).contains(rootOrganization.getQualifiedName()));
   }
 
   @Test(priority = 2)
@@ -121,21 +124,21 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.clickOnOrganization(parentOrganization.getName());
 
     organizationPage.waitOrganizationName(parentOrganization.getName());
-    assertTrue(organizationPage.isOrganizationNameReadonly());
+    assertFalse(organizationPage.isOrganizationNameReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
     assertTrue(organizationPage.isRunningCapReadonly());
     assertTrue(organizationPage.isRAMCapReadonly());
     assertTrue(organizationPage.isWorkspaceCapReadonly());
-    assertFalse(organizationPage.isDeleteButtonVisible());
+    assertTrue(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
-    assertFalse(organizationPage.isAddMemberButtonVisible());
+    assertTrue(organizationPage.isAddMemberButtonVisible());
 
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForOrganizationsList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
-    assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
+    assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
     assertTrue(organizationListPage.getValues(NAME).contains(childOrganization.getQualifiedName()));
 
     organizationPage.clickBackButton();
@@ -151,21 +154,21 @@ public class AdminOfSubOrganizationTest {
     organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
 
     organizationPage.waitOrganizationName(childOrganization.getQualifiedName());
-    assertFalse(organizationPage.isOrganizationNameReadonly());
-    assertTrue(organizationPage.isWorkspaceCapReadonly());
-    assertTrue(organizationPage.isRunningCapReadonly());
-    assertTrue(organizationPage.isRAMCapReadonly());
-    assertTrue(organizationPage.isWorkspaceCapReadonly());
-    assertTrue(organizationPage.isDeleteButtonVisible());
+    assertTrue(organizationPage.isOrganizationNameReadonly());
+    assertFalse(organizationPage.isWorkspaceCapReadonly());
+    assertFalse(organizationPage.isRunningCapReadonly());
+    assertFalse(organizationPage.isRAMCapReadonly());
+    assertFalse(organizationPage.isWorkspaceCapReadonly());
+    assertFalse(organizationPage.isDeleteButtonVisible());
 
     organizationPage.clickMembersTab();
     organizationPage.waitMembersList();
-    assertTrue(organizationPage.isAddMemberButtonVisible());
+    assertFalse(organizationPage.isAddMemberButtonVisible());
 
     organizationPage.clickSubOrganizationsTab();
     organizationListPage.waitForSubOrganizationsEmptyList();
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
-    assertTrue(organizationListPage.isAddSubOrganizationButtonVisible());
+    assertFalse(organizationListPage.isAddSubOrganizationButtonVisible());
 
     organizationPage.clickBackButton();
     organizationPage.waitOrganizationName(parentOrganization.getName());

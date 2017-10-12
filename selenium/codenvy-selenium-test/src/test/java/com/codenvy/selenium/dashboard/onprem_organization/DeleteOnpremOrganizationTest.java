@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.testng.Assert.assertEquals;
 
@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-public class DeleteOrganizationTest {
+public class DeleteOnpremOrganizationTest {
   private OrganizationDto parentOrganization;
   private OrganizationDto childOrganization;
 

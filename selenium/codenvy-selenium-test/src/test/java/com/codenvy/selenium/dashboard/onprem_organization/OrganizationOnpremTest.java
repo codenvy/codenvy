@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package com.codenvy.selenium.dashboard.organization;
+package com.codenvy.selenium.dashboard.onprem_organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
@@ -34,7 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
-public class OrganizationTest {
+public class OrganizationOnpremTest {
 
   private String orgName;
   private List<String> emailsList;
@@ -78,7 +78,7 @@ public class OrganizationTest {
 
     organization = organizationServiceClient.createOrganization(orgName);
 
-    dashboard.open();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
   @AfterClass
