@@ -115,7 +115,6 @@ public class LoginAndCreateOnpremAccountPage implements LoginPage {
       waitLoginPage();
       return true;
     } catch (TimeoutException ex) {
-      ex.printStackTrace();
       return false;
     }
   }
