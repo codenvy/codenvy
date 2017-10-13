@@ -14,6 +14,7 @@ import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestProfileServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.user.TestUser;
 
@@ -21,12 +22,17 @@ import org.eclipse.che.selenium.core.user.TestUser;
 public class OnpremEntranceImpl implements Entrance {
 
   private final SeleniumWebDriver seleniumWebDriver;
-
-  @Inject private LoginAndCreateOnpremAccountPage loginAndCreateOnpremAccountPage;
+  private final LoginAndCreateOnpremAccountPage loginAndCreateOnpremAccountPage;
+  private final TestProfileServiceClient testProfileServiceClient;
 
   @Inject
-  public OnpremEntranceImpl(SeleniumWebDriver seleniumWebDriver) {
+  public OnpremEntranceImpl(
+      SeleniumWebDriver seleniumWebDriver,
+      LoginAndCreateOnpremAccountPage loginAndCreateOnpremAccountPage,
+      TestProfileServiceClient testProfileServiceClient) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.loginAndCreateOnpremAccountPage = loginAndCreateOnpremAccountPage;
+    this.testProfileServiceClient = testProfileServiceClient;
   }
 
   /**
