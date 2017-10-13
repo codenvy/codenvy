@@ -22,31 +22,34 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.multiuser.api.permission.shared.dto.PermissionsDto;
 import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** This util is handling the requests to Organization API. */
 @Singleton
-public class OnpremTestOrganizationServiceClient {
+public class OnpremTestOrganizationServiceClientImpl implements TestOrganizationServiceClient {
   private static final Logger LOG =
-      LoggerFactory.getLogger(OnpremTestOrganizationServiceClient.class);
+      LoggerFactory.getLogger(OnpremTestOrganizationServiceClientImpl.class);
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
-  public OnpremTestOrganizationServiceClient(
+  public OnpremTestOrganizationServiceClientImpl(
       TestApiEndpointUrlProvider apiEndpointUrlProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpoint = apiEndpointUrlProvider.get().toString();
     this.requestFactory = requestFactory;
   }
 
-  public List<OrganizationDto> getOrganizations() throws Exception {
-    return getOrganizations(null);
+  @Override
+  public List<OrganizationDto> getAll() throws Exception {
+    return getAll(null);
   }
 
-  public List<OrganizationDto> getOrganizations(@Nullable String parent) throws Exception {
+  @Override
+  public List<OrganizationDto> getAll(@Nullable String parent) throws Exception {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
@@ -61,7 +64,8 @@ public class OnpremTestOrganizationServiceClient {
     return apiEndpoint + "organization/";
   }
 
-  public OrganizationDto createOrganization(String name, String parentId) throws Exception {
+  @Override
+  public OrganizationDto create(String name, String parentId) throws Exception {
     OrganizationDto data = newDto(OrganizationDto.class).withName(name).withParent(parentId);
 
     OrganizationDto organizationDto =
@@ -81,11 +85,13 @@ public class OnpremTestOrganizationServiceClient {
     return organizationDto;
   }
 
-  public OrganizationDto createOrganization(String name) throws Exception {
-    return createOrganization(name, null);
+  @Override
+  public OrganizationDto create(String name) throws Exception {
+    return create(name, null);
   }
 
-  public void deleteOrganizationById(String id) throws Exception {
+  @Override
+  public void deleteById(String id) throws Exception {
     String apiUrl = format("%s%s", getApiUrl(), id);
 
     try {
@@ -97,39 +103,44 @@ public class OnpremTestOrganizationServiceClient {
     LOG.debug("Organization with id='{}' removed", id);
   }
 
-  public void deleteOrganizationByName(String name) throws Exception {
-    OrganizationDto organization = getOrganization(name);
+  @Override
+  public void deleteByName(String name) throws Exception {
+    OrganizationDto organization = get(name);
 
     if (organization != null) {
-      deleteOrganizationById(organization.getId());
+      deleteById(organization.getId());
     }
   }
 
-  public void deleteAllOrganizations(String user) throws Exception {
-    getOrganizations(user)
+  @Override
+  public void deleteAll(String user) throws Exception {
+    getAll(user)
         .stream()
         .filter(organization -> organization.getParent() != null)
         .forEach(
             organization -> {
               try {
-                deleteOrganizationById(organization.getId());
+                deleteById(organization.getId());
               } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
               }
             });
   }
 
-  public OrganizationDto getOrganization(String organizationName) throws Exception {
+  @Override
+  public OrganizationDto get(String organizationName) throws Exception {
     String apiUrl = format("%sfind?name=%s", getApiUrl(), organizationName);
     return requestFactory.fromUrl(apiUrl).request().asDto(OrganizationDto.class);
   }
 
-  public void addOrganizationMember(String organizationId, String userId) throws Exception {
-    addOrganizationMember(organizationId, userId, asList("createWorkspaces"));
+  @Override
+  public void addMember(String organizationId, String userId) throws Exception {
+    addMember(organizationId, userId, asList("createWorkspaces"));
   }
 
-  public void addOrganizationAdmin(String organizationId, String userId) throws Exception {
-    addOrganizationMember(
+  @Override
+  public void addAdmin(String organizationId, String userId) throws Exception {
+    addMember(
         organizationId,
         userId,
         asList(
@@ -142,7 +153,8 @@ public class OnpremTestOrganizationServiceClient {
             "manageSuborganizations"));
   }
 
-  public void addOrganizationMember(String organizationId, String userId, List<String> actions)
+  @Override
+  public void addMember(String organizationId, String userId, List<String> actions)
       throws Exception {
     String apiUrl = apiEndpoint + "permissions";
     PermissionsDto data =

@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 
 import com.codenvy.selenium.core.client.OnpremTestAuthServiceClient;
 import com.codenvy.selenium.core.client.OnpremTestMachineServiceClient;
-import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClient;
+import com.codenvy.selenium.core.client.OnpremTestOrganizationServiceClientImpl;
 import com.codenvy.selenium.core.client.OnpremTestUserServiceClient;
 import com.codenvy.selenium.core.provider.OnpremTestApiEndpointUrlProvider;
 import com.codenvy.selenium.core.provider.OnpremTestDashboardUrlProvider;
@@ -34,10 +34,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.*;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.provider.CheTestSvnPasswordProvider;
@@ -123,15 +120,15 @@ public class OnpremSeleniumSuiteModule extends AbstractModule {
   }
 
   @Provides
-  public ActionsFactory getActionFactory() {
-    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
+  @Named("admin")
+  public TestOrganizationServiceClient getAdminOrganizationServiceClient(
+      TestApiEndpointUrlProvider apiEndpointUrlProvider,
+      TestAdminHttpJsonRequestFactory requestFactory) {
+    return new OnpremTestOrganizationServiceClientImpl(apiEndpointUrlProvider, requestFactory);
   }
 
   @Provides
-  @Named("admin")
-  public OnpremTestOrganizationServiceClient getAdminOrganizationServiceClient(
-      TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      TestAdminHttpJsonRequestFactory requestFactory) {
-    return new OnpremTestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
+  public ActionsFactory getActionFactory() {
+    return isMac() ? new MacOSActionsFactory() : new GenericActionsFactory();
   }
 }
