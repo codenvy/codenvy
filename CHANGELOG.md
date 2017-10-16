@@ -1,5 +1,41 @@
 # Change Log
 
+## [5.19.0](https://github.com/codenvy/codenvy/tree/5.19.0) (2017-10-14)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.18.0...5.19.0)
+
+**Merged pull requests:**
+
+- Add ability to inject different webdrivers into the Entrance class [\#2489](https://github.com/codenvy/codenvy/pull/2489) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix organization selenium tests [\#2487](https://github.com/codenvy/codenvy/pull/2487) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Update mockito to v2.10 [\#2485](https://github.com/codenvy/codenvy/pull/2485) ([benoitf](https://github.com/benoitf))
+- Check if there is a login page before login to Codenvy from selenium tests [\#2481](https://github.com/codenvy/codenvy/pull/2481) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix selenium test to don't remove default user unexpectedly [\#2472](https://github.com/codenvy/codenvy/pull/2472) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Delete all selenium tests for Bitnami stacks [\#2468](https://github.com/codenvy/codenvy/pull/2468) ([SkorikSergey](https://github.com/SkorikSergey))
+- Increase the maximum number of sessions in chrome node [\#2466](https://github.com/codenvy/codenvy/pull/2466) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Added missing org.eclipse.persistence.jpa dependency [\#2465](https://github.com/codenvy/codenvy/pull/2465) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix CheckMainFeatureForCharpLanguageTest name [\#2458](https://github.com/codenvy/codenvy/pull/2458) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix tests  dependent on VSTS git provider [\#2455](https://github.com/codenvy/codenvy/pull/2455) ([musienko-maxim](https://github.com/musienko-maxim))
+- Add new test to codenvy testsuite [\#2453](https://github.com/codenvy/codenvy/pull/2453) ([musienko-maxim](https://github.com/musienko-maxim))
+- Fix comparing selenium tests execution results with CI [\#2451](https://github.com/codenvy/codenvy/pull/2451) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- fix tests [\#2448](https://github.com/codenvy/codenvy/pull/2448) ([riuvshin](https://github.com/riuvshin))
+- Remove unnecessary tests [\#2444](https://github.com/codenvy/codenvy/pull/2444) ([musienko-maxim](https://github.com/musienko-maxim))
+- Rename the test in the testsuite [\#2441](https://github.com/codenvy/codenvy/pull/2441) ([musienko-maxim](https://github.com/musienko-maxim))
+- Fix editor settings test [\#2438](https://github.com/codenvy/codenvy/pull/2438) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Use Guice container to instantiate TestWorkspaceServiceClient class [\#2435](https://github.com/codenvy/codenvy/pull/2435) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add property from the upstream Che [\#2434](https://github.com/codenvy/codenvy/pull/2434) ([garagatyi](https://github.com/garagatyi))
+- CHE-4634 remove ZeroClipboard library [\#2433](https://github.com/codenvy/codenvy/pull/2433) ([olexii4](https://github.com/olexii4))
+- Clean up target directory at start of selenium tests [\#2428](https://github.com/codenvy/codenvy/pull/2428) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- RELEASE: Update CHANGELOG [\#2425](https://github.com/codenvy/codenvy/pull/2425) ([riuvshin](https://github.com/riuvshin))
+- Fix organization migration [\#2467](https://github.com/codenvy/codenvy/pull/2467) ([mshaposhnik](https://github.com/mshaposhnik))
+- CODENVY-2445 fix account profile form [\#2454](https://github.com/codenvy/codenvy/pull/2454) ([olexii4](https://github.com/olexii4))
+- Add missing artifacts of EclipseLink for the runtime [\#2449](https://github.com/codenvy/codenvy/pull/2449) ([benoitf](https://github.com/benoitf))
+- Fix integration tests with EclipseLink 2.7.0 [\#2446](https://github.com/codenvy/codenvy/pull/2446) ([benoitf](https://github.com/benoitf))
+- \[multi-user Eclipse Che\] Adapt to changes in upstream [\#2442](https://github.com/codenvy/codenvy/pull/2442) ([skabashnyuk](https://github.com/skabashnyuk))
+- Update to EclipseLink 2.7 [\#2429](https://github.com/codenvy/codenvy/pull/2429) ([benoitf](https://github.com/benoitf))
+- fix docker images build [\#2426](https://github.com/codenvy/codenvy/pull/2426) ([riuvshin](https://github.com/riuvshin))
+- interrupt build scripts for docker files if failure occurs [\#2424](https://github.com/codenvy/codenvy/pull/2424) ([riuvshin](https://github.com/riuvshin))
+
+
 ## [5.18.0](https://github.com/codenvy/codenvy/tree/5.18.0) (2017-09-20)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.17.0...5.18.0)
 
