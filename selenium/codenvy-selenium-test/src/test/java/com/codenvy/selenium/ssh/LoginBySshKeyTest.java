@@ -28,7 +28,6 @@ import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -62,7 +61,6 @@ public class LoginBySshKeyTest {
   @Inject private TestWorkspace ws1;
   @Inject private TestWorkspace ws2;
 
-  @Inject private TestUser user;
   @Inject private CommandsExplorer commandsExplorer;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Preferences preferences;
@@ -117,7 +115,7 @@ public class LoginBySshKeyTest {
 
     String sshPrivateKeyFromFirstMachine =
         testSshServiceClient.getPrivateKeyByName(TITLE_OF_SSH_KEY);
-    workspaceServiceClient.stop(ws1.getName(), user.getName(), false);
+    workspaceServiceClient.stop(ws1.getName(), ws1.getOwner().getName(), false);
     seleniumWebDriver.navigate().refresh();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
@@ -127,8 +125,6 @@ public class LoginBySshKeyTest {
     String commandForConnection = getCommandFromSshConsole();
     ide.open(ws2);
     projectExplorer.waitProjectExplorer();
-    notifications.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
     String commandForCreatingSshKey =
         "mkdir -p ~/.ssh && echo -e '"
             + sshPrivateKeyFromFirstMachine.replaceAll("\n", "\\\\n")
