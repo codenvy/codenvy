@@ -13,6 +13,7 @@ package com.codenvy.selenium.pageobject.site;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
@@ -20,7 +21,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
-import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -132,10 +132,9 @@ public class LoginAndCreateOnpremAccountPage implements LoginPage {
 
   /** wait main elements on login page */
   public void waitLoginPageClosed() {
-    loadPageTimeout.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.USER_NAME_INPUT_XPATH)));
     redrawTimeout.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.PASSWORD_INPUT_XPATH)));
+        ExpectedConditions.invisibilityOfAllElements(
+            ImmutableList.of(usernameInput, passwordInput, loginButton)));
   }
 
   /**
@@ -151,6 +150,7 @@ public class LoginAndCreateOnpremAccountPage implements LoginPage {
     passwordInput.clear();
     passwordInput.sendKeys(password);
     clickOnLogInBtnAndGo();
+    waitLoginPageClosed();
   }
 
   /** click on button Login and wait closing of the IDE loader */
