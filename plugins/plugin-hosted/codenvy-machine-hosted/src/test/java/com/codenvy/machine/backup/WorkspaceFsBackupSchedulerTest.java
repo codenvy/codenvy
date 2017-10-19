@@ -169,7 +169,8 @@ public class WorkspaceFsBackupSchedulerTest {
     scheduler.scheduleBackup();
 
     // then
-    // add this verification with timeout to ensure that thread executor had enough time before verification of call
+    // add this verification with timeout to ensure that thread executor had enough time before
+    // verification of call
     verify(backupManager, timeout(2000)).backupWorkspace(WORKSPACE_ID_1);
     verify(backupManager, timeout(2000)).backupWorkspace(WORKSPACE_ID_2);
     verify(backupManager, after(2000).never()).backupWorkspace("ws3");
@@ -185,7 +186,8 @@ public class WorkspaceFsBackupSchedulerTest {
     addWorkspace("ws3");
     scheduler.scheduleBackup();
 
-    // add this verification with timeout to ensure that thread executor had enough time before verification of call
+    // add this verification with timeout to ensure that thread executor had enough time before
+    // verification of call
     verify(backupManager, timeout(2000)).backupWorkspace("ws3");
 
     // when

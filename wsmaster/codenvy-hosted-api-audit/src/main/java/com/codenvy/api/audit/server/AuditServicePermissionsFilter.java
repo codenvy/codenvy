@@ -38,7 +38,7 @@ public class AuditServicePermissionsFilter extends CheMethodInvokerFilter {
           .getSubject()
           .checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION);
     } else {
-      //unknown method
+      // unknown method
       throw new ForbiddenException("User is not authorized to perform this operation");
     }
   }

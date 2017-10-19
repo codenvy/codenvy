@@ -97,7 +97,7 @@ public class LoginFilter implements Filter {
 
       HttpSession session;
       if (token != null) {
-        //TODO thread safety
+        // TODO thread safety
         session = sessionStore.getSession(token);
         if (session == null) {
           session = httpReq.getSession();
@@ -111,9 +111,9 @@ public class LoginFilter implements Filter {
           tokenHandler.handleValidToken(httpReq, httpResp, chain, session, principal);
         }
       } else {
-        //token not exists
+        // token not exists
         if (httpReq.getParameter("cookiePresent") != null) {
-          //we know that token have to be in cookies but it's not there
+          // we know that token have to be in cookies but it's not there
           httpResp.sendRedirect(cookiesDisabledErrorPageUrl);
         } else {
           tokenHandler.handleMissingToken(httpReq, httpResp, chain);

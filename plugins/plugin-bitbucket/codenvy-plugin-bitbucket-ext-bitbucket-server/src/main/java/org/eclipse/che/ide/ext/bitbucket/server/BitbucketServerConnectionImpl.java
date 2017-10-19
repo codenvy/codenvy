@@ -69,12 +69,14 @@ public class BitbucketServerConnectionImpl implements BitbucketConnection {
 
   @Override
   public BitbucketUser getUser() throws ServerException, IOException, BitbucketException {
-    //Need to check if user has permissions to retrieve full information from Bitbucket Server rest API.
-    //Other requests will not fail with 403 error, but may return empty data.
+    // Need to check if user has permissions to retrieve full information from Bitbucket Server rest
+    // API.
+    // Other requests will not fail with 403 error, but may return empty data.
     doRequest(this, GET, bitbucketEndpoint + "/rest/api/latest/users", null, null);
 
-    //Bitbucket Server does not have direct API method to retrieve authenticated user.
-    //Authenticated user exists in http clone url of any repository (http://<user>@bitbucketserver.com/scm/project/repository.git).
+    // Bitbucket Server does not have direct API method to retrieve authenticated user.
+    // Authenticated user exists in http clone url of any repository
+    // (http://<user>@bitbucketserver.com/scm/project/repository.git).
     String response = getJson(this, bitbucketEndpoint + "/rest/api/latest/repos");
     Optional<BitbucketLink> optional =
         parseJsonResponse(response, BitbucketServerRepositoriesPage.class)

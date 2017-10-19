@@ -148,7 +148,8 @@ public class LoginBySshKeyTest {
         TestCommandsConstants.CUSTOM,
         ws2.getId());
 
-    //This actions for redrawing the just add commands on Toolbar widget after fixing CHE-1357 the refresh browser block should be removed
+    // This actions for redrawing the just add commands on Toolbar widget after fixing CHE-1357 the
+    // refresh browser block should be removed
     seleniumWebDriver.navigate().refresh();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);

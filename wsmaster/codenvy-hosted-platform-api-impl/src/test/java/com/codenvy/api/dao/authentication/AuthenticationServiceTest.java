@@ -89,7 +89,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldAuthenticateWithCorrectParams() throws Exception {
-    //given
+    // given
 
     when(handler.authenticate(eq(USER.getName()), eq("secret"))).thenReturn(USER.getId());
     doAnswer(
@@ -142,7 +142,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldReturnBadRequestIfLoginIsNotSet() throws Exception {
-    //given
+    // given
     // when
     given()
         .contentType(ContentType.JSON)
@@ -160,7 +160,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldReturnBadRequestIfLoginIsEmpty() throws Exception {
-    //given
+    // given
     // when
     given()
         .contentType(ContentType.JSON)
@@ -178,7 +178,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldReturnBadRequestIfPassowordIsNotSet() throws Exception {
-    //given
+    // given
     // when
     given()
         .contentType(ContentType.JSON)
@@ -196,7 +196,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldReturnBadRequestIfPasswordIsEmpty() throws Exception {
-    //given
+    // given
     // when
     given()
         .contentType(ContentType.JSON)
@@ -214,7 +214,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldReturnBadRequestIfHandlerNotAbleToAuthenticate() throws Exception {
-    //given
+    // given
     doThrow(new AuthenticationException("Not able to authenticate"))
         .when(handler)
         .authenticate(eq(USER.getName()), eq("asdfasdf"));
@@ -235,7 +235,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldLogoutFirstIfUserAlreadyLoggedIn() throws Exception {
-    //given
+    // given
     when(handler.authenticate(eq(USER.getName()), eq("secret"))).thenReturn(USER.getId());
     doAnswer(
             new Answer<Object>() {
@@ -292,7 +292,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldBeAbleToLogoutByQueryParameter() throws Exception {
-    //given
+    // given
     when(ticketManager.removeTicket(eq(token2)))
         .thenReturn(new AccessTicket(token2, USER_2.getId(), "default"));
     // when
@@ -304,13 +304,13 @@ public class AuthenticationServiceTest {
         .statusCode(200)
         .when()
         .post("/auth/logout");
-    //then
+    // then
     verify(ticketManager).removeTicket(eq(token2));
   }
 
   @Test
   public void shouldBeAbleToLogoutByCookie() throws Exception {
-    //given
+    // given
     when(ticketManager.removeTicket(eq(token2)))
         .thenReturn(new AccessTicket(token2, USER_2.getId(), "default"));
     // when
@@ -322,13 +322,13 @@ public class AuthenticationServiceTest {
         .statusCode(200)
         .when()
         .post("/auth/logout");
-    //then
+    // then
     verify(ticketManager).removeTicket(eq(token2));
   }
 
   @Test
   public void shouldFailToLogoutWithoutToken() throws Exception {
-    //given
+    // given
     // when
     given()
         .contentType(ContentType.JSON)

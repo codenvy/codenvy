@@ -142,8 +142,8 @@ public class VSTSConnection {
    */
   private String extensionStorageHttpUrl(
       final String visualStudioHost, final String account, final String collection) {
-    //https://vsts-test.visualstudio.com/DefaultCollection/_apis
-    //https://vsts-test.extmgmt.visualstudio.com/DefaultCollection/_apis
+    // https://vsts-test.visualstudio.com/DefaultCollection/_apis
+    // https://vsts-test.extmgmt.visualstudio.com/DefaultCollection/_apis
     final String host = account + ".extmgmt." + visualStudioHost + ".com";
     final String collectionPath = collection + "/_apis";
     final String extensionStoragePath =

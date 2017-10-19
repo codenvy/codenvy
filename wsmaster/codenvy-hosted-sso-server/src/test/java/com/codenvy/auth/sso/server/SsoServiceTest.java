@@ -73,7 +73,7 @@ public class SsoServiceTest {
 
   @Test
   public void shouldValidUserIfTokenIsValid() throws NotFoundException, ServerException {
-    //given
+    // given
     when(userManager.getById(eq(user.getId()))).thenReturn(user);
     AccessTicket ticket = new AccessTicket("t1", user.getId(), "default");
     SubjectDto subjectDto =
@@ -84,7 +84,7 @@ public class SsoServiceTest {
 
     when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
 
-    //when
+    // when
     final Response response =
         given()
             .pathParam("token", "t1")
@@ -94,16 +94,16 @@ public class SsoServiceTest {
             .statusCode(200)
             .when()
             .get("internal/sso/server/{token}");
-    //then
+    // then
     assertEquals(unwrapDto(response, SubjectDto.class), subjectDto);
     assertTrue(ticket.getRegisteredClients().contains("http://dev.box.com/api"));
   }
 
   @Test
   public void shouldUnregisterClientByToken() {
-    //given
+    // given
 
-    //when
+    // when
     given()
         .pathParam("token", "t1")
         .then()
@@ -111,17 +111,17 @@ public class SsoServiceTest {
         .statusCode(204)
         .when()
         .delete("internal/sso/server/{token}");
-    //then
+    // then
     verify(ticketManager).removeTicket("t1");
   }
 
   @Test
   public void shouldUnregisterClientByTokenAndUrl() {
-    //given
+    // given
     AccessTicket ticket = new AccessTicket("t1", "id-34", "default");
     ticket.registerClientUrl("http://dev.box.com/api");
     when(ticketManager.getAccessTicket(eq("t1"))).thenReturn(ticket);
-    //when
+    // when
     given()
         .pathParam("token", "t1")
         .queryParam("clienturl", "http://dev.box.com/api")
@@ -130,7 +130,7 @@ public class SsoServiceTest {
         .statusCode(204)
         .when()
         .delete("internal/sso/server/{token}");
-    //then
+    // then
     verify(ticketManager).getAccessTicket(eq("t1"));
     verifyNoMoreInteractions(ticketManager);
     assertEquals(ticket.getRegisteredClients().size(), 0);

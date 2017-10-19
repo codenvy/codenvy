@@ -118,14 +118,14 @@ public class AuditManager {
   private void printAllUsersInfo(Path auditReport) throws ServerException {
     Page<UserImpl> currentPage = userManager.getAll(30, 0);
     do {
-      //Print users with their workspaces from current page
+      // Print users with their workspaces from current page
       for (UserImpl user : currentPage.getItems()) {
         List<WorkspaceImpl> workspaces;
         try {
           workspaces = workspaceManager.getWorkspaces(user.getId(), false);
           Set<String> workspaceIds =
               workspaces.stream().map(WorkspaceImpl::getId).collect(Collectors.toSet());
-          //add workspaces witch are belong to user, but user doesn't have permissions for them.
+          // add workspaces witch are belong to user, but user doesn't have permissions for them.
           workspaceManager
               .getByNamespace(user.getName(), false)
               .stream()
@@ -145,7 +145,7 @@ public class AuditManager {
                 workspace.getId(),
                 permissionsManager.get(user.getId(), DOMAIN_ID, workspace.getId()));
           } catch (NotFoundException | ConflictException ignored) {
-            //User doesn't have permissions for workspace
+            // User doesn't have permissions for workspace
           }
         }
         Printer.createUserPrinter(auditReport, user, workspaces, wsPermissions).print();

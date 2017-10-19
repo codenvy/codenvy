@@ -54,7 +54,8 @@ public class HostedServersInstanceRuntimeInfo extends DockerInstanceRuntimeInfo 
 
   @Override
   public Map<String, ServerImpl> getServers() {
-    // don't use locks because value is always the same and it is ok if one thread overrides saved value
+    // don't use locks because value is always the same and it is ok if one thread overrides saved
+    // value
     if (servers == null) {
       // get servers with direct urls, transform them to use proxy if needed
       final HashMap<String, ServerImpl> servers = new HashMap<>(super.getServers());

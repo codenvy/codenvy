@@ -184,7 +184,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
 
     install(new com.codenvy.plugin.webhooks.bitbucketserver.inject.BitbucketServerWebhookModule());
 
-    //oauth
+    // oauth
     bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(OAuthAuthenticatorTokenProvider.class);
@@ -258,7 +258,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(WorkspaceMessenger.class).asEagerSingleton();
 
-    //Permission filters
+    // Permission filters
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
@@ -283,12 +283,12 @@ public class OnPremisesIdeApiModule extends AbstractModule {
     bind(AuditService.class);
     bind(AuditServicePermissionsFilter.class);
 
-    //authentication
+    // authentication
 
     bind(TokenValidator.class).to(com.codenvy.auth.sso.server.BearerTokenValidator.class);
     bind(com.codenvy.auth.sso.oauth.SsoOAuthAuthenticationService.class);
 
-    //machine authentication
+    // machine authentication
     bind(
         org.eclipse.che.multiuser.machine.authentication.server.MachineTokenPermissionsFilter
             .class);
@@ -305,7 +305,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
     bind(ServerClient.class).to(com.codenvy.auth.sso.client.MachineSsoServerClient.class);
     bind(OnPremisesMachineSessionInvalidator.class);
 
-    //SSO
+    // SSO
     Multibinder<com.codenvy.api.dao.authentication.AuthenticationHandler> handlerBinder =
         Multibinder.newSetBinder(
             binder(), com.codenvy.api.dao.authentication.AuthenticationHandler.class);
@@ -353,7 +353,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                         new PathSegmentValueFilter(4, "image"),
                         new PathSegmentValueFilter(4, "snippet"),
                         new ConjunctionRequestFilter(
-                            //api/factory/{}
+                            // api/factory/{}
                             new PathSegmentNumberFilter(3),
                             new NegationRequestFilter(
                                 new UriStartFromRequestFilter("/api/factory/find"))))),
@@ -458,7 +458,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         .addBinding()
         .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
-    //workspace activity service
+    // workspace activity service
     install(new com.codenvy.plugin.activity.inject.WorkspaceActivityModule());
 
     MapBinder<String, com.codenvy.machine.MachineServerProxyTransformer> mapBinder =
@@ -490,7 +490,7 @@ public class OnPremisesIdeApiModule extends AbstractModule {
     requestInjection(interceptor);
     bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
 
-    //ldap
+    // ldap
     if (LdapAuthenticationHandler.TYPE.equals(System.getProperty("auth.handler.default"))) {
       install(new LdapModule());
     }

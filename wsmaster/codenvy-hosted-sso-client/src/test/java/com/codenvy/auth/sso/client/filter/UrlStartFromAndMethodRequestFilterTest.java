@@ -25,12 +25,12 @@ public class UrlStartFromAndMethodRequestFilterTest {
 
   @Test(dataProvider = "excludedPathProvider")
   public void shouldSkipRequestWithExcludedPath(String path) throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + path, null, 0, "GET", null);
 
     RegexpRequestFilter filter = new RegexpRequestFilter(filterPattern);
-    //when -then
+    // when -then
     Assert.assertTrue(filter.shouldSkip(request));
   }
 
@@ -55,11 +55,11 @@ public class UrlStartFromAndMethodRequestFilterTest {
   @Test(dataProvider = "notExcludedPathProvider")
   public void shouldNotSkipRequestWithNotExcludedPath(String path)
       throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + path, null, 0, "GET", null);
     RegexpRequestFilter filter = new RegexpRequestFilter(filterPattern);
-    //when -then
+    // when -then
     Assert.assertFalse(filter.shouldSkip(request));
   }
 }

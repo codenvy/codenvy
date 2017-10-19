@@ -10,6 +10,7 @@
  */
 package com.codenvy.api.dao.authentication;
 /** @author Sergii Kabashniuk */
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

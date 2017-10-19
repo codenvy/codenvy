@@ -194,7 +194,8 @@ public class LdapSynchronizer {
 
         syncFetched(entry, linkingIds, syncResult);
 
-        // Each EACH_ENTRIES_COUNT_CHECK_INTERRUPTION synchronized entries check whether thread wasn't interrupted
+        // Each EACH_ENTRIES_COUNT_CHECK_INTERRUPTION synchronized entries check whether thread
+        // wasn't interrupted
         // if it was - stop the synchronization, all the users who were not synchronized
         // will be synchronized with the next synchronization
         if (syncResult.fetched % EACH_ENTRIES_COUNT_CHECK_INTERRUPTION == 0) {

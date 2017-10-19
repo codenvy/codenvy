@@ -16,7 +16,7 @@ package com.codenvy.swarm.client.model;
  * @author Eugene Voevodin
  */
 public class DockerNode {
-  //TODO add ram and containers ?
+  // TODO add ram and containers ?
   private final String hostname;
   private final String addr;
 

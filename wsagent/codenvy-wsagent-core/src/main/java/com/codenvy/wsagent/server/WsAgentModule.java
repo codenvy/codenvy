@@ -37,7 +37,7 @@ public class WsAgentModule extends AbstractModule {
   protected void configure() {
 
     bind(PermissionChecker.class).to(HttpPermissionCheckerImpl.class);
-    //bind(TokenHandler.class).to(com.codenvy.api.permission.server.PermissionTokenHandler.class);
+    // bind(TokenHandler.class).to(com.codenvy.api.permission.server.PermissionTokenHandler.class);
     bind(TokenHandler.class)
         .annotatedWith(Names.named("delegated.handler"))
         .to(com.codenvy.auth.sso.client.NoUserInteractionTokenHandler.class);

@@ -50,28 +50,28 @@ public class SystemRamLimitMessageSenderTest {
   @Test
   public void shouldSetSystemRamLimitExceedMessageSentFlagToFalseWhenRamLimitNotExceedMessageSent()
       throws Exception {
-    //given
+    // given
     systemRamLimitExceedMessageSent.set(systemRamLimitMessageSender, true);
     when(systemRamInfo.isSystemRamLimitExceeded()).thenReturn(false);
 
-    //when
+    // when
     systemRamLimitMessageSender.checkRamLimitAndSendMessageIfNeeded();
 
-    //then
+    // then
     assertFalse((boolean) systemRamLimitExceedMessageSent.get(systemRamLimitMessageSender));
   }
 
   @Test
   public void shouldSetSystemRamLimitExceedMessageSentFlagToTrueWhenRamLimitExceedMessageSent()
       throws Exception {
-    //given
+    // given
     systemRamLimitExceedMessageSent.set(systemRamLimitMessageSender, false);
     when(systemRamInfo.isSystemRamLimitExceeded()).thenReturn(true);
 
-    //when
+    // when
     systemRamLimitMessageSender.checkRamLimitAndSendMessageIfNeeded();
 
-    //then
+    // then
     assertTrue((boolean) systemRamLimitExceedMessageSent.get(systemRamLimitMessageSender));
   }
 }

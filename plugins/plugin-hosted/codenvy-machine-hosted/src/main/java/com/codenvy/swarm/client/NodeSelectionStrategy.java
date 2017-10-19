@@ -14,7 +14,7 @@ import com.codenvy.swarm.client.model.DockerNode;
 import java.io.IOException;
 import java.util.List;
 
-//TODO consider should it be DockerNode || URI || something else
+// TODO consider should it be DockerNode || URI || something else
 
 /**
  * Node selection strategy for Swarm. Used for not implemented yet in Swarm docker operations.

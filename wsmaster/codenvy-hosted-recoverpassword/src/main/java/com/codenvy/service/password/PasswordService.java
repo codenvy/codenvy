@@ -117,7 +117,7 @@ public class PasswordService {
   public void recoverPassword(@PathParam("usermail") String mail)
       throws ServerException, NotFoundException {
     try {
-      //check if user exists
+      // check if user exists
       userManager.getByEmail(mail);
       final String masterEndpoint =
           uriInfo.getBaseUriBuilder().replacePath(null).build().toString();

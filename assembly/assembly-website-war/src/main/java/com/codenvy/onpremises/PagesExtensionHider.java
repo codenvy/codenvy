@@ -46,23 +46,23 @@ public class PagesExtensionHider implements Filter {
     String requestURI = httpRequest.getServletPath();
     LOG.debug("Request {} to {} ", httpRequest.getMethod(), requestURI);
 
-    //most commonly used request to main page.
+    // most commonly used request to main page.
     if ("/".equals(requestURI)) {
       chain.doFilter(request, response);
     }
-    //request not to pages or resources
+    // request not to pages or resources
     else if (!"GET".equals(httpRequest.getMethod())) {
       chain.doFilter(request, response);
     }
-    //to the index page o
+    // to the index page o
     else if ("/".equals(requestURI.substring(requestURI.length() - 1))) {
       chain.doFilter(request, response);
     }
-    //non page resources of the site like scripts, css, fonts
+    // non page resources of the site like scripts, css, fonts
     else if (requestURI.contains(".")) {
       chain.doFilter(request, response);
     }
-    //known mapped services
+    // known mapped services
     else {
       if (excludesPattern != null) {
         Matcher m = excludesPattern.matcher(requestURI);
@@ -71,7 +71,7 @@ public class PagesExtensionHider implements Filter {
           return;
         }
       }
-      //request to common site pages
+      // request to common site pages
       httpRequest.getRequestDispatcher(requestURI + ".html").forward(request, response);
     }
   }

@@ -21,27 +21,27 @@ import org.testng.annotations.Test;
 public class RequestMethodFilterTest {
   @Test(dataProvider = "skip")
   public void testShouldSkip(String requestUri, String method) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, method, null);
 
     RequestMethodFilter filter = new RequestMethodFilter("GET");
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertTrue(result);
   }
 
   @Test(dataProvider = "notskip")
   public void testShouldNotSkip(String requestUri, String method) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, method, null);
 
     RequestMethodFilter filter = new RequestMethodFilter("POST");
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertFalse(result);
   }
 

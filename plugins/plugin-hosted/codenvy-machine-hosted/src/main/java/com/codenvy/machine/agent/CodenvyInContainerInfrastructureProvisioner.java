@@ -81,7 +81,8 @@ public class CodenvyInContainerInfrastructureProvisioner extends DefaultInfrastr
     for (CheServiceImpl service : internalEnv.getServices().values()) {
       volumes = new ArrayList<>(service.getVolumes());
       volumes.addAll(
-          SNAPSHOT_EXCLUDED_DIRECTORIES); // creates volume for each directory to exclude from a snapshot
+          SNAPSHOT_EXCLUDED_DIRECTORIES); // creates volume for each directory to exclude from a
+      // snapshot
       service.setVolumes(volumes);
     }
 

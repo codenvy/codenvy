@@ -41,7 +41,7 @@ public class DestroySessionListener implements HttpSessionListener {
           "Unable to remove session from SSO Store. Session store is not configured in servlet context.");
     } else {
 
-      //If principal in session it means logout by session timeout.
+      // If principal in session it means logout by session timeout.
       SsoClientPrincipal principal = (SsoClientPrincipal) se.getSession().getAttribute("principal");
       if (principal != null) {
         ServerClient client = getInstance(ServerClient.class, servletContext);
@@ -51,7 +51,7 @@ public class DestroySessionListener implements HttpSessionListener {
               principal.getName(),
               principal.getClientUrl(),
               principal.getToken());
-          //notify sso server to unregistered current client
+          // notify sso server to unregistered current client
           client.unregisterClient(principal.getToken(), principal.getClientUrl());
         }
       }

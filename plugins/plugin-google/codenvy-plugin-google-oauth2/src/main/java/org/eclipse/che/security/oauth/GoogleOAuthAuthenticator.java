@@ -93,7 +93,8 @@ public class GoogleOAuthAuthenticator extends OAuthAuthenticator {
   public OAuthToken getToken(String userId) throws IOException {
     final OAuthToken token = super.getToken(userId);
     if (!(token == null || token.getToken() == null || token.getToken().isEmpty())) {
-      // Need to check if token which stored is valid for requests, then if it is valid - we return it to caller
+      // Need to check if token which stored is valid for requests, then if it is valid - we return
+      // it to caller
       URL tokenInfoUrl =
           new URL(
               "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + token.getToken());

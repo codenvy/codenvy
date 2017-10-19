@@ -40,18 +40,19 @@ public class UserCreatorInterceptor implements MethodInterceptor {
 
   @Inject private CreationNotificationSender notificationSender;
 
-  //Do not remove ApiException. It used to tell dependency plugin that api-core is need not only for tests.
+  // Do not remove ApiException. It used to tell dependency plugin that api-core is need not only
+  // for tests.
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable, ApiException {
-    //UserCreator should not create user if he already exists
+    // UserCreator should not create user if he already exists
     final String email = (String) invocation.getArguments()[0];
     try {
       userManager.getByEmail(email);
 
-      //user is already registered
+      // user is already registered
       return invocation.proceed();
     } catch (NotFoundException e) {
-      //user was not found and it will be created
+      // user was not found and it will be created
     }
 
     final Object proceed = invocation.proceed();

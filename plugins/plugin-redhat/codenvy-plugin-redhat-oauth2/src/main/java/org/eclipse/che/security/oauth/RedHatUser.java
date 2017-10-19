@@ -15,6 +15,7 @@ package org.eclipse.che.security.oauth;
  *
  * @author Max Shaposhnik
  */
+
 import org.eclipse.che.security.oauth.shared.User;
 
 public class RedHatUser implements User {

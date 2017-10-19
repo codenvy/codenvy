@@ -51,10 +51,10 @@ import org.testng.annotations.Test;
 public class InviteServiceTest {
   private static final String EMAIL_TO_INVITE = "userok@test.com";
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper mapper;
 
-  @SuppressWarnings("unused") //is declared for deploying by everrest-assured
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
 
   @Mock private InviteManager inviteManager;

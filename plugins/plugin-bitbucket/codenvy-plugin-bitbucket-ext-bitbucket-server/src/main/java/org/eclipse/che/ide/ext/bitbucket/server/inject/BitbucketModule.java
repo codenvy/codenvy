@@ -38,6 +38,7 @@ public class BitbucketModule extends AbstractModule {
     Multibinder.newSetBinder(binder(), ProjectImporter.class)
         .addBinding()
         .to(BitbucketProjectImporter.class);
-    //Multibinder.newSetBinder(binder(), SshKeyUploader.class).addBinding().to(BitbucketKeyUploader.class);
+    // Multibinder.newSetBinder(binder(),
+    // SshKeyUploader.class).addBinding().to(BitbucketKeyUploader.class);
   }
 }

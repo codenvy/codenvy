@@ -288,7 +288,8 @@ public class VSTSWebhookService extends BaseWebhookService {
           pullRequestUpdatedEvent.getResource().getLastMergeSourceCommit().getCommitId();
 
       // Get VSTS data from repository URL
-      // URL to parse: 'https://{account}.{host}.com/{collection}/_apis/git/repositories/{repositoryId}'
+      // URL to parse:
+      // 'https://{account}.{host}.com/{collection}/_apis/git/repositories/{repositoryId}'
       final String collectionUrl = repositoryIdUrl.split("/_apis/git/repositories/")[0];
       LOG.debug("collectionUrl: {}", collectionUrl);
       final String[] collectionUrlSplit = collectionUrl.split("/");

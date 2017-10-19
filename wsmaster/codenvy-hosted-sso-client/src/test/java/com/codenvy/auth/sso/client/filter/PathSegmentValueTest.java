@@ -20,27 +20,27 @@ public class PathSegmentValueTest {
 
   @Test(dataProvider = "skip")
   public void testShouldSkip(String requestUri) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, "GET", null);
 
     PathSegmentValueFilter filter = new PathSegmentValueFilter(4, "find");
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertTrue(result);
   }
 
   @Test(dataProvider = "notskip")
   public void testShouldNotSkip(String requestUri) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, "GET", null);
 
     PathSegmentValueFilter filter = new PathSegmentValueFilter(4, "organization");
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertFalse(result);
   }
 

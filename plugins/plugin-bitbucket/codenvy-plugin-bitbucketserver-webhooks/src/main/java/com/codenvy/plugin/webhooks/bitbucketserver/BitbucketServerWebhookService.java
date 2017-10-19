@@ -79,8 +79,9 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
             return false;
           }
 
-          //Bitbucket Server adds user's name to repository's clone url, but there is no user in received webhook.
-          //So need to remove '<username>@' from repository's clone url in given project source.
+          // Bitbucket Server adds user's name to repository's clone url, but there is no user in
+          // received webhook.
+          // So need to remove '<username>@' from repository's clone url in given project source.
           final String projectLocation = source.getLocation().replaceAll("://.+@", "://");
           final String projectBranch = source.getParameters().get("branch");
 
@@ -191,8 +192,9 @@ public class BitbucketServerWebhookService extends BaseWebhookService {
         properties
             .entrySet()
             .stream()
-            //Bitbucket Server adds user's name to repository's clone url, but there is no user in received webhook.
-            //So need to remove '<username>@' from repository's clone url in given factory source.
+            // Bitbucket Server adds user's name to repository's clone url, but there is no user in
+            // received webhook.
+            // So need to remove '<username>@' from repository's clone url in given factory source.
             .filter(entry -> repositoryUrl.equals(entry.getValue().replaceAll("://.+@", "://")))
             .map(
                 entry ->

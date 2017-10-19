@@ -56,7 +56,7 @@ public class AccessTicketInvalidator extends TimerTask {
 
   @PostConstruct
   public void startTimer() {
-    //wait 1 second and run each minute
+    // wait 1 second and run each minute
     timer.schedule(this, 1000, 60000);
   }
 

@@ -44,22 +44,22 @@ public class DashboardRedirectionFilterTest {
 
   @Test
   public void shouldSkipRequestToProject() throws Exception {
-    //given
+    // given
     when(request.getMethod()).thenReturn("GET");
     when(request.getRequestURI()).thenReturn("/namespace/ws-id/project1");
     when(request.getRequestURL())
         .thenReturn(new StringBuffer("http://localhost:8080/namespace/ws-id/project1"));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(chain).doFilter(nullable(ServletRequest.class), nullable(ServletResponse.class));
   }
 
   @Test(dataProvider = "nonNamespacePathProvider")
   public void shouldRedirectIfRequestWithoutNamespace(String uri, String url) throws Exception {
-    //given
+    // given
     when(request.getMethod()).thenReturn("GET");
     when(request.getRequestURI()).thenReturn(uri);
     when(request.getRequestURL()).thenReturn(new StringBuffer(url));
@@ -67,10 +67,10 @@ public class DashboardRedirectionFilterTest {
     context.setSubject(new SubjectImpl("id123", "name", "token123", false));
     EnvironmentContext.setCurrent(context);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).sendRedirect(eq("/dashboard/"));
   }
 
@@ -84,16 +84,16 @@ public class DashboardRedirectionFilterTest {
 
   @Test(dataProvider = "notGETMethodProvider")
   public void shouldSkipNotGETRequest(String method) throws Exception {
-    //given
+    // given
     when(request.getMethod()).thenReturn(method);
     when(request.getRequestURI()).thenReturn("/ws/ws-id/project1");
     when(request.getRequestURL())
         .thenReturn(new StringBuffer("http://localhost:8080/ws/ws-id/project1"));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(chain).doFilter(nullable(ServletRequest.class), nullable(ServletResponse.class));
   }
 

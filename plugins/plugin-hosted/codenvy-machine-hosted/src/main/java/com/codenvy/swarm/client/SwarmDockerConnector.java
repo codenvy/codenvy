@@ -68,7 +68,7 @@ public class SwarmDockerConnector extends DockerConnector {
       "no resources available to schedule container";
 
   private final NodeSelectionStrategy strategy;
-  //TODO should it be done in other way?
+  // TODO should it be done in other way?
   private final String nodeDaemonScheme;
   private final int nodeDescriptionLength;
   // Map of exec ID to container ID (or name)
@@ -167,7 +167,8 @@ public class SwarmDockerConnector extends DockerConnector {
     try {
       super.startExec(params, execOutputProcessor);
     } catch (ExecNotFoundException e) {
-      // Sometimes swarm returns this error for unknown reason, see https://github.com/docker/swarm/issues/2664
+      // Sometimes swarm returns this error for unknown reason, see
+      // https://github.com/docker/swarm/issues/2664
       // Log additional info to find out if this endpoint knows about exec at exactly that time
       logMissingExecInfo(params.getExecId());
       try {
@@ -275,7 +276,7 @@ public class SwarmDockerConnector extends DockerConnector {
     return nodes;
   }
 
-  //TODO find better solution
+  // TODO find better solution
   private URI addrToUri(String addr) {
     return URI.create(nodeDaemonScheme + "://" + addr);
   }

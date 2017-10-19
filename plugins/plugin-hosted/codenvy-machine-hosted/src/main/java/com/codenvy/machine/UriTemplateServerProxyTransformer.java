@@ -78,8 +78,10 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
       serverPath = serverPath.substring(1);
     }
 
-    // In case of external address property set, we should replace codenvy.host by this external address.
-    // for example on macOS, codenvy.host is defaulted to 192.168.65.2 which is not reachable from host machine while
+    // In case of external address property set, we should replace codenvy.host by this external
+    // address.
+    // for example on macOS, codenvy.host is defaulted to 192.168.65.2 which is not reachable from
+    // host machine while
     // it needs to use localhost (external address).
     final String externalAddress;
     if (!Strings.isNullOrEmpty(cheDockerIpExternal)) {
@@ -89,7 +91,8 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
     }
 
     try {
-      // external URI/address will be used by the browser clients (redirect calls through externalAddress or codenvyHost if not set)
+      // external URI/address will be used by the browser clients (redirect calls through
+      // externalAddress or codenvyHost if not set)
       URI serverUriExternal =
           new URI(
               format(
@@ -103,7 +106,8 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
           serverUriExternal.getHost()
               + (serverUriExternal.getPort() == -1 ? "" : ":" + serverUriExternal.getPort());
 
-      // internal URI/address will be used by workspace agents internals (we redirect calls to codenvyHost)
+      // internal URI/address will be used by workspace agents internals (we redirect calls to
+      // codenvyHost)
       URI serverUriInternal =
           new URI(
               format(

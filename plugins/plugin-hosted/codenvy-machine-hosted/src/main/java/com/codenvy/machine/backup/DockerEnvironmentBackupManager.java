@@ -71,7 +71,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
   private static final Set<Integer> RESTORE_SUCCESS_RETURN_CODES = ImmutableSet.of(0);
   // if exit code 0 script finished successfully
   // if exit code 24 some files are gone during transfer. It may happen on scheduled backups when
-  // user performs some files operations like git checkout. So we treat this situation as successful.
+  // user performs some files operations like git checkout. So we treat this situation as
+  // successful.
   private static final Set<Integer> BACKUP_SUCCESS_RETURN_CODES = ImmutableSet.of(0, 24);
 
   private final String backupScript;
@@ -161,7 +162,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
     } catch (IOException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     } finally {
-      // remove lock in case exception prevent removing it in regular place to prevent resources leak
+      // remove lock in case exception prevent removing it in regular place to prevent resources
+      // leak
       // and blocking further WS start
       workspacesBackupLocks.remove(workspaceId);
       // clear user info cache
@@ -219,7 +221,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
       if (lock.tryLock()) {
         try {
           if (workspacesBackupLocks.get(workspaceId) == null) {
-            // It is possible to reach here, because remove lock from locks map and following unlock in
+            // It is possible to reach here, because remove lock from locks map and following unlock
+            // in
             // backup with cleanup method is not atomic operation.
             // In very rare case it may happens, but it is ok. Just ignore this backup
             // because it is called after cleanup
@@ -249,7 +252,8 @@ public class DockerEnvironmentBackupManager implements EnvironmentBackupManager 
       lock.lock();
       try {
         if (workspacesBackupLocks.get(workspaceId) == null) {
-          // it is possible to reach here if invoke this method again while previous one is in progress
+          // it is possible to reach here if invoke this method again while previous one is in
+          // progress
           LOG.error(
               "Backup with cleanup of the workspace {} was invoked several times simultaneously",
               workspaceId);

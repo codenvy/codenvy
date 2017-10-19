@@ -20,27 +20,27 @@ public class PathSegmentNumberFilterTest {
 
   @Test(dataProvider = "notskip")
   public void testShouldSkip(String requestUri) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, "GET", null);
 
     PathSegmentNumberFilter filter = new PathSegmentNumberFilter(3);
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertTrue(result);
   }
 
   @Test(dataProvider = "skip")
   public void testShouldNotSkip(String requestUri) throws Exception {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080" + requestUri, null, 0, "GET", null);
 
     PathSegmentNumberFilter filter = new PathSegmentNumberFilter(2);
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertFalse(result);
   }
 
@@ -50,7 +50,7 @@ public class PathSegmentNumberFilterTest {
       {"/api/"},
       {"/api/organization/ojo2934kpoak"},
       {"/api/organization/ojo2934kpoak"},
-      //{"/api?user=sd"},
+      // {"/api?user=sd"},
       {"/api/user/sdf02304"},
       {"/api/account/factoryixak9964p942mikq"}
     };
