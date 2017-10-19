@@ -13,10 +13,13 @@ package com.codenvy.selenium.factory;
 import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
@@ -29,6 +32,8 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Profile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,38 +61,30 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
   @Inject private TestApiEndpointUrlProvider apiEndpointUrlProvider;
   @Inject private TestUserNamespaceResolver testUserNamespaceResolver;
   @Inject private TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
+  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private TestGitHubServiceClient testGitHubServiceClient;
 
   private TestFactory testFactory;
+  private final String WORKSPACE_TOOLBAR = "Workspaces";
 
   @BeforeClass
   public void setUp() throws Exception {
     testFactory = testFactoryInitializer.fromTemplate(FactoryTemplate.MINIMAL).build();
   }
 
-  //  @AfterClass
-  // This method removes default user instead of github user.
-  // Need to be reworked https://github.com/codenvy/codenvy/issues/2471
+  @AfterClass
   public void tearDown() throws Exception {
-    User user = testUserServiceClient.findByEmail(testUser.getEmail());
-    TestWorkspaceServiceClient workspaceServiceClient =
-        testWorkspaceServiceClientFactory.create(testUser.getEmail(), testUser.getPassword());
-    workspaceServiceClient
-        .getAll()
-        .forEach(
-            ws -> {
-              try {
-                workspaceServiceClient.delete(ws, user.getName());
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            });
+    String userGitHubEmail =
+        testGitHubServiceClient.getUserPublicEmail(gitHubUsername, gitHubPassword);
 
-    testUserServiceClient.remove(testUserServiceClient.findByEmail(testUser.getEmail()).getId());
+    User user = testUserServiceClient.findByEmail(userGitHubEmail);
+    testUserServiceClient.remove(user.getId());
     testFactory.delete();
   }
 
   @Test
   public void loginThroughGitHubOAuthAndAcceptFactory() throws Exception {
+
     testFactory.open(ide.driver());
 
     loginPage.waitMainElementsOnLoginPage();
@@ -106,5 +103,51 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
+
+    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    dashboardWorkspace.waitToolbarTitleName("Workspaces");
+    dashboardWorkspace.waitListWorkspacesOnDashboard();
+
+    deleteAllWorkspaces(getAllWorkspaceNames());
+    testFactory.delete();
+  }
+
+  private void deleteAllWorkspaces(List<String> workspaces) {
+    workspaces.forEach(
+        wsName -> {
+          seleniumWebDriver.get(getDashboardWorkspaceUrl());
+          dashboardWorkspace.waitToolbarTitleName(WORKSPACE_TOOLBAR);
+          dashboardWorkspace.waitListWorkspacesOnDashboard();
+          dashboardWorkspace.selectWorkspaceItemName(wsName);
+          dashboardWorkspace.waitToolbarTitleName(Arrays.asList(wsName.split("/")).get(1));
+          dashboardWorkspace.clickOnDeleteWorkspace();
+          dashboardWorkspace.clickOnDeleteDialogButton();
+          dashboardWorkspace.waitToolbarTitleName(WORKSPACE_TOOLBAR);
+        });
+  }
+
+  private List<String> getAllWorkspaceNames() {
+    List<String> workspaces = new ArrayList<>();
+    getNotFilteredWorkspaceNames()
+        .forEach(
+            workspaceName -> {
+              if (isWorkspaceName(workspaceName)) {
+                workspaces.add(workspaceName);
+              }
+            });
+
+    return workspaces;
+  }
+
+  private List<String> getNotFilteredWorkspaceNames() {
+    return Arrays.asList(dashboardWorkspace.getTextFromListWorkspaces().split("\n"));
+  }
+
+  private boolean isWorkspaceName(String workspaceName) {
+    return workspaceName.contains("/") && workspaceName.length() > 3;
+  }
+
+  private String getDashboardWorkspaceUrl() {
+    return apiEndpointUrlProvider.get().toString().replace("api/", "") + "dashboard/#/workspaces";
   }
 }
