@@ -74,6 +74,13 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
   @AfterClass
   public void tearDown() throws Exception {
+
+    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    dashboardWorkspace.waitToolbarTitleName("Workspaces");
+    dashboardWorkspace.waitListWorkspacesOnDashboard();
+
+    deleteAllWorkspaces(getAllWorkspaceNames());
+
     String userGitHubEmail =
         testGitHubServiceClient.getUserPublicEmail(gitHubUsername, gitHubPassword);
 
@@ -103,13 +110,6 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
-
-    seleniumWebDriver.get(getDashboardWorkspaceUrl());
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.waitListWorkspacesOnDashboard();
-
-    deleteAllWorkspaces(getAllWorkspaceNames());
-    testFactory.delete();
   }
 
   private void deleteAllWorkspaces(List<String> workspaces) {
