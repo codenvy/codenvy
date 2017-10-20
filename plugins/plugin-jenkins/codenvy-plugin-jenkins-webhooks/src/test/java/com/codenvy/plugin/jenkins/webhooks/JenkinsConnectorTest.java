@@ -46,19 +46,19 @@ public class JenkinsConnectorTest {
 
   @Test
   public void shouldUpdateConnectorWithUrlWithCredentialsFromProperties() throws Exception {
-    //when
+    // when
     JenkinsConnector jenkinsConnector = this.jenkinsConnector.updateUrlWithCredentials();
 
-    //then
+    // then
     assertEquals(jenkinsConnector.url, "http://user:password@jenkins.url");
   }
 
   @Test
   public void shouldGetRelatedFactoryIdFromProperties() throws Exception {
-    //when
+    // when
     String factoryId = jenkinsConnector.getFactoryId();
 
-    //then
+    // then
     assertEquals(factoryId, "factoryId");
   }
 }

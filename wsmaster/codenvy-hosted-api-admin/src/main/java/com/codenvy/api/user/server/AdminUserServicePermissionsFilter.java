@@ -37,7 +37,7 @@ public class AdminUserServicePermissionsFilter extends CheMethodInvokerFilter {
           .getSubject()
           .checkPermission(SystemDomain.DOMAIN_ID, null, MANAGE_USERS_ACTION);
     } else {
-      //unknown method
+      // unknown method
       throw new ForbiddenException("User is not authorized to perform this operation");
     }
   }

@@ -63,7 +63,7 @@ public class AuditManagerTest {
 
     auditManager = new AuditManager(userManager, workspaceManager, permissionsManager);
 
-    //User
+    // User
     UserImpl user1 = mock(UserImpl.class);
     UserImpl user2 = mock(UserImpl.class);
     when(user1.getEmail()).thenReturn("user@email.com");
@@ -72,12 +72,12 @@ public class AuditManagerTest {
     when(user2.getId()).thenReturn("User2Id");
     when(user1.getName()).thenReturn("User1");
     when(user2.getName()).thenReturn("User2");
-    //Workspace config
+    // Workspace config
     WorkspaceConfigImpl ws1config = mock(WorkspaceConfigImpl.class);
     WorkspaceConfigImpl ws2config = mock(WorkspaceConfigImpl.class);
     when(ws1config.getName()).thenReturn("Workspace1Name");
     when(ws2config.getName()).thenReturn("Workspace2Name");
-    //Workspace
+    // Workspace
     when(workspace1.getNamespace()).thenReturn("User1");
     when(workspace2.getNamespace()).thenReturn("User2");
     when(workspace1.getId()).thenReturn("Workspace1Id");
@@ -88,7 +88,7 @@ public class AuditManagerTest {
         .thenReturn(asList(workspace1, workspace2));
     when(workspaceManager.getWorkspaces(eq("User2Id"), eq(false)))
         .thenReturn(singletonList(workspace2));
-    //Permissions
+    // Permissions
     AbstractPermissions ws1User1Permissions = mock(AbstractPermissions.class);
     AbstractPermissions ws2User1Permissions = mock(AbstractPermissions.class);
     AbstractPermissions ws2User2Permissions = mock(AbstractPermissions.class);
@@ -110,7 +110,7 @@ public class AuditManagerTest {
         .thenReturn(ws2User1Permissions);
     when(permissionsManager.get(eq("User2Id"), anyString(), eq("Workspace2Id")))
         .thenReturn(ws2User2Permissions);
-    //Page
+    // Page
     Page page = mock(Page.class);
     when(page.getItems()).thenReturn(asList(user1, user2));
     when(page.hasNextPage()).thenReturn(false);
@@ -127,10 +127,10 @@ public class AuditManagerTest {
 
   @Test
   public void shouldReturnFullAuditReport() throws Exception {
-    //when
+    // when
     auditReport = auditManager.generateAuditReport();
 
-    //then
+    // then
     assertEquals(
         readFileToString(auditReport.toFile()),
         "Number of users: 2\n"
@@ -144,7 +144,7 @@ public class AuditManagerTest {
   @Test
   public void shouldReturnFullAuditReportWithWorkspaceThatBelongsToUserButWithoutPermissionsToUser()
       throws Exception {
-    //given
+    // given
     List<WorkspaceImpl> workspaces = new ArrayList<>();
     workspaces.add(workspace2);
     when(workspace1.getNamespace()).thenReturn("User2");
@@ -153,10 +153,10 @@ public class AuditManagerTest {
     when(workspaceManager.getByNamespace(eq("User2"), eq(false)))
         .thenReturn(asList(workspace1, workspace2));
 
-    //when
+    // when
     auditReport = auditManager.generateAuditReport();
 
-    //then
+    // then
     assertEquals(
         readFileToString(auditReport.toFile()),
         "Number of users: 2\n"
@@ -171,14 +171,14 @@ public class AuditManagerTest {
   @Test
   public void shouldReturnAuditReportWithoutUserWorkspacesIfFailedToRetrieveTheListOfHisWorkspaces()
       throws Exception {
-    //given
+    // given
     when(workspaceManager.getWorkspaces(eq("User1Id"), eq(false)))
         .thenThrow(new ServerException("Failed to retrieve workspaces"));
 
-    //when
+    // when
     auditReport = auditManager.generateAuditReport();
 
-    //then
+    // then
     assertEquals(
         readFileToString(auditReport.toFile()),
         "Number of users: 2\n"

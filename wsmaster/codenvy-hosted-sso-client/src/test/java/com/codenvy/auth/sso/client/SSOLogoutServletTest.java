@@ -41,38 +41,38 @@ public class SSOLogoutServletTest {
 
   @Test
   public void shouldFailIfTokenIsNotSet() throws ServletException, IOException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/sso/logout", null, 0, "POST", null);
-    //when
+    // when
     servlet.doPost(request, response);
-    //when                                    ,
+    // when                                    ,
     verify(response).sendError(eq(HttpServletResponse.SC_BAD_REQUEST), eq("Token is not set"));
   }
 
   @Test
   public void shouldRemoveToken() throws ServletException, IOException {
-    //given
+    // given
     MockHttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/sso/logout", null, 0, "POST", null);
     request.setParameter("authToken", "t-12312344");
-    //when
+    // when
     servlet.doPost(request, response);
-    //when
+    // when
     verify(sessionStore).removeSessionByToken("t-12312344");
     verifyZeroInteractions(response);
   }
 
   @Test
   public void shouldCleanupHttpSession() throws ServletException, IOException {
-    //given
+    // given
     MockHttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/sso/logout", null, 0, "POST", null);
     request.setParameter("authToken", "t-12312344");
     when(sessionStore.removeSessionByToken(eq("t-12312344"))).thenReturn(session);
-    //when
+    // when
     servlet.doPost(request, response);
-    //when
+    // when
     verify(session).invalidate();
     verify(session).removeAttribute(eq("principal"));
   }

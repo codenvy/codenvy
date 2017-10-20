@@ -56,7 +56,7 @@ public class OrgServiceUserCreator implements UserCreator {
   @Override
   public User createUser(String email, String userName, String firstName, String lastName)
       throws IOException {
-    //TODO check this method should only call if user is not exists.
+    // TODO check this method should only call if user is not exists.
     try {
       return userManager.getByEmail(email);
     } catch (NotFoundException e) {

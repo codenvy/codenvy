@@ -108,7 +108,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao {
           ticketManager.removeTicket(accessTicket.getAccessToken());
         }
       } else {
-        //cookie is outdated, clearing
+        // cookie is outdated, clearing
         if (cookieBuilder != null) {
           cookieBuilder.clearCookies(builder, tokenAccessCookie.getValue(), secure);
         }

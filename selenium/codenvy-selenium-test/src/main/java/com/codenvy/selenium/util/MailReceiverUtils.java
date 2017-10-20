@@ -69,9 +69,9 @@ public class MailReceiverUtils {
         session.getStore("imaps"); // Get a Store object that implements the specified protocol.
     mailStore.connect(
         host, user,
-        password); //Connect to the current host using the specified username and password.
+        password); // Connect to the current host using the specified username and password.
     mailBoxFolder =
-        mailStore.getFolder("inbox"); //Create a Folder object corresponding to the given name.
+        mailStore.getFolder("inbox"); // Create a Folder object corresponding to the given name.
     mailBoxFolder.open(Folder.READ_ONLY); // Open the Folder.
     Message[] msgs = mailBoxFolder.getMessages();
     return msgs;
@@ -90,9 +90,9 @@ public class MailReceiverUtils {
         session.getStore("imaps"); // Get a Store object that implements the specified protocol.
     store.connect(
         host, user,
-        password); //Connect to the current host using the specified username and password.
+        password); // Connect to the current host using the specified username and password.
     Folder folder =
-        store.getFolder("inbox"); //Create a Folder object corresponding to the given name.
+        store.getFolder("inbox"); // Create a Folder object corresponding to the given name.
     folder.open(Folder.READ_WRITE); // Open the Folder.
     Message[] messages = folder.getMessages();
     for (int i = 0, n = messages.length; i < n; i++) {

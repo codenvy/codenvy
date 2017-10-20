@@ -47,7 +47,8 @@ public class PullRequestUpdatedWebhook {
     this.apiVersion = apiVersion;
     this.credentials = credentials;
 
-    // No more than one webhook can be configured for a given combination of VSTS account/host/collection
+    // No more than one webhook can be configured for a given combination of VSTS
+    // account/host/collection
     this.id = account + "-" + host + "-" + collection;
 
     if (factoriesIds != null && factoriesIds.length > 0) {

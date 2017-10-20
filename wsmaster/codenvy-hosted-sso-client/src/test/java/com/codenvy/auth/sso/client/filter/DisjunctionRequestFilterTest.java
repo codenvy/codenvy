@@ -25,26 +25,26 @@ public class DisjunctionRequestFilterTest {
   @Test(dataProvider = "skip")
   public void testShouldSkip(List<RequestFilter> requestFilters) throws Exception {
     RequestFilter[] filters = (RequestFilter[]) requestFilters.toArray();
-    //given
+    // given
     DisjunctionRequestFilter filter =
         new DisjunctionRequestFilter(
             filters[0], filters[1], Arrays.copyOfRange(filters, 2, filters.length));
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertTrue(result);
   }
 
   @Test(dataProvider = "notskip")
   public void testShouldNotSkip(List<RequestFilter> requestFilters) throws Exception {
     RequestFilter[] filters = (RequestFilter[]) requestFilters.toArray();
-    //given
+    // given
     DisjunctionRequestFilter filter =
         new DisjunctionRequestFilter(
             filters[0], filters[1], Arrays.copyOfRange(filters, 2, filters.length));
-    //when
+    // when
     boolean result = filter.shouldSkip(request);
-    //then
+    // then
     Assert.assertFalse(result);
   }
 

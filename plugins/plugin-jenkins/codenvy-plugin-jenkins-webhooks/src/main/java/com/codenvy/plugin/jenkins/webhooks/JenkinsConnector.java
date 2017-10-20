@@ -155,7 +155,8 @@ public class JenkinsConnector {
   public String getCommitId(int buildId) throws IOException, ServerException {
     String requestUrl = url + "/job/" + jobName + "/" + buildId + "/api/json";
     String request = doRequest(GET, requestUrl, APPLICATION_XML, null);
-    //It is not possible to use Gson parser here because the given JSON contains objects in camel-case and upper-case at he same time.
+    // It is not possible to use Gson parser here because the given JSON contains objects in
+    // camel-case and upper-case at he same time.
     return request.substring(request.indexOf("SHA1") + 7).substring(0, 40);
   }
 

@@ -27,10 +27,10 @@ public class UnstagedChangesInformer extends Action {
 
   private final AppContext appContext;
 
-  @SuppressWarnings({"unused", "FieldCanBeLocal"}) //used in native method
+  @SuppressWarnings({"unused", "FieldCanBeLocal"}) // used in native method
   private final String restContext;
 
-  @SuppressWarnings({"unused", "FieldCanBeLocal"}) //used in native method
+  @SuppressWarnings({"unused", "FieldCanBeLocal"}) // used in native method
   private final String workspaceId;
 
   @Inject

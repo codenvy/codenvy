@@ -62,7 +62,7 @@ public class BearerTokenAuthenticationHandler {
 
   @PostConstruct
   public void startTimer() {
-    //wait 1 second and run each minute.
+    // wait 1 second and run each minute.
     timer.schedule(
         new TimerTask() {
           @Override

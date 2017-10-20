@@ -67,7 +67,7 @@ public class SsoOAuthAuthenticationService extends OAuthAuthenticationService {
       throw new OAuthAuthenticationException(e.getLocalizedMessage(), e);
     }
     final String mode = getParameter(params, "mode");
-    //federated_login left for backward compatibility
+    // federated_login left for backward compatibility
     if ("sso".equals(mode) || "federated_login".equals(mode)) {
       Map<String, String> payload = new HashMap<>();
       payload.put("provider", providerName);

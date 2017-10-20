@@ -29,15 +29,15 @@ import org.eclipse.che.inject.DynaModule;
 public class WsAgentServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    //listeners
+    // listeners
     getServletContext().addListener(new com.codenvy.auth.sso.client.DestroySessionListener());
 
-    //filters
+    // filters
     filter("/*").through(CheCorsFilter.class);
     filter("/*")
         .through(org.eclipse.che.multiuser.machine.authentication.agent.MachineLoginFilter.class);
 
-    //servlets
+    // servlets
     install(new com.codenvy.auth.sso.client.deploy.SsoClientServletModule());
     serveRegex("/[^/]+/api((?!(/(ws|eventbus)($|/.*)))/.*)")
         .with(org.everrest.guice.servlet.GuiceEverrestServlet.class);

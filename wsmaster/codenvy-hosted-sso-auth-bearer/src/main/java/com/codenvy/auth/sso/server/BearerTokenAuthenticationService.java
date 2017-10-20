@@ -155,7 +155,7 @@ public class BearerTokenAuthenticationService {
             ticketManager.removeTicket(accessTicket.getAccessToken());
           }
         } else {
-          //cookie is outdated, clearing
+          // cookie is outdated, clearing
           cookieBuilder.clearCookies(builder, tokenAccessCookie.getValue(), isSecure);
         }
       }

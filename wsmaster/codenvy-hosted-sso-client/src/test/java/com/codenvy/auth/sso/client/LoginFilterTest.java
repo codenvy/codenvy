@@ -116,7 +116,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRedirectToSsoServerIfSessionDoesntContainsPrincipalOnGet()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/myworkspace", null, 0, "GET", null);
 
@@ -127,10 +127,10 @@ public class LoginFilterTest {
         "tokenHandler",
         new RecoverableTokenHandler(requestWrapper, clientUrlExtractor, true));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -143,7 +143,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRedirectToSsoServerAnonymousIsNotAllowed()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     setFieldValue(filter, "attemptToGetNewTokenIfNotExist", true);
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/myworkspace", null, 0, "GET", null);
@@ -154,10 +154,10 @@ public class LoginFilterTest {
         "tokenHandler",
         new RecoverableTokenHandler(requestWrapper, clientUrlExtractor, false));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -171,7 +171,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRedirectToSsoServerWithCorrectRedirectAndClientUrl()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest(
             "http://localhost:8080/ws/mypersonal.Workspace", null, 0, "GET", null);
@@ -182,10 +182,10 @@ public class LoginFilterTest {
         "tokenHandler",
         new RecoverableTokenHandler(requestWrapper, clientUrlExtractor, false));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -198,7 +198,7 @@ public class LoginFilterTest {
   @Test
   public void shouldAppendQueryUrlToRedirectURLToSsoServer()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest(
             "http://localhost:8080/ws/mypersonal.Workspace?myparam=myValue&param2=value2",
@@ -214,10 +214,10 @@ public class LoginFilterTest {
         "tokenHandler",
         new RecoverableTokenHandler(requestWrapper, clientUrlExtractor, false));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
 
     verify(response)
         .sendRedirect(
@@ -232,7 +232,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRedirectToLoginIfPrincipalIsNotNullButQueryParameterLoginExists()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest(
             "http://localhost:8080/ws/mypersonal.Workspace?myparam=myValue&param2=value2&login",
@@ -252,10 +252,10 @@ public class LoginFilterTest {
                 createSubject("user@domain")));
     filter.init(filterConfig);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -268,7 +268,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRedirectToLoginIfPrincipalIsNullButQueryParameterLoginExists()
       throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest(
             "http://localhost:8080/ws/mypersonal.Workspace?myparam=myValue&param2=value2&login",
@@ -280,10 +280,10 @@ public class LoginFilterTest {
         .thenReturn("http://localhost:8080/ws/mypersonal.Workspace");
     filter.init(filterConfig);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -295,17 +295,17 @@ public class LoginFilterTest {
 
   @Test
   public void shouldPutPrincipalInSession() throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/ws?token=t13f", null, 0, "GET", null);
 
     when(tokenExtractor.getToken(eq(request))).thenReturn("t13f");
     when(ssoServerClient.getSubject(eq("t13f"), nullable(String.class)))
         .thenReturn(createSubject("user@domain"));
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     SsoClientPrincipal actual = (SsoClientPrincipal) request.getSession().getAttribute("principal");
     assertEquals(actual.getName(), "user@domain");
     verify(chain).doFilter(any(ServletRequest.class), eq(response));
@@ -314,7 +314,7 @@ public class LoginFilterTest {
   @Test
   public void shouldBeAbleToReplaceAnonymousWithCorrectUserPrincipal()
       throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/ws?token=t13f", null, 0, "GET", null);
 
@@ -330,10 +330,10 @@ public class LoginFilterTest {
             "t12f", "http://localhost:8080/ws/ws", createSubject("Anonymous123@domain"));
     request.getSession().setAttribute("principal", anonymous);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     ArgumentCaptor<ServletRequest> captor = ArgumentCaptor.forClass(ServletRequest.class);
     verify(chain).doFilter(captor.capture(), eq(response));
     assertEquals(
@@ -353,10 +353,10 @@ public class LoginFilterTest {
         "tokenHandler",
         new RecoverableTokenHandler(requestWrapper, clientUrlExtractor, false));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response)
         .sendRedirect(
             eq(
@@ -368,7 +368,7 @@ public class LoginFilterTest {
 
   @Test
   public void shouldWrapPrincipalInRequest() throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/ws", null, 0, "GET", null);
 
@@ -380,10 +380,10 @@ public class LoginFilterTest {
         new SsoClientPrincipal("t13f", "http://localhost:8080/ws/ws", createSubject("user@domain"));
     request.getSession().setAttribute("principal", principal);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     ArgumentCaptor<HttpServletRequest> captor = ArgumentCaptor.forClass(HttpServletRequest.class);
     verify(chain).doFilter(captor.capture(), any(ServletResponse.class));
     HttpServletRequest actual = captor.getValue();
@@ -395,7 +395,7 @@ public class LoginFilterTest {
   @Test
   public void shouldWrappedPrincipalShouldNotBeTheSameAsInRequest()
       throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/ws", null, 0, "GET", null);
     when(tokenExtractor.getToken(eq(request))).thenReturn("t13f");
@@ -406,10 +406,10 @@ public class LoginFilterTest {
         new SsoClientPrincipal("t13f", "http://localhost:8080/ws/ws", createSubject("user@domain"));
     request.getSession().setAttribute("principal", principal);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     ArgumentCaptor<HttpServletRequest> captor = ArgumentCaptor.forClass(HttpServletRequest.class);
     verify(chain).doFilter(captor.capture(), any(ServletResponse.class));
     HttpServletRequest actual = captor.getValue();
@@ -420,7 +420,7 @@ public class LoginFilterTest {
 
   @Test
   public void shouldReuseSessionAssociatedWithToken() throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         spy(
             new MockHttpServletRequest(
@@ -435,10 +435,10 @@ public class LoginFilterTest {
     when(sessionStore.getSession(eq("t13f"))).thenReturn(session1);
     request.getSession().setAttribute("principal", principal);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     ArgumentCaptor<HttpServletRequest> captor = ArgumentCaptor.forClass(HttpServletRequest.class);
     verify(chain).doFilter(captor.capture(), any(ServletResponse.class));
     HttpServletRequest actual = captor.getValue();
@@ -450,7 +450,7 @@ public class LoginFilterTest {
 
   public void shouldReplaceUpdateSessionStoreIfClientUsedSameSessionButDifferentToken()
       throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         spy(
             new MockHttpServletRequest(
@@ -466,10 +466,10 @@ public class LoginFilterTest {
     request.getSession().setAttribute("principal", principal);
     setFieldValue(filter, "tokenHandler", tokenHandler);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
 
     ArgumentCaptor<HttpSession> captor = ArgumentCaptor.forClass(HttpSession.class);
     verify(tokenHandler)
@@ -489,17 +489,17 @@ public class LoginFilterTest {
 
   @Test
   public void shouldRespond401IfPostRequestHasNoToken() throws IOException, ServletException {
-    //given
+    // given
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     PrintWriter writer = new PrintWriter(bos);
     when(response.getWriter()).thenReturn(writer);
     HttpServletRequest request =
         spy(new MockHttpServletRequest("http://localhost:8080/ws/ws", null, 0, "POST", null));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     assertEquals(
         new String(bos.toByteArray()),
@@ -508,7 +508,7 @@ public class LoginFilterTest {
 
   @Test
   public void shouldRespond401IfGetRequestHasNoToken() throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         spy(new MockHttpServletRequest("http://localhost:8080/ws/ws", null, 0, "GET", null));
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -517,10 +517,10 @@ public class LoginFilterTest {
 
     setFieldValue(filter, "tokenHandler", new NoUserInteractionTokenHandler(requestWrapper));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     assertEquals(
         new String(bos.toByteArray()),
@@ -531,16 +531,16 @@ public class LoginFilterTest {
   public void shouldRedirectToCookieErrorPageIfNotTokenInRequestButCookiesCheckRequested()
       throws IOException, ServletException {
 
-    //given
+    // given
     HttpServletRequest request =
         spy(
             new MockHttpServletRequest(
                 "http://localhost:8080/ws/ws?par=val&cookiePresent", null, 0, "GET", null));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).sendRedirect(eq("/site/cookiesDisabledErrorPageUrl"));
   }
 
@@ -557,10 +557,10 @@ public class LoginFilterTest {
     when(response.getWriter()).thenReturn(writer);
     setFieldValue(filter, "tokenHandler", new NoUserInteractionTokenHandler(requestWrapper));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
     assertEquals(new String(bos.toByteArray()), "{\"message\":\"Provided token t13f is invalid\"}");
     Assert.assertTrue(bos.size() > 0);
@@ -578,10 +578,10 @@ public class LoginFilterTest {
     when(response.getWriter()).thenReturn(writer);
     setFieldValue(filter, "tokenHandler", new NoUserInteractionTokenHandler(requestWrapper));
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
     assertEquals(new String(bos.toByteArray()), "{\"message\":\"Provided token t13f is invalid\"}");
     Assert.assertTrue(bos.size() > 0);
@@ -590,7 +590,7 @@ public class LoginFilterTest {
   @Test
   public void shouldRemoveCookiePresentParamFromValidGetRequestWithTokenAndRedirect()
       throws IOException, ServletException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest(
             "http://localhost:8080/ws/ws?token=t13f&cookiePresent&cookiePresent=true",
@@ -602,24 +602,24 @@ public class LoginFilterTest {
     when(tokenExtractor.getToken(eq(request))).thenReturn("t13f");
     when(ssoServerClient.getSubject(eq("t13f"), nullable(String.class)))
         .thenReturn(createSubject("user@domain"));
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(response).sendRedirect(eq("http://localhost:8080/ws/ws?token=t13f"));
   }
 
   @Test
   public void shouldSkipRequestByFilter() throws IOException, ServletException, URISyntaxException {
-    //given
+    // given
     HttpServletRequest request =
         new MockHttpServletRequest("http://localhost:8080/ws/myworkspace", null, 0, "GET", null);
     when(requestFilter.shouldSkip(eq(request))).thenReturn(true);
 
-    //when
+    // when
     filter.doFilter(request, response, chain);
 
-    //then
+    // then
     verify(chain).doFilter(request, response);
     verifyNoMoreInteractions(sessionStore, tokenExtractor, clientUrlExtractor, ssoServerClient);
   }

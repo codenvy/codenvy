@@ -144,7 +144,7 @@ public class SystemRamCheckingWorkspaceManagerTest {
      to be able to release the throughput limit.
     */
     final CountDownLatch invokeProcessLatch = new CountDownLatch(6);
-    //Pause 5 threads after they will acquire all permits to check RAM.
+    // Pause 5 threads after they will acquire all permits to check RAM.
     doAnswer(
             invocationOnMock -> {
               invokeProcessLatch.countDown();
@@ -161,7 +161,8 @@ public class SystemRamCheckingWorkspaceManagerTest {
           } catch (Exception ignored) {
           }
         };
-    //Run 7 threads (more than number of allowed same time requests) that want to request RAM check at the same time.
+    // Run 7 threads (more than number of allowed same time requests) that want to request RAM check
+    // at the same time.
     ExecutorService executor = Executors.newFixedThreadPool(7);
     executor.submit(runnable);
     executor.submit(runnable);
@@ -171,12 +172,14 @@ public class SystemRamCheckingWorkspaceManagerTest {
     executor.submit(runnable);
     executor.submit(runnable);
 
-    //Wait for throughput limit will be reached and check that RAM check was performed only in allowed number of threads.
+    // Wait for throughput limit will be reached and check that RAM check was performed only in
+    // allowed number of threads.
     verify(manager, timeout(300).times(5)).checkSystemRamLimitAndPropagateStart(anyObject());
 
-    //Execute paused threads to release the throughput limit for other threads.
+    // Execute paused threads to release the throughput limit for other threads.
     invokeProcessLatch.countDown();
-    //Wait for throughput limit will be released and check that RAM check was performed in other threads.
+    // Wait for throughput limit will be released and check that RAM check was performed in other
+    // threads.
     verify(manager, timeout(300).times(7)).checkSystemRamLimitAndPropagateStart(anyObject());
   }
 

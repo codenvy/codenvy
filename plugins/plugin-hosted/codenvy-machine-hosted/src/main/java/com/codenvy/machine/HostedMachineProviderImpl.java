@@ -230,7 +230,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
       if (workDir != null) {
         FileCleaner.addFile(workDir);
       }
-      // When new image is being built it pulls base image. This operation is performed by docker build command.
+      // When new image is being built it pulls base image. This operation is performed by docker
+      // build command.
       // So, after build it is needed to cleanup base image if it is a snapshot.
       if (service.getImage().contains(MACHINE_SNAPSHOT_PREFIX)) {
         submitCleanSnapshotImageTask(service.getImage());
@@ -246,7 +247,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
    * @param image image to clean, e.g. 172.11.12.13:5000/machine_snapshot_abcdef1234567890:latest
    */
   private void submitCleanSnapshotImageTask(String image) {
-    // TODO replace this method by docker.removeImage(image) call after fix of the problem in pure Docker Swarm
+    // TODO replace this method by docker.removeImage(image) call after fix of the problem in pure
+    // Docker Swarm
     snapshotImagesCleanerService.schedule(
         () -> {
           try {

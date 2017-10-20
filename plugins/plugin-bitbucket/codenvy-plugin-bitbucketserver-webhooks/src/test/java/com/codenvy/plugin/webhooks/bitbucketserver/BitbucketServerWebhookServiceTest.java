@@ -93,28 +93,28 @@ public class BitbucketServerWebhookServiceTest {
 
   @Test
   public void shouldHandlePushEvent() throws Exception {
-    //given
+    // given
     PushEvent pushEvent = createPushEvent("commit");
 
-    //when
+    // when
     service.handleWebhookEvent(pushEvent);
 
-    //then
+    // then
     verify(service).handlePushEvent(anyObject(), anyString());
   }
 
   @Test
   public void shouldChangeFactoryStartPointFromBranchToCommitWhenMergeCommitDetected()
       throws Exception {
-    //given
+    // given
     PushEvent pushEvent =
         createPushEvent(
             "Merge pull request #3 in ~projectkey/repository from testBranch to master");
 
-    //when
+    // when
     service.handleWebhookEvent(pushEvent);
 
-    //then
+    // then
     verify(service).handleMergeEvent(anyObject(), anyString());
     assertFalse(parameters.containsKey("branch"));
     assertEquals(parameters.get("commitId"), "hash commit");

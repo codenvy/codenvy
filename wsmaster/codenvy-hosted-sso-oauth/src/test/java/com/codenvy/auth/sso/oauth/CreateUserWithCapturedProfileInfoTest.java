@@ -56,7 +56,7 @@ public class CreateUserWithCapturedProfileInfoTest {
     // oAuthLoginServlet = new OAuthLoginServlet();
     when(servletConfig.getServletContext()).thenReturn(servletContext);
 
-    //oAuthLoginServlet.init(servletConfig);
+    // oAuthLoginServlet.init(servletConfig);
   }
 
   @Test

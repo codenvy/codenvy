@@ -37,7 +37,8 @@ public class CreateUserInterceptor implements MethodInterceptor {
 
   @Inject private CreationNotificationSender notificationSender;
 
-  //Do not remove ApiException. It used to tell dependency plugin that api-core is need not only for tests.
+  // Do not remove ApiException. It used to tell dependency plugin that api-core is need not only
+  // for tests.
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable, ApiException {
     Object proceed = invocation.proceed();

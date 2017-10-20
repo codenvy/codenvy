@@ -107,23 +107,23 @@ public class JenkinsWebhookManagerTest {
 
   @Test
   public void shouldAddFailedBuildFactoryLink() throws Exception {
-    //when
+    // when
     manager.handleFailedJobEvent(jenkinsEvent);
 
-    //then
+    // then
     verify(jenkinsConnector).addFailedBuildFactoryLink(eq("url/f?id=factoryId"));
   }
 
   @Test
   public void shouldGenerateFailedBuildFactory() throws Exception {
-    //given
+    // given
     parameters.put("branch", "branch");
     when(factory.getName()).thenReturn("name");
 
-    //when
+    // when
     manager.handleFailedJobEvent(jenkinsEvent);
 
-    //then
+    // then
     verify(factoryManager).saveFactory(factory);
     verify(factory).setName(eq("name_commitId"));
     assertNull(parameters.get("branch"));
@@ -132,13 +132,13 @@ public class JenkinsWebhookManagerTest {
 
   @Test
   public void shouldNotCreateNewFactoryIfFactoryWithCommitIdIsPresent() throws Exception {
-    //given
+    // given
     parameters.put("commitId", "commitId");
 
-    //when
+    // when
     manager.handleFailedJobEvent(jenkinsEvent);
 
-    //then
+    // then
     verify(factoryManager, never()).saveFactory(factory);
   }
 }

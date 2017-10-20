@@ -158,7 +158,7 @@ public class JpaInviteDao implements InviteDao {
       manager.remove(invite);
       manager.flush();
     } catch (NotFoundException e) {
-      //invite is already removed
+      // invite is already removed
     }
   }
 

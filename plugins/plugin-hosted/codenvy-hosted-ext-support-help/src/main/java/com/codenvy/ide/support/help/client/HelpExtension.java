@@ -69,14 +69,17 @@ public class HelpExtension {
     // TODO: fixme account
     //        final String accountId = Config.getCurrentWorkspace().getAccountId();
     //        if (accountId != null) {
-    //            subscriptionServiceClient.getSubscriptions(accountId, new AsyncRequestCallback<List<SubscriptionDescriptor>>(
-    //                    dtoUnmarshallerFactory.newListUnmarshaller(SubscriptionDescriptor.class)) {
+    //            subscriptionServiceClient.getSubscriptions(accountId, new
+    // AsyncRequestCallback<List<SubscriptionDescriptor>>(
+    //                    dtoUnmarshallerFactory.newListUnmarshaller(SubscriptionDescriptor.class))
+    // {
     //
     //                @Override
     //                protected void onSuccess(List<SubscriptionDescriptor> result) {
     //                    for (SubscriptionDescriptor subscription : result) {
     //                        if (!("Saas".equals(subscription.getServiceId()) &&
-    //                              "Community".equals(subscription.getProperties().get("Package")))) {
+    //
+    // "Community".equals(subscription.getProperties().get("Package")))) {
     //                            addPremiumSupportHelpAction();
     //                            return;
     //                        }
@@ -93,8 +96,9 @@ public class HelpExtension {
 
   private void addDefaultHelpAction() {
     // TODO change link for engineer chat channel
-    //actionManager.registerAction(localizationConstant.redirectToEngineerChatChannelAction(), redirectToEngineerChatChannelAction);
-    //helpGroup.add(redirectToEngineerChatChannelAction);
+    // actionManager.registerAction(localizationConstant.redirectToEngineerChatChannelAction(),
+    // redirectToEngineerChatChannelAction);
+    // helpGroup.add(redirectToEngineerChatChannelAction);
   }
 
   private void addPremiumSupportHelpAction() {

@@ -133,7 +133,7 @@ public class HostedDockerInstanceTest {
     // when
     executor.execute(() -> performCommit(repo3, TAG));
 
-    Thread.sleep(200); //to allow thread # 3 start
+    Thread.sleep(200); // to allow thread # 3 start
 
     // thread #3 is entered  method but should wait - semaphore is red
     verify(dockerInstance).commitContainer(eq(repo3), eq(TAG));

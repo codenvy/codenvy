@@ -54,10 +54,10 @@ public class RemoteDockerNodeTest {
 
   @Test
   public void shouldRestoreWorkspaceBackupOnNodeBinding() throws Exception {
-    //when
+    // when
     remoteDockerNode.bindWorkspace();
 
-    //then
+    // then
     verify(backupManager)
         .restoreWorkspaceBackup(eq("WorkspaceId"), eq("ContainerId"), eq("127.0.0.1"));
   }
@@ -66,10 +66,10 @@ public class RemoteDockerNodeTest {
   public void shouldBackupAndCleanupWSOnNodeUnbinding() throws Exception {
     remoteDockerNode.bindWorkspace();
 
-    //when
+    // when
     remoteDockerNode.unbindWorkspace();
 
-    //then
+    // then
     verify(backupManager)
         .backupWorkspaceAndCleanup(eq("WorkspaceId"), eq("ContainerId"), eq("127.0.0.1"));
   }

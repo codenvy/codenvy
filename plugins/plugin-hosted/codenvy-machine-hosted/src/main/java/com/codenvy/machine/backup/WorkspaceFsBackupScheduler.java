@@ -77,7 +77,8 @@ public class WorkspaceFsBackupScheduler {
     for (String workspaceId : workspaceRuntimes.getRuntimesIds()) {
 
       try {
-        // re-read workspace state to ensure that it's still active after processing of all previous workspaces
+        // re-read workspace state to ensure that it's still active after processing of all previous
+        // workspaces
         WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         // get active env from this WS instead of wsStateEntry because
         // workspace could be restarted during backup of previous WSs with another environment
@@ -109,7 +110,8 @@ public class WorkspaceFsBackupScheduler {
 
                       lastWorkspaceSynchronizationTime.put(workspaceId, System.currentTimeMillis());
                     } catch (NotFoundException ignore) {
-                      // it is ok, machine was stopped while this backup task was in the executor queue
+                      // it is ok, machine was stopped while this backup task was in the executor
+                      // queue
                     } catch (Exception e) {
                       LOG.error(e.getLocalizedMessage(), e);
                     } finally {
