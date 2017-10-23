@@ -19,6 +19,8 @@
          metadata-complete="true">
     <display-name>Platform Service Api</display-name>
 
+    <absolute-ordering></absolute-ordering>
+
     <context-param>
         <param-name>org.everrest.asynchronous</param-name>
         <param-value>false</param-value>

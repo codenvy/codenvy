@@ -19,6 +19,8 @@
          metadata-complete="true">
     <display-name>User dashboard</display-name>
 
+    <absolute-ordering></absolute-ordering>
+
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
     </listener>
