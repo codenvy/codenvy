@@ -19,6 +19,8 @@
          metadata-complete="true">
     <display-name>IDE</display-name>
 
+    <absolute-ordering></absolute-ordering>
+
     <context-param>
         <param-name>org.everrest.asynchronous.pool.size</param-name>
         <param-value>100</param-value>
