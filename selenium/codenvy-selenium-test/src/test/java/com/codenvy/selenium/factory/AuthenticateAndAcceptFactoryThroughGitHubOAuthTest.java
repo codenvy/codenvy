@@ -86,7 +86,6 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
   @Test
   public void loginThroughGitHubOAuthAndAcceptFactory() throws Exception {
-
     testFactory.open(ide.driver());
 
     loginPage.waitMainElementsOnLoginPage();
