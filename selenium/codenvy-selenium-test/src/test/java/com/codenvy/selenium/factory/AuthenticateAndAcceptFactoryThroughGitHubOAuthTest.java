@@ -13,9 +13,6 @@ package com.codenvy.selenium.factory;
 import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -65,7 +62,6 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
   @Inject private TestGitHubServiceClient testGitHubServiceClient;
 
   private TestFactory testFactory;
-  private final String WORKSPACE_TOOLBAR = "Workspaces";
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -74,15 +70,14 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-
-    seleniumWebDriver.get(getDashboardWorkspaceUrl());
+    seleniumWebDriver.get(dashboardWorkspace.getDashboardWorkspaceUrl());
     dashboardWorkspace.waitToolbarTitleName("Workspaces");
     dashboardWorkspace.waitListWorkspacesOnDashboard();
 
-    deleteAllWorkspaces(getAllWorkspaceNames());
-
     String userGitHubEmail =
-        testGitHubServiceClient.getUserPublicEmail(gitHubUsername, gitHubPassword);
+        testGitHubServiceClient.getUserPublicPrimaryEmail(gitHubUsername, gitHubPassword);
+
+    dashboardWorkspace.deleteAllWorkspaces();
 
     User user = testUserServiceClient.findByEmail(userGitHubEmail);
     testUserServiceClient.remove(user.getId());
@@ -110,44 +105,5 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
-  }
-
-  private void deleteAllWorkspaces(List<String> workspaces) {
-    workspaces.forEach(
-        wsName -> {
-          seleniumWebDriver.get(getDashboardWorkspaceUrl());
-          dashboardWorkspace.waitToolbarTitleName(WORKSPACE_TOOLBAR);
-          dashboardWorkspace.waitListWorkspacesOnDashboard();
-          dashboardWorkspace.selectWorkspaceItemName(wsName);
-          dashboardWorkspace.waitToolbarTitleName(Arrays.asList(wsName.split("/")).get(1));
-          dashboardWorkspace.clickOnDeleteWorkspace();
-          dashboardWorkspace.clickOnDeleteDialogButton();
-          dashboardWorkspace.waitToolbarTitleName(WORKSPACE_TOOLBAR);
-        });
-  }
-
-  private List<String> getAllWorkspaceNames() {
-    List<String> workspaces = new ArrayList<>();
-    getNotFilteredWorkspaceNames()
-        .forEach(
-            workspaceName -> {
-              if (isWorkspaceName(workspaceName)) {
-                workspaces.add(workspaceName);
-              }
-            });
-
-    return workspaces;
-  }
-
-  private List<String> getNotFilteredWorkspaceNames() {
-    return Arrays.asList(dashboardWorkspace.getTextFromListWorkspaces().split("\n"));
-  }
-
-  private boolean isWorkspaceName(String workspaceName) {
-    return workspaceName.contains("/") && workspaceName.length() > 3;
-  }
-
-  private String getDashboardWorkspaceUrl() {
-    return apiEndpointUrlProvider.get().toString().replace("api/", "") + "dashboard/#/workspaces";
   }
 }
