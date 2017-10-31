@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-hosted-integration-tests</artifactId>
         <groupId>com.codenvy.integration.tests</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>5.21.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-integration-tck-jpa</artifactId>
     <packaging>jar</packaging>

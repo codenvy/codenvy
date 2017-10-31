@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-master-parent</artifactId>
         <groupId>com.codenvy.onpremises.wsmaster</groupId>
-        <version>5.20.0-SNAPSHOT</version>
+        <version>5.21.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-hosted-template-processor</artifactId>
     <packaging>jar</packaging>
