@@ -57,6 +57,7 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
+import org.eclipse.che.plugin.docker.machine.SecurityOptProvider;
 import org.slf4j.Logger;
 
 /**
@@ -103,6 +104,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
       @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
       @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
       @Named("che.docker.privileged") boolean privilegedMode,
+      SecurityOptProvider securityOptProvider,
       @Named("che.docker.pids_limit") int pidsLimit,
       @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
@@ -132,6 +134,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         allMachinesSystemVolumes,
         doForcePullOnBuild,
         privilegedMode,
+        securityOptProvider,
         pidsLimit,
         devMachineEnvVariables,
         allMachinesEnvVariables,

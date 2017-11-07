@@ -54,6 +54,7 @@ import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
+import org.eclipse.che.plugin.docker.machine.SecurityOptProvider;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -81,6 +82,7 @@ public class HostedMachineProviderImplTest {
   @Mock private ImageConfig imageConfig;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineTokenRegistry machineTokenRegistry;
+  @Mock private SecurityOptProvider securityOptProvider;
 
   private WindowsPathEscaper windowsPathEscaper = new WindowsPathEscaper();
 
@@ -133,6 +135,7 @@ public class HostedMachineProviderImplTest {
             emptySet(),
             false,
             false,
+            securityOptProvider,
             -1,
             emptySet(),
             emptySet(),
@@ -187,6 +190,7 @@ public class HostedMachineProviderImplTest {
             emptySet(),
             false,
             false,
+            securityOptProvider,
             -1,
             emptySet(),
             emptySet(),
