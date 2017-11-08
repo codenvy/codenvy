@@ -70,6 +70,9 @@ machine.proxy_terminal_server_url_template=<%= scope.lookupvar('codenvy::host_pr
 # If true, then all docker machines will start in privilege mode.
 che.docker.privileged=<%= scope.lookupvar('codenvy::machine_docker_privileged') %>
 
+# Security options
+che.docker.securityopt=<%= scope.lookupvar('codenvy::machine_docker_securityopt') %>
+
 # Allows to use registry for machine docker snapshots, you should set this property to {true},
 # otherwise workspace snapshots would be saved locally.
 che.docker.registry_for_snapshots=true
