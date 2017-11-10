@@ -112,6 +112,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-dynamodule-maven-plugin</artifactId>
+                <version>${che.version}</version>
                 <executions>
                     <execution>
                         <id>generate</id>
