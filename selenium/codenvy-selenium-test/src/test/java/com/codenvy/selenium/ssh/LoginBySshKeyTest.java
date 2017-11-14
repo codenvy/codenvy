@@ -98,7 +98,7 @@ public class LoginBySshKeyTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testSshServiceClient.deleteMachineKeyByName(TITLE_OF_SSH_KEY);
+    testSshServiceClient.deleteMachineKey(TITLE_OF_SSH_KEY);
   }
 
   @Test
@@ -114,7 +114,7 @@ public class LoginBySshKeyTest {
     preferences.clickOnCloseBtn();
 
     String sshPrivateKeyFromFirstMachine =
-        testSshServiceClient.getPrivateKeyByName(TITLE_OF_SSH_KEY);
+        testSshServiceClient.getPrivateMachineKey(TITLE_OF_SSH_KEY);
     workspaceServiceClient.stop(ws1.getName(), ws1.getOwner().getName(), false);
     seleniumWebDriver.navigate().refresh();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
