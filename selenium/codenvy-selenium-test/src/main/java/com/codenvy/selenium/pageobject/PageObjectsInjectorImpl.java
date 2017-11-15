@@ -30,6 +30,7 @@ public class PageObjectsInjectorImpl extends PageObjectsInjector {
   @Inject private TestProfileServiceClient testProfileServiceClient;
   @Inject private TestDashboardUrlProvider dashboardUrlProvider;
 
+  @Override
   public Map<Class<?>, Object> getDependenciesWithWebdriver(SeleniumWebDriver seleniumWebDriver) {
     Map<Class<?>, Object> dependencies = new HashMap<>();
     dependencies.put(

@@ -40,6 +40,7 @@ public class OnpremEntranceImpl implements Entrance {
    *
    * @param user
    */
+  @Override
   public void login(TestUser user) {
     if (loginAndCreateOnpremAccountPage.isOpened()) {
       loginAndCreateOnpremAccountPage.waitLoginPage();
