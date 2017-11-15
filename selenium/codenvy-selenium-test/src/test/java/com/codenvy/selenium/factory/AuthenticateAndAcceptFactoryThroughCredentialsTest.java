@@ -50,7 +50,7 @@ public class AuthenticateAndAcceptFactoryThroughCredentialsTest {
 
   @Test
   public void loginThroughEnteringCredentialsAndAcceptFactory() throws Exception {
-    testFactory.open(ide.driver());
+    testFactory.open(seleniumWebDriver);
     loginPage.waitMainElementsOnLoginPage();
 
     loginPage.loginToDashboard(testUser.getName(), testUser.getPassword());

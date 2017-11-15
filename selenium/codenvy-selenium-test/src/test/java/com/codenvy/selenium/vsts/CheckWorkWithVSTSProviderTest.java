@@ -85,7 +85,7 @@ public class CheckWorkWithVSTSProviderTest {
   @Test
   public void cloneProjectFromVSTS() {
     projectExplorer.waitProjectExplorer();
-    String ideWin = ide.driver().getWindowHandle();
+    String ideWin = seleniumWebDriver.getWindowHandle();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);

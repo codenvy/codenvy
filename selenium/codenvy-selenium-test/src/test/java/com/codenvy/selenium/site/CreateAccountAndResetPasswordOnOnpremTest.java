@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
@@ -64,6 +65,7 @@ public class CreateAccountAndResetPasswordOnOnpremTest {
   @Inject private RecoverPasswordPage recoverPasswordPage;
   @Inject private TestAuthServiceClient authServiceClient;
   @Inject private TestUserServiceClient testUserServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   private MailReceiverUtils mailReceiverUtils;
   private String userName;
@@ -101,7 +103,7 @@ public class CreateAccountAndResetPasswordOnOnpremTest {
   @Test
   public void createAccountTest() throws Exception {
     String expectedMessageInMail = "To gain access to Codenvy, please verify your email";
-    ide.driver().get(ideUrlProvider.get().toString());
+    seleniumWebDriver.get(ideUrlProvider.get().toString());
 
     loginPage.waitLoginPage();
     loginPage.clickCreateNewAccount();
@@ -109,13 +111,12 @@ public class CreateAccountAndResetPasswordOnOnpremTest {
     loginPage.enterUserName(userName);
     loginPage.clickSignUp();
 
-    ide.driver()
-        .get(
-            mailReceiverUtils.waitAndGetLink(
-                ELEMENT_TIMEOUT_SEC,
-                EXPECTED_MESS_IN_CONSOLE_SEC,
-                expectedMessageInMail,
-                format(CONFIRM_WORKSPACE_CREATION_PATTERN, productHost)));
+    seleniumWebDriver.get(
+        mailReceiverUtils.waitAndGetLink(
+            ELEMENT_TIMEOUT_SEC,
+            EXPECTED_MESS_IN_CONSOLE_SEC,
+            expectedMessageInMail,
+            format(CONFIRM_WORKSPACE_CREATION_PATTERN, productHost)));
 
     dashboard.waitDeveloperFaceImg();
   }
@@ -124,21 +125,21 @@ public class CreateAccountAndResetPasswordOnOnpremTest {
   public void checkRestorePassword() throws Exception {
     String expectedMessageInMail = "Click to reset your Codenvy password - this link is valid for";
     String newPassword = NameGenerator.generate(testPassword, 2);
-    authServiceClient.logout(ide.driver().manage().getCookieNamed("session-access-key").getValue());
-    ide.driver().manage().deleteAllCookies();
-    ide.driver().get(ideUrlProvider.get().toString());
+    authServiceClient.logout(
+        seleniumWebDriver.manage().getCookieNamed("session-access-key").getValue());
+    seleniumWebDriver.manage().deleteAllCookies();
+    seleniumWebDriver.get(ideUrlProvider.get().toString());
 
     loginPage.waitLoginPage();
     loginPage.clickOnResetPasswordLnk();
     recoverPasswordPage.sendMessageResetPassword(testUser);
 
-    ide.driver()
-        .get(
-            mailReceiverUtils.waitAndGetLink(
-                ELEMENT_TIMEOUT_SEC,
-                EXPECTED_MESS_IN_CONSOLE_SEC,
-                expectedMessageInMail,
-                format(RESET_PASSWORD_PATTERN, productHost)));
+    seleniumWebDriver.get(
+        mailReceiverUtils.waitAndGetLink(
+            ELEMENT_TIMEOUT_SEC,
+            EXPECTED_MESS_IN_CONSOLE_SEC,
+            expectedMessageInMail,
+            format(RESET_PASSWORD_PATTERN, productHost)));
 
     recoverPasswordPage.setNewPasswordAndSave(newPassword);
     loginPage.loginToDashboard(userName, newPassword);

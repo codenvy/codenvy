@@ -16,6 +16,7 @@ import com.codenvy.selenium.pageobject.MicrosoftOauthPage;
 import com.codenvy.selenium.pageobject.site.LoginAndCreateOnpremAccountPage;
 import com.google.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -29,6 +30,7 @@ public class LoginWithMicrosoftOAuthTest {
   @Inject private LoginAndCreateOnpremAccountPage loginPage;
   @Inject private MicrosoftOauthPage microsoftOauthPage;
   @Inject private Dashboard dashboard;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @Inject
   @Named("vsts.user")
@@ -45,7 +47,7 @@ public class LoginWithMicrosoftOAuthTest {
     loginPage.clickOnMicrosoftOauthBtn();
     microsoftOauthPage.loginToMicrosoftAccount(vstsAccountEmail, vstsAccountPassword);
 
-    new WebDriverWait(ide.driver(), ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.urlContains(
                 "https://app.vssps.visualstudio.com/oauth2/authorize?client_id"));
