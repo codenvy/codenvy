@@ -11,14 +11,13 @@
 
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Codenvy On-Prem selenium tests"
+<suite name="Multi-thread Codenvy On-Prem selenium tests"
        verbose="10"
        parallel="classes"
        thread-count="4">
 
     <test name="all">
         <classes>
-            <class name="org.eclipse.che.selenium.addsshkey.AddSshKeyForGitHubTest"/>
             <class name="com.codenvy.selenium.assistant.CheckFindActionInCodenvyFeatureTest"/>
             <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
             <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest">
@@ -250,91 +249,17 @@
             <class name="org.eclipse.che.selenium.filewatcher.UpdateFilesWithoutIDE"/>
             <class name="org.eclipse.che.selenium.filewatcher.CheckDeletingProjectByApiTest"/>
             <class name="org.eclipse.che.selenium.filewatcher.CheckFileWatcherExcludeFeatureTest"/>
-            <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/5071 -->
-                    <exclude name="addFilesTest"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.git.AddFilesToIndexTest"/>
             <class name="org.eclipse.che.selenium.git.AmendCommitTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckoutBranchTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="checkoutBranchTest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
+            <class name="org.eclipse.che.selenium.git.CheckoutBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
-            <class name="org.eclipse.che.selenium.git.CommitFilesTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/5071 -->
-                    <exclude name="commitFilesTest"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
             <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="fetchUpdatesAndMergeRemoteBranch"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.GitCompareTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="checkGitCompareTest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.GitPullTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="checkImportProjectSubmoduleByHttpsUrl"/>
-
-                    <!-- unstable -->
-                    <exclude name="checkImportProjectSubmoduleBySshUrl"/>
-
-                    <!-- unstable -->
-                    <exclude name="checkImportProjectSubmoduleFromGithub"/>
-                </methods>
-            </class>
+            <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
+            <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
+            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
-            <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest">
-                <methods>
-                    <!-- https://github.com/eclipse/che/issues/1853 -->
-                    <exclude name="keepDirectoryGitImport"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="checkFactoryOnGitHub"/>
-
-                    <!-- unstable -->
-                    <exclude name="createPullRequest"/>
-
-                    <!-- unstable -->
-                    <exclude name="updatePullRequest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="createPullRequest"/>
-
-                    <!-- unstable -->
-                    <exclude name="updatePullRequest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest">
-                <methods>
-                    <!-- unstable -->
-                    <exclude name="pushNoneUpdateTest"/>
-                </methods>
-            </class>
-            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
+            <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
             <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
             <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest">
@@ -852,4 +777,9 @@
             </class>
         </classes>
     </test>
+
+    <suite-files>
+        <!-- that is the path where sub-suite file being looked at -->
+        <suite-file path="src/test/resources/suites/CodenvyOnpremOneThreadTestsSuite.xml"/>
+    </suite-files>
 </suite>
