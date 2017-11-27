@@ -1,5 +1,21 @@
 # Change Log
 
+## [5.21.0](https://github.com/codenvy/codenvy/tree/5.21.0) (2017-11-22)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.20.0...5.21.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#2544](https://github.com/codenvy/codenvy/pull/2544) ([riuvshin](https://github.com/riuvshin))
+- Add a selenium test for testing the workspace details feature on Codenvy [\#2538](https://github.com/codenvy/codenvy/pull/2538) ([SkorikSergey](https://github.com/SkorikSergey))
+- Housekeeping of selenium tests [\#2534](https://github.com/codenvy/codenvy/pull/2534) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Move git-specific selenium tests to one-thread suite.xml [\#2533](https://github.com/codenvy/codenvy/pull/2533) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Fix LoginBySshKeyTest to comply changes in Che [\#2531](https://github.com/codenvy/codenvy/pull/2531) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add version to dynamodule plugin [\#2528](https://github.com/codenvy/codenvy/pull/2528) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Add new properties required in upstream che [\#2524](https://github.com/codenvy/codenvy/pull/2524) ([benoitf](https://github.com/benoitf))
+- Update for Eclipse Che changes on PR https://github.com/eclipse/che/pull/6856 [\#2521](https://github.com/codenvy/codenvy/pull/2521) ([benoitf](https://github.com/benoitf))
+- Avoid scan of classes during runtime in order to find dynamodules [\#2506](https://github.com/codenvy/codenvy/pull/2506) ([mkuznyetsov](https://github.com/mkuznyetsov))
+
+
 ## [5.19.0](https://github.com/codenvy/codenvy/tree/5.19.0) (2017-10-14)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.18.0...5.19.0)
 
