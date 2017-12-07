@@ -29,7 +29,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Profile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -58,7 +58,7 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
   @Inject private TestApiEndpointUrlProvider apiEndpointUrlProvider;
   @Inject private TestUserNamespaceResolver testUserNamespaceResolver;
   @Inject private TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private Workspaces workspaces;
   @Inject private TestGitHubServiceClient testGitHubServiceClient;
 
   private TestFactory testFactory;
@@ -70,14 +70,14 @@ public class AuthenticateAndAcceptFactoryThroughGitHubOAuthTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    seleniumWebDriver.get(dashboardWorkspace.getDashboardWorkspaceUrl());
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.waitListWorkspacesOnDashboard();
+    seleniumWebDriver.get(workspaces.getDashboardWorkspaceUrl());
+    workspaces.waitToolbarTitleName("Workspaces");
+    workspaces.waitListWorkspacesOnDashboard();
 
     String userGitHubEmail =
         testGitHubServiceClient.getUserPublicPrimaryEmail(gitHubUsername, gitHubPassword);
 
-    dashboardWorkspace.deleteAllWorkspaces();
+    workspaces.deleteAllWorkspaces();
 
     User user = testUserServiceClient.findByEmail(userGitHubEmail);
     testUserServiceClient.remove(user.getId());
