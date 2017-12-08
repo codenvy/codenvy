@@ -21,6 +21,7 @@ machine.ws_agent.run_command=<%= scope.lookupvar('codenvy::machine_ws_agent_run_
 che.workspace.agent.dev.max_start_time_ms=<%= scope.lookupvar('codenvy::machine_ws_agent_max_start_time_ms') %>
 che.workspace.agent.dev.ping_delay_ms=2000
 che.workspace.agent.dev.ping_conn_timeout_ms=2000
+che.workspace.agent.dev.ping_success_threshold=1
 che.workspace.agent.dev.ping_timeout_error_msg=Timeout. The Che server is unable to ping your workspace. This implies a network configuration issue, workspace boot failure, or an unusually slow workspace boot.
 
 machine.ws_agent.agent_api.path=/wsagent/ext/
