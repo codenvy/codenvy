@@ -1,5 +1,19 @@
 # Change Log
 
+## [5.22.0](https://github.com/codenvy/codenvy/tree/5.22.0) (2017-12-13)
+[Full Changelog](https://github.com/codenvy/codenvy/compare/5.21.0...5.22.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#2570](https://github.com/codenvy/codenvy/pull/2570) ([riuvshin](https://github.com/riuvshin))
+- Selenium: add locators to Codenvy navbar [\#2566](https://github.com/codenvy/codenvy/pull/2566) ([SkorikSergey](https://github.com/SkorikSergey))
+- Add missing property [\#2564](https://github.com/codenvy/codenvy/pull/2564) ([riuvshin](https://github.com/riuvshin))
+- Selenium: Rework selenium tests according to changes in dashboard page objects [\#2562](https://github.com/codenvy/codenvy/pull/2562) ([SkorikSergey](https://github.com/SkorikSergey))
+- Remove separation of selenium tests on stable/unstable/failed [\#2559](https://github.com/codenvy/codenvy/pull/2559) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Include organization selenium tests into the single thread selenium tests suite [\#2557](https://github.com/codenvy/codenvy/pull/2557) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- RELEASE: Update CHANGELOG [\#2551](https://github.com/codenvy/codenvy/pull/2551) ([riuvshin](https://github.com/riuvshin))
+
+
 ## [5.21.0](https://github.com/codenvy/codenvy/tree/5.21.0) (2017-11-22)
 [Full Changelog](https://github.com/codenvy/codenvy/compare/5.20.0...5.21.0)
 
