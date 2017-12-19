@@ -10,12 +10,15 @@
  */
 package com.codenvy.selenium.assistant;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_ACTION;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.FindAction;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -28,60 +31,33 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class CheckFindActionInCodenvyFeatureTest {
 
-  private static final String FIRST_ACTION_NAME = "con";
-  private static final String SECOND_ACTION_NAME = "comm";
+  private static final String FIRST_ACTION_NAME = "config";
+  private static final String SECOND_ACTION_NAME = "commands";
   private static final String THIRD_ACTION_NAME = "che";
 
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
+
   private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY =
-      "Configuration...  Project\n"
+      "Update Project Configuration...  Project\n"
           + "Configure Classpath  Project\n"
-          + "Content Assist  Assistant\n"
-          + "Convert To Project  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
           + "Import From Codenvy Config...  Project";
-
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY =
-      "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ... [Alt+C]  GitCommandGroup\n"
-          + "Commit...  SvnFileCommandGroup\n"
-          + "SvnCredentialsCommandGroup  Subversion";
-
+      "Commands Palette [Shift+F10]  Run";
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY =
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String FIRST_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
-      "Update Project Configuration...  Project\n"
+      "Configuration \n"
+          + "Update Project Configuration...  Project\n"
           + "Configure Classpath  Project\n"
-          + "Content Assist  Assistant\n"
-          + "Convert To Project  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
           + "Import From Codenvy Config...  Project\n"
-          + "consolesTreeContextMenu \n"
-          + "debugGroupContextMenu \n"
-          + "editorTabContextMenu \n"
-          + "mainContextMenu \n"
-          + "projectExplorerContextMenu \n"
-          + "runGroupContextMenu ";
-
+          + "breakpointConfiguration ";
   private static final String SECOND_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
-      "Commands \n"
-          + "Commands Palette [Shift+F10]  Run\n"
-          + "Commit ... [Alt+C]  GitCommandGroup\n"
-          + "Commit...  SvnFileCommandGroup\n"
-          + "Execute default command of Debug goal [Alt+D] \n"
-          + "Execute default command of Run goal [Alt+R] \n"
-          + "GitCommandGroup \n"
-          + "SvnAddCommandGroup \n"
-          + "SvnCredentialsCommandGroup  Subversion\n"
-          + "SvnFileCommandGroup \n"
-          + "SvnMiscellaneousCommandGroup \n"
-          + "SvnRemoteCommandGroup \n"
-          + "SvnRepositoryCommandGroup ";
+      "Commands \n" + "Commands Palette [Shift+F10]  Run";
   private static final String THIRD_ACTION_NAME_EXPECTED_ARRAY_WITH_FLAG =
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
-
-  private static final String PROJECT_NAME =
-      CheckFindActionInCodenvyFeatureTest.class.getSimpleName();
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private FindAction findAction;
@@ -97,17 +73,12 @@ public class CheckFindActionInCodenvyFeatureTest {
             .getClass()
             .getResource("/projects/default-spring-project");
     testProjectServiceClient.importProject(
-        testWorkspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        testWorkspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
 
     ide.open(testWorkspace);
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FIND_ACTION);
+    menu.runCommand(ASSISTANT, FIND_ACTION);
     findAction.setCheckBoxInSelectedPosition();
   }
 
@@ -116,7 +87,7 @@ public class CheckFindActionInCodenvyFeatureTest {
     checkAction(actionName, result);
   }
 
-  @Test(dataProvider = "checkAllActionsForCodenvyDataWithoutChkBox", priority = 1)
+  @Test(dataProvider = "checkAllActionsForCodenvyDataWithoutChkBox")
   public void checkSearchActionsForMenuItemsTest(String actionName, String result) {
     findAction.setCheckBoxInNotSelectedPosition();
     checkAction(actionName, result);
