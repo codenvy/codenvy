@@ -109,7 +109,7 @@ public class CheckWorkWithVSTSProviderTest {
 
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
 
-    loginVSTS.clickOnOldAuthPageLink();
+    loginVSTS.clickOnOldSignInPageLink();
     loginVSTS.waitLoginPage();
     if (stateVSTSLoginPage()) {
       loginVSTS.enterLogin(vstsLogin);

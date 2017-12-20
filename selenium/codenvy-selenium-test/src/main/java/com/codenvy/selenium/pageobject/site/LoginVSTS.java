@@ -37,7 +37,7 @@ public class LoginVSTS {
     String LOGIN = "//input[@type='email']";
     String PASSWORD = "//input[@type='password']";
     String LOGIN_PAGE = "login_panel";
-    String OLD_AUTH_PAGE = "uxOptOutLink";
+    String OLD_SIGN_IN_PAGE = "uxOptOutLink";
     String SIGN_IN_BTN = "//input[@type='submit']";
     String ACCEPT = "accept-button";
     String CONTINUE = "cred_continue_button";
@@ -65,8 +65,8 @@ public class LoginVSTS {
   @FindBy(id = Locators.SIGN_IN_PAGE)
   WebElement signInPage;
 
-  @FindBy(id = Locators.OLD_AUTH_PAGE)
-  WebElement oldAuthPageLink;
+  @FindBy(id = Locators.OLD_SIGN_IN_PAGE)
+  WebElement oldSignInPageLink;
 
   /** Wait 'Visual Studio' authorization window is opened */
   public void waitLoginPage() {
@@ -140,9 +140,9 @@ public class LoginVSTS {
   }
 
   /** Click on 'Go back to the old one' link */
-  public void clickOnOldAuthPageLink() {
+  public void clickOnOldSignInPageLink() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(oldAuthPageLink))
+        .until(visibilityOf(oldSignInPageLink))
         .click();
   }
 }
