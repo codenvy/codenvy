@@ -10,13 +10,23 @@
  */
 package com.codenvy.selenium.vsts;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.COMMIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.RESET;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PULL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+
 import com.codenvy.selenium.core.client.OnpremTestOAuthServiceClient;
 import com.codenvy.selenium.pageobject.site.LoginVSTS;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.Date;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -38,7 +48,7 @@ import org.testng.annotations.Test;
 public class CheckWorkWithVSTSProviderTest {
   private static final String GIT_URL_TO_PROJECT =
       "https://iedexmain1.visualstudio.com/_git/MyFirstProject";
-  private static final String PROJECT_NAME = "cloneProjectFromVSTS";
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
   private static final String OAUTH_PROVIDER = "microsoft";
   private static final String PATH_TO_README = PROJECT_NAME + "/README.md";
   private static final String README_FILE = "README.md";
@@ -50,7 +60,6 @@ public class CheckWorkWithVSTSProviderTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private TestUser user;
-
   @Inject private ImportProjectFromLocation importWidget;
   @Inject private Menu menu;
   @Inject private Loader loader;
@@ -84,11 +93,10 @@ public class CheckWorkWithVSTSProviderTest {
 
   @Test
   public void cloneProjectFromVSTS() {
-    projectExplorer.waitProjectExplorer();
     String ideWin = seleniumWebDriver.getWindowHandle();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+
+    projectExplorer.waitProjectExplorer();
+    menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importWidget.waitMainForm();
     importWidget.selectGitSourceItem();
     loader.waitOnClosed();
@@ -98,7 +106,10 @@ public class CheckWorkWithVSTSProviderTest {
     authorizationDialog.waitFormToOpen();
     authorizationDialog.clickOkBtn();
     authorizationDialog.waitFormToClose();
+
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+
+    loginVSTS.clickOnOldAuthPageLink();
     loginVSTS.waitLoginPage();
     if (stateVSTSLoginPage()) {
       loginVSTS.enterLogin(vstsLogin);
@@ -116,9 +127,11 @@ public class CheckWorkWithVSTSProviderTest {
       performSignInPage();
     }
     loginVSTS.clickOnAcceptBtn();
+
     seleniumWebDriver.switchTo().window(ideWin);
+
     loader.waitOnClosed();
-    wizard.selectTypeProject(Wizard.TypeProject.BLANK);
+    wizard.selectTypeProject(BLANK);
     loader.waitOnClosed();
     wizard.clickSaveButton();
     loader.waitOnClosed();
@@ -143,14 +156,11 @@ public class CheckWorkWithVSTSProviderTest {
     editor.waitWhileFileIsClosed(README_FILE);
 
     projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
     git.waitAndRunCommit(TIME.toString());
     loader.waitOnClosed();
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT,
-        TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
-        TestMenuCommandsConstants.Git.Remotes.PUSH);
+    menu.runCommand(GIT, REMOTES_TOP, PUSH);
     loader.waitOnClosed();
     git.waitPushFormToOpen();
     git.clickPush();
@@ -167,7 +177,7 @@ public class CheckWorkWithVSTSProviderTest {
     editor.closeAllTabs();
 
     projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.RESET);
+    menu.runCommand(GIT, RESET);
     git.waitResetWindowOpen();
     git.waitCommitIsPresentResetWindow(TIME.toString());
     git.selectCommitResetWindow(2);
@@ -176,10 +186,7 @@ public class CheckWorkWithVSTSProviderTest {
     git.waitResetWindowClose();
     loader.waitOnClosed();
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT,
-        TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
-        TestMenuCommandsConstants.Git.Remotes.PULL);
+    menu.runCommand(GIT, REMOTES_TOP, PULL);
     git.waitPullFormToOpen();
     git.clickPull();
     git.waitPullFormToClose();
@@ -187,7 +194,6 @@ public class CheckWorkWithVSTSProviderTest {
     consoles.waitProcessInProcessConsoleTree("Git pull");
     events.clickProjectEventsTab();
     events.clickProjectEventsTab();
-
     events.waitExpectedMessage(PULL_MSG);
 
     projectExplorer.openItemByPath(PATH_TO_README);

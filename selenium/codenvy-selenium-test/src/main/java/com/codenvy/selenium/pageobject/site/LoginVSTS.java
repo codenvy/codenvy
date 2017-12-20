@@ -11,6 +11,7 @@
 package com.codenvy.selenium.pageobject.site;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,7 +19,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Andrey Chizhikov */
@@ -37,6 +37,7 @@ public class LoginVSTS {
     String LOGIN = "//input[@type='email']";
     String PASSWORD = "//input[@type='password']";
     String LOGIN_PAGE = "login_panel";
+    String OLD_AUTH_PAGE = "uxOptOutLink";
     String SIGN_IN_BTN = "//input[@type='submit']";
     String ACCEPT = "accept-button";
     String CONTINUE = "cred_continue_button";
@@ -64,16 +65,17 @@ public class LoginVSTS {
   @FindBy(id = Locators.SIGN_IN_PAGE)
   WebElement signInPage;
 
+  @FindBy(id = Locators.OLD_AUTH_PAGE)
+  WebElement oldAuthPageLink;
+
   /** Wait 'Visual Studio' authorization window is opened */
   public void waitLoginPage() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(loginPage));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(loginPage));
   }
 
   /** Wait 'Sign in' window is opened */
   public void waitSignInPage() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(signInPage));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(signInPage));
   }
 
   /**
@@ -83,7 +85,7 @@ public class LoginVSTS {
    */
   public void enterLogin(String login) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(loginInput))
+        .until(visibilityOf(loginInput))
         .sendKeys(login);
   }
 
@@ -94,28 +96,28 @@ public class LoginVSTS {
    */
   public void enterPassword(String password) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(passwordInput))
+        .until(visibilityOf(passwordInput))
         .sendKeys(password);
   }
 
   /** Click on 'Sign in' button in the 'Visual Studio' authorization window */
   public void clickOnSignInBtn() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(signInBtn))
+        .until(visibilityOf(signInBtn))
         .click();
   }
 
   /** Click on 'Accept' button in the 'Visual Studio' authorization window */
   public void clickOnAcceptBtn() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(acceptBtn))
+        .until(visibilityOf(acceptBtn))
         .click();
   }
 
   /** Click on 'Continue' button in the 'Visual Studio' authorization window */
   public void clickOnContinueBtn() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(continueBtn))
+        .until(visibilityOf(continueBtn))
         .click();
   }
 
@@ -125,8 +127,7 @@ public class LoginVSTS {
    * @param timeoutDefinedByUser
    */
   public void waitLoginField(int timeoutDefinedByUser) {
-    new WebDriverWait(seleniumWebDriver, timeoutDefinedByUser)
-        .until(ExpectedConditions.visibilityOf(passwordInput));
+    new WebDriverWait(seleniumWebDriver, timeoutDefinedByUser).until(visibilityOf(passwordInput));
   }
 
   /**
@@ -135,7 +136,13 @@ public class LoginVSTS {
    * @param timeoutDefinedByUser
    */
   public void waitPasswordField(int timeoutDefinedByUser) {
-    new WebDriverWait(seleniumWebDriver, timeoutDefinedByUser)
-        .until(ExpectedConditions.visibilityOf(passwordInput));
+    new WebDriverWait(seleniumWebDriver, timeoutDefinedByUser).until(visibilityOf(passwordInput));
+  }
+
+  /** Click on 'Go back to the old one' link */
+  public void clickOnOldAuthPageLink() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(oldAuthPageLink))
+        .click();
   }
 }
