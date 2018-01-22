@@ -76,10 +76,11 @@ public class MachineInnerRsyncAgentLauncherImpl extends AbstractAgentLauncher {
     LOG.info(
         "Docker machine has been deployed. "
             + "ID '{}'. Workspace ID '{}'. "
-            + "Container ID '{}'. Node host '{}'. Node IP '{}'",
+            + "Container ID '{}'. RAM '{}'. Node host '{}'. Node IP '{}'",
         machine.getId(),
         machine.getWorkspaceId(),
         dockerMachine.getContainer(),
+        dockerMachine.getConfig().getLimits().getRam(),
         node.getHost(),
         node.getIp());
   }
