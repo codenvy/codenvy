@@ -49,6 +49,10 @@ public class EmailValidator {
 
   private Set<String> emailBlackList = Collections.emptySet();
 
+  private long emailBlackListFileSize;
+
+  private long emailBlackListFileDate;
+
   @Inject
   public EmailValidator(@Nullable @Named(EMAIL_BLACKLIST_FILE) String emailBlacklistFile) {
     this.blacklistPath = emailBlacklistFile;
@@ -86,14 +90,19 @@ public class EmailValidator {
       }
     }
 
-    try (InputStream is = blacklistStream) {
-      Set<String> blacklist = new HashSet<>();
-      try (Scanner in = new Scanner(is)) {
-        while (in.hasNextLine()) {
-          blacklist.add(in.nextLine().trim());
+    if (blacklistFile.length() != emailBlackListFileSize
+        || blacklistFile.lastModified() != emailBlackListFileDate) {
+      try (InputStream is = blacklistStream) {
+        Set<String> blacklist = new HashSet<>();
+        try (Scanner in = new Scanner(is)) {
+          while (in.hasNextLine()) {
+            blacklist.add(in.nextLine().trim());
+          }
         }
+        this.emailBlackList = blacklist;
+        this.emailBlackListFileDate = blacklistFile.lastModified();
+        this.emailBlackListFileSize = blacklistFile.length();
       }
-      this.emailBlackList = blacklist;
     }
   }
 
@@ -109,13 +118,57 @@ public class EmailValidator {
       throw new BadRequestException(
           "E-Mail validation failed. Please check the format of your e-mail address.");
     }
-
-    // Check blacklist
-    for (String current : emailBlackList) {
-      if ((current.startsWith("*") && userMail.endsWith(current.substring(1)))
-          || userMail.equals(current)) {
+    if (isGmailAddress(userMail)) {
+      validateGmailAdress(userMail);
+    } else {
+      if (isEmailBlacklisted(userMail)) {
         throw new BadRequestException("User mail " + userMail + " is forbidden.");
       }
     }
+
+  }
+
+  private boolean isEmailBlacklisted(String email) {
+    for (String blackListEntry : emailBlackList) {
+      if (blackListEntry.startsWith("regexp:")) {
+        if (email.matches(blackListEntry.split("^regexp:")[1])) {
+          return true;
+        }
+      }
+      if ((blackListEntry.startsWith("*") && email.endsWith(blackListEntry.substring(1).toLowerCase()))
+          || email.equals(blackListEntry.toLowerCase())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isGmailAddress(String mail) {
+    return mail.toLowerCase().endsWith("@gmail.com") || mail.toLowerCase()
+        .endsWith("@googlemail.com");
+  }
+
+  /**
+   *
+   * @param email
+   * @return true if address is valid, false otherwise
+   */
+  private boolean validateGmailAdress(String email) throws BadRequestException {
+    String lowercasedEmail = email.toLowerCase();
+    String emailParts[] = lowercasedEmail.split("@");
+    String emailLocalPart= emailParts[0].replace(".", "");
+    String emailDomain = emailParts[1];
+
+    switch (emailDomain) {
+      case "gmail.com" :
+        if (isEmailBlacklisted(emailLocalPart + "@googlemail.com")) {
+          throw new BadRequestException("User mail " + email + " is forbidden.");
+        }
+      case "googlemail.com" :
+        if (isEmailBlacklisted(emailLocalPart + "@gmail.com")) {
+          throw new BadRequestException("User mail " + email + " is forbidden.");
+        }
+    }
+    return true;
   }
 }
