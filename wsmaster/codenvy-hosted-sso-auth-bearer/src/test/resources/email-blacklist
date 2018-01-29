@@ -1,1 +1,3 @@
-hello@gmail.com
+illegal@gmail.com
+*banned@gmail.com
+regexp:(expr1@mail|expr2@mail)
