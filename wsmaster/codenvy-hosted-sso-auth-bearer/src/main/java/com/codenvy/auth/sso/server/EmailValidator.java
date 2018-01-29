@@ -52,7 +52,6 @@ public class EmailValidator {
   private final String blacklistPath;
 
   private Set<String> blacklist = Collections.emptySet();
-  private Set<String> blacklistGmail = Collections.emptySet();
   private Set<String> blacklistPartial = Collections.emptySet();
   private Set<Pattern> blacklistRegexp = Collections.emptySet();
 
