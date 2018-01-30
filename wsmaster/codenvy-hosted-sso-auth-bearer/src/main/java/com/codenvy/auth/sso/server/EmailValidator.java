@@ -144,29 +144,22 @@ public class EmailValidator {
           "E-Mail validation failed. Please check the format of your e-mail address.");
     }
 
-    if (isEmailBlacklisted(userMail)) {
-      throw new BadRequestException("User mail " + userMail + " is forbidden.");
+    if (blacklist.contains(userMail)) {
+      throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
     }
-  }
-
-  private boolean isEmailBlacklisted(String email) {
-    if (blacklist.contains(email)) {
-      return true;
-    }
-    if (isGmailAddress(email) && blacklistGmail.contains(getGmailNormalizedLocalPart(email))) {
-      return true;
+    if (isGmailAddress(userMail) && blacklistGmail.contains(getGmailNormalizedLocalPart(userMail))) {
+      throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
     }
     for (String blacklistedPartialEmail : blacklistPartial) {
-      if (email.endsWith(blacklistedPartialEmail)) {
-        return true;
+      if (userMail.endsWith(blacklistedPartialEmail)) {
+        throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
       }
     }
     for (Pattern blackListRegexp : blacklistRegexp) {
-      if (blackListRegexp.matcher(email).find()) {
-        return true;
+      if (blackListRegexp.matcher(userMail).find()) {
+        throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
       }
     }
-    return false;
   }
 
   private boolean isGmailAddress(String mail) {

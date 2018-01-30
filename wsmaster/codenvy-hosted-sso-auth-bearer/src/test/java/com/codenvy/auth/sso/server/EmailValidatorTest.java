@@ -40,9 +40,9 @@ public class EmailValidatorTest {
   }
 
   @Test(
-      dataProvider = "blackListedEmails",
-      expectedExceptions = BadRequestException.class,
-      expectedExceptionsMessageRegExp = "User mail .* is forbidden."
+    dataProvider = "blackListedEmails",
+    expectedExceptions = BadRequestException.class,
+    expectedExceptionsMessageRegExp = "User mail .* is forbidden"
   )
   public void shouldInvalidateBlackListedEmail(String emails) throws Exception {
     emailValidator.validateUserMail(emails);
@@ -51,12 +51,12 @@ public class EmailValidatorTest {
   @DataProvider(name = "validEmails")
   public Object[][] validEmails() {
     return new Object[][] {
-        {"test@gmail.com"},
-        {"test.test@gmail.com"},
-        {"test@googlemail.com"},
-        {"test190@gmail.com"},
-        {"test@mail.net"},
-        {"user-test@mail.net"},
+      {"test@gmail.com"},
+      {"test.test@gmail.com"},
+      {"test@googlemail.com"},
+      {"test190@gmail.com"},
+      {"test@mail.net"},
+      {"user-test@mail.net"},
     };
   }
 
