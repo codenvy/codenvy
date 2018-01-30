@@ -21,9 +21,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.internet.AddressException;
@@ -47,7 +45,8 @@ public class EmailValidator {
   private static final Logger LOG = LoggerFactory.getLogger(EmailValidator.class);
 
   private static final String EMAIL_BLACKLIST_FILE = "emailvalidator.blacklistfile";
-  private static final Pattern EMAIL_ILLEGAL_CHARACTERS_PATTERN = Pattern.compile("(?:\\+|/|\\.\\.)");
+  private static final Pattern EMAIL_ILLEGAL_CHARACTERS_PATTERN =
+      Pattern.compile("(?:\\+|/|\\.\\.)");
 
   private final String blacklistPath;
 
@@ -127,7 +126,8 @@ public class EmailValidator {
     userMail = userMail.toLowerCase();
 
     if (EMAIL_ILLEGAL_CHARACTERS_PATTERN.matcher(userMail).find()) {
-      throw new BadRequestException("User mail must not contain characters like '+','/'or consecutive periods");
+      throw new BadRequestException(
+          "User mail must not contain characters like '+','/'or consecutive periods");
     }
 
     try {
@@ -140,20 +140,20 @@ public class EmailValidator {
 
     boolean blacklisted;
     if (isGmailAddress(userMail)) {
-      blacklisted = isEmailBlacklisted(
-          getNormalizedGmailAddress(userMail, false),
-          getNormalizedGmailAddress(userMail, true));
+      blacklisted =
+          isEmailBlacklisted(
+              getNormalizedGmailAddress(userMail, false),
+              getNormalizedGmailAddress(userMail, true));
     } else {
       blacklisted = isEmailBlacklisted(userMail);
     }
     if (blacklisted) {
       throw new BadRequestException("User mail " + userMail + " is forbidden.");
     }
-
   }
 
   private boolean isEmailBlacklisted(String... emails) {
-    for(String email : emails) {
+    for (String email : emails) {
       if (blacklist.contains(email)) {
         return true;
       }
@@ -177,7 +177,7 @@ public class EmailValidator {
 
   private String getNormalizedGmailAddress(String email, boolean alternativeDomain) {
     String emailParts[] = email.split("@");
-    String emailLocalPart= emailParts[0].replace(".", "");
+    String emailLocalPart = emailParts[0].replace(".", "");
     String emailDomain = emailParts[1];
 
     if (alternativeDomain) {
