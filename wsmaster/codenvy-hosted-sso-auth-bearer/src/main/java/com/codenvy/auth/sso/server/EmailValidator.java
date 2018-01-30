@@ -71,7 +71,7 @@ public class EmailValidator {
 
   /**
    * Reads set of forbidden words from file. One word by line. If file not found file reading
-   * failed, then throws exception.
+   * failed, then logs error.
    *
    * @return set with forbidden words
    * @throws java.io.FileNotFoundException
@@ -82,45 +82,39 @@ public class EmailValidator {
     if (blacklistPath == null) {
       return;
     }
-    InputStream blacklistStream;
     File blacklistFile = new File(blacklistPath);
-    if (blacklistFile.exists() && blacklistFile.isFile()) {
-      blacklistStream = new FileInputStream(blacklistFile);
-    } else {
-      blacklistStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(blacklistPath);
-      if (blacklistStream == null) {
-        throw new FileNotFoundException("Blacklist file " + blacklistPath + " not found!");
-      }
-    }
+    if (blacklistFile.exists()) {
+      if (blacklistFile.lastModified() != emailBlackListFileDate) {
+        try (InputStream is = new FileInputStream(blacklistFile)) {
+          Set<String> blackList = new HashSet<>();
+          Set<String> partialBlackList = new HashSet<>();
+          Set<String> gmailBlackList = new HashSet<>();
+          Set<Pattern> regexpList = new HashSet<>();
 
-    if (blacklistFile.lastModified() != emailBlackListFileDate) {
-      try (InputStream is = blacklistStream) {
-        Set<String> blackList = new HashSet<>();
-        Set<String> partialBlackList = new HashSet<>();
-        Set<String> gmailBlackList = new HashSet<>();
-        Set<Pattern> regexpList = new HashSet<>();
-
-        try (Scanner in = new Scanner(is)) {
-          while (in.hasNextLine()) {
-            String line = in.nextLine().trim();
-            if (line.startsWith("regexp:")) {
-              regexpList.add(Pattern.compile(line.split("^regexp:")[1]));
-            } else if (line.startsWith("*")) {
-              partialBlackList.add(line.substring(1).toLowerCase());
-            } else if (isGmailAddress(line.toLowerCase())) {
-              gmailBlackList.add(getGmailNormalizedLocalPart(line.toLowerCase()));
-            } else {
-              blackList.add(line.toLowerCase());
+          try (Scanner in = new Scanner(is)) {
+            while (in.hasNextLine()) {
+              String line = in.nextLine().trim();
+              if (line.startsWith("regexp:")) {
+                regexpList.add(Pattern.compile(line.split("^regexp:")[1]));
+              } else if (line.startsWith("*")) {
+                partialBlackList.add(line.substring(1).toLowerCase());
+              } else if (isGmailAddress(line.toLowerCase())) {
+                gmailBlackList.add(getGmailNormalizedLocalPart(line.toLowerCase()));
+              } else {
+                blackList.add(line.toLowerCase());
+              }
             }
           }
+          this.blacklist = blackList;
+          this.blacklistPartial = partialBlackList;
+          this.blacklistGmail = gmailBlackList;
+          this.blacklistRegexp = regexpList;
+
+          this.emailBlackListFileDate = blacklistFile.lastModified();
         }
-        this.blacklist = blackList;
-        this.blacklistPartial = partialBlackList;
-        this.blacklistGmail = gmailBlackList;
-        this.blacklistRegexp = regexpList;
-        this.emailBlackListFileDate = blacklistFile.lastModified();
       }
+    } else {
+      LOG.error("Couldn't read from blacklist: File does not exist");
     }
   }
 
@@ -147,7 +141,8 @@ public class EmailValidator {
     if (blacklist.contains(userMail)) {
       throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
     }
-    if (isGmailAddress(userMail) && blacklistGmail.contains(getGmailNormalizedLocalPart(userMail))) {
+    if (isGmailAddress(userMail)
+        && blacklistGmail.contains(getGmailNormalizedLocalPart(userMail))) {
       throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
     }
     for (String blacklistedPartialEmail : blacklistPartial) {
