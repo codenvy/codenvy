@@ -1,3 +1,3 @@
-illegal@gmail.com
-*banned@gmail.com
-regexp:(expr1@mail|expr2@mail)
+banned@gmail.com
+*blacklisted@mail.net
+regexp:(user-1.*@mail|user-2.*@mail)

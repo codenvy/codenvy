@@ -30,15 +30,6 @@ public class EmailValidatorTest {
   }
 
   @Test(
-    dataProvider = "blackListedEmails",
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp = "User mail .* is forbidden."
-  )
-  public void shouldInvalidateBlackListedEmail(String emails) throws Exception {
-    emailValidator.validateUserMail(emails);
-  }
-
-  @Test(
     dataProvider = "invalidEmails",
     expectedExceptions = BadRequestException.class,
     expectedExceptionsMessageRegExp =
@@ -48,10 +39,24 @@ public class EmailValidatorTest {
     emailValidator.validateUserMail(emails);
   }
 
+  @Test(
+      dataProvider = "blackListedEmails",
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp = "User mail .* is forbidden."
+  )
+  public void shouldInvalidateBlackListedEmail(String emails) throws Exception {
+    emailValidator.validateUserMail(emails);
+  }
+
   @DataProvider(name = "validEmails")
   public Object[][] validEmails() {
     return new Object[][] {
-      {"test@gmail.com"}, {"test.test@gmail.com"}, {"test@googlemail.com"}, {"test190@gmail.com"},
+        {"test@gmail.com"},
+        {"test.test@gmail.com"},
+        {"test@googlemail.com"},
+        {"test190@gmail.com"},
+        {"test@mail.net"},
+        {"user-test@mail.net"},
     };
   }
 
@@ -72,19 +77,19 @@ public class EmailValidatorTest {
   @DataProvider(name = "blackListedEmails")
   public Object[][] blackListedEmails() {
     return new Object[][] {
-      {"illegal@gmail.com"},
-      {"illegal@googlemail.com"},
-      {"iLLegal@gmail.com"},
-      {"ille.gal@gmail.com"},
-      {"illegal@Gmail.com"},
-      {"illegal@googleMaiL.com"},
-      {"illeg.a.l@gOOglemail.com"},
       {"banned@gmail.com"},
-      {"newbanned@gmail.com"},
-      {"new.banned@gmail.com"},
-      {"new.banned@gmail.com"},
-      {"testexpr1@mail.com"},
-      {"testexpr2@mail.com"},
+      {"banned@googlemail.com"},
+      {"ban.ned@gmail.com"},
+      {"baNnEd@gmail.com"},
+      {"banned@Gmail.com"},
+      {"ban.ned@googleMaiL.com"},
+      {"banned.@gOOglemail.com"},
+      {"ba.n.n.ed@gmail.com"},
+      {"blacklisted@mail.net"},
+      {"new-blacklisted@mail.net"},
+      {"NEW-blacklisted@mail.net"},
+      {"user-1212@mail.com"},
+      {"user-2121@mail.org"},
     };
   }
 }

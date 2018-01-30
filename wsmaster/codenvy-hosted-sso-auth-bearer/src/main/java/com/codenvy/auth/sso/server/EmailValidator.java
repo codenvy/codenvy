@@ -51,6 +51,7 @@ public class EmailValidator {
   private final String blacklistPath;
 
   private Set<String> blacklist = Collections.emptySet();
+  private Set<String> blacklistGmail = Collections.emptySet();
   private Set<String> blacklistPartial = Collections.emptySet();
   private Set<Pattern> blacklistRegexp = Collections.emptySet();
 
@@ -97,21 +98,26 @@ public class EmailValidator {
       try (InputStream is = blacklistStream) {
         Set<String> blackList = new HashSet<>();
         Set<String> partialBlackList = new HashSet<>();
+        Set<String> gmailBlackList = new HashSet<>();
         Set<Pattern> regexpList = new HashSet<>();
+
         try (Scanner in = new Scanner(is)) {
           while (in.hasNextLine()) {
-            String line = in.nextLine().trim().toLowerCase();
+            String line = in.nextLine().trim();
             if (line.startsWith("regexp:")) {
               regexpList.add(Pattern.compile(line.split("^regexp:")[1]));
             } else if (line.startsWith("*")) {
-              partialBlackList.add(line.substring(1));
+              partialBlackList.add(line.substring(1).toLowerCase());
+            } else if (isGmailAddress(line.toLowerCase())) {
+              gmailBlackList.add(getGmailNormalizedLocalPart(line.toLowerCase()));
             } else {
-              blackList.add(line);
+              blackList.add(line.toLowerCase());
             }
           }
         }
         this.blacklist = blackList;
         this.blacklistPartial = partialBlackList;
+        this.blacklistGmail = gmailBlackList;
         this.blacklistRegexp = regexpList;
         this.emailBlackListFileDate = blacklistFile.lastModified();
       }
@@ -138,34 +144,26 @@ public class EmailValidator {
           "E-Mail validation failed. Please check the format of your e-mail address.");
     }
 
-    boolean blacklisted;
-    if (isGmailAddress(userMail)) {
-      blacklisted =
-          isEmailBlacklisted(
-              getNormalizedGmailAddress(userMail, false),
-              getNormalizedGmailAddress(userMail, true));
-    } else {
-      blacklisted = isEmailBlacklisted(userMail);
-    }
-    if (blacklisted) {
+    if (isEmailBlacklisted(userMail)) {
       throw new BadRequestException("User mail " + userMail + " is forbidden.");
     }
   }
 
-  private boolean isEmailBlacklisted(String... emails) {
-    for (String email : emails) {
-      if (blacklist.contains(email)) {
+  private boolean isEmailBlacklisted(String email) {
+    if (blacklist.contains(email)) {
+      return true;
+    }
+    if (isGmailAddress(email) && blacklistGmail.contains(getGmailNormalizedLocalPart(email))) {
+      return true;
+    }
+    for (String blacklistedPartialEmail : blacklistPartial) {
+      if (email.endsWith(blacklistedPartialEmail)) {
         return true;
       }
-      for (String blacklistedPartialEmail : blacklistPartial) {
-        if (email.endsWith(blacklistedPartialEmail)) {
-          return true;
-        }
-        for (Pattern blackListRegexp : blacklistRegexp) {
-          if (blackListRegexp.matcher(email).find()) {
-            return true;
-          }
-        }
+    }
+    for (Pattern blackListRegexp : blacklistRegexp) {
+      if (blackListRegexp.matcher(email).find()) {
+        return true;
       }
     }
     return false;
@@ -175,19 +173,7 @@ public class EmailValidator {
     return mail.endsWith("@gmail.com") || mail.endsWith("@googlemail.com");
   }
 
-  private String getNormalizedGmailAddress(String email, boolean alternativeDomain) {
-    String emailParts[] = email.split("@");
-    String emailLocalPart = emailParts[0].replace(".", "");
-    String emailDomain = emailParts[1];
-
-    if (alternativeDomain) {
-      if (emailDomain.equals("gmail.com")) {
-        return emailLocalPart + "@googlemail.com";
-      } else {
-        return emailLocalPart + "@gmail.com";
-      }
-    } else {
-      return emailLocalPart + "@" + emailDomain;
-    }
+  private String getGmailNormalizedLocalPart(String email) {
+    return email.split("@")[0].replace(".", "");
   }
 }
