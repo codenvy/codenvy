@@ -95,7 +95,7 @@ public class EmailValidator {
             while (in.hasNextLine()) {
               String line = in.nextLine().trim();
               if (line.startsWith("regexp:")) {
-                regexpList.add(Pattern.compile(line.split("^regexp:")[1]));
+                regexpList.add(Pattern.compile(line.split("^regexp:", 2)[1]));
               } else if (line.startsWith("*")) {
                 partialBlackList.add(line.substring(1).toLowerCase());
               } else if (isGmailAddress(line.toLowerCase())) {
@@ -114,7 +114,7 @@ public class EmailValidator {
         }
       }
     } else {
-      LOG.error("Couldn't read from blacklist: File does not exist");
+      LOG.error("Couldn't read from blacklist: File {} does not exist", blacklistPath);
     }
   }
 
