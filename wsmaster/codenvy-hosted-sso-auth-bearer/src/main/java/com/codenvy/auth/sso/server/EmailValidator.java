@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,7 +27,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +75,6 @@ public class EmailValidator {
    * @throws java.io.FileNotFoundException
    * @throws java.io.IOException
    */
-  @ScheduleRate(period = 2, unit = TimeUnit.MINUTES)
   private void readBlacklistFile() throws IOException {
     if (blacklistPath == null) {
       return;
@@ -138,6 +135,11 @@ public class EmailValidator {
           "E-Mail validation failed. Please check the format of your e-mail address.");
     }
 
+    try {
+      readBlacklistFile();
+    } catch (IOException e) {
+      LOG.error("Error occured during reading blacklist file {}", e);
+    }
     if (blacklist.contains(userMail)) {
       throw new BadRequestException(String.format("User mail %s is forbidden", userMail));
     }
