@@ -103,7 +103,7 @@ public class MachineInnerRsyncAgent extends AgentImpl {
             + "elif echo ${LINUX_TYPE} | grep -qi \"arch\"; then\n"
             + "    command -v rsync >/dev/null 2>&1 || { PACKAGES=${PACKAGES}\" rsync\"; }\n"
             + "    test \"${PACKAGES}\" = \"\" || {\n"
-            + "        ${SUDO} pacman -Sy ${PACKAGES};\n"
+            + "        ${SUDO} pacman -Sy --noconfirm ${PACKAGES};\n"
             + "    }\n\n"
             + "else\n"
             + "    >&2 echo \"Unrecognized Linux Type\"\n"
